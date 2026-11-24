@@ -55,11 +55,12 @@ function createPrisma(feedbackRows: ReturnType<typeof makeFeedback>[]) {
   const records = feedbackRows.map((row) => row.record)
   const prisma = {
     student: {
-      findUnique: vi.fn(async ({ where }: { where: { id: string } }) => where.id === 'missing'
+      findFirst: vi.fn(async ({ where }: { where: { id: string; deletedAt?: null } }) => where.id === 'missing' || where.deletedAt !== null
         ? null
-        : { id: where.id, name: where.id === 'student-b' ? '学生B' : '学生A', grade: '初二', division: 'JUNIOR' }),
+        : { id: where.id, identityId: 'identity-a', name: where.id === 'student-b' ? '学生B' : '学生A', grade: '初二', division: 'JUNIOR' }),
       findMany: vi.fn(async ({ where }: { where: Record<string, unknown> }) => {
         if ('OR' in where) return [{ id: 'student-a' }]
+        if ('identityId' in where) return [{ id: 'student-a' }, { id: 'student-a-old' }]
         const ids = (where.id as { in: string[] }).in
         return ids.map((id) => ({ id, name: id === 'student-b' ? '学生B' : '学生A', grade: '初二' }))
       }),
@@ -75,6 +76,10 @@ function createPrisma(feedbackRows: ReturnType<typeof makeFeedback>[]) {
         if (where.studentIds && typeof where.studentIds === 'object' && 'has' in where.studentIds) {
           const studentId = (where.studentIds as { has: string }).has
           indexes = indexes.filter((index) => records[index].studentIds.includes(studentId))
+        }
+        if (where.studentIds && typeof where.studentIds === 'object' && 'hasSome' in where.studentIds) {
+          const studentIds = (where.studentIds as { hasSome: string[] }).hasSome
+          indexes = indexes.filter((index) => records[index].studentIds.some((id) => studentIds.includes(id)))
         }
         if (where.id && typeof where.id === 'object' && 'in' in where.id) {
           const ids = (where.id as { in: string[] }).in
@@ -115,6 +120,24 @@ describe('student classroom feedback archive', () => {
     )
     expect(result.items).toHaveLength(2)
     expect(result.summary.teacherCount).toBe(2)
+  })
+
+  it('includes feedback from linked term records only when an admin requests it', async () => {
+    const prisma = createPrisma([
+      makeFeedback(1),
+      makeFeedback(2, 'teacher-2', ['student-a-old']),
+    ])
+    const actor = { id: 'admin', role: 'admin', division: 'JUNIOR' }
+
+    const currentTermOnly = await getFeedbackArchive(prisma, actor, { studentId: 'student-a' })
+    const completeIdentity = await getFeedbackArchive(prisma, actor, {
+      studentId: 'student-a',
+      includeLinkedRecords: true,
+    })
+
+    expect(currentTermOnly.items).toHaveLength(1)
+    expect(completeIdentity.items).toHaveLength(2)
+    expect(completeIdentity.items.find((item) => item.teacher.id === 'teacher-2')?.studentRating).toBe('OKAY')
   })
 
   it('limits a teacher archive to feedback created by that teacher', async () => {

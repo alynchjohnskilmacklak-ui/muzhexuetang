@@ -5,6 +5,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { visibleClassGroupWhere, visibleStudentWhere } from '@/lib/business-visibility'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,9 +69,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
       teacher: { select: { name: true, avatar: true } },
       group: {
         include: {
-          course: { select: { name: true } },
+          course: { select: { name: true, subject: true } },
           room: { select: { name: true } },
           teacher: { select: { name: true, avatar: true } },
+          enrollments: {
+            where: { status: 'ACTIVE', deletedAt: null, student: scopedStudentWhere },
+            select: { studentId: true, subjects: true },
+          },
         },
       },
       lessonStudents: {
@@ -91,7 +96,15 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const attendanceMap = new Map(lesson.attendances.map((a) => [a.studentId, a]))
     const feedback = lesson.classroomFeedbacks[0]
     const feedbackStudentIds = new Set(lesson.classroomFeedbacks.flatMap(row => row.studentIds))
-    const students = lesson.lessonStudents.map(({ student }) => {
+    const eligibleStudentIds = new Set(resolveSubjectLessonStudentIds(
+      lesson.lessonStudents.map(({ student }) => student.id),
+      lesson.group.enrollments,
+      lesson.subject ?? lesson.group.course?.subject,
+      lesson.lessonDate,
+    ))
+    const students = lesson.lessonStudents
+      .filter(({ student }) => eligibleStudentIds.has(student.id))
+      .map(({ student }) => {
       const attendance = attendanceMap.get(student.id)
       return {
         id: student.id,
@@ -102,7 +115,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         attendanceStatusRaw: attendance?.status ?? null,
         hoursDeducted: attendance?.hoursDeducted ?? 0,
       }
-    })
+      })
     return {
       id: lesson.id,
       time: `${lesson.startTime}-${lesson.endTime}`,

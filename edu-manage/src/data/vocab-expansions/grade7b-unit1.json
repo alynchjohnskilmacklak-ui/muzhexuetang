@@ -1,0 +1,482 @@
+[
+  {
+    "word": "fox",
+    "examTags": ["词汇·野生动物", "阅读·根据外形识别动物"],
+    "grammar": "n. 狐狸；可数，复数 foxes。",
+    "collocations": "a red fox; a fox in the forest; foxes live in the wild。",
+    "commonMistake": "fox 的复数加 -es：foxes；不要写 foxs。",
+    "example": {"english": "A fox is looking for food near the trees.", "chinese": "一只狐狸正在树丛附近寻找食物。"},
+    "application": {"prompt": "This wild animal has a pointed face and a bushy tail. It is a ___. A. fox B. whale", "solution": "A。解析：尖尖的脸和蓬松尾巴是狐狸的典型外形特征。"},
+    "sources": [{"label": "Cambridge Dictionary: fox", "url": "https://dictionary.cambridge.org/dictionary/english/fox"}]
+  },
+  {
+    "word": "giraffe",
+    "examTags": ["词汇·野生动物", "阅读·根据身体特征识别动物"],
+    "grammar": "n. 长颈鹿；可数，复数 giraffes。",
+    "collocations": "a tall giraffe; a giraffe's long neck; giraffes eat leaves。",
+    "commonMistake": "giraffe 的复数是 giraffes；注意拼写中有两个 f。",
+    "example": {"english": "The giraffe can reach leaves high in the trees.", "chinese": "长颈鹿能够够到高处树上的叶子。"},
+    "application": {"prompt": "Which animal has a very long neck? A. giraffe B. penguin", "solution": "A。解析：长颈鹿最显著的身体特征是长脖子。"},
+    "sources": [{"label": "Cambridge Dictionary: giraffe", "url": "https://dictionary.cambridge.org/dictionary/english/giraffe"}]
+  },
+  {
+    "word": "eagle",
+    "examTags": ["词汇·野生动物与鸟类", "阅读·根据动物特征获取信息"],
+    "grammar": "n. 雕；鹰；可数，复数 eagles。",
+    "collocations": "a golden eagle; an eagle's wings; eagles fly high。",
+    "commonMistake": "eagle 是可数名词，单数前通常用 an：an eagle。",
+    "example": {"english": "An eagle circles high above the mountain.", "chinese": "一只鹰在山上空盘旋。"},
+    "application": {"prompt": "Choose the bird of prey: A. eagle B. sandwich", "solution": "A。解析：eagle 是鹰类鸟；sandwich 是三明治。"},
+    "sources": [{"label": "Cambridge Dictionary: eagle", "url": "https://dictionary.cambridge.org/dictionary/english/eagle"}]
+  },
+  {
+    "word": "wolf",
+    "examTags": ["词汇·不规则名词复数", "阅读·野生动物信息"],
+    "grammar": "n. 狼；可数，复数 wolves，属于 f/fe 变 ves 的不规则拼写。",
+    "collocations": "a grey wolf; a pack of wolves; wolves live in forests。",
+    "commonMistake": "wolf 的复数是 wolves，不是 wolfs；注意 f 变 v 后加 -es。",
+    "example": {"english": "Wolves often live and hunt in groups.", "chinese": "狼常常成群生活和捕猎。"},
+    "application": {"prompt": "There are two ___ in the picture. A. wolves B. wolfs", "solution": "A。解析：wolf 的不规则复数形式是 wolves。"},
+    "sources": [{"label": "Cambridge Dictionary: wolf", "url": "https://dictionary.cambridge.org/dictionary/english/wolf"}]
+  },
+  {
+    "word": "penguin",
+    "examTags": ["词汇·野生动物与鸟类", "阅读·栖息地与动物习性"],
+    "grammar": "n. 企鹅；可数，复数 penguins。企鹅是鸟类，但不会飞，善于游泳。",
+    "collocations": "a penguin colony; penguins swim; penguins in Antarctica。",
+    "commonMistake": "penguin 是可数名词；单数前用 a，复数加 -s：a penguin / penguins。",
+    "example": {"english": "The penguins swim quickly in the cold sea.", "chinese": "企鹅在寒冷的海水中游得很快。"},
+    "application": {"prompt": "These birds cannot fly, but swim well and live in cold regions. They are ___. A. penguins B. eagles", "solution": "A。解析：不会飞、善游泳的鸟是 penguins（企鹅）。"},
+    "sources": [{"label": "Cambridge Dictionary: penguin", "url": "https://dictionary.cambridge.org/dictionary/english/penguin"}]
+  },
+  {
+    "word": "care",
+    "examTags": ["词汇·名词与动词", "语法·动词搭配", "阅读·动物保护语境"],
+    "grammar": "n. 照顾；护理；关心；v. 关心、在乎。常用 care for（照料/喜欢）和 care about（关心）。",
+    "collocations": "take care; care for an animal; care about wildlife。",
+    "commonMistake": "care 作动词时常说 care about sb./sth.；照料某人或动物可说 care for sb./sth.。",
+    "example": {"english": "People should care about wild animals and their homes.", "chinese": "人们应该关心野生动物和它们的家园。"},
+    "application": {"prompt": "Mina feeds and protects an injured bird. She takes ___ of it. A. care B. danger", "solution": "A。解析：take care of 表示“照顾”。"},
+    "sources": [{"label": "Cambridge Dictionary: care", "url": "https://dictionary.cambridge.org/dictionary/english/care"}]
+  },
+  {
+    "word": "take care of",
+    "examTags": ["词汇·动词短语", "语言运用·表达照料行为"],
+    "grammar": "phr. 照顾；处理。后接名词或代词作宾语；代词放在 of 后，如 take care of them。",
+    "collocations": "take care of a pet; take good care of; take care of the problem。",
+    "commonMistake": "短语中 of 不能省略；代词放在短语后：take care of it，不说 take care it。",
+    "example": {"english": "The volunteers take care of the rescued penguins.", "chinese": "志愿者照顾获救的企鹅。"},
+    "application": {"prompt": "The young fox has no parent nearby. The wildlife team will ___ it. A. take care of B. cut down", "solution": "A。解析：照料小狐狸用 take care of；cut down 表示砍倒或减少。"},
+    "sources": [{"label": "Cambridge Dictionary: take care of", "url": "https://dictionary.cambridge.org/dictionary/english/take-care-of"}]
+  },
+  {
+    "word": "sandwich",
+    "examTags": ["词汇·可数名词与复数", "阅读·食物信息"],
+    "grammar": "n. 三明治；可数，复数 sandwiches。",
+    "collocations": "a cheese sandwich; make a sandwich; two sandwiches。",
+    "commonMistake": "sandwich 的复数加 -es：sandwiches；单数前用 a。",
+    "example": {"english": "I packed a sandwich for the long trip.", "chinese": "我为这趟长途旅行准备了一个三明治。"},
+    "application": {"prompt": "Bread with cheese and vegetables between the slices is a ___. A. sandwich B. snake", "solution": "A。解析：夹有馅料的两片面包组成 sandwich（三明治）。"},
+    "sources": [{"label": "Cambridge Dictionary: sandwich", "url": "https://dictionary.cambridge.org/dictionary/english/sandwich"}]
+  },
+  {
+    "word": "snake",
+    "examTags": ["词汇·野生动物", "阅读·根据外形识别动物"],
+    "grammar": "n. 蛇；可数，复数 snakes。",
+    "collocations": "a long snake; a snake in the grass; snakes crawl。",
+    "commonMistake": "snake 是可数名词；表示一种蛇时用 a snake，多个用 snakes。",
+    "example": {"english": "A small snake is resting under a rock.", "chinese": "一条小蛇正在岩石下面休息。"},
+    "application": {"prompt": "This long animal has no legs and moves along the ground. It is a ___. A. snake B. giraffe", "solution": "A。解析：蛇没有腿，靠身体移动。"},
+    "sources": [{"label": "Cambridge Dictionary: snake", "url": "https://dictionary.cambridge.org/dictionary/english/snake"}]
+  },
+  {
+    "word": "scary",
+    "examTags": ["词汇·形容词与情感表达", "阅读·区分事物特点和人的感受"],
+    "grammar": "adj. 吓人的；恐怖的。比较级 scarier，最高级 scariest。",
+    "collocations": "a scary story; a scary animal; look scary。",
+    "commonMistake": "scary 描述“令人害怕的事物”；scared 描述“感到害怕的人”。",
+    "example": {"english": "The dark cave looks scary, but it is safe to enter with a guide.", "chinese": "黑暗的洞穴看起来吓人，但有向导陪同进入是安全的。"},
+    "application": {"prompt": "The loud thunder made Sam feel ___. A. scared B. scary", "solution": "A。解析：Sam 是感到害怕的人，用 scared；引起害怕的事物用 scary。"},
+    "sources": [{"label": "Cambridge Dictionary: scary", "url": "https://dictionary.cambridge.org/dictionary/english/scary"}]
+  },
+  {
+    "word": "neck",
+    "examTags": ["词汇·身体部位", "阅读·理解动物身体特征"],
+    "grammar": "n. 脖子；颈部；可数，复数 necks。",
+    "collocations": "a long neck; turn your neck; around the neck。",
+    "commonMistake": "neck 指连接头和身体的颈部；不要与 knee（膝盖）混淆拼写和意思。",
+    "example": {"english": "A giraffe uses its long neck to reach leaves.", "chinese": "长颈鹿用它的长脖子够到树叶。"},
+    "application": {"prompt": "The body part between your head and shoulders is your ___. A. neck B. trunk", "solution": "A。解析：头和肩膀之间的部位是 neck（脖子）。"},
+    "sources": [{"label": "Cambridge Dictionary: neck", "url": "https://dictionary.cambridge.org/dictionary/english/neck"}]
+  },
+  {
+    "word": "guess",
+    "examTags": ["词汇·动词搭配", "语言运用·表达推测"],
+    "grammar": "v. 猜测；估计；guess—guessed—guessed—guessing。可接答案、数字或疑问词引导的从句。",
+    "collocations": "guess the answer; guess how many; guess at a number。",
+    "commonMistake": "guess 的过去式和过去分词加 -ed：guessed；第三人称单数是 guesses。",
+    "example": {"english": "Can you guess how many penguins are on the ice?", "chinese": "你能猜出冰面上有多少只企鹅吗？"},
+    "application": {"prompt": "I do not know the answer, so I will ___ it. A. guess B. carry", "solution": "A。解析：不知道答案时可以 guess（猜测）。"},
+    "sources": [{"label": "Cambridge Dictionary: guess", "url": "https://dictionary.cambridge.org/dictionary/english/guess"}]
+  },
+  {
+    "word": "shark",
+    "examTags": ["词汇·海洋动物", "阅读·动物特征与栖息地"],
+    "grammar": "n. 鲨鱼；可数，复数 sharks。",
+    "collocations": "a large shark; a shark in the sea; shark species。",
+    "commonMistake": "shark 是可数名词；与 whale 区分时可根据体形、呼吸和哺乳等信息判断。",
+    "example": {"english": "The shark swims through the deep water.", "chinese": "鲨鱼游过深水区。"},
+    "application": {"prompt": "This large sea fish has a strong tail and several rows of teeth. It is a ___. A. shark B. penguin", "solution": "A。解析：鲨鱼是有多排牙齿的海洋鱼类；企鹅是鸟类。"},
+    "sources": [{"label": "Cambridge Dictionary: shark", "url": "https://dictionary.cambridge.org/dictionary/english/shark"}]
+  },
+  {
+    "word": "whale",
+    "examTags": ["词汇·海洋动物", "阅读·比较动物特征"],
+    "grammar": "n. 鲸；可数，复数 whales。鲸是哺乳动物，不是鱼。",
+    "collocations": "a blue whale; a whale in the ocean; whales breathe air。",
+    "commonMistake": "whale 虽生活在海里，却是哺乳动物；注意与 shark（鲨鱼）区分。",
+    "example": {"english": "A whale comes to the surface to breathe air.", "chinese": "鲸会浮到水面呼吸空气。"},
+    "application": {"prompt": "This huge sea animal breathes air and feeds its baby milk. It is a ___. A. whale B. shark", "solution": "A。解析：鲸是哺乳动物，会用肺呼吸并哺育幼崽。"},
+    "sources": [{"label": "Cambridge Dictionary: whale", "url": "https://dictionary.cambridge.org/dictionary/english/whale"}]
+  },
+  {
+    "word": "huge",
+    "examTags": ["词汇·形容词语境义", "阅读·理解程度和大小"],
+    "grammar": "adj. 巨大的；极多的。可作定语或表语；比较时可用 huge 或 very large 表示程度。",
+    "collocations": "a huge animal; a huge amount; a huge difference。",
+    "commonMistake": "huge 是形容词，常放在名词前，如 a huge whale；副词形式是 hugely。",
+    "example": {"english": "A blue whale is a huge animal.", "chinese": "蓝鲸是一种巨大的动物。"},
+    "application": {"prompt": "The elephant is very large. It is a ___ animal. A. huge B. tiny", "solution": "A。解析：huge 表示“巨大的”，tiny 表示“极小的”。"},
+    "sources": [{"label": "Cambridge Dictionary: huge", "url": "https://dictionary.cambridge.org/dictionary/english/huge"}]
+  },
+  {
+    "word": "dangerous",
+    "examTags": ["词汇·形容词与名词派生", "阅读·理解风险信息"],
+    "grammar": "adj. 危险的；有危害的。常用 be dangerous to sb./sth.；名词是 danger。",
+    "collocations": "a dangerous animal; dangerous to people; a dangerous road。",
+    "commonMistake": "dangerous 是形容词，修饰人或事物；danger 是名词，如 be in danger。",
+    "example": {"english": "It can be dangerous to approach a wild animal.", "chinese": "靠近野生动物可能很危险。"},
+    "application": {"prompt": "The broken bridge is not safe to cross. It is ___. A. dangerous B. playful", "solution": "A。解析：不安全、可能造成伤害的东西是 dangerous（危险的）。"},
+    "sources": [{"label": "Cambridge Dictionary: dangerous", "url": "https://dictionary.cambridge.org/dictionary/english/dangerous"}]
+  },
+  {
+    "word": "save",
+    "examTags": ["词汇·熟词多义", "阅读·动物保护与资源保存"],
+    "grammar": "v. 救；储蓄；保存。规则变化 save—saved—saved—saving；可接人、动物、钱或文件作宾语。",
+    "collocations": "save an animal; save money; save a file。",
+    "commonMistake": "save 可指救助、储蓄或保存；根据宾语判断词义，如 save a life 与 save money。",
+    "example": {"english": "The rescue team works to save injured wild animals.", "chinese": "救援队努力救助受伤的野生动物。"},
+    "application": {"prompt": "The forest team takes an injured fox to a safe place to ___. A. save it B. kill it", "solution": "A。解析：把受伤的狐狸带到安全地点是为了救助它，用 save。"},
+    "sources": [{"label": "Cambridge Dictionary: save", "url": "https://dictionary.cambridge.org/dictionary/english/save"}]
+  },
+  {
+    "word": "luck",
+    "examTags": ["词汇·不可数名词与祝愿表达", "语言运用·表达祝福"],
+    "grammar": "n. 幸运；运气；通常不可数。常说 good luck、bad luck、luckily（幸运地）。",
+    "collocations": "good luck; have good luck; a bit of luck。",
+    "commonMistake": "luck 通常不可数，不说 a luck；祝愿别人可说 Good luck!。",
+    "example": {"english": "Good luck with your animal report!", "chinese": "祝你的动物报告顺利！"},
+    "application": {"prompt": "Your friend is going to give a speech. You say, “Good ___!” A. luck B. danger", "solution": "A。解析：Good luck! 是祝别人顺利的常用表达。"},
+    "sources": [{"label": "Cambridge Dictionary: luck", "url": "https://dictionary.cambridge.org/dictionary/english/luck"}]
+  },
+  {
+    "word": "Thai",
+    "examTags": ["词汇·国家与语言名称", "拼写·专有名词大写"],
+    "grammar": "adj./n. 泰国的；泰国人的；泰国人；泰语。国籍和语言名称首字母大写；表示语言时通常不可数。",
+    "collocations": "Thai food; Thai language; Thai people。",
+    "commonMistake": "Thai 作国籍形容词、名词或语言名称时首字母都大写；不要把 Thai 和 Thailand 混淆。",
+    "example": {"english": "Malee teaches us a few Thai words.", "chinese": "Malee 教我们几个泰语单词。"},
+    "application": {"prompt": "The language spoken in Thailand is ___. A. Thai B. Thailand", "solution": "A。解析：Thai 可表示泰语；Thailand 是国家名“泰国”。"},
+    "sources": [{"label": "Cambridge Dictionary: Thai", "url": "https://dictionary.cambridge.org/dictionary/english/thai"}]
+  },
+  {
+    "word": "trunk",
+    "examTags": ["词汇·动物身体部位", "阅读·理解大象特征"],
+    "grammar": "n. 象鼻；可数，复数 trunks。trunk 也可指树干或汽车后备箱，需结合语境判断。",
+    "collocations": "an elephant's trunk; a long trunk; use its trunk。",
+    "commonMistake": "trunk 可表示象鼻、树干或后备箱；和 elephant 连用时通常指象鼻。",
+    "example": {"english": "The elephant uses its trunk to pick up a branch.", "chinese": "大象用它的象鼻捡起一根树枝。"},
+    "application": {"prompt": "An elephant uses this long body part to drink water. It is its ___. A. trunk B. neck", "solution": "A。解析：大象用 trunk（象鼻）吸水和抓取物品。"},
+    "sources": [{"label": "Cambridge Dictionary: trunk", "url": "https://dictionary.cambridge.org/dictionary/english/trunk"}]
+  },
+  {
+    "word": "pick",
+    "examTags": ["词汇·动词多义与搭配", "语法·动词词形"],
+    "grammar": "v. 捡；摘；挑选。pick—picked—picked—picking；pick flowers/fruit 表示采摘，pick a book 表示挑选。",
+    "collocations": "pick flowers; pick fruit; pick a name。",
+    "commonMistake": "pick 表示“捡起”时常用 pick up；pick flowers 表示“采花”，不要误加 up。",
+    "example": {"english": "The apples are ripe, so the farmer picks them from the trees.", "chinese": "苹果熟了，所以农民把它们从树上摘下来。"},
+    "application": {"prompt": "The apples are ripe, so the farmer will ___ them from the trees. A. pick B. carry", "solution": "A。解析：从树上采摘水果用 pick。"},
+    "sources": [{"label": "Cambridge Dictionary: pick", "url": "https://dictionary.cambridge.org/dictionary/english/pick"}]
+  },
+  {
+    "word": "pick up",
+    "examTags": ["词汇·动词短语与宾语位置", "阅读·理解动作顺序"],
+    "grammar": "phr. 捡起；举起。宾语可放在 up 前或后；代词必须放在中间：pick it up。",
+    "collocations": "pick up a bag; pick the book up; pick it up。",
+    "commonMistake": "宾语是代词时必须放中间：pick it up；不说 pick up it。",
+    "example": {"english": "Please pick up the paper near the door.", "chinese": "请捡起门边的纸。"},
+    "application": {"prompt": "The bottle is on the floor. Please pick ___ up. A. it B. up it", "solution": "A。解析：动词短语接代词时，代词放在 pick 和 up 之间。"},
+    "sources": [{"label": "Cambridge Dictionary: pick up", "url": "https://dictionary.cambridge.org/dictionary/english/pick-up"}]
+  },
+  {
+    "word": "carry",
+    "examTags": ["词汇·动作表达", "语法·及物动词"],
+    "grammar": "v. 搬运；携带。常接物品作宾语，也可表示抱、背着。",
+    "collocations": "carry a bag; carry a box; carry a baby",
+    "commonMistake": "carry 表示把物品带在身上或搬运；“捡起”强调动作，可用 pick up。",
+    "example": {"english": "The keeper carries food to the young foxes.", "chinese": "饲养员把食物送给小狐狸。"},
+    "application": {"prompt": "Mia has a heavy box in her hands. She can ___ it to the car. A. carry B. hear", "solution": "A。解析：把箱子搬到车上用 carry。"},
+    "sources": [{"label": "Cambridge Dictionary: carry", "url": "https://dictionary.cambridge.org/dictionary/english/carry"}]
+  },
+  {
+    "word": "playful",
+    "examTags": ["词汇·形容词", "语法·形容词作表语"],
+    "grammar": "adj. 爱玩的；活泼的。可放在名词前，也可放在 be、look 等词后。",
+    "collocations": "a playful puppy; playful animals; look playful",
+    "commonMistake": "playful 是形容词；描述动物“正在玩”可用 playing。",
+    "example": {"english": "The playful dolphins follow the boat.", "chinese": "活泼的海豚跟着小船游。"},
+    "application": {"prompt": "The young otter runs and plays all day. It is ___. A. playful B. dangerous", "solution": "A。解析：喜欢玩、活泼的用 playful。"},
+    "sources": [{"label": "Cambridge Dictionary: playful", "url": "https://dictionary.cambridge.org/dictionary/english/playful"}]
+  },
+  {
+    "word": "swimmer",
+    "examTags": ["词汇·名词派生", "语法·可数名词"],
+    "grammar": "n. 游泳者；善于游泳的动物。由 swim + -er 构成，指做游泳动作的人或动物。",
+    "collocations": "a strong swimmer; a fast swimmer; a good swimmer",
+    "commonMistake": "swimmer 指游泳者；swimming 可作“游泳”或现在分词。",
+    "example": {"english": "A seal is a strong swimmer.", "chinese": "海豹很擅长游泳。"},
+    "application": {"prompt": "A person who swims is a ___. A. swimmer B. forest", "solution": "A。解析：swimmer 是“游泳者”。"},
+    "sources": [{"label": "Cambridge Dictionary: swimmer", "url": "https://dictionary.cambridge.org/dictionary/english/swimmer"}]
+  },
+  {
+    "word": "one another",
+    "examTags": ["词汇·代词短语", "语法·相互代词"],
+    "grammar": "phr. 彼此；互相。作动词的宾语，表示两个或多个人相互做某事。",
+    "collocations": "help one another; know one another; talk to one another",
+    "commonMistake": "one another 表示“彼此”；不要误写成 another one（另一个）。",
+    "example": {"english": "The young animals stay close to one another.", "chinese": "小动物们彼此靠在一起。"},
+    "application": {"prompt": "The two classmates help ___. A. one another B. another one", "solution": "A。解析：表示两人互相帮助用 one another。"},
+    "sources": [{"label": "Cambridge Dictionary: one another", "url": "https://dictionary.cambridge.org/dictionary/english/one-another"}]
+  },
+  {
+    "word": "look after",
+    "examTags": ["词汇·动词短语", "语法·短语动词"],
+    "grammar": "phr. 照料；照看。后接人或物作宾语，宾语放在 after 后。",
+    "collocations": "look after a child; look after a pet; look after yourself",
+    "commonMistake": "look after 是固定搭配，不能把宾语放在 look 和 after 之间。",
+    "example": {"english": "The rescue team looks after the injured bird.", "chinese": "救援队照料这只受伤的鸟。"},
+    "application": {"prompt": "Please look ___ the puppy while I get its food. A. after B. at", "solution": "A。解析：照料小狗用 look after。"},
+    "sources": [{"label": "Cambridge Dictionary: look after", "url": "https://dictionary.cambridge.org/dictionary/english/look-after"}]
+  },
+  {
+    "word": "culture",
+    "examTags": ["词汇·名词", "语法·不可数名词"],
+    "grammar": "n. 文化。通常作不可数名词；说不同的文化时可用 cultures。",
+    "collocations": "local culture; animal culture; learn about a culture",
+    "commonMistake": "culture 表示“文化”时通常不加 a；特指一种文化时可说 a culture。",
+    "example": {"english": "The museum teaches us about the culture of the region.", "chinese": "博物馆让我们了解这个地区的文化。"},
+    "application": {"prompt": "We can learn about local ___ at the museum. A. culture B. cultures of one", "solution": "A。解析：此处 culture 泛指文化，通常用不可数形式。"},
+    "sources": [{"label": "Cambridge Dictionary: culture", "url": "https://dictionary.cambridge.org/dictionary/english/culture"}]
+  },
+  {
+    "word": "however",
+    "examTags": ["词汇·连接副词", "语法·转折关系"],
+    "grammar": "adv. 然而；不过。用于连接意思相反或不同的句子，常放句首并用逗号隔开。",
+    "collocations": "However, ...; ..., however, ...",
+    "commonMistake": "however 不能像 but 一样直接把两个完整句子连在一起；句首常写“However, ...”。",
+    "example": {"english": "The forest looks quiet. However, many birds live there.", "chinese": "森林看起来很安静。不过，那里住着许多鸟。"},
+    "application": {"prompt": "The path is long. ___, we can reach the lake before noon. A. However B. Because", "solution": "A。解析：前后形成转折，用 However。"},
+    "sources": [{"label": "Cambridge Dictionary: however", "url": "https://dictionary.cambridge.org/dictionary/english/however"}]
+  },
+  {
+    "word": "danger",
+    "examTags": ["词汇·名词", "语法·不可数名词"],
+    "grammar": "n. 危险。常作不可数名词；常见结构有 in danger 和 out of danger。",
+    "collocations": "be in danger; face danger; out of danger",
+    "commonMistake": "说“处于危险中”用 in danger，不说 in a danger。",
+    "example": {"english": "Plastic waste can put sea animals in danger.", "chinese": "塑料垃圾会使海洋动物陷入危险。"},
+    "application": {"prompt": "The baby bird cannot fly and is ___ danger. A. in B. on", "solution": "A。解析：固定搭配是 in danger。"},
+    "sources": [{"label": "Cambridge Dictionary: danger", "url": "https://dictionary.cambridge.org/dictionary/english/danger"}]
+  },
+  {
+    "word": "in danger",
+    "examTags": ["词汇·介词短语", "语法·固定搭配"],
+    "grammar": "phr. 处于危险中。常用 be in danger；danger 前通常不加冠词。",
+    "collocations": "be in danger; put ... in danger; animals in danger",
+    "commonMistake": "固定说 in danger；不要说 in the danger 来表示一般的危险。",
+    "example": {"english": "Some sea turtles are in danger because of fishing nets.", "chinese": "一些海龟因渔网而处于危险中。"},
+    "application": {"prompt": "The sign says the old bridge is unsafe. People who cross it are ___. A. in danger B. in a danger", "solution": "A。解析：固定表达为 in danger。"},
+    "sources": [{"label": "Cambridge Dictionary: in danger", "url": "https://dictionary.cambridge.org/dictionary/english/in-danger"}]
+  },
+  {
+    "word": "forest",
+    "examTags": ["词汇·名词", "语法·可数名词"],
+    "grammar": "n. 森林。是可数名词，单数前通常要有限定词，复数为 forests。",
+    "collocations": "a forest; a tropical forest; forest animals",
+    "commonMistake": "forest 是可数名词，泛指一片森林可说 a forest。",
+    "example": {"english": "Many wild animals find food in the forest.", "chinese": "许多野生动物在森林里寻找食物。"},
+    "application": {"prompt": "We walked through ___ forest to watch birds. A. a B. an", "solution": "A。解析：forest 是以辅音音素开头的可数名词单数，用 a。"},
+    "sources": [{"label": "Cambridge Dictionary: forest", "url": "https://dictionary.cambridge.org/dictionary/english/forest"}]
+  },
+  {
+    "word": "cut down",
+    "examTags": ["词汇·动词短语", "语法·短语动词"],
+    "grammar": "phr. 砍倒；减少。宾语为代词时放在 cut 和 down 之间，如 cut them down。",
+    "collocations": "cut down a tree; cut down trees; cut down on waste",
+    "commonMistake": "表示砍倒树时是 cut down a tree；宾语为代词要说 cut it down。",
+    "example": {"english": "People should not cut down trees in this forest.", "chinese": "人们不应该砍伐这片森林里的树木。"},
+    "application": {"prompt": "The trees are old. Please do not cut ___ down. A. them B. down them", "solution": "A。解析：cut down 接代词时，代词放在中间。"},
+    "sources": [{"label": "Cambridge Dictionary: cut down", "url": "https://dictionary.cambridge.org/dictionary/english/cut-down"}]
+  },
+  {
+    "word": "too many",
+    "examTags": ["词汇·数量表达", "语法·可数名词复数"],
+    "grammar": "phr. 太多。后接可数名词复数；修饰不可数名词用 too much。",
+    "collocations": "too many cars; too many bags; too much noise",
+    "commonMistake": "too many 后接可数名词复数；不可数名词前用 too much。",
+    "example": {"english": "Too many lights can disturb birds at night.", "chinese": "夜间太多灯光会打扰鸟类。"},
+    "application": {"prompt": "There are ___ plastic bottles on the beach. A. too many B. too much", "solution": "A。解析：bottles 是可数名词复数，用 too many。"},
+    "sources": [{"label": "Cambridge Dictionary: too many", "url": "https://dictionary.cambridge.org/dictionary/english/too-many"}]
+  },
+  {
+    "word": "kill",
+    "examTags": ["词汇·动词", "语法·及物动词"],
+    "grammar": "v. 杀死；导致死亡。过去式和过去分词为 killed；可直接接人或动物作宾语。",
+    "collocations": "kill an animal; kill insects; be killed by",
+    "commonMistake": "kill 是动词，描述已经发生的事用 killed；不要把 killed 和 kill 混用。",
+    "example": {"english": "We should never kill wild animals for fun.", "chinese": "我们绝不应该为了好玩而杀害野生动物。"},
+    "application": {"prompt": "The past form of kill is ___. A. killed B. kill", "solution": "A。解析：kill 是规则动词，过去式加 -ed。"},
+    "sources": [{"label": "Cambridge Dictionary: kill", "url": "https://dictionary.cambridge.org/dictionary/english/kill"}]
+  },
+  {
+    "word": "made of",
+    "examTags": ["词汇·固定表达", "语法·被动结构"],
+    "grammar": "phr. 由……制成。be made of 后接材料，材料仍能看出；be made from 常用于原料经过加工后看不出原样。",
+    "collocations": "be made of wood; be made of cotton; a table made of glass",
+    "commonMistake": "说明成品由什么材料制成用 be made of；注意根据主语选 is、are 或 was。",
+    "example": {"english": "This small model is made of paper.", "chinese": "这个小模型是用纸做的。"},
+    "application": {"prompt": "We can still see the wood in this desk. It is ___ wood. A. made of B. made in", "solution": "A。解析：看得出材料是木头，用 be made of。"},
+    "sources": [{"label": "Cambridge Dictionary: made of", "url": "https://dictionary.cambridge.org/dictionary/english/made-of"}]
+  },
+  {
+    "word": "ivory",
+    "examTags": ["词汇·材料名词", "语法·不可数名词"],
+    "grammar": "n. 象牙。通常作不可数名词；也可指象牙色。",
+    "collocations": "ivory trade; ivory products; ivory-coloured",
+    "commonMistake": "ivory 表示材料“象牙”时通常不可数，不说 an ivory；象牙制品不能成为伤害野生动物的理由。",
+    "example": {"english": "Elephants need protection from the illegal ivory trade.", "chinese": "大象需要得到保护，免受非法象牙贸易的伤害。"},
+    "application": {"prompt": "Elephants are killed for ___. A. ivory B. an ivory", "solution": "A。解析：ivory 表示象牙材料时通常不可数，不加 a/an。"},
+    "sources": [{"label": "Cambridge Dictionary: ivory", "url": "https://dictionary.cambridge.org/dictionary/english/ivory"}]
+  },
+  {
+    "word": "friendly",
+    "examTags": ["词汇·形容词派生", "语法·形容词作表语"],
+    "grammar": "adj. 友好的。可修饰名词，也可作表语；常见结构 be friendly to sb。",
+    "collocations": "a friendly animal; be friendly to visitors; a friendly smile",
+    "commonMistake": "friendly 虽以 -ly 结尾，却是形容词；副词形式是 in a friendly way。",
+    "example": {"english": "The guide is friendly to visitors at the wildlife park.", "chinese": "野生动物园的向导对游客很友好。"},
+    "application": {"prompt": "The new keeper is kind to every animal. He is ___ to them. A. friendly B. friend", "solution": "A。解析：be 后需用形容词 friendly，且搭配 friendly to。"},
+    "sources": [{"label": "Cambridge Dictionary: friendly", "url": "https://dictionary.cambridge.org/dictionary/english/friendly"}]
+  },
+  {
+    "word": "quite",
+    "examTags": ["词汇·程度副词", "语法·副词修饰形容词"],
+    "grammar": "adv. 相当；很；完全。常放在形容词或副词前；具体程度要结合语境判断。",
+    "collocations": "quite large; quite dangerous; quite well",
+    "commonMistake": "quite 修饰形容词时通常放在其前面：quite big；不要误放在形容词后。",
+    "example": {"english": "The whale is quite large, but it is gentle.", "chinese": "这头鲸相当大，但它很温和。"},
+    "application": {"prompt": "The path is not small; it is ___ wide. A. quite B. quite a", "solution": "A。解析：wide 是形容词，前面用 quite；quite a 后应接名词短语。"},
+    "sources": [{"label": "Cambridge Dictionary: quite", "url": "https://dictionary.cambridge.org/dictionary/english/quite"}]
+  },
+  {
+    "word": "quite a",
+    "examTags": ["词汇·程度表达", "语法·冠词与形容词顺序"],
+    "grammar": "phr. 相当……的一个。结构为 quite a/an + 形容词 + 单数可数名词。",
+    "collocations": "quite a big animal; quite a long trip; quite an interesting book",
+    "commonMistake": "quite a/an 后接形容词和单数可数名词；形容词以元音音素开头时用 an。",
+    "example": {"english": "A giraffe has quite a long neck.", "chinese": "长颈鹿的脖子相当长。"},
+    "application": {"prompt": "It is ___ unusual animal. A. quite an B. quite a", "solution": "A。解析：unusual 以元音音素开头，用 an。"},
+    "sources": [{"label": "Cambridge Dictionary: quite", "url": "https://dictionary.cambridge.org/dictionary/english/quite"}]
+  },
+  {
+    "word": "not ... at all",
+    "examTags": ["词汇·否定表达", "语法·not与短语搭配"],
+    "grammar": "phr. 一点也不；完全不。not 放在助动词或 be 后，at all 常放在句末加强否定。",
+    "collocations": "not like ... at all; not dangerous at all; do not worry at all",
+    "commonMistake": "not ... at all 表否定；句中已有 not，不要再加 never 表达同一层否定。",
+    "example": {"english": "This quiet rabbit is not scary at all.", "chinese": "这只安静的兔子一点也不可怕。"},
+    "application": {"prompt": "The animal is very calm. It is ___ scary at all. A. not B. no", "solution": "A。解析：固定否定表达为 not ... at all。"},
+    "sources": [{"label": "Cambridge Dictionary: at all", "url": "https://dictionary.cambridge.org/dictionary/english/at-all"}]
+  },
+  {
+    "word": "fur",
+    "examTags": ["词汇·材料名词", "语法·不可数名词"],
+    "grammar": "n. （动物的）软毛；毛皮。表示动物的毛时通常不可数；表示毛皮衣物或种类时可数。",
+    "collocations": "thick fur; soft fur; a fur coat",
+    "commonMistake": "描述动物身上的毛通常说 fur，不用 hairs；fur 作“毛”时一般不加复数 -s。",
+    "example": {"english": "The fox grows thick fur before winter.", "chinese": "狐狸在冬天来临前长出浓密的毛。"},
+    "application": {"prompt": "A fox has soft ___. A. fur B. furs", "solution": "A。解析：这里泛指动物身上的毛，fur 通常不可数。"},
+    "sources": [{"label": "Cambridge Dictionary: fur", "url": "https://dictionary.cambridge.org/dictionary/english/fur"}]
+  },
+  {
+    "word": "blind",
+    "examTags": ["词汇·形容词", "语法·形容词作表语"],
+    "grammar": "adj. 失明的；看不见的。常作表语，也可作定语；描述人时可用 blind people。",
+    "collocations": "be blind; a blind person; blind animals",
+    "commonMistake": "blind 是形容词；“失明”可说 be blind，不要误用名词 blindness。",
+    "example": {"english": "The rescued dog is blind, so it needs a safe home.", "chinese": "这只获救的狗失明了，所以它需要一个安全的家。"},
+    "application": {"prompt": "A person who cannot see is ___. A. blind B. hearing", "solution": "A。解析：blind 表示失明的；hearing 与听觉有关。"},
+    "sources": [{"label": "Cambridge Dictionary: blind", "url": "https://dictionary.cambridge.org/dictionary/english/blind"}]
+  },
+  {
+    "word": "hearing",
+    "examTags": ["词汇·名词派生", "语法·不可数名词"],
+    "grammar": "n. 听力；听觉。表示听觉能力时通常不可数；也可指正式听证会。",
+    "collocations": "good hearing; lose one's hearing; hearing problems",
+    "commonMistake": "表示“听力”时用 hearing；hear 是动词，意为“听见”。",
+    "example": {"english": "Owls have good hearing and can find food at night.", "chinese": "猫头鹰听觉灵敏，夜间也能找到食物。"},
+    "application": {"prompt": "The noun meaning the ability to hear is ___. A. hearing B. hear", "solution": "A。解析：hear 是动词；hearing 可作“听力、听觉”。"},
+    "sources": [{"label": "Cambridge Dictionary: hearing", "url": "https://dictionary.cambridge.org/dictionary/english/hearing"}]
+  },
+  {
+    "word": "Antarctica",
+    "examTags": ["词汇·地理名称", "语法·专有名词大写"],
+    "grammar": "n. 南极洲。专有地名，首字母大写；通常不与 the 连用。",
+    "collocations": "in Antarctica; the Antarctic region; Antarctica's wildlife",
+    "commonMistake": "Antarctica 是洲名，首字母必须大写；表示“在南极洲”常说 in Antarctica。",
+    "example": {"english": "Penguins live in Antarctica and other southern regions.", "chinese": "企鹅生活在南极洲和其他南部地区。"},
+    "application": {"prompt": "Choose the correctly written continent: A. Antarctica B. antarctica", "solution": "A。解析：专有地名 Antarctica 的首字母要大写。"},
+    "sources": [{"label": "Encyclopaedia Britannica: Antarctica", "url": "https://www.britannica.com/place/Antarctica"}]
+  },
+  {
+    "word": "Africa",
+    "examTags": ["词汇·地理名称", "语法·专有名词大写"],
+    "grammar": "n. 非洲。专有地名，首字母大写；通常不与 the 连用。",
+    "collocations": "in Africa; African animals; across Africa",
+    "commonMistake": "Africa 是洲名，写作 Africa；表示“非洲的”常用形容词 African。",
+    "example": {"english": "Many giraffes live in Africa.", "chinese": "许多长颈鹿生活在非洲。"},
+    "application": {"prompt": "The adjective for something from Africa is ___. A. African B. Africa", "solution": "A。解析：Africa 是名词地名；African 是形容词，意为“非洲的”。"},
+    "sources": [{"label": "Encyclopaedia Britannica: Africa", "url": "https://www.britannica.com/place/Africa"}]
+  },
+  {
+    "word": "Malee",
+    "examTags": ["词汇·人名", "语法·专有名词大写"],
+    "grammar": "n. 玛莉（人名）。人名首字母大写；通常不与 a/an 或 the 连用。",
+    "collocations": "Malee's family; meet Malee; ask Malee",
+    "commonMistake": "Malee 是人名，首字母大写；表示所属关系可写 Malee's。",
+    "example": {"english": "Malee helps the animal-care team after school.", "chinese": "放学后，玛莉帮助动物护理小组。"},
+    "application": {"prompt": "Choose the correct spelling of the name: A. Malee B. malee", "solution": "A。解析：人名是专有名词，首字母大写。"},
+    "sources": [{"label": "Behind the Name: Malee", "url": "https://www.behindthename.com/name/malee"}]
+  },
+  {
+    "word": "Thailand",
+    "examTags": ["词汇·国家名称", "语法·专有名词大写"],
+    "grammar": "n. 泰国。国家名称，首字母大写；表示“泰国的/泰国人”常用 Thai。",
+    "collocations": "in Thailand; travel to Thailand; Thai culture",
+    "commonMistake": "Thailand 是国家名；Thai 可作形容词或名词，不能把二者当作同一个词性使用。",
+    "example": {"english": "The class reads about elephants in Thailand.", "chinese": "全班阅读有关泰国大象的资料。"},
+    "application": {"prompt": "The country is ___. A. Thailand B. Thai", "solution": "A。解析：Thailand 是国家名；Thai 表示“泰国的”或“泰国人/泰语”。"},
+    "sources": [{"label": "Encyclopaedia Britannica: Thailand", "url": "https://www.britannica.com/place/Thailand"}]
+  }
+]

@@ -20,15 +20,40 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
   const prisma = await getRequestPrisma()
 
   const { id } = await params
-  const student = await prisma.student.findUnique({
-    where: { id },
+  const studentBase = await prisma.student.findUnique({ where: { id }, select: { id: true, division: true } })
+  if (!studentBase) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const isAdmin = user.role === 'admin' || user.role === 'SUPER_ADMIN'
+  const selectedTerm = isAdmin
+    ? await resolveAdminTermScope(prisma, studentBase.division, req)
+    : null
+  if (isAdmin && !selectedTerm) {
+    return NextResponse.json({ error: '当前没有可查看的运营批次' }, { status: 409 })
+  }
+  const termId = selectedTerm?.id
+  const student = await prisma.student.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+      ...(termId ? { termMemberships: { some: { termId } } } : {}),
+    },
     include: {
       mainTeacher: true,
       parent: { select: { id: true, name: true, email: true, role: true, status: true, wxpusherUid: true } },
+      ...(termId ? {
+        termMemberships: {
+          where: { termId },
+          select: { grade: true },
+          take: 1,
+        },
+      } : {}),
       enrollments: {
         where: {
           status: 'ACTIVE',
-          group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
+          group: {
+            ...(termId ? { termId } : {}),
+            status: { not: 'ARCHIVED' },
+            course: { isActive: true },
+          },
         },
         include: {
           group: {
@@ -43,6 +68,12 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
         orderBy: { enrolledAt: 'desc' },
       },
       attendances: {
+        where: termId ? {
+          OR: [
+            { lesson: { group: { termId } } },
+            { lessonId: null, enrollment: { group: { termId } } },
+          ],
+        } : undefined,
         orderBy: { createdAt: 'desc' },
         take: 50,
         include: {
@@ -58,7 +89,10 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
           },
         },
       },
-      fees: { orderBy: { createdAt: 'desc' } },
+      fees: {
+        where: termId ? { termId } : undefined,
+        orderBy: { createdAt: 'desc' },
+      },
     },
   })
 
@@ -104,11 +138,11 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     }
   })
   const approvedIntensiveAttendances = await prisma.attendance.findMany({
-    where: {
+      where: {
       studentId: student.id,
       lesson: {
         intensiveReviewStatus: 'APPROVED',
-        group: { intensiveMode: 'INTENSIVE' },
+          group: { intensiveMode: 'INTENSIVE', ...(termId ? { termId } : {}) },
       },
     },
     select: {
@@ -138,21 +172,57 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     const parentUserId = student.parentUserId || student.parentId || null
     if (parentUserId) {
       const familyRows = await prisma.student.findMany({
-        where: { parentUserId, deletedAt: null },
+        where: {
+          parentUserId,
+          deletedAt: null,
+          ...(termId ? { termMemberships: { some: { termId } } } : {}),
+        },
         select: {
           id: true, name: true, grade: true, status: true, totalHours: true, remainHours: true,
+          ...(termId ? {
+            termMemberships: {
+              where: { termId },
+              select: { grade: true },
+              take: 1,
+            },
+          } : {}),
           enrollments: {
-            where: { status: 'ACTIVE', deletedAt: null },
+            where: { status: 'ACTIVE', deletedAt: null, ...(termId ? { group: { termId } } : {}) },
             select: { id: true, group: { select: { name: true } } },
             take: 3,
           },
         },
         orderBy: [{ createdAt: 'asc' }],
       })
+      const familyBalances = termId && familyRows.length
+        ? await prisma.enrollment.groupBy({
+          by: ['studentId'],
+          where: {
+            studentId: { in: familyRows.map((row) => row.id) },
+            status: 'ACTIVE',
+            deletedAt: null,
+            group: {
+              termId,
+              status: { not: 'ARCHIVED' },
+              course: { isActive: { not: false } },
+            },
+          },
+          _sum: { totalHours: true, remainHours: true },
+        })
+        : []
+      const familyBalanceByStudentId = new Map(familyBalances.map((row) => [row.studentId, {
+        totalHours: Number(row._sum.totalHours || 0),
+        remainHours: Number(row._sum.remainHours || 0),
+      }]))
       family = familyRows.map((row) => ({
         ...row,
-        totalHours: Number(row.totalHours || 0),
-        remainHours: Number(row.remainHours || 0),
+        grade: termId ? row.termMemberships?.[0]?.grade ?? row.grade : row.grade,
+        totalHours: termId
+          ? familyBalanceByStudentId.get(row.id)?.totalHours || 0
+          : Number(row.totalHours || 0),
+        remainHours: termId
+          ? familyBalanceByStudentId.get(row.id)?.remainHours || 0
+          : Number(row.remainHours || 0),
         isCurrent: row.id === student.id,
         enrollments: row.enrollments.map((enrollment) => ({
           id: enrollment.id,
@@ -175,9 +245,12 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
         email: undefined,
       }
     : student
+  const studentForTerm = termId
+    ? { ...visibleStudent, grade: student.termMemberships[0]?.grade ?? student.grade }
+    : visibleStudent
 
   return NextResponse.json({
-    ...visibleStudent,
+    ...studentForTerm,
     enrollments: enrollmentsWithSubjects,
     remainHours,
     totalHours,

@@ -2,16 +2,15 @@
 
 import { useMemo } from 'react'
 import useSWR from 'swr'
-import { Button, Space, Typography } from 'antd'
+import { Button } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeftOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, BulbOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { PullToRefresh } from '@/components/PullToRefresh'
-import { resolveMembership, MEMBERSHIP_THEME } from '@/constants/membership'
 import { StudentAvatar } from '@/components/Common/StudentAvatar'
-
-const { Text } = Typography
+import { StudentMembershipBadge } from '@/components/Common/StudentMembershipBadge'
+import { getTeacherAttendanceHref, getTeacherInteractionHref } from '@/lib/teacher-lesson-navigation'
 
 type Tone = 'blue' | 'orange' | 'red' | 'green' | 'purple' | 'brown' | 'dark'
 
@@ -67,32 +66,6 @@ function formatLessonDate(dateKey?: string | null) {
   return `${month}月${day}日 · 周${weekday}`
 }
 
-function MembershipBadge({ level }: { level?: string | null }) {
-  const membership = resolveMembership(level)
-  const theme = MEMBERSHIP_THEME[membership]
-  if (!theme.badge) {
-    return <span style={{ fontSize: 11, color: '#8D806F' }}>普通</span>
-  }
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        padding: '0 6px',
-        borderRadius: 999,
-        fontSize: 10.5,
-        fontWeight: 700,
-        lineHeight: '18px',
-        color: theme.text,
-        background: theme.bg,
-        border: `1px solid ${theme.border}`,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {theme.badge}
-    </span>
-  )
-}
-
 export default function TeacherLessonDetailPage() {
   const params = useParams<{ lessonId: string }>()
   const router = useRouter()
@@ -134,7 +107,7 @@ export default function TeacherLessonDetailPage() {
   return (
     <PullToRefresh onRefresh={async () => { await mutate() }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <button type="button" className="lesson-detail__back" onClick={() => router.back()}>
+      <button type="button" className="lesson-detail__back mobile-shell-back" onClick={() => router.back()}>
         <ArrowLeftOutlined /> 返回
       </button>
 
@@ -175,8 +148,8 @@ export default function TeacherLessonDetailPage() {
                 <StudentAvatar photoUrl={student.photoUrl} gender={student.gender} name={student.name} size={30} className="teacher-today-student-chip__avatar" />
                 <span className="teacher-today-student-chip__body">
                   <span className="teacher-today-student-chip__name">
-                    {student.name}
-                    <MembershipBadge level={student.membershipLevel} />
+                    <span className="teacher-today-student-chip__name-text" title={student.name}>{student.name}</span>
+                    <StudentMembershipBadge level={student.membershipLevel} className="teacher-today-student-chip__membership" />
                   </span>
                   <span className="teacher-today-student-chip__meta">
                     {[student.grade, student.school].filter(Boolean).join(' · ') || '—'}
@@ -192,14 +165,22 @@ export default function TeacherLessonDetailPage() {
 
       {/* 操作 */}
       <section className="lesson-detail-card">
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <Button
             block
             size="large"
             icon={<CheckCircleOutlined />}
-            onClick={() => router.push(`/teacher/attendance?lessonId=${lesson.id}`)}
+            onClick={() => router.push(getTeacherAttendanceHref(lesson.id))}
           >
             录入考勤
+          </Button>
+          <Button
+            block
+            size="large"
+            icon={<BulbOutlined />}
+            onClick={() => router.push(getTeacherInteractionHref(lesson.lessonId || lesson.id))}
+          >
+            课堂互动
           </Button>
           <Button
             block

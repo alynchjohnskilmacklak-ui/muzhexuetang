@@ -1,6 +1,8 @@
 import type { PrismaClient } from '@prisma/client'
 import { visiblePerformancePostWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 import { resolveFeedbackImageVariants, variantsForFeedback, type FeedbackImageVariant } from '@/lib/file-asset-variants'
+import { filterStudentRatingsForStudents } from '@/lib/classroom-feedback/access'
+import { getStudentFeedbackRating } from '@/lib/classroom-feedback/feedback-followup'
 import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
 
 export interface ProfileRange { from: Date; to: Date }
@@ -10,7 +12,7 @@ export async function getStudentProfile(
   studentId: string,
   range: ProfileRange,
   historicalStudentIds: string[] = [studentId],
-  options: { includeReport?: boolean } = {},
+  options: { includeReport?: boolean; includeImages?: boolean } = {},
 ) {
   const { from, to } = range
   const studentIds = [...new Set([studentId, ...historicalStudentIds])]
@@ -32,7 +34,7 @@ export async function getStudentProfile(
           id: true, title: true, subject: true, paperDate: true, teacher: { select: { name: true, subjects: true } },
           questions: { select: { mastery: true, topic: true } },
         },
-        orderBy: { paperDate: 'desc' }, take: 50,
+        orderBy: { paperDate: 'desc' }, ...(options.includeReport ? {} : { take: 50 }),
       }),
       prisma.gradeRecord.findMany({
         where: { ...linkedStudentWhere, assessment: { assessDate: { gte: from, lte: to } } },
@@ -45,12 +47,12 @@ export async function getStudentProfile(
         orderBy: { assessment: { assessDate: 'asc' } },
       }),
       prisma.weaknessRecord.findMany({
-        where: linkedStudentWhere,
+        where: { ...linkedStudentWhere, createdAt: { gte: from, lte: to } },
         select: { id: true, topic: true, mistakeCount: true, suggestion: true, createdAt: true },
-        orderBy: [{ mistakeCount: 'desc' }, { createdAt: 'desc' }], take: 20,
+        orderBy: [{ mistakeCount: 'desc' }, { createdAt: 'desc' }], ...(options.includeReport ? {} : { take: 20 }),
       }),
       prisma.learningGoal.findMany({
-        where: linkedStudentWhere,
+        where: { ...linkedStudentWhere, deletedAt: null },
         select: { id: true, subject: true, goalDesc: true, deadline: true, isAchieved: true, achievedAt: true, createdAt: true },
         orderBy: [{ isAchieved: 'asc' }, { createdAt: 'desc' }],
       }),
@@ -61,9 +63,9 @@ export async function getStudentProfile(
       }),
       prisma.classroomFeedback.findMany({
         where: { studentIds: { hasSome: studentIds }, status: 'PUBLISHED', deletedAt: null, createdAt: { gte: from, lte: to } },
-        select: { id: true, mood: true, tags: true, lessonContent: true, knowledgePoints: true, knowledgeCard: true, summary: true, overallComment: true,
+        select: { id: true, studentIds: true, mood: true, tags: true, lessonContent: true, knowledgePoints: true, knowledgeCard: true, summary: true, overallComment: true,
           feedbackGroupId: true,
-          homework: true, badge: true,
+          homework: true, badge: true, studentRatings: true,
           imageUrls: true,
           homeworkDone: true, inClassRating: true,
           createdAt: true, teacher: { select: { id: true, name: true, subjects: true } },
@@ -110,18 +112,39 @@ export async function getStudentProfile(
     },
   }) : []
   const feedbackGroupMap = new Map(feedbackGroups.map((group) => [group.id, group]))
-  const feedbackImageVariants = await resolveFeedbackImageVariants(prisma, feedbacks.flatMap(feedback => feedback.imageUrls))
+  const feedbackImageVariants = options.includeImages === false
+    ? new Map<string, FeedbackImageVariant>()
+    : await resolveFeedbackImageVariants(prisma, feedbacks.flatMap(feedback => feedback.imageUrls))
 
   // ── 学：知识掌握 ──
   const masteryCount: Record<string, number> = { MASTERED: 0, NEEDS_REVIEW: 0, NEEDS_PRACTICE: 0 }
-  for (const p of papers) for (const q of p.questions) masteryCount[q.mastery] = (masteryCount[q.mastery] || 0) + 1
+  const topicMastery = new Map<string, { subject: string; topic: string; total: number; mastered: number; needsReview: number; needsPractice: number }>()
+  for (const paper of papers) {
+    for (const question of paper.questions) {
+      masteryCount[question.mastery] = (masteryCount[question.mastery] || 0) + 1
+      const topic = question.topic.trim()
+      if (!topic) continue
+      const subject = paper.subject || '综合'
+      const key = `${subject}\u0000${topic}`
+      const current = topicMastery.get(key) || { subject, topic, total: 0, mastered: 0, needsReview: 0, needsPractice: 0 }
+      current.total += 1
+      if (question.mastery === 'MASTERED') current.mastered += 1
+      else if (question.mastery === 'NEEDS_REVIEW') current.needsReview += 1
+      else if (question.mastery === 'NEEDS_PRACTICE') current.needsPractice += 1
+      topicMastery.set(key, current)
+    }
+  }
   const masteryTotal = masteryCount.MASTERED + masteryCount.NEEDS_REVIEW + masteryCount.NEEDS_PRACTICE
   const pct = (n: number) => (masteryTotal ? Math.round((n / masteryTotal) * 100) : 0)
   const mastery = {
     total: masteryTotal,
+    masteredCount: masteryCount.MASTERED,
+    needsReviewCount: masteryCount.NEEDS_REVIEW,
+    needsPracticeCount: masteryCount.NEEDS_PRACTICE,
     masteredPct: pct(masteryCount.MASTERED),
     reviewPct: pct(masteryCount.NEEDS_REVIEW),
     weakPct: pct(masteryCount.NEEDS_PRACTICE),
+    topics: [...topicMastery.values()].sort((a, b) => b.total - a.total || a.topic.localeCompare(b.topic, 'zh-CN')),
   }
   const latestWithDims = [...grades].reverse().find(g => g.dimensions.length > 0)
   const radar = latestWithDims
@@ -276,17 +299,31 @@ export async function getStudentProfile(
     )?.subject || group?.course?.subject || subjOf(feedback.teacher)
   }
 
-  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: Array<string | FeedbackImageVariant>; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { lessonContent?: string; comment?: string; summary?: string; knowledgePoints?: string[]; knowledgeCard?: unknown; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null } }
+  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: Array<string | FeedbackImageVariant>; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { lessonContent?: string; comment?: string; summary?: string; knowledgePoints?: string[]; knowledgeCard?: unknown; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null; studentPerformance?: string; studentMastery?: string; studentTags?: string[]; nextLessonFocus?: string; personalizedLearning?: unknown } }
   const timeline: TLItem[] = []
   for (const p of papers) {
     const m = p.questions.filter(q => q.mastery === 'MASTERED').length
     timeline.push({ type: 'paper', title: `${p.title} 已批改`, sub: `掌握 ${m}/${p.questions.length} 题`, date: p.paperDate, teacher: p.teacher?.name, teacherSubject: subjOf(p.teacher), refType: 'paper', refId: p.id })
   }
-  for (const f of feedbacks) timeline.push({
+  const performanceLabels: Record<string, string> = {
+    GREAT: '表现积极',
+    OKAY: '状态平稳',
+    NEEDS_IMPROVEMENT: '需要更多引导',
+  }
+  for (const f of feedbacks) {
+    const studentRating = studentIds
+      .map((recordId) => getStudentFeedbackRating(f.studentRatings, recordId, f.studentIds))
+      .find((rating) => rating !== null)
+    const ratingCode = typeof studentRating?.rating === 'string' ? studentRating.rating : ''
+    const studentTags = Array.isArray(studentRating?.tags)
+      ? studentRating.tags.filter((tag): tag is string => typeof tag === 'string' && Boolean(tag.trim())).map((tag) => tag.trim()).slice(0, 30)
+      : []
+    const nextLessonFocus = typeof studentRating?.nextLessonFocus === 'string' ? studentRating.nextLessonFocus.trim() : ''
+    timeline.push({
     type: 'feedback', title: '课堂反馈',
     sub: f.overallComment || f.summary || (f.tags || []).join(' '),
     date: f.createdAt, teacher: f.teacher?.name, teacherSubject: subjectOfFeedback(f),
-    images: variantsForFeedback(f.imageUrls, feedbackImageVariants),
+    images: options.includeImages === false ? [] : variantsForFeedback(f.imageUrls, feedbackImageVariants),
     refType: 'feedback', refId: f.id,
     detail: {
       lessonContent: f.lessonContent || undefined,
@@ -302,8 +339,14 @@ export async function getStudentProfile(
       tags: f.tags || [],
       badge: f.badge || null,
       mood: f.mood || null,
+      studentPerformance: performanceLabels[ratingCode] || undefined,
+      studentMastery: typeof studentRating?.masteryLevel === 'string' ? studentRating.masteryLevel.trim() || undefined : undefined,
+      studentTags,
+      nextLessonFocus: nextLessonFocus || undefined,
+      personalizedLearning: studentRating?.personalizedLearning ?? undefined,
     },
-  })
+    })
+  }
   for (const po of posts) timeline.push({ type: 'post', title: '成长动态', sub: po.content, date: po.createdAt, teacher: po.teacher?.name, teacherSubject: subjOf(po.teacher), images: (po.images as string[] | undefined) || undefined, refType: 'post', refId: po.id })
   for (const b of badges) timeline.push({ type: 'badge', title: `获得徽章「${b.badgeType}」`, sub: b.description || undefined, date: b.earnedAt })
   for (const g of grades) timeline.push({ type: 'grade', title: `${g.assessment.name}`, sub: `${g.score} 分`, date: g.assessment.assessDate })

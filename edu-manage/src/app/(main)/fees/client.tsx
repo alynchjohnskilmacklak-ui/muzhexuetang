@@ -4,8 +4,8 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import {
-  Alert, App, Button, Card, Col, DatePicker,
-  Form, Input, InputNumber, Popconfirm, Row, Select, Space,
+  Alert, App, Button, Card, Col, DatePicker, Radio,
+  Form, Input, InputNumber, Popconfirm, Row, Space,
   Spin, Statistic, Table, Tag, Typography,
 } from 'antd'
 import {
@@ -47,6 +47,8 @@ interface FeeRow {
   course?: { id: string; name: string } | null
   amount: number
   type: string
+  status: string
+  dueDate: string | null
   hours: number | null
   campus: string | null
   operator: string | null
@@ -175,7 +177,11 @@ export function FeesClient() {
   }, [data])
 
   const columns: ColumnsType<FeeRow> = [
+    { title: '状态', dataIndex: 'status', key: 'status', width: 86,
+      render: (v: string) => <Tag color={v === 'paid' ? 'green' : 'gold'}>{v === 'paid' ? '已缴' : '待缴'}</Tag> },
     { title: '收费日期', dataIndex: 'paidAt', key: 'paidAt', width: 110,
+      render: (v: string | null) => v ? dayjs(v).format('YYYY-MM-DD') : '-' },
+    { title: '到期日', dataIndex: 'dueDate', key: 'dueDate', width: 110,
       render: (v: string | null) => v ? dayjs(v).format('YYYY-MM-DD') : '-' },
     { title: '学生', dataIndex: ['student', 'name'], key: 'student', width: 100,
       render: (name: string, record: FeeRow) => (
@@ -215,6 +221,8 @@ export function FeesClient() {
                 studentId: r.studentId,
                 studentName: r.student.name,
                 type: r.type,
+                status: r.status,
+                dueDate: r.dueDate ? dayjs(r.dueDate) : undefined,
                 amount: r.amount,
                 hours: r.hours,
                 campus: r.campus,
@@ -256,12 +264,14 @@ export function FeesClient() {
       const body = {
         studentId: values.studentId,
         type: values.type || '其他',
+        status: values.status || 'paid',
         amount: values.amount,
         hours: values.hours ?? null,
         campus: values.campus || null,
         operator: values.operator || null,
         notes: values.notes || null,
         paidAt: values.paidAt ? values.paidAt.format('YYYY-MM-DD') : undefined,
+        dueDate: values.dueDate ? values.dueDate.format('YYYY-MM-DD') : null,
         division: recordDivision,
       }
       const url = editingId ? `/api/fees/${editingId}?division=${recordDivision}` : '/api/fees'
@@ -436,7 +446,7 @@ export function FeesClient() {
             columns={[
               { title: '校区', dataIndex: 'campus', key: 'campus' },
               { title: '总额', dataIndex: 'total', key: 'total', render: (v: number) => `¥${v.toLocaleString()}` },
-              { title: '课时', dataIndex: 'hours', key: 'hours', render: (v: number) => v.toFixed(1) },
+              { title: '课时', dataIndex: 'hours', key: 'hours', render: (v: number) => v.toFixed(2) },
               { title: '笔数', dataIndex: 'count', key: 'count' },
             ]}
             size="small"
@@ -455,7 +465,7 @@ export function FeesClient() {
         destroyOnClose
         width={isMobile ? 'calc(100vw - 24px)' : 560}
       >
-        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+        <Form form={form} layout="vertical" initialValues={{ status: 'paid' }} style={{ marginTop: 16 }}>
           <Form.Item name="studentId" label="学生" rules={[{ required: true, message: '请选择学生' }]}>
             <AdaptiveSelect showSearch placeholder="按名字搜索学生" filterOption={false}
               onSearch={handleStudentSearch}
@@ -475,7 +485,23 @@ export function FeesClient() {
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
+              <Form.Item name="status" label="收费状态" rules={[{ required: true }]}>
+                <Radio.Group id="fee-status" optionType="button" buttonStyle="solid" size="large" aria-label="收费状态" options={[{ label: '已缴费', value: 'paid' }, { label: '待缴费', value: 'pending' }]} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="paidAt" label="收费日期">
+                <DatePicker style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item name="dueDate" label="缴费到期日" dependencies={['status']} rules={[{
+                validator: (_rule, value) => form.getFieldValue('status') === 'pending' && !value
+                  ? Promise.reject(new Error('待缴费用请填写到期日'))
+                  : Promise.resolve(),
+              }]}>
                 <DatePicker style={{ width: '100%' }} />
               </Form.Item>
             </Col>

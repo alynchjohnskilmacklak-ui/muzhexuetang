@@ -1,6 +1,7 @@
 // 通知类型 → 家长端展示名（未读分组统计与筛选共用）
 export const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   CLASSROOM_FEEDBACK: '课堂反馈',
+  FEEDBACK_REVIEW: '家长教学评价',
   PERFORMANCE_FEEDBACK: '成长反馈',
   PERFORMANCE_UPDATE: '表现更新',
   ATTENDANCE: '考勤',

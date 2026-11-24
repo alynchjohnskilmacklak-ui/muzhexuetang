@@ -1,20 +1,16 @@
-# 基础镜像经 DaoCloud 加速拉取（等价官方 node:22-bookworm-slim，public.ecr.aws 直连不可用）
-FROM docker.m.daocloud.io/library/node:22-bookworm-slim AS base
+# syntax=docker/dockerfile:1
+# 使用 Docker Hub 官方 Node 22 slim 基础镜像，避免镜像代理的对象存储下载中断。
+FROM node:22-bookworm-slim AS base
 FROM base AS deps
 WORKDIR /app
-# 构建阶段 apt 源切换国内镜像（仅影响构建下载，不影响运行时产物）
-# bookworm-slim 同时存在 /etc/apt/sources.list 与 deb822 格式 /etc/apt/sources.list.d/debian.sources
-RUN sed -i 's@deb.debian.org@mirrors.aliyun.com@g' /etc/apt/sources.list 2>/dev/null || true; \
-  sed -i 's@security.debian.org@mirrors.aliyun.com/debian-security@g' /etc/apt/sources.list 2>/dev/null || true; \
-  sed -i -E 's@^(URIs: http://)deb\.debian\.org@\1mirrors.aliyun.com@' /etc/apt/sources.list.d/debian.sources 2>/dev/null || true; \
-  sed -i -E 's@^(URIs: http://)security\.debian\.org(.*)$@\1mirrors.aliyun.com/debian-security\2@' /etc/apt/sources.list.d/debian.sources 2>/dev/null || true
 RUN apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=30 \
   && apt-get install -y --no-install-recommends ca-certificates openssl -o Acquire::Retries=3 -o Acquire::http::Timeout=30 \
   && rm -rf /var/lib/apt/lists/*
-ARG NPM_REGISTRY=https://registry.npmmirror.com
+ARG NPM_REGISTRY=https://registry.npmjs.org
 COPY package.json package-lock.json ./
-RUN npm config set registry "${NPM_REGISTRY}" \
-  && npm ci --no-audit --no-fund
+RUN --mount=type=cache,id=edu-manage-npm,target=/root/.npm,sharing=locked \
+  npm config set registry "${NPM_REGISTRY}" \
+  && npm ci --no-audit --no-fund --fetch-retries=5 --fetch-retry-mintimeout=10000 --fetch-retry-maxtimeout=120000
 
 FROM deps AS builder
 WORKDIR /app
@@ -26,7 +22,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
   DATABASE_URL_SENIOR=postgresql://placeholder:placeholder@127.0.0.1:5432/senior
 COPY . .
 RUN npx prisma generate
-RUN npm run build
+RUN --mount=type=cache,id=edu-manage-next,target=/app/.next/cache,sharing=locked npm run build
 
 FROM base AS migrator
 WORKDIR /app
@@ -47,7 +43,7 @@ RUN apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=30 \
   && apt-get install -y --no-install-recommends ca-certificates jq openssl postgresql-client python3 python3-pip -o Acquire::Retries=3 -o Acquire::http::Timeout=30 \
   && pip3 install --break-system-packages -i https://pypi.tuna.tsinghua.edu.cn/simple pymupdf==1.24.10 \
   && rm -rf /var/lib/apt/lists/*
-ARG NPM_REGISTRY=https://registry.npmmirror.com
+ARG NPM_REGISTRY=https://registry.npmjs.org
 ENV NODE_ENV=production \
   NEXT_TELEMETRY_DISABLED=1 \
   HOSTNAME=0.0.0.0 \
@@ -67,8 +63,13 @@ COPY --from=builder --chown=node:node /app/scripts/compress-pdf.py ./scripts/com
 # 破坏 standalone traced 产物中的 @prisma/client generate 文件，导致 middleware 启动即崩。
 # esbuild/wrangler 冲突已由 package.json overrides（wrangler=4.152.0，esbuild 0.28 线）根治。
 COPY --from=deps --chown=node:node /app/package.json /app/package-lock.json ./
-RUN npm config set registry "${NPM_REGISTRY}" \
-  && unset NODE_OPTIONS && npm install --omit=dev --no-audit --no-fund ali-oss@^6.23.0 mammoth@^1.12.0
+RUN --mount=type=cache,id=edu-manage-npm,target=/root/.npm,sharing=locked \
+  npm config set registry "${NPM_REGISTRY}" \
+  && unset NODE_OPTIONS && npm install --omit=dev --no-audit --no-fund --fetch-retries=5 --fetch-retry-mintimeout=10000 --fetch-retry-maxtimeout=120000 ali-oss@^6.23.0 mammoth@^1.12.0
+# The standalone trace can contain an older generated client when the builder
+# reused dependency layers. Always ship the Prisma client generated from this
+# build's prisma/schema.prisma into the runtime image.
+COPY --from=builder --chown=node:node /app/node_modules/.prisma ./node_modules/.prisma
 RUN mkdir -p /app/.next/cache && chown -R node:node /app/.next/cache
 USER node
 EXPOSE 3000

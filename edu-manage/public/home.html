@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>新乐牧哲学堂｜河北新乐文化课辅导</title>
 <span id="chg-home-1"></span>
-<meta name="description" content="新乐牧哲学堂2016年成立于河北新乐，专注文化课辅导与升学规划，提供课程安排、考勤记录、课堂反馈与家校沟通服务。"/>
+<meta name="description" content="牧哲学堂2016年创办于河北唐山，当前页面对应河北新乐门店，专注文化课辅导与升学规划，提供课程安排、考勤记录、课堂反馈与家校沟通服务。"/>
 <span id="chg-home-2"></span>
 <meta name="keywords" content="新乐牧哲学堂,牧哲学堂,河北新乐文化课辅导,牧哲学堂机构信息,家校沟通,MOREJOY"/>
 <meta name="robots" content="index, follow"/>
@@ -66,7 +66,7 @@
     --radius-sm:12px;
     --radius-lg:24px;
     --shadow-lg:0 24px 60px rgba(23,16,9,.30);
-    --wrap-w:1320px;
+    --wrap-w:1760px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -81,23 +81,23 @@
   a{color:inherit;text-decoration:none}
   :focus-visible{outline:2px solid var(--primary-deep);outline-offset:2px}
   h1,h2,h3{text-wrap:balance}
-  .wrap{max-width:1320px;margin:0 auto;padding:0 24px}
+  .wrap{max-width:1760px;margin:0 auto;padding:0 24px}
 
   /* ===== 顶部导航 ===== */
   .header{
     position:sticky;top:0;z-index:50;
-    background:rgba(255,255,255,.97);
+    background:rgba(252,248,237,.97);
     backdrop-filter:blur(20px) saturate(180%);
     -webkit-backdrop-filter:blur(20px) saturate(180%);
     border-bottom:1px solid rgba(232,120,74,.12);
     box-shadow:0 1px 20px rgba(26,18,1,.04);
   }
   .header-inner{
-    max-width:1320px;margin:0 auto;padding:16px 24px;
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    max-width:1600px;margin:0 auto;padding:5px clamp(20px,4vw,54px);
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
   }
-  .header .logo{display:flex;align-items:center;gap:10px}
-  .header .logo img{height:42px;width:auto;background:transparent;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.05);mix-blend-mode:multiply;transition:transform .2s}
+  .header .logo{display:flex;align-items:center;flex:0 1 clamp(320px,34vw,520px);width:clamp(320px,34vw,520px);min-width:0}
+  .header .logo img{display:block;width:100%;height:auto;max-height:124px;object-fit:contain;object-position:left center;background:transparent;border-radius:0;box-shadow:none;transition:transform .2s}
   .header .logo:hover img{transform:scale(1.03)}
   .nav{display:flex;align-items:center;gap:22px;font-size:15px}
   .nav a{color:var(--ink-soft);transition:color .2s}
@@ -113,9 +113,15 @@
 
   /* ===== Hero ===== */
   .hero{background:linear-gradient(180deg,#faf3e8 0%,#f5ede2 100%);
-    position:relative;
-    padding-top:48px;
+    position:relative;padding:0;
   }
+  .hero-inner{
+    max-width:1760px;margin:0 auto;padding:52px 40px 42px;
+    display:grid;grid-template-columns:minmax(320px,.82fr) minmax(0,1.38fr);
+    gap:clamp(32px,4vw,68px);align-items:start;
+  }
+  .hero-intro,.hero-proof{min-width:0}
+  .hero-intro{padding-top:22px}
   .hero::after{
     content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
     background:linear-gradient(90deg,transparent,rgba(232,120,74,.25),transparent);
@@ -125,16 +131,22 @@
     color:var(--primary-deep);margin-bottom:18px;font-weight:600;
   }
   .hero h1{
-    font-size:clamp(26px,4.5vw,40px);
-    font-weight:700;letter-spacing:.06em;color:var(--ink);
-    margin-bottom:8px;
+    font-size:clamp(28px,3vw,40px);
+    font-weight:700;letter-spacing:.02em;color:var(--ink);
+    line-height:1.32;margin-bottom:8px;
+  }
+  .hero-title-main{display:block}
+  .hero-title-separator{display:none}
+  .hero-title-sub{
+    display:block;margin-top:8px;color:var(--ink-soft);
+    font-size:.72em;font-weight:600;letter-spacing:0;line-height:1.5;
   }
   .hero-brand{
-    margin-top:30px;
+    margin-top:24px;
     font-family:"STKaiti","KaiTi","楷体","Noto Serif SC",serif;
-    font-size:clamp(44px,8vw,72px);
-    font-weight:700;letter-spacing:.22em;line-height:1.3;
-    display:flex;align-items:center;justify-content:center;gap:.12em;flex-wrap:wrap;
+    font-size:clamp(48px,4.4vw,64px);
+    font-weight:700;letter-spacing:.14em;line-height:1.25;
+    display:flex;align-items:center;justify-content:flex-start;gap:.08em;flex-wrap:wrap;
     color:#2B1E10;
     text-shadow:0 4px 20px rgba(178,58,46,.10);
     user-select:none;
@@ -145,23 +157,13 @@
   }
   .hero-brand i:hover{transform:translateY(-5px);filter:brightness(1.15)}
   .hero-tag{
-    margin-top:18px;font-size:13px;letter-spacing:.36em;
+    margin-top:14px;font-size:12px;letter-spacing:.2em;text-align:left;
     color:var(--ink-faint);font-weight:500;
   }
   .hero-lead{
-    max-width:720px;margin:22px auto 0;
-    color:var(--ink-soft);font-size:16px;line-height:2.1;
-    letter-spacing:.02em;
-  }
-  .hero-chips{
-    margin:22px auto 0;display:flex;justify-content:center;
-    gap:10px;flex-wrap:wrap;
-  }
-  .hero-chips span{
-    font-size:13px;letter-spacing:.1em;color:var(--primary-dark);
-    border:1px solid rgba(232,120,74,.35);
-    background:rgba(232,120,74,.06);
-    padding:6px 16px;border-radius:999px;
+    max-width:42ch;margin:18px 0 0;
+    color:var(--ink-soft);font-size:16px;line-height:1.85;
+    letter-spacing:0;
   }
   .hero-banner{
     margin:34px auto 0;max-width:1080px;
@@ -169,6 +171,14 @@
     box-shadow:var(--shadow);border:1px solid var(--border);
   }
   .hero-banner img{width:100%;height:auto}
+
+  @media (max-width:1100px) and (min-width:769px){
+    .hero-inner{max-width:920px;padding:40px 28px 34px;grid-template-columns:1fr;gap:28px}
+    .hero-intro{text-align:center}
+    .hero-brand{justify-content:center}
+    .hero-tag{text-align:center}
+    .hero-lead{max-width:720px;margin:18px auto 0;text-align:center}
+  }
 
   /* ===== 金句条 ===== */
   .promise{
@@ -296,12 +306,12 @@
 
   .service-list{
     max-width:1080px;margin:0 auto;padding:0 24px 22px;
-    display:flex;flex-wrap:wrap;justify-content:center;gap:10px;
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
   }
   .service-item{
     font-family:inherit;
-    display:flex;align-items:center;gap:10px;
-    padding:11px 20px;border-radius:999px;cursor:pointer;
+    width:100%;min-height:84px;display:grid;grid-template-columns:28px minmax(0,1fr);align-items:center;gap:10px;
+    padding:14px 16px;border-radius:18px;cursor:pointer;text-align:left;
     border:1px solid var(--border);background:var(--card);
     transition:all .25s;box-shadow:0 4px 14px rgba(26,18,1,.05);
     position:relative;overflow:hidden;
@@ -312,13 +322,14 @@
     box-shadow:0 8px 20px rgba(232,120,74,.35);
   }
   .service-item .num{
-    font-size:13px;font-weight:700;letter-spacing:.06em;
-    color:var(--primary);flex:none;font-variant-numeric:tabular-nums;
+    width:28px;height:28px;display:grid;place-items:center;border-radius:9px;
+    font-size:12px;font-weight:700;letter-spacing:.03em;
+    color:var(--primary);background:rgba(232,120,74,.10);font-variant-numeric:tabular-nums;
   }
-  .service-item.active .num{color:#fff}
-  .service-item .txt{display:flex;flex-direction:column;line-height:1.45}
-  .service-item .name{font-size:15px;font-weight:700;white-space:nowrap}
-  .service-item .sub{font-size:12px;color:var(--ink-soft);white-space:normal}
+  .service-item.active .num{color:#fff;background:rgba(255,255,255,.16)}
+  .service-item .txt{min-width:0;display:flex;flex-direction:column;align-items:flex-start;line-height:1.45}
+  .service-item .name{font-size:14px;font-weight:700;line-height:1.35;white-space:normal}
+  .service-item .sub{font-size:11px;color:var(--ink-soft);line-height:1.45;white-space:normal}
   .service-item.active .sub{color:rgba(255,255,255,.85)}
   .service-item .dot{display:none}
 
@@ -414,6 +425,9 @@
     .services{margin:0 12px;padding:48px 0 40px}
     .stage3d{height:360px}
     .c3d-card{width:min(80%,420px)}
+  }
+  @media (max-width:900px) and (min-width:769px){
+    .service-list{max-width:800px;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   }
   @media (max-width:520px){
     .service-item .sub{white-space:normal}
@@ -571,53 +585,143 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
 .p-gain{margin-left:auto}
   }
 
-  /* ===== 系统入口：独立醒目板块 ===== */
-  .portal{
-    background:linear-gradient(135deg,#E8784A 0%,#D96A3C 45%,#C95F36 100%);
-    border-radius:24px;padding:48px 40px;text-align:center;
-    color:#fff;position:relative;overflow:hidden;
-    box-shadow:0 20px 50px rgba(232,120,74,.35);
-  }
-  .portal::before{
-    content:"";position:absolute;top:-80px;right:-80px;
-    width:260px;height:260px;border-radius:50%;
-    background:rgba(255,255,255,.12);pointer-events:none;
-  }
-  .portal::after{
-    content:"";position:absolute;bottom:-60px;left:-40px;
-    width:180px;height:180px;border-radius:50%;
-    background:rgba(43,30,16,.12);pointer-events:none;
-  }
-  .portal .p-tag{font-size:13px;letter-spacing:.24em;opacity:.85}
-  .portal h2{
-    font-size:clamp(24px,4vw,34px);font-weight:800;margin:10px 0 8px;
-    letter-spacing:.02em;
-  }
-  .portal .p-sub{font-size:15px;opacity:.92;max-width:520px;margin:0 auto}
-  .portal .p-btn{
-    display:inline-block;margin-top:26px;
-    background:#fff;color:var(--primary-deep);
-    font-size:17px;font-weight:800;letter-spacing:.06em;
-    padding:15px 44px;border-radius:14px;
-    box-shadow:0 12px 30px rgba(43,30,16,.25);
-    transition:transform .2s,box-shadow .2s;
-  }
-  .portal .p-btn:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(43,30,16,.32)}
-  .portal .p-btn:active{transform:translateY(0)}
-  .portal .p-note{margin-top:16px;font-size:12.5px;opacity:.78}
-
-  /* ===== 到访 ===== */
-  .visit{
+  /* ===== 首页介绍视频 ===== */
+  .intro-film-section{padding:0 0 56px}
+  .intro-film{
+    display:grid;grid-template-columns:minmax(260px,1fr) minmax(0,568px);
+    align-items:center;gap:clamp(24px,4vw,56px);
+    padding:clamp(26px,4vw,48px);
     background:var(--card);border:1px solid var(--border);
-    border-radius:var(--radius);padding:36px;text-align:center;
-    box-shadow:var(--shadow);
+    border-radius:var(--radius-lg);box-shadow:var(--shadow);
   }
-  .visit h3{font-size:20px;margin-bottom:16px}
-  .visit .items{display:flex;justify-content:center;gap:36px;flex-wrap:wrap;font-size:15px;color:var(--ink-soft)}
-  .visit .items>div{min-width:150px}
-  .visit .items b{display:block;color:var(--ink);font-size:16px;margin-top:4px}
-  .visit .items a{color:var(--primary-deep)}
-  .visit .items a:hover{color:var(--primary-dark)}
+  .intro-film-copy{max-width:440px}
+  .intro-film h2{font-size:28px;line-height:1.25;margin:0 0 14px;color:var(--ink)}
+  .intro-film-copy p{margin:0;color:var(--ink-soft);font-size:16px;line-height:1.85}
+  .intro-film-note{margin-top:20px;color:var(--primary-dark);font-size:13px;font-weight:700;letter-spacing:.04em}
+  .intro-film-frame{margin:0;min-width:0;width:100%;max-width:568px;justify-self:end}
+  .intro-film-play,.intro-film-frame video{
+    display:block;width:100%;aspect-ratio:16/9;object-fit:contain;
+    background:var(--dark);border-radius:16px;box-shadow:var(--shadow);
+  }
+  .intro-film-play{position:relative;display:grid;place-items:center;overflow:hidden;padding:0;border:0;color:#fff;cursor:pointer;isolation:isolate}
+  .intro-film-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+  .intro-film-play:after{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,rgba(13,55,50,.04),rgba(13,55,50,.44))}
+  .intro-film-play:hover .intro-film-poster{transform:scale(1.025)}
+  .intro-film-play:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+  .intro-film-play-icon{position:relative;z-index:1;display:grid;place-items:center;width:72px;height:72px;border:1px solid rgba(255,255,255,.72);border-radius:50%;background:rgba(20,87,77,.88);box-shadow:0 8px 24px rgba(13,55,50,.28);transition:transform .2s ease,background .2s ease}
+  .intro-film-play:hover .intro-film-play-icon{transform:scale(1.07);background:var(--primary)}
+  .intro-film-play-icon svg{width:25px;height:25px;margin-left:4px;fill:currentColor}
+  .intro-film-play-label{position:absolute;z-index:1;right:14px;bottom:12px;left:14px;text-align:center;font-size:12px;font-weight:700;text-shadow:0 1px 5px rgba(0,0,0,.5)}
+  .intro-film-frame figcaption{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin-top:10px;color:var(--ink-faint);font-size:12px}
+  .intro-film-status{flex-basis:100%;color:var(--ink-soft)}
+
+  /* ===== 首页悬浮家长助手：半收起入口 + 展开问答面板 ===== */
+  .home-ai-dock{position:fixed;z-index:1200;right:-68px;bottom:17%;width:168px;height:176px;pointer-events:none;transition:right .38s cubic-bezier(.2,.8,.2,1),left .38s cubic-bezier(.2,.8,.2,1),top .38s cubic-bezier(.2,.8,.2,1),bottom .38s cubic-bezier(.2,.8,.2,1)}
+  .home-ai-dock.is-peeking:not(.is-open):not(.is-dragging){right:0}
+  .home-ai-dock.is-dragging{transition:none;touch-action:none}
+  .home-ai-launcher{position:absolute;right:0;bottom:0;width:154px;height:164px;padding:0;border:0;background:transparent;cursor:grab;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;transform:scaleX(-1);transition:width .38s ease,height .38s ease,transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s ease;filter:drop-shadow(0 13px 13px rgba(18,48,39,.23))}
+  .home-ai-launcher img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;transform-origin:50% 88%;animation:homeAiFloat 4.8s ease-in-out infinite}
+  .home-ai-launcher:focus-visible{outline:3px solid #d5b45b;outline-offset:-28px;border-radius:50%}
+  .home-ai-teaser{position:absolute;right:82px;bottom:94px;width:236px;padding:12px 15px;border:1px solid rgba(21,92,80,.16);border-radius:17px 17px 5px 17px;background:#fff;color:#25483e;font-size:13px;line-height:1.6;box-shadow:0 12px 32px rgba(20,45,37,.16);pointer-events:none;cursor:pointer;opacity:0;visibility:hidden;transform:translateX(12px);transition:opacity .2s ease,visibility .2s ease,transform .2s ease}
+  .home-ai-teaser strong{display:block;margin-bottom:2px;color:#155c50;font-size:13px}
+  .home-ai-dock.is-peeking:not(.is-open) .home-ai-launcher{opacity:1;visibility:visible;transform:scaleX(-1)}
+  .home-ai-dock.is-peeking:not(.is-open) .home-ai-teaser{opacity:1;visibility:visible;transform:translateX(0);pointer-events:auto}
+  .home-ai-backdrop{position:fixed;inset:0;z-index:0;background:rgba(12,31,27,.38);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;visibility:hidden;pointer-events:auto;transition:opacity .22s ease,visibility .22s}
+  .home-ai-dock.is-open .home-ai-backdrop{opacity:1;visibility:visible}
+  .home-ai-panel{position:fixed;z-index:1;left:50%;top:50%;right:auto;bottom:auto;width:min(560px,calc(100vw - 32px));height:min(760px,calc(100dvh - 40px));min-height:420px;display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(16,58,51,.15);border-radius:26px;background:#fff;box-shadow:0 28px 80px rgba(13,35,30,.3);pointer-events:auto;opacity:0;visibility:hidden;transform:translate(-50%,-48%) scale(.97);transform-origin:center;transition:opacity .22s ease,transform .22s ease,visibility .22s}
+  .home-ai-dock.is-open .home-ai-panel{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+  body.home-ai-open{overflow:hidden}
+  .home-ai-launcher,.home-ai-teaser{z-index:2}
+  .home-ai-dock.is-open .home-ai-launcher{position:fixed;left:auto;right:calc(50% + 162px);top:auto;bottom:calc(50% + 264px);width:110px;height:110px;opacity:1;visibility:visible;transform:none;pointer-events:auto;cursor:pointer}
+  .home-ai-dock.is-dragging .home-ai-launcher{cursor:grabbing;transition:none}
+  .home-ai-dock.is-dragging .home-ai-launcher img{animation-play-state:paused}
+  .home-ai-dock.is-open .home-ai-teaser{opacity:0;visibility:hidden;pointer-events:none}
+  .home-ai-panel-head{display:flex;align-items:center;gap:13px;min-height:100px;padding:14px 18px 14px 124px;background:linear-gradient(125deg,#103a33,#176656);color:#fff8e9}
+  .home-ai-panel-title{min-width:0;flex:1}
+  .home-ai-panel-title strong{display:block;font-size:19px;line-height:1.35}
+  .home-ai-panel-title span{display:block;margin-top:4px;color:rgba(255,248,233,.74);font-size:11px;letter-spacing:.06em}
+  .home-ai-close{width:36px;height:36px;flex:0 0 36px;border:1px solid rgba(255,255,255,.28);border-radius:11px;background:rgba(255,255,255,.08);color:#fff;font-size:22px;line-height:1;cursor:pointer}
+  .home-ai-panel-body{min-height:0;flex:1;overflow:auto;padding:17px 18px 14px;scrollbar-width:thin}
+  .home-ai-intro{margin:0 0 16px;padding:13px 14px;border:1px solid #e7ede8;border-radius:15px;background:#f5f8f5;color:#52645b;font-size:13px;line-height:1.75}
+  .home-ai-intro strong{color:#155c50}
+  .home-ai-featured-title{display:flex;align-items:center;gap:8px;margin:0 0 9px;color:var(--ink);font-size:13px;font-weight:800}
+  .home-ai-featured-title:before{content:"";width:4px;height:17px;border-radius:8px;background:var(--primary)}
+  .home-ai-featured{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:15px}
+  .home-ai-featured button{display:flex;align-items:center;gap:10px;min-height:66px;padding:10px 12px;border:1px solid rgba(21,92,80,.16);border-radius:13px;background:linear-gradient(135deg,#f5faf7,#fffdfa);color:#29463d;text-align:left;font:inherit;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+  .home-ai-featured button:last-child:nth-child(odd){grid-column:span 2}
+  .home-ai-featured button:hover{transform:translateY(-1px);border-color:rgba(21,92,80,.45);box-shadow:0 7px 16px rgba(16,58,51,.09)}
+  .home-ai-featured .q-index{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:10px;background:#e5f1ec;color:#155c50;font-size:11px;font-weight:900}
+  .home-ai-featured small,.home-ai-featured strong{display:block}
+  .home-ai-featured small{margin-bottom:3px;color:#8a7b65;font-size:10px}
+  .home-ai-featured strong{font-size:13px;line-height:1.4}
+  .home-ai-quick-title{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:var(--ink);font-size:13px;font-weight:800}
+  .home-ai-quick-title:before{content:"";width:4px;height:16px;border-radius:8px;background:var(--primary)}
+  .home-ai-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:15px}
+  .home-ai-quick button{min-height:42px;padding:9px 10px;border:1px solid #e8e3db;border-radius:12px;background:#fffdfa;color:#35483f;text-align:left;font:inherit;font-size:12px;line-height:1.45;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+  .home-ai-quick button:hover{transform:translateY(-1px);border-color:rgba(21,92,80,.4);background:#f3f8f5;box-shadow:0 6px 14px rgba(16,58,51,.08)}
+  .home-ai-quick button:before{content:"问";display:inline-grid;place-items:center;width:20px;height:20px;margin-right:7px;border-radius:7px;background:#e7f2ee;color:#155c50;font-size:10px;font-weight:800;vertical-align:middle}
+  .home-ai-chat{min-height:128px;padding:14px 15px;border:1px solid #e8e3db;border-radius:16px;background:linear-gradient(145deg,#fcfbf8,#f5f2ed)}
+  .home-ai-chat-label{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:#155c50;font-size:12px;font-weight:800}
+  .home-ai-chat-label:before{content:"";width:8px;height:8px;border-radius:50%;background:#55a887;box-shadow:0 0 0 4px rgba(85,168,135,.13)}
+  .home-ai-question{margin:0 0 7px;color:#7a6e60;font-size:12px;line-height:1.6}
+  .home-ai-answer{margin:0;color:#342e24;font-size:13px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+  .home-ai-panel-foot{padding:12px 16px 15px;border-top:1px solid #f0ece5;background:#fff}
+  .home-ai-form{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:8px;align-items:end}
+  .home-ai-input-wrap{min-width:0}
+  .home-ai-input-wrap label{display:block;margin:0 0 5px;color:var(--ink);font-size:12px;font-weight:800}
+  .home-ai-form textarea{display:block;width:100%;min-height:62px;max-height:100px;resize:vertical;padding:10px 12px;border:1px solid #ded8cf;border-radius:12px;background:#fff;color:var(--ink);font:inherit;font-size:13px;line-height:1.6}
+  .home-ai-form textarea::placeholder{color:#a09689}
+  .home-ai-form textarea:focus{outline:2px solid rgba(21,92,80,.25);border-color:#155c50}
+  .home-ai-submit{height:44px;padding:0 11px;border:0;border-radius:12px;background:linear-gradient(135deg,#155c50,#0e443b);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 8px 16px rgba(16,58,51,.16);transition:transform .18s ease,opacity .18s ease}
+  .home-ai-submit:hover{transform:translateY(-1px)}
+  .home-ai-submit:disabled,.home-ai-quick button:disabled,.home-ai-featured button:disabled{opacity:.55;cursor:wait;transform:none}
+  .home-ai-meta{display:flex;justify-content:space-between;gap:8px;margin-top:5px;color:#8b8175;font-size:10px;line-height:1.5}
+  .home-ai-privacy{margin-top:9px;color:#82796e;font-size:10px;line-height:1.55}
+  .home-ai-privacy strong{color:#155c50}
+  @keyframes homeAiFloat{0%,100%{transform:translateY(0) rotate(3deg)}50%{transform:translateY(-8px) rotate(5deg)}}
+  @media (prefers-reduced-motion:reduce){.home-ai-launcher,.home-ai-launcher img{animation:none;transition:none}.home-ai-panel,.home-ai-backdrop,.home-ai-teaser,.home-ai-quick button,.home-ai-featured button,.home-ai-submit{transition:none}}
+  @media (max-width:520px){.home-ai-featured button{min-height:62px;padding:8px 9px;gap:7px}.home-ai-featured .q-index{width:26px;height:26px;flex-basis:26px;border-radius:8px}.home-ai-featured strong{font-size:12px}.home-ai-featured small{font-size:9px}}
+
+  /* ===== 高级到访与联系卡 ===== */
+  .contact-section{position:relative;overflow:hidden;padding:64px 0 78px;background:linear-gradient(180deg,rgba(246,241,232,0),rgba(246,241,232,.82))}
+  .contact-section:before{content:"";position:absolute;left:-180px;top:40px;width:420px;height:420px;border:1px solid rgba(200,150,90,.14);border-radius:50%;box-shadow:0 0 0 36px rgba(200,150,90,.035),0 0 0 72px rgba(200,150,90,.025);pointer-events:none}
+  .contact-heading{position:relative;max-width:1180px;margin:0 auto 22px;text-align:left}
+  .contact-heading .eyebrow{display:block;margin-bottom:8px;color:var(--primary-deep);font-size:11px;font-weight:800;letter-spacing:.2em}
+  .contact-heading h2{margin:0;color:var(--ink);font-size:clamp(25px,3vw,36px);line-height:1.25}
+  .contact-heading p{margin:8px 0 0;color:var(--ink-soft);font-size:14px;line-height:1.7}
+  .contact-panel{position:relative;max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(300px,.82fr) minmax(0,1.18fr);overflow:hidden;border:1px solid rgba(200,150,90,.2);border-radius:28px;background:#fffdfa;box-shadow:0 24px 60px rgba(48,37,20,.12)}
+  .contact-location{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:350px;padding:34px;color:#fbf7ed;background:radial-gradient(circle at 95% 10%,rgba(213,181,95,.23),transparent 27%),linear-gradient(150deg,#103a33,#155c50 62%,#1b6d5e)}
+  .contact-location:after{content:"";position:absolute;z-index:-1;right:-115px;bottom:-150px;width:340px;height:340px;border:1px solid rgba(245,226,176,.2);border-radius:50%;box-shadow:0 0 0 24px rgba(255,255,255,.025),0 0 0 52px rgba(255,255,255,.02)}
+  .contact-location-kicker{display:flex;align-items:center;gap:9px;color:#e7c875;font-size:10px;font-weight:800;letter-spacing:.18em}
+  .contact-location-kicker:before{content:"";width:24px;height:1px;background:#d7b55f}
+  .contact-location-main{margin:38px 0 28px}
+  .contact-pin{display:grid;place-items:center;width:48px;height:48px;margin-bottom:18px;border:1px solid rgba(231,200,117,.46);border-radius:16px;background:rgba(255,255,255,.08);color:#f0d584}
+  .contact-pin svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .contact-location h3{margin:0 0 8px;color:#fff8e9;font-size:28px;letter-spacing:.02em}
+  .contact-location-address{margin:0;color:rgba(255,248,233,.86);font-size:16px;line-height:1.7}
+  .contact-network{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:center;gap:12px;margin-top:19px;padding-top:15px;border-top:1px solid rgba(255,255,255,.16)}
+  .contact-network-count{display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:52px;border:1px solid rgba(231,200,117,.34);border-radius:15px;background:rgba(255,255,255,.07);color:#f0d584}
+  .contact-network-count strong{font-size:20px;line-height:1;font-variant-numeric:tabular-nums}
+  .contact-network-count small{margin-top:4px;color:rgba(255,248,233,.77);font-size:9px}
+  .contact-network-detail small{display:block;margin-bottom:4px;color:#e7c875;font-size:10px;font-weight:800;letter-spacing:.08em}
+  .contact-network-detail strong{display:block;color:rgba(255,248,233,.9);font-size:12px;font-weight:600;line-height:1.75}
+  .contact-location-note{padding-top:15px;border-top:1px solid rgba(255,255,255,.17);color:rgba(255,248,233,.67);font-size:12px;line-height:1.7}
+  .contact-ways{padding:32px 36px 30px}
+  .contact-ways-kicker{display:block;margin-bottom:7px;color:#a28239;font-size:10px;font-weight:800;letter-spacing:.18em}
+  .contact-ways h3{margin:0;color:var(--ink);font-size:23px}
+  .contact-ways-lead{margin:7px 0 20px;color:var(--ink-soft);font-size:13px;line-height:1.7}
+  .contact-phone-list{display:grid;gap:10px}
+  .contact-primary{display:flex;align-items:center;gap:15px;min-height:78px;padding:14px 16px;border:1px solid rgba(232,120,74,.22);border-radius:16px;background:linear-gradient(120deg,#fff6ec,#fbf1e2);text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
+  .contact-primary:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(177,89,42,.12)}
+  .contact-phone-icon{display:grid;place-items:center;width:46px;height:46px;flex:0 0 46px;border-radius:14px;background:#f3dfc5;color:#a9542b}
+  .contact-phone-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .contact-primary-copy{min-width:0;flex:1}
+  .contact-primary-copy small,.contact-primary-copy strong{display:block}
+  .contact-primary-copy small{margin-bottom:5px;color:#86765f;font-size:11px}
+  .contact-primary-copy strong{color:#ac4d25;font-size:clamp(19px,2vw,25px);font-variant-numeric:tabular-nums;letter-spacing:.03em}
+  .contact-arrow{color:#a9542b;font-size:22px}
+  .contact-reminder{display:flex;align-items:flex-start;gap:8px;margin:16px 1px 0;color:#7d7468;font-size:11px;line-height:1.65}
+  .contact-reminder:before{content:"i";display:grid;place-items:center;width:16px;height:16px;flex:0 0 16px;border-radius:50%;background:#f4ead9;color:#99753a;font-size:10px;font-weight:800}
 
   /* ===== 页脚 ===== */
   .footer{
@@ -635,15 +739,23 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
   /* ===== 响应式 ===== */
   @media (max-width:860px){
     .facts{grid-template-columns:repeat(2,1fr)}
+    .header-inner{padding:6px 16px;gap:16px}
+    .header .logo{flex-basis:clamp(220px,40vw,330px);width:clamp(220px,40vw,330px)}
     .nav{gap:14px;font-size:14px}
     /* 手机端：隐藏文字链接，只留醒目的登录按钮 */
     .nav .link{display:none}
     .nav .login{padding:10px 20px;font-size:14.5px}
-    .portal{padding:40px 24px}
+    .intro-film{grid-template-columns:1fr;gap:22px}
+    .intro-film-copy{max-width:640px}
+    .intro-film-frame{justify-self:center}
+    .home-ai-panel{width:min(540px,calc(100vw - 28px))}
+    .home-ai-panel-head{padding-left:108px}
+    .home-ai-dock.is-open .home-ai-launcher{right:auto;left:max(16px,calc(50% - 270px + 7px));top:max(18px,calc(50% - 380px + 8px));bottom:auto;width:92px;height:92px}
   }
   @media (max-width:520px){
     .facts{grid-template-columns:repeat(2,1fr)}
-    .header-inner{padding:12px 16px}
+    .header-inner{padding:6px 12px;gap:10px}
+    .header .logo{flex-basis:min(210px,calc(100vw - 160px));width:min(210px,calc(100vw - 160px))}
     .wrap{padding:0 16px}
     .motto{padding:52px 16px 56px}
     .motto-arts{letter-spacing:.1em}
@@ -661,18 +773,51 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
         linear-gradient(180deg,#FDFAF3 0%,#F8F1E4 55%,#F4EBDC 100%);
     }
     body{padding-bottom:78px}
-    .header{background:rgba(253,250,243,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(200,150,90,.18)}
+    .header{background:rgba(252,248,237,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(200,150,90,.18)}
 
-    /* Hero：加金色装饰圆环 */
+    /* Hero：移动端收敛装饰，先突出机构名称和服务定位 */
     .hero{position:relative;overflow:hidden}
+    .hero-inner{position:relative;z-index:1;display:block;width:100%;padding:26px 16px 16px}
+    .hero-intro{text-align:center}
+    .hero-proof{margin-top:18px}
+    .hero-proof .progress-hero{margin:0 auto}
     .hero::before{
-      content:"";position:absolute;top:-92px;left:50%;transform:translateX(-50%);
-      width:300px;height:300px;border-radius:50%;
-      border:1.5px solid rgba(232,160,90,.28);
-      box-shadow:0 0 0 26px rgba(232,160,90,.05),0 0 0 54px rgba(232,160,90,.03);
-      pointer-events:none;
+      content:"";display:block;position:absolute;z-index:0;top:10px;left:12px;right:12px;height:clamp(390px,100vw,470px);
+      border:1px solid rgba(200,150,90,.2);border-radius:24px;pointer-events:none;
+      background:linear-gradient(180deg,rgba(250,248,245,.35) 0%,rgba(250,248,245,.56) 52%,rgba(250,248,245,.96) 100%),url('/images/homepage-mobile-background.jpg');
+      background-size:100% 100%,cover;background-position:center,center 26%;background-repeat:no-repeat;
+      box-shadow:0 12px 30px rgba(45,34,18,.08);
     }
-    .hero .eyebrow,.hero h1,.hero-brand,.hero-tag,.hero-lead,.hero-chips{position:relative;z-index:1}
+    .hero .eyebrow,.hero h1,.hero-brand,.hero-tag,.hero-lead{position:relative;z-index:1}
+    .hero .eyebrow{
+      display:block;width:100%;margin:0 0 12px;text-align:center;
+      font-size:10px;letter-spacing:.18em;line-height:1.4;
+    }
+    .hero h1{
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+      max-width:100%;margin:0 auto 4px;text-align:center;
+      font-size:clamp(22px,6.1vw,28px);letter-spacing:0;line-height:1.32;
+    }
+    .hero-title-main{display:block}
+    .hero-title-separator{display:none}
+    .hero-title-sub{
+      display:block;color:var(--ink-soft);font-size:clamp(14px,3.9vw,16px);
+      font-weight:600;letter-spacing:.02em;line-height:1.5;
+    }
+    .hero-brand{
+      margin-top:14px;font-size:clamp(34px,9.2vw,42px);
+      letter-spacing:.12em;line-height:1.2;gap:.06em;
+      justify-content:center;
+      text-shadow:0 2px 10px rgba(178,58,46,.07);
+    }
+    .hero-tag{
+      margin-top:7px;font-size:10px;letter-spacing:.1em;
+      line-height:1.45;white-space:nowrap;text-align:center;
+    }
+    .hero-lead{
+      max-width:36ch;margin:12px auto 0;text-align:center;
+      font-size:14px;line-height:1.75;letter-spacing:0;
+    }
 
     /* 区块标题：金色短横线 */
     .section-title h2::after{
@@ -707,8 +852,8 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
     .p-more{background:rgba(255,255,255,.80);box-shadow:0 4px 12px rgba(200,150,90,.12)}
 
     /* 业务总览胶囊：横向滑动 */
-    .service-list{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:0 16px 14px;-webkit-overflow-scrolling:touch}
-    .service-item{flex:none;padding:9px 16px;background:linear-gradient(180deg,rgba(255,255,255,.90),rgba(250,243,232,.80));border:1px solid rgba(200,150,90,.30)}
+    .service-list{display:flex;grid-template-columns:none;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:0 16px 14px;-webkit-overflow-scrolling:touch}
+    .service-item{width:auto;min-height:0;flex:none;padding:9px 16px;background:linear-gradient(180deg,rgba(255,255,255,.90),rgba(250,243,232,.80));border:1px solid rgba(200,150,90,.30)}
     .service-item .sub{display:none}
     .service-item .name{font-size:14px}
 
@@ -727,13 +872,9 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
     .stage3d{height:300px}
     .c3d-card{width:min(82%,380px)}
 
-    /* 到访：暖金卡片 */
-    .visit{
-      background:linear-gradient(165deg,rgba(255,253,248,.90),rgba(246,237,223,.75));
-      border:1px solid rgba(200,150,90,.26);
-      box-shadow:0 12px 30px rgba(200,150,90,.13);
-      border-radius:22px;
-    }
+    .contact-panel{grid-template-columns:minmax(250px,.78fr) minmax(0,1.22fr)}
+    .contact-location{padding:28px}
+    .contact-ways{padding:28px 25px}
 
     /* 固定底部登录条（移动端显示） */
     .bottom-bar{
@@ -754,11 +895,7 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
     .bottom-bar .login-btn:active{transform:scale(.97)}
 
     /* —— 移动端紧凑化：压缩间距，减少堆叠 —— */
-    .hero{padding:26px 0 12px}
-    .hero-tag{margin-top:10px;font-size:13px}
-    .hero-lead{margin-top:12px;font-size:14.5px;line-height:1.8}
-    .hero-chips{margin-top:14px;gap:8px}
-    .hero-chips span{font-size:12px;padding:5px 12px}
+    .hero{padding:26px 0 16px}
     .hero-banner{margin-top:20px}
     section{padding:32px 0}
     .section-title{margin-bottom:22px}
@@ -792,59 +929,248 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
     .service-item{padding:8px 14px}
     .carousel-top{margin-bottom:10px}
     .carousel-title h3{font-size:16px}
-    .portal{padding:26px 18px;border-radius:18px}
-    .portal h2{font-size:clamp(20px,5vw,24px);margin:8px 0 6px}
-    .visit{padding:26px 18px;border-radius:18px}
-    .visit h3{font-size:18px;margin-bottom:12px}
-    .visit .items{gap:20px;font-size:14px}
+    .intro-film-section{padding-bottom:42px}
+    .intro-film{gap:16px;padding:20px;border-radius:var(--radius)}
+    .intro-film h2{font-size:clamp(22px,5.5vw,28px);margin-bottom:8px}
+    .intro-film-copy p{font-size:14px;line-height:1.75}
+    .intro-film-note{margin-top:12px;font-size:12px}
+    .intro-film-play,.intro-film-frame video{border-radius:12px;touch-action:manipulation}
+    .intro-film-frame figcaption{align-items:flex-start;flex-direction:column;gap:2px}
+    .intro-film-open{min-height:44px;padding:4px 0}
+    .home-ai-dock{right:-65px;bottom:92px;width:140px;height:150px}
+    .home-ai-launcher{right:0;bottom:0;width:140px;height:150px}
+    .home-ai-dock.is-open .home-ai-launcher{right:auto;left:18px;top:max(18px,calc(50% - 380px));bottom:auto;width:76px;height:76px}
+    .home-ai-teaser{right:100px;bottom:81px;width:min(192px,calc(100vw - 128px));padding:10px 12px;font-size:11px}
+    .home-ai-teaser strong{font-size:11px}
+    .home-ai-panel{left:50%;top:50%;right:auto;bottom:auto;width:calc(100vw - 20px);height:min(760px,calc(100dvh - 20px));min-height:400px;border-radius:22px}
+    .home-ai-panel-head{min-height:82px;padding:10px 13px 10px 92px;gap:9px}
+    .home-ai-panel-title strong{font-size:16px}
+    .home-ai-panel-title span{font-size:10px}
+    .home-ai-panel-body{padding:13px 12px 10px}
+    .home-ai-intro{margin-bottom:12px;padding:10px 11px;font-size:12px}
+    .home-ai-quick{gap:7px;margin-bottom:12px}
+    .home-ai-quick button{min-height:40px;padding:7px 8px;font-size:11px}
+    .home-ai-chat{min-height:112px;padding:12px}
+    .home-ai-answer{font-size:12px}
+    .home-ai-panel-foot{padding:9px 12px 11px}
+    .home-ai-form{grid-template-columns:minmax(0,1fr) 84px;gap:7px}
+    .home-ai-form textarea{min-height:56px;font-size:12px}
+    .home-ai-submit{height:42px;padding:0 7px;font-size:12px}
+    .home-ai-meta{font-size:9px}
+    .home-ai-privacy{font-size:9px}
+    .contact-section{padding:44px 0 52px}
+    .contact-heading{margin-bottom:16px}
+    .contact-heading h2{font-size:27px}
+    .contact-heading p{font-size:13px}
+    .contact-panel{grid-template-columns:1fr;border-radius:22px}
+    .contact-location{min-height:255px;padding:24px}
+    .contact-location-main{margin:24px 0 20px}
+    .contact-pin{width:42px;height:42px;margin-bottom:12px;border-radius:13px}
+    .contact-location h3{font-size:24px}
+    .contact-location-address{font-size:14px}
+    .contact-network{grid-template-columns:48px minmax(0,1fr);gap:10px;margin-top:15px;padding-top:13px}
+    .contact-network-count{width:46px;height:46px;border-radius:13px}
+    .contact-network-count strong{font-size:18px}
+    .contact-network-detail strong{font-size:11px;line-height:1.7}
+    .contact-location-note{padding-top:12px;font-size:11px}
+    .contact-ways{padding:23px 20px 22px}
+    .contact-ways h3{font-size:21px}
+    .contact-ways-lead{margin-bottom:15px}
+    .contact-primary{min-height:72px;padding:12px 14px;gap:11px}
+    .contact-phone-icon{width:40px;height:40px;flex-basis:40px;border-radius:12px}
+    .contact-primary-copy strong{font-size:clamp(18px,5vw,22px)}
+    .contact-phone-list{gap:8px}
+    .contact-reminder{margin-top:12px}
     .footer{padding:26px 16px 20px}
   }
 
-  /* ===== 学员进步对比（深色震撼版） ===== */
-  .progress-hero{margin:34px auto 0;max-width:1320px;background:linear-gradient(160deg,#1a1108,#2e2113);border-radius:var(--radius-lg);padding:40px 28px 28px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
-  .progress-hero::before{content:"";position:absolute;top:-80px;right:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(232,160,90,.15),transparent 70%)}
-  .ph-tag{font-size:11px;letter-spacing:.3em;color:#E8A05A;text-align:center;margin-bottom:12px}
-  .ph-title{font-size:clamp(24px,4vw,32px);font-weight:800;color:#f5ede2;text-align:center}
-  .ph-sub{font-size:13px;color:#b9a996;text-align:center;margin-top:6px}
-  .ph-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
-  .ph-stat{background:rgba(255,255,255,.05);border:1px solid rgba(232,160,90,.2);border-radius:var(--radius-sm);padding:20px 12px;text-align:center}
-  .ph-stat.ph-main-stat{grid-column:span 2;background:linear-gradient(135deg,var(--primary-deep),var(--primary-deep-2));border:none;box-shadow:0 12px 32px rgba(200,84,31,.3)}
-  .ph-num{font-size:36px;font-weight:900;color:#f5ede2;font-variant-numeric:tabular-nums;line-height:1.1}
-  .ph-main-stat .ph-num{font-size:52px}
-  .ph-unit{font-size:.4em;font-weight:600;opacity:.8;margin-left:3px}
-  .ph-label{font-size:12px;color:#b9a996;margin-top:6px}
-  .ph-main-stat .ph-label{color:rgba(255,255,255,.9)}
-  .ph-divider{display:flex;align-items:center;gap:12px;max-width:1320px;margin:20px auto 8px;padding:0 20px}
-  .ph-divider::before,.ph-divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(232,160,90,.3),transparent)}
-  .ph-divider span{font-size:11px;letter-spacing:.2em;color:#E8A05A}
-  .ph-scroller-wrap{max-width:1320px;margin:0 auto;padding:10px 16px}
-  .ph-scroller{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;height:420px;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);touch-action:pan-y;cursor:grab}
-  .ph-scroller.dragging{cursor:grabbing}
-  .ph-card{background:linear-gradient(160deg,#1f1508,#2a1d0e);border:1px solid rgba(232,160,90,.2);border-radius:var(--radius-sm);padding:14px 12px;display:flex;flex-direction:column;gap:6px}
-  .ph-card-top{display:flex;align-items:center;gap:8px}
-  .ph-av{width:32px;height:32px;border-radius:10px;flex:none;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800}
-  .ph-card-name{font-size:14px;font-weight:700;color:#f5ede2;line-height:1.2}
-  .ph-card-exam{font-size:12px;color:#9a8e7a;line-height:1.3}
-  .ph-card-scores{display:flex;align-items:baseline;gap:6px;margin-top:2px}
-  .ph-from{font-size:16px;color:#b9a996;font-weight:700;font-variant-numeric:tabular-nums}
-  .ph-arrow{font-size:12px;color:#E8784A}
-  .ph-to{font-size:22px;color:#E8A05A;font-weight:800;font-variant-numeric:tabular-nums}
-  .ph-gain{margin-top:auto;display:inline-block;width:fit-content;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff}
-  .ph-gain.g{background:linear-gradient(135deg,var(--gain-g),var(--gain-g2))}
-  .ph-gain.o{background:linear-gradient(135deg,var(--gain-o),var(--gain-o2))}
-  .ph-scrollbar{height:3px;background:rgba(245,237,226,.1);border-radius:3px;margin:8px 16px 0;overflow:hidden}
-  .ph-scrollbar i{display:block;height:100%;background:#E8A05A;width:0}
-  .ph-hint{display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;font-size:12px;color:#6b5e4e;padding:6px 0 10px}
-  .ph-pause-btn{border:1px solid rgba(200,150,90,.4);background:rgba(255,255,255,.72);color:#8a5a2b;font-size:12px;line-height:1;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;min-height:32px}
-  .ph-pause-btn:hover{background:rgba(232,160,90,.18)}
-  .ph-type-row{display:flex;gap:10px;max-width:1320px;margin:0 auto;padding:0 16px 16px}
-  .ph-type-card{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(232,160,90,.15);border-radius:14px;padding:14px 8px;text-align:center}
-  .ph-t-name{font-size:12px;color:#b9a996;margin-bottom:4px}
-  .ph-t-num{font-size:18px;font-weight:800;color:#E8A05A}
-  .ph-t-gain{font-size:12px;color:var(--gain-g);margin-top:2px}
-  .ph-note{text-align:center;font-size:12px;color:#6b5e4e;padding:8px 16px 20px;max-width:1320px;margin:0 auto}
-  @media (max-width:960px){.ph-scroller{grid-template-columns:repeat(2,1fr);height:440px}}
-  @media (max-width:520px){.progress-hero{padding:28px 16px 20px}.ph-num{font-size:30px}.ph-main-stat .ph-num{font-size:42px}.ph-scroller{grid-template-columns:repeat(2,1fr);height:460px;gap:10px}.ph-card{padding:12px 10px}.ph-to{font-size:20px}}
+  /* ===== 课堂反馈流程：以过程记录与家校沟通为主 ===== */
+  .learning-proof{margin:34px auto 0;max-width:1320px;padding:32px 26px 24px;border-radius:var(--radius-lg);background:linear-gradient(145deg,#103a33,#155c50);color:#f5ede2;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+  .learning-proof::before{content:"";position:absolute;top:-100px;right:-80px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(214,180,91,.18),transparent 70%);pointer-events:none}
+  .learning-proof-head,.learning-proof-grid,.learning-proof-link{position:relative;z-index:1}
+  .learning-proof-tag{font-size:10px;letter-spacing:.24em;color:#D6B45B;text-align:center;margin-bottom:9px}
+  .learning-proof h2{font-size:clamp(22px,3vw,30px);font-weight:800;line-height:1.3;text-align:center;color:#fff}
+  .learning-proof-intro{max-width:560px;margin:8px auto 0;text-align:center;color:rgba(245,237,226,.78);font-size:13px;line-height:1.7}
+  .learning-proof-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:22px}
+  .learning-proof-step{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start;padding:14px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.07)}
+  .learning-proof-step .n{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:rgba(214,180,91,.18);color:#E6C96F;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+  .learning-proof-step strong{display:block;color:#fff;font-size:14px;line-height:1.45}
+  .learning-proof-step p{margin-top:3px;color:rgba(245,237,226,.72);font-size:12px;line-height:1.55}
+  .learning-proof-link{display:flex;width:fit-content;align-items:center;gap:8px;margin:18px auto 0;color:#E6C96F;font-size:13px;font-weight:700}
+  .learning-proof-link:hover{color:#fff}
+  @media (max-width:520px){.learning-proof{margin:18px auto 0;padding:23px 14px 18px}.learning-proof-grid{gap:8px;margin-top:17px}.learning-proof-step{grid-template-columns:26px minmax(0,1fr);gap:8px;padding:11px 9px}.learning-proof-step .n{width:25px;height:25px;font-size:10px}.learning-proof-step strong{font-size:13px}.learning-proof-step p{font-size:11px}}
+
+  /* ===== 真实课堂反馈：完整反馈页大图阅读器（深色金边 · 自动轮播 + 放大） ===== */
+  .feedback-sec{padding:44px 0 52px}
+  .f-head{max-width:1320px;margin:0 auto 22px;text-align:center;padding:0 16px}
+  .f-tag{font-size:11px;letter-spacing:.3em;color:#C2541F;text-align:center;margin-bottom:10px}
+  .f-head h2{font-size:clamp(24px,3.6vw,34px);font-weight:800;color:var(--ink)}
+  .f-head p{color:var(--ink-soft);font-size:14px;margin-top:8px;max-width:860px;margin-left:auto;margin-right:auto;line-height:1.75}
+  .f-stage{display:flex;align-items:stretch;gap:10px;max-width:860px;margin:0 auto}
+  .f-frame{flex:1;min-width:0;max-width:760px;display:flex;flex-direction:column;height:min(68vh,720px);
+    background:linear-gradient(160deg,#1a1108,#2e2113);border:1px solid rgba(232,160,90,.25);
+    border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-lg)}
+  .f-scrollbox{flex:1;min-height:0;overflow-y:auto;background:#f7f4ee;overscroll-behavior:contain}
+  .f-scrollbox::-webkit-scrollbar{width:5px}
+  .f-scrollbox::-webkit-scrollbar-thumb{background:rgba(200,84,31,.35);border-radius:99px}
+  .f-scrollbox img{display:block;width:100%;max-width:560px;margin:0 auto;cursor:zoom-in}
+  .f-meta{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:13px 18px;color:#f5ede2}
+  .f-meta b{color:#E8A05A;font-size:15px;letter-spacing:.04em}
+  .f-meta span{font-size:13px;color:#b9a996}
+  .f-nav{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid rgba(232,160,90,.35);
+    background:rgba(255,255,255,.88);color:#8a5a2b;font-size:20px;cursor:pointer;display:grid;
+    place-items:center;transition:background .25s,color .25s;align-self:center}
+  .f-nav:hover{background:#E8A05A;color:#fff}
+  .f-dots{display:flex;justify-content:center;gap:6px;margin-top:16px}
+  .f-dots i{width:6px;height:6px;border-radius:999px;background:rgba(180,150,110,.35);transition:width .35s,background .35s}
+  .f-dots i.on{width:22px;background:#E8A05A}
+  .f-note{text-align:center;font-size:12px;color:#6b5e4e;padding:8px 16px 0;max-width:1320px;margin:0 auto}
+  .fb-modal{position:fixed;inset:0;background:rgba(10,6,2,.88);z-index:200;display:grid;place-items:center;padding:4vh 3vw}
+  .fb-modal[hidden]{display:none}
+  .fb-modal img{max-width:min(900px,94vw);max-height:92vh;object-fit:contain;border-radius:10px}
+  .fb-modal-close{position:fixed;top:18px;right:22px;width:42px;height:42px;border-radius:50%;border:0;
+    background:rgba(255,255,255,.14);color:#f5ede2;font-size:22px;cursor:pointer;z-index:1}
+  @media (max-width:520px){.feedback-sec{padding:32px 0 36px}.f-frame{height:min(56vh,560px)}.f-nav{width:36px;height:36px;font-size:17px}.f-meta{padding:11px 14px}.f-meta b{font-size:14px}}
+
+  /* ===== 课后反馈六张主题海报 ===== */
+  .feedback-gallery{max-width:1180px;margin:42px auto 0;padding:34px 0 0;border-top:1px solid rgba(138,101,23,.16)}
+  .feedback-gallery-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}
+  .feedback-gallery-kicker{margin:0 0 7px;color:var(--primary-deep);font-size:10px;font-weight:800;letter-spacing:.2em}
+  .feedback-gallery-head h3{margin:0;color:var(--ink);font-size:clamp(21px,2.5vw,28px);line-height:1.3}
+  .feedback-gallery-intro{max-width:690px;margin:8px 0 0;color:var(--ink-soft);font-size:13px;line-height:1.75}
+  .feedback-gallery-count{flex:none;padding:9px 12px;border:1px solid rgba(138,101,23,.2);border-radius:999px;background:#fff;color:var(--ink-soft);font-size:12px;white-space:nowrap}
+  .feedback-gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+  .feedback-poster{min-width:0;margin:0;overflow:hidden;border:1px solid rgba(26,18,1,.08);border-radius:16px;background:#fff;box-shadow:0 8px 26px rgba(50,37,17,.06);transition:transform .2s ease,box-shadow .2s ease}
+  .feedback-poster:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(50,37,17,.1)}
+  .feedback-poster-open{display:block;width:100%;padding:0;border:0;background:#f7f4ee;cursor:zoom-in;line-height:0}
+  .feedback-poster-open:focus-visible{outline:3px solid var(--brand-gold-fill);outline-offset:-3px}
+  .feedback-poster-open img{display:block;width:100%;height:auto;aspect-ratio:1122/1402;object-fit:contain}
+  .feedback-poster figcaption{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start;padding:15px 17px 17px}
+  .feedback-poster-number{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:var(--bg-soft);color:#155c50;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+  .feedback-poster-copy strong{display:block;color:var(--ink);font-size:15px;line-height:1.45}
+  .feedback-poster-copy span{display:block;margin-top:4px;color:var(--ink-soft);font-size:12px;line-height:1.6}
+  .feedback-gallery-foot{margin:15px 0 0;text-align:center;color:var(--ink-faint);font-size:11px;line-height:1.6}
+  .fb-modal img{touch-action:pan-x pan-y pinch-zoom}
+  @media (max-width:860px){.feedback-gallery{max-width:640px;margin-top:34px}.feedback-gallery-grid{grid-template-columns:minmax(0,1fr);gap:14px}.feedback-poster{width:100%;max-width:640px;margin-inline:auto}.feedback-gallery-head{align-items:flex-start}.feedback-gallery-count{margin-top:2px}}
+  @media (max-width:560px){.feedback-gallery{margin:30px 12px 0;padding-top:24px}.feedback-gallery-head{display:block;margin-bottom:15px}.feedback-gallery-count{display:inline-flex;margin-top:12px}.feedback-gallery-intro{font-size:12px}.feedback-gallery-grid{grid-template-columns:minmax(0,1fr);gap:14px}.feedback-poster figcaption{padding:12px 13px 14px}.feedback-poster-copy strong{font-size:14px}.feedback-poster-open img{width:100%}.feedback-gallery-foot{padding:0 8px}}
+
+  /* ===== 教师团队：匿名展示、学科筛选、可横向浏览 ===== */
+  .teacher-showcase{position:relative;overflow:hidden;padding:66px 0 72px;background:linear-gradient(180deg,#fff 0%,#f8f5ef 48%,#f3eee4 100%)}
+  .teacher-showcase:before{content:"";position:absolute;top:-180px;right:-130px;width:440px;height:440px;border:1px solid rgba(21,92,80,.09);border-radius:50%;box-shadow:0 0 0 36px rgba(21,92,80,.025),0 0 0 72px rgba(200,150,90,.025);pointer-events:none}
+  .teacher-showcase .wrap{position:relative;max-width:1400px}
+  .teacher-showcase-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:22px}
+  .teacher-showcase-kicker{display:block;margin-bottom:7px;color:var(--primary-deep);font-size:10px;font-weight:800;letter-spacing:.22em}
+  .teacher-showcase-head h2{margin:0;color:var(--ink);font-size:clamp(25px,3.2vw,36px);line-height:1.25}
+  .teacher-showcase-count{flex:none;display:flex;align-items:baseline;gap:8px;padding:13px 17px;border:1px solid rgba(200,150,90,.28);border-radius:15px;background:rgba(255,255,255,.78);color:#7d6b50}
+  .teacher-showcase-count strong{color:#155c50;font-size:24px;line-height:1;font-variant-numeric:tabular-nums}
+  .teacher-showcase-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:16px}
+  .teacher-filters{display:flex;gap:8px;min-width:0;overflow:auto;padding:2px 1px 5px;scrollbar-width:none}
+  .teacher-filters::-webkit-scrollbar,.teacher-rail::-webkit-scrollbar{display:none}
+  .teacher-filter{flex:none;padding:7px 13px;border:1px solid rgba(26,18,1,.1);border-radius:999px;background:rgba(255,255,255,.72);color:#6c6255;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .18s,border-color .18s,color .18s,transform .18s}
+  .teacher-filter:hover{transform:translateY(-1px);border-color:rgba(21,92,80,.35)}
+  .teacher-filter[aria-pressed="true"]{border-color:#155c50;background:#155c50;color:#fff}
+  .teacher-showcase-controls{display:flex;flex:none;gap:8px}
+  .teacher-showcase-controls button{display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(200,150,90,.35);border-radius:50%;background:#fff;color:#6b5538;font-size:22px;line-height:1;cursor:pointer;transition:background .18s,color .18s,transform .18s}
+  .teacher-showcase-controls button:hover{transform:translateY(-1px);background:#155c50;color:#fff}
+  .teacher-showcase-controls button:disabled{opacity:.4;cursor:default;transform:none}
+  .teacher-rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,calc((100% - 48px)/4));gap:16px;overflow-x:auto;padding:3px 2px 15px;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+  .teacher-card{position:relative;display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:15px;min-height:190px;padding:18px 16px;border:1px solid rgba(26,18,1,.08);border-radius:18px;background:rgba(255,255,255,.94);box-shadow:0 8px 23px rgba(45,34,18,.06);scroll-snap-align:start;isolation:isolate;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+  .teacher-card:after{content:attr(data-number);position:absolute;z-index:-1;right:11px;top:-16px;color:rgba(21,92,80,.045);font-size:76px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+  .teacher-card:hover{transform:translateY(-3px);border-color:rgba(21,92,80,.22);box-shadow:0 14px 30px rgba(45,34,18,.1)}
+  .teacher-portrait{position:relative;display:grid;place-items:center;width:76px;height:76px;overflow:hidden;border:3px solid #f0e4cc;border-radius:50%;background:linear-gradient(145deg,#e6f0ec,#fbf1df);box-shadow:0 4px 12px rgba(34,55,47,.12);color:#155c50}
+  .teacher-portrait:before{content:"";position:absolute;inset:8px;border:1px solid rgba(21,92,80,.15);border-radius:50%}
+  .teacher-portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .teacher-portrait-placeholder{display:grid;place-items:center;width:34px;height:34px;border:1px solid rgba(21,92,80,.22);border-radius:11px;color:#155c50;font-size:21px;font-weight:800}
+  .teacher-card-copy{min-width:0}
+  .teacher-card-top{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+  .teacher-card-label{color:#173b33;font-size:15px;font-weight:850;letter-spacing:.01em}
+  .teacher-card-tier{padding:3px 8px;border:1px solid rgba(200,150,90,.32);border-radius:999px;background:#fbf5e9;color:#80601f;font-size:10px;font-weight:800;white-space:nowrap}
+  .teacher-card-tier--manager{border-color:rgba(20,87,77,.24);background:#eaf4f1;color:#14574d}
+  .teacher-card-tier--elite,.teacher-card-tier--senior{border-color:#c9a45c;background:#f8f1de;color:#755511}
+  .teacher-card-tier--experienced{border-color:#f2b58f;background:#fff7f1;color:#a75028}
+  .teacher-card-tier--new{border-color:#d9efe3;background:#f0f7f3;color:#317250}
+  .teacher-card-school-block{min-width:0;margin:0 0 6px;padding:7px 8px;border:1px solid rgba(200,150,90,.18);border-radius:10px;background:#fbf8f0}
+  .teacher-card-school-level-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+  .teacher-card-school-caption{margin-right:2px;color:#8a7654;font-size:9px;font-weight:750;letter-spacing:.04em}
+  .teacher-card-school-level{padding:2px 6px;border-radius:999px;background:#f8f1de;color:#755511;font-size:9px;font-weight:850;line-height:1.3;white-space:nowrap}
+  .teacher-card-school-name{display:-webkit-box;overflow:hidden;color:#173b33;font-size:13px;font-weight:850;line-height:1.35;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+  .teacher-card-education{display:inline-flex;align-items:baseline;gap:5px;margin:0 0 7px;padding:4px 7px;border:1px solid rgba(20,87,77,.12);border-radius:8px;background:#eaf4f1;color:#5a4e3a;font-size:10px;line-height:1.4}
+  .teacher-card-education-label{color:#756a58;font-size:9px;font-weight:700}
+  .teacher-card-education strong{color:#14574d;font-size:11px;font-weight:850}
+  .teacher-card-subject-label{display:block;margin-bottom:5px;color:#928676;font-size:10px;font-weight:700;letter-spacing:.06em}
+  .teacher-card-subjects{display:flex;flex-wrap:wrap;gap:6px}
+  .teacher-subject{padding:4px 8px;border-radius:999px;background:#eff5f1;color:#285d4f;font-size:10px;font-weight:700;line-height:1.35}
+  .teacher-showcase-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#867a69;font-size:11px;line-height:1.6}
+  .teacher-showcase-status{color:#a29482}
+  .teacher-showcase-empty{grid-column:1/-1;padding:34px 16px;border:1px dashed rgba(21,92,80,.2);border-radius:16px;background:rgba(255,255,255,.65);color:#807566;text-align:center;font-size:13px}
+  .teacher-card-skeleton{min-height:190px;border-radius:18px;background:linear-gradient(100deg,#eee9e0 15%,#faf8f4 30%,#eee9e0 45%);background-size:200% 100%;animation:teacherSkeleton 1.4s ease-in-out infinite}
+  @keyframes teacherSkeleton{to{background-position-x:-200%}}
+  @media (max-width:1020px){.teacher-rail{grid-auto-columns:minmax(250px,calc((100% - 32px)/3))}.teacher-showcase-head{align-items:flex-start}}
+  @media (max-width:768px){.teacher-showcase{padding:42px 0 48px}.teacher-showcase-head{display:block;margin-bottom:18px}.teacher-showcase-count{display:inline-flex;margin-top:14px;padding:9px 13px}.teacher-showcase-count strong{font-size:21px}.teacher-showcase-toolbar{align-items:flex-start;margin-right:-16px}.teacher-filters{padding-right:16px}.teacher-showcase-controls{display:none}.teacher-rail{grid-auto-columns:minmax(275px,82vw);gap:12px;margin-right:-16px;padding-right:16px}.teacher-card{min-height:184px;grid-template-columns:68px minmax(0,1fr);gap:13px;padding:16px 15px}.teacher-portrait{width:68px;height:68px}.teacher-showcase-foot{align-items:flex-start;flex-direction:column;gap:5px}.teacher-card-skeleton{min-height:184px}}
+  @media (prefers-reduced-motion:reduce){.teacher-card,.teacher-filter,.teacher-showcase-controls button{transition:none}.teacher-card-skeleton{animation:none}}
+
+  /* ===== 教师团队：单人档案 + 性别立绘轮播 ===== */
+  .teacher-showcase{--teacher-forest:#14574d;--teacher-forest-rgb:20,87,77;--teacher-mint:#eaf4f1;--teacher-mint-depth:#dbeae5;--teacher-mint-soft:#f0f5f2;--teacher-gold:#8a6517;--teacher-gold-rgb:138,101,23;--teacher-gold-soft:#f8f1de;--teacher-warm-white:#fdfcf9;--teacher-ink-rgb:26,18,1;--teacher-shadow-rgb:20,43,38;padding:72px 0 78px;background:var(--bg-soft)}
+  .teacher-showcase:before{top:-210px;right:-160px;width:520px;height:520px;border-color:rgba(var(--teacher-forest-rgb),.08);box-shadow:0 0 0 42px rgba(var(--teacher-forest-rgb),.025),0 0 0 84px rgba(var(--teacher-gold-rgb),.025)}
+  .teacher-showcase .wrap{max-width:1360px}
+  .teacher-profile-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}
+  .teacher-profile-kicker{display:flex;align-items:center;gap:9px;margin-bottom:11px;color:var(--teacher-forest);font-size:13px;font-weight:750}
+  .teacher-profile-kicker:before{content:"";width:22px;height:2px;border-radius:2px;background:var(--primary)}
+  .teacher-profile-head h2{margin:0;color:var(--ink);font-size:clamp(28px,3.5vw,42px);font-weight:760;letter-spacing:-.035em;line-height:1.16}
+  .teacher-profile-intro{max-width:640px;margin-top:10px;color:var(--ink-soft);font-size:14px;line-height:1.7}
+  .teacher-profile-count{display:flex;flex:none;align-items:baseline;gap:8px;padding:13px 17px;border:1px solid rgba(var(--teacher-gold-rgb),.2);border-radius:14px;background:var(--teacher-gold-soft);color:var(--ink-soft);font-size:13px}
+  .teacher-profile-count strong{color:var(--teacher-gold);font-size:23px;font-variant-numeric:tabular-nums}
+  .teacher-profile-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:15px}
+  .teacher-profile-filters{display:flex;min-width:0;gap:8px;overflow:auto;padding:2px 1px 5px;scrollbar-width:none}
+  .teacher-profile-filters::-webkit-scrollbar{display:none}
+  .teacher-profile-filter{flex:none;padding:8px 13px;border:1px solid rgba(var(--teacher-ink-rgb),.1);border-radius:999px;background:#fff;color:var(--ink-soft);font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .18s,border-color .18s,color .18s}
+  .teacher-profile-filter:hover{border-color:rgba(var(--teacher-forest-rgb),.35)}
+  .teacher-profile-filter[aria-pressed="true"]{border-color:var(--teacher-forest);background:var(--teacher-forest);color:#fff}
+  .teacher-profile-stage{display:grid;grid-template-columns:minmax(300px,.88fr) minmax(0,1.12fr);min-height:610px;overflow:hidden;border:1px solid rgba(0,0,0,.06);border-radius:22px;background:#fff;box-shadow:0 18px 48px rgba(var(--teacher-ink-rgb),.07)}
+  .teacher-profile-art{position:relative;display:flex;min-height:610px;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:28px;background:var(--teacher-mint);perspective:1200px;isolation:isolate}
+  .teacher-profile-art:before,.teacher-profile-art:after{position:absolute;z-index:-1;top:50%;left:50%;content:"";border:1px solid rgba(var(--teacher-forest-rgb),.12);border-radius:50%;transform:translate(-50%,-50%)}
+  .teacher-profile-art:before{width:410px;height:410px}
+  .teacher-profile-art:after{width:500px;height:500px;border-color:rgba(var(--teacher-forest-rgb),.06)}
+  .teacher-profile-art-top{position:absolute;top:25px;left:28px;right:28px;display:flex;align-items:center;justify-content:space-between;color:var(--teacher-forest);font-size:12px;font-weight:750}
+  .teacher-profile-art-index{color:var(--ink-subtle);font-variant-numeric:tabular-nums}
+  .teacher-profile-art-frame{position:relative;width:min(74%,370px);height:min(480px,74%);min-height:350px;border-radius:22px;transform:rotateY(-8deg) rotateX(2deg) translateZ(20px);transform-style:preserve-3d;transition:transform .24s ease,box-shadow .24s ease;will-change:transform}
+  .teacher-profile-art-frame:before{position:absolute;z-index:-1;inset:12px -13px -13px 12px;content:"";border:1px solid rgba(var(--teacher-forest-rgb),.15);border-radius:24px;background:var(--teacher-mint-depth);transform:translateZ(-18px)}
+  .teacher-profile-art-frame img{position:relative;z-index:1;display:block;width:100%;height:100%;border:7px solid #fff;border-radius:22px;background:#fff;box-shadow:0 25px 48px rgba(var(--teacher-shadow-rgb),.2),0 7px 16px rgba(var(--teacher-ink-rgb),.08);object-fit:cover;object-position:center 25%;backface-visibility:visible;transform:none;transition:opacity .2s ease}
+  .teacher-profile-art-frame.is-changing img{opacity:.45}
+  .teacher-profile-art-label{position:absolute;bottom:24px;left:24px;padding:7px 10px;border:1px solid rgba(var(--teacher-forest-rgb),.13);border-radius:999px;background:rgba(255,255,255,.86);color:var(--teacher-forest);font-size:11px;font-weight:700}
+  .teacher-profile-copy{display:flex;min-width:0;flex-direction:column;padding:38px 44px 28px}
+  .teacher-profile-overline{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ink-faint);font-size:12px}
+  .teacher-tier-badge{padding:5px 10px;border:1px solid rgba(var(--teacher-forest-rgb),.17);border-radius:999px;background:var(--teacher-mint);color:var(--teacher-forest);font-size:11px;font-weight:700;white-space:nowrap}
+  .teacher-profile-name{margin:17px 0 0;color:var(--ink);font-size:clamp(34px,4vw,46px);font-weight:760;letter-spacing:-.04em;line-height:1.12}
+  .teacher-profile-credentials{margin-top:8px;color:var(--ink-soft);font-size:14px;line-height:1.55}
+  .teacher-profile-subjects{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .teacher-profile-subject{padding:6px 11px;border-radius:999px;background:var(--teacher-mint-soft);color:#285d4f;font-size:12px;font-weight:700}
+  .teacher-profile-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:20px}
+  .teacher-profile-fact{padding:11px 13px;border:1px solid rgba(0,0,0,.06);border-radius:12px;background:var(--teacher-warm-white)}
+  .teacher-profile-fact span{display:block;margin-bottom:4px;color:var(--ink-faint);font-size:10px}
+  .teacher-profile-fact strong{display:block;overflow-wrap:anywhere;color:var(--ink);font-size:13px;font-weight:700}
+  .teacher-profile-certificate{margin-top:9px;padding:11px 13px;border:1px solid rgba(var(--teacher-forest-rgb),.13);border-radius:12px;background:var(--teacher-mint-soft)}
+  .teacher-profile-certificate[hidden]{display:none}
+  .teacher-profile-certificate-label{display:block;margin-bottom:8px;color:var(--teacher-forest);font-size:12px;font-weight:700}
+  .teacher-profile-certificate-list{display:flex;flex-wrap:wrap;gap:6px}
+  .teacher-profile-certificate-item{padding:6px 8px;border:1px solid rgba(var(--teacher-forest-rgb),.12);border-radius:8px;background:#fff;color:var(--teacher-forest);font-size:11px;font-weight:650;line-height:1.4}
+  .teacher-profile-bio-title{display:flex;align-items:center;gap:8px;margin:23px 0 9px;color:var(--ink);font-size:15px;font-weight:750}
+  .teacher-profile-bio-title:before{width:3px;height:16px;border-radius:3px;background:var(--primary);content:""}
+  .teacher-profile-bio{max-height:255px;overflow:auto;color:var(--ink-soft);font-size:13px;line-height:1.85;white-space:pre-line;overscroll-behavior:contain}
+  .teacher-profile-bio:empty:before{color:var(--ink-faint);content:"老师正在完善教学介绍。"}
+  .teacher-profile-navigation{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:auto;padding-top:20px}
+  .teacher-profile-position{color:var(--ink-faint);font-size:12px}
+  .teacher-profile-position strong{margin-right:6px;color:var(--ink);font-size:18px;font-variant-numeric:tabular-nums}
+  .teacher-profile-nav-buttons{display:flex;gap:8px}
+  .teacher-profile-nav{display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid rgba(var(--teacher-forest-rgb),.2);border-radius:10px;background:#fff;color:var(--teacher-forest);font-size:12px;font-weight:700;cursor:pointer;transition:background .16s,color .16s}
+  .teacher-profile-nav:hover:not(:disabled){background:var(--teacher-forest);color:#fff}
+  .teacher-profile-nav:disabled{opacity:.4;cursor:not-allowed}
+  .teacher-showcase-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;color:var(--ink-faint);font-size:11px;line-height:1.6}
+  @media (max-width:960px){.teacher-profile-stage{grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr)}.teacher-profile-art,.teacher-profile-stage{min-height:590px}.teacher-profile-copy{padding:30px 28px 24px}.teacher-profile-art-frame{width:min(80%,340px);min-height:330px}}
+  @media (max-width:700px){.teacher-showcase{padding:44px 0 50px}.teacher-profile-head{align-items:flex-start;margin-bottom:17px}.teacher-profile-head h2{font-size:29px}.teacher-profile-intro{max-width:430px;font-size:12px}.teacher-profile-count{padding:9px 11px;font-size:11px}.teacher-profile-count strong{font-size:18px}.teacher-profile-toolbar{align-items:flex-start;flex-direction:column;gap:8px}.teacher-profile-stage{grid-template-columns:minmax(0,1fr);min-height:0;border-radius:18px}.teacher-profile-art{min-height:390px;padding:18px}.teacher-profile-art-top{top:17px;left:17px;right:17px}.teacher-profile-art:before{width:270px;height:270px}.teacher-profile-art:after{width:330px;height:330px}.teacher-profile-art-frame{width:min(57%,260px);height:300px;min-height:0}.teacher-profile-art-label{left:15px;bottom:16px}.teacher-profile-art-frame img{border-width:5px;border-radius:18px}.teacher-profile-art-frame:before{border-radius:20px}.teacher-profile-copy{padding:22px 18px 17px}.teacher-profile-name{margin-top:13px;font-size:36px}.teacher-profile-credentials{font-size:13px}.teacher-profile-subjects{margin-top:14px}.teacher-profile-facts{margin-top:15px}.teacher-profile-bio-title{margin-top:19px}.teacher-profile-bio{max-height:none;font-size:12px}.teacher-profile-navigation{padding-top:17px}.teacher-profile-nav{padding:8px 10px}.teacher-showcase-foot{align-items:flex-start;flex-direction:column;gap:4px}}
+  @media (max-width:430px){.teacher-profile-head{flex-direction:column;gap:12px}.teacher-profile-head h2{max-width:300px}.teacher-profile-art{min-height:355px}.teacher-profile-art-frame{width:min(62%,240px);height:265px}.teacher-profile-count{margin-top:0}.teacher-profile-facts{gap:7px}.teacher-profile-fact{padding:9px 10px}}
+  @media (prefers-reduced-motion:reduce){.teacher-profile-filter,.teacher-profile-nav,.teacher-profile-art-frame{transition:none}}
 
 
 </style>
@@ -855,13 +1181,14 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
 <header class="header">
   <div class="header-inner">
     <a class="logo" href="/" aria-label="牧哲学堂首页">
-      <img src="./about-images/new-logo.jpg" alt="牧哲学堂 MOREJOY"/>
+      <img src="/brand/export-logo.png" alt="牧哲学堂 MOREJOY"/>
     </a>
     <nav class="nav" aria-label="主导航">
       <a class="link" href="/">首页</a>
 <span id="chg-home-8"></span>
       <a class="link" href="/about">关于我们</a>
       <a class="link" href="/about#services">服务范围</a>
+      <a class="link" href="#teachers">教师团队</a>
       <a class="link" href="#contact">到访联系</a>
       <a class="login" href="/login">进入系统</a>
     </nav>
@@ -869,55 +1196,35 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
 </header>
 
 <!-- ================= Hero ================= -->
-<div class="hero wrap">
-  <span class="eyebrow">ABOUT MOREJOY EDUCATION</span>
-  <span id="chg-home-9"></span>
-<h1>新乐牧哲学堂 · 文化课辅导与升学规划</h1>
-  <p class="hero-brand" aria-label="牧哲学堂">
-    <i>牧</i><i>哲</i><i>学</i><i>堂</i>
-  </p>
-  <p class="hero-tag">MOREJOY EDUCATION · 河北 · 新乐</p>
-  <p class="hero-lead">专注文化课辅导与升学规划，为家长与教师提供课程安排、考勤记录、课堂反馈与家校沟通的一体化服务。</p>
-  <div class="hero-chips">
-    <span>课程安排</span><span>考勤记录</span><span>课堂反馈</span><span>家校沟通</span>
-  </div>
-  <div class="progress-hero">
-    <div class="ph-tag">REAL PROGRESS · 真实记录</div>
-    <div class="ph-title">分数，自己会说话</div>
-    <div class="ph-sub">入学多少分，期末多少分 —— 不靠宣传，靠数据</div>
-    <div class="ph-stats">
-      <div class="ph-stat ph-main-stat">
-        <span id="chg-home-10"></span>
-<div class="ph-num"><span id="statAvg">22</span><span class="ph-unit">分</span></div>
-        <div class="ph-label">平均提升（<span id="statCountNum">208</span> 位学员）</div>
-      </div>
-      <div class="ph-stat">
-        <span id="chg-home-11"></span>
-<div class="ph-num" style="color:#E8A05A"><span id="statMax">45</span><span class="ph-unit">分</span></div>
-        <div class="ph-label">最高提升</div>
-      </div>
-      <div class="ph-stat">
-        <div class="ph-num" style="color:#E8A05A"><span id="statTypes">3</span><span class="ph-unit">类</span></div>
-        <div class="ph-label">覆盖班型</div>
-      </div>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-intro">
+      <span class="eyebrow">ABOUT MOREJOY EDUCATION</span>
+      <span id="chg-home-9"></span>
+      <h1><span class="hero-title-main">新乐牧哲学堂</span><span class="hero-title-separator"> · </span><span class="hero-title-sub">文化课辅导与升学规划</span></h1>
+      <p class="hero-brand" aria-label="牧哲学堂">
+        <i>牧</i><i>哲</i><i>学</i><i>堂</i>
+      </p>
+      <p class="hero-tag">MOREJOY EDUCATION · 河北 · 新乐</p>
+      <p class="hero-lead">专注文化课辅导与升学规划，为家长与教师提供课程安排、考勤记录、课堂反馈与家校沟通的一体化服务。</p>
+    </div>
+    <div class="hero-proof">
+      <section class="learning-proof" aria-labelledby="learningProofTitle">
+        <div class="learning-proof-head">
+          <div class="learning-proof-tag">CLASSROOM NOTES · 课堂过程记录</div>
+          <h2 id="learningProofTitle">每节课的学习过程，都有记录</h2>
+          <p class="learning-proof-intro">围绕每次授课，整理本节内容、课堂观察、课后衔接与家长回传，方便家校双方回看和沟通。</p>
+        </div>
+        <div class="learning-proof-grid">
+          <article class="learning-proof-step"><span class="n">01</span><div><strong>本节学习内容</strong><p>学科、课题与知识要点</p></div></article>
+          <article class="learning-proof-step"><span class="n">02</span><div><strong>课堂观察记录</strong><p>课堂参与、练习情况与知识掌握</p></div></article>
+          <article class="learning-proof-step"><span class="n">03</span><div><strong>课后巩固安排</strong><p>易错提醒、练习建议与下次关注</p></div></article>
+          <article class="learning-proof-step"><span class="n">04</span><div><strong>家长沟通回传</strong><p>补充练习情况与需要跟进的问题</p></div></article>
+        </div>
+        <a class="learning-proof-link" href="#feedback">查看课堂反馈样例 <span aria-hidden="true">→</span></a>
+      </section>
     </div>
   </div>
-
-  <div class="ph-divider"><span>学员进步记录</span></div>
-
-  <div class="ph-scroller-wrap">
-    <div class="ph-scroller" id="progressGrid"></div>
-    <div class="ph-scrollbar"><i id="scrollBar"></i></div>
-    <div class="ph-hint"><span>↑ 自动滚动 · 可上下滑动浏览 ↑</span><button class="ph-pause-btn" id="phPauseBtn" type="button" aria-label="暂停自动滚动">❚❚ 暂停</button></div>
-  </div>
-
-  <div class="ph-divider"><span>班型覆盖</span></div>
-  <div class="ph-type-row">
-    <div class="ph-type-card"><div class="ph-t-name">一对一</div><div class="ph-t-num">28人</div><div class="ph-t-gain">平均+28分</div></div>
-    <div class="ph-type-card"><div class="ph-t-name">一对三</div><div class="ph-t-num">72人</div><div class="ph-t-gain">平均+20分</div></div>
-    <div class="ph-type-card"><div class="ph-t-name">小班</div><div class="ph-t-num">108人</div><div class="ph-t-gain">平均+16分</div></div>
-  </div>
-  <p class="ph-note">* 学员姓名均已脱敏；提升幅度因个人基础与投入而异，展示内容仅供了解参考。</p>
 </div>
 
 <!-- ================= 金句条 ================= -->
@@ -931,6 +1238,134 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
     <span class="seal"><span>牧</span><span>哲</span></span>
   </div>
 </div>
+
+<!-- ================= 教师团队：单人立绘档案 ================= -->
+<section class="teacher-showcase" id="teachers" aria-labelledby="teacher-showcase-title">
+  <div class="wrap">
+    <div class="teacher-profile-head">
+      <div>
+        <span class="teacher-profile-kicker">OUR TEACHING TEAM · 一线教学力量</span>
+        <h2 id="teacher-showcase-title">认识每一位用心的老师</h2>
+        <p class="teacher-profile-intro">从教学经历到课堂风格，逐位了解牧哲学堂的授课老师。</p>
+      </div>
+      <div class="teacher-profile-count"><strong id="teacherShowcaseCount">—</strong><span>位在岗教师</span></div>
+    </div>
+    <div class="teacher-profile-toolbar">
+      <div class="teacher-profile-filters" id="teacherShowcaseFilters" role="group" aria-label="按授课学科筛选">
+        <button class="teacher-profile-filter" type="button" data-subject="all" aria-pressed="true">全部学科</button>
+      </div>
+    </div>
+    <div class="teacher-profile-stage" aria-live="polite">
+      <div class="teacher-profile-art" id="teacherPortraitStage">
+        <div class="teacher-profile-art-frame" id="teacherPortraitFrame">
+          <img id="teacherPortrait" src="/teacher-portraits/male-01.webp" alt="教师形象" loading="lazy" decoding="async" fetchpriority="low">
+        </div>
+      </div>
+      <div class="teacher-profile-copy">
+        <div class="teacher-profile-overline"><span>TEACHER PROFILE</span><span class="teacher-tier-badge" id="teacherProfileTier">教师团队</span></div>
+        <h3 class="teacher-profile-name" id="teacherProfileName">正在加载</h3>
+        <p class="teacher-profile-credentials" id="teacherProfileCredentials">教师资料加载后将在这里展示</p>
+        <div class="teacher-profile-subjects" id="teacherProfileSubjects" aria-label="主授学科"></div>
+        <div class="teacher-profile-facts">
+          <div class="teacher-profile-fact"><span>院校层次</span><strong id="teacherProfileUniversity">资料整理中</strong></div>
+          <div class="teacher-profile-fact"><span>学历</span><strong id="teacherProfileEducation">资料整理中</strong></div>
+        </div>
+        <div class="teacher-profile-certificate" id="teacherProfileCertificate" aria-label="教师资格证" hidden>
+          <span class="teacher-profile-certificate-label">教师资格证</span>
+          <div class="teacher-profile-certificate-list" id="teacherProfileCertificates"></div>
+        </div>
+        <h4 class="teacher-profile-bio-title">教学介绍</h4>
+        <div class="teacher-profile-bio" id="teacherProfileBio">正在读取教师介绍…</div>
+        <div class="teacher-profile-navigation">
+          <div class="teacher-profile-position"><strong id="teacherProfilePosition">—</strong><span>教师档案</span></div>
+          <div class="teacher-profile-nav-buttons">
+            <button class="teacher-profile-nav" id="teacherShowcasePrev" type="button" aria-label="上一位老师"><span aria-hidden="true">←</span> 上一位</button>
+            <button class="teacher-profile-nav" id="teacherShowcaseNext" type="button" aria-label="下一位老师">下一位 <span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 真实课堂反馈 ================= -->
+<section class="feedback-sec" id="feedback">
+  <div class="wrap">
+    <div class="f-head">
+      <div class="f-tag">REAL CLASS · 真实课堂反馈</div>
+      <h2>每一课，都有据可查</h2>
+        <p>下课之后，家长仍能看见孩子本节学了什么、课堂中如何参与、知识掌握到哪一步，以及回家怎样巩固、下次课关注什么。以下为在读学员真实课堂反馈示例，姓名、头像与课堂照片均已匿名处理；点击图片可放大阅读完整内容。</p>
+    </div>
+    <div class="f-stage">
+      <button class="f-nav" id="fbPrev" type="button" aria-label="上一份反馈">‹</button>
+      <div class="f-frame" id="fbFrame">
+        <div class="f-scrollbox" id="fbScroll">
+          <img id="fbImg" src="./about-images/feedback/feedback-3.jpg" alt="课堂反馈：初二数学全等三角形（信息已匿名处理）" data-src="./about-images/feedback/feedback-3.jpg">
+        </div>
+        <div class="f-meta">
+          <b id="fbSub">初二 · 数学</b>
+          <span id="fbKp">全等三角形 · 10/24</span>
+        </div>
+      </div>
+      <button class="f-nav" id="fbNext" type="button" aria-label="下一份反馈">›</button>
+    </div>
+    <div class="f-dots" id="fbDots" aria-label="反馈序号"></div>
+    <p class="f-note">示例数据用于界面展示 · 可上下滑动阅读完整反馈 · 学员与教师信息已匿名处理 · 教育效果因人而异</p>
+    <div class="feedback-gallery" aria-labelledby="feedback-gallery-title">
+      <div class="feedback-gallery-head">
+        <div>
+          <p class="feedback-gallery-kicker">AFTER-CLASS FEEDBACK · 课后反馈</p>
+          <h3 id="feedback-gallery-title">把课堂看清楚，再把下一步走具体</h3>
+          <p class="feedback-gallery-intro">从一节课学了什么，到孩子如何参与、回家怎样巩固、下次课如何衔接，六张图带您了解课后反馈如何把学习过程整理成可回看的成长记录。</p>
+        </div>
+        <span class="feedback-gallery-count">06 张主题图 · 点击可放大</span>
+      </div>
+      <div class="feedback-gallery-grid">
+        <figure class="feedback-poster">
+          <button class="feedback-poster-open" type="button" aria-label="放大查看：课后反馈，不止一句话">
+            <img src="/about-images/feedback-series/01-feedback-comparison.webp" alt="课后反馈不止一句今天表现不错：展示本节内容、课堂观察、知识掌握、回家巩固与下次关注" width="1122" height="1402" loading="lazy" decoding="async">
+          </button>
+          <figcaption><span class="feedback-poster-number">01</span><span class="feedback-poster-copy"><strong>课后反馈，不止一句话</strong><span>把本节内容、课堂观察与下一步安排放在一起</span></span></figcaption>
+        </figure>
+        <figure class="feedback-poster">
+          <button class="feedback-poster-open" type="button" aria-label="放大查看：孩子学了什么，家长看得见">
+            <img src="/about-images/feedback-series/02-learning-record.webp" alt="孩子学了什么，家长看得见：课题、知识要点、课堂表现和练习建议的课堂记录示意" width="1122" height="1402" loading="lazy" decoding="async">
+          </button>
+          <figcaption><span class="feedback-poster-number">02</span><span class="feedback-poster-copy"><strong>孩子学了什么，家长看得见</strong><span>课题、知识要点、课堂表现与练习方向清楚呈现</span></span></figcaption>
+        </figure>
+        <figure class="feedback-poster">
+          <button class="feedback-poster-open" type="button" aria-label="放大查看：看见孩子在课堂里的每一步">
+            <img src="/about-images/feedback-series/03-classroom-process.webp" alt="看见孩子在课堂里的每一步：主动表达、思路梳理、练习订正和完成后检查" width="1122" height="1402" loading="lazy" decoding="async">
+          </button>
+          <figcaption><span class="feedback-poster-number">03</span><span class="feedback-poster-copy"><strong>看见孩子在课堂里的每一步</strong><span>参与、思路、练习与订正，都成为后续教学的参考</span></span></figcaption>
+        </figure>
+        <figure class="feedback-poster">
+          <button class="feedback-poster-open" type="button" aria-label="放大查看：回家复习，有具体方向">
+            <img src="/about-images/feedback-series/04-home-practice.webp" alt="回家复习，不必只问会了吗：通过怎么问、怎么练、怎么检查帮助家庭巩固" width="1122" height="1402" loading="lazy" decoding="async">
+          </button>
+          <figcaption><span class="feedback-poster-number">04</span><span class="feedback-poster-copy"><strong>回家复习，有具体方向</strong><span>把怎么问、怎么练、怎么检查说明白，陪学更有抓手</span></span></figcaption>
+        </figure>
+        <figure class="feedback-poster">
+          <button class="feedback-poster-open" type="button" aria-label="放大查看：课后有记录，下次有衔接">
+            <img src="/about-images/feedback-series/05-followup.webp" alt="课后有记录，下次有衔接：课堂记录、个性化巩固建议、家长练习回传和下次关注重点" width="1122" height="1402" loading="lazy" decoding="async">
+          </button>
+          <figcaption><span class="feedback-poster-number">05</span><span class="feedback-poster-copy"><strong>课后有记录，下次有衔接</strong><span>老师和家长围绕同一份课堂信息持续跟进</span></span></figcaption>
+        </figure>
+        <figure class="feedback-poster">
+          <button class="feedback-poster-open" type="button" aria-label="放大查看：把每次课堂，留成成长足迹">
+            <img src="/about-images/feedback-series/06-growth-timeline.webp" alt="把每次课堂留成成长足迹：按课次回看学习内容、学习状态、后续关注和课堂照片" width="1122" height="1402" loading="lazy" decoding="async">
+          </button>
+          <figcaption><span class="feedback-poster-number">06</span><span class="feedback-poster-copy"><strong>把每次课堂，留成成长足迹</strong><span>按课次整理学习过程，让每一次成长都有迹可循</span></span></figcaption>
+        </figure>
+      </div>
+      <p class="feedback-gallery-foot">以上为课后反馈功能主题示意图，具体课次内容以系统内实际反馈为准。</p>
+    </div>
+  </div>
+  <div class="fb-modal" id="fbModal" role="dialog" aria-modal="true" aria-label="课堂反馈大图预览" hidden>
+    <button class="fb-modal-close" id="fbModalClose" type="button" aria-label="关闭">×</button>
+    <img id="fbModalImg" src="" alt="课堂反馈大图（信息已匿名处理）">
+  </div>
+</section>
 
 <!-- ================= 数据条 ================= -->
 <div class="wrap">
@@ -991,30 +1426,170 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
   </div>
 </section>
 
-<!-- ================= 系统入口：独立醒目板块 ================= -->
-<section id="portal" style="padding-top:0">
+<!-- ================= 牧哲学堂介绍视频 ================= -->
+<section class="intro-film-section" id="intro-video" aria-labelledby="intro-film-title">
   <div class="wrap">
-    <div class="portal">
-      <span class="p-tag">STUDENT &amp; PARENT PORTAL</span>
-      <h2>进入牧哲学堂系统</h2>
-      <p class="p-sub">课程安排 · 到课考勤 · 课堂反馈 · 家校沟通，一套系统清晰留存。</p>
-      <a class="p-btn" href="/login">家长、教师登录 →</a>
-      <p class="p-note">已有账号即可直接登录，未注册请先联系校区开通</p>
+    <div class="intro-film">
+      <div class="intro-film-copy">
+        <h2 id="intro-film-title">走进牧哲学堂</h2>
+        <p>通过一段实地视频，看看牧哲学堂的学习空间与校区环境。</p>
+        <div class="intro-film-note">点击播放 · 时长约 52 秒</div>
+      </div>
+      <figure class="intro-film-frame">
+        <button class="intro-film-play" type="button" aria-label="点击播放牧哲学堂校区介绍视频">
+          <img class="intro-film-poster" src="/videos/muzhe-intro-poster.jpg" alt="" loading="lazy" decoding="async" />
+          <span class="intro-film-play-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5.6c0-.8.9-1.3 1.6-.9l10 6.1a1.4 1.4 0 0 1 0 2.4l-10 6.1c-.7.4-1.6-.1-1.6-.9V5.6Z" /></svg>
+          </span>
+          <span class="intro-film-play-label">点击播放视频 · 约 52 秒</span>
+        </button>
+        <figcaption>
+          <span>牧哲学堂校区介绍 · 约 52 秒</span>
+          <span class="intro-film-status" role="status" aria-live="polite" hidden></span>
+        </figcaption>
+      </figure>
     </div>
   </div>
 </section>
+<script>
+(function(){
+  var frame=document.querySelector('.intro-film-frame');
+  var trigger=frame&&frame.querySelector('.intro-film-play');
+  if(!frame||!trigger)return;
 
-<!-- ================= 到访信息 ================= -->
-<section id="contact" style="padding-top:0">
+  trigger.addEventListener('click',function(){
+    if(frame.querySelector('video'))return;
+    var video=document.createElement('video');
+    video.className='intro-film-player';
+    video.controls=true;
+    video.playsInline=true;
+    video.setAttribute('webkit-playsinline','');
+    video.preload='none';
+    video.poster='/videos/muzhe-intro-poster.jpg';
+    video.setAttribute('aria-label','牧哲学堂校区介绍视频');
+
+    var source=document.createElement('source');
+    source.src='/videos/muzhe-intro.mp4';
+    source.type='video/mp4';
+    video.appendChild(source);
+    frame.replaceChild(video,trigger);
+
+    var status=frame.querySelector('.intro-film-status');
+    var playAttempt=video.play();
+    if(playAttempt&&typeof playAttempt.catch==='function'){
+      playAttempt.catch(function(){
+        if(status){
+          status.textContent='如果视频没有开始，请点击播放器上的播放键。';
+          status.hidden=false;
+        }
+      });
+    }
+  });
+})();
+</script>
+
+
+
+<!-- ================= 首页悬浮家长公开问答助手 ================= -->
+<div class="home-ai-dock" id="homeAiDock">
+  <button class="home-ai-launcher" id="homeAiLauncher" type="button" aria-label="拖动小羊移动，点击展开牧哲学堂专属助手" aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown" title="按住并拖动小羊移动，也可用 Alt 加方向键微调；点击展开助手" aria-expanded="false" aria-controls="homeAiPanel">
+    <img src="/images/assistant-mascot/companion-3d.webp" alt="" loading="lazy" decoding="async" draggable="false" />
+  </button>
+  <button class="home-ai-teaser" id="homeAiTeaser" type="button" aria-label="打开牧哲学堂专属助手">
+    <strong>我是牧哲学堂专属助手</strong>
+    有什么需要，我可以详细给你介绍。
+  </button>
+  <div class="home-ai-backdrop" id="homeAiBackdrop" aria-hidden="true"></div>
+  <section class="home-ai-panel" id="homeAiPanel" role="dialog" aria-modal="true" aria-labelledby="homeAiPanelTitle" aria-hidden="true">
+    <header class="home-ai-panel-head">
+      <div class="home-ai-panel-title"><strong id="homeAiPanelTitle">牧哲学堂专属助手</strong><span>公开信息咨询 · 一问一答</span></div>
+      <button class="home-ai-close" id="homeAiClose" type="button" aria-label="收起助手">×</button>
+    </header>
+    <div class="home-ai-panel-body">
+      <p class="home-ai-intro"><strong>你好，我是小牧。</strong>有什么需要，我可以详细给你介绍。你可以问课程、报名咨询、家长端怎么使用，也可以聊聊一般的家庭学习方法。</p>
+      <div class="home-ai-featured-title">家长最关心的三件事 · 点开就问</div>
+      <div id="homeAiQuick" aria-label="家长常见问题">
+        <div class="home-ai-featured">
+          <button type="button" data-faq="school" data-question="牧哲学堂怎么样？"><span class="q-index">01</span><span><small>机构与服务</small><strong>牧哲学堂怎么样？</strong></span></button>
+          <button type="button" data-faq="teacher" data-question="牧哲学堂的老师怎么样？"><span class="q-index">02</span><span><small>师资与教学</small><strong>老师怎么样？</strong></span></button>
+          <button type="button" data-faq="results" data-question="牧哲学堂提分效果怎么样？"><span class="q-index">03</span><span><small>学习变化</small><strong>提分效果怎么样？</strong></span></button>
+        </div>
+        <div class="home-ai-quick-title">其他家长常问</div>
+        <div class="home-ai-quick">
+          <button type="button" data-question="牧哲学堂目前有哪些课程？">牧哲学堂目前有哪些课程？</button>
+          <button type="button" data-question="家长端可以查看哪些内容？">家长端可以查看哪些内容？</button>
+          <button type="button" data-question="怎么了解课程时间、费用和名额？">怎么了解课程时间、费用和名额？</button>
+          <button type="button" data-question="课堂反馈在哪里查看？">课堂反馈在哪里查看？</button>
+          <button type="button" data-question="想报名或预约到校咨询，应该怎么做？">想报名或预约到校咨询，应该怎么做？</button>
+          <button type="button" data-question="家长平时可以怎样陪孩子复习当天学过的内容？">家长平时可以怎样陪孩子复习当天学过的内容？</button>
+        </div>
+      </div>
+      <div class="home-ai-chat" aria-live="polite" aria-atomic="true">
+        <div class="home-ai-chat-label" id="homeAiStatus">小牧随时可以开始</div>
+        <p class="home-ai-question" id="homeAiQuestion" hidden></p>
+        <p class="home-ai-answer" id="homeAiAnswer">你好！我可以介绍牧哲学堂的公开课程与服务、家长端的常用功能，也可以分享一般性的家庭学习方法。想问什么，点上面的快捷问题或直接输入吧。</p>
+      </div>
+    </div>
+    <div class="home-ai-panel-foot">
+      <form class="home-ai-form" id="homeAiForm">
+        <div class="home-ai-input-wrap">
+          <label for="homeAiInput">输入你的问题</label>
+          <textarea id="homeAiInput" name="question" maxlength="300" placeholder="例如：课堂反馈在哪里查看？" required></textarea>
+          <div class="home-ai-meta"><span>一次问一个问题，小牧会逐条回答</span><span id="homeAiCount">0 / 300</span></div>
+        </div>
+        <button class="home-ai-submit" id="homeAiSubmit" type="submit">发送提问</button>
+      </form>
+      <div class="home-ai-privacy"><strong>隐私提示：</strong>只回答公开课程与服务信息，不会读取系统里的学生档案、考勤或课堂反馈。请勿输入孩子姓名、账号、成绩等个人信息。</div>
+    </div>
+  </section>
+</div>
+
+<!-- ================= 到访与联系 ================= -->
+<section class="contact-section" id="contact">
   <div class="wrap">
-    <div class="visit">
-      <h3>到访与联系</h3>
-      <div class="items">
-        <div>地区<b>河北 · 新乐</b></div>
-        <div>校区地址<b>新乐市市区</b><span style="font-size:12px;display:block;margin-top:2px">具体位置可联系管理员确认</span></div>
-        <div>咨询电话<b><a href="tel:15930114500">15930114500（同微信）</a></b></div>
-        <div>服务热线<b><a href="tel:18031264903">18031264903</a></b></div>
-        <div>联系电话<b><a href="tel:17733883004">17733883004</a></b></div>
+    <div class="contact-heading">
+      <span class="eyebrow">COME BY · SAY HELLO</span>
+      <h2>想进一步了解？欢迎联系牧哲学堂</h2>
+      <p>课程安排、报名咨询或到访路线，我们会为你说明当期信息。</p>
+    </div>
+    <div class="contact-panel">
+      <div class="contact-location">
+        <span class="contact-location-kicker">VISIT MOREJOY · 当前门店</span>
+        <div class="contact-location-main">
+          <span class="contact-pin" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+          </span>
+          <h3>河北 · 新乐</h3>
+          <p class="contact-location-address">新乐市市区<br>具体校区位置请联系确认</p>
+          <div class="contact-network">
+            <span class="contact-network-count"><strong>31</strong><small>家门店</small></span>
+            <span class="contact-network-detail"><small>其他地区门店</small><strong>河北张家口 · 河北唐山 · 河北邢台<br>河北保定 · 河北邯郸 · 天津等</strong></span>
+          </div>
+        </div>
+        <div class="contact-location-note">计划到访前，建议先电话联系，确认校区位置及当期课程安排。</div>
+      </div>
+      <div class="contact-ways">
+        <span class="contact-ways-kicker">CONTACT · 联系方式</span>
+        <h3>和我们聊聊你的需求</h3>
+        <p class="contact-ways-lead">了解课程、年级与报名安排，可联系以下老师。</p>
+        <div class="contact-phone-list">
+          <a class="contact-primary" href="tel:15930114500" aria-label="拨打任老师电话 15930114500，微信同号">
+            <span class="contact-phone-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h3l1.4 4-2 1.6a15 15 0 0 0 6 6l1.6-2L21 14v3a2 2 0 0 1-2 2C10.7 19 5 13.3 5 5a2 2 0 0 1 2-2Z"/></svg></span>
+            <span class="contact-primary-copy"><small>任老师 · 微信同号</small><strong>15930114500</strong></span>
+            <span class="contact-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a class="contact-primary" href="tel:18031264903" aria-label="拨打马老师电话 18031264903">
+            <span class="contact-phone-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h3l1.4 4-2 1.6a15 15 0 0 0 6 6l1.6-2L21 14v3a2 2 0 0 1-2 2C10.7 19 5 13.3 5 5a2 2 0 0 1 2-2Z"/></svg></span>
+            <span class="contact-primary-copy"><small>马老师</small><strong>18031264903</strong></span>
+            <span class="contact-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a class="contact-primary" href="tel:17733883004" aria-label="拨打张老师电话 17733883004">
+            <span class="contact-phone-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h3l1.4 4-2 1.6a15 15 0 0 0 6 6l1.6-2L21 14v3a2 2 0 0 1-2 2C10.7 19 5 13.3 5 5a2 2 0 0 1 2-2Z"/></svg></span>
+            <span class="contact-primary-copy"><small>张老师</small><strong>17733883004</strong></span>
+            <span class="contact-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <p class="contact-reminder">校区详细地址和当期课程信息可能随安排调整，请以电话确认为准。</p>
       </div>
     </div>
   </div>
@@ -1033,229 +1608,86 @@ box-shadow:0 4px 14px rgba(232,160,90,.40);
   <a class="login-btn" href="/login">进入系统 · 家长 / 教师登录</a>
 </div>
 
-<script>
-/* ================= 学员进步对比：深色6宫格自动滚动 ================= */
-(function(){
-  const SURS = "王李张刘陈杨黄赵周吴徐孙马朱胡郭林何高罗郑梁谢宋唐许韩冯邓曹彭曾萧田董袁潘蒋蔡余杜叶程苏魏吕丁任沈姚卢姜崔钟谭陆汪范金石廖贾夏韦付方白邹孟熊秦邱江尹薛闫段雷侯龙史陶黎贺顾毛郝龚邵万钱严覃武戴莫孔向汤".split("");
-  const NAMES = "浩然,梓萱,雨欣,俊杰,欣怡,子涵,宇轩,晨曦,欣妍,铭泽,思远,嘉懿,雨桐,天佑,静姝,梦琪,俊驰,可馨,佳禾,亦凡,书瑶,睿哲,若彤,立诚,沐宸,芷晴,彦博,博文,雅宁,悦心,景行,嘉树,明宇,婉清,泽翰,星辰,语嫣,承恩,清雅,弘毅,瑞霖,诗颖,卓航,嘉乐,思齐,云帆,承睿,思源,子墨,安妮,俊朗,欣蕾,乐珊,思楠,可儿,梓瑞,若岚,宛瑜,允熙,瑾言,子轩,雨泽,梓豪,一诺,沐阳,若曦,梓晨,雨桐,思远,佳怡,子墨,欣怡,宇辰,语彤,浩宇,诗涵,俊杰,雅静,志强,慧敏,建国,秀兰,桂英".split(",");
-  const SUBJECTS = [
-    {exam:"2026 地生会考", subject:"地生", full:120},
-    {exam:"2026 中考", subject:"数学", full:120},
-    {exam:"2026 中考", subject:"语文", full:120},
-    {exam:"2026 中考", subject:"英语", full:120},
-    {exam:"2026 中考", subject:"物理", full:60},
-    {exam:"2026 中考", subject:"化学", full:60},
-    {exam:"2026 中考", subject:"政治", full:60},
-    {exam:"2026 中考", subject:"历史", full:60},
-    {exam:"2026 上学期期末", subject:"数学", full:120},
-    {exam:"2026 上学期期末", subject:"语文", full:120},
-    {exam:"2026 上学期期末", subject:"英语", full:120},
-    {exam:"2026 上学期期末", subject:"物理", full:60},
-    {exam:"2026 上学期期末", subject:"化学", full:60},
-    {exam:"2026 上学期期末", subject:"政治", full:60},
-    {exam:"2026 上学期期末", subject:"历史", full:60},
-    {exam:"2026 上学期期末", subject:"地理", full:60},
-    {exam:"2026 上学期期末", subject:"生物", full:60},
-    {exam:"2026 高考", subject:"数学", full:150},
-    {exam:"2026 高考", subject:"语文", full:150},
-    {exam:"2026 高考", subject:"英语", full:150},
-    {exam:"2026 高考", subject:"物理", full:100},
-    {exam:"2026 高考", subject:"化学", full:100},
-    {exam:"2026 高考", subject:"生物", full:100},
-    {exam:"2026 高考", subject:"政治", full:100},
-    {exam:"2026 高考", subject:"历史", full:100},
-    {exam:"2026 高考", subject:"地理", full:100}
-  ];
-  const TYPES = ["一对一","一对三","小班"];
-  const AV_COLORS = ["#C2541F","#1E7A33","#185FA5","#8F5A12","#7c5cd6","#B03A5E"];
 
-  let seed = 20260920;
-  function rnd(){ seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
-  function pick(arr){ return arr[Math.floor(rnd() * arr.length)]; }
-
-  const NAME_TAILS = (function(){
-    const seen = new Set(), out = [];
-    for (const n of NAMES){ const t = n[n.length - 1]; if (!seen.has(t)){ seen.add(t); out.push(n); } }
-    return out;
-  })();
-  const NAME_POOL = (function(){
-    const a = NAME_TAILS.slice();
-    for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-    return a;
-  })();
-  let nameIdx = 0;
-  function makeName(){ return pick(SURS) + "*" + NAME_POOL[nameIdx++ % NAME_POOL.length].slice(-1); }
-
-  const POOL = (function(){
-    const arr = SUBJECTS.slice();
-    for (let i = arr.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
-    return arr;
-  })();
-  let poolIdx = 0;
-
-  function makeRecord(){
-    const s = POOL[poolIdx % POOL.length]; poolIdx++;
-    const type = TYPES[Math.floor(rnd() * TYPES.length)];
-    // 入学分：32%~85% 满分，加随机抖动避免重复
-    const base = Math.round(s.full * (0.32 + rnd() * 0.53)) + Math.floor(rnd() * 16) - 8;
-    // 按班型分提升幅度：
-    //   一对一（单科）：5~18 分
-    //   一对三（单科）：8~25 分
-    //   小班（四科总分）：12~32 分
-    let gain;
-    if (type === "一对一") gain = 5 + Math.floor(rnd() * 14);
-    else if (type === "一对三") gain = 8 + Math.floor(rnd() * 18);
-    else gain = 12 + Math.floor(rnd() * 21);
-    const final = Math.min(Math.floor(s.full * 0.94), base + gain);
-    return { name: makeName(), exam: s.exam, course: s.subject + (type === "一对一" ? "一对一" : type), from: Math.max(20, base), to: final, full: s.full };
-  }
-
-  const DATA = [
-    {name:"杜*诺", exam:"2026 地生会考", course:"地生一对三", from:112, to:120, full:120},
-    {name:"马*晨", exam:"2026 地生会考", course:"地生一对三", from:105, to:112, full:120},
-    {name:"刘*宇", exam:"2026 地生会考", course:"地生一对三", from:85, to:108, full:120}
-  ];
-  while (DATA.length < 208) DATA.push(makeRecord());
-
-  const avgGain = Math.round(DATA.reduce((s, d) => s + d.to - d.from, 0) / DATA.length);
-  const maxGain = Math.max(...DATA.map(d => d.to - d.from));
-
-  // 数字滚动
-  function animateNum(el, target, dur){
-    dur = dur || 1500; const start = performance.now();
-    function tick(now){ const p = Math.min(1, (now - start) / dur); const e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(target * e); if (p < 1) requestAnimationFrame(tick); }
-    requestAnimationFrame(tick);
-  }
-  // 静态 HTML 已预渲染真实值（22 / 45），仅在数值不同时才覆盖，避免闪回 0
-  const statAvgEl = document.getElementById("statAvg");
-  const statMaxEl = document.getElementById("statMax");
-  if (statAvgEl.textContent !== String(avgGain)) animateNum(statAvgEl, avgGain);
-  if (statMaxEl.textContent !== String(maxGain)) animateNum(statMaxEl, maxGain);
-
-  // 渲染6宫格（复制两份实现无缝滚动）
-  const scroller = document.getElementById("progressGrid");
-  const allItems = [...DATA, ...DATA];
-  scroller.innerHTML = allItems.map((c, i) => {
-    const gain = c.to - c.from;
-    const color = AV_COLORS[i % AV_COLORS.length];
-    return `<div class="ph-card">
-      <div class="ph-card-top">
-        <div class="ph-av" style="background:${color}">${c.name[0]}</div>
-        <div><div class="ph-card-name">${c.name}</div><div class="ph-card-exam">${c.exam}</div></div>
-      </div>
-      <div class="ph-card-scores">
-        <span class="ph-from">${c.from}</span><span class="ph-arrow">→</span><span class="ph-to">${c.to}</span>
-      </div>
-      <span class="ph-gain ${gain >= 20 ? 'o' : 'g'}">+${gain}分 · ${c.course}</span>
-    </div>`;
-  }).join("");
-
-  // 自动滚动 + 手动滑动
-  let offset = 0, isDragging = false, startY = 0, startOffset = 0, pauseUntil = 0;
-  function cardH(){ return scroller.querySelector(".ph-card").offsetHeight + 12; }
-  const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let phPaused = reduceMotion;
-  const phPauseBtn = document.getElementById("phPauseBtn");
-  if (phPaused){ phPauseBtn.textContent = "▶ 继续"; phPauseBtn.setAttribute("aria-label", "继续自动滚动"); }
-  phPauseBtn.addEventListener("click", function(){
-    phPaused = !phPaused;
-    phPauseBtn.textContent = phPaused ? "▶ 继续" : "❚❚ 暂停";
-    phPauseBtn.setAttribute("aria-label", phPaused ? "继续自动滚动" : "暂停自动滚动");
-  });
-  setInterval(function(){
-    if (Date.now() < pauseUntil || isDragging || phPaused) return;
-    offset += 1;
-    const total = DATA.length * cardH();
-    if (offset >= total) offset = 0;
-    scroller.scrollTop = offset;
-    document.getElementById("scrollBar").style.width = (offset / total * 100) + "%";
-  }, 30);
-
-  scroller.addEventListener("pointerdown", function(e){ isDragging = true; startY = e.clientY; startOffset = scroller.scrollTop; scroller.classList.add("dragging"); scroller.setPointerCapture(e.pointerId); });
-  scroller.addEventListener("pointermove", function(e){ if (!isDragging) return; scroller.scrollTop = startOffset - (e.clientY - startY); });
-  scroller.addEventListener("pointerup", function(){ isDragging = false; scroller.classList.remove("dragging"); offset = scroller.scrollTop; pauseUntil = Date.now() + 3000; });
-  scroller.addEventListener("pointercancel", function(){ isDragging = false; scroller.classList.remove("dragging"); });
-})();
-</script>
 <script>
 /* ================= 业务数据 ================= */
 const SERVICES = [
   {
     id:"01", name:"寒暑假冲刺预备课", sub:"集中学习 · 系统复习 · 查漏补缺 · 专项训练",
     slides:[
-      {src:"./about-images/01-1.png", cap:"寒暑假冲刺预备课 · 招生说明"},
-      {src:"./about-images/01-2.png", cap:"寒暑假冲刺预备课 · 课程设置"},
-      {src:"./about-images/01-3.png", cap:"寒暑假冲刺预备课 · 年级与科目"},
-      {src:"./about-images/01-4.png", cap:"寒暑假冲刺预备课 · 服务亮点"},
-      {src:"./about-images/01-5.png", cap:"寒暑假冲刺预备课 · 校区服务"}
+      {src:"./about-images/01-1.webp", cap:"寒暑假冲刺预备课 · 招生说明"},
+      {src:"./about-images/01-2.webp", cap:"寒暑假冲刺预备课 · 课程设置"},
+      {src:"./about-images/01-3.webp", cap:"寒暑假冲刺预备课 · 年级与科目"},
+      {src:"./about-images/01-4.webp", cap:"寒暑假冲刺预备课 · 服务亮点"},
+      {src:"./about-images/01-5.webp", cap:"寒暑假冲刺预备课 · 校区服务"}
     ]
   },
   {
     id:"02", name:"一对一冲刺课程", sub:"课后即反馈 · 学情报告 · 学习留痕 · 量身定制",
     slides:[
-      {src:"./about-images/02-1.png", cap:"一对一冲刺课程 · 个性化教学"},
-      {src:"./about-images/02-2.png", cap:"一对一冲刺课程 · 课堂反馈"},
-      {src:"./about-images/02-3.png", cap:"一对一冲刺课程 · 学情报告"},
-      {src:"./about-images/02-4.png", cap:"一对一冲刺课程 · 学习留痕"},
-      {src:"./about-images/02-5.png", cap:"一对一冲刺课程 · 量身定制冲刺"}
+      {src:"./about-images/02-1.webp", cap:"一对一冲刺课程 · 个性化教学"},
+      {src:"./about-images/02-2.webp", cap:"一对一冲刺课程 · 课堂反馈"},
+      {src:"./about-images/02-3.webp", cap:"一对一冲刺课程 · 学情报告"},
+      {src:"./about-images/02-4.webp", cap:"一对一冲刺课程 · 学习留痕"},
+      {src:"./about-images/02-5.webp", cap:"一对一冲刺课程 · 量身定制冲刺"}
     ]
   },
   {
     id:"03", name:"晚间课业辅导营", sub:"当天问题当天讲 · 作业前后对比可查",
     slides:[
-      {src:"./about-images/03-1.png", cap:"晚间课业辅导营 · 晚间学习场景"},
-      {src:"./about-images/03-2.png", cap:"晚间课业辅导营 · 作业辅导"},
-      {src:"./about-images/03-3.png", cap:"晚间课业辅导营 · 答疑讲解"},
-      {src:"./about-images/03-4.png", cap:"晚间课业辅导营 · 作业前后对比"}
+      {src:"./about-images/03-1.webp", cap:"晚间课业辅导营 · 晚间学习场景"},
+      {src:"./about-images/03-2.webp", cap:"晚间课业辅导营 · 作业辅导"},
+      {src:"./about-images/03-3.webp", cap:"晚间课业辅导营 · 答疑讲解"},
+      {src:"./about-images/03-4.webp", cap:"晚间课业辅导营 · 作业前后对比"}
     ]
   },
   {
     id:"04", name:"周末先锋营", sub:"本周疑难点及时解决 · 下周新知识提前预备",
     slides:[
-      {src:"./about-images/04-1.png", cap:"周末先锋营 · 周末学习安排"},
-      {src:"./about-images/04-2.png", cap:"周末先锋营 · 疑难点专项讲解"},
-      {src:"./about-images/04-3.png", cap:"周末先锋营 · 查漏补缺"},
-      {src:"./about-images/04-4.png", cap:"周末先锋营 · 提前预备新知识"}
+      {src:"./about-images/04-1.webp", cap:"周末先锋营 · 周末学习安排"},
+      {src:"./about-images/04-2.webp", cap:"周末先锋营 · 疑难点专项讲解"},
+      {src:"./about-images/04-3.webp", cap:"周末先锋营 · 查漏补缺"},
+      {src:"./about-images/04-4.webp", cap:"周末先锋营 · 提前预备新知识"}
     ]
   },
   {
     id:"05", name:"中考升学规划", sub:"新乐首家志愿填报模拟平台 · 92 所高中信息",
     slides:[
-      {src:"./about-images/05-1.png", cap:"中考升学规划 · 志愿填报模拟平台"},
-      {src:"./about-images/05-2.png", cap:"中考升学规划 · 分数定位"},
-      {src:"./about-images/05-3.png", cap:"中考升学规划 · 志愿结构"},
-      {src:"./about-images/05-4.png", cap:"中考升学规划 · 冲稳保方案"}
+      {src:"./about-images/05-1.webp", cap:"中考升学规划 · 志愿填报模拟平台"},
+      {src:"./about-images/05-2.webp", cap:"中考升学规划 · 分数定位"},
+      {src:"./about-images/05-3.webp", cap:"中考升学规划 · 志愿结构"},
+      {src:"./about-images/05-4.webp", cap:"中考升学规划 · 冲稳保方案"}
     ]
   },
   {
     id:"06", name:"高考志愿咨询", sub:"人工手工填报 · 就业导向选专业 · 最少 3 人审核",
     slides:[
-      {src:"./about-images/06-1.png", cap:"高考志愿咨询 · 志愿填报指导"},
-      {src:"./about-images/06-2.png", cap:"高考志愿咨询 · 专业选择"},
-      {src:"./about-images/06-3.png", cap:"高考志愿咨询 · 就业研判"},
-      {src:"./about-images/06-4.png", cap:"高考志愿咨询 · 多人审核"},
-      {src:"./about-images/06-5.png", cap:"高考志愿咨询 · 交档讲解"}
+      {src:"./about-images/06-1.webp", cap:"高考志愿咨询 · 志愿填报指导"},
+      {src:"./about-images/06-2.webp", cap:"高考志愿咨询 · 专业选择"},
+      {src:"./about-images/06-3.webp", cap:"高考志愿咨询 · 就业研判"},
+      {src:"./about-images/06-4.webp", cap:"高考志愿咨询 · 多人审核"},
+      {src:"./about-images/06-5.webp", cap:"高考志愿咨询 · 交档讲解"}
     ]
   },
   {
     id:"07", name:"单招文化课辅导", sub:"单招在职教师授课 · 6 人小班 · 紧扣考纲",
     slides:[
-      {src:"./about-images/07-1.png", cap:"单招文化课辅导 · 单招专项"},
-      {src:"./about-images/07-2.png", cap:"单招文化课辅导 · 6 人小班"},
-      {src:"./about-images/07-3.png", cap:"单招文化课辅导 · 紧扣考纲"},
-      {src:"./about-images/07-4.png", cap:"单招文化课辅导 · 阶段测试"},
-      {src:"./about-images/07-5.png", cap:"单招文化课辅导 · 提分看得见"}
+      {src:"./about-images/07-1.webp", cap:"单招文化课辅导 · 单招专项"},
+      {src:"./about-images/07-2.webp", cap:"单招文化课辅导 · 6 人小班"},
+      {src:"./about-images/07-3.webp", cap:"单招文化课辅导 · 紧扣考纲"},
+      {src:"./about-images/07-4.webp", cap:"单招文化课辅导 · 阶段测试"},
+      {src:"./about-images/07-5.webp", cap:"单招文化课辅导 · 提分看得见"}
     ]
   },
   {
     id:"08", name:"考研公共课辅导", sub:"在读硕士授课 · 直系学长学姐资源对接",
     slides:[
-      {src:"./about-images/08-1.png", cap:"考研公共课辅导 · 授课师资"},
-      {src:"./about-images/08-2.png", cap:"考研公共课辅导 · 数学体系"},
-      {src:"./about-images/08-3.png", cap:"考研公共课辅导 · 英语方法"},
-      {src:"./about-images/08-4.png", cap:"考研公共课辅导 · 复习规划"},
-      {src:"./about-images/08-5.png", cap:"考研公共课辅导 · 学长学姐对接"},
-      {src:"./about-images/08-6.png", cap:"考研公共课辅导 · 服务对比"}
+      {src:"./about-images/08-1.webp", cap:"考研公共课辅导 · 授课师资"},
+      {src:"./about-images/08-2.webp", cap:"考研公共课辅导 · 数学体系"},
+      {src:"./about-images/08-3.webp", cap:"考研公共课辅导 · 英语方法"},
+      {src:"./about-images/08-4.webp", cap:"考研公共课辅导 · 复习规划"},
+      {src:"./about-images/08-5.webp", cap:"考研公共课辅导 · 学长学姐对接"},
+      {src:"./about-images/08-6.webp", cap:"考研公共课辅导 · 服务对比"}
     ]
   }
 ];
@@ -1435,6 +1867,543 @@ stageEl.addEventListener("pointerup", (e) => {
 /* ================= 初始化 ================= */
 renderCards(SERVICES[0]);
 play();
+</script>
+<script>
+/* ================= 真实课堂反馈：完整反馈页大图阅读器（自动轮播 + 指示点 + 手势 + 放大） ================= */
+(function(){
+  var FB=[
+    {src:'./about-images/feedback/feedback-3.jpg',sub:'初二 · 数学',kp:'全等三角形 · 10/24',alt:'课堂反馈：初二数学全等三角形（信息已匿名处理）'},
+    {src:'./about-images/feedback/feedback-5.jpg',sub:'初一 · 英语',kp:'there be 句型 · 10/17',alt:'课堂反馈：初一英语 Unit3（信息已匿名处理）'},
+    {src:'./about-images/feedback/feedback-4.jpg',sub:'初一 · 英语',kp:'Unit4 基础语法 · 10/31',alt:'课堂反馈：初一英语 Unit4（信息已匿名处理）'},
+    {src:'./about-images/feedback/feedback-1.jpg',sub:'初三 · 数学',kp:'锐角三角函数 · 10/31',alt:'课堂反馈：初三数学锐角三角函数（信息已匿名处理）'},
+    {src:'./about-images/feedback/feedback-2.jpg',sub:'初三 · 数学一对一',kp:'一元二次方程 · 11/01',alt:'课堂反馈：初三数学一元二次方程（信息已匿名处理）'},
+    {src:'./about-images/feedback/feedback-6.jpg',sub:'初三 · 英语',kp:'被动语态复习 · 10/31',alt:'课堂反馈：初三英语被动语态（信息已匿名处理）'}
+  ];
+  var frame=document.getElementById('fbFrame');
+  var img=document.getElementById('fbImg');
+  var sub=document.getElementById('fbSub');
+  var kp=document.getElementById('fbKp');
+  var scrollbox=document.getElementById('fbScroll');
+  var dotsWrap=document.getElementById('fbDots');
+  var prev=document.getElementById('fbPrev');
+  var next=document.getElementById('fbNext');
+  var modal=document.getElementById('fbModal');
+  var modalImg=document.getElementById('fbModalImg');
+  var modalClose=document.getElementById('fbModalClose');
+  if(!frame||!img||!sub||!kp||!dotsWrap)return;
+  FB.forEach(function(){var d=document.createElement('i');dotsWrap.appendChild(d);});
+  var dots=[].slice.call(dotsWrap.children);
+  var i=0,timer=null,t0x=null,t0y=0,ty=0;
+  function upd(){
+    var it=FB[i];
+    img.src=it.src;img.alt=it.alt;
+    sub.textContent=it.sub;kp.textContent=it.kp;
+    dots.forEach(function(d,k){d.classList.toggle('on',k===i);});
+    if(scrollbox)scrollbox.scrollTop=0;
+  }
+  function play(){
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+    clearInterval(timer);
+    timer=setInterval(function(){i=(i+1)%FB.length;upd();},5000);
+  }
+  function pause(){clearInterval(timer);}
+  var modalTrigger=null;
+  function openModal(src,alt,trigger){
+    if(!modal||!modalImg)return;
+    pause();modalTrigger=trigger||null;modalImg.src=src;modalImg.alt=alt||'课堂反馈大图';modal.hidden=false;document.body.style.overflow='hidden';
+    if(modalClose)modalClose.focus();
+  }
+  function closeModal(){
+    if(!modal||modal.hidden)return;
+    modal.hidden=true;document.body.style.overflow='';
+    if(modalTrigger&&typeof modalTrigger.focus==='function')modalTrigger.focus();
+    modalTrigger=null;play();
+  }
+  upd();
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
+    play();
+    frame.addEventListener('mouseenter',pause);
+    frame.addEventListener('mouseleave',play);
+  }
+  prev.addEventListener('click',function(){i=(i-1+FB.length)%FB.length;upd();play();});
+  next.addEventListener('click',function(){i=(i+1)%FB.length;upd();play();});
+  frame.addEventListener('touchstart',function(e){t0x=e.touches[0].clientX;t0y=e.touches[0].clientY;ty=0;pause();},{passive:true});
+  frame.addEventListener('touchmove',function(e){
+    if(t0x==null)return;
+    var dx=e.touches[0].clientX-t0x;
+    var dy=Math.abs(e.touches[0].clientY-t0y);
+    if(Math.abs(dx)>24&&Math.abs(dx)>dy)ty=dx;
+  },{passive:true});
+  frame.addEventListener('touchend',function(){
+    if(t0x==null)return;
+    if(Math.abs(ty)>60){i=ty<0?(i+1)%FB.length:(i-1+FB.length)%FB.length;upd();}
+    t0x=null;ty=0;play();
+  });
+  img.addEventListener('click',function(){openModal(img.currentSrc||img.src,img.alt,img);});
+  if(modalClose)modalClose.addEventListener('click',closeModal);
+  if(modal)modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+  document.querySelectorAll('.feedback-poster-open').forEach(function(button){
+    var poster=button.querySelector('img');
+    if(poster)button.addEventListener('click',function(){openModal(poster.currentSrc||poster.src,poster.alt,button);});
+  });
+  addEventListener('keydown',function(e){if(e.key==='Escape'&&modal&&!modal.hidden)closeModal();});
+})();
+</script>
+<script>
+/* ================= 首页公开问答：只提交当前问题，不读取账户或历史记录 ================= */
+(function(){
+  var dock=document.getElementById('homeAiDock');
+  var launcher=document.getElementById('homeAiLauncher');
+  var teaser=document.getElementById('homeAiTeaser');
+  var backdrop=document.getElementById('homeAiBackdrop');
+  var panel=document.getElementById('homeAiPanel');
+  var close=document.getElementById('homeAiClose');
+  var form=document.getElementById('homeAiForm');
+  var input=document.getElementById('homeAiInput');
+  var submit=document.getElementById('homeAiSubmit');
+  var quick=document.getElementById('homeAiQuick');
+  var status=document.getElementById('homeAiStatus');
+  var questionEl=document.getElementById('homeAiQuestion');
+  var answerEl=document.getElementById('homeAiAnswer');
+  var count=document.getElementById('homeAiCount');
+  if(!dock||!launcher||!teaser||!backdrop||!panel||!close||!form||!input||!submit||!quick||!status||!questionEl||!answerEl)return;
+
+  var peekTimer=null;
+  var dragState=null;
+  var suppressLauncherClick=false;
+  var suppressClickTimer=null;
+  var dockPositionKey='morejoy-home-ai-dock-position-v1';
+
+  function setDockPosition(left,top){
+    var bounds=dock.getBoundingClientRect();
+    var maxLeft=Math.max(0,window.innerWidth-bounds.width);
+    var maxTop=Math.max(0,window.innerHeight-bounds.height);
+    var position={
+      left:Math.max(0,Math.min(left,maxLeft)),
+      top:Math.max(0,Math.min(top,maxTop))
+    };
+    dock.style.left=position.left+'px';
+    dock.style.top=position.top+'px';
+    dock.style.right='auto';
+    dock.style.bottom='auto';
+    return position;
+  }
+
+  function saveDockPosition(position){
+    try{window.localStorage.setItem(dockPositionKey,JSON.stringify(position));}catch(error){}
+  }
+
+  try{
+    var savedPosition=JSON.parse(window.localStorage.getItem(dockPositionKey)||'null');
+    if(savedPosition&&Number.isFinite(savedPosition.left)&&Number.isFinite(savedPosition.top)){
+      setDockPosition(savedPosition.left,savedPosition.top);
+    }
+  }catch(error){}
+
+  function beginLauncherDrag(event){
+    if(event.button!==0||event.isPrimary===false||dock.classList.contains('is-open'))return;
+    var bounds=dock.getBoundingClientRect();
+    dragState={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,left:bounds.left,top:bounds.top,moved:false};
+    try{launcher.setPointerCapture(event.pointerId);}catch(error){}
+  }
+
+  function moveLauncher(event){
+    var state=dragState;
+    if(!state||state.pointerId!==event.pointerId)return;
+    var dx=event.clientX-state.startX;
+    var dy=event.clientY-state.startY;
+    if(!state.moved&&Math.hypot(dx,dy)>7){
+      state.moved=true;
+      dock.classList.add('is-dragging');
+      dock.classList.remove('is-peeking');
+    }
+    if(!state.moved)return;
+    event.preventDefault();
+    setDockPosition(state.left+dx,state.top+dy);
+  }
+
+  function finishLauncherDrag(event){
+    var state=dragState;
+    if(!state||state.pointerId!==event.pointerId)return;
+    dragState=null;
+    dock.classList.remove('is-dragging');
+    if(!state.moved)return;
+
+    saveDockPosition({left:parseFloat(dock.style.left)||0,top:parseFloat(dock.style.top)||0});
+    suppressLauncherClick=true;
+    window.clearTimeout(suppressClickTimer);
+    suppressClickTimer=window.setTimeout(function(){suppressLauncherClick=false;suppressClickTimer=null;},350);
+  }
+
+  launcher.addEventListener('pointerdown',beginLauncherDrag);
+  launcher.addEventListener('pointermove',moveLauncher);
+  launcher.addEventListener('pointerup',finishLauncherDrag);
+  launcher.addEventListener('pointercancel',finishLauncherDrag);
+  launcher.addEventListener('lostpointercapture',finishLauncherDrag);
+  launcher.addEventListener('keydown',function(event){
+    if(!event.altKey||dock.classList.contains('is-open'))return;
+    var bounds=dock.getBoundingClientRect();
+    var step=event.shiftKey?56:24;
+    var delta={ArrowLeft:[-step,0],ArrowRight:[step,0],ArrowUp:[0,-step],ArrowDown:[0,step]}[event.key];
+    if(!delta)return;
+    event.preventDefault();
+    saveDockPosition(setDockPosition(bounds.left+delta[0],bounds.top+delta[1]));
+  });
+  window.addEventListener('resize',function(){
+    if(!dock.style.left||!dock.style.top)return;
+    saveDockPosition(setDockPosition(parseFloat(dock.style.left)||0,parseFloat(dock.style.top)||0));
+  });
+
+  function peek(){
+    window.clearTimeout(peekTimer);
+    if(!dock.classList.contains('is-open'))dock.classList.add('is-peeking');
+  }
+  function retractSoon(){
+    window.clearTimeout(peekTimer);
+    peekTimer=window.setTimeout(function(){
+      if(!dragState&&!dock.classList.contains('is-open')&&!dock.contains(document.activeElement))dock.classList.remove('is-peeking');
+    },700);
+  }
+  launcher.addEventListener('pointerenter',peek);
+  launcher.addEventListener('pointerleave',function(){if(!dragState)retractSoon();});
+  teaser.addEventListener('pointerenter',peek);
+  teaser.addEventListener('pointerleave',retractSoon);
+  dock.addEventListener('focusin',peek);
+  dock.addEventListener('focusout',function(event){if(!dock.contains(event.relatedTarget))retractSoon();});
+
+  function setOpen(open,restoreFocus){
+    window.clearTimeout(peekTimer);
+    dock.classList.toggle('is-open',open);
+    if(open)dock.classList.remove('is-peeking');
+    document.body.classList.toggle('home-ai-open',open);
+    launcher.setAttribute('aria-expanded',open?'true':'false');
+    launcher.setAttribute('aria-label',open?'收起牧哲学堂专属助手':'拖动小羊移动，点击展开牧哲学堂专属助手');
+    panel.setAttribute('aria-hidden',open?'false':'true');
+    backdrop.setAttribute('aria-hidden',open?'false':'true');
+    if(open)close.focus();
+    else if(restoreFocus){launcher.focus();dock.classList.remove('is-peeking');}
+  }
+  launcher.addEventListener('click',function(event){
+    if(suppressLauncherClick){
+      event.preventDefault();
+      suppressLauncherClick=false;
+      window.clearTimeout(suppressClickTimer);
+      suppressClickTimer=null;
+      return;
+    }
+    setOpen(!dock.classList.contains('is-open'),true);
+  });
+  teaser.addEventListener('click',function(){setOpen(true);});
+  close.addEventListener('click',function(){setOpen(false,true);});
+  backdrop.addEventListener('click',function(){setOpen(false,true);});
+  document.addEventListener('keydown',function(event){if(event.key==='Escape'&&dock.classList.contains('is-open'))setOpen(false,true);});
+
+  var HOME_FAQ={
+    school:'牧哲学堂2016年创办于河北唐山。您目前查看的是河北新乐门店，位于新乐市区，详细校区位置请联系确认。其他地区有31家门店，分布在河北张家口、唐山、邢台、保定、邯郸及天津等地。课程与报名安排以当地门店确认为准。新乐咨询：15930114500（同微信）、18031264903、17733883004。',
+    teacher:'了解师资，可以先确认四件事：\n01 具体由哪位老师授课，任教哪些年级和学科；\n02 班型、课程安排及老师是否稳定带课；\n03 每节课后如何反馈学习内容与课堂表现；\n04 有问题时如何和老师沟通跟进。\n\n首页没有公布每位教师的完整履历，我不会替具体老师虚构资历或效果；当期师资请向对应门店确认。家长端可查看课堂反馈。',
+    results:'学习变化因孩子基础、学习周期、到课和课后练习等因素而异，我们不承诺统一提分或具体分数。\n\n建议和老师一起看这些过程：\n01 当前学习起点与阶段目标；\n02 每节课的学习内容和掌握反馈；\n03 作业、练习或阶段测评中的变化；\n04 下一阶段准备怎样跟进。\n\n家长端可查看课程安排、考勤和课堂反馈。更具体的课程方案，可带近期学习情况向当地门店咨询。'
+  };
+  function faqTypeFor(question){
+    var normalized=question.toLowerCase().replace(/[\s，。！？；、,.!?;：:]/g,'');
+    if(/提分|提成绩|成绩提升|学习效果|提高.*分|提升.*分|考多少分/.test(normalized))return 'results';
+    if(/老师|教师|师资/.test(normalized)&&/怎么样|好不好|好吗|水平|资历|专业|靠谱吗|负责吗/.test(normalized))return 'teacher';
+    if(/牧哲学堂|机构/.test(normalized)&&/怎么样|好不好|好吗|靠谱吗|口碑|什么样|哪里|在哪|地址|创办|起源|发源/.test(normalized))return 'school';
+    return '';
+  }
+  function updateCount(){count.textContent=input.value.length+' / 300';}
+  function setBusy(busy){
+    submit.disabled=busy;
+    submit.textContent=busy?'正在整理…':'发送提问';
+    Array.prototype.forEach.call(quick.querySelectorAll('button'),function(button){button.disabled=busy;});
+  }
+  function ask(raw,faqType){
+    var question=String(raw||'').trim();
+    if(!question||question.length>300)return;
+    input.value=question;updateCount();
+    questionEl.hidden=false;
+    questionEl.textContent='你问：'+question;
+    var curatedType=faqType||faqTypeFor(question);
+    if(curatedType&&HOME_FAQ[curatedType]){
+      answerEl.textContent=HOME_FAQ[curatedType];
+      status.textContent='已为你整理好这类常见问题';
+      input.value='';updateCount();setBusy(false);
+      var chat=document.querySelector('.home-ai-chat');
+      if(chat)chat.scrollIntoView({block:'nearest',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+      return;
+    }
+    answerEl.textContent='小牧正在整理答复…';
+    status.textContent='正在为你查找公开信息';
+    setBusy(true);
+    fetch('/api/ai/public-assistant',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:question})
+    }).then(function(response){
+      return response.json().catch(function(){return {};}).then(function(data){
+        if(!response.ok)throw new Error(data.error||'暂时无法取得答复，请稍后重试。');
+        return data;
+      });
+    }).then(function(data){
+      answerEl.textContent=data.answer||'小牧暂时没有整理出答复，请换种问法再试。';
+      status.textContent='小牧已答复';
+      input.value='';updateCount();
+    }).catch(function(error){
+      answerEl.textContent=error&&error.message?error.message:'小牧暂时无法连接，请稍后重试，或拨打页面上的咨询电话。';
+      status.textContent='暂时没有答复';
+    }).finally(function(){setBusy(false);});
+  }
+
+  input.addEventListener('input',updateCount);
+  form.addEventListener('submit',function(event){event.preventDefault();ask(input.value);});
+  quick.addEventListener('click',function(event){
+    var button=event.target.closest('button[data-question]');
+    if(button)ask(button.getAttribute('data-question'),button.getAttribute('data-faq'));
+  });
+})();
+</script>
+<script>
+(function(){
+  var section=document.getElementById('teachers');
+  var filters=document.getElementById('teacherShowcaseFilters');
+  var count=document.getElementById('teacherShowcaseCount');
+  var previous=document.getElementById('teacherShowcasePrev');
+  var next=document.getElementById('teacherShowcaseNext');
+  var name=document.getElementById('teacherProfileName');
+  var tier=document.getElementById('teacherProfileTier');
+  var credentials=document.getElementById('teacherProfileCredentials');
+  var subjectsNode=document.getElementById('teacherProfileSubjects');
+  var university=document.getElementById('teacherProfileUniversity');
+  var education=document.getElementById('teacherProfileEducation');
+  var certificateBox=document.getElementById('teacherProfileCertificate');
+  var certificatesNode=document.getElementById('teacherProfileCertificates');
+  var bio=document.getElementById('teacherProfileBio');
+  var position=document.getElementById('teacherProfilePosition');
+  var portrait=document.getElementById('teacherPortrait');
+  var portraitIndexNode=document.getElementById('teacherPortraitIndex');
+  var portraitStage=document.getElementById('teacherPortraitStage');
+  var portraitFrame=document.getElementById('teacherPortraitFrame');
+  if(!section||!filters||!count||!name||!portrait||!portraitFrame||!certificateBox||!certificatesNode)return;
+
+  var femalePortraits=[1,2,3,4,5,6,7,8].map(function(index){return '/teacher-portraits/portrait-'+('0'+index).slice(-2)+'.webp';});
+  var malePortraits=[1,2,3,4,5,6,7,8].map(function(index){return '/teacher-portraits/male-'+('0'+index).slice(-2)+'.webp';});
+  // Ordered to match the first 26 teacher profiles in the public showcase.
+  var certificateAssignments=[
+    ['高级中学数学教师资格证'],
+    ['高级中学数学教师资格证'],
+    ['初级中学英语教师资格证'],
+    ['高级中学物理教师资格证'],
+    ['高级中学化学教师资格证'],
+    ['高级中学英语教师资格证','初级中学物理教师资格证'],
+    ['初级心理学教师资格证','高级中学英语教师资格证','高级中学数学教师资格证','教师从业资格证'],
+    ['高级中学数学教师资格证','初级中学英语教师资格证','初级中学物理教师资格证'],
+    ['初级中学化学教师资格证'],
+    ['高级中学物理教师资格证'],
+    ['初级中学英语教师资格证'],
+    ['高级中学语文教师资格证'],
+    ['初级中学数学教师资格证'],
+    ['初级中学英语教师资格证','初级中学数学教师资格证'],
+    ['初级中学数学教师资格证'],
+    ['初级中学数学教师资格证','初级中学语文教师资格证'],
+    ['初级中学英语教师资格证'],
+    ['高级中学英语教师资格证'],
+    ['高级中学数学教师资格证'],
+    ['初级中学英语教师资格证'],
+    ['高级中学化学教师资格证'],
+    ['初级中学化学教师资格证'],
+    ['初级中学生物教师资格证'],
+    ['初级中学数学教师资格证','初级中学英语教师资格证'],
+    ['初级中学数学教师资格证','初级中学化学教师资格证'],
+    ['高级中学数学教师资格证']
+  ];
+  var allTeachers=[];
+  var activeSubject='all';
+  var activeIndex=0;
+  var currentTeacher=null;
+  var portraitIndex=0;
+  var requested=false;
+  var motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function filteredTeachers(){
+    return activeSubject==='all'?allTeachers:allTeachers.filter(function(item){return item.subjects.indexOf(activeSubject)>=0;});
+  }
+
+  function isFemaleTeacher(item){
+    if(item.portraitType==='female')return true;
+    if(item.portraitType==='male')return false;
+    return /\/avatars\/f\/|female/i.test(String(item.portrait||''));
+  }
+
+  function portraitsForTeacher(item){
+    return isFemaleTeacher(item)?femalePortraits:malePortraits;
+  }
+
+  function updatePortraitLabel(isFemale){
+    if(!portraitIndexNode)return;
+    var portraitCount=isFemale?femalePortraits.length:malePortraits.length;
+    portraitIndexNode.textContent=(isFemale?'女生':'男生')+'立绘 '+('0'+(portraitIndex+1)).slice(-2)+' / '+('0'+portraitCount).slice(-2);
+  }
+
+  function applyPortrait(animate){
+    if(!currentTeacher)return;
+    var isFemale=isFemaleTeacher(currentTeacher);
+    var source=portraitsForTeacher(currentTeacher)[portraitIndex];
+    if(animate&&!motionQuery.matches)portraitFrame.classList.add('is-changing');
+    portrait.src=source;
+    portrait.alt=currentTeacher.label+'立绘示意';
+    updatePortraitLabel(isFemale);
+    if(animate&&!motionQuery.matches){
+      window.setTimeout(function(){portraitFrame.classList.remove('is-changing');},220);
+    }
+  }
+
+  function showPortrait(item){
+    currentTeacher=item;
+    var portraits=portraitsForTeacher(item);
+    var seed=Number(item.portraitSeed);
+    portraitIndex=Number.isFinite(seed)?(seed>>>0)%portraits.length:0;
+    applyPortrait(true);
+  }
+
+  function render(){
+    var list=filteredTeachers();
+    if(!list.length){
+      name.textContent=allTeachers.length?'暂无该学科的老师':'暂未获取教师资料';
+      tier.textContent='教师团队';
+      credentials.textContent='请稍后再试。';
+      university.textContent='—';
+      education.textContent='—';
+      certificateBox.hidden=true;
+      certificatesNode.replaceChildren();
+      bio.textContent='教师团队资料暂时无法加载。';
+      subjectsNode.replaceChildren();
+      position.textContent='—';
+      if(previous)previous.disabled=true;
+      if(next)next.disabled=true;
+      count.textContent=String(allTeachers.length);
+      return;
+    }
+
+    activeIndex=(activeIndex+list.length)%list.length;
+    var item=list[activeIndex];
+    name.textContent=item.label||'老师';
+    tier.textContent=item.tier||'一线教师';
+    credentials.textContent=item.university?'毕业于 '+item.university:'一线授课教师';
+    university.textContent=Array.isArray(item.schoolLevels)&&item.schoolLevels.length?item.schoolLevels.join(' · '):'暂未登记';
+    education.textContent=item.education||'暂未登记';
+    var certificateFragment=document.createDocumentFragment();
+    var certificateItems=Array.isArray(item.certificates)?item.certificates.filter(function(value){return typeof value==='string'&&value.trim();}):[];
+    certificateItems.forEach(function(value){
+      var certificate=document.createElement('span');
+      certificate.className='teacher-profile-certificate-item';
+      certificate.textContent=value;
+      certificateFragment.appendChild(certificate);
+    });
+    certificatesNode.replaceChildren(certificateFragment);
+    certificateBox.hidden=certificateItems.length===0;
+    bio.textContent=(item.bio||'').trim()||'目前暂无可展示的教学介绍。';
+    position.textContent=('0'+(activeIndex+1)).slice(-2)+' / '+('0'+list.length).slice(-2);
+
+    var subjectFragment=document.createDocumentFragment();
+    item.subjects.forEach(function(subject){
+      var tag=document.createElement('span');
+      tag.className='teacher-profile-subject';
+      tag.textContent=subject;
+      subjectFragment.appendChild(tag);
+    });
+    subjectsNode.replaceChildren(subjectFragment);
+    if(previous)previous.disabled=list.length<2;
+    if(next)next.disabled=list.length<2;
+    count.textContent=String(allTeachers.length);
+    showPortrait(item);
+  }
+
+  function renderFilters(){
+    var subjects=[];
+    allTeachers.forEach(function(item){
+      item.subjects.forEach(function(subject){
+        if(subjects.indexOf(subject)<0)subjects.push(subject);
+      });
+    });
+    var fragment=document.createDocumentFragment();
+    [['all','全部学科']].concat(subjects.map(function(subject){return [subject,subject];})).forEach(function(entry){
+      var button=document.createElement('button');
+      button.type='button';
+      button.className='teacher-profile-filter';
+      button.setAttribute('data-subject',entry[0]);
+      button.setAttribute('aria-pressed',entry[0]===activeSubject?'true':'false');
+      button.textContent=entry[1];
+      fragment.appendChild(button);
+    });
+    filters.replaceChildren(fragment);
+  }
+
+  function load(){
+    if(requested)return;
+    requested=true;
+    fetch('/api/public/teacher-showcase?portrait-layout=1',{headers:{'Accept':'application/json'},credentials:'omit',cache:'no-store'})
+      .then(function(response){if(!response.ok)throw new Error('教师资料暂时无法加载');return response.json();})
+      .then(function(data){
+        allTeachers=Array.isArray(data.teachers)?data.teachers.filter(function(item){
+          return item&&typeof item.label==='string'&&Array.isArray(item.subjects);
+        }):[];
+        allTeachers.forEach(function(item,index){
+          var apiCertificates=Array.isArray(item.certificates)?item.certificates:[];
+          item.certificates=apiCertificates.length?apiCertificates:(certificateAssignments[index]||[]);
+        });
+        renderFilters();
+        render();
+      })
+      .catch(function(){
+        name.textContent='教师资料暂不可用';
+        tier.textContent='请稍后再试';
+        credentials.textContent='教师团队资料暂时无法加载。';
+        university.textContent='—';
+        education.textContent='—';
+        certificateBox.hidden=true;
+        certificatesNode.replaceChildren();
+        bio.textContent='页面其余内容可正常浏览。';
+        count.textContent='—';
+        position.textContent='—';
+      });
+  }
+
+  filters.addEventListener('click',function(event){
+    var button=event.target.closest('button[data-subject]');
+    if(!button)return;
+    activeSubject=button.getAttribute('data-subject')||'all';
+    activeIndex=0;
+    Array.prototype.forEach.call(filters.querySelectorAll('button[data-subject]'),function(item){
+      item.setAttribute('aria-pressed',item===button?'true':'false');
+    });
+    render();
+  });
+  function moveTeacher(direction){
+    var list=filteredTeachers();
+    if(list.length<2)return;
+    activeIndex=(activeIndex+direction+list.length)%list.length;
+    render();
+  }
+  if(previous)previous.addEventListener('click',function(){moveTeacher(-1);});
+  if(next)next.addEventListener('click',function(){moveTeacher(1);});
+
+  portraitStage.addEventListener('pointermove',function(event){
+    if(motionQuery.matches||event.pointerType==='touch')return;
+    var bounds=portraitStage.getBoundingClientRect();
+    var x=(event.clientX-bounds.left)/bounds.width-.5;
+    var y=(event.clientY-bounds.top)/bounds.height-.5;
+    portraitFrame.style.transform='rotateX('+(2-y*8)+'deg) rotateY('+(-8+x*14)+'deg) translateZ(24px)';
+  });
+  portraitStage.addEventListener('pointerleave',function(){portraitFrame.style.transform='';});
+
+  if('IntersectionObserver' in window){
+    var observer=new IntersectionObserver(function(entries){
+      if(entries.some(function(entry){return entry.isIntersecting;})){
+        observer.disconnect();
+        load();
+      }
+    },{rootMargin:'320px 0px'});
+    observer.observe(section);
+  }else load();
+})();
 </script>
 </body>
 </html>

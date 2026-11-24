@@ -2,7 +2,7 @@
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Avatar, Badge, Button, Empty, Input, Select, Tag, Typography } from 'antd'
+import { Avatar, Badge, Button, Empty, Input, Segmented, Tag, Typography } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
 import {
   CheckCircleOutlined, SendOutlined, SearchOutlined, BellOutlined,
@@ -20,6 +20,11 @@ import { StickerMessageContent } from '@/components/Parent/StickerMessageContent
 import { StudentAvatar } from '@/components/Common/StudentAvatar'
 import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 import { uploadMessageImage } from '@/lib/client-image-upload'
+import {
+  getMessageSensitivity,
+  sortMessagesWithSensitivity,
+  SUPERVISOR_REPLY_TEMPLATES,
+} from '@/lib/parent-message-sensitivity'
 
 const { Text, Title } = Typography
 const { TextArea } = Input
@@ -137,14 +142,15 @@ function ConversationItem({ msg, onClick, active }: { msg: Message; onClick: () 
   const studentName = msg.student?.name || '学员信息待完善'
   const pendingTeacher = isPendingTeacherReply(msg)
   const pendingParent = isPendingParentRead(msg)
+  const sensitivity = getMessageSensitivity(msg)
   return (
     <button type="button" aria-pressed={active} onClick={onClick} style={{
       display: 'flex', width: '100%', minWidth: 0, minHeight: 158, gap: 14, alignItems: 'flex-start',
       textAlign: 'left', color: 'var(--color-ink)', font: 'inherit',
-      background: active ? 'var(--color-primary-bg)' : 'var(--color-surface-1)',
-      border: `1px solid ${active ? 'rgba(232,120,74,.35)' : 'var(--color-hairline)'}`,
+      background: active ? 'var(--color-primary-bg)' : sensitivity.isSensitive ? '#FFFDFB' : 'var(--color-surface-1)',
+      border: `1px solid ${active ? 'rgba(232,120,74,.35)' : sensitivity.isSensitive ? 'rgba(224,62,45,.35)' : 'var(--color-hairline)'}`,
       borderRadius: 16, padding: 16, cursor: 'pointer',
-      boxShadow: active ? '0 8px 22px rgba(119,67,40,.10)' : '0 3px 12px rgba(37,29,20,.045)',
+      boxShadow: active ? '0 8px 22px rgba(119,67,40,.10)' : sensitivity.isSensitive ? '0 4px 14px rgba(224,62,45,.08)' : '0 3px 12px rgba(37,29,20,.045)',
       transition: 'background .16s ease, box-shadow .16s ease, transform .16s ease',
     }}>
       <div style={{ position: 'relative', flexShrink: 0, paddingTop: 2 }}>
@@ -177,6 +183,16 @@ function ConversationItem({ msg, onClick, active }: { msg: Message; onClick: () 
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', marginTop: 11 }}>
+          {sensitivity.isSensitive && (
+            <span style={{
+              padding: '3px 8px', borderRadius: 999,
+              background: '#FEECEC', color: '#E03E2D',
+              fontSize: 10, fontWeight: 750,
+              border: '1px solid rgba(224,62,45,.3)',
+            }}>
+              ⚠️ 重点预警：{sensitivity.matchedKeywords.join('、')}
+            </span>
+          )}
           {pendingTeacher && msg.status !== 'CLOSED' && (
             <span style={{ padding: '3px 8px', borderRadius: 999, background: msg.workflow?.overdue ? 'var(--color-error-bg)' : 'var(--color-primary-bg)', color: msg.workflow?.overdue ? 'var(--color-error)' : 'var(--color-primary-focus)', fontSize: 10, fontWeight: 650 }}>
               {msg.workflow?.overdue ? '回复超时' : formatWaitingTime(msg.workflow?.waitingMinutes)}
@@ -214,7 +230,7 @@ function ConversationItem({ msg, onClick, active }: { msg: Message; onClick: () 
   )
 }
 
-export function AdminMessagesClient() {
+export function AdminMessagesClient({ embedded = false }: { embedded?: boolean } = {}) {
   const isMobile = useIsMobile() ?? false
   const [activeId, setActiveId] = useState<string | null>(null)
   const [filter, setFilter] = useState<'ALL' | 'PENDING_TEACHER' | 'PENDING_PARENT' | 'CLOSED'>('ALL')
@@ -317,6 +333,9 @@ export function AdminMessagesClient() {
       .filter(m => !teacherFilter || m.teacher?.id === teacherFilter)
       .filter(m => !kw || `${m.title} ${m.parent.name} ${m.teacher?.name || ''} ${m.student?.name || ''} ${m.subject || ''}`.includes(kw) || m.replies.some(r => r.content.includes(kw)))
       .sort((a, b) => {
+        const sa = getMessageSensitivity(a).isSensitive ? 1 : 0
+        const sb = getMessageSensitivity(b).isSensitive ? 1 : 0
+        if (sa !== sb) return sb - sa
         const pa = isPendingTeacherReply(a) ? 1 : 0
         const pb = isPendingTeacherReply(b) ? 1 : 0
         if (pa !== pb) return pb - pa
@@ -484,13 +503,18 @@ export function AdminMessagesClient() {
       <AdaptiveSelect allowClear placeholder="按老师" value={teacherFilter || undefined}
         onChange={v => setTeacherFilter(v || '')} options={teacherOptions} style={{ width: '100%', height: 42 }}
         showSearch filterOption={(i, o) => String(o?.label || '').includes(i)} />
-      <AdaptiveSelect value={filter} onChange={v => setFilter(v)} style={{ width: '100%', height: 42 }}
+      <Segmented
+        block
+        value={filter}
+        onChange={(value) => setFilter(value as typeof filter)}
+        style={{ width: '100%', height: 42, gridColumn: isMobile ? '1 / -1' : undefined }}
         options={[
-          { value: 'ALL', label: '全部状态' },
+          { value: 'ALL', label: '全部' },
           { value: 'PENDING_TEACHER', label: '待教师回复' },
           { value: 'PENDING_PARENT', label: '待家长查看' },
           { value: 'CLOSED', label: '已关闭' },
-        ]} />
+        ]}
+      />
     </div>
   )
 
@@ -611,6 +635,27 @@ export function AdminMessagesClient() {
               event.currentTarget.value = ''
             }}
           />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, color: 'var(--color-ink-muted)' }}>教研协同代答：</span>
+            {SUPERVISOR_REPLY_TEMPLATES.map((tmpl) => (
+              <button
+                key={tmpl.label}
+                type="button"
+                onClick={() => setReplyText(tmpl.text)}
+                style={{
+                  fontSize: 11,
+                  padding: '3px 8px',
+                  borderRadius: 6,
+                  background: 'var(--color-surface-2)',
+                  border: '1px solid var(--color-hairline)',
+                  color: 'var(--color-ink)',
+                  cursor: 'pointer',
+                }}
+              >
+                {tmpl.label}
+              </button>
+            ))}
+          </div>
           <div style={{ display: 'flex', gap: 7, alignItems: 'flex-end' }}>
             <Button aria-label="上传图片" icon={<PictureOutlined />} loading={uploading} disabled={uploading} onClick={() => fileInputRef.current?.click()} style={{ width: 38, height: 38, flexShrink: 0, borderRadius: 10 }} />
             <Button aria-label="选择表情" icon={<SmileOutlined />} onClick={() => { setShowEmoji(value => !value); setShowSticker(false) }} style={{ width: 38, height: 38, flexShrink: 0, borderRadius: 10, background: showEmoji ? 'var(--color-primary-bg)' : undefined, color: showEmoji ? 'var(--color-primary)' : undefined }} />
@@ -636,15 +681,17 @@ export function AdminMessagesClient() {
 
   return (
     <div style={{ paddingBottom: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
-        <div>
-          <Title level={4} style={{ margin: '0 0 3px', color: 'var(--color-ink)' }}>家长沟通</Title>
-          <Text style={{ color: 'var(--color-ink-muted)', fontSize: 13 }}>查看家长、学生与任课老师的完整留言往来</Text>
+      {!embedded && (
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+          <div>
+            <Title level={4} style={{ margin: '0 0 3px', color: 'var(--color-ink)' }}>家长沟通</Title>
+            <Text style={{ color: 'var(--color-ink-muted)', fontSize: 13 }}>查看家长、学生与任课老师的完整留言往来</Text>
+          </div>
+          <Tag style={{ margin: 2, border: 0, borderRadius: 999, background: 'var(--color-success-bg)', color: 'var(--color-success)', fontSize: 11, whiteSpace: 'nowrap' }}>
+            <span style={{ display: 'inline-block', width: 6, height: 6, marginRight: 6, borderRadius: '50%', background: 'var(--color-success)', verticalAlign: 'middle' }} />实时同步
+          </Tag>
         </div>
-        <Tag style={{ margin: 2, border: 0, borderRadius: 999, background: 'var(--color-success-bg)', color: 'var(--color-success)', fontSize: 11, whiteSpace: 'nowrap' }}>
-          <span style={{ display: 'inline-block', width: 6, height: 6, marginRight: 6, borderRadius: '50%', background: 'var(--color-success)', verticalAlign: 'middle' }} />实时同步
-        </Tag>
-      </div>
+      )}
 
       {statCards}
       {servicePanel}

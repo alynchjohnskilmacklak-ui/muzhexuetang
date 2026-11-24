@@ -17,3 +17,13 @@ export function resolveParentFeedbackReadAt(
     return !latest || readAt > latest ? readAt : latest
   }, null)
 }
+
+export function projectParentFeedbackReadState<T extends { parentReadAt?: Date | null }>(
+  feedback: T,
+  receipts: ParentFeedbackReadReceipt[],
+): T & { parentReadAt: Date | null } {
+  return {
+    ...feedback,
+    parentReadAt: resolveParentFeedbackReadAt(feedback.parentReadAt, receipts),
+  }
+}

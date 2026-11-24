@@ -1,59 +1,76 @@
-﻿'use client'
+'use client'
 
+import { useState } from 'react'
+import { AIClientOverview, type AIOverviewAction } from '@/components/AI/AIClientOverview'
 import { AIChatPanel } from '@/components/AI/AIChatPanel'
-import { MODEL_CONFIG } from '@/data/ai-prompts'
-import { Tag } from 'antd'
+import useSWR from 'swr'
+import {
+  BookOutlined,
+  CalendarOutlined,
+  CheckSquareOutlined,
+  CommentOutlined,
+  ExperimentOutlined,
+  FileTextOutlined,
+} from '@ant-design/icons'
+import { resolveTier, TIER_THEME, type TeacherTier } from '@/constants/teacher-tier'
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 const SUGGESTED = [
-  '帮我出3道初三物理欧姆定律中等难度练习题，附答案',
-  '分析这道题的考查点：二次函数f(x)=x²-4x+3的顶点坐标',
-  '初二语文说明文阅读理解答题技巧，附范例',
-  '河北中考2025年物理新考纲有哪些重点变化',
-  '设计一节关于光的折射的探究实验教学环节',
-  '帮我批改这篇作文并给出评分和修改建议',
+  '设计一节45分钟的初二物理“光的折射与透镜”探究课，写出教学目标、探究环节和课堂提问。',
+  '围绕一次函数与实际问题设计基础题、变式题各两道，并附详细解析与易错辨析。',
+  '针对九年级学生期中复习，整理一份“化学方程式配平与计算”思维导图提纲。',
+  '如何把“课堂注意力易分散、几何辅助线缺乏思路”写成专业且具鼓励性的家长学情反馈？',
+  '分析二次函数求解析式与最值综合题的常见误区，并梳理课堂变式讲解步骤。',
+  '制定一份中考英语读写综合复习计划，按考点模块和课时分配展开。',
+]
+
+const QUESTION_GROUPS = [
+  { title: '精准备课', questions: SUGGESTED.slice(0, 3) },
+  { title: '学情反馈', questions: SUGGESTED.slice(3, 6) },
+]
+
+const ACTIONS: AIOverviewAction[] = [
+  { href: '/teacher/schedule', icon: <CalendarOutlined />, label: '今日课表', description: '确认课堂时段与学员' },
+  { href: '/teacher/materials', icon: <BookOutlined />, label: '教学资料库', description: '调取讲义与备课课件' },
+  { href: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真实验室', description: '数理化实验课堂演示' },
+  { href: '/teacher/feedback', icon: <FileTextOutlined />, label: '课堂反馈', description: '生成评语草稿并核对' },
+  { href: '/teacher/messages', icon: <CommentOutlined />, label: '家校沟通', description: '跟进家长留言与叮嘱' },
+  { href: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', description: '课后即时出勤勾选' },
 ]
 
 export default function TeacherAIPage() {
+  const [quickAsk, setQuickAsk] = useState<string | null>(null)
+  const { data: dashData } = useSWR('/api/teacher/dashboard', fetcher)
+  const currentTier: TeacherTier = resolveTier(dashData?.teacher?.tierLevel)
+  const theme = TIER_THEME[currentTier]
+
   return (
-    <div>
-      <div style={{
-        borderRadius: 8,
-        marginBottom: 20,
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #0d1117 0%, #1a2332 50%, #1e3a5f 100%)',
-        boxShadow: '0 8px 32px rgba(0,0,0,.2)',
-        position: 'relative',
-      }}>
-        <div style={{ position: 'relative', padding: '24px 28px 20px' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 10 }}>
-            AI 教学助手
-          </div>
-          <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,.75)', lineHeight: 1.9, marginBottom: 16 }}>
-            专为牧哲学堂教师设计，支持<span style={{ color: '#E8784A', fontWeight: 600 }}>出题组卷、题目分析、教学设计、作文批改</span>，
-            熟悉河北省中考考纲（2025年新版），助力高效备课。
-          </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {MODEL_CONFIG.map((model) => (
-              <div key={model.id} style={{
-                padding: '6px 12px',
-                borderRadius: 8,
-                backgroundColor: 'rgba(255,255,255,.06)',
-                border: `1px solid ${model.color}40`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-              }}>
-                <span style={{ color: model.color, fontWeight: 800 }}>{model.icon}</span>
-                <span style={{ fontSize: 12, color: '#fff', fontWeight: 600 }}>{model.label}</span>
-                <Tag style={{ backgroundColor: model.badgeColor, color: '#fff', border: 'none', fontSize: 10, padding: '0 4px' }}>
-                  {model.badge}
-                </Tag>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <AIChatPanel aiRole="teacher" suggestedQuestions={SUGGESTED} />
+    <div
+      style={{
+        width: '100%',
+        maxWidth: '100%',
+        ['--role-accent' as any]: theme.primary,
+        ['--role-tint' as any]: `${theme.primary}12`,
+        ['--color-role-teacher' as any]: theme.primary,
+      }}
+    >
+      <AIClientOverview
+        role="teacher"
+        eyebrow={`AI 助教 · ${theme.roleTag || theme.name}`}
+        title="备课更聚焦，分层更精准，反馈更具温度"
+        description="从分层探究教案、考点题型推导到学生课后观察反馈，小牧助教为您整理思路、提供专业草稿建议。考勤与课后反馈请在对应系统页面核对后正式提交。"
+        capabilities={['启发式探究教案', '分层变式练习', '多维评语草稿', '考点易错剖析']}
+        actionsTitle="教师工作台直达"
+        actions={ACTIONS}
+        questionGroups={QUESTION_GROUPS}
+        onAskQuestion={setQuickAsk}
+      />
+      <AIChatPanel
+        aiRole="teacher"
+        quickAsk={quickAsk}
+        onQuickAskHandled={() => setQuickAsk(null)}
+      />
     </div>
   )
 }

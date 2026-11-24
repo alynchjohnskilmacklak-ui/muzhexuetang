@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"/>
@@ -76,11 +76,11 @@
     border-bottom:1px solid var(--border);
   }
   .header-inner{
-    max-width:1320px;margin:0 auto;padding:14px 24px;
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    max-width:1600px;margin:0 auto;padding:5px clamp(20px,4vw,54px);
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
   }
-  .header .logo{display:flex;align-items:center;gap:12px}
-  .header .logo img{height:38px;width:auto}
+  .header .logo{display:flex;align-items:center;flex:0 1 clamp(320px,34vw,520px);width:clamp(320px,34vw,520px);min-width:0}
+  .header .logo img{display:block;width:100%;height:auto;max-height:124px;object-fit:contain;object-position:left center;border-radius:0;box-shadow:none;background:transparent}
   .nav{display:flex;align-items:center;gap:22px;font-size:15px}
   .nav a{color:var(--ink-soft);transition:color .2s}
   .nav a:hover{color:var(--primary)}
@@ -615,6 +615,8 @@
   /* ===== 响应式 ===== */
   @media (max-width:860px){
     .facts{grid-template-columns:repeat(2,1fr)}
+    .header-inner{padding:6px 16px;gap:16px}
+    .header .logo{flex-basis:clamp(220px,40vw,330px);width:clamp(220px,40vw,330px)}
     .nav{gap:14px;font-size:14px}
     /* 手机端：隐藏文字链接，只留醒目的登录按钮 */
     .nav .link{display:none}
@@ -623,7 +625,8 @@
   }
   @media (max-width:520px){
     .facts{grid-template-columns:repeat(2,1fr)}
-    .header-inner{padding:12px 16px}
+    .header-inner{padding:6px 12px;gap:10px}
+    .header .logo{flex-basis:min(210px,calc(100vw - 160px));width:min(210px,calc(100vw - 160px))}
     .wrap{padding:0 16px}
     .motto{padding:52px 16px 56px}
     .motto-arts{letter-spacing:.1em}
@@ -827,7 +830,7 @@
 <header class="header">
   <div class="header-inner">
     <a class="logo" href="/" aria-label="牧哲学堂首页">
-      <img src="/images/logo.jpg" alt="牧哲学堂 MOREJOY"/>
+      <img src="/brand/export-logo.png" alt="牧哲学堂 MOREJOY"/>
     </a>
     <nav class="nav" aria-label="主导航">
       <a class="link" href="/">首页</a>
@@ -1156,79 +1159,79 @@ const SERVICES = [
   {
     id:"01", name:"寒暑假冲刺预备课", sub:"集中学习 · 系统复习 · 查漏补缺 · 专项训练",
     slides:[
-      {src:"/about-images/01-1.png", cap:"寒暑假冲刺预备课 · 招生说明"},
-      {src:"/about-images/01-2.png", cap:"寒暑假冲刺预备课 · 课程设置"},
-      {src:"/about-images/01-3.png", cap:"寒暑假冲刺预备课 · 年级与科目"},
-      {src:"/about-images/01-4.png", cap:"寒暑假冲刺预备课 · 服务亮点"},
-      {src:"/about-images/01-5.png", cap:"寒暑假冲刺预备课 · 校区服务"}
+      {src:"/about-images/01-1.webp", cap:"寒暑假冲刺预备课 · 招生说明"},
+      {src:"/about-images/01-2.webp", cap:"寒暑假冲刺预备课 · 课程设置"},
+      {src:"/about-images/01-3.webp", cap:"寒暑假冲刺预备课 · 年级与科目"},
+      {src:"/about-images/01-4.webp", cap:"寒暑假冲刺预备课 · 服务亮点"},
+      {src:"/about-images/01-5.webp", cap:"寒暑假冲刺预备课 · 校区服务"}
     ]
   },
   {
     id:"02", name:"一对一冲刺课程", sub:"课后即反馈 · 学情报告 · 学习留痕 · 量身定制",
     slides:[
-      {src:"/about-images/02-1.png", cap:"一对一冲刺课程 · 个性化教学"},
-      {src:"/about-images/02-2.png", cap:"一对一冲刺课程 · 课堂反馈"},
-      {src:"/about-images/02-3.png", cap:"一对一冲刺课程 · 学情报告"},
-      {src:"/about-images/02-4.png", cap:"一对一冲刺课程 · 学习留痕"},
-      {src:"/about-images/02-5.png", cap:"一对一冲刺课程 · 量身定制冲刺"}
+      {src:"/about-images/02-1.webp", cap:"一对一冲刺课程 · 个性化教学"},
+      {src:"/about-images/02-2.webp", cap:"一对一冲刺课程 · 课堂反馈"},
+      {src:"/about-images/02-3.webp", cap:"一对一冲刺课程 · 学情报告"},
+      {src:"/about-images/02-4.webp", cap:"一对一冲刺课程 · 学习留痕"},
+      {src:"/about-images/02-5.webp", cap:"一对一冲刺课程 · 量身定制冲刺"}
     ]
   },
   {
     id:"03", name:"晚间课业辅导营", sub:"当天问题当天讲 · 作业前后对比可查",
     slides:[
-      {src:"/about-images/03-1.png", cap:"晚间课业辅导营 · 晚间学习场景"},
-      {src:"/about-images/03-2.png", cap:"晚间课业辅导营 · 作业辅导"},
-      {src:"/about-images/03-3.png", cap:"晚间课业辅导营 · 答疑讲解"},
-      {src:"/about-images/03-4.png", cap:"晚间课业辅导营 · 作业前后对比"}
+      {src:"/about-images/03-1.webp", cap:"晚间课业辅导营 · 晚间学习场景"},
+      {src:"/about-images/03-2.webp", cap:"晚间课业辅导营 · 作业辅导"},
+      {src:"/about-images/03-3.webp", cap:"晚间课业辅导营 · 答疑讲解"},
+      {src:"/about-images/03-4.webp", cap:"晚间课业辅导营 · 作业前后对比"}
     ]
   },
   {
     id:"04", name:"周末先锋营", sub:"本周疑难点及时解决 · 下周新知识提前预备",
     slides:[
-      {src:"/about-images/04-1.png", cap:"周末先锋营 · 周末学习安排"},
-      {src:"/about-images/04-2.png", cap:"周末先锋营 · 疑难点专项讲解"},
-      {src:"/about-images/04-3.png", cap:"周末先锋营 · 查漏补缺"},
-      {src:"/about-images/04-4.png", cap:"周末先锋营 · 提前预备新知识"}
+      {src:"/about-images/04-1.webp", cap:"周末先锋营 · 周末学习安排"},
+      {src:"/about-images/04-2.webp", cap:"周末先锋营 · 疑难点专项讲解"},
+      {src:"/about-images/04-3.webp", cap:"周末先锋营 · 查漏补缺"},
+      {src:"/about-images/04-4.webp", cap:"周末先锋营 · 提前预备新知识"}
     ]
   },
   {
     id:"05", name:"中考升学规划", sub:"新乐首家志愿填报模拟平台 · 92 所高中信息",
     slides:[
-      {src:"/about-images/05-1.png", cap:"中考升学规划 · 志愿填报模拟平台"},
-      {src:"/about-images/05-2.png", cap:"中考升学规划 · 分数定位"},
-      {src:"/about-images/05-3.png", cap:"中考升学规划 · 志愿结构"},
-      {src:"/about-images/05-4.png", cap:"中考升学规划 · 冲稳保方案"}
+      {src:"/about-images/05-1.webp", cap:"中考升学规划 · 志愿填报模拟平台"},
+      {src:"/about-images/05-2.webp", cap:"中考升学规划 · 分数定位"},
+      {src:"/about-images/05-3.webp", cap:"中考升学规划 · 志愿结构"},
+      {src:"/about-images/05-4.webp", cap:"中考升学规划 · 冲稳保方案"}
     ]
   },
   {
     id:"06", name:"高考志愿咨询", sub:"人工手工填报 · 就业导向选专业 · 最少 3 人审核",
     slides:[
-      {src:"/about-images/06-1.png", cap:"高考志愿咨询 · 志愿填报指导"},
-      {src:"/about-images/06-2.png", cap:"高考志愿咨询 · 专业选择"},
-      {src:"/about-images/06-3.png", cap:"高考志愿咨询 · 就业研判"},
-      {src:"/about-images/06-4.png", cap:"高考志愿咨询 · 多人审核"},
-      {src:"/about-images/06-5.png", cap:"高考志愿咨询 · 交档讲解"}
+      {src:"/about-images/06-1.webp", cap:"高考志愿咨询 · 志愿填报指导"},
+      {src:"/about-images/06-2.webp", cap:"高考志愿咨询 · 专业选择"},
+      {src:"/about-images/06-3.webp", cap:"高考志愿咨询 · 就业研判"},
+      {src:"/about-images/06-4.webp", cap:"高考志愿咨询 · 多人审核"},
+      {src:"/about-images/06-5.webp", cap:"高考志愿咨询 · 交档讲解"}
     ]
   },
   {
     id:"07", name:"单招文化课辅导", sub:"单招在职教师授课 · 6 人小班 · 紧扣考纲",
     slides:[
-      {src:"/about-images/07-1.png", cap:"单招文化课辅导 · 单招专项"},
-      {src:"/about-images/07-2.png", cap:"单招文化课辅导 · 6 人小班"},
-      {src:"/about-images/07-3.png", cap:"单招文化课辅导 · 紧扣考纲"},
-      {src:"/about-images/07-4.png", cap:"单招文化课辅导 · 阶段测试"},
-      {src:"/about-images/07-5.png", cap:"单招文化课辅导 · 提分看得见"}
+      {src:"/about-images/07-1.webp", cap:"单招文化课辅导 · 单招专项"},
+      {src:"/about-images/07-2.webp", cap:"单招文化课辅导 · 6 人小班"},
+      {src:"/about-images/07-3.webp", cap:"单招文化课辅导 · 紧扣考纲"},
+      {src:"/about-images/07-4.webp", cap:"单招文化课辅导 · 阶段测试"},
+      {src:"/about-images/07-5.webp", cap:"单招文化课辅导 · 提分看得见"}
     ]
   },
   {
     id:"08", name:"考研公共课辅导", sub:"在读硕士高分授课 · 直系学长学姐资源对接",
     slides:[
-      {src:"/about-images/08-1.png", cap:"考研公共课辅导 · 高分师资"},
-      {src:"/about-images/08-2.png", cap:"考研公共课辅导 · 数学体系"},
-      {src:"/about-images/08-3.png", cap:"考研公共课辅导 · 英语方法"},
-      {src:"/about-images/08-4.png", cap:"考研公共课辅导 · 复习规划"},
-      {src:"/about-images/08-5.png", cap:"考研公共课辅导 · 学长学姐对接"},
-      {src:"/about-images/08-6.png", cap:"考研公共课辅导 · 服务对比"}
+      {src:"/about-images/08-1.webp", cap:"考研公共课辅导 · 高分师资"},
+      {src:"/about-images/08-2.webp", cap:"考研公共课辅导 · 数学体系"},
+      {src:"/about-images/08-3.webp", cap:"考研公共课辅导 · 英语方法"},
+      {src:"/about-images/08-4.webp", cap:"考研公共课辅导 · 复习规划"},
+      {src:"/about-images/08-5.webp", cap:"考研公共课辅导 · 学长学姐对接"},
+      {src:"/about-images/08-6.webp", cap:"考研公共课辅导 · 服务对比"}
     ]
   }
 ];

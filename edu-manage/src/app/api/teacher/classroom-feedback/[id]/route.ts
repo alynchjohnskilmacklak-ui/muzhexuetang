@@ -13,7 +13,7 @@ export const GET = apiHandler(async (
   const { teacher, prisma } = await requireCurrentTeacher()
 
   const feedback = await prisma.classroomFeedback.findFirst({
-    where: { id, teacherId: teacher.id },
+    where: { id, teacherId: teacher.id, deletedAt: null },
     include: {
       classLesson: {
         include: {

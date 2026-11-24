@@ -79,9 +79,9 @@ export async function runDataHealthCheck(db?: PrismaClient, division?: Division)
   // totalHours === 0 by design and accrue usedHours as students attend; withdrawn
   // enrollments may also have their remaining balance cleared intentionally.
   // The prepaid balance equation only applies to active prepaid enrollments.
-  // Hour values are rounded to one decimal in src/lib/hours.ts; compare at
-  // that precision to avoid binary floating-point noise.
-  const enrollmentMismatchCondition = Prisma.sql`e."deletedAt" IS NULL ${scope('s')} AND e."status" = 'ACTIVE' AND e."totalHours" > 0 AND ROUND(e."remainHours"::numeric, 1) != ROUND((e."totalHours" - e."usedHours")::numeric, 1)`
+  // Hour calculations retain 8 decimal places (minutes / 60). Compare at
+  // the same precision so old one-decimal drift is not hidden.
+  const enrollmentMismatchCondition = Prisma.sql`e."deletedAt" IS NULL ${scope('s')} AND e."status" = 'ACTIVE' AND e."totalHours" > 0 AND ROUND(e."remainHours"::numeric, 8) != ROUND((e."totalHours" - e."usedHours")::numeric, 8)`
   const [enrollmentMismatchCount, enrollmentMismatch] = await Promise.all([
     prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`SELECT COUNT(*)::bigint AS count FROM "Enrollment" e JOIN "Student" s ON e."studentId" = s."id" WHERE ${enrollmentMismatchCondition}`),
     prisma.$queryRaw<{ id: string }[]>(Prisma.sql`SELECT e."id" FROM "Enrollment" e JOIN "Student" s ON e."studentId" = s."id" WHERE ${enrollmentMismatchCondition} LIMIT 50`),
@@ -92,8 +92,101 @@ export async function runDataHealthCheck(db?: PrismaClient, division?: Division)
       label: '课时账目不平',
       count: enrollmentMismatchTotal,
       severity: 'high',
-      description: '预付课时报名按一位小数精度比较后，remainHours 与 totalHours - usedHours 仍不一致',
+      description: '预付课时报名按 8 位小数精度比较后，remainHours 与 totalHours - usedHours 不一致',
       sampleIds: enrollmentMismatch.map((r) => r.id),
+    })
+  }
+
+  // Surface legacy one-decimal charges and leave-policy drift without applying
+  // a bulk correction. Partial deductions may be legitimate when a balance
+  // was exhausted, so an administrator must review each affected attendance.
+  const attendanceHoursMismatch = await sample<{ id: string; cnt: bigint }>(Prisma.sql`
+    WITH attendance_expected AS (
+      SELECT a."id", a."hoursDeducted", a."status",
+             COALESCE(t."kind"::text, 'REGULAR') AS "termKind",
+             CASE
+               WHEN g."intensiveMode" = 'INTENSIVE' OR c."type" = 'ONE_ON_ONE'
+                 THEN COALESCE(NULLIF(a."actualMinutes", 0), cl."plannedMinutes", g."lessonMinutes", 40)
+               ELSE COALESCE(cl."plannedMinutes", g."lessonMinutes", 40)
+             END AS "expectedMinutes"
+      FROM "Attendance" a
+      JOIN "Student" s ON s."id" = a."studentId"
+      JOIN "ClassLesson" cl ON cl."id" = a."lessonId"
+      JOIN "ClassGroup" g ON g."id" = cl."groupId"
+      JOIN "Course" c ON c."id" = g."courseId"
+      LEFT JOIN "AcademicTerm" t ON t."id" = g."termId"
+      WHERE a."deletedAt" IS NULL AND a."lessonId" IS NOT NULL ${scope('s')}
+    ), expected AS (
+      SELECT "id", "hoursDeducted",
+             CASE
+               WHEN "status" = 'PRESENT' THEN ROUND("expectedMinutes"::numeric / 60, 8)
+               WHEN "status" IN ('ABSENT', 'LEAVE') AND "termKind" <> 'WEEKEND'
+                 THEN ROUND("expectedMinutes"::numeric / 60, 8)
+               ELSE 0
+             END AS "expectedHours"
+      FROM attendance_expected
+    )
+    SELECT "id", 1 AS cnt
+    FROM expected
+    WHERE ROUND(COALESCE("hoursDeducted", 0)::numeric, 8) <> ROUND("expectedHours"::numeric, 8)
+  `)
+  if (attendanceHoursMismatch.length > 0) {
+    issues.push({
+      label: '考勤课时与批次规则不一致',
+      count: total(attendanceHoursMismatch),
+      severity: 'high',
+      description: '考勤已记课时与当前批次计费规则按 8 位精度计算的目标不一致。余额不足产生的部分扣减可能是合理情况，请逐条核对课时流水后再修正。',
+      sampleIds: attendanceHoursMismatch.map((row) => row.id),
+    })
+  }
+
+  const approvedLeaveWithPresentAttendance = await sample<{ id: string; cnt: bigint }>(Prisma.sql`
+    SELECT lr."id", COUNT(DISTINCT a."id")::int AS cnt
+    FROM "LeaveRequest" lr
+    JOIN "Student" s ON s."id" = lr."studentId"
+    JOIN "Attendance" a ON a."studentId" = lr."studentId" AND a."status" = 'PRESENT' AND a."deletedAt" IS NULL
+    JOIN "ClassLesson" cl ON cl."id" = a."lessonId"
+    WHERE lr."status" = 'approved' AND lr."deletedAt" IS NULL
+      AND (
+        (lr."lessonId" IS NOT NULL AND lr."lessonId" = cl."id")
+        OR (
+          lr."lessonId" IS NULL
+          AND (lr."leaveDate" + INTERVAL '8 hours')::date = (cl."lessonDate" + INTERVAL '8 hours')::date
+        )
+      )
+      ${scope('s')}
+    GROUP BY lr."id"
+  `)
+  if (approvedLeaveWithPresentAttendance.length > 0) {
+    issues.push({
+      label: '已批准请假仍记为到课',
+      count: total(approvedLeaveWithPresentAttendance),
+      severity: 'high',
+      description: '已批准的请假申请仍关联到课考勤，需检查批次扣课政策、课时流水和是否应修正考勤状态。',
+      sampleIds: approvedLeaveWithPresentAttendance.map((row) => row.id),
+    })
+  }
+
+  // Student balances are a compatibility snapshot of active enrollments.
+  // Keep this separate from the enrollment equation: the two can diverge even
+  // when every individual enrollment is internally consistent.
+  const snapshotMismatch = await sample<{ id: string; cnt: bigint }>(Prisma.sql`
+    SELECT s."id", 1 AS cnt
+    FROM "Student" s
+    LEFT JOIN "Enrollment" e
+      ON e."studentId" = s."id" AND e."status" = 'ACTIVE' AND e."deletedAt" IS NULL
+    WHERE s."deletedAt" IS NULL ${scope('s')}
+    GROUP BY s."id", s."remainHours", s."totalHours"
+    HAVING ROUND(s."remainHours"::numeric, 8) != ROUND(COALESCE(SUM(e."remainHours"), 0)::numeric, 8)
+       OR ROUND(s."totalHours"::numeric, 8) != ROUND(COALESCE(SUM(e."totalHours"), 0)::numeric, 8)
+  `)
+  if (snapshotMismatch.length > 0) {
+    issues.push({
+      label: '学员课时快照与活跃报名不一致',
+      count: total(snapshotMismatch),
+      severity: 'high',
+      description: '学员兼容快照与有效报名课时汇总不一致，需按报名账本核对后修正快照。',
+      sampleIds: snapshotMismatch.map((row) => row.id),
     })
   }
 

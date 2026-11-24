@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { calculateAttendanceDeductHours, termKindToBillingMode } from '@/lib/attendance-hours'
 import { createLessonPayInTransaction } from '@/lib/teacher-salary'
+import { getAttendanceSubmissionConflict } from '@/lib/attendance-submission-conflict'
 import { postAttendanceHours } from '@/lib/attendance-hour-posting'
 import { parseAttendanceRecordStatus } from '@/lib/attendance-status'
 import { resolveIntensiveActualMinutes } from '@/lib/intensive-class'
@@ -11,8 +12,10 @@ import { createIntensiveLessonPayInTransaction } from '@/lib/intensive-settlemen
 import { isClassLessonInActiveTerm } from '@/lib/admin-term-scope'
 import { syncAutomaticMealAttendance } from '@/lib/meal-attendance-sync'
 import { isFirstTeachingPeriod, normalizeSchedulePeriods } from '@/lib/schedule-periods'
-import { hasAttendingStudent } from '@/lib/attendance-submission'
+import { hasAttendingStudent, validateAttendanceSubmissionRecords } from '@/lib/attendance-submission'
+import { attendanceEligibleLessonWhere, visibleStudentWhere } from '@/lib/business-visibility'
 import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { lessonStartAt } from '@/lib/teacher-intensive-scheduling'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,8 +26,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
   const prisma = await getRequestPrisma()
 
-  const { lessonId, records, mealStudentIds } = await req.json() as {
+  const { lessonId, teacherId: requestedTeacherId, records, mealStudentIds } = await req.json() as {
     lessonId?: string
+    teacherId?: string
     records?: { studentId?: string; status?: string; actualMinutes?: number }[]
     mealStudentIds?: string[]
   }
@@ -32,12 +36,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!lessonId || !Array.isArray(records) || records.length === 0) {
     return NextResponse.json({ error: '缺少 lessonId 或考勤记录' }, { status: 400 })
   }
-  if (!await isClassLessonInActiveTerm(prisma, lessonId)) {
+  if (!await isClassLessonInActiveTerm(prisma, lessonId, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能补交或修改考勤' }, { status: 409 })
   }
 
   const lesson = await prisma.classLesson.findFirst({
-    where: { id: lessonId, status: { not: 'CANCELLED' } },
+    where: { id: lessonId, ...attendanceEligibleLessonWhere },
     include: {
       group: {
         include: {
@@ -46,20 +50,33 @@ export const POST = apiHandler(async (req: NextRequest) => {
           teacher: { select: { id: true, name: true } },
           teacherAssignments: { select: { teacherId: true, subject: true } },
           enrollments: {
-            where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } },
+            where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere },
           },
         },
       },
       lessonStudents: { select: { studentId: true } },
+      attendances: { select: { studentId: true, hoursDeducted: true } },
       teacher: { select: { id: true, name: true } },
     },
   })
 
   if (!lesson) {
-    return NextResponse.json({ error: '课次不存在或已取消' }, { status: 404 })
+    return NextResponse.json({ error: '课次不存在、已取消、已调课或不在当前可操作范围' }, { status: 404 })
+  }
+  if (
+    lesson.attendanceSubmittedAt
+    || lesson.status === 'COMPLETED'
+    || lesson.hoursDeductedAt
+    || lesson.attendances.some((attendance) => Number(attendance.hoursDeducted || 0) > 0)
+  ) {
+    return NextResponse.json(
+      { error: '本节课考勤已经提交或结算，不能整课重提；请使用管理员的单人考勤更正流程' },
+      { status: 409 },
+    )
   }
 
-  const teacherId = lesson.teacherId || lesson.group.teacherId
+  const selectedTeacherAssignment = lesson.group.teacherAssignments.find((assignment) => assignment.teacherId === requestedTeacherId)
+  const teacherId = lesson.teacherId || selectedTeacherAssignment?.teacherId || lesson.group.teacherId
   if (Array.isArray(mealStudentIds)) {
     const scheduleConfig = await prisma.systemConfig.findUnique({
       where: { id: 'singleton' },
@@ -74,9 +91,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
   }
 
-  const [lessonHour, lessonMinute = 0] = (lesson.startTime || '00:00').split(':').map(Number)
-  const lessonStart = new Date(lesson.lessonDate)
-  lessonStart.setHours(lessonHour, lessonMinute, 0, 0)
+  const lessonStart = lessonStartAt(lesson.lessonDate, lesson.startTime || '00:00')
   const earliestAllowed = new Date(lessonStart.getTime() - 30 * 60 * 1000)
   if (new Date() < earliestAllowed) {
     return NextResponse.json(
@@ -101,13 +116,21 @@ export const POST = apiHandler(async (req: NextRequest) => {
     lessonSubject,
     lesson.lessonDate,
   ))
-  const enrollmentByStudentId = new Map(lesson.group.enrollments.map((enrollment) => [enrollment.studentId, enrollment]))
-  const validRecords = records.filter((record) => typeof record.studentId === 'string'
-    && enrollmentByStudentId.has(record.studentId)
-    && rosterStudentIds.has(record.studentId))
-  if (validRecords.length === 0) {
-    return NextResponse.json({ error: '没有本节学科的有效考勤记录，请先核对学员报名学科与课次名单' }, { status: 400 })
+  const validation = validateAttendanceSubmissionRecords(records as unknown[], rosterStudentIds)
+  if (!validation.ok) {
+    const errors = {
+      EMPTY: { status: 400, error: '没有本节学科的有效考勤记录，请先核对学员报名学科与课次名单' },
+      INVALID_RECORD: { status: 400, error: '考勤名单数据无效，请刷新页面后重试' },
+      DUPLICATE_STUDENT: { status: 400, error: '考勤名单中有重复学员，请刷新页面后重试' },
+      OUTSIDE_ROSTER: { status: 409, error: '本节课报名名单已更新，请刷新页面后重新提交考勤' },
+      MISSING_ROSTER_STUDENT: { status: 409, error: '考勤名单不完整，本次考勤未保存，请刷新完整名单后重试' },
+      INVALID_STATUS: { status: 400, error: '存在无效考勤状态，请刷新页面后重试' },
+      INVALID_MINUTES: { status: 400, error: '实际上课时长无效，请检查后重试' },
+    } as const
+    const error = errors[validation.reason]
+    return NextResponse.json({ error: error.error }, { status: error.status })
   }
+  const validRecords = validation.records
   if (!hasAttendingStudent(validRecords)) {
     return NextResponse.json({ error: '本次课没有实际出勤学员，不能提交已上课考勤；请取消或调整课次' }, { status: 400 })
   }
@@ -117,6 +140,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       where: { lessonId, hoursDeducted: { gt: 0 } },
     }) > 0
   )
+  const enrollmentByStudentId = new Map(lesson.group.enrollments.map((enrollment) => [enrollment.studentId, enrollment]))
   let processedCount = 0
   let presentCount = 0
   let deductedCount = 0
@@ -131,6 +155,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   try {
     await prisma.$transaction(async (tx) => {
+    const submissionClaim = await tx.classLesson.updateMany({
+      where: {
+        id: lessonId,
+        deletedAt: null,
+        status: { notIn: ['COMPLETED', 'CANCELLED', 'POSTPONED'] },
+        attendanceSubmittedAt: null,
+        hoursDeductedAt: null,
+      },
+      data: { attendanceSubmittedAt: now },
+    })
+    if (submissionClaim.count !== 1) throw new Error('ATTENDANCE_SUBMISSION_LOCKED')
+
     if (isIntensive) {
       const claimed = await tx.classLesson.updateMany({
         where: { id: lessonId, settlementStatus: 'UNSETTLED' },
@@ -142,7 +178,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     for (const record of validRecords) {
       const studentId = typeof record.studentId === 'string' ? record.studentId : ''
       const enrollment = enrollmentByStudentId.get(studentId)
-      if (!enrollment) continue
+      if (!enrollment) throw new Error('ATTENDANCE_ROSTER_CHANGED')
 
       const status = parseAttendanceRecordStatus(record.status)
       if (!status) {
@@ -159,7 +195,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             studentId,
           },
         },
-        update: { status, enrollmentId: enrollment.id, actualMinutes },
+        update: { status, enrollmentId: enrollment.id, actualMinutes, deletedAt: null, deletionBatchId: null },
         create: { lessonId, studentId, enrollmentId: enrollment.id, status, actualMinutes },
       })
 
@@ -272,8 +308,16 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
     })
   } catch (error) {
+    const submissionConflict = getAttendanceSubmissionConflict(error)
+    if (submissionConflict) return NextResponse.json(submissionConflict.body, { status: submissionConflict.status })
+    if (error instanceof Error && error.message === 'ATTENDANCE_SUBMISSION_LOCKED') {
+      return NextResponse.json({ error: '本节课考勤正在提交或已提交，请刷新并确认最新状态' }, { status: 409 })
+    }
     if (error instanceof Error && error.message === 'NO_ATTENDING_STUDENTS') {
       return NextResponse.json({ error: '本次课没有实际出勤学员，不能提交已上课考勤；请取消或调整课次' }, { status: 400 })
+    }
+    if (error instanceof Error && error.message === 'ATTENDANCE_ROSTER_CHANGED') {
+      return NextResponse.json({ error: '报名名单已变化，本次考勤未保存，请刷新名单后重试' }, { status: 409 })
     }
     if (error instanceof Error && error.message === 'INTENSIVE_SETTLEMENT_LOCKED') {
       return NextResponse.json({ error: '该突击班课次已被结算，请刷新后通过结算调整流程修改' }, { status: 409 })

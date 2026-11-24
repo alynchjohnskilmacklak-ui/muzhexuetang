@@ -1,0 +1,1274 @@
+[
+  {
+    "word": "bring about",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "phr. 引起；造成。bring sth about 常表示使变化或事件发生。",
+    "collocations": "bring about change; bring about reform; bring about a result",
+    "commonMistake": "bring about 后接所引起的结果；过去式和过去分词均为 brought。",
+    "example": {
+      "english": "The new railway brought about a major change in village life.",
+      "chinese": "新铁路给村庄生活带来了重大变化。"
+    },
+    "application": {
+      "prompt": "The new road has ___ a big change in how people travel. A. brought about B. brought up",
+      "solution": "A。解析：A 正确；bring about 表示“引起”，本句指新路改变了出行方式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bring about",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bring-about"
+      }
+    ]
+  },
+  {
+    "word": "rough",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 粗糙的；崎岖的；艰难的。比较级 rougher，最高级 roughest。",
+    "collocations": "a rough road; rough ground; rough weather",
+    "commonMistake": "rough 描写路面崎岖或表面不平；指人粗鲁时含义不同，不能一概译作“困难”。",
+    "example": {
+      "english": "The bus slowed down on the rough road.",
+      "chinese": "公共汽车在崎岖的路上减慢了速度。"
+    },
+    "application": {
+      "prompt": "Which sentence uses rough to describe a road? A. The road was roughly after the storm. B. We drove slowly along a rough road.",
+      "solution": "B。解析：B 正确；rough 是形容词，可描述崎岖的 road；roughly 是副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rough",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rough"
+      }
+    ]
+  },
+  {
+    "word": "be covered with",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "phr. 被……覆盖；表面有……。结构为 be covered with + 覆盖物。",
+    "collocations": "be covered with snow; be covered with dust; a field covered with grass",
+    "commonMistake": "主动形式是 cover sth with sth；被动句用 be covered with，主语是被覆盖物。",
+    "example": {
+      "english": "After the snowfall, the roofs were covered with white snow.",
+      "chinese": "下雪后，屋顶上覆盖着白雪。"
+    },
+    "application": {
+      "prompt": "After the storm, the garden was ___ fallen leaves. A. covered with B. covered from",
+      "solution": "A。解析：A 正确；被落叶覆盖用 be covered with，with 后接覆盖物。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: be covered with",
+        "url": "https://dictionary.cambridge.org/dictionary/english/covered-with"
+      }
+    ]
+  },
+  {
+    "word": "sandstorm",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 沙尘暴。可数名词，复数 sandstorms。",
+    "collocations": "a severe sandstorm; a sandstorm warning; during a sandstorm",
+    "commonMistake": "sandstorm 指强风卷起沙尘的天气；不要与普通的 rainstorm 混用。",
+    "example": {
+      "english": "The sandstorm forced the drivers to stop beside the road.",
+      "chinese": "沙尘暴迫使司机把车停在路边。"
+    },
+    "application": {
+      "prompt": "A wall of dust moved across the town, and the radio warned of a ___. A. sandstorm B. sunrise",
+      "solution": "A。解析：A 正确；大量沙尘席卷城镇说明有 sandstorm（沙尘暴）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sandstorm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sandstorm"
+      }
+    ]
+  },
+  {
+    "word": "shortage",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 短缺；不足。常用 a shortage of + 名词。",
+    "collocations": "a water shortage; a shortage of food; face a shortage",
+    "commonMistake": "shortage 是可数名词，常说 a shortage of sth；不要漏掉 a 或 of。",
+    "example": {
+      "english": "The long dry season caused a shortage of clean water.",
+      "chinese": "漫长的旱季造成了清洁水短缺。"
+    },
+    "application": {
+      "prompt": "The village has ___ of drinking water after months without rain. A. short B. a shortage",
+      "solution": "B。解析：B 正确；名词短语 a shortage of 表示“……短缺”，句中缺名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shortage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shortage"
+      }
+    ]
+  },
+  {
+    "word": "farmland",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 耕地；农田，通常作不可数名词。",
+    "collocations": "protect farmland; farmland near a river; fertile farmland",
+    "commonMistake": "farmland 指用于耕作的土地，通常不加复数词尾；表示一块地可说 a piece of farmland。",
+    "example": {
+      "english": "The new highway was planned to avoid taking too much farmland.",
+      "chinese": "新公路的规划尽量避免占用过多耕地。"
+    },
+    "application": {
+      "prompt": "The farmers grow rice on the fertile ___. A. farmland B. factory",
+      "solution": "A。解析：A 正确；种植水稻的肥沃土地是 farmland（耕地）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: farmland",
+        "url": "https://dictionary.cambridge.org/dictionary/english/farmland"
+      }
+    ]
+  },
+  {
+    "word": "lack",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 缺乏；v. 缺少。名词常接 of，动词 lack 可直接接宾语。",
+    "collocations": "a lack of sleep; lack confidence; lack experience",
+    "commonMistake": "a lack of 后接名词；作动词时说 lack sth，不说 lack of sth。",
+    "example": {
+      "english": "A lack of buses made the morning journey difficult.",
+      "chinese": "公交车数量不足让早晨的出行变得困难。"
+    },
+    "application": {
+      "prompt": "The plan failed because of ___ clean water. A. lacked B. a lack of",
+      "solution": "B。解析：B 正确；because of 后接名词短语 a lack of，表示“缺乏”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lack",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lack"
+      }
+    ]
+  },
+  {
+    "word": "bush",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 灌木；矮树。可数名词，复数 bushes。",
+    "collocations": "a rose bush; a thick bush; hide behind a bush",
+    "commonMistake": "以 sh 结尾的 bush 变复数加 -es，拼作 bushes。",
+    "example": {
+      "english": "A small bird built its nest in the bush by the fence.",
+      "chinese": "一只小鸟在篱笆旁的灌木丛里筑了巢。"
+    },
+    "application": {
+      "prompt": "Several ___ grow along the path and provide shade for insects. A. bushs B. bushes",
+      "solution": "B。解析：B 正确；bush 的复数形式是 bushes，本句 several 后需复数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bush",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bush"
+      }
+    ]
+  },
+  {
+    "word": "root",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 根；根部；根源。可数，复数 roots。",
+    "collocations": "tree roots; root vegetables; the root of a problem",
+    "commonMistake": "root 可指植物的根，也可比喻问题的根源；不要与 route（路线）混淆。",
+    "example": {
+      "english": "The tree roots held the soil in place during the heavy rain.",
+      "chinese": "暴雨期间，树根把土壤固定住了。"
+    },
+    "application": {
+      "prompt": "The gardener carefully covered the young plant's ___ with soil. A. roots B. routes",
+      "solution": "A。解析：A 正确；埋进土里的植物部分是 roots（根），routes 表示路线。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: root",
+        "url": "https://dictionary.cambridge.org/dictionary/english/root"
+      }
+    ]
+  },
+  {
+    "word": "soil",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 土壤；泥土，表示土地材料时通常不可数。",
+    "collocations": "rich soil; dry soil; improve the soil",
+    "commonMistake": "soil 通常不说 a soil 或 soils；形容“脏的”要用 dirty，而 soil 是名词。",
+    "example": {
+      "english": "These vegetables grow well in the rich soil near the river.",
+      "chinese": "这些蔬菜在河边肥沃的土壤里长得很好。"
+    },
+    "application": {
+      "prompt": "The seeds need warm, wet ___ before they begin to grow. A. soils B. soil",
+      "solution": "B。解析：B 正确；此处 soil 指土壤这一材料，通常作不可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: soil",
+        "url": "https://dictionary.cambridge.org/dictionary/english/soil"
+      }
+    ]
+  },
+  {
+    "word": "sandy",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 含沙的；铺满沙子的。由 sand 加 -y 构成。",
+    "collocations": "sandy soil; a sandy beach; a sandy path",
+    "commonMistake": "sand 是名词“沙子”，sandy 是形容词；不要把 sandy 当作名词来用。",
+    "example": {
+      "english": "The sandy path was difficult to ride a bicycle on.",
+      "chinese": "那条沙土路骑自行车很难走。"
+    },
+    "application": {
+      "prompt": "The wind left the garden with ___ ground that drained water quickly. A. sandy B. sand",
+      "solution": "A。解析：A 正确；修饰 ground 要用形容词 sandy，表示“含沙的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sandy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sandy"
+      }
+    ]
+  },
+  {
+    "word": "government",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 政府。可数名词；表示一个国家的政府时常用 the government。",
+    "collocations": "the local government; government support; form a government",
+    "commonMistake": "government 可作集体名词，作主语时常按整体用单数谓语；不要漏写词尾 -ment。",
+    "example": {
+      "english": "The government built wells to help villages during the drought.",
+      "chinese": "旱灾期间，政府打井帮助各村庄。"
+    },
+    "application": {
+      "prompt": "The local ___ has promised to repair the bridge this year. A. govern B. government",
+      "solution": "B。解析：B 正确；the local 后需名词 government，句意是地方政府承诺修桥。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: government",
+        "url": "https://dictionary.cambridge.org/dictionary/english/government"
+      }
+    ]
+  },
+  {
+    "word": "support",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 支持；v. 支持；供养。名词前可用形容词，动词直接接宾语。",
+    "collocations": "support a plan; support local farmers; family support",
+    "commonMistake": "support 作动词时后直接接支持对象，不用 support to sb；作名词时可说 support for。",
+    "example": {
+      "english": "Many families support the market by buying local products.",
+      "chinese": "许多家庭通过购买本地产品来支持这个市场。"
+    },
+    "application": {
+      "prompt": "Which sentence uses support correctly? A. Local families support the school garden. B. Local families support to the school garden.",
+      "solution": "A。解析：A 正确；support 作动词时直接接宾语 the school garden，不加 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: support",
+        "url": "https://dictionary.cambridge.org/dictionary/english/support"
+      }
+    ]
+  },
+  {
+    "word": "corn",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 玉米；谷物。表示玉米作物或食物时通常不可数。",
+    "collocations": "grow corn; a field of corn; corn soup",
+    "commonMistake": "corn 作食物或作物时通常不加 -s；“一根玉米”可说 an ear of corn。",
+    "example": {
+      "english": "The children ate sweet corn after helping in the fields.",
+      "chinese": "孩子们在田里帮忙后吃了甜玉米。"
+    },
+    "application": {
+      "prompt": "The farmer planted ___ on the dry land after the rain returned. A. corns B. corn",
+      "solution": "B。解析：B 正确；此处 corn 指玉米作物，通常用不可数形式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: corn",
+        "url": "https://dictionary.cambridge.org/dictionary/english/corn"
+      }
+    ]
+  },
+  {
+    "word": "high-tech",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 高科技的；技术含量高的。作名词前定语，通常带连字符。",
+    "collocations": "high-tech equipment; high-tech farming; a high-tech device",
+    "commonMistake": "high-tech 是形容词，不能在名词前改成 high-technologically。",
+    "example": {
+      "english": "The high-tech greenhouse checks the temperature every minute.",
+      "chinese": "这座高科技温室每分钟检测一次温度。"
+    },
+    "application": {
+      "prompt": "The farm uses ___ sensors to water each plant only when needed. A. high-tech B. high-technology",
+      "solution": "A。解析：A 正确；修饰名词 sensors 应用形容词 high-tech，意为“高科技的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: high-tech",
+        "url": "https://dictionary.cambridge.org/dictionary/english/high-tech"
+      }
+    ]
+  },
+  {
+    "word": "greenhouse",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 温室；暖房。可数名词，复数 greenhouses。",
+    "collocations": "a glass greenhouse; grow tomatoes in a greenhouse; greenhouse effect",
+    "commonMistake": "greenhouse 是一个合成词，指栽培植物的玻璃或塑料温室；不等于普通的 green house。",
+    "example": {
+      "english": "We grew tomatoes in the greenhouse throughout the winter.",
+      "chinese": "整个冬天我们都在温室里种番茄。"
+    },
+    "application": {
+      "prompt": "The seedlings stayed warm inside the glass ___. A. greenhouse B. highway",
+      "solution": "A。解析：A 正确；玻璃房内培育幼苗的是 greenhouse（温室）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: greenhouse",
+        "url": "https://dictionary.cambridge.org/dictionary/english/greenhouse"
+      }
+    ]
+  },
+  {
+    "word": "highway",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 公路；干道。可数名词，复数 highways。",
+    "collocations": "a busy highway; cross the highway; highway traffic",
+    "commonMistake": "highway 是供车辆通行的公路；铁路交通用 railway，不要混淆。",
+    "example": {
+      "english": "A new highway connects the village with the capital.",
+      "chinese": "一条新公路把这个村庄和首都连接起来。"
+    },
+    "application": {
+      "prompt": "The bus left the ___ and turned onto a road leading to the village. A. railway B. highway",
+      "solution": "B。解析：B 正确；公交车驶离供汽车通行的公路 highway，railway 是铁路。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: highway",
+        "url": "https://dictionary.cambridge.org/dictionary/english/highway"
+      }
+    ]
+  },
+  {
+    "word": "railway",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 铁路；铁道。可数名词，复数 railways。",
+    "collocations": "a railway line; railway station; travel by railway",
+    "commonMistake": "railway 指铁路系统或线路；说“乘火车”常用 by train，而不是 by railway train。",
+    "example": {
+      "english": "The railway made it easier for farmers to send vegetables to the port.",
+      "chinese": "铁路让农民更方便地把蔬菜运到港口。"
+    },
+    "application": {
+      "prompt": "A passenger train travels along the ___ between the two cities. A. railway B. highway",
+      "solution": "A。解析：A 正确；列车行驶在 railway（铁路）上，而不是 highway（公路）上。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: railway",
+        "url": "https://dictionary.cambridge.org/dictionary/english/railway"
+      }
+    ]
+  },
+  {
+    "word": "attraction",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 吸引人的事物；吸引力。可数名词；动词为 attract，形容词 attractive。",
+    "collocations": "a tourist attraction; a popular attraction; tourist attractions",
+    "commonMistake": "attraction 是名词；句中作谓语要用 attract，不能用 attraction 作动词。",
+    "example": {
+      "english": "The old railway station became a popular attraction for visitors.",
+      "chinese": "这座老火车站成了游客喜爱的景点。"
+    },
+    "application": {
+      "prompt": "The new science museum is the town's biggest tourist ___. A. attractive B. attraction",
+      "solution": "B。解析：B 正确；biggest 后此处需要名词 attraction，指旅游景点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: attraction",
+        "url": "https://dictionary.cambridge.org/dictionary/english/attraction"
+      }
+    ]
+  },
+  {
+    "word": "product",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 产品；制品。可数名词，复数 products；动词 produce 表示生产。",
+    "collocations": "a dairy product; a new product; product quality",
+    "commonMistake": "product 是可数名词；produce 可作动词“生产”，也可作农产品总称。",
+    "example": {
+      "english": "The company tested its new product before selling it online.",
+      "chinese": "公司在网上销售新产品前先进行了测试。"
+    },
+    "application": {
+      "prompt": "The factory introduced a water-saving ___ for small farms. A. product B. produce",
+      "solution": "A。解析：A 正确；a 后接可数名词 product，指新推出的产品。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: product",
+        "url": "https://dictionary.cambridge.org/dictionary/english/product"
+      }
+    ]
+  },
+  {
+    "word": "greatly",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adv. 大大地；非常。常修饰动词或过去分词。",
+    "collocations": "greatly improve; greatly reduce; be greatly affected",
+    "commonMistake": "greatly 是副词，修饰动词；great 是形容词，不能直接修饰 increased。",
+    "example": {
+      "english": "Better transport has greatly improved access to the city market.",
+      "chinese": "交通改善大大便利了人们前往城市市场。"
+    },
+    "application": {
+      "prompt": "Since the railway opened, travel time has ___ decreased. A. great B. greatly",
+      "solution": "B。解析：B 正确；greatly 作副词修饰 decreased，表示“显著减少”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: greatly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/greatly"
+      }
+    ]
+  },
+  {
+    "word": "socialist",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 社会主义的；n. 社会主义者。作形容词时置于名词前。",
+    "collocations": "a socialist society; socialist ideas; a socialist",
+    "commonMistake": "socialist 以 -ist 结尾，可作形容词或指人；socialism 才是“社会主义”这一制度或思想。",
+    "example": {
+      "english": "The article describes how a socialist community shared public services.",
+      "chinese": "这篇文章介绍了一个社会主义社区如何共享公共服务。"
+    },
+    "application": {
+      "prompt": "The textbook compares ___ ideas with other political systems. A. socialist B. socialism",
+      "solution": "A。解析：A 正确；修饰名词 ideas 需要形容词 socialist，而 socialism 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: socialist",
+        "url": "https://dictionary.cambridge.org/dictionary/english/socialist"
+      }
+    ]
+  },
+  {
+    "word": "e-payment",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 电子支付；电子付款。可数名词，复数 e-payments。",
+    "collocations": "make an e-payment; e-payment service; accept e-payments",
+    "commonMistake": "e-payment 是名词，前面可用 an；表示支付方式时不要把 payment 写成动词。",
+    "example": {
+      "english": "The shop accepts e-payment, so visitors do not need to carry cash.",
+      "chinese": "这家商店接受电子支付，因此游客不必带现金。"
+    },
+    "application": {
+      "prompt": "I made ___ for the bus ticket with my phone. A. e-paying B. an e-payment",
+      "solution": "B。解析：B 正确；made 后需名词宾语，an e-payment 指一次电子付款。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: e-payment",
+        "url": "https://dictionary.cambridge.org/dictionary/english/payment"
+      }
+    ]
+  },
+  {
+    "word": "housing",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 住房；住宅供给，通常不可数。",
+    "collocations": "public housing; housing costs; a housing project",
+    "commonMistake": "housing 指住房或住房供给，通常不可数；一套房可说 a house 或 a flat。",
+    "example": {
+      "english": "The town is building more housing near the railway station.",
+      "chinese": "镇上正在铁路站附近建造更多住房。"
+    },
+    "application": {
+      "prompt": "The council plans to provide affordable ___ for young families. A. housing B. houses",
+      "solution": "A。解析：A 正确；此处谈可负担的住房供给，用不可数名词 housing。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: housing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/housing"
+      }
+    ]
+  },
+  {
+    "word": "digital",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 数字的；数码的。名词 digit 指数字，副词 digitally。",
+    "collocations": "digital payment; digital tools; a digital record",
+    "commonMistake": "digital 作形容词修饰名词；digit 是数字符号，不能直接说 digit payment。",
+    "example": {
+      "english": "Many villagers now use digital services to pay their bills.",
+      "chinese": "如今许多村民使用数字服务缴费。"
+    },
+    "application": {
+      "prompt": "The office keeps a ___ copy of every paper receipt. A. digitally B. digital",
+      "solution": "B。解析：B 正确；修饰名词 copy 要用形容词 digital。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: digital",
+        "url": "https://dictionary.cambridge.org/dictionary/english/digital"
+      }
+    ]
+  },
+  {
+    "word": "audio",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 音频的；n. 音频。常作名词前定语。",
+    "collocations": "audio guide; audio recording; audio equipment",
+    "commonMistake": "audio 表示声音或音频；表示能听见的形容词是 audible，二者词性和搭配不同。",
+    "example": {
+      "english": "The museum offers an audio guide in three languages.",
+      "chinese": "博物馆提供三种语言的语音导览。"
+    },
+    "application": {
+      "prompt": "Visitors can listen to the ___ guide while walking around the museum. A. audio B. audible",
+      "solution": "A。解析：A 正确；audio guide 是“语音导览”的常见搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: audio",
+        "url": "https://dictionary.cambridge.org/dictionary/english/audio"
+      }
+    ]
+  },
+  {
+    "word": "dirt",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 泥土；尘土，通常不可数。形容词 dirty。",
+    "collocations": "covered in dirt; a dirt road; wash dirt off",
+    "commonMistake": "dirt 是名词，dirty 是形容词；不能用 dirt 修饰表示“脏”的状态。",
+    "example": {
+      "english": "After working in the field, his boots were covered in dirt.",
+      "chinese": "在田里干活后，他的靴子上沾满了泥土。"
+    },
+    "application": {
+      "prompt": "The children washed the ___ from their hands before eating. A. dirty B. dirt",
+      "solution": "B。解析：B 正确；the 后需要名词 dirt，指手上的泥土。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dirt",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dirt"
+      }
+    ]
+  },
+  {
+    "word": "track",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 小路；轨道；跑道。可数，复数 tracks；也可作动词“跟踪”。",
+    "collocations": "a dirt track; a railway track; run on the track",
+    "commonMistake": "track 可指路、轨道或跑道，需结合语境；不要与表示铁路系统的 railway 混为一谈。",
+    "example": {
+      "english": "A narrow track leads from the village to the river.",
+      "chinese": "一条狭窄的小路从村庄通向河边。"
+    },
+    "application": {
+      "prompt": "The runners waited for the signal beside the school ___ . A. track B. tunnel",
+      "solution": "A。解析：A 正确；跑步运动员在跑道 track 旁等待信号。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: track",
+        "url": "https://dictionary.cambridge.org/dictionary/english/track"
+      }
+    ]
+  },
+  {
+    "word": "wide",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 宽的；宽阔的。比较级 wider，最高级 widest；副词 widely。",
+    "collocations": "a wide road; wide open; a wide range of",
+    "commonMistake": "wide 是形容词，修饰名词；widely 是副词，不能放在 be 后描述宽度。",
+    "example": {
+      "english": "The bridge is wide enough for two lorries to pass.",
+      "chinese": "这座桥足够宽，能让两辆卡车通过。"
+    },
+    "application": {
+      "prompt": "The river is too ___ for the children to cross on foot. A. widely B. wide",
+      "solution": "B。解析：B 正确；be too 后接形容词 wide 描写河的宽度。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wide",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wide"
+      }
+    ]
+  },
+  {
+    "word": "tunnel",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 隧道；地下通道。可数名词，复数 tunnels。",
+    "collocations": "a railway tunnel; drive through a tunnel; tunnel under a hill",
+    "commonMistake": "tunnel 作名词时前可加 a；不要将 tunnel 与 tunnel through（挖隧道穿过）混作同一词性。",
+    "example": {
+      "english": "The train passed through a long tunnel beneath the mountain.",
+      "chinese": "火车穿过了山下的一条长隧道。"
+    },
+    "application": {
+      "prompt": "The road disappears into a ___ and comes out on the other side of the hill. A. tunnel B. tunnelled",
+      "solution": "A。解析：A 正确；公路从山的一侧进入并从另一侧出来，穿过的是 tunnel（隧道）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tunnel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tunnel"
+      }
+    ]
+  },
+  {
+    "word": "link",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 联系；交通路线；v. 连接。作动词常用 link A to/with B。",
+    "collocations": "a direct link; link a village to a city; link between places",
+    "commonMistake": "名词 link 后常接 between；动词 link 后可用 to/with，不能漏掉连接对象。",
+    "example": {
+      "english": "A new bridge links the port to the capital.",
+      "chinese": "一座新桥把港口和首都连接起来。"
+    },
+    "application": {
+      "prompt": "The footpath provides a direct ___ between the station and the market. A. link B. link to",
+      "solution": "A。解析：A 正确；direct 后需要名词 link，表示两地之间的联系。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: link",
+        "url": "https://dictionary.cambridge.org/dictionary/english/link"
+      }
+    ]
+  },
+  {
+    "word": "port",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 港口；港口城市。可数名词，复数 ports。",
+    "collocations": "a busy port; a fishing port; arrive at the port",
+    "commonMistake": "port 是船只装卸货物的港口；airport 是飞机起降的机场。",
+    "example": {
+      "english": "The ship unloaded its cargo at the port before continuing north.",
+      "chinese": "船在继续北行前先在港口卸下了货物。"
+    },
+    "application": {
+      "prompt": "The cargo ship reached the ___ before sunset and unloaded its goods. A. porch B. port",
+      "solution": "B。解析：B 正确；货船卸货的地点是 port（港口）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: port",
+        "url": "https://dictionary.cambridge.org/dictionary/english/port"
+      }
+    ]
+  },
+  {
+    "word": "capital",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 首都；资本；大写字母。可数，首都义常用 the capital of。",
+    "collocations": "the capital of Kenya; move capital; capital city",
+    "commonMistake": "capital 可指首都或资金；表示首都时说 the capital of a country，不说 capital for。",
+    "example": {
+      "english": "Nairobi is the capital of Kenya.",
+      "chinese": "内罗毕是肯尼亚的首都。"
+    },
+    "application": {
+      "prompt": "Which sentence identifies a capital correctly? A. Nairobi is the capital of Kenya. B. Nairobi is the capital at Kenya.",
+      "solution": "A。解析：A 正确；表示某国的首都用 the capital of + country。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: capital",
+        "url": "https://dictionary.cambridge.org/dictionary/english/capital"
+      }
+    ]
+  },
+  {
+    "word": "complete",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "v. 完成；adj. 完整的。副词 completely；过去式和过去分词 completed。",
+    "collocations": "complete a form; complete a task; a complete list",
+    "commonMistake": "complete 作动词表示完成，后直接接宾语；completely 是副词，不能作谓语。",
+    "example": {
+      "english": "Please complete the form before you apply for a market stall.",
+      "chinese": "申请摊位前请填写完这张表格。"
+    },
+    "application": {
+      "prompt": "Please ___ the online form before Friday so the office can process it. A. completely B. complete",
+      "solution": "B。解析：B 正确；情态动词 can 后用动词原形 complete，意为“填完”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: complete",
+        "url": "https://dictionary.cambridge.org/dictionary/english/complete"
+      }
+    ]
+  },
+  {
+    "word": "Kenyan",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 肯尼亚人；adj. 肯尼亚的。国籍形容词和国民名词均大写，复数 Kenyans。",
+    "collocations": "a Kenyan farmer; Kenyan culture; many Kenyans",
+    "commonMistake": "Kenyan 是国籍词，首字母大写；表示语言不能照搬国家名，要说 Swahili 或 English。",
+    "example": {
+      "english": "A Kenyan engineer helped design the railway bridge.",
+      "chinese": "一位肯尼亚工程师参与设计了这座铁路桥。"
+    },
+    "application": {
+      "prompt": "A ___ farmer showed us how corn is grown near Mombasa. A. Kenyan B. Kenya",
+      "solution": "A。解析：A 正确；修饰 farmer 需用国籍形容词 Kenyan，Kenya 是国家名。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Kenyan",
+        "url": "https://dictionary.cambridge.org/dictionary/english/Kenyan"
+      }
+    ]
+  },
+  {
+    "word": "convenient",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 方便的；便利的。常用 It is convenient for sb to do sth。",
+    "collocations": "a convenient time; convenient for visitors; find it convenient",
+    "commonMistake": "convenient 描述安排或地点；表示某人方便常说 convenient for sb，不说 convenient to sb do。",
+    "example": {
+      "english": "Paying by phone is convenient for people who do not carry cash.",
+      "chinese": "对不带现金的人来说，用手机付款很方便。"
+    },
+    "application": {
+      "prompt": "The new timetable is ___ for farmers who need to reach the market early. A. convenience B. convenient",
+      "solution": "B。解析：B 正确；be 动词后作表语需用形容词 convenient。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: convenient",
+        "url": "https://dictionary.cambridge.org/dictionary/english/convenient"
+      }
+    ]
+  },
+  {
+    "word": "business",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 生意；商业；事务。可数义“企业”，不可数义“商业活动”。",
+    "collocations": "do business; a small business; business centre",
+    "commonMistake": "business 是名词，busy 是形容词；表示企业时可数，表示商业活动时通常不可数。",
+    "example": {
+      "english": "Her family runs a small business beside the railway station.",
+      "chinese": "她家在火车站旁经营一家小生意。"
+    },
+    "application": {
+      "prompt": "The family opened a small ___ selling farm tools to local villagers. A. business B. busy",
+      "solution": "A。解析：A 正确；opened 后接可数名词 business，指一家小企业。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: business",
+        "url": "https://dictionary.cambridge.org/dictionary/english/business"
+      }
+    ]
+  },
+  {
+    "word": "ease",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 容易；自在；v. 减轻；缓解。名词常见搭配 with ease。",
+    "collocations": "with ease; ease the pressure; ease of use",
+    "commonMistake": "ease 可作名词或动词；easy 是形容词，不能替代名词短语 with ease。",
+    "example": {
+      "english": "The new footbridge eased the villagers' daily journey to school.",
+      "chinese": "新建的人行桥减轻了村民每天上学的路途负担。"
+    },
+    "application": {
+      "prompt": "The wider footpath brought ___ to the daily walk for older villagers. A. easy B. ease",
+      "solution": "B。解析：B 正确；brought 后接名词 ease，表示出行变得更轻松。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ease",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ease"
+      }
+    ]
+  },
+  {
+    "word": "with ease",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "phr. 轻松地；毫不费力地。ease 在此为名词。",
+    "collocations": "answer with ease; move with ease; complete the task with ease",
+    "commonMistake": "with ease 是副词性短语，修饰动作；不要说 with easy，easy 是形容词。",
+    "example": {
+      "english": "The new train reaches the port with ease, even in bad weather.",
+      "chinese": "即使天气不好，新列车也能轻松抵达港口。"
+    },
+    "application": {
+      "prompt": "The lorry crossed the wider bridge ___, without slowing down. A. with ease B. with easy",
+      "solution": "A。解析：A 正确；with ease 修饰 crossed，表示卡车“轻松地”过桥。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: with ease",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ease"
+      }
+    ]
+  },
+  {
+    "word": "lorry",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 卡车（英式英语常用）。可数名词，复数 lorries。",
+    "collocations": "a delivery lorry; drive a lorry; lorry driver",
+    "commonMistake": "以辅音字母加 y 结尾的 lorry 变复数时 y 改 i 加 -es，拼作 lorries。",
+    "example": {
+      "english": "A lorry delivered fresh corn to the village market.",
+      "chinese": "一辆卡车把新鲜玉米送到了村里的集市。"
+    },
+    "application": {
+      "prompt": "Two ___ brought building materials to the new houses. A. lorrys B. lorries",
+      "solution": "B。解析：B 正确；可数名词 lorry 的复数拼作 lorries。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lorry",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lorry"
+      }
+    ]
+  },
+  {
+    "word": "manager",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 经理；管理者。动词 manage，名词 manager，管理工作 management。",
+    "collocations": "a store manager; project manager; manage a team",
+    "commonMistake": "manager 指管理者，manage 是动词；manager 后常接 of，表示负责的对象。",
+    "example": {
+      "english": "The market manager checks the stalls before they open.",
+      "chinese": "集市经理在摊位开门前进行检查。"
+    },
+    "application": {
+      "prompt": "The shop ___ orders new stock from local farmers each week. A. manages B. manager",
+      "solution": "A。解析：A 正确；主语是 shop，空格处需要谓语动词 manages。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: manager",
+        "url": "https://dictionary.cambridge.org/dictionary/english/manager"
+      }
+    ]
+  },
+  {
+    "word": "comment",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 评论；v. 评论。动词常用 comment on sth。",
+    "collocations": "make a comment; comment on a plan; comment briefly",
+    "commonMistake": "comment 作动词时后接 on 引出话题；comment on 不等于直接加人作为宾语。",
+    "example": {
+      "english": "The villagers commented on the new bus service at the meeting.",
+      "chinese": "村民在会上评论了新的公交服务。"
+    },
+    "application": {
+      "prompt": "At the meeting, several residents ___ on the plan to widen the road. A. comments B. commented",
+      "solution": "B。解析：B 正确；several residents 作复数主语，过去时谓语用 commented on。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: comment",
+        "url": "https://dictionary.cambridge.org/dictionary/english/comment"
+      }
+    ]
+  },
+  {
+    "word": "conclusion",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 结论；总结。常用 draw/reach/come to a conclusion。",
+    "collocations": "reach a conclusion; in conclusion; final conclusion",
+    "commonMistake": "conclusion 是名词；动词形式是 conclude，不能说 reach a conclude。",
+    "example": {
+      "english": "The report came to the conclusion that the bridge was safe.",
+      "chinese": "报告得出的结论是这座桥安全。"
+    },
+    "application": {
+      "prompt": "After checking all the figures, the team reached a ___. A. conclude B. conclusion",
+      "solution": "B。解析：B 正确；reach 后接名词 conclusion，表示“得出结论”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: conclusion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/conclusion"
+      }
+    ]
+  },
+  {
+    "word": "rail",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 铁轨；栏杆；铁路运输。表示乘火车可说 by rail。",
+    "collocations": "by rail; railway rail; hold the rail",
+    "commonMistake": "rail 是单根铁轨或栏杆；railway 指铁路系统或线路，词义范围不同。",
+    "example": {
+      "english": "The old station still has a rail line leading to the port.",
+      "chinese": "老车站仍有一条通往港口的铁路。"
+    },
+    "application": {
+      "prompt": "The vegetables were sent to the city ___ because the rail service was fast. A. by rail B. by rails",
+      "solution": "A。解析：A 正确；表示“通过铁路运输”用固定搭配 by rail，rail 不加复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rail",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rail"
+      }
+    ]
+  },
+  {
+    "word": "narrow",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 窄的；狭窄的。比较级 narrower，最高级 narrowest；动词可表示使变窄。",
+    "collocations": "a narrow lane; narrow the gap; narrowly avoid",
+    "commonMistake": "narrow 作形容词修饰名词；narrowly 是副词，常修饰动词如 narrowly miss。",
+    "example": {
+      "english": "The lorry could not enter the narrow lane behind the houses.",
+      "chinese": "卡车无法驶进房屋后面那条狭窄的小巷。"
+    },
+    "application": {
+      "prompt": "Only one bicycle can pass through this ___ lane at a time. A. narrowly B. narrow",
+      "solution": "B。解析：B 正确；修饰名词 lane 要用形容词 narrow。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: narrow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/narrow"
+      }
+    ]
+  },
+  {
+    "word": "villager",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 村民。可数名词，复数 villagers；由 village + -er 构成。",
+    "collocations": "local villagers; a village school; villagers' homes",
+    "commonMistake": "villager 指住在村子里的人；village 是地点名词，表示人要加 -er。",
+    "example": {
+      "english": "A villager showed the visitors the shortest route to the river.",
+      "chinese": "一位村民给游客指了去河边的最近路线。"
+    },
+    "application": {
+      "prompt": "Which sentence uses villager to name a person correctly? A. A villager showed us the path. B. A villagers showed us the path.",
+      "solution": "A。解析：A 正确；a 后用单数 villager；villagers 是复数，不能与不定冠词 a 连用。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: villager",
+        "url": "https://dictionary.cambridge.org/dictionary/english/villager"
+      }
+    ]
+  },
+  {
+    "word": "lead",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "v. 带领；过（某种生活）；n. 领先地位；主角。过去式 led。",
+    "collocations": "lead a team; lead a life; take the lead",
+    "commonMistake": "lead 表示“带领”时过去式是 led，不是 leaded；名词 lead 的读音和词义另有不同。",
+    "example": {
+      "english": "A local guide will lead the group through the old railway tunnel.",
+      "chinese": "一位当地向导将带领团队穿过旧铁路隧道。"
+    },
+    "application": {
+      "prompt": "Which sentence uses lead after will correctly? A. The guide will led the group through the tunnel. B. The guide will lead the group through the tunnel.",
+      "solution": "B。解析：B 正确；will 后接动词原形 lead，表示导游将带领团队穿过隧道。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lead",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lead"
+      }
+    ]
+  },
+  {
+    "word": "man-made",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 人造的；非天然的。常置于名词前作定语。",
+    "collocations": "man-made lake; man-made materials; man-made structure",
+    "commonMistake": "man-made 指由人建造或制造；handmade 强调手工制作，两者含义不完全相同。",
+    "example": {
+      "english": "The man-made lake supplies water to several farms.",
+      "chinese": "这座人工湖为几个农场供水。"
+    },
+    "application": {
+      "prompt": "Unlike the natural lake, this ___ reservoir was built by engineers. A. man-made B. natural-made",
+      "solution": "A。解析：A 正确；工程师建造的水库是 man-made（人造的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: man-made",
+        "url": "https://dictionary.cambridge.org/dictionary/english/man-made"
+      }
+    ]
+  },
+  {
+    "word": "miracle",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 奇迹；令人惊叹的事。可数名词，复数 miracles。",
+    "collocations": "a miracle of nature; work a miracle; by some miracle",
+    "commonMistake": "miracle 是可数名词，单数前通常要有 a；不要与 medical（医学的）混淆。",
+    "example": {
+      "english": "It was a miracle that the village bridge survived the flood.",
+      "chinese": "村里的桥在洪水中幸存下来真是个奇迹。"
+    },
+    "application": {
+      "prompt": "The rescue team called the safe return of every passenger a ___. A. mirror B. miracle",
+      "solution": "B。解析：B 正确；所有乘客平安归来令人惊叹，称得上 miracle（奇迹）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: miracle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/miracle"
+      }
+    ]
+  },
+  {
+    "word": "junior",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "adj. 初级的；低年级的；n. 年少者。常用 junior to sb。",
+    "collocations": "junior school; a junior student; junior to her sister",
+    "commonMistake": "junior 作形容词通常放在名词前；比较年龄或级别时用 junior to，不用 than。",
+    "example": {
+      "english": "My brother is two years junior to me at school.",
+      "chinese": "我弟弟在学校比我低两个年级。"
+    },
+    "application": {
+      "prompt": "Tina is three grades ___ her cousin and studies in the lower school. A. junior than B. junior to",
+      "solution": "B。解析：B 正确；表示年级或资历较低用 junior to，而不是 junior than。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: junior",
+        "url": "https://dictionary.cambridge.org/dictionary/english/junior"
+      }
+    ]
+  },
+  {
+    "word": "flat",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 公寓；adj. 平坦的；平淡的。公寓义可数，复数 flats。",
+    "collocations": "a small flat; rent a flat; a flat roof",
+    "commonMistake": "flat 作名词可指公寓，作形容词可指平的；不要因词形相同而混淆词性。",
+    "example": {
+      "english": "They rented a flat near the new railway station.",
+      "chinese": "他们在新火车站附近租了一套公寓。"
+    },
+    "application": {
+      "prompt": "The family lives in a two-bedroom ___ above the bakery. A. flat B. flatly",
+      "solution": "A。解析：A 正确；a two-bedroom 后需要名词 flat，意为“公寓”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flat"
+      }
+    ]
+  },
+  {
+    "word": "discussion",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 讨论；商讨。可数名词，动词为 discuss。",
+    "collocations": "have a discussion; a discussion about sth; group discussion",
+    "commonMistake": "discussion 后可接 about 引出主题；动词 discuss 则直接接宾语，不加 about。",
+    "example": {
+      "english": "The class had a discussion about how to reduce waste.",
+      "chinese": "全班讨论了如何减少浪费。"
+    },
+    "application": {
+      "prompt": "Which sentence is grammatically correct? A. We discussed about the bus stop. B. We had a discussion about the bus stop.",
+      "solution": "B。解析：B 正确；名词 discussion 可接 about；动词 discuss 后直接接宾语，不加 about。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: discussion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/discussion"
+      }
+    ]
+  },
+  {
+    "word": "aspect",
+    "examTags": [
+      "词汇·环境与发展",
+      "语法·词形与语境"
+    ],
+    "grammar": "n. 方面；层面。可数名词，复数 aspects。",
+    "collocations": "an important aspect; every aspect of life; in this aspect",
+    "commonMistake": "aspect 常与 of 连用指出事物的某一方面；不能把它当作形容词来修饰名词。",
+    "example": {
+      "english": "Transport is an important aspect of life in a growing town.",
+      "chinese": "交通是发展中城镇生活的一个重要方面。"
+    },
+    "application": {
+      "prompt": "One important ___ of the project is how it will protect farmland. A. aspect B. aspectly",
+      "solution": "A。解析：A 正确；important 后接名词 aspect，指出项目的一个重要方面。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: aspect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/aspect"
+      }
+    ]
+  }
+]

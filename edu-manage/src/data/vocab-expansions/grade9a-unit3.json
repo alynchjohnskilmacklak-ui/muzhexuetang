@@ -1,0 +1,1226 @@
+[
+  {
+    "word": "learner",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 学习者；学习某种技能的人。可数名词，动词 learn。",
+    "collocations": "a language learner; young learners; learner of English",
+    "commonMistake": "learner 指正在学习的人；learn 是动词，learning 可指学习过程，不能互换词性。",
+    "example": {
+      "english": "A patient learner practised the new words for ten minutes each day.",
+      "chinese": "一位有耐心的学习者每天练习这些新词十分钟。"
+    },
+    "application": {
+      "prompt": "A good language ___ reviews mistakes and tries the sentence again. A. learner B. learning",
+      "solution": "A。解析：A 正确；a good 后需要表示“学习者”的名词 learner。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: learner",
+        "url": "https://dictionary.cambridge.org/dictionary/english/learner"
+      }
+    ]
+  },
+  {
+    "word": "flashcard",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 学习卡片；抽认卡。可数名词，复数 flashcards。",
+    "collocations": "make flashcards; review with a flashcard; a set of flashcards",
+    "commonMistake": "flashcard 是卡片，复数加 -s；不要和 flash drive（闪存盘）混淆。",
+    "example": {
+      "english": "I wrote one new word on each flashcard and practised with a friend.",
+      "chinese": "我在每张抽认卡上写一个新词，然后和朋友一起练习。"
+    },
+    "application": {
+      "prompt": "Which sentence uses flashcard correctly in a study context? A. Mei made a flashcard for each new word. B. Mei made a flashcards for each new word.",
+      "solution": "A。解析：A 正确；a 后用单数 flashcard；flashcards 是复数形式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flashcard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flash-card"
+      }
+    ]
+  },
+  {
+    "word": "project",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 专题研究；项目。可数名词；v. 预测或投射。",
+    "collocations": "a science project; work on a project; project costs",
+    "commonMistake": "project 作学校任务时是可数名词；projected 是动词过去分词或形容词，不可用来表示一个项目。",
+    "example": {
+      "english": "Our science project tests whether sunlight helps seeds grow faster.",
+      "chinese": "我们的科学项目研究阳光是否能让种子长得更快。"
+    },
+    "application": {
+      "prompt": "The class worked in groups to prepare a science ___ about clean water. A. projector B. project",
+      "solution": "B。解析：B 正确；小组共同准备的是一项 science project（科学项目）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: project",
+        "url": "https://dictionary.cambridge.org/dictionary/english/project"
+      }
+    ]
+  },
+  {
+    "word": "website",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 网站。可数名词，复数 websites。",
+    "collocations": "visit a website; website address; official website",
+    "commonMistake": "website 指网站本身，web page 指网站中的单个网页；拼写通常合写为一个词。",
+    "example": {
+      "english": "The school website posts homework and schedule changes.",
+      "chinese": "学校网站会发布作业和日程变更。"
+    },
+    "application": {
+      "prompt": "The library put its opening hours on the ___ so students could check them at home. A. web B. website",
+      "solution": "B。解析：B 正确；学生在家查询开放时间要访问图书馆网站 website。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: website",
+        "url": "https://dictionary.cambridge.org/dictionary/english/website"
+      }
+    ]
+  },
+  {
+    "word": "hands-on",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "adj. 动手实践的；实际操作的。通常作名词前定语。",
+    "collocations": "hands-on activity; hands-on experience; hands-on learning",
+    "commonMistake": "hands-on 作复合形容词时用连字符；不能作副词修饰动词，如 hands-on learn。",
+    "example": {
+      "english": "The hands-on lesson let students build a simple radio.",
+      "chinese": "这堂实践课让学生亲手组装了一台简易收音机。"
+    },
+    "application": {
+      "prompt": "The museum offers a ___ workshop where children can make their own models. A. hands-on B. hand-on",
+      "solution": "A。解析：A 正确；修饰 workshop 用复合形容词 hands-on，拼写有 s 和连字符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hands-on",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hands-on"
+      }
+    ]
+  },
+  {
+    "word": "experiment",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 实验；试验。可数名词；v. 做实验，常用 experiment on/with。",
+    "collocations": "conduct an experiment; a science experiment; experiment with a method",
+    "commonMistake": "experiment 作名词时常与 conduct/do 连用；experiment 是动词时通常用 with/on，别漏介词。",
+    "example": {
+      "english": "The students designed an experiment to compare two kinds of soil.",
+      "chinese": "学生们设计了一项实验来比较两种土壤。"
+    },
+    "application": {
+      "prompt": "The class will ___ with different amounts of water to see how seeds grow. A. experience B. experiment",
+      "solution": "B。解析：B 正确；experiment with 表示“用不同水量做实验”，符合科学探究语境。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: experiment",
+        "url": "https://dictionary.cambridge.org/dictionary/english/experiment"
+      }
+    ]
+  },
+  {
+    "word": "look up",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 查阅；检查（信息）。宾语是代词时置于 look 与 up 之间。",
+    "collocations": "look up a word; look the date up; look it up online",
+    "commonMistake": "look up sth 表示查找资料；代词作宾语必须说 look it up，不说 look up it。",
+    "example": {
+      "english": "I looked up the word in a dictionary before using it in my essay.",
+      "chinese": "我在作文里使用这个词之前先查了词典。"
+    },
+    "application": {
+      "prompt": "Which sentence places the pronoun correctly in look up? A. Please look it up in the dictionary. B. Please look up it in the dictionary.",
+      "solution": "A。解析：A 正确；代词 it 作宾语时放在短语动词中间，look it up 表示查阅它。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: look up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/look-up"
+      }
+    ]
+  },
+  {
+    "word": "dictionary",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 词典；字典。可数名词，复数 dictionaries。",
+    "collocations": "a bilingual dictionary; look sth up in a dictionary; dictionary entry",
+    "commonMistake": "dictionary 是可数名词，辅音字母加 y 结尾，复数写 dictionaries。",
+    "example": {
+      "english": "The dictionary gives an example sentence for every new word.",
+      "chinese": "这本词典为每个生词提供例句。"
+    },
+    "application": {
+      "prompt": "She checked the spelling in a ___ before sending the email. A. dictionary B. diary",
+      "solution": "A。解析：A 正确；查拼写需要 dictionary（词典），diary 是日记本。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dictionary",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dictionary"
+      }
+    ]
+  },
+  {
+    "word": "aloud",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "adv. 出声地；大声地。常与 read/say/speak 连用。",
+    "collocations": "read aloud; say the answer aloud; think aloud",
+    "commonMistake": "aloud 表示出声地让别人听见；loud 常修饰声音大小。",
+    "example": {
+      "english": "Reading the dialogue aloud helped Noah notice the missing word.",
+      "chinese": "把对话朗读出来帮助诺亚发现了漏掉的词。"
+    },
+    "application": {
+      "prompt": "Which sentence uses aloud correctly? A. The class read the dialogue aloudly. B. The class read the dialogue aloud.",
+      "solution": "B。解析：B 正确；aloud 是副词，表示出声朗读；英语中不用 aloudly。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: aloud",
+        "url": "https://dictionary.cambridge.org/dictionary/english/aloud"
+      }
+    ]
+  },
+  {
+    "word": "dialogue",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 对话；对白。可数名词，复数 dialogues。",
+    "collocations": "a dialogue between friends; write a dialogue; dialogue in a play",
+    "commonMistake": "dialogue 常用 dialogue between A and B；美式拼写为 dialog，教材拼法 dialogue 不要漏掉 -ue。",
+    "example": {
+      "english": "The dialogue between the two learners was about a school project.",
+      "chinese": "两位学习者的对话是关于一个学校项目的。"
+    },
+    "application": {
+      "prompt": "The play opens with a short ___ between a teacher and a new learner. A. dialogue B. dialect",
+      "solution": "A。解析：A 正确；角色之间的交谈是 dialogue；dialect 指方言。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dialogue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dialogue"
+      }
+    ]
+  },
+  {
+    "word": "general",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "adj. 总的；大体的；普遍的。副词 generally。",
+    "collocations": "general idea; general rule; in general",
+    "commonMistake": "general 作形容词修饰名词；generally 是副词，常表示“通常、一般而言”。",
+    "example": {
+      "english": "The teacher gave us a general idea before explaining each method.",
+      "chinese": "老师先给我们介绍了大致思路，然后讲解每种方法。"
+    },
+    "application": {
+      "prompt": "Before reading the details, write down the ___ idea of the article. A. generally B. general",
+      "solution": "B。解析：B 正确；修饰名词 idea 应用形容词 general。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: general",
+        "url": "https://dictionary.cambridge.org/dictionary/english/general"
+      }
+    ]
+  },
+  {
+    "word": "in general",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 总的来说；通常；总体上。用来概括一般情况。",
+    "collocations": "in general, students learn; people in general; in general terms",
+    "commonMistake": "in general 表示总体情况；in particular 则表示具体某一项，不能把两者意思混同。",
+    "example": {
+      "english": "In general, short daily practice is more useful than one long session.",
+      "chinese": "总的来说，每天短时间练习比一次长时间练习更有效。"
+    },
+    "application": {
+      "prompt": "Which phrase introduces a broad observation about learning? A. In particular, learners benefit from daily review. B. In general, learners benefit from daily review.",
+      "solution": "B。解析：B 正确；in general 概括普遍情况；in particular 则强调某个具体对象。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in general",
+        "url": "https://dictionary.cambridge.org/dictionary/english/general"
+      }
+    ]
+  },
+  {
+    "word": "suit",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "v. 适合；有利于；n. 套装。动词常直接接人或事物。",
+    "collocations": "suit sb well; suit the time; a business suit",
+    "commonMistake": "suit 作动词时可直接接宾语，不说 suit for me；表示适合某人的需要也常用 suit sb。",
+    "example": {
+      "english": "The morning class suits learners who work in the afternoon.",
+      "chinese": "上午的课程适合下午要上班的学习者。"
+    },
+    "application": {
+      "prompt": "Which sentence uses suit without an extra preposition? A. The plan suits to Mia. B. The plan suits Mia.",
+      "solution": "B。解析：B 正确；动词 suit 直接接宾语 Mia，不在宾语前加 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suit"
+      }
+    ]
+  },
+  {
+    "word": "speed",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 速度；v. 加速；促进。过去式和过去分词可为 sped 或 speeded。",
+    "collocations": "at high speed; speed up; speed a process",
+    "commonMistake": "speed 作名词常与 at 连用；作动词过去式可用 sped，也可规则变化 speeded。",
+    "example": {
+      "english": "The learner read at a steady speed and understood every line.",
+      "chinese": "这位学习者以稳定的速度阅读，理解了每一行。"
+    },
+    "application": {
+      "prompt": "The bus had to ___ up when the road became clear. A. speed B. speedy",
+      "solution": "A。解析：A 正确；had to 后接动词原形 speed，speed up 表示加快速度。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: speed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/speed"
+      }
+    ]
+  },
+  {
+    "word": "grammar",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 语法。通常不可数；可由 grammar book/lesson 表示教材或课程。",
+    "collocations": "English grammar; grammar rule; study grammar",
+    "commonMistake": "grammar 通常指语法体系，不加复数；具体规则可说 grammar rules。",
+    "example": {
+      "english": "Good grammar makes the instructions easier to understand.",
+      "chinese": "语法正确能让说明更容易理解。"
+    },
+    "application": {
+      "prompt": "We reviewed English ___ before writing the dialogue. A. grammars B. grammar",
+      "solution": "B。解析：B 正确；此处 grammar 指语法知识，通常作不可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grammar",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grammar"
+      }
+    ]
+  },
+  {
+    "word": "podcast",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 播客；播客节目。可数名词，复数 podcasts。",
+    "collocations": "listen to a podcast; podcast episode; record a podcast",
+    "commonMistake": "podcast 是可数名词，前面可用 a；节目内容的一集可称 an episode。",
+    "example": {
+      "english": "Our class made a podcast about ways to protect the valley.",
+      "chinese": "我们班制作了一期关于保护山谷的方法的播客。"
+    },
+    "application": {
+      "prompt": "Lena downloaded a ___ about pronunciation to listen to on the bus. A. podcast B. passport",
+      "solution": "A。解析：A 正确；在公交上收听发音节目的音频内容是 podcast。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: podcast",
+        "url": "https://dictionary.cambridge.org/dictionary/english/podcast"
+      }
+    ]
+  },
+  {
+    "word": "zero",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "num. 零；n. 最低程度或零点。复数可作 zeros/zeroes。",
+    "collocations": "zero degrees; from zero to ten; score zero",
+    "commonMistake": "zero 表示数值 0；在单数测量表达中常说 zero degrees，动词依实际主语决定。",
+    "example": {
+      "english": "The temperature fell to zero during the night.",
+      "chinese": "夜间气温降到了零度。"
+    },
+    "application": {
+      "prompt": "The test score was ___ because the answer sheet was left blank. A. zero B. tenth",
+      "solution": "A。解析：A 正确；空白答题卡没有得分，分数是 zero（零）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: zero",
+        "url": "https://dictionary.cambridge.org/dictionary/english/zero"
+      }
+    ]
+  },
+  {
+    "word": "come across",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 偶然遇见；偶然发现。过去式 came across。",
+    "collocations": "come across an old note; come across a new word; come across as",
+    "commonMistake": "come across sth 表示偶然发现；come across as sb/sth 则表示“给人……印象”，要看结构辨义。",
+    "example": {
+      "english": "I came across a useful study method in an old textbook.",
+      "chinese": "我在一本旧课本里偶然发现了一种有用的学习方法。"
+    },
+    "application": {
+      "prompt": "While sorting her notes, Zoe ___ a flashcard she had made years ago. A. came across B. came over",
+      "solution": "A。解析：A 正确；整理时意外发现卡片用 came across，过去式为 came。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: come across",
+        "url": "https://dictionary.cambridge.org/dictionary/english/come-across"
+      }
+    ]
+  },
+  {
+    "word": "step by step",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 逐步地；循序渐进地。作副词性短语。",
+    "collocations": "learn step by step; explain it step by step; follow steps",
+    "commonMistake": "step by step 描写按顺序逐渐进行；不能在 step 后加 -s 写成 steps by steps。",
+    "example": {
+      "english": "The guide showed us step by step how to use the online dictionary.",
+      "chinese": "指南逐步展示了如何使用在线词典。"
+    },
+    "application": {
+      "prompt": "Instead of skipping ahead, the teacher explained the experiment ___. A. steps by steps B. step by step",
+      "solution": "B。解析：B 正确；固定副词短语 step by step 表示按步骤进行，step 不变复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: step by step",
+        "url": "https://dictionary.cambridge.org/dictionary/english/step-by-step"
+      }
+    ]
+  },
+  {
+    "word": "build up",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 增加；加强；逐步建立。可分动词短语。",
+    "collocations": "build up confidence; build up a collection; build it up",
+    "commonMistake": "build up sth 可分开；代词作宾语时说 build it up，不说 build up it。",
+    "example": {
+      "english": "Short practice sessions build up learners' confidence over time.",
+      "chinese": "短时间练习会逐渐增强学习者的信心。"
+    },
+    "application": {
+      "prompt": "After making a mistake, she used small daily goals to ___ her confidence. A. build up B. break down",
+      "solution": "A。解析：A 正确；小目标逐步增强信心用 build up，break down 表示分解或崩溃。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: build up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/build-up"
+      }
+    ]
+  },
+  {
+    "word": "actively",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "adv. 积极地；主动地。形容词 active，名词 activity。",
+    "collocations": "participate actively; listen actively; actively seek feedback",
+    "commonMistake": "actively 是副词，用来修饰动作；active 是形容词，不能放在动词后直接表示“积极地”。",
+    "example": {
+      "english": "He actively joined the discussion instead of waiting to be called on.",
+      "chinese": "他主动参与讨论，而不是等着被点名。"
+    },
+    "application": {
+      "prompt": "Which sentence uses actively to modify an action? A. The students active joined the dialogue. B. The students actively joined the dialogue.",
+      "solution": "B。解析：B 正确；actively 是副词，修饰 joined；active 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: actively",
+        "url": "https://dictionary.cambridge.org/dictionary/english/actively"
+      }
+    ]
+  },
+  {
+    "word": "enjoyable",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "adj. 令人愉快的；有乐趣的。由 enjoy + -able 构成。",
+    "collocations": "an enjoyable lesson; make learning enjoyable; enjoyable experience",
+    "commonMistake": "enjoyable 描述事物带来乐趣；enjoy 是动词，不能说 an enjoy lesson。",
+    "example": {
+      "english": "The hands-on project made the grammar lesson enjoyable.",
+      "chinese": "实践项目让语法课变得有趣。"
+    },
+    "application": {
+      "prompt": "The class found the podcast game both useful and ___. A. enjoyable B. enjoyment",
+      "solution": "A。解析：A 正确；and 连接两个形容词 useful 和 enjoyable，描述游戏的特点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: enjoyable",
+        "url": "https://dictionary.cambridge.org/dictionary/english/enjoyable"
+      }
+    ]
+  },
+  {
+    "word": "strategy",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 策略；方案。可数名词，复数 strategies。",
+    "collocations": "a learning strategy; develop a strategy; strategy for reading",
+    "commonMistake": "strategy 以辅音字母加 y 结尾，复数将 y 改为 i 加 -es，写 strategies。",
+    "example": {
+      "english": "One useful strategy is to review flashcards before going to bed.",
+      "chinese": "一种有用的策略是睡前复习抽认卡。"
+    },
+    "application": {
+      "prompt": "The teacher suggested a new reading ___ for learners who read slowly. A. strategys B. strategy",
+      "solution": "B。解析：B 正确；a new 后需单数名词 strategy，表示一种阅读策略。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: strategy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/strategy"
+      }
+    ]
+  },
+  {
+    "word": "suggest",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "v. 建议；提议；暗示。常用 suggest doing sth 或 suggest that sb do sth。",
+    "collocations": "suggest a method; suggest trying again; suggest that we leave",
+    "commonMistake": "suggest 后可接动名词或 that 从句；不说 suggest sb to do sth。",
+    "example": {
+      "english": "I suggest reviewing the new words before the experiment begins.",
+      "chinese": "我建议在实验开始前复习这些新词。"
+    },
+    "application": {
+      "prompt": "Which advice follows the usual pattern after suggest? A. I suggest him to reread the sentence. B. I suggest rereading the sentence.",
+      "solution": "B。解析：B 正确；suggest 可接动名词作宾语；标准结构不用 suggest sb to do。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suggest",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suggest"
+      }
+    ]
+  },
+  {
+    "word": "method",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 方法；办法。可数名词；常用 method of/for doing sth。",
+    "collocations": "a useful method; method of learning; try a new method",
+    "commonMistake": "method 后可接 of/for 引出做事方式；不要用 method 作动词，表达“采用方法”用 use a method。",
+    "example": {
+      "english": "This method helps learners remember new words through short stories.",
+      "chinese": "这种方法通过短故事帮助学习者记住新词。"
+    },
+    "application": {
+      "prompt": "The teacher showed us a simple ___ for checking pronunciation. A. method B. mannerly",
+      "solution": "A。解析：A 正确；a simple 后需名词 method，表示检查发音的方法。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: method",
+        "url": "https://dictionary.cambridge.org/dictionary/english/method"
+      }
+    ]
+  },
+  {
+    "word": "summarize",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "v. 总结；概括。英式拼写 summarise；名词 summary。",
+    "collocations": "summarize a story; briefly summarize; summarize the main points",
+    "commonMistake": "summarize 是动词；summary 是名词，复数 summaries。注意英式变体 summarise 仍是同一动词。",
+    "example": {
+      "english": "At the end of the project, each group summarized what it had learned.",
+      "chinese": "项目结束时，每组都总结了自己学到的内容。"
+    },
+    "application": {
+      "prompt": "Please ___ the main results in two sentences at the end of your report. A. summary B. summarize",
+      "solution": "B。解析：B 正确；please 后用动词原形 summarize，表示概括主要结果。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: summarize",
+        "url": "https://dictionary.cambridge.org/dictionary/english/summarize"
+      }
+    ]
+  },
+  {
+    "word": "growth",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 成长；增加；增长。通常不可数；动词 grow。",
+    "collocations": "economic growth; plant growth; growth in confidence",
+    "commonMistake": "growth 是名词，grow 是动词；表示整体成长或增长时通常不加复数 -s。",
+    "example": {
+      "english": "Regular reading supports the growth of a learner's vocabulary.",
+      "chinese": "定期阅读有助于学习者词汇量的增长。"
+    },
+    "application": {
+      "prompt": "The young trees showed strong ___ after receiving enough water. A. growth B. grew",
+      "solution": "A。解析：A 正确；strong 后需名词 growth，表示树木的生长。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: growth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/growth"
+      }
+    ]
+  },
+  {
+    "word": "mindset",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 思维模式；观念模式。可数名词，复数 mindsets。",
+    "collocations": "a growth mindset; have a positive mindset; change one's mindset",
+    "commonMistake": "mindset 是可数名词，可说 a mindset；不要和 mind（思维能力）当作完全相同的词。",
+    "example": {
+      "english": "A growth mindset helps learners treat mistakes as chances to improve.",
+      "chinese": "成长型思维能帮助学习者把错误看作进步的机会。"
+    },
+    "application": {
+      "prompt": "After failing the first test, Leo kept a positive ___ and tried a new strategy. A. mind B. mindset",
+      "solution": "B。解析：B 正确；积极的观念模式用 mindset，句中 a positive 修饰可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mindset",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mindset"
+      }
+    ]
+  },
+  {
+    "word": "material",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 材料；资料。可数或不可数，取决于指材料总称还是不同种类。",
+    "collocations": "learning materials; building material; reading material",
+    "commonMistake": "material 指制作物品的材料或学习资料；表示不同的材料种类可用复数 materials。",
+    "example": {
+      "english": "The teacher prepared extra reading material for learners who finished early.",
+      "chinese": "老师为提前完成任务的学习者准备了额外阅读材料。"
+    },
+    "application": {
+      "prompt": "Please bring the course ___, including the handout and the map. A. materials B. materialize",
+      "solution": "A。解析：A 正确；手册和地图是多份课程资料，用复数 materials。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: material",
+        "url": "https://dictionary.cambridge.org/dictionary/english/material"
+      }
+    ]
+  },
+  {
+    "word": "in part",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 在某种程度上；部分地。表示原因或结果并非全部。",
+    "collocations": "due in part to; explain in part; be in part responsible",
+    "commonMistake": "in part 表示部分原因或程度，不等于 entirely；搭配中 part 不加冠词。",
+    "example": {
+      "english": "The improvement was due in part to daily feedback from the teacher.",
+      "chinese": "这次进步部分归功于老师每天给出的反馈。"
+    },
+    "application": {
+      "prompt": "The project succeeded ___ because learners tested the website with real users. A. in full B. in part",
+      "solution": "B。解析：B 正确；真实用户测试是成功的部分原因，in part 表示“部分地”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in part",
+        "url": "https://dictionary.cambridge.org/dictionary/english/part"
+      }
+    ]
+  },
+  {
+    "word": "guidance",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 指导；引导。通常不可数，常用 guidance on/in。",
+    "collocations": "under a teacher's guidance; seek guidance; guidance on writing",
+    "commonMistake": "guidance 通常不可数；指一位指导者用 guide，不能说 a guidance。",
+    "example": {
+      "english": "With guidance from her tutor, Mia corrected the pronunciation of each word.",
+      "chinese": "在导师的指导下，米娅纠正了每个单词的发音。"
+    },
+    "application": {
+      "prompt": "The learners asked their teacher for ___ on how to plan the project. A. guidance B. guide",
+      "solution": "A。解析：A 正确；for 后需要名词 guidance，表示关于项目规划的指导。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: guidance",
+        "url": "https://dictionary.cambridge.org/dictionary/english/guidance"
+      }
+    ]
+  },
+  {
+    "word": "feedback",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 反馈意见；反馈信息。通常不可数。",
+    "collocations": "give feedback; feedback on a draft; useful feedback",
+    "commonMistake": "feedback 通常不加复数 -s；提出多条意见时仍可说 some feedback 或 pieces of feedback。",
+    "example": {
+      "english": "The teacher's feedback helped me improve the second draft.",
+      "chinese": "老师的反馈帮助我改进了第二稿。"
+    },
+    "application": {
+      "prompt": "Which sentence uses feedback as an uncountable noun? A. The group received a useful feedback. B. The group received useful feedback.",
+      "solution": "B。解析：B 正确；feedback 表示反馈意见时通常不可数，不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: feedback",
+        "url": "https://dictionary.cambridge.org/dictionary/english/feedback"
+      }
+    ]
+  },
+  {
+    "word": "addition",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 添加；增加；加法。可数名词，常见 in addition to。",
+    "collocations": "in addition to; an addition to the team; do addition",
+    "commonMistake": "addition 是名词；in addition to 中 to 是介词，后接名词或动名词。",
+    "example": {
+      "english": "The addition of a podcast made the course more interesting.",
+      "chinese": "加入播客让这门课程更有趣。"
+    },
+    "application": {
+      "prompt": "The ___ of a pronunciation game helped more learners join the lesson. A. addition B. additional",
+      "solution": "A。解析：A 正确；The 后需名词 addition，表示加入游戏这一行为。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: addition",
+        "url": "https://dictionary.cambridge.org/dictionary/english/addition"
+      }
+    ]
+  },
+  {
+    "word": "in addition",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 另外；此外。用于补充信息，常置于句首并加逗号。",
+    "collocations": "in addition, we need; in addition to the cost; add in addition",
+    "commonMistake": "in addition 单独表示“此外”；后接名词时要用 in addition to，不能漏掉 to。",
+    "example": {
+      "english": "In addition, the website provides audio examples for each new word.",
+      "chinese": "此外，这个网站还为每个生词提供音频例句。"
+    },
+    "application": {
+      "prompt": "Which sentence uses In addition before a complete sentence? A. In addition to, the site provides audio examples. B. In addition, the site provides audio examples.",
+      "solution": "B。解析：B 正确；in addition 可连接完整句；in addition to 后要接名词或动名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in addition",
+        "url": "https://dictionary.cambridge.org/dictionary/english/in-addition-to"
+      }
+    ]
+  },
+  {
+    "word": "resource",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 资源；资料。可数名词，复数 resources。",
+    "collocations": "online resources; natural resources; a resource for learners",
+    "commonMistake": "resource 是可数名词，单数前通常需要限定词；resources 常指多种学习或自然资源。",
+    "example": {
+      "english": "The website is a useful resource for students practising grammar.",
+      "chinese": "这个网站是学生练习语法的有用资源。"
+    },
+    "application": {
+      "prompt": "The library offers an online ___ for learners who cannot visit in person. A. resource B. resort",
+      "solution": "A。解析：A 正确；在线学习资料是 resource，resort 指度假胜地或求助手段。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: resource",
+        "url": "https://dictionary.cambridge.org/dictionary/english/resource"
+      }
+    ]
+  },
+  {
+    "word": "textbook",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 教科书；课本。可数名词，复数 textbooks。",
+    "collocations": "a science textbook; textbook exercise; open the textbook",
+    "commonMistake": "textbook 是合成名词，复数在中心词 book 上加 -s，写 textbooks。",
+    "example": {
+      "english": "The textbook includes a short dialogue at the end of each unit.",
+      "chinese": "这本课本每个单元末尾都附有一段简短对话。"
+    },
+    "application": {
+      "prompt": "Please open your English ___ to page 24 and read the example. A. textbook B. textbookly",
+      "solution": "A。解析：A 正确；English 后需要名词 textbook，指英语课本。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: textbook",
+        "url": "https://dictionary.cambridge.org/dictionary/english/textbook"
+      }
+    ]
+  },
+  {
+    "word": "advantage",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 优势；有利条件。可数名词；常用 advantage of/over。",
+    "collocations": "have an advantage; advantage over others; take advantage of",
+    "commonMistake": "advantage 通常作可数名词，单数前常用 an；注意 take advantage of 后接对象。",
+    "example": {
+      "english": "One advantage of flashcards is that they are easy to carry.",
+      "chinese": "抽认卡的一个优点是便于携带。"
+    },
+    "application": {
+      "prompt": "A small group has the ___ of giving every learner time to speak. A. advantageous B. advantage",
+      "solution": "B。解析：B 正确；the 后需要名词 advantage，说明小组学习的优点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: advantage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/advantage"
+      }
+    ]
+  },
+  {
+    "word": "take advantage of",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 利用；善用（机会或条件）。后接名词或代词作宾语。",
+    "collocations": "take advantage of an opportunity; take advantage of resources; take full advantage of",
+    "commonMistake": "of 是介词，后接名词或动名词；此短语也可含“占便宜”之意，需根据语境判断。",
+    "example": {
+      "english": "We took advantage of the quiet room to record our podcast.",
+      "chinese": "我们利用安静的房间录制了播客。"
+    },
+    "application": {
+      "prompt": "The learners ___ the free website to practise pronunciation after class. A. took advantage of B. took advantage for",
+      "solution": "A。解析：A 正确；take advantage of sth 表示善用资源，此处指利用免费的网站。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: take advantage of",
+        "url": "https://dictionary.cambridge.org/dictionary/english/take-advantage-of"
+      }
+    ]
+  },
+  {
+    "word": "efficiently",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "adv. 高效地；效率高地。形容词 efficient，名词 efficiency。",
+    "collocations": "work efficiently; use time efficiently; run efficiently",
+    "commonMistake": "efficiently 是副词，用来修饰动词；efficient 是形容词，不能说 work efficient。",
+    "example": {
+      "english": "The group used the dictionary efficiently by checking several words at once.",
+      "chinese": "小组通过一次查多个词，高效地使用了词典。"
+    },
+    "application": {
+      "prompt": "With a clear plan, the class finished the experiment more ___. A. efficient B. efficiently",
+      "solution": "B。解析：B 正确；more 后修饰动词 finished，用副词 efficiently。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: efficiently",
+        "url": "https://dictionary.cambridge.org/dictionary/english/efficiently"
+      }
+    ]
+  },
+  {
+    "word": "valley",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 山谷；溪谷。可数名词，复数 valleys。",
+    "collocations": "a river valley; deep in the valley; valley floor",
+    "commonMistake": "valley 以辅音字母加 y 结尾，复数 y 改 i 加 -es，写 valleys。",
+    "example": {
+      "english": "A small school in the valley uses solar power to run its website.",
+      "chinese": "山谷里的一所小学校使用太阳能运行网站。"
+    },
+    "application": {
+      "prompt": "The river flows through a narrow ___ between two high hills. A. valley B. volume",
+      "solution": "A。解析：A 正确；两座高山之间的低地是 valley（山谷）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: valley",
+        "url": "https://dictionary.cambridge.org/dictionary/english/valley"
+      }
+    ]
+  },
+  {
+    "word": "pronunciation",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 发音；读音。通常不可数；动词 pronounce。",
+    "collocations": "correct pronunciation; pronunciation of a word; practise pronunciation",
+    "commonMistake": "pronunciation 是名词，拼写中没有 pronounce 的字母 o；动词 pronounce 不能代替名词。",
+    "example": {
+      "english": "The podcast gives a clear pronunciation of each new term.",
+      "chinese": "这档播客清晰地读出了每个新术语。"
+    },
+    "application": {
+      "prompt": "The dictionary includes an audio guide to the ___ of difficult words. A. pronounce B. pronunciation",
+      "solution": "B。解析：B 正确；the 后需要名词 pronunciation，表示单词的读音。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pronunciation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pronunciation"
+      }
+    ]
+  },
+  {
+    "word": "click",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "v. 点击；发出咔嗒声；n. 咔嗒声。过去式 clicked。",
+    "collocations": "click on a link; click the button; hear a click",
+    "commonMistake": "表示点击按钮时 click 可直接接宾语；click on a link 中 on 不能漏，但不说 click at the button。",
+    "example": {
+      "english": "Click the blue button to open the school's project website.",
+      "chinese": "点击蓝色按钮打开学校项目网站。"
+    },
+    "application": {
+      "prompt": "To hear the example, ___ on the small speaker icon beside the word. A. click B. click at",
+      "solution": "A。解析：A 正确；click on 是点击图标的搭配，此处 on 后接图标。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: click",
+        "url": "https://dictionary.cambridge.org/dictionary/english/click"
+      }
+    ]
+  },
+  {
+    "word": "newspaper",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 报纸。可数名词，复数 newspapers。",
+    "collocations": "read a newspaper; newspaper article; local newspaper",
+    "commonMistake": "newspaper 是可数名词；说“在报纸上”常用 in the newspaper，不用 on the newspaper。",
+    "example": {
+      "english": "The newspaper published an article about the learners' science project.",
+      "chinese": "报纸刊登了一篇关于学习者科学项目的文章。"
+    },
+    "application": {
+      "prompt": "Her interview appeared in the local ___ on Saturday morning. A. news B. newspaper",
+      "solution": "B。解析：B 正确；刊登采访的出版物是 newspaper；news 是不可数的新闻内容。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: newspaper",
+        "url": "https://dictionary.cambridge.org/dictionary/english/newspaper"
+      }
+    ]
+  },
+  {
+    "word": "magazine",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 杂志；期刊。可数名词，复数 magazines。",
+    "collocations": "a science magazine; magazine article; monthly magazine",
+    "commonMistake": "magazine 指定期出版物；newspaper 通常每日或每周报道新闻，二者出版形式不同。",
+    "example": {
+      "english": "He found an experiment idea in a children's science magazine.",
+      "chinese": "他在一本儿童科学杂志里发现了一个实验点子。"
+    },
+    "application": {
+      "prompt": "The school library subscribes to a ___ about technology and learning. A. magazine B. manuscript",
+      "solution": "A。解析：A 正确；图书馆订阅的定期刊物是 magazine（杂志）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: magazine",
+        "url": "https://dictionary.cambridge.org/dictionary/english/magazine"
+      }
+    ]
+  },
+  {
+    "word": "shelf",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 架子；搁板。可数名词，复数 shelves。",
+    "collocations": "on the shelf; a bookshelf; shelf space",
+    "commonMistake": "shelf 复数为 shelves，f 变 v 后加 -es；不要写 shelfses。",
+    "example": {
+      "english": "I put the dictionary back on the shelf after checking the word.",
+      "chinese": "查完这个词后，我把词典放回了架子上。"
+    },
+    "application": {
+      "prompt": "The teacher placed the flashcards on two ___ near the door. A. shelfs B. shelves",
+      "solution": "B。解析：B 正确；shelf 的常见复数形式是 shelves。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shelf",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shelf"
+      }
+    ]
+  },
+  {
+    "word": "open up",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "phr. 打开；开放；开辟（机会或空间）。可分动词短语。",
+    "collocations": "open up a shop; open up opportunities; open it up",
+    "commonMistake": "open up 可表示打开空间或带来机会；代词作宾语时置于 open 与 up 中间。",
+    "example": {
+      "english": "The new website opened up more chances for learners to practise English.",
+      "chinese": "新网站为学习者创造了更多练习英语的机会。"
+    },
+    "application": {
+      "prompt": "The school library's new online service will ___ learning opportunities for remote students. A. open up B. close down",
+      "solution": "A。解析：A 正确；open up opportunities 表示开辟学习机会，与远程学生受益的语境相符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: open up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/open-up"
+      }
+    ]
+  },
+  {
+    "word": "print",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "v. 打印；印刷；n. 印刷品。过去式 printed。",
+    "collocations": "print a document; print out a page; in print",
+    "commonMistake": "print 作动词直接接要打印的内容；printout 作名词或 print out 作短语动词，注意词性。",
+    "example": {
+      "english": "Please print the project notes before the group meeting.",
+      "chinese": "请在小组会议前把项目笔记打印出来。"
+    },
+    "application": {
+      "prompt": "The teacher asked us to ___ the final report and bring a copy. A. printer B. print",
+      "solution": "B。解析：B 正确；asked us to 后接动词原形 print，表示打印报告。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: print",
+        "url": "https://dictionary.cambridge.org/dictionary/english/print"
+      }
+    ]
+  },
+  {
+    "word": "e-book",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 电子书。可数名词，复数 e-books。",
+    "collocations": "download an e-book; e-book reader; read an e-book",
+    "commonMistake": "e-book 前常用 an，因为字母 e 的读音以元音音素开头；拼写保留连字符。",
+    "example": {
+      "english": "I downloaded an e-book about the history of the universe.",
+      "chinese": "我下载了一本关于宇宙历史的电子书。"
+    },
+    "application": {
+      "prompt": "She read an ___ on her tablet during the train ride. A. e-book B. e-booking",
+      "solution": "A。解析：A 正确；在平板上阅读的是电子书 e-book，an 与其开头读音搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: e-book",
+        "url": "https://dictionary.cambridge.org/dictionary/english/e-book"
+      }
+    ]
+  },
+  {
+    "word": "schoolwork",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "n. 学校作业；课业。通常不可数。",
+    "collocations": "finish schoolwork; schoolwork load; do schoolwork",
+    "commonMistake": "schoolwork 通常作不可数名词，不说 schoolworks；具体一项作业可说 an assignment。",
+    "example": {
+      "english": "He finished his schoolwork before listening to the podcast.",
+      "chinese": "他听播客之前先完成了学校作业。"
+    },
+    "application": {
+      "prompt": "After dinner, Mina spent an hour doing her ___. A. schoolworks B. schoolwork",
+      "solution": "B。解析：B 正确；schoolwork 表示课业时通常不可数，不加 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: schoolwork",
+        "url": "https://dictionary.cambridge.org/dictionary/english/schoolwork"
+      }
+    ]
+  },
+  {
+    "word": "recent",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "adj. 最近的；近来的。副词 recently。",
+    "collocations": "recent changes; in recent years; a recent study",
+    "commonMistake": "recent 是形容词，修饰名词；recently 是副词，常放在完成时或句末。",
+    "example": {
+      "english": "A recent study found that short breaks can improve concentration.",
+      "chinese": "最近的一项研究发现，短暂休息能提高注意力。"
+    },
+    "application": {
+      "prompt": "The website lists the ___ changes to the school timetable. A. recent B. recently",
+      "solution": "A。解析：A 正确；修饰名词 changes 需要形容词 recent。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: recent",
+        "url": "https://dictionary.cambridge.org/dictionary/english/recent"
+      }
+    ]
+  },
+  {
+    "word": "HSK",
+    "examTags": [
+      "词汇·学习方法",
+      "语言运用·句型辨析"
+    ],
+    "grammar": "abbr. 汉语水平考试（Hanyu Shuiping Kaoshi），面向中文学习者的标准化考试。",
+    "collocations": "take the HSK; prepare for the HSK; HSK test level",
+    "commonMistake": "HSK 是专有缩写，字母全大写；不在缩写内部插入句点，也不加撇号表示复数。",
+    "example": {
+      "english": "Lena is preparing for the HSK to measure her Chinese language ability.",
+      "chinese": "莉娜正在准备汉语水平考试，以检验自己的中文能力。"
+    },
+    "application": {
+      "prompt": "Lena is learning Chinese and has registered for the ___, a standardized test of Chinese proficiency. A. IELTS B. HSK",
+      "solution": "B。解析：B 正确；HSK 是汉语水平考试，句中明确说明是中文能力标准化考试。"
+    },
+    "sources": [
+      {
+        "label": "Chinese Test Service: HSK",
+        "url": "https://www.chinesetest.cn/"
+      }
+    ]
+  }
+]

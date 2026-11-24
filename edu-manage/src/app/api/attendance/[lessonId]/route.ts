@@ -45,6 +45,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
   const records = await prisma.attendance.findMany({
     where: {
       lessonId,
+      deletedAt: null,
       lesson: lessonScope,
       enrollment: activeEnrollmentWhere,
       student: studentScope,

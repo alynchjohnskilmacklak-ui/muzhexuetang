@@ -136,8 +136,31 @@ export function OneOnOneModal({
             placeholder="选择老师"
             style={{ width: '100%' }}
             value={teacherId || undefined}
-            onChange={v => { setTeacherId(v); setConflicts([]) }}
-            options={teacherList.map((t: Record<string, unknown>) => ({ label: t.name as string, value: t.id as string }))}
+            onChange={v => {
+              setTeacherId(v)
+              setConflicts([])
+              const selected = teacherList.find((t: Record<string, unknown>) => t.id === v)
+              const teacherSubs = (typeof selected?.subjects === 'string'
+                ? selected.subjects.split(/[,，、]/)
+                : Array.isArray(selected?.subjects)
+                  ? selected.subjects
+                  : []
+              ).map((s: string) => s.trim()).filter(Boolean)
+              if (teacherSubs.length > 0 && (!subject || !teacherSubs.includes(subject))) {
+                setSubject(teacherSubs[0])
+              }
+            }}
+            options={teacherList.map((t: Record<string, unknown>) => {
+              const teacherSub = typeof t.subjects === 'string'
+                ? t.subjects
+                : Array.isArray(t.subjects)
+                  ? t.subjects.join('/')
+                  : ''
+              return {
+                label: teacherSub ? `${t.name as string} (${teacherSub})` : (t.name as string),
+                value: t.id as string,
+              }
+            })}
           />
         </div>
 

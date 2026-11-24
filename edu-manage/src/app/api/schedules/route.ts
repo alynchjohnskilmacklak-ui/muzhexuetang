@@ -67,7 +67,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: '历史批次只允许查看，请切换到当前运营批次后再排课' }, { status: 409 })
     }
 
-    const dedupedStudentIds = [...new Set(Array.isArray(studentIds) ? studentIds : [])] as string[]
+    const dedupedStudentIds = Array.isArray(studentIds)
+      ? [...new Set(studentIds.filter((studentId): studentId is string => typeof studentId === 'string' && Boolean(studentId.trim()))) ]
+      : []
     const intensiveTeachingType = toIntensiveTeachingType(classType)
     const room = roomId
       ? await prisma.room.findUnique({ where: { id: roomId }, select: { capacity: true } })
@@ -140,8 +142,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
       // Validate the course and teacher again inside the write transaction.
       const course = await tx.course.findFirst({
-        where: { id: courseId, isActive: true },
-        select: { id: true, name: true, division: true },
+        where: { id: courseId, isActive: true, deletedAt: null },
+        select: { id: true, name: true, subject: true, division: true },
       })
       if (!course) throw { status: 400, message: '所选课程不存在或已停用' }
       const lessonDivision = normalizeWritableDivision(course.division, requestedDivision)
@@ -154,22 +156,44 @@ export const POST = apiHandler(async (req: NextRequest) => {
       })
       if (!teacher) throw { status: 400, message: '请选择当前学部的在职教师' }
 
+      if (dedupedStudentIds.length) {
+        const eligibleStudents = await tx.student.findMany({
+          where: {
+            id: { in: dedupedStudentIds },
+            division: lessonDivision,
+            status: { not: 'INACTIVE' },
+            deletedAt: null,
+          },
+          select: { id: true },
+        })
+        if (eligibleStudents.length !== dedupedStudentIds.length) {
+          throw { status: 400, message: '所选学员已停用或不属于当前学部，请刷新名单后重试' }
+        }
+      }
+
       // 使用已有 ClassGroup 或创建新班级（不再用"临时"前缀污染班级列表）
       const groupName = body.groupName || `${course.name}·${teacher.name}·${startDate}`
       let group = classGroupId
-        ? await tx.classGroup.findFirst({ where: { id: classGroupId, termId: selectedTerm.id, status: { not: 'ARCHIVED' } } })
+        ? await tx.classGroup.findFirst({ where: { id: classGroupId, termId: selectedTerm.id, status: { not: 'ARCHIVED' }, deletedAt: null } })
         : await tx.classGroup.findFirst({
             where: {
               name: groupName,
               teacherId,
               courseId,
               status: { not: 'ARCHIVED' },
+              deletedAt: null,
               division: lessonDivision,
               intensiveMode: intensiveTeachingType ? 'INTENSIVE' : 'NORMAL',
               termId: selectedTerm.id,
             },
           })
-      if (group && intensiveTeachingType && (group.intensiveMode !== 'INTENSIVE' || group.teachingType !== intensiveTeachingType)) {
+      if (group && group.courseId !== course.id) {
+        throw { status: 400, message: '所选班级所属课程与本次排课课程不一致' }
+      }
+      if (group && group.intensiveMode !== (intensiveTeachingType ? 'INTENSIVE' : 'NORMAL')) {
+        throw { status: 400, message: '所选班级与本次排课班型不一致' }
+      }
+      if (group && intensiveTeachingType && group.teachingType !== intensiveTeachingType) {
         throw { status: 400, message: '所选班级与突击班类型不一致' }
       }
       if (!group) {
@@ -199,8 +223,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
       // Create enrollment relationship only (no fake hour purchase)
       for (const studentId of dedupedStudentIds) {
-        const existing = await tx.enrollment.findFirst({
-          where: { groupId: group.id, studentId },
+        const existing = await tx.enrollment.findUnique({
+          where: { studentId_groupId: { groupId: group.id, studentId } },
         })
         if (!existing) {
           await tx.enrollment.create({
@@ -210,7 +234,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
               totalHours: 0,
               remainHours: 0,
               status: 'ACTIVE',
+              subjects: [course.subject],
             },
+          })
+        } else if (existing.status !== 'ACTIVE' || existing.deletedAt) {
+          throw { status: 409, message: '所选学员在该班级的报名已结束或已删除，请先恢复有效报名后再排课' }
+        } else if (!existing.subjects.includes(course.subject)) {
+          await tx.enrollment.update({
+            where: { id: existing.id },
+            data: { subjects: [...new Set([...existing.subjects, course.subject])] },
           })
         }
       }
@@ -223,6 +255,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         data: {
           groupId: group.id,
           teacherId,
+          subject: course.subject,
           lessonDate,
           startTime: startTimeVal,
           endTime: endTimeVal,
@@ -246,7 +279,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         },
       })
 
-      if (intensiveTeachingType && dedupedStudentIds.length) {
+      if (dedupedStudentIds.length) {
         await tx.classLessonStudent.createMany({
           data: dedupedStudentIds.map((studentId) => ({ lessonId: lesson.id, studentId })),
           skipDuplicates: true,

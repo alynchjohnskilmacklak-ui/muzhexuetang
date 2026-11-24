@@ -186,7 +186,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
 export const POST = apiHandler(async (req: NextRequest) => {
   const body = await req.json()
 
-  const { studentId, type, amount, hours, campus, operator, notes, paidAt, courseId } = body
+  const { studentId, type, amount, hours, campus, operator, notes, paidAt, dueDate, courseId } = body
+  if (body.status !== undefined && body.status !== 'paid' && body.status !== 'pending') {
+    return NextResponse.json({ error: '收费状态无效' }, { status: 400 })
+  }
+  const status = body.status === 'pending' ? 'pending' : 'paid'
   const requestedDivision: Division = body.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
   const { user } = await requireFeeAdminScope(requestedDivision)
   const db = isDualDbEnabled()
@@ -201,6 +205,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
   if (hours !== undefined && hours !== null && (typeof hours !== 'number' || !Number.isFinite(hours) || hours < 0)) {
     return NextResponse.json({ error: '课时数必须 >= 0' }, { status: 400 })
+  }
+  if (status === 'pending' && (!dueDate || Number.isNaN(new Date(dueDate).getTime()))) {
+    return NextResponse.json({ error: '待缴费用请填写有效到期日' }, { status: 400 })
+  }
+  if (dueDate && Number.isNaN(new Date(dueDate).getTime())) {
+    return NextResponse.json({ error: '到期日格式无效' }, { status: 400 })
   }
 
   const student = await db.student.findUnique({ where: { id: studentId }, select: { id: true, division: true } })
@@ -229,8 +239,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
         courseId: courseId || null,
         amount,
         type: type || '其他',
-        status: 'paid',
-        paidAt: paidAt ? new Date(paidAt) : new Date(),
+        status,
+        paidAt: status === 'paid' ? (paidAt ? new Date(paidAt) : new Date()) : null,
+        dueDate: dueDate ? new Date(dueDate) : null,
         hours: hours ?? null,
         campus: campus || null,
         operator: operator || null,

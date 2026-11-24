@@ -74,28 +74,41 @@ function memCheck(key: string, rpm: number): { allowed: boolean; retryAfter?: nu
 let _redisClient: unknown = null
 let _redisInitFailed = false
 
-function isExplicitRedisDriver(): boolean {
-  return process.env.RATE_LIMIT_DRIVER?.toLowerCase() === 'redis'
+const REDIS_RATE_LIMIT_SCRIPT = `
+local count = redis.call('INCR', KEYS[1])
+local ttl = redis.call('TTL', KEYS[1])
+if ttl < 0 then
+  redis.call('EXPIRE', KEYS[1], tonumber(ARGV[1]))
+  ttl = tonumber(ARGV[1])
+end
+if count > tonumber(ARGV[2]) then
+  return { 0, ttl }
+end
+return { 1, ttl }
+`
+
+function requiresRedisFailureClosed(): boolean {
+  const configured = (process.env.RATE_LIMIT_DRIVER || 'auto').toLowerCase()
+  return configured === 'redis' || (process.env.NODE_ENV === 'production' && configured === 'auto')
 }
 
 async function getRedis(): Promise<unknown | null> {
   if (_redisClient) return _redisClient
   if (_redisInitFailed) {
-    if (isExplicitRedisDriver()) {
+    if (requiresRedisFailureClosed()) {
       throw new Error('[rate-limit] Redis 初始化此前已失败，显式 Redis 模式拒绝降级')
     }
     return null
   }
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { createClient } = require('redis') as { createClient: (opts: Record<string, unknown>) => { connect(): Promise<void>; incr(k: string): Promise<number>; expire(k: string, s: number): Promise<void>; ttl(k: string): Promise<number> } }
+    const { createClient } = await import('redis')
     const client = createClient({ url: process.env.REDIS_URL })
     await client.connect()
     _redisClient = client
     return client
   } catch (error) {
     _redisInitFailed = true
-    if (isExplicitRedisDriver()) {
+    if (requiresRedisFailureClosed()) {
       throw new Error('[rate-limit] RATE_LIMIT_DRIVER=redis，但 Redis 初始化失败', { cause: error })
     }
     console.warn('[rate-limit] Redis 不可用，降级为内存限流')
@@ -107,21 +120,23 @@ async function redisCheck(key: string, rpm: number): Promise<{ allowed: boolean;
   const redis = await getRedis()
   if (!redis) return memCheck(key, rpm)
 
-  const r = redis as { incr(k: string): Promise<number>; expire(k: string, s: number): Promise<void>; ttl(k: string): Promise<number> }
+  const r = redis as { eval(script: string, options: { keys: string[]; arguments: string[] }): Promise<unknown> }
   try {
-    const count = await r.incr(key)
-    if (count === 1) {
-      await r.expire(key, 60)
-    }
-    if (count > rpm) {
-      const ttl = await r.ttl(key)
-      return { allowed: false, retryAfter: Math.max(1, ttl) }
-    }
-    return { allowed: true }
+    const result = await r.eval(REDIS_RATE_LIMIT_SCRIPT, {
+      keys: [key],
+      arguments: ['60', String(rpm)],
+    })
+    if (!Array.isArray(result) || result.length < 2) throw new Error('REDIS_RATE_LIMIT_RESULT_INVALID')
+    const [allowedValue, ttlValue] = result.map(Number)
+    if (!Number.isFinite(allowedValue) || !Number.isFinite(ttlValue)) throw new Error('REDIS_RATE_LIMIT_RESULT_INVALID')
+    return allowedValue === 1
+      ? { allowed: true }
+      : { allowed: false, retryAfter: Math.max(1, ttlValue) }
   } catch (error) {
-    if (isExplicitRedisDriver()) {
+    if (requiresRedisFailureClosed()) {
       throw new Error('[rate-limit] Redis 限流请求失败，拒绝静默降级', { cause: error })
     }
+    console.warn('[rate-limit] Redis 限流请求失败，降级为内存限流')
     return memCheck(key, rpm)
   }
 }
@@ -141,6 +156,9 @@ function resolveDriver(): 'redis' | 'memory' {
     throw new Error(`[rate-limit] 不支持的 RATE_LIMIT_DRIVER: ${configured}`)
   }
   // auto
+  if (process.env.NODE_ENV === 'production' && !process.env.REDIS_URL) {
+    throw new Error('[rate-limit] 生产环境 auto 模式必须配置 REDIS_URL，拒绝使用进程内存限流')
+  }
   return process.env.REDIS_URL ? 'redis' : 'memory'
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { getRequestDivision } from '@/lib/division'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
@@ -32,12 +33,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
       select: { id: true },
     })
     if (!owns) return NextResponse.json({ error: '无权限' }, { status: 403 })
+  } else {
+    const division = getRequestDivision(user, searchParams.get('division'))
+    const owns = await prisma.classGroup.findFirst({
+      where: { id: groupId, division, status: { not: 'ARCHIVED' } },
+      select: { id: true },
+    })
+    if (!owns) return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
 
   const assessments = await prisma.assessment.findMany({
     where: { groupId },
     include: {
       gradeRecords: {
+        where: { deletedAt: null },
         include: {
           student: { select: { id: true, name: true } },
           dimensions: true,
@@ -59,6 +68,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const { groupId, name, type, assessDate, fullScore } = body
 
   if (!groupId || !name) return NextResponse.json({ error: '请填写班级和测评名称' }, { status: 400 })
+  if (type !== undefined && !['DIAGNOSTIC', 'STAGE', 'WEEKLY', 'MONTHLY', 'FINAL', 'MOCK'].includes(type)) {
+    return NextResponse.json({ error: '测评类型无效' }, { status: 400 })
+  }
+  if (fullScore !== undefined && (typeof fullScore !== 'number' || !Number.isFinite(fullScore) || fullScore <= 0 || fullScore > 1000)) {
+    return NextResponse.json({ error: '满分须大于 0 且不超过 1000 分' }, { status: 400 })
+  }
+  if (assessDate !== undefined && (typeof assessDate !== 'string' || Number.isNaN(new Date(assessDate).getTime()))) {
+    return NextResponse.json({ error: '测评日期无效' }, { status: 400 })
+  }
 
   const activeGroup = await prisma.classGroup.findFirst({
     where: { id: groupId, division: user.division, term: { status: 'ACTIVE' } },

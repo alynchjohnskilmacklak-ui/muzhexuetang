@@ -1,0 +1,121 @@
+
+=== Q3a 通知 userId 与学生当前 parentUserId 不一致（换绑/解绑残留） ===
+[
+  {
+    "type": "PARENT_MESSAGE",
+    "n": 31
+  },
+  {
+    "type": "PARENT_MESSAGE_REMINDER",
+    "n": 13
+  },
+  {
+    "type": "leave",
+    "n": 8
+  },
+  {
+    "type": "FEEDBACK_REVIEW",
+    "n": 4
+  }
+]
+
+=== Q3e 学生已无家长绑定(parentUserId null) 但通知仍挂 ACTIVE ===
+[]
+
+=== Q3f 通知 studentId 为空的 ACTIVE 通知（广播/系统类） ===
+[
+  {
+    "type": "CLASSROOM_FEEDBACK",
+    "n": 10227
+  },
+  {
+    "type": "CLASS_ENROLLMENT",
+    "n": 102
+  },
+  {
+    "type": "CLASS_START",
+    "n": 79
+  },
+  {
+    "type": "PAPER_PUBLISHED",
+    "n": 15
+  },
+  {
+    "type": "SCHEDULE_CHANGE",
+    "n": 1
+  }
+]
+
+=== Q1d teacher 角色账号 teacherId 为空（孤立账号） ===
+[
+  {
+    "orphan_teacher_accounts": 14
+  }
+]
+
+=== Q1e 教师 User 账号 division 与 Teacher.division 不一致 ===
+[]
+
+=== Q4c 家长名下 ACTIVE 通知数 vs 其活跃孩子数 概览（Top 残留家长） ===
+[
+  {
+    "userId": "cmr9b4w4001b993eizeubjmdg",
+    "name": "张思梦家长",
+    "active_notifications": 168,
+    "active_children": 0
+  },
+  {
+    "userId": "cmr3dqq9o0016nvkf9dfz49d9",
+    "name": "胡浩森家长",
+    "active_notifications": 166,
+    "active_children": 0
+  },
+  {
+    "userId": "cmrbppvfk000anropeyxrxejp",
+    "name": "张梓妍家长",
+    "active_notifications": 161,
+    "active_children": 0
+  },
+  {
+    "userId": "cmquespu5001d69ns182pgwa7",
+    "name": "默子诺家长",
+    "active_notifications": 161,
+    "active_children": 0
+  },
+  {
+    "userId": "cmq0vtaps00023upjnx204x4d",
+    "name": "赵亦昊家长",
+    "active_notifications": 160,
+    "active_children": 0
+  },
+  {
+    "userId": "cmr9aal43017493ei1k5r8t4f",
+    "name": "杨子涵家长",
+    "active_notifications": 159,
+    "active_children": 0
+  },
+  {
+    "userId": "cmr3dpxct000wnvkfcci8nrid",
+    "name": "赵茜雅家长",
+    "active_notifications": 152,
+    "active_children": 0
+  },
+  {
+    "userId": "cmpaml6p5000jcv8lwri1orc4",
+    "name": "赵浩淼家长",
+    "active_notifications": 133,
+    "active_children": 0
+  },
+  {
+    "userId": "cmrakp8fc01zm12iv9swunr99",
+    "name": "李烨灿家长",
+    "active_notifications": 132,
+    "active_children": 0
+  },
+  {
+    "userId": "cmra3qc9e000m12ivhy4b576e",
+    "name": "丁宇辰家长",
+    "active_notifications": 98,
+    "active_children": 0
+  }
+]

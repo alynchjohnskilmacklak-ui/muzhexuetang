@@ -31,6 +31,15 @@ export function feedbackValue(value: unknown): string | null {
   return String(value).trim() || null
 }
 
+/** The first paragraph is the general lesson evaluation shown to families and on share posters. */
+export function getOverallEvaluationContent(value: unknown): string {
+  return (feedbackValue(value) || '')
+    .replace(/\r\n?/g, '\n')
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .find(Boolean) || ''
+}
+
 function extractStructuredSections(item: ParentFeedbackContentInput) {
   const overallComment = feedbackValue(item.overallComment) || ''
   const article = articleSections(overallComment)
@@ -154,4 +163,25 @@ export function getParentFeedbackDisplaySections(item: ParentFeedbackContentInpu
     .trim()
     .replace(/S\d+(?:同学)?/g, studentName ? `${studentName}同学` : '孩子')
   return [{ label: '课堂反馈', content: normalizedContent }]
+}
+
+/** Returns only the teacher-facing feedback body, excluding the generated lesson and mastery sections. */
+export function getParentClassroomFeedbackContent(value: unknown, studentName?: unknown) {
+  const source = feedbackValue(value) || ''
+  if (!source) return ''
+
+  const structured = extractStructuredSections({ overallComment: source })
+  const content = structured.get('课堂反馈') || [
+    structured.get('课堂表现'),
+    structured.get('存在问题'),
+    structured.get('后续建议'),
+  ].filter(Boolean).join('\n\n') || (!structured.size ? source : '')
+  if (!content) return ''
+
+  const name = feedbackValue(studentName)
+  return removeDuplicatedOpeningObservation(content)
+    .replace(/(^|[\n。！？])\s*(?:(?:但是|不过)\s*)?(?:还是\s*)?课下多背背[，,。！？]?/g, '$1')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .replace(/S\d+(?:同学)?/g, name ? `${name}同学` : '孩子')
 }

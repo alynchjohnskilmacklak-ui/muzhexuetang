@@ -1,0 +1,758 @@
+{
+  "schemaVersion": "muzhe-poetry-recitation-v1",
+  "volume": {
+    "grade": 7,
+    "semester": 2,
+    "name": "七年级下册",
+    "edition": "统编版（人民教育出版社）"
+  },
+  "scopeNotice": "收录本册教材诗歌与课外古诗词诵读。教材收录不自动等同于全国统一必背；由教师按教学和本地考试范围布置。",
+  "sourceBook": "最新【人教版】7年级语文课本•下册.pdf",
+  "reviewStatus": "待教师二次校对",
+  "items": [
+    {
+      "id": "g7-2-001",
+      "sequence": 1,
+      "title": "木兰诗",
+      "author": "北朝民歌",
+      "dynasty": "南北朝",
+      "textbookSection": "木兰诗",
+      "contentType": "课内诗歌",
+      "genre": "乐府民歌·叙事诗",
+      "stanzas": [
+        [
+          "唧唧复唧唧，木兰当户织。",
+          "不闻机杼声，唯闻女叹息。"
+        ],
+        [
+          "问女何所思，问女何所忆。",
+          "女亦无所思，女亦无所忆。",
+          "昨夜见军帖，可汗大点兵。",
+          "军书十二卷，卷卷有爷名。",
+          "阿爷无大儿，木兰无长兄。",
+          "愿为市鞍马，从此替爷征。"
+        ],
+        [
+          "东市买骏马，西市买鞍鞯。",
+          "南市买辔头，北市买长鞭。",
+          "旦辞爷娘去，暮宿黄河边。",
+          "不闻爷娘唤女声，但闻黄河流水鸣溅溅。",
+          "旦辞黄河去，暮至黑山头。",
+          "不闻爷娘唤女声，但闻燕山胡骑鸣啾啾。"
+        ],
+        [
+          "万里赴戎机，关山度若飞。",
+          "朔气传金柝，寒光照铁衣。",
+          "将军百战死，壮士十年归。"
+        ],
+        [
+          "归来见天子，天子坐明堂。",
+          "策勋十二转，赏赐百千强。",
+          "可汗问所欲，木兰不用尚书郎。",
+          "愿驰千里足，送儿还故乡。"
+        ],
+        [
+          "爷娘闻女来，出郭相扶将。",
+          "阿姊闻妹来，当户理红妆。",
+          "小弟闻姊来，磨刀霍霍向猪羊。",
+          "开我东阁门，坐我西阁床。",
+          "脱我战时袍，著我旧时裳。",
+          "当窗理云鬓，对镜帖花黄。",
+          "出门看火伴，火伴皆惊忙。",
+          "同行十二年，不知木兰是女郎。"
+        ],
+        [
+          "雄兔脚扑朔，雌兔眼迷离。",
+          "双兔傍地走，安能辨我是雄雌？"
+        ]
+      ],
+      "meaningSummary": "叙写木兰代父从军、征战归来和恢复女儿身的经历，赞美她的勇敢、孝心与机敏。",
+      "keyNotes": [
+        {
+          "term": "市",
+          "meaning": "买"
+        },
+        {
+          "term": "戎机",
+          "meaning": "战事"
+        },
+        {
+          "term": "著",
+          "meaning": "穿"
+        },
+        {
+          "term": "帖花黄",
+          "meaning": "贴上黄色的面饰"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          11,
+          14
+        ],
+        "pdfPages": [
+          20,
+          23
+        ],
+        "crosswalkTitle": "木兰诗",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 53,
+        "printedPage": 46,
+        "otherTitleHits": [
+          54,
+          55,
+          56
+        ],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-002",
+      "sequence": 2,
+      "title": "竹里馆",
+      "author": "王维",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（一）",
+      "contentType": "课外古诗词诵读",
+      "genre": "五言绝句",
+      "stanzas": [
+        [
+          "独坐幽篁里，弹琴复长啸。",
+          "深林人不知，明月来相照。"
+        ]
+      ],
+      "meaningSummary": "诗人独坐幽深竹林，弹琴长啸，与明月相伴，写出宁静淡泊、自得其乐的心境。",
+      "keyNotes": [
+        {
+          "term": "幽篁",
+          "meaning": "幽深的竹林"
+        },
+        {
+          "term": "长啸",
+          "meaning": "撮口发出清越悠长的声音"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "竹里馆",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 100,
+        "printedPage": 93,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-003",
+      "sequence": 3,
+      "title": "春夜洛城闻笛",
+      "author": "李白",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（一）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "谁家玉笛暗飞声，散入春风满洛城。",
+          "此夜曲中闻折柳，何人不起故园情。"
+        ]
+      ],
+      "meaningSummary": "春夜笛声传遍洛阳，听到离别曲《折杨柳》，诗人由己及人地想到游子的故园之思。",
+      "keyNotes": [
+        {
+          "term": "玉笛",
+          "meaning": "对笛子的美称"
+        },
+        {
+          "term": "折柳",
+          "meaning": "指《折杨柳》曲，常寄托惜别之情"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "春夜洛城闻笛",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 100,
+        "printedPage": 93,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-004",
+      "sequence": 4,
+      "title": "逢入京使",
+      "author": "岑参",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（一）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "故园东望路漫漫，双袖龙钟泪不干。",
+          "马上相逢无纸笔，凭君传语报平安。"
+        ]
+      ],
+      "meaningSummary": "诗人赴边途中遇到回京使者，思乡落泪却托人报平安，情感真挚而克制。",
+      "keyNotes": [
+        {
+          "term": "龙钟",
+          "meaning": "沾湿的样子"
+        },
+        {
+          "term": "凭",
+          "meaning": "烦劳、请托"
+        },
+        {
+          "term": "传语",
+          "meaning": "捎口信"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "逢入京使",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 101,
+        "printedPage": 94,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-005",
+      "sequence": 5,
+      "title": "晚春",
+      "author": "韩愈",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（一）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "草树知春不久归，百般红紫斗芳菲。",
+          "杨花榆荚无才思，惟解漫天作雪飞。"
+        ]
+      ],
+      "meaningSummary": "诗人用拟人手法描写暮春百花争艳、杨花榆荚飞舞，表达对春天的留恋。",
+      "keyNotes": [
+        {
+          "term": "榆荚",
+          "meaning": "榆树的果实，俗称榆钱"
+        },
+        {
+          "term": "惟解",
+          "meaning": "只知道、只会"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "晚春",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 101,
+        "printedPage": 94,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-006",
+      "sequence": 6,
+      "title": "登幽州台歌",
+      "author": "陈子昂",
+      "dynasty": "唐",
+      "textbookSection": "古代诗歌五首",
+      "contentType": "课内古诗",
+      "genre": "古体诗",
+      "stanzas": [
+        [
+          "前不见古人，后不见来者。",
+          "念天地之悠悠，独怆然而涕下！"
+        ]
+      ],
+      "meaningSummary": "诗人登台远望，感叹时间久远、天地辽阔而知音难遇，抒发孤独悲愤之情。",
+      "keyNotes": [
+        {
+          "term": "悠悠",
+          "meaning": "形容时间久远、空间广大"
+        },
+        {
+          "term": "怆然",
+          "meaning": "悲伤的样子"
+        },
+        {
+          "term": "涕",
+          "meaning": "眼泪"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          15,
+          16
+        ],
+        "pdfPages": [
+          24,
+          25
+        ],
+        "crosswalkTitle": "登幽州台歌",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 140,
+        "printedPage": 133,
+        "otherTitleHits": [
+          142
+        ],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-007",
+      "sequence": 7,
+      "title": "望岳",
+      "author": "杜甫",
+      "dynasty": "唐",
+      "textbookSection": "古代诗歌五首",
+      "contentType": "课内古诗",
+      "genre": "五言古诗",
+      "stanzas": [
+        [
+          "岱宗夫如何？齐鲁青未了。",
+          "造化钟神秀，阴阳割昏晓。"
+        ],
+        [
+          "荡胸生曾云，决眦入归鸟。",
+          "会当凌绝顶，一览众山小。"
+        ]
+      ],
+      "meaningSummary": "诗人描写泰山雄伟神奇的景象，并以登顶愿望表达不畏艰难、勇于攀登的抱负。",
+      "keyNotes": [
+        {
+          "term": "岱宗",
+          "meaning": "泰山"
+        },
+        {
+          "term": "钟",
+          "meaning": "聚集"
+        },
+        {
+          "term": "曾",
+          "meaning": "同“层”"
+        },
+        {
+          "term": "会当",
+          "meaning": "终当、终要"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          17,
+          18
+        ],
+        "pdfPages": [
+          26,
+          27
+        ],
+        "crosswalkTitle": "望岳",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 141,
+        "printedPage": 134,
+        "otherTitleHits": [
+          143
+        ],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-008",
+      "sequence": 8,
+      "title": "登飞来峰",
+      "author": "王安石",
+      "dynasty": "北宋",
+      "textbookSection": "古代诗歌五首",
+      "contentType": "课内古诗",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "飞来山上千寻塔，闻说鸡鸣见日升。",
+          "不畏浮云遮望眼，自缘身在最高层。"
+        ]
+      ],
+      "meaningSummary": "诗人登高望远，借“不畏浮云”表达远见卓识和坚定自信。",
+      "keyNotes": [
+        {
+          "term": "千寻",
+          "meaning": "极言塔高"
+        },
+        {
+          "term": "缘",
+          "meaning": "因为"
+        },
+        {
+          "term": "浮云",
+          "meaning": "既指眼前景物，也可比喻困难或障碍"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          19,
+          20
+        ],
+        "pdfPages": [
+          28,
+          29
+        ],
+        "crosswalkTitle": "登飞来峰",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 141,
+        "printedPage": 134,
+        "otherTitleHits": [
+          143
+        ],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-009",
+      "sequence": 9,
+      "title": "游山西村",
+      "author": "陆游",
+      "dynasty": "南宋",
+      "textbookSection": "古代诗歌五首",
+      "contentType": "课内古诗",
+      "genre": "七言律诗",
+      "stanzas": [
+        [
+          "莫笑农家腊酒浑，丰年留客足鸡豚。",
+          "山重水复疑无路，柳暗花明又一村。"
+        ],
+        [
+          "箫鼓追随春社近，衣冠简朴古风存。",
+          "从今若许闲乘月，拄杖无时夜叩门。"
+        ]
+      ],
+      "meaningSummary": "诗人记叙山村淳朴好客的风俗和优美风光，也写出困境中出现转机的哲理。",
+      "keyNotes": [
+        {
+          "term": "腊酒",
+          "meaning": "腊月酿制的酒"
+        },
+        {
+          "term": "足鸡豚",
+          "meaning": "备足鸡肉、猪肉"
+        },
+        {
+          "term": "无时",
+          "meaning": "没有固定时间，随时"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          21,
+          23
+        ],
+        "pdfPages": [
+          30,
+          32
+        ],
+        "crosswalkTitle": "游山西村",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 142,
+        "printedPage": 135,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-010",
+      "sequence": 10,
+      "title": "己亥杂诗（其五）",
+      "author": "龚自珍",
+      "dynasty": "清",
+      "textbookSection": "古代诗歌五首",
+      "contentType": "课内古诗",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "浩荡离愁白日斜，吟鞭东指即天涯。",
+          "落红不是无情物，化作春泥更护花。"
+        ]
+      ],
+      "meaningSummary": "诗人辞官离京时心怀离愁，却表示即使离开官场仍愿为国家和社会尽力。",
+      "keyNotes": [
+        {
+          "term": "吟鞭",
+          "meaning": "诗人的马鞭"
+        },
+        {
+          "term": "落红",
+          "meaning": "落花，诗中寄托奉献之情"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          24,
+          25
+        ],
+        "pdfPages": [
+          33,
+          34
+        ],
+        "crosswalkTitle": "己亥杂诗（其五）",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 142,
+        "printedPage": 135,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-011",
+      "sequence": 11,
+      "title": "泊秦淮",
+      "author": "杜牧",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（二）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "烟笼寒水月笼沙，夜泊秦淮近酒家。",
+          "商女不知亡国恨，隔江犹唱后庭花。"
+        ]
+      ],
+      "meaningSummary": "诗人夜泊秦淮，借歌女唱亡国之音，委婉批评沉溺享乐、漠视国事的统治者。",
+      "keyNotes": [
+        {
+          "term": "商女",
+          "meaning": "歌女"
+        },
+        {
+          "term": "后庭花",
+          "meaning": "《玉树后庭花》的简称，后世常称亡国之音"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          26,
+          27
+        ],
+        "pdfPages": [
+          35,
+          36
+        ],
+        "crosswalkTitle": "泊秦淮",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 181,
+        "printedPage": 174,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-012",
+      "sequence": 12,
+      "title": "贾生",
+      "author": "李商隐",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（二）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "宣室求贤访逐臣，贾生才调更无伦。",
+          "可怜夜半虚前席，不问苍生问鬼神。"
+        ]
+      ],
+      "meaningSummary": "诗人借汉文帝夜问贾谊却只问鬼神，讽刺当时统治者不能真正关心民生。",
+      "keyNotes": [
+        {
+          "term": "宣室",
+          "meaning": "汉代宫殿中的正室"
+        },
+        {
+          "term": "前席",
+          "meaning": "向前移动座席，表示倾听"
+        },
+        {
+          "term": "苍生",
+          "meaning": "百姓"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "贾生",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 181,
+        "printedPage": 174,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-013",
+      "sequence": 13,
+      "title": "过松源晨炊漆公店（其五）",
+      "author": "杨万里",
+      "dynasty": "南宋",
+      "textbookSection": "课外古诗词诵读（二）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "莫言下岭便无难，赚得行人错喜欢。",
+          "政入万山围子里，一山放出一山拦。"
+        ]
+      ],
+      "meaningSummary": "诗人写山路起伏提醒行人不要因眼前顺利而放松，蕴含做事须看长远的道理。",
+      "keyNotes": [
+        {
+          "term": "赚得",
+          "meaning": "骗得"
+        },
+        {
+          "term": "错喜欢",
+          "meaning": "空欢喜"
+        },
+        {
+          "term": "政",
+          "meaning": "同“正”"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "过松源晨炊漆公店（其五）",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 182,
+        "printedPage": 175,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-2-014",
+      "sequence": 14,
+      "title": "约客",
+      "author": "赵师秀",
+      "dynasty": "南宋",
+      "textbookSection": "课外古诗词诵读（二）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "黄梅时节家家雨，青草池塘处处蛙。",
+          "有约不来过夜半，闲敲棋子落灯花。"
+        ]
+      ],
+      "meaningSummary": "诗人以梅雨、蛙声和等待友人的细节，写出夜深人静时略带寂寞的闲情。",
+      "keyNotes": [
+        {
+          "term": "黄梅时节",
+          "meaning": "夏初梅雨季节"
+        },
+        {
+          "term": "灯花",
+          "meaning": "灯芯燃烧后结成的花状物"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "约客",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级下册/最新【人教版】7年级语文课本•下册.pdf",
+        "pdfPageIndex": 182,
+        "printedPage": 175,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    }
+  ],
+  "sourceCrosswalk": "01-语文/古诗词/教材对应提取_人教版初中语文_20261113/教材篇目与53必背古诗文逐篇对照表.md"
+}

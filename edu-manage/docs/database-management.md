@@ -88,7 +88,8 @@ npm run db:generate        # 重新生成 Prisma Client
 
 # 数据维护
 npm run cleanup:residual -- --dry-run    # 预览残留数据清理
-npm run normalize:hours -- --dry-run     # 预览课时标准化
+npm run normalize:hours                  # 默认只预览课时标准化，不写数据库
+npm run normalize:hours -- --apply       # 备份并核对预览结果后，显式写入课时精度规范化
 npm run check:data                       # 数据完整性检查
 npm run fix:duplicate-attendance         # 修复重复考勤
 npm run export:data                      # 导出核心业务数据到 exports/

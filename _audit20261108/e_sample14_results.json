@@ -1,0 +1,227 @@
+{
+  "queries": {
+    "Q1_approved_leave_present": {
+      "sql": "WITH approved AS (\n       SELECT lr.id, lr.\"studentId\", lr.\"lessonId\", lr.\"leaveDate\"::date AS leave_date\n       FROM \"LeaveRequest\" lr\n       WHERE lr.status='approved' AND lr.\"deletedAt\" IS NULL\n     ),\n     matched AS (\n       SELECT ap.id AS leave_id, ap.\"studentId\", ap.\"lessonId\", ap.leave_date,\n              a.id AS att_id, a.status::text AS att_status, cl.\"lessonDate\"::date AS lesson_date\n       FROM approved ap\n       LEFT JOIN \"Attendance\" a\n         ON a.\"studentId\"=ap.\"studentId\" AND a.\"deletedAt\" IS NULL\n        AND ( (ap.\"lessonId\" IS NOT NULL AND a.\"lessonId\"=ap.\"lessonId\")\n           OR (ap.\"lessonId\" IS NULL AND EXISTS (\n                 SELECT 1 FROM \"ClassLesson\" cl2\n                 WHERE cl2.id=a.\"lessonId\" AND cl2.\"lessonDate\"::date=ap.leave_date)) )\n       LEFT JOIN \"ClassLesson\" cl ON cl.id=a.\"lessonId\"\n     )\n     SELECT (SELECT count(*) FROM approved)::int AS approved_total,\n            count(*) FILTER (WHERE att_status='PRESENT')::int AS present_att_rows,\n            count(*) FILTER (WHERE att_status IS NULL)::int AS no_attendance_row,\n            count(DISTINCT leave_id) FILTER (WHERE att_status='PRESENT')::int AS approved_with_present\n     FROM matched",
+      "rows": [
+        {
+          "approved_total": 2,
+          "present_att_rows": 12,
+          "no_attendance_row": 0,
+          "approved_with_present": 2
+        }
+      ]
+    },
+    "Q1_sample": {
+      "sql": "WITH approved AS (\n       SELECT lr.id, lr.\"studentId\", lr.\"lessonId\", lr.\"leaveDate\"::date AS leave_date, lr.status\n       FROM \"LeaveRequest\" lr WHERE lr.status='approved' AND lr.\"deletedAt\" IS NULL\n     )\n     SELECT s.name, cl.\"lessonDate\"::text AS lesson_date, ap.status AS leave_status,\n            a.status::text AS att_status,\n            CASE WHEN ap.\"lessonId\" IS NOT NULL THEN 'lesson' ELSE 'date' END AS match_by\n     FROM approved ap\n     JOIN \"Attendance\" a ON a.\"studentId\"=ap.\"studentId\" AND a.\"deletedAt\" IS NULL\n       AND ( (ap.\"lessonId\" IS NOT NULL AND a.\"lessonId\"=ap.\"lessonId\")\n          OR (ap.\"lessonId\" IS NULL AND EXISTS (\n                SELECT 1 FROM \"ClassLesson\" cl2 WHERE cl2.id=a.\"lessonId\" AND cl2.\"lessonDate\"::date=ap.leave_date)) )\n     JOIN \"Student\" s ON s.id=ap.\"studentId\"\n     LEFT JOIN \"ClassLesson\" cl ON cl.id=a.\"lessonId\"\n     WHERE a.status::text='PRESENT'\n     ORDER BY cl.\"lessonDate\" DESC LIMIT 5",
+      "rows": [
+        {
+          "name": "韩**",
+          "lesson_date": "2026-08-03 00:00:00",
+          "leave_status": "approved",
+          "att_status": "PRESENT",
+          "match_by": "date"
+        },
+        {
+          "name": "韩**",
+          "lesson_date": "2026-08-03 00:00:00",
+          "leave_status": "approved",
+          "att_status": "PRESENT",
+          "match_by": "date"
+        },
+        {
+          "name": "韩**",
+          "lesson_date": "2026-08-03 00:00:00",
+          "leave_status": "approved",
+          "att_status": "PRESENT",
+          "match_by": "date"
+        },
+        {
+          "name": "韩**",
+          "lesson_date": "2026-08-03 00:00:00",
+          "leave_status": "approved",
+          "att_status": "PRESENT",
+          "match_by": "date"
+        },
+        {
+          "name": "韩**",
+          "lesson_date": "2026-08-03 00:00:00",
+          "leave_status": "approved",
+          "att_status": "PRESENT",
+          "match_by": "date"
+        }
+      ]
+    },
+    "Q1_summary": {
+      "sql": "derived from Q1_approved_leave_present",
+      "rows": [
+        {
+          "approved_total": 2,
+          "present_att_rows": 12,
+          "no_attendance_row": 0,
+          "approved_with_present": 2
+        }
+      ]
+    },
+    "Q2_leave_without_request": {
+      "sql": "WITH leave_att AS (\n       SELECT a.id, a.\"studentId\", a.\"lessonId\"\n       FROM \"Attendance\" a\n       WHERE a.status::text='LEAVE' AND a.\"deletedAt\" IS NULL\n     ),\n     covered_any AS (\n       SELECT DISTINCT la.id AS att_id\n       FROM leave_att la\n       JOIN \"LeaveRequest\" lr ON lr.\"studentId\"=la.\"studentId\" AND lr.\"deletedAt\" IS NULL\n       LEFT JOIN \"ClassLesson\" cl ON cl.id=la.\"lessonId\"\n       WHERE (lr.\"lessonId\" IS NOT NULL AND lr.\"lessonId\"=la.\"lessonId\")\n          OR (lr.\"lessonId\" IS NULL AND cl.\"lessonDate\"::date=lr.\"leaveDate\"::date)\n     ),\n     covered_approved AS (\n       SELECT DISTINCT la.id AS att_id\n       FROM leave_att la\n       JOIN \"LeaveRequest\" lr ON lr.\"studentId\"=la.\"studentId\" AND lr.status='approved' AND lr.\"deletedAt\" IS NULL\n       LEFT JOIN \"ClassLesson\" cl ON cl.id=la.\"lessonId\"\n       WHERE (lr.\"lessonId\" IS NOT NULL AND lr.\"lessonId\"=la.\"lessonId\")\n          OR (lr.\"lessonId\" IS NULL AND cl.\"lessonDate\"::date=lr.\"leaveDate\"::date)\n     )\n     SELECT count(*)::int AS leave_att_rows,\n            count(*) FILTER (WHERE ca.att_id IS NULL)::int AS no_request_any,\n            count(*) FILTER (WHERE cp.att_id IS NULL)::int AS no_request_approved\n     FROM leave_att la\n     LEFT JOIN covered_any ca ON ca.att_id=la.id\n     LEFT JOIN covered_approved cp ON cp.att_id=la.id",
+      "rows": [
+        {
+          "leave_att_rows": 925,
+          "no_request_any": 921,
+          "no_request_approved": 921
+        }
+      ]
+    },
+    "Q2_sample": {
+      "sql": "WITH leave_att AS (\n       SELECT a.id, a.\"studentId\", a.\"lessonId\", a.\"hoursDeducted\"\n       FROM \"Attendance\" a WHERE a.status::text='LEAVE' AND a.\"deletedAt\" IS NULL\n     ),\n     covered_any AS (\n       SELECT DISTINCT la.id AS att_id\n       FROM leave_att la\n       JOIN \"LeaveRequest\" lr ON lr.\"studentId\"=la.\"studentId\" AND lr.\"deletedAt\" IS NULL\n       LEFT JOIN \"ClassLesson\" cl ON cl.id=la.\"lessonId\"\n       WHERE (lr.\"lessonId\" IS NOT NULL AND lr.\"lessonId\"=la.\"lessonId\")\n          OR (lr.\"lessonId\" IS NULL AND cl.\"lessonDate\"::date=lr.\"leaveDate\"::date)\n     )\n     SELECT s.name, cl.\"lessonDate\"::text AS lesson_date, a.status::text AS att_status, a.\"hoursDeducted\"\n     FROM leave_att la\n     JOIN \"Attendance\" a ON a.id=la.id\n     JOIN \"Student\" s ON s.id=a.\"studentId\"\n     LEFT JOIN \"ClassLesson\" cl ON cl.id=a.\"lessonId\"\n     LEFT JOIN covered_any ca ON ca.att_id=la.id\n     WHERE ca.att_id IS NULL\n     ORDER BY cl.\"lessonDate\" DESC NULLS LAST LIMIT 5",
+      "rows": [
+        {
+          "name": "魏**",
+          "lesson_date": "2026-10-05 16:00:00",
+          "att_status": "LEAVE",
+          "hoursDeducted": 0.7
+        },
+        {
+          "name": "郝**",
+          "lesson_date": "2026-10-05 16:00:00",
+          "att_status": "LEAVE",
+          "hoursDeducted": 0.7
+        },
+        {
+          "name": "默**",
+          "lesson_date": "2026-10-05 16:00:00",
+          "att_status": "LEAVE",
+          "hoursDeducted": 0.7
+        },
+        {
+          "name": "李**",
+          "lesson_date": "2026-10-05 16:00:00",
+          "att_status": "LEAVE",
+          "hoursDeducted": 0.7
+        },
+        {
+          "name": "郝**",
+          "lesson_date": "2026-10-05 16:00:00",
+          "att_status": "LEAVE",
+          "hoursDeducted": 0.7
+        }
+      ]
+    },
+    "Q3_meal_overview": {
+      "sql": "SELECT count(*)::int AS total,\n            count(*) FILTER (WHERE source='AUTO')::int AS auto_n,\n            count(*) FILTER (WHERE source='MANUAL')::int AS manual_n,\n            count(*) FILTER (WHERE eating)::int AS eating_true,\n            count(*) FILTER (WHERE NOT eating)::int AS eating_false,\n            count(*) FILTER (WHERE \"updatedAt\" > \"createdAt\")::int AS ever_updated,\n            count(*) FILTER (WHERE source='AUTO' AND \"updatedAt\" > \"createdAt\")::int AS auto_resynced,\n            count(*) FILTER (WHERE source='MANUAL' AND \"updatedAt\" > \"createdAt\")::int AS manual_edited\n     FROM \"StudentMealAttendance\"",
+      "rows": [
+        {
+          "total": 1492,
+          "auto_n": 100,
+          "manual_n": 1392,
+          "eating_true": 1396,
+          "eating_false": 96,
+          "ever_updated": 17,
+          "auto_resynced": 16,
+          "manual_edited": 1
+        }
+      ]
+    },
+    "Q3_source_eating_breakdown": {
+      "sql": "SELECT source, eating, count(*)::int AS n\n     FROM \"StudentMealAttendance\" GROUP BY source, eating ORDER BY source, eating",
+      "rows": [
+        {
+          "source": "AUTO",
+          "eating": false,
+          "n": 96
+        },
+        {
+          "source": "AUTO",
+          "eating": true,
+          "n": 4
+        },
+        {
+          "source": "MANUAL",
+          "eating": true,
+          "n": 1392
+        }
+      ]
+    },
+    "Q4_withdrawn_deducted": {
+      "sql": "SELECT count(*)::int AS rows_deducted,\n            COALESCE(SUM(a.\"hoursDeducted\"),0)::float AS sum_hours,\n            count(*) FILTER (WHERE e.id IS NOT NULL AND e.status::text <> 'ACTIVE')::int AS inactive_enrollment,\n            count(*) FILTER (WHERE e.id IS NULL)::int AS no_enrollment,\n            count(*) FILTER (WHERE cl.\"deletedAt\" IS NOT NULL)::int AS lesson_deleted,\n            count(*) FILTER (WHERE a.\"deletedAt\" IS NOT NULL)::int AS att_soft_deleted\n     FROM \"Attendance\" a\n     LEFT JOIN \"Enrollment\" e ON e.id=a.\"enrollmentId\"\n     LEFT JOIN \"ClassLesson\" cl ON cl.id=a.\"lessonId\"\n     WHERE a.\"hoursDeducted\" > 0\n       AND ( e.id IS NULL OR e.status::text <> 'ACTIVE' OR cl.\"deletedAt\" IS NOT NULL )",
+      "rows": [
+        {
+          "rows_deducted": 1181,
+          "sum_hours": 838.4000000000128,
+          "inactive_enrollment": 1181,
+          "no_enrollment": 0,
+          "lesson_deleted": 39,
+          "att_soft_deleted": 0
+        }
+      ]
+    },
+    "Q4_sample": {
+      "sql": "SELECT s.name, cl.\"lessonDate\"::text AS lesson_date, e.status::text AS enr_status,\n            a.\"hoursDeducted\", a.status::text AS att_status,\n            CASE WHEN e.id IS NULL THEN 'NO_ENROLLMENT' WHEN cl.\"deletedAt\" IS NOT NULL THEN 'LESSON_DELETED' ELSE e.status::text END AS bucket\n     FROM \"Attendance\" a\n     LEFT JOIN \"Enrollment\" e ON e.id=a.\"enrollmentId\"\n     LEFT JOIN \"ClassLesson\" cl ON cl.id=a.\"lessonId\"\n     JOIN \"Student\" s ON s.id=a.\"studentId\"\n     WHERE a.\"deletedAt\" IS NULL AND a.\"hoursDeducted\" > 0\n       AND ( e.id IS NULL OR e.status::text <> 'ACTIVE' OR cl.\"deletedAt\" IS NOT NULL )\n     ORDER BY a.\"hoursDeducted\" DESC LIMIT 5",
+      "rows": [
+        {
+          "name": "王**",
+          "lesson_date": "2026-09-05 00:00:00",
+          "enr_status": "WITHDRAWN",
+          "hoursDeducted": 1,
+          "att_status": "LEAVE",
+          "bucket": "LESSON_DELETED"
+        },
+        {
+          "name": "孙**",
+          "lesson_date": "2026-09-05 00:00:00",
+          "enr_status": "WITHDRAWN",
+          "hoursDeducted": 1,
+          "att_status": "PRESENT",
+          "bucket": "LESSON_DELETED"
+        },
+        {
+          "name": "王**",
+          "lesson_date": "2026-09-05 00:00:00",
+          "enr_status": "WITHDRAWN",
+          "hoursDeducted": 1,
+          "att_status": "LEAVE",
+          "bucket": "LESSON_DELETED"
+        },
+        {
+          "name": "刘**",
+          "lesson_date": "2026-09-05 00:00:00",
+          "enr_status": "WITHDRAWN",
+          "hoursDeducted": 1,
+          "att_status": "PRESENT",
+          "bucket": "LESSON_DELETED"
+        },
+        {
+          "name": "牛**",
+          "lesson_date": "2026-09-05 00:00:00",
+          "enr_status": "WITHDRAWN",
+          "hoursDeducted": 1,
+          "att_status": "PRESENT",
+          "bucket": "LESSON_DELETED"
+        }
+      ]
+    },
+    "Q5_leave_deducted_hours": {
+      "sql": "SELECT count(*)::int AS leave_deducted_rows,\n            COALESCE(SUM(a.\"hoursDeducted\"),0)::float AS sum_hours,\n            COALESCE(AVG(a.\"hoursDeducted\"),0)::float AS avg_hours\n     FROM \"Attendance\" a\n     WHERE a.status::text='LEAVE' AND a.\"deletedAt\" IS NULL AND a.\"hoursDeducted\" > 0",
+      "rows": [
+        {
+          "leave_deducted_rows": 922,
+          "sum_hours": 646.6000000000026,
+          "avg_hours": 0.7013015184381808
+        }
+      ]
+    },
+    "Q5_by_value": {
+      "sql": "SELECT a.\"hoursDeducted\"::float AS h, count(*)::int AS n\n     FROM \"Attendance\" a\n     WHERE a.status::text='LEAVE' AND a.\"deletedAt\" IS NULL AND a.\"hoursDeducted\" > 0\n     GROUP BY a.\"hoursDeducted\" ORDER BY h",
+      "rows": [
+        {
+          "h": 0.7,
+          "n": 918
+        },
+        {
+          "h": 1,
+          "n": 4
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,465 @@
+{
+  "schemaVersion": "muzhe-poetry-recitation-v1",
+  "volume": {
+    "grade": 9,
+    "semester": 2,
+    "name": "九年级下册",
+    "edition": "统编版（人民教育出版社）"
+  },
+  "scopeNotice": "收录本册教材诗词与课外古诗词诵读。教材收录不自动等同于全国统一必背；由教师按教学和本地考试范围布置。",
+  "sourceBook": "最新【人教版】9年级语文课本•下册.pdf",
+  "sourceNote": "此册PDF主要为扫描图像，正文未能通过文本层完整提取；本文件中的录入文本须对照原书影像进行逐字校对后发布。",
+  "reviewStatus": "待教师逐字校对",
+  "items": [
+    {
+      "id": "g9-2-001",
+      "sequence": 1,
+      "title": "渔家傲·秋思",
+      "author": "范仲淹",
+      "dynasty": "北宋",
+      "textbookSection": "词四首",
+      "contentType": "课内词",
+      "genre": "词·渔家傲",
+      "stanzas": [
+        [
+          "塞下秋来风景异，衡阳雁去无留意。",
+          "四面边声连角起，千嶂里，长烟落日孤城闭。"
+        ],
+        [
+          "浊酒一杯家万里，燕然未勒归无计。",
+          "羌管悠悠霜满地，人不寐，将军白发征夫泪。"
+        ]
+      ],
+      "meaningSummary": "词人描写边塞秋景和孤城闭守，写出将士思乡却因战事未成而不能归的复杂心情。",
+      "keyNotes": [
+        {
+          "term": "边声",
+          "meaning": "边塞特有的声音"
+        },
+        {
+          "term": "千嶂",
+          "meaning": "层层叠叠的山峰"
+        },
+        {
+          "term": "燕然未勒",
+          "meaning": "尚未建立战功、边患未平"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          68,
+          69
+        ],
+        "pdfPages": [
+          77,
+          78
+        ],
+        "crosswalkTitle": "渔家傲·秋思",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/九年级下册/最新【人教版】9年级语文课本•下册.pdf",
+        "pdfPageIndex": null,
+        "printedPage": null,
+        "otherTitleHits": [],
+        "locatorStatus": "scanned_page_manual_check"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g9-2-002",
+      "sequence": 2,
+      "title": "江城子·密州出猎",
+      "author": "苏轼",
+      "dynasty": "北宋",
+      "textbookSection": "词四首",
+      "contentType": "课内词",
+      "genre": "词·江城子",
+      "stanzas": [
+        [
+          "老夫聊发少年狂。左牵黄，右擎苍。",
+          "锦帽貂裘，千骑卷平冈。"
+        ],
+        [
+          "为报倾城随太守，亲射虎，看孙郎。",
+          "酒酣胸胆尚开张。鬓微霜，又何妨！"
+        ],
+        [
+          "持节云中，何日遣冯唐？",
+          "会挽雕弓如满月，西北望，射天狼。"
+        ]
+      ],
+      "meaningSummary": "词人描写出猎盛况，借孙权和冯唐典故抒写报国壮志及渴望得到重用的心情。",
+      "keyNotes": [
+        {
+          "term": "擎苍",
+          "meaning": "举着苍鹰"
+        },
+        {
+          "term": "倾城",
+          "meaning": "全城的人"
+        },
+        {
+          "term": "天狼",
+          "meaning": "此处指侵扰边境的敌人"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          70,
+          71
+        ],
+        "pdfPages": [
+          79,
+          80
+        ],
+        "crosswalkTitle": "江城子·密州出猎",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/九年级下册/最新【人教版】9年级语文课本•下册.pdf",
+        "pdfPageIndex": null,
+        "printedPage": null,
+        "otherTitleHits": [],
+        "locatorStatus": "scanned_page_manual_check"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g9-2-003",
+      "sequence": 3,
+      "title": "破阵子·为陈同甫赋壮词以寄之",
+      "author": "辛弃疾",
+      "dynasty": "南宋",
+      "textbookSection": "词四首",
+      "contentType": "课内词",
+      "genre": "词·破阵子",
+      "stanzas": [
+        [
+          "醉里挑灯看剑，梦回吹角连营。",
+          "八百里分麾下炙，五十弦翻塞外声，沙场秋点兵。"
+        ],
+        [
+          "马作的卢飞快，弓如霹雳弦惊。",
+          "了却君王天下事，赢得生前身后名。",
+          "可怜白发生！"
+        ]
+      ],
+      "meaningSummary": "词人以梦境再现军营生活和战斗场面，表达收复失地、建功立业的壮志及理想落空的悲愤。",
+      "keyNotes": [
+        {
+          "term": "八百里",
+          "meaning": "指牛"
+        },
+        {
+          "term": "麾下",
+          "meaning": "部下"
+        },
+        {
+          "term": "了却",
+          "meaning": "完成"
+        },
+        {
+          "term": "可怜",
+          "meaning": "可惜"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          72,
+          73
+        ],
+        "pdfPages": [
+          81,
+          82
+        ],
+        "crosswalkTitle": "破阵子·为陈同甫赋壮词以寄之",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/九年级下册/最新【人教版】9年级语文课本•下册.pdf",
+        "pdfPageIndex": null,
+        "printedPage": null,
+        "otherTitleHits": [],
+        "locatorStatus": "scanned_page_manual_check"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g9-2-004",
+      "sequence": 4,
+      "title": "满江红（小住京华）",
+      "author": "秋瑾",
+      "dynasty": "清",
+      "textbookSection": "词四首",
+      "contentType": "课内词",
+      "genre": "词·满江红",
+      "stanzas": [
+        [
+          "小住京华，早又是，中秋佳节。",
+          "为篱下黄花开遍，秋容如拭。"
+        ],
+        [
+          "四面歌残终破楚，八年风味徒思浙。",
+          "苦将侬，强派作蛾眉，殊未屑！"
+        ],
+        [
+          "身不得，男儿列；心却比，男儿烈。",
+          "算平生肝胆，因人常热。"
+        ],
+        [
+          "俗子胸襟谁识我？英雄末路当磨折。",
+          "莽红尘，何处觅知音？青衫湿！"
+        ]
+      ],
+      "meaningSummary": "词人借中秋秋景抒发身为女子却胸怀男儿壮志的豪情，也写出知音难觅的孤独。",
+      "keyNotes": [
+        {
+          "term": "京华",
+          "meaning": "京城"
+        },
+        {
+          "term": "蛾眉",
+          "meaning": "女子细长而弯的眉毛，借指女子"
+        },
+        {
+          "term": "殊未屑",
+          "meaning": "很不屑"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          74,
+          76
+        ],
+        "pdfPages": [
+          83,
+          85
+        ],
+        "crosswalkTitle": "满江红（小住京华）",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/九年级下册/最新【人教版】9年级语文课本•下册.pdf",
+        "pdfPageIndex": null,
+        "printedPage": null,
+        "otherTitleHits": [],
+        "locatorStatus": "scanned_page_manual_check"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g9-2-005",
+      "sequence": 5,
+      "title": "定风波（莫听穿林打叶声）",
+      "author": "苏轼",
+      "dynasty": "北宋",
+      "textbookSection": "课外古诗词诵读",
+      "contentType": "课外古诗词诵读",
+      "genre": "词·定风波",
+      "stanzas": [
+        [
+          "莫听穿林打叶声，何妨吟啸且徐行。",
+          "竹杖芒鞋轻胜马，谁怕？一蓑烟雨任平生。"
+        ],
+        [
+          "料峭春风吹酒醒，微冷，山头斜照却相迎。",
+          "回首向来萧瑟处，归去，也无风雨也无晴。"
+        ]
+      ],
+      "meaningSummary": "词人雨中徐行，面对风雨仍从容自若，借自然天气变化表达豁达的人生态度。",
+      "keyNotes": [
+        {
+          "term": "吟啸",
+          "meaning": "吟咏长啸"
+        },
+        {
+          "term": "芒鞋",
+          "meaning": "草鞋"
+        },
+        {
+          "term": "料峭",
+          "meaning": "形容微寒"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "定风波（莫听穿林打叶声）",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/九年级下册/最新【人教版】9年级语文课本•下册.pdf",
+        "pdfPageIndex": null,
+        "printedPage": null,
+        "otherTitleHits": [],
+        "locatorStatus": "scanned_page_manual_check"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g9-2-006",
+      "sequence": 6,
+      "title": "临江仙（夜登小阁，忆洛中旧游）",
+      "author": "陈与义",
+      "dynasty": "南宋",
+      "textbookSection": "课外古诗词诵读",
+      "contentType": "课外古诗词诵读",
+      "genre": "词·临江仙",
+      "stanzas": [
+        [
+          "忆昔午桥桥上饮，坐中多是豪英。",
+          "长沟流月去无声。",
+          "杏花疏影里，吹笛到天明。"
+        ],
+        [
+          "二十余年如一梦，此身虽在堪惊。",
+          "闲登小阁看新晴。",
+          "古今多少事，渔唱起三更。"
+        ]
+      ],
+      "meaningSummary": "词人追忆洛阳旧游和昔日豪英，感叹二十余年世事如梦，借渔歌表现旷达中的苍凉。",
+      "keyNotes": [
+        {
+          "term": "午桥",
+          "meaning": "洛阳附近的桥名"
+        },
+        {
+          "term": "堪惊",
+          "meaning": "令人惊叹、感慨"
+        },
+        {
+          "term": "三更",
+          "meaning": "深夜"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "临江仙（夜登小阁，忆洛中旧游）",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/九年级下册/最新【人教版】9年级语文课本•下册.pdf",
+        "pdfPageIndex": null,
+        "printedPage": null,
+        "otherTitleHits": [],
+        "locatorStatus": "scanned_page_manual_check"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g9-2-007",
+      "sequence": 7,
+      "title": "太常引（建康中秋夜为吕叔潜赋）",
+      "author": "辛弃疾",
+      "dynasty": "南宋",
+      "textbookSection": "课外古诗词诵读",
+      "contentType": "课外古诗词诵读",
+      "genre": "词·太常引",
+      "stanzas": [
+        [
+          "一轮秋影转金波，飞镜又重磨。",
+          "把酒问姮娥：被白发、欺人奈何？"
+        ],
+        [
+          "乘风好去，长空万里，直下看山河。",
+          "斫去桂婆娑，人道是、清光更多。"
+        ]
+      ],
+      "meaningSummary": "词人借中秋问月表达年华易逝的感慨，并想象乘风俯瞰山河、扫除阴翳的豪情。",
+      "keyNotes": [
+        {
+          "term": "姮娥",
+          "meaning": "嫦娥"
+        },
+        {
+          "term": "斫",
+          "meaning": "砍、削"
+        },
+        {
+          "term": "桂婆娑",
+          "meaning": "月中桂树的枝叶"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "太常引（建康中秋夜为吕叔潜赋）",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/九年级下册/最新【人教版】9年级语文课本•下册.pdf",
+        "pdfPageIndex": null,
+        "printedPage": null,
+        "otherTitleHits": [],
+        "locatorStatus": "scanned_page_manual_check"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g9-2-008",
+      "sequence": 8,
+      "title": "浣溪沙（身向云山那畔行）",
+      "author": "纳兰性德",
+      "dynasty": "清",
+      "textbookSection": "课外古诗词诵读",
+      "contentType": "课外古诗词诵读",
+      "genre": "词·浣溪沙",
+      "stanzas": [
+        [
+          "身向云山那畔行，北风吹断马嘶声，深秋远塞若为情！"
+        ],
+        [
+          "一抹晚烟荒戍垒，半竿斜日旧关城，古今幽恨几时平！"
+        ]
+      ],
+      "meaningSummary": "词人远行边塞，写晚烟、荒垒和斜日下的旧关城，抒发苍凉幽怨的感受。",
+      "keyNotes": [
+        {
+          "term": "那畔",
+          "meaning": "那边"
+        },
+        {
+          "term": "戍垒",
+          "meaning": "边防营垒"
+        },
+        {
+          "term": "若为情",
+          "meaning": "怎能不令人动情"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "浣溪沙（身向云山那畔行）",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/九年级下册/最新【人教版】9年级语文课本•下册.pdf",
+        "pdfPageIndex": null,
+        "printedPage": null,
+        "otherTitleHits": [],
+        "locatorStatus": "scanned_page_manual_check"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    }
+  ],
+  "sourceCrosswalk": "01-语文/古诗词/教材对应提取_人教版初中语文_20261113/教材篇目与53必背古诗文逐篇对照表.md"
+}

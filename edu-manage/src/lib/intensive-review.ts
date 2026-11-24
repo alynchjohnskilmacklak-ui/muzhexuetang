@@ -1,14 +1,17 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
+import { syncAutomaticMealAttendance, type AutomaticMealSyncInput } from '@/lib/meal-attendance-sync'
 import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
 import { createIntensiveLessonPayInTransaction } from '@/lib/intensive-settlement'
 import { hasAttendingStudent } from '@/lib/attendance-submission'
 import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
+import { accrueEnrollmentHours } from '@/lib/attendance-balance'
 
 export type IntensiveReviewAttendanceStatus = 'PRESENT' | 'LEAVE' | 'ABSENT' | 'MAKEUP'
 
 export interface IntensiveReviewAttendanceRecord {
   studentId: string
   status: IntensiveReviewAttendanceStatus
+  rollCallStatus?: 'PRESENT' | 'ABSENT' | 'LATE' | null
 }
 
 export class IntensiveReviewError extends Error {
@@ -29,7 +32,7 @@ const VALID_STATUS = new Set<IntensiveReviewAttendanceStatus>([
   'MAKEUP',
 ])
 
-const roundHours = (value: number) => Number(value.toFixed(4))
+const roundHours = (value: number) => Number(value.toFixed(8))
 
 function normalizeAttendanceSnapshot(value: Prisma.JsonValue): IntensiveReviewAttendanceRecord[] {
   if (!Array.isArray(value)) return []
@@ -52,14 +55,18 @@ function normalizeAttendanceSnapshot(value: Prisma.JsonValue): IntensiveReviewAt
 export function calculateApprovedHourSettlement(params: {
   status: string
   actualMinutes: number
+  totalHours: number
   remainHours: number
 }) {
   const requestedHours = calculateIntensiveDeductHours(params.status, params.actualMinutes)
-  const deductedHours = roundHours(Math.min(requestedHours, Math.max(0, params.remainHours)))
+  const accrualMode = params.totalHours <= 0
+  const accruedHours = accrualMode ? requestedHours : 0
+  const deductedHours = accrualMode ? 0 : roundHours(Math.min(requestedHours, Math.max(0, params.remainHours)))
   return {
     requestedHours,
     deductedHours,
-    uncoveredHours: roundHours(Math.max(0, requestedHours - deductedHours)),
+    accruedHours,
+    uncoveredHours: accrualMode ? 0 : roundHours(Math.max(0, requestedHours - deductedHours)),
   }
 }
 
@@ -99,6 +106,8 @@ export async function submitIntensiveLessonReview(params: {
   actualMinutes: number
   records: IntensiveReviewAttendanceRecord[]
   teacherNote?: string | null
+  mealAttendance?: AutomaticMealSyncInput
+  rollCallSubmission?: boolean
 }) {
   return params.prisma.$transaction(async (tx) => {
     const lesson = await tx.classLesson.findUnique({
@@ -140,14 +149,41 @@ export async function submitIntensiveLessonReview(params: {
       throw new IntensiveReviewError('INVALID_SUBMISSION', validationError)
     }
 
+    const rejectedRetry = lesson.status === 'COMPLETED'
+      && lesson.attendanceSubmittedAt !== null
+      && lesson.intensiveReviewStatus === 'REJECTED'
+    if ((lesson.status === 'COMPLETED' || lesson.attendanceSubmittedAt !== null) && !rejectedRetry) {
+      throw new IntensiveReviewError('ALREADY_SUBMITTED', '该课次考勤已提交，不能重复提交', 409)
+    }
+
+    const now = new Date()
+    const submissionClaim = await tx.classLesson.updateMany({
+      where: {
+        id: lesson.id,
+        settlementStatus: 'UNSETTLED',
+        OR: rejectedRetry
+          ? [{ status: 'COMPLETED', attendanceSubmittedAt: { not: null }, intensiveReviewStatus: 'REJECTED' }]
+          : [{ status: { notIn: ['COMPLETED', 'CANCELLED', 'POSTPONED'] }, attendanceSubmittedAt: null, intensiveReviewStatus: { notIn: ['PENDING', 'APPROVED'] } }],
+      },
+      data: {
+        status: 'COMPLETED',
+        attendanceSubmittedAt: now,
+        actualMinutes: null,
+        hoursDeductedAt: null,
+        intensiveReviewStatus: 'PENDING',
+        ...(params.rollCallSubmission ? { rollCallSubmittedAt: now } : {}),
+      },
+    })
+    if (submissionClaim.count !== 1) {
+      throw new IntensiveReviewError('REVIEW_ALREADY_HANDLED', '该课次正在提交或审核状态已变化，请刷新后确认', 409)
+    }
+
     const latestReview = await tx.intensiveLessonReview.findFirst({
       where: { lessonId: lesson.id },
       select: { revision: true },
       orderBy: { revision: 'desc' },
     })
     const revision = (latestReview?.revision || 0) + 1
-    const now = new Date()
-
     for (const record of params.records) {
       const enrollment = await tx.enrollment.findUnique({
         where: {
@@ -173,6 +209,12 @@ export async function submitIntensiveLessonReview(params: {
           status: record.status,
           actualMinutes: params.actualMinutes,
           hoursDeducted: 0,
+          ...(record.rollCallStatus !== undefined ? {
+            rollCallStatus: record.rollCallStatus,
+            rollCallMarkedAt: record.rollCallStatus ? now : null,
+          } : {}),
+          deletedAt: null,
+          deletionBatchId: null,
         },
         create: {
           lessonId: lesson.id,
@@ -181,6 +223,8 @@ export async function submitIntensiveLessonReview(params: {
           status: record.status,
           actualMinutes: params.actualMinutes,
           hoursDeducted: 0,
+          rollCallStatus: record.rollCallStatus ?? null,
+          rollCallMarkedAt: record.rollCallStatus ? now : null,
         },
       })
     }
@@ -197,17 +241,9 @@ export async function submitIntensiveLessonReview(params: {
         status: 'PENDING',
       },
     })
-    await tx.classLesson.update({
-      where: { id: lesson.id },
-      data: {
-        status: 'COMPLETED',
-        attendanceSubmittedAt: now,
-        actualMinutes: null,
-        hoursDeductedAt: null,
-        settlementStatus: 'UNSETTLED',
-        intensiveReviewStatus: 'PENDING',
-      },
-    })
+    if (params.mealAttendance) {
+      await syncAutomaticMealAttendance(tx, params.mealAttendance)
+    }
     await tx.activityLog.create({
       data: {
         userId: params.submittedById,
@@ -362,6 +398,7 @@ export async function reviewIntensiveLesson(params: {
     }
 
     let deductedStudents = 0
+    let accruedStudents = 0
     let uncoveredHours = 0
     for (const attendance of review.lesson.attendances) {
       if (!attendance.enrollment) {
@@ -370,15 +407,39 @@ export async function reviewIntensiveLesson(params: {
       const hourSettlement = calculateApprovedHourSettlement({
         status: attendance.status,
         actualMinutes: review.actualMinutes,
+        totalHours: Number(attendance.enrollment.totalHours || 0),
         remainHours: attendance.enrollment.remainHours,
       })
       const safeDeduct = hourSettlement.deductedHours
+      const safeAccrual = hourSettlement.accruedHours
       uncoveredHours = roundHours(uncoveredHours + hourSettlement.uncoveredHours)
+
+      if (safeAccrual > 0) {
+        const accrual = await accrueEnrollmentHours(tx, attendance.enrollment.id, safeAccrual)
+        if (accrual.accrued !== safeAccrual) {
+          throw new IntensiveReviewError('ACCRUAL_AMOUNT_CHANGED', '累计课时入账金额发生变化，请刷新后重试', 409)
+        }
+        await tx.hourTransaction.create({
+          data: {
+            studentId: attendance.studentId,
+            enrollmentId: attendance.enrollment.id,
+            lessonId: review.lessonId,
+            amount: accrual.accrued,
+            beforeHours: accrual.beforeHours,
+            afterHours: accrual.afterHours,
+            type: 'ATTENDANCE_ACCRUE',
+            reason: `强化课审核通过累计课时：${review.actualMinutes}分钟`,
+            operatorId: params.reviewedById,
+          },
+        })
+        accruedStudents += 1
+      }
+
       await tx.attendance.update({
         where: { id: attendance.id },
         data: {
           actualMinutes: review.actualMinutes,
-          hoursDeducted: safeDeduct,
+          hoursDeducted: safeDeduct || safeAccrual,
         },
       })
       if (attendance.status === 'LEAVE' || attendance.status === 'ABSENT') {
@@ -392,7 +453,7 @@ export async function reviewIntensiveLesson(params: {
           },
         })
       }
-      if (safeDeduct <= 0) continue
+      if (safeAccrual > 0 || safeDeduct <= 0) continue
       deductedStudents += 1
       await tx.enrollment.update({
         where: { id: attendance.enrollment.id },
@@ -424,7 +485,7 @@ export async function reviewIntensiveLesson(params: {
         settlementStatus: 'SETTLED',
         intensiveReviewStatus: 'APPROVED',
         attendanceSubmittedAt: review.lesson.attendanceSubmittedAt || review.submittedAt,
-        hoursDeductedAt: deductedStudents > 0 ? now : null,
+        hoursDeductedAt: deductedStudents + accruedStudents > 0 ? now : null,
       },
     })
     for (const studentId of new Set(review.lesson.attendances.map((attendance) => attendance.studentId))) {
@@ -458,6 +519,7 @@ export async function reviewIntensiveLesson(params: {
           salaryAmount: salary.amount,
           salarySkipped: salary.skipped,
           deductedStudents,
+          accruedStudents,
           uncoveredHours,
           reviewNote,
         },
@@ -470,6 +532,7 @@ export async function reviewIntensiveLesson(params: {
       salaryAmount: salary.amount,
       salarySkipped: salary.skipped,
       deductedStudents,
+      accruedStudents,
       uncoveredHours,
     }
   }, {

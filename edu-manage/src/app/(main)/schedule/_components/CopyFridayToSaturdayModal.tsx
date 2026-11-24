@@ -33,9 +33,10 @@ interface Props {
   open: boolean
   onClose: () => void
   onSuccess: () => void
+  groupIds?: string[]
 }
 
-export function CopyFridayToSaturdayModal({ open, onClose, onSuccess }: Props) {
+export function CopyFridayToSaturdayModal({ open, onClose, onSuccess, groupIds }: Props) {
   const { division } = useDivision()
   const [fridayDate, setFridayDate] = useState<string>('')
   const [loading, setLoading] = useState(false)
@@ -59,7 +60,7 @@ export function CopyFridayToSaturdayModal({ open, onClose, onSuccess }: Props) {
       const res = await fetch('/api/class-lessons/copy-friday-to-saturday', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fridayDate, division, dryRun: true }),
+        body: JSON.stringify({ fridayDate, division, groupIds, dryRun: true }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || '预检查失败')
@@ -80,7 +81,7 @@ export function CopyFridayToSaturdayModal({ open, onClose, onSuccess }: Props) {
       const res = await fetch('/api/class-lessons/copy-friday-to-saturday', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fridayDate, division, dryRun: false, overwrite: false }),
+        body: JSON.stringify({ fridayDate, division, groupIds, dryRun: false, overwrite: false }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || '复制失败')
@@ -120,7 +121,7 @@ export function CopyFridayToSaturdayModal({ open, onClose, onSuccess }: Props) {
         <Alert
           type="info"
           showIcon
-          message="系统只会复制课程安排，不会复制考勤、扣课时、反馈和工资记录。周六上课后，老师正常提交考勤，系统再按原流程扣课时、生成反馈和工资。"
+          message={`${groupIds?.length ? '本次仅处理已选班级。' : ''}系统只会复制课程安排，不会复制考勤、扣课时、反馈和工资记录。周六上课后，老师正常提交考勤，系统再按原流程扣课时、生成反馈和工资。`}
           style={{ fontSize: 12 }}
         />
 

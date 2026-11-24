@@ -20,7 +20,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     include: { teacher: { select: { id: true, name: true } } },
   })
   return NextResponse.json(courses, {
-    headers: { 'Cache-Control': 'public, max-age=120, stale-while-revalidate=60' },
+    headers: { 'Cache-Control': 'private, no-store' },
   })
 })
 

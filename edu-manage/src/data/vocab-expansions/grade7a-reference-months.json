@@ -1,0 +1,122 @@
+[
+  {
+    "word": "January",
+    "examTags": ["书写规范：月份首字母大写", "语法知识：in/on 时间介词"],
+    "grammar": "n. 一月。月份名是专有名词，首字母大写；月份前通常用 in，具体日期前用 on。",
+    "collocations": "in January；January 1st；the first month of the year",
+    "commonMistake": "只说月份用 in January；说具体日期用 on 1 January 或 on January 1st，不说 on January。",
+    "example": {"english": "I usually write my goals in January.", "chinese": "我通常在一月写下自己的目标。"},
+    "application": {"prompt": "My cousin’s birthday is ___ January; no exact date is given. (in / on)", "solution": "in。解析：月份前用 in；具体日期前才用 on。"},
+    "sources": [{"label": "Cambridge Dictionary: January", "url": "https://dictionary.cambridge.org/dictionary/english/january"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "February",
+    "examTags": ["书写规范：月份首字母大写", "语法知识：具体日期表达"],
+    "grammar": "n. 二月。月份名首字母大写；表示月份用 in February，表示某一天用 on + 日期。",
+    "collocations": "in February；February 14th；the second month of the year",
+    "commonMistake": "月份名称要大写；具体日期用 on，如 on 14 February，不能只因含月份就用 in。",
+    "example": {"english": "Our reading club holds a book fair in February.", "chinese": "我们的阅读社团在二月举办图书展。"},
+    "application": {"prompt": "The book fair is ___ 12 February. (in / on)", "solution": "on。解析：12 February 是具体日期，日期前用 on。"},
+    "sources": [{"label": "Cambridge Dictionary: February", "url": "https://dictionary.cambridge.org/dictionary/english/february"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "March",
+    "examTags": ["书写规范：月份首字母大写", "词汇·月份顺序"],
+    "grammar": "n. 三月。月份名是专有名词，首字母大写；March 是一年中的第三个月。",
+    "collocations": "in March；March 8th；the month of March",
+    "commonMistake": "月份名 March 要大写；表示“在三月”用 in March，具体某一天用 on March 8th。",
+    "example": {"english": "We begin our science project in March.", "chinese": "我们在三月开始科学项目。"},
+    "application": {"prompt": "The month between February and April is ___. (March / May)", "solution": "March。解析：March（三月）排在 February（二月）之后、April（四月）之前。"},
+    "sources": [{"label": "Cambridge Dictionary: March", "url": "https://dictionary.cambridge.org/dictionary/english/march"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "April",
+    "examTags": ["书写规范：月份首字母大写", "语法知识：in/on 时间介词"],
+    "grammar": "n. 四月。月份名首字母大写；作时间状语时常用 in April，具体日期用 on。",
+    "collocations": "in April；April 1st；early April",
+    "commonMistake": "表示“在四月”用 in April；April Fools’ Day 是节日名，April 仍需大写。",
+    "example": {"english": "My family plans a museum visit in April.", "chinese": "我家计划在四月去参观博物馆。"},
+    "application": {"prompt": "We will visit the museum ___ April, without naming a day. (in / on)", "solution": "in。解析：句中只说月份，没有具体日期，因此用 in。"},
+    "sources": [{"label": "Cambridge Dictionary: April", "url": "https://dictionary.cambridge.org/dictionary/english/april"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "May",
+    "examTags": ["书写规范：月份首字母大写", "词汇·月份顺序"],
+    "grammar": "n. 五月。月份名首字母大写；May 既可表示五月，也可作情态动词表示“可以”，需结合句子判断。",
+    "collocations": "in May；May Day；the fifth month of the year",
+    "commonMistake": "月份 May 必须大写；它与情态动词 may 词形相同，句首大写不一定表示月份。",
+    "example": {"english": "Our club shares its new schedule in May.", "chinese": "我们的社团在五月分享新的活动安排。"},
+    "application": {"prompt": "May is the ___ month of the year. (fifth / sixth)", "solution": "fifth。解析：May（五月）是一年中的第五个月。"},
+    "sources": [{"label": "Cambridge Dictionary: May", "url": "https://dictionary.cambridge.org/dictionary/english/may"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "June",
+    "examTags": ["书写规范：月份首字母大写", "语法知识：具体日期表达"],
+    "grammar": "n. 六月。月份名是专有名词，首字母大写；月份前用 in，具体日期前用 on。",
+    "collocations": "in June；June 1st；the sixth month of the year",
+    "commonMistake": "June 表示月份时首字母大写；说某月某日要用 on，如 on 30 June。",
+    "example": {"english": "Our class plans a short trip in June.", "chinese": "我们班计划在六月进行一次短途旅行。"},
+    "application": {"prompt": "The course ends ___ 30 June. (in / on)", "solution": "on。解析：30 June 是具体日期，日期前用 on。"},
+    "sources": [{"label": "Cambridge Dictionary: June", "url": "https://dictionary.cambridge.org/dictionary/english/june"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "July",
+    "examTags": ["书写规范：月份首字母大写", "词汇·月份顺序"],
+    "grammar": "n. 七月。月份名首字母大写；July 是一年中的第七个月，常与 in 连用表示月份。",
+    "collocations": "in July；July 4th；the seventh month of the year",
+    "commonMistake": "月份前用 in July；具体日期前用 on July 4th。July 的缩写可写作 Jul.，不要和 June 混淆。",
+    "example": {"english": "The writing course starts in July.", "chinese": "写作课程在七月开始。"},
+    "application": {"prompt": "July is the ___ month of the year. (seventh / ninth)", "solution": "seventh。解析：July（七月）是一年中的第七个月。"},
+    "sources": [{"label": "Cambridge Dictionary: July", "url": "https://dictionary.cambridge.org/dictionary/english/july"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "August",
+    "examTags": ["书写规范：月份首字母大写", "语法知识：in/on 时间介词"],
+    "grammar": "n. 八月。月份名首字母大写；只说月份时用 in August，具体日期前用 on。",
+    "collocations": "in August；August 15th；late August",
+    "commonMistake": "August 的首字母要大写；表示在八月用 in August，不用 on August（除非后接具体日期）。",
+    "example": {"english": "We plan to visit the science centre in August.", "chinese": "我们计划在八月参观科学中心。"},
+    "application": {"prompt": "Our music lessons take place ___ August; no date is specified. (in / on)", "solution": "in。解析：只说明月份时用 in。"},
+    "sources": [{"label": "Cambridge Dictionary: August", "url": "https://dictionary.cambridge.org/dictionary/english/august"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "September",
+    "examTags": ["书写规范：月份首字母大写", "语法知识：具体日期表达"],
+    "grammar": "n. 九月。月份名是专有名词，首字母大写；月份用 in，日期用 on。",
+    "collocations": "in September；September 5th；the ninth month of the year",
+    "commonMistake": "表示“在九月”用 in September；写具体日期时用 on，如 on 5 September。",
+    "example": {"english": "I start a new reading plan in September.", "chinese": "我在九月开始新的阅读计划。"},
+    "application": {"prompt": "The class meeting is ___ 5 September. (in / on)", "solution": "on。解析：5 September 是一个具体日期，前面用 on。"},
+    "sources": [{"label": "Cambridge Dictionary: September", "url": "https://dictionary.cambridge.org/dictionary/english/september"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "October",
+    "examTags": ["书写规范：月份首字母大写", "词汇·月份顺序"],
+    "grammar": "n. 十月。月份名首字母大写；October 是一年中的第十个月。",
+    "collocations": "in October；October 10th；the tenth month of the year",
+    "commonMistake": "October 表示月份时要大写；月份前用 in，具体日期前用 on。",
+    "example": {"english": "Our class meeting usually takes place in October.", "chinese": "我们的班会通常在十月举行。"},
+    "application": {"prompt": "October is the ___ month of the year. (tenth / twelfth)", "solution": "tenth。解析：October（十月）是一年中的第十个月。"},
+    "sources": [{"label": "Cambridge Dictionary: October", "url": "https://dictionary.cambridge.org/dictionary/english/october"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "November",
+    "examTags": ["书写规范：月份首字母大写", "语法知识：in/on 时间介词"],
+    "grammar": "n. 十一月。月份名首字母大写；表示在十一月用 in November，某一日期用 on。",
+    "collocations": "in November；November 11th；late November",
+    "commonMistake": "不要把只含月份的时间表达写成 on November；应说 in November，具体日期才用 on。",
+    "example": {"english": "My aunt visits us in November.", "chinese": "我姑妈在十一月来看我们。"},
+    "application": {"prompt": "We plan the trip ___ November, without choosing a date. (in / on)", "solution": "in。解析：只说月份时用 in。"},
+    "sources": [{"label": "Cambridge Dictionary: November", "url": "https://dictionary.cambridge.org/dictionary/english/november"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "December",
+    "examTags": ["书写规范：月份首字母大写", "词汇·月份顺序"],
+    "grammar": "n. 十二月。月份名首字母大写；December 是一年中的第十二个月，常用 in December 表示在十二月。",
+    "collocations": "in December；December 25th；the last month of the year",
+    "commonMistake": "December 表示月份时首字母大写；只说月份用 in，具体日期用 on。",
+    "example": {"english": "Our English club reviews the year in December.", "chinese": "我们的英语社团在十二月回顾这一年。"},
+    "application": {"prompt": "December is the ___ month of the year. (twelfth / eleventh)", "solution": "twelfth。解析：December（十二月）是一年中的第十二个月。"},
+    "sources": [{"label": "Cambridge Dictionary: December", "url": "https://dictionary.cambridge.org/dictionary/english/december"}, {"label": "Cambridge Grammar: Dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/dates"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  }
+]

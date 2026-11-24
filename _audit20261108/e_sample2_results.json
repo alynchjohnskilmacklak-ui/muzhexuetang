@@ -1,0 +1,871 @@
+{
+  "queries": {
+    "S3d_zero_deduct_by_status": {
+      "sql": "SELECT a.status::text, count(*)::int AS rows,\n            count(*) FILTER (WHERE COALESCE(a.\"hoursDeducted\",0)=0)::int AS zero_deduct\n     FROM \"Attendance\" a\n     JOIN \"ClassLesson\" l ON l.id = a.\"lessonId\"\n     WHERE a.\"deletedAt\" IS NULL AND l.\"deletedAt\" IS NULL AND l.\"attendanceSubmittedAt\" IS NOT NULL\n     GROUP BY a.status ORDER BY rows DESC",
+      "rows": [
+        {
+          "status": "PRESENT",
+          "rows": 24235,
+          "zero_deduct": 210
+        },
+        {
+          "status": "LEAVE",
+          "rows": 921,
+          "zero_deduct": 3
+        },
+        {
+          "status": "ABSENT",
+          "rows": 9,
+          "zero_deduct": 0
+        }
+      ]
+    },
+    "S3e_present_zero_deduct_sample": {
+      "sql": "SELECT a.id, s.name AS student, l.\"lessonDate\", a.status, a.\"hoursDeducted\",\n            a.\"actualMinutes\", l.\"hoursDeductedAt\", l.\"intensiveReviewStatus\"\n     FROM \"Attendance\" a\n     JOIN \"ClassLesson\" l ON l.id = a.\"lessonId\"\n     LEFT JOIN \"Student\" s ON s.id = a.\"studentId\"\n     WHERE a.\"deletedAt\" IS NULL AND l.\"deletedAt\" IS NULL AND l.\"attendanceSubmittedAt\" IS NOT NULL\n       AND a.status = 'PRESENT' AND COALESCE(a.\"hoursDeducted\",0) = 0\n     ORDER BY l.\"lessonDate\" DESC LIMIT 20",
+      "rows": [
+        {
+          "id": "cmv1sp2wh000p6e7kf8g49b6s",
+          "student": "本**",
+          "lessonDate": "2026-10-10T01:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "NOT_REQUIRED"
+        },
+        {
+          "id": "cmv1sp2vr000h6e7kgnzgd5mo",
+          "student": "本**",
+          "lessonDate": "2026-10-09T01:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "NOT_REQUIRED"
+        },
+        {
+          "id": "cmv1sp2w7000l6e7ku0dsgrxy",
+          "student": "本**",
+          "lessonDate": "2026-10-09T01:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "NOT_REQUIRED"
+        },
+        {
+          "id": "cmssbxrnu004cwhp5bwqg3leo",
+          "student": "贾**",
+          "lessonDate": "2026-08-13T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 120,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsredpsz003fwhp5dkxhahbr",
+          "student": "贾**",
+          "lessonDate": "2026-08-12T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 120,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsouqznh001mwhp50rza4ikg",
+          "student": "底**",
+          "lessonDate": "2026-08-10T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmso21h0x0pptcatzs6m7bk6z",
+          "student": "贾**",
+          "lessonDate": "2026-08-10T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 120,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmso9cs6x000479x1tzxgemwq",
+          "student": "底**",
+          "lessonDate": "2026-08-10T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsouqy9d001bwhp5b3wfx43e",
+          "student": "杨**",
+          "lessonDate": "2026-08-10T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsmtt2go0pmocatzu7gesulp",
+          "student": "底**",
+          "lessonDate": "2026-08-09T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsn201cv0pnscatzqldgbtpd",
+          "student": "底**",
+          "lessonDate": "2026-08-09T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsmx2vko0pnfcatzx0j6voaw",
+          "student": "杨**",
+          "lessonDate": "2026-08-09T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmso0rl0y0ppgcatzp7ikqp8r",
+          "student": "贾**",
+          "lessonDate": "2026-08-09T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 120,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsit5oiw0gr5catzvrvi7aii",
+          "student": "张**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 120,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsj07l6s0hy1catzym6mrgjl",
+          "student": "默**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 120,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsiatlz40c43catzhi8jeahk",
+          "student": "贾**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsimzwe80f0qcatzs9d6dtqk",
+          "student": "底**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsimxvhm0f09catzct5b59qo",
+          "student": "底**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsj07yxq0i3ycatz0i19nj95",
+          "student": "默**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 120,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        },
+        {
+          "id": "cmsiedzlp0dcicatzep5khgl4",
+          "student": "贾**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "PRESENT",
+          "hoursDeducted": 0,
+          "actualMinutes": 90,
+          "hoursDeductedAt": null,
+          "intensiveReviewStatus": "APPROVED"
+        }
+      ]
+    },
+    "S3f_submitted_no_deducted_at_sample": {
+      "sql": "SELECT l.id, t.name AS teacher, l.\"lessonDate\", l.status, l.\"attendanceSubmittedAt\",\n            l.\"hoursDeductedAt\", count(a.id)::int AS att_rows,\n            count(*) FILTER (WHERE COALESCE(a.\"hoursDeducted\",0)>0)::int AS deducted_rows\n     FROM \"ClassLesson\" l\n     LEFT JOIN \"Teacher\" t ON t.id = l.\"teacherId\"\n     LEFT JOIN \"Attendance\" a ON a.\"lessonId\" = l.id AND a.\"deletedAt\" IS NULL\n     WHERE l.\"deletedAt\" IS NULL AND l.\"attendanceSubmittedAt\" IS NOT NULL AND l.\"hoursDeductedAt\" IS NULL\n     GROUP BY l.id, t.name, l.\"lessonDate\", l.status, l.\"attendanceSubmittedAt\", l.\"hoursDeductedAt\"\n     ORDER BY l.\"lessonDate\" DESC LIMIT 15",
+      "rows": [
+        {
+          "id": "local-demo-20261010-lesson-english",
+          "teacher": "本**",
+          "lessonDate": "2026-10-10T01:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-10-10T01:00:00.000Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "local-demo-20261010-lesson-math",
+          "teacher": "本**",
+          "lessonDate": "2026-10-09T01:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-10-09T01:00:00.000Z",
+          "hoursDeductedAt": null,
+          "att_rows": 2,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmssbxodh0046whp5etiawt6n",
+          "teacher": "陈**",
+          "lessonDate": "2026-08-13T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-14T02:30:19.720Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmsqurngb0037whp5xdvvr35e",
+          "teacher": "陈**",
+          "lessonDate": "2026-08-12T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-13T10:50:56.865Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmso0s15q0ppncatz5td0q7mx",
+          "teacher": "陈**",
+          "lessonDate": "2026-08-10T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-11T02:42:11.694Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmso9ahpd0pqkcatztdnaghht",
+          "teacher": "王**",
+          "lessonDate": "2026-08-10T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-11T16:05:49.676Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmso55fy50pqacatzml2gz235",
+          "teacher": "毛**",
+          "lessonDate": "2026-08-10T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-11T06:06:56.695Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmso9ayjn0pqqcatzq04grj2s",
+          "teacher": "王**",
+          "lessonDate": "2026-08-10T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-11T16:05:51.481Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmsmuhnsj0pn5catze3cpqysh",
+          "teacher": "王**",
+          "lessonDate": "2026-08-09T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-10T09:53:18.557Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmso0rhrx0ppacatzn3bul6nz",
+          "teacher": "陈**",
+          "lessonDate": "2026-08-09T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-11T02:06:30.704Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmsmtngx00pmgcatzm3ay46v5",
+          "teacher": "毛**",
+          "lessonDate": "2026-08-09T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-10T06:03:56.470Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmsmuh7jn0pmzcatzcj4f8nw3",
+          "teacher": "王**",
+          "lessonDate": "2026-08-09T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-10T07:35:32.951Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmsi66osq0bnkcatzr6cbz7fh",
+          "teacher": "王**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-07T02:01:24.350Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmsit5j250gqzcatzgnaqt1af",
+          "teacher": "陈**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-07T10:34:40.614Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        },
+        {
+          "id": "cmsifgn170dqycatznzoj87y2",
+          "teacher": "胡**",
+          "lessonDate": "2026-08-06T16:00:00.000Z",
+          "status": "COMPLETED",
+          "attendanceSubmittedAt": "2026-08-07T13:40:45.668Z",
+          "hoursDeductedAt": null,
+          "att_rows": 1,
+          "deducted_rows": 0
+        }
+      ]
+    },
+    "S5c_duplicate_lesson_pay": {
+      "sql": "SELECT \"lessonId\", \"teacherId\", count(*)::int AS pay_rows,\n            array_agg(amount) AS amounts, array_agg(x.\"createdAt\") AS created\n     FROM \"TeacherSalaryTransaction\" x\n     WHERE x.\"deletedAt\" IS NULL AND x.\"lessonId\" IS NOT NULL AND type = 'LESSON_PAY'\n     GROUP BY \"lessonId\", \"teacherId\" HAVING count(*) > 1 ORDER BY pay_rows DESC LIMIT 20",
+      "rows": []
+    },
+    "S5d_groups_pay_breakdown": {
+      "sql": "SELECT pay_rows, count(*)::int AS groups FROM (\n       SELECT \"lessonId\", \"teacherId\",\n              count(*) FILTER (WHERE type='LESSON_PAY')::int AS pay_rows\n       FROM \"TeacherSalaryTransaction\"\n       WHERE \"deletedAt\" IS NULL AND \"lessonId\" IS NOT NULL\n       GROUP BY \"lessonId\", \"teacherId\"\n     ) g GROUP BY pay_rows ORDER BY pay_rows",
+      "rows": [
+        {
+          "pay_rows": 0,
+          "groups": 4
+        },
+        {
+          "pay_rows": 1,
+          "groups": 2007
+        }
+      ]
+    },
+    "G3c_mismatch_enrollment_detail": {
+      "sql": "SELECT s.name AS student, s.\"remainHours\" AS student_remain,\n            e.id AS enrollment_id, e.status, e.\"totalHours\", e.\"usedHours\", e.\"remainHours\" AS enrollment_remain,\n            g.name AS group_name\n     FROM \"Student\" s\n     JOIN \"Enrollment\" e ON e.\"studentId\" = s.id\n     LEFT JOIN \"ClassGroup\" g ON g.id = e.\"groupId\"\n     JOIN (SELECT \"studentId\", SUM(\"remainHours\")::float AS sum FROM \"Enrollment\"\n           WHERE status='ACTIVE' AND \"deletedAt\" IS NULL GROUP BY \"studentId\") enr\n       ON enr.\"studentId\" = s.id\n     WHERE s.\"deletedAt\" IS NULL AND e.\"deletedAt\" IS NULL\n       AND ABS(s.\"remainHours\" - enr.sum) > 0.05\n     ORDER BY s.name LIMIT 25",
+      "rows": [
+        {
+          "student": "丁**",
+          "student_remain": 78.4,
+          "enrollment_id": "cmrf7s875009ebcuoag158msh",
+          "status": "ACTIVE",
+          "totalHours": 140,
+          "usedHours": 133.00000000000028,
+          "enrollment_remain": 6.999999999999842,
+          "group_name": "牧哲学堂初三（四班）"
+        },
+        {
+          "student": "丁**",
+          "student_remain": 119,
+          "enrollment_id": "cmrkernyo09etbbxt2l64nfjs",
+          "status": "ACTIVE",
+          "totalHours": 119,
+          "usedHours": 119,
+          "enrollment_remain": 0,
+          "group_name": "牧哲学堂初升高衔接班"
+        },
+        {
+          "student": "任**",
+          "student_remain": 78.4,
+          "enrollment_id": "cmrf7s7qe008fbcuo2hnockdr",
+          "status": "ACTIVE",
+          "totalHours": 140,
+          "usedHours": 133.00000000000028,
+          "enrollment_remain": 6.999999999999842,
+          "group_name": "牧哲学堂初三（四班）"
+        },
+        {
+          "student": "何**",
+          "student_remain": 134.4,
+          "enrollment_id": "cmty66etv01kibsan7hc7qgpq",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 11.199999999999998,
+          "enrollment_remain": 123.20000000000009,
+          "group_name": "牧哲学堂初二周六冲刺班"
+        },
+        {
+          "student": "何**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc0lil502gdnropeo2ecxis",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 131.6000000000003,
+          "enrollment_remain": 2.799999999999656,
+          "group_name": "牧哲学堂初二（一班）"
+        },
+        {
+          "student": "侯**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrbt2u5v00eqnropnzmhxo1e",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "enrollment_remain": 1.399999999999656,
+          "group_name": "牧哲学堂初一（一班）"
+        },
+        {
+          "student": "冯**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc1svw303kynrop3rakgcnq",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "enrollment_remain": 0,
+          "group_name": "牧哲学堂初三（一班）"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 78.4,
+          "enrollment_id": "cmrf7s7ts008mbcuollpa0oez",
+          "status": "ACTIVE",
+          "totalHours": 140,
+          "usedHours": 133.00000000000028,
+          "enrollment_remain": 6.999999999999842,
+          "group_name": "牧哲学堂初三（四班）"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 85.4,
+          "enrollment_id": "cmrtatdj103ut7dp2633rke2m",
+          "status": "ACTIVE",
+          "totalHours": 85.4,
+          "usedHours": 82.60000000000018,
+          "enrollment_remain": 2.7999999999998124,
+          "group_name": "牧哲学堂初三（三班）"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 134.4,
+          "enrollment_id": "cmty66elm014lbsanyfdzvg3u",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 11.199999999999998,
+          "enrollment_remain": 123.20000000000009,
+          "group_name": "牧哲学堂初二周六冲刺班"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 133,
+          "enrollment_id": "cmrbt2upw00fwnrop9w78xvhq",
+          "status": "WITHDRAWN",
+          "totalHours": 16,
+          "usedHours": 5.6000000000000005,
+          "enrollment_remain": 0,
+          "group_name": "牧哲学堂初一（一班）"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 133,
+          "enrollment_id": "cmrdhvvg702usn6sugksivlu4",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 127.40000000000036,
+          "enrollment_remain": 6.999999999999714,
+          "group_name": "牧哲学堂初二（一班）"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrcqsul3046jnrop3iinnnav",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 131.6000000000003,
+          "enrollment_remain": 2.799999999999656,
+          "group_name": "牧哲学堂初二（一班）"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc0lgz902epnrop9ugq08jc",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 131.6000000000003,
+          "enrollment_remain": 2.799999999999656,
+          "group_name": "牧哲学堂初二（一班）"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc1vhz503mcnrop259ege4r",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "enrollment_remain": 1.399999999999656,
+          "group_name": "牧哲学堂初三（二班）"
+        },
+        {
+          "student": "刘**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc1sv9l03k9nrop4nktmk9e",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "enrollment_remain": 0,
+          "group_name": "牧哲学堂初三（一班）"
+        },
+        {
+          "student": "史**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc5lunz03ybnrop4dticf82",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 131.6000000000003,
+          "enrollment_remain": 2.799999999999656,
+          "group_name": "牧哲学堂初二（二班）"
+        },
+        {
+          "student": "史**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrbt7akq00gmnropiftm09rq",
+          "status": "WITHDRAWN",
+          "totalHours": 16,
+          "usedHours": 0,
+          "enrollment_remain": 0,
+          "group_name": "牧哲学堂初一（一班）"
+        },
+        {
+          "student": "史**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc1swdz03linropha80eqqk",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "enrollment_remain": 0,
+          "group_name": "牧哲学堂初三（一班）"
+        },
+        {
+          "student": "吕**",
+          "student_remain": 134.4,
+          "enrollment_id": "cmrf80mrg00kfbcuopfqi1edl",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "enrollment_remain": 0,
+          "group_name": "牧哲学堂初升高衔接班"
+        },
+        {
+          "student": "吕**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc1vi7z03mmnroplnn95ndi",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "enrollment_remain": 1.399999999999656,
+          "group_name": "牧哲学堂初三（二班）"
+        },
+        {
+          "student": "周**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrbtbrw400j1nropf3gjueih",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "enrollment_remain": 1.399999999999656,
+          "group_name": "牧哲学堂初一（二班）"
+        },
+        {
+          "student": "周**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc0yhow02nbnropm8bzi19v",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 131.6000000000003,
+          "enrollment_remain": 2.799999999999656,
+          "group_name": "牧哲学堂初三（三班）"
+        },
+        {
+          "student": "周**",
+          "student_remain": 128.8,
+          "enrollment_id": "cmrc0li2d02ftnrop7z089y3f",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 131.6000000000003,
+          "enrollment_remain": 2.799999999999656,
+          "group_name": "牧哲学堂初二（一班）"
+        },
+        {
+          "student": "孙**",
+          "student_remain": 116.9,
+          "enrollment_id": "cmrii2taw0089bbxt93w3d27w",
+          "status": "ACTIVE",
+          "totalHours": 116.9,
+          "usedHours": 115.50000000000031,
+          "enrollment_remain": 1.3999999999996844,
+          "group_name": "牧哲学堂初三（二班）"
+        }
+      ]
+    },
+    "S4d_nonfeedback_no_lesson_sample": {
+      "sql": "SELECT x.id, t.name AS teacher, x.type, x.amount, x.\"termId\", x.\"lessonDate\", x.\"createdAt\", x.description\n     FROM \"TeacherSalaryTransaction\" x\n     LEFT JOIN \"Teacher\" t ON t.id = x.\"teacherId\"\n     WHERE x.\"deletedAt\" IS NULL AND x.\"lessonId\" IS NULL AND x.type <> 'FEEDBACK_BONUS'\n     ORDER BY x.\"createdAt\" DESC LIMIT 20",
+      "rows": [
+        {
+          "id": "cmv3wnky2000he84cmsrzbmb1",
+          "teacher": "胡**",
+          "type": "SALARY_SETTLEMENT",
+          "amount": 22,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-10-11T14:15:08.996Z",
+          "description": "10月工资结算 · 共 1 笔应发流水"
+        },
+        {
+          "id": "cmv3wi634000ce84c092j7hdm",
+          "teacher": "范**",
+          "type": "SALARY_SETTLEMENT",
+          "amount": 320,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-10-11T14:10:56.459Z",
+          "description": "10月工资结算 · 共 16 笔应发流水"
+        },
+        {
+          "id": "cmv3wi2020007e84cnyrj2sz2",
+          "teacher": "朱**",
+          "type": "SALARY_SETTLEMENT",
+          "amount": 244,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-10-11T14:10:51.161Z",
+          "description": "10月工资结算 · 共 19 笔应发流水"
+        },
+        {
+          "id": "cmv3wgpkc0002e84c4wrx8nqf",
+          "teacher": "胡**",
+          "type": "SALARY_SETTLEMENT",
+          "amount": 245.5,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-10-11T14:09:48.360Z",
+          "description": "10月工资结算 · 共 23 笔应发流水"
+        },
+        {
+          "id": "cmuqxqyyh01e3oaqw7l6dtj1v",
+          "teacher": "胡**",
+          "type": "manual_adjust",
+          "amount": 22,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-10-02T12:24:46.416Z",
+          "description": "[小班课] 补差价"
+        },
+        {
+          "id": "cmtyhbdgm002sop6s9217xfbe",
+          "teacher": "范**",
+          "type": "manual_adjust",
+          "amount": -60,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-09-12T14:27:11.973Z",
+          "description": "[小班课] 重新"
+        },
+        {
+          "id": "cmtycxb7e00s22wlvupkuj7og",
+          "teacher": "胡**",
+          "type": "manual_adjust",
+          "amount": -30,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-09-12T12:24:17.401Z",
+          "description": "[小班课] 重新"
+        },
+        {
+          "id": "cmtycx3ha00s02wlvy8ftm4zy",
+          "teacher": "朱**",
+          "type": "manual_adjust",
+          "amount": -123,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-09-12T12:24:07.389Z",
+          "description": "[小班课] 重新"
+        },
+        {
+          "id": "cmtnqep49001lv49sg08a4gjv",
+          "teacher": "胡**",
+          "type": "manual_adjust",
+          "amount": 8,
+          "termId": "cmtiej14s000u5vcgsmi92umi",
+          "lessonDate": null,
+          "createdAt": "2026-09-05T01:56:15.656Z",
+          "description": "[小班课] 加8"
+        },
+        {
+          "id": "cmt9ya55v000kjm3nu5gvsx3q",
+          "teacher": "胡**",
+          "type": "STUDY_HALL_ATTENDANCE",
+          "amount": 40,
+          "termId": "cmsorqmpv0006gh0u9g4fmlbz",
+          "lessonDate": "2026-08-26T00:00:00.000Z",
+          "createdAt": "2026-08-26T10:27:53.636Z",
+          "description": "晚托作业班考勤奖励：晚托作业班 · 2026-08-26，全班完成考勤"
+        },
+        {
+          "id": "cmt9y9jvm0006jm3ni0720hbn",
+          "teacher": "胡**",
+          "type": "STUDY_HALL_ATTENDANCE",
+          "amount": 40,
+          "termId": "cmsorqmpv0006gh0u9g4fmlbz",
+          "lessonDate": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-26T10:27:26.051Z",
+          "description": "晚托作业班考勤奖励：晚托作业班 · 2026-08-25，全班完成考勤"
+        },
+        {
+          "id": "cmt9usnem00105c92gzbgzis6",
+          "teacher": "胡**",
+          "type": "STUDY_HALL_BONUS",
+          "amount": 0.5,
+          "termId": "cmsorqmpv0006gh0u9g4fmlbz",
+          "lessonDate": "2026-08-26T00:00:00.000Z",
+          "createdAt": "2026-08-26T08:50:18.622Z",
+          "description": "[小班课] 作业班登记奖励：晚托作业班 · 刘子旭，0.50元/人"
+        },
+        {
+          "id": "cmt9ukttq000h5c926o233yvd",
+          "teacher": "胡**",
+          "type": "STUDY_HALL_BONUS",
+          "amount": 0.5,
+          "termId": "cmsorqmpv0006gh0u9g4fmlbz",
+          "lessonDate": "2026-08-25T00:00:00.000Z",
+          "createdAt": "2026-08-26T08:44:13.694Z",
+          "description": "[小班课] 作业班登记奖励：晚托作业班 · 刘子旭，0.50元/人"
+        },
+        {
+          "id": "cmt4d0f3m000cy216mvkkvv47",
+          "teacher": "胡**",
+          "type": "STUDY_HALL_BONUS",
+          "amount": 0.5,
+          "termId": "cmsorqmpv0006gh0u9g4fmlbz",
+          "lessonDate": "2026-08-21T00:00:00.000Z",
+          "createdAt": "2026-08-22T12:33:37.138Z",
+          "description": "[小班课] 作业班登记奖励：晚托作业班 · 刘子旭，0.50元/人"
+        },
+        {
+          "id": "cmskclost0pl3catzn1yuq8tu",
+          "teacher": "苏**",
+          "type": "manual_adjust",
+          "amount": -365,
+          "termId": "cmso9d0qi000a79x1tv8vselb",
+          "lessonDate": null,
+          "createdAt": "2026-08-08T12:26:46.349Z",
+          "description": "[一对一/二/三] 工资结算"
+        },
+        {
+          "id": "cmskcl3oq0pl1catzh7ouu44v",
+          "teacher": "徐**",
+          "type": "manual_adjust",
+          "amount": -1006.5,
+          "termId": "cmso9d0qi000a79x1tv8vselb",
+          "lessonDate": null,
+          "createdAt": "2026-08-08T12:26:18.985Z",
+          "description": "[一对一/二/三] 工资结算"
+        },
+        {
+          "id": "cmskcjdzp0pkxcatzqcl5mdvd",
+          "teacher": "王**",
+          "type": "manual_adjust",
+          "amount": -25,
+          "termId": "cmso9d0qi000a79x1tv8vselb",
+          "lessonDate": null,
+          "createdAt": "2026-08-08T12:24:59.029Z",
+          "description": "[小班课] 多补了一次奶茶"
+        },
+        {
+          "id": "cmskchzo70pktcatzrh0b2fja",
+          "teacher": "苏**",
+          "type": "manual_adjust",
+          "amount": -1473.82,
+          "termId": "cmso9d0qi000a79x1tv8vselb",
+          "lessonDate": null,
+          "createdAt": "2026-08-08T12:23:53.815Z",
+          "description": "[小班课] 工资结算"
+        },
+        {
+          "id": "cmskca98g0pkpcatzlljfvuzp",
+          "teacher": "陈**",
+          "type": "manual_adjust",
+          "amount": -864,
+          "termId": "cmso9d0qi000a79x1tv8vselb",
+          "lessonDate": null,
+          "createdAt": "2026-08-08T12:17:52.959Z",
+          "description": "[一对一/二/三] 工资结算"
+        },
+        {
+          "id": "cmskc9e1g0pkncatz4038pa5a",
+          "teacher": "王**",
+          "type": "manual_adjust",
+          "amount": -106,
+          "termId": "cmso9d0qi000a79x1tv8vselb",
+          "lessonDate": null,
+          "createdAt": "2026-08-08T12:17:12.532Z",
+          "description": "[一对一/二/三] 杨雨泽"
+        }
+      ]
+    },
+    "G3d_overall_compare": {
+      "sql": "SELECT count(*)::int AS active_students,\n            count(*) FILTER (WHERE ABS(s.\"remainHours\" - COALESCE(enr.sum,0)) > 0.05)::int AS mismatch,\n            count(*) FILTER (WHERE s.\"remainHours\" > 0 AND COALESCE(enr.sum,0) = 0)::int AS student_positive_enrollment_zero\n     FROM \"Student\" s\n     LEFT JOIN (SELECT \"studentId\", SUM(\"remainHours\")::float AS sum FROM \"Enrollment\"\n                WHERE status='ACTIVE' AND \"deletedAt\" IS NULL GROUP BY \"studentId\") enr\n       ON enr.\"studentId\" = s.id\n     WHERE s.\"deletedAt\" IS NULL",
+      "rows": [
+        {
+          "active_students": 191,
+          "mismatch": 136,
+          "student_positive_enrollment_zero": 37
+        }
+      ]
+    }
+  }
+}

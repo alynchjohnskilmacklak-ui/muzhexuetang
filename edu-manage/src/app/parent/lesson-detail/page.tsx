@@ -1,11 +1,12 @@
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 import { redactFeedbackForParent } from '@/lib/classroom-feedback/access'
 import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
 import { variantsForFeedback } from '@/lib/file-asset-variants'
 import { signedFeedbackImageUrls } from '@/lib/classroom-feedback/signed-images'
+import { buildParentLessonDetailWhere, resolveParentLessonPresentation } from '@/lib/parent-lesson-detail'
 import { LessonDetailClient } from './client'
 
 export const dynamic = 'force-dynamic'
@@ -13,18 +14,22 @@ export const dynamic = 'force-dynamic'
 export default async function LessonDetailPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ teacher?: string; course?: string; childId?: string; time?: string; room?: string; date?: string }>
+  searchParams?: Promise<{ lessonId?: string; teacher?: string; course?: string; childId?: string; time?: string; room?: string; date?: string }>
 }) {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
   const params = await searchParams
+  const lessonIdParam = params?.lessonId || ''
   const teacherParam = params?.teacher || ''
   const courseParam = params?.course || ''
   const childId = params?.childId || ''
-  const timeParam = params?.time || ''
-  const roomParam = params?.room || ''
-  const lessonDateParam = params?.date || ''
+  const fallbackPresentation = {
+    course: courseParam,
+    time: params?.time || '',
+    room: params?.room || '',
+    lessonDate: params?.date || '',
+  }
 
   const db = await getRequestPrisma()
   const studentIds = (
@@ -35,7 +40,55 @@ export default async function LessonDetailPage({
   ).map((student) => student.id)
   const scopedStudentIds = childId && studentIds.includes(childId) ? [childId] : studentIds
 
-  const teacher = teacherParam
+  const currentLesson = lessonIdParam
+    ? await db.classLesson.findFirst({
+        where: buildParentLessonDetailWhere(userId, lessonIdParam, scopedStudentIds),
+        include: {
+          teacher: { select: { id: true, name: true } },
+          group: {
+            select: {
+              id: true,
+              teacherId: true,
+              course: { select: { name: true, subject: true } },
+              room: { select: { name: true } },
+              teacher: { select: { id: true, name: true } },
+            },
+          },
+        },
+      })
+    : null
+  if (lessonIdParam && !currentLesson) notFound()
+
+  const presentation = resolveParentLessonPresentation(currentLesson, fallbackPresentation)
+  const courseClean = presentation.course
+  const timeParam = presentation.time
+  const roomParam = presentation.room
+  const lessonDateParam = presentation.lessonDate
+  const currentTeacherId = currentLesson?.teacher?.id || currentLesson?.group.teacher?.id || null
+  const teacher = currentLesson
+    ? currentTeacherId
+      ? await db.teacher.findFirst({
+          where: { id: currentTeacherId, status: { not: 'RESIGNED' } },
+          select: {
+            id: true,
+            name: true,
+            gender: true,
+            avatar: true,
+            education: true,
+            university: true,
+            major: true,
+            graduationYear: true,
+            currentUnit: true,
+            subjects: true,
+            bio: true,
+            employmentType: true,
+            tierLevel: true,
+            rating: true,
+            ratingCount: true,
+          },
+        })
+      : null
+    : teacherParam
     ? await db.teacher.findFirst({
         where: { name: teacherParam, status: { not: 'RESIGNED' } },
         select: {
@@ -58,7 +111,6 @@ export default async function LessonDetailPage({
       })
     : null
 
-  const courseClean = courseParam.replace(/^牧哲学堂/, '').trim()
   const visibilityWhere = {
     studentIds: { hasSome: scopedStudentIds },
     ...visibleClassroomFeedbackWhere,
@@ -74,8 +126,19 @@ export default async function LessonDetailPage({
     },
   }
 
-  let feedback = null
-  if (teacher) {
+  let feedback = currentLesson && currentTeacherId
+    ? await db.classroomFeedback.findFirst({
+        where: {
+          ...visibilityWhere,
+          teacherId: currentTeacherId,
+          classLessonId: currentLesson.id,
+        },
+        include,
+        orderBy: { createdAt: 'desc' },
+      })
+    : null
+  const feedbackTeacherId = teacher?.id || currentTeacherId
+  if (!feedback && feedbackTeacherId) {
     // 如果指定了课程日期，按日期+老师+课程名精确查询这节课的反馈
     if (lessonDateParam) {
       const dayStart = new Date(lessonDateParam)
@@ -85,7 +148,7 @@ export default async function LessonDetailPage({
       feedback = await db.classroomFeedback.findFirst({
         where: {
           ...visibilityWhere,
-          teacherId: teacher.id,
+          teacherId: feedbackTeacherId,
           createdAt: { gte: dayStart, lte: dayEnd },
           ...(courseClean ? {
             classLesson: { is: { group: { is: { course: { is: { name: { contains: courseClean } } } } } } },
@@ -98,7 +161,7 @@ export default async function LessonDetailPage({
       feedback = await db.classroomFeedback.findFirst({
         where: {
           ...visibilityWhere,
-          teacherId: teacher.id,
+          teacherId: feedbackTeacherId,
           classLesson: { is: { group: { is: { course: { is: { name: { contains: courseClean } } } } } } },
         },
         include,
@@ -107,7 +170,7 @@ export default async function LessonDetailPage({
     }
     if (!feedback && !lessonDateParam) {
       feedback = await db.classroomFeedback.findFirst({
-        where: { ...visibilityWhere, teacherId: teacher.id },
+        where: { ...visibilityWhere, teacherId: feedbackTeacherId },
         include,
         orderBy: { createdAt: 'desc' },
       })
@@ -156,7 +219,9 @@ export default async function LessonDetailPage({
               rating: teacher.rating,
               ratingCount: teacher.ratingCount,
             }))
-          : null
+          : currentLesson
+            ? { name: currentLesson.teacher?.name || currentLesson.group.teacher?.name || '授课老师' }
+            : null
       }
       course={courseClean}
       time={timeParam}

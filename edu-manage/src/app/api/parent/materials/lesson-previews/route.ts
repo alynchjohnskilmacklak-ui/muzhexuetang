@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestPrisma } from '@/lib/prisma'
 import { parentActiveEnrollmentWhere, parentVisibleLessonWhere } from '@/lib/business-visibility'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,13 +22,17 @@ export const GET = apiHandler(async () => {
       startTime: true,
       endTime: true,
       subject: true,
+      lessonStudents: { select: { studentId: true } },
       group: {
         select: {
           name: true,
           teacherId: true,
           teacherAssignments: { select: { teacherId: true } },
           course: { select: { subject: true } },
-          enrollments: { where: parentActiveEnrollmentWhere(session.user.id), select: { studentId: true, student: { select: { name: true } } } },
+          enrollments: {
+            where: parentActiveEnrollmentWhere(session.user.id),
+            select: { studentId: true, subjects: true, student: { select: { name: true } } },
+          },
         },
       },
     },
@@ -39,6 +44,7 @@ export const GET = apiHandler(async () => {
     where: {
       isLessonPreview: true,
       status: 'PUBLISHED',
+      deletedAt: null,
       audience: { in: ['STUDENT', 'BOTH'] },
       classLessonId: { in: visibleLessonIds },
     },
@@ -66,6 +72,20 @@ export const GET = apiHandler(async () => {
     if (!material.classLesson || !material.classLessonId) return []
     const lesson = lessonsById.get(material.classLessonId)
     if (!lesson) return []
+    const lessonSubject = lesson.subject || lesson.group.course?.subject
+    if (lessonSubject && material.subject !== lessonSubject) return []
+    const parentStudentIds = new Set(lesson.group.enrollments.map((item) => item.studentId))
+    const lessonRosterIds = resolveSubjectLessonStudentIds(
+      lesson.lessonStudents.map((item) => item.studentId),
+      lesson.group.enrollments,
+      lessonSubject,
+      lesson.lessonDate,
+    )
+    const visibleStudentIds = new Set(lessonRosterIds.filter((id) => parentStudentIds.has(id)))
+    const studentNames = [...new Set(lesson.group.enrollments
+      .filter((item) => visibleStudentIds.has(item.studentId))
+      .map((item) => item.student.name))]
+    if (studentNames.length === 0) return []
     return [{
       id: material.id,
       title: material.title,
@@ -79,7 +99,7 @@ export const GET = apiHandler(async () => {
       subject: material.subject,
       teacherName: material.teacher?.name || '授课老师',
       groupName: lesson.group.name,
-      studentNames: [...new Set(lesson.group.enrollments.map((item) => item.student.name))],
+      studentNames,
     }]
   })
 

@@ -8,9 +8,12 @@ import type { PracticeAnswer, PracticeQuestion, PracticeSet } from '@/data/paren
 import { normalizeTextbookGrade } from '@/lib/classroom-feedback/textbook-editions'
 import { MathText } from './MathText'
 import { PracticeCanvas } from './PracticeCanvas'
+import { AnimatedNumber } from '@/components/Common/AnimatedNumber'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import styles from './practice-bank.module.css'
 import { formatPracticeAnswer, getBalancedOptionOrders, getDifficultyLabel, isPracticeAnswerCorrect, isValidPracticeAnswer, practiceQuestionRevision, selectPracticeQuestions, type PracticeMode } from '@/lib/practice-bank'
 import { PracticeSaveError, practiceDraftKey, readPracticeDraft, savePracticeSubmission, type PracticeDraft, type PracticeSubmission } from '@/lib/practice-session-client'
+import { useMobileBackHandler } from '@/components/Layout/MobileLayout'
 
 type Child = { id: string; name: string; grade: string | null }
 type SavedResult = { score: number; total: number; wrongIds: string[]; finishedAt: string }
@@ -58,6 +61,9 @@ export function PracticeBank({
   initialSubject = '',
   focusTopics = [],
   fromFeedback = false,
+  selectedVolume = '',
+  hideSubjectTabs = false,
+  onBackToVolumes,
 }: {
   grade: string
   subject: string
@@ -70,12 +76,15 @@ export function PracticeBank({
   initialSubject?: string
   focusTopics?: string[]
   fromFeedback?: boolean
+  selectedVolume?: string
+  hideSubjectTabs?: boolean
+  onBackToVolumes?: () => void
 }) {
   const { data: session } = useSession()
   const userId = session?.user?.id || ''
   const [childId, setChildId] = useState(initialChildId)
   const [localGrade, setLocalGrade] = useState(grade)
-  const [activeSubject, setActiveSubject] = useState(initialSubject)
+  const [activeSubject, setActiveSubject] = useState(subject || initialSubject)
   const [feedbackFocusActive, setFeedbackFocusActive] = useState(fromFeedback && focusTopics.length > 0)
   const [activeSet, setActiveSet] = useState<PracticeSet | null>(null)
   const [answers, setAnswers] = useState<Record<string, PracticeAnswer>>({})
@@ -140,7 +149,7 @@ export function PracticeBank({
 
   useEffect(() => { setChildId(initialChildId) }, [initialChildId])
   useEffect(() => { setLocalGrade(grade) }, [grade])
-  useEffect(() => { setActiveSubject(initialSubject) }, [initialSubject])
+  useEffect(() => { setActiveSubject(subject || initialSubject) }, [subject, initialSubject])
   useEffect(() => { setFeedbackFocusActive(fromFeedback && focusTopicKey.length > 0) }, [fromFeedback, focusTopicKey])
 
   // 切换孩子时，自动切换到该孩子的年级
@@ -257,35 +266,42 @@ export function PracticeBank({
     return seen
   }, [available])
 
-  const activeSubjects = subjects.includes(activeSubject)
+  const activeSubjects = subject || (subjects.includes(activeSubject)
     ? activeSubject
     : subjects.find((candidate) => initialSubject && (initialSubject.includes(candidate) || candidate.includes(initialSubject)))
       || subjects[0]
-      || ''
+      || '')
 
-  // 当前学科的小节按 章节分组
+  // 当前学科的小节按 章节分组（支持指定分册过滤）
   const groupedChapters = useMemo(() => {
     const byChapter = new Map<string, PracticeSetSummary[]>()
     for (const set of catalogSets) {
       if (set.subject !== activeSubjects) continue
-      const chapterKey = `${set.volume} · ${set.chapter}`
+      if (selectedVolume && set.volume !== selectedVolume) continue
+      const chapterKey = selectedVolume ? set.chapter : `${set.volume} · ${set.chapter}`
       if (!byChapter.has(chapterKey)) byChapter.set(chapterKey, [])
       byChapter.get(chapterKey)!.push(set)
     }
     return [...byChapter.entries()]
-  }, [catalogSets, activeSubjects])
+  }, [catalogSets, activeSubjects, selectedVolume])
 
   const subjectDone = useMemo(() => {
-    const sets = available.filter((s) => s.subject === activeSubjects && s.available)
+    const sets = available.filter((s) => s.subject === activeSubjects && (!selectedVolume || s.volume === selectedVolume) && s.available)
     const done = sets.filter((s) => savedResults[s.id]).length
     return { done, total: sets.length }
-  }, [available, activeSubjects, savedResults])
+  }, [available, activeSubjects, selectedVolume, savedResults])
 
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (feedbackFocusActive && groupedChapters.length > 0) {
       setExpandedChapters(new Set(groupedChapters.map(([chapterKey]) => chapterKey)))
+    } else if (groupedChapters.length > 0) {
+      // 默认展开第一个单元，避免全收起让家长摸不着头脑
+      setExpandedChapters((prev) => {
+        if (prev.size === 0) return new Set([groupedChapters[0][0]])
+        return prev
+      })
     }
   }, [feedbackFocusActive, groupedChapters])
 
@@ -452,7 +468,7 @@ export function PracticeBank({
     message.info('练习范围已调整，当前作答进度已清空')
   }
 
-  const goBack = () => {
+  const goBack = useCallback(() => {
     if (saveLock.current) return
     sessionEpoch.current += 1
     setActiveSet(null)
@@ -467,7 +483,16 @@ export function PracticeBank({
     pendingSubmission.current = null
     onSessionChange?.(false)
     window.scrollTo({ top: 0, behavior: 'auto' })
-  }
+  }, [onSessionChange])
+
+  const handleMobileBack = useCallback(() => {
+    if (!activeSet) return false
+    if (saving) return true
+    goBack()
+    return true
+  }, [activeSet, goBack, saving])
+
+  useMobileBackHandler(handleMobileBack, 10)
 
   const submit = async () => {
     if (!activeSet || !childId || !userId || saveLock.current || !questions.length) return
@@ -559,33 +584,41 @@ export function PracticeBank({
           </div>
         )}
 
-        {/* 学科 Tab */}
-        <div className={styles.catalogLabel}>选择学科 <span>{localGrade}</span></div>
-        <div className={styles.subjectTabs} aria-label="选择学科">
-          {subjects.map((s) => (
-            <button
-              key={s}
-              type="button"
-              className={`${styles.subjectTab} ${s === activeSubjects ? styles.subjectTabActive : ''}`}
-              onClick={() => { setActiveSubject(s); setExpandedChapters(new Set()) }}
-              aria-pressed={s === activeSubjects}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        {/* 学科 Tab（可由外部受控隐藏） */}
+        {!hideSubjectTabs && (
+          <>
+            <div className={styles.catalogLabel}>选择学科 <span>{localGrade}</span></div>
+            <div className={styles.subjectTabs} aria-label="选择学科">
+              {subjects.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`${styles.subjectTab} ${s === activeSubjects ? styles.subjectTabActive : ''}`}
+                  onClick={() => { setActiveSubject(s); setExpandedChapters(new Set()) }}
+                  aria-pressed={s === activeSubjects}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
-        {/* 学科进度条 */}
+        {/* 进度条 */}
         {subjectDone.total > 0 && (
           <div className={styles.subjectProgress}>
-            <span className={styles.subjectProgressText}>{activeSubjects} {loadingSavedResults ? '进度同步中' : savedResultsError ? '进度暂时无法读取' : `已练 ${subjectDone.done}/${subjectDone.total} 节`}</span>
+            <span className={styles.subjectProgressText}>
+              {activeSubjects}{selectedVolume ? ` · ${selectedVolume}` : ''} {loadingSavedResults ? '进度同步中' : savedResultsError ? '进度暂时无法读取' : `已练 ${subjectDone.done}/${subjectDone.total} 节`}
+            </span>
             <div className={styles.progressTrack}>
               <div className={styles.progressFill} style={{ width: `${Math.round((subjectDone.done / subjectDone.total) * 100)}%` }} />
             </div>
           </div>
         )}
 
-        {feedbackFocusActive && !contextualSets.some((set) => set.subject === activeSubjects) ? (
+        {bankCatalogLoading ? (
+          <CardSkeleton rows={3} />
+        ) : feedbackFocusActive && !contextualSets.some((set) => set.subject === activeSubjects) ? (
           <div className={styles.feedbackPracticeEmpty} role="status">
             <strong>暂未找到明确对应的已上架题组</strong>
             <p>为避免推荐错章节，你可以浏览 {activeSubjects || '当前年级'} 的全部已上架练习。</p>
@@ -614,7 +647,7 @@ export function PracticeBank({
                 </button>
                 {isOpen && (
                   <div className={styles.setList}>
-                    {sets.map((set) => {
+                    {sets.map((set, si) => {
                       const saved = savedResults[set.id]
                       const scorePct = saved ? Math.round((saved.score / saved.total) * 100) : 0
                       const wrongCount = set.available ? saved?.wrongIds.length || 0 : 0
@@ -622,7 +655,7 @@ export function PracticeBank({
                       const mediumCount = set.difficultyCounts?.medium || 0
                       const examCount = set.difficultyCounts?.challenge || 0
                       return (
-                        <article className={styles.setCard} key={set.id}>
+                        <article className={`${styles.setCard} stagger-item`} key={set.id} style={{ animationDelay: `${Math.min(si, 8) * 40}ms` }}>
                           <div className={styles.setCardTop}>
                             <h4>{set.section}</h4>
                             {!set.available ? (
@@ -665,7 +698,7 @@ export function PracticeBank({
     <section className={`${styles.sheet} ${onSessionChange ? styles.focusSheet : ''}`} aria-label="做题">
       {/* 顶部栏 */}
       <div className={styles.sheetTop}>
-        <button className={styles.backBtn} disabled={saving} onClick={goBack} aria-label="返回章节列表">
+        <button className={`${styles.backBtn} mobile-shell-back`} disabled={saving} onClick={goBack} aria-label="返回章节列表">
           <LeftOutlined /> <span>返回</span>
         </button>
         <div className={styles.sheetTitleWrap}>
@@ -683,7 +716,7 @@ export function PracticeBank({
           {!saving && ['QUESTION_CHANGED', 'WRONG_SCOPE_CHANGED', 'INVALID_SUBMISSION'].includes(saveErrorCode) && (
             <Button onClick={() => Modal.confirm({
               title: '重新开始本次练习？', content: '服务器已拒绝本次提交。重新开始将清除这份临时答案，已保存的历史记录不会删除。',
-              okText: '重新开始', cancelText: '保留作答', onOk: () => openSet(activeSet.id, reviewOnly, true),
+              okText: '重新开始', cancelText: '保留作答', maskClosable: false, onOk: () => openSet(activeSet.id, reviewOnly, true),
             })}>重新开始</Button>
           )}
         </div>
@@ -885,19 +918,19 @@ export function PracticeBank({
               style={{ background: `conic-gradient(#C9A45C ${Math.round((result.score / result.total) * 100) * 3.6}deg, rgba(0,0,0,0.06) 0deg)` }}
             >
               <div className={styles.ringInner}>
-                <div className={styles.ringScore}>{result.score}<small>/{result.total}</small></div>
+                <div className={styles.ringScore}><AnimatedNumber value={result.score} /><small>/{result.total}</small></div>
                 <div className={styles.ringLabel}>答对题数</div>
               </div>
             </div>
             <div className={styles.resultStats}>
               <div className={styles.resultStat}>
                 <div className={styles.resultStatValue} style={{ color: result.score / result.total >= 0.8 ? '#1d9e75' : result.score / result.total >= 0.6 ? '#d98c00' : '#e24b4a' }}>
-                  {Math.round((result.score / result.total) * 100)}%
+                  <AnimatedNumber value={Math.round((result.score / result.total) * 100)} />%
                 </div>
                 <div className={styles.resultStatLabel}>正确率</div>
               </div>
               <div className={styles.resultStat}>
-                <div className={styles.resultStatValue} style={{ color: result.wrongIds.length ? '#e24b4a' : '#1d9e75' }}>{result.wrongIds.length}</div>
+                <div className={styles.resultStatValue} style={{ color: result.wrongIds.length ? '#e24b4a' : '#1d9e75' }}><AnimatedNumber value={result.wrongIds.length} /></div>
                 <div className={styles.resultStatLabel}>错题</div>
               </div>
             </div>
@@ -913,7 +946,7 @@ export function PracticeBank({
             <Button className={styles.ghostBtn} onClick={() => openSet(activeSet.id, false, true)}>
               <ReloadOutlined /> 再做一次
             </Button>
-            <Button className={styles.ghostBtn} onClick={goBack}>
+            <Button className={`${styles.ghostBtn} mobile-shell-back`} onClick={goBack}>
               <AppstoreOutlined /> 返回章节
             </Button>
           </div>
@@ -932,7 +965,7 @@ export function PracticeBank({
                     ? question.correctAnswer.map((answer, answerIndex) => `第 ${answerIndex + 1} 项：${answer}`).join('；')
                     : question.correctAnswer || question.acceptedAnswers?.join('；') || '请对照参考要点'
               return (
-                <div key={question.id} className={`${styles.reviewItem} ${isCorrect ? styles.reviewCorrect : styles.reviewWrong}`}>
+                <div key={question.id} className={`${styles.reviewItem} stagger-item ${isCorrect ? styles.reviewCorrect : styles.reviewWrong}`} style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}>
                   <div className={styles.reviewHead}>
                     <span className={styles.reviewNum}>第 {idx + 1} 题</span>
                     <span className={`${styles.reviewTag} ${isCorrect ? styles.reviewTagOk : styles.reviewTagNo}`}>

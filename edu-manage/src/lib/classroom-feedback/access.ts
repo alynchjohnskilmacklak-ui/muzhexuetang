@@ -1,6 +1,11 @@
 import type { PrismaClient } from '@prisma/client'
 import { extractUploadStorageKey } from '@/lib/upload-url'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { loadLessonFeedbackBlockReasons } from '@/lib/classroom-feedback/lesson-eligibility'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
+import { parentStudentHistoryWhere, visibleClassGroupWhere, visibleStudentWhere } from '@/lib/business-visibility'
+import { getTeacherFeedbackSubjects } from '@/lib/classroom-feedback/teacher-subjects'
 
 export type FeedbackAccessActor = {
   id: string
@@ -11,6 +16,7 @@ export type FeedbackAccessActor = {
 export type FeedbackAccessRecord = {
   teacherId: string
   status?: string | null
+  deletedAt?: Date | null
   studentIds: string[]
   classLesson?: { teacherId?: string | null } | null
 }
@@ -50,8 +56,11 @@ type FeedbackCreationScopeInput = {
   feedbackGroupId?: string | null
   requestedStudentIds: string[]
   expandClassTarget?: boolean
+  requireLesson?: boolean
+  requireAttendanceSubmitted?: boolean
   submittedCourseType?: 'GROUP' | 'ONE_ON_ONE'
   requestedSubject?: string | null
+  isSingleSession?: boolean
 }
 
 type ScopedStudent = {
@@ -63,7 +72,7 @@ type ScopedStudent = {
 
 export type FeedbackCreationScope = {
   allowed: boolean
-  reason?: 'lesson' | 'group' | 'student'
+  reason?: 'lesson' | 'group' | 'student' | 'blocked' | 'lesson-required' | 'attendance-required'
   students: ScopedStudent[]
   feedbackGroupId: string | null
   feedbackCourseType: 'GROUP' | 'ONE_ON_ONE'
@@ -161,6 +170,9 @@ export function canViewFeedback(
 ) {
   const role = normalizeRole(actor.role)
   if (role === 'admin') return true
+  const status = String(feedback.status || '').toUpperCase()
+  const unavailable = feedback.deletedAt != null || ['ARCHIVED', 'REVOKED', 'DELETED'].includes(status)
+  if (unavailable) return false
   if (role === 'teacher') {
     return Boolean(actor.teacherId) && (
       feedback.teacherId === actor.teacherId || feedback.classLesson?.teacherId === actor.teacherId
@@ -168,7 +180,7 @@ export function canViewFeedback(
   }
   if (role === 'parent') {
     const allowed = new Set(parentStudentIds)
-    return feedback.status === 'PUBLISHED' && feedback.studentIds.some((studentId) => allowed.has(studentId))
+    return status === 'PUBLISHED' && feedback.studentIds.some((studentId) => allowed.has(studentId))
   }
   return false
 }
@@ -185,10 +197,7 @@ export async function getParentFeedbackStudentIds(
   parentId: string,
 ) {
   const students = await prisma.student.findMany({
-    where: {
-      OR: [{ parentId }, { parentUserId: parentId }],
-      status: { not: 'INACTIVE' },
-    },
+    where: parentStudentHistoryWhere(parentId),
     select: { id: true },
   })
   return students.map((student) => student.id)
@@ -206,23 +215,67 @@ export async function resolveTeacherFeedbackCreationScope(
   let termId: string | null = null
   let reason: FeedbackCreationScope['reason'] = 'student'
 
-  if (input.classLessonId) {
+  if (input.isSingleSession) {
+    const subject = input.requestedSubject?.trim() || ''
+    if (input.classLessonId || input.feedbackGroupId || input.requestedStudentIds.length !== 1 || !subject) {
+      return { allowed: false, reason, students: [], feedbackGroupId: null, feedbackCourseType, termId }
+    }
+
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: input.teacherId },
+      select: { id: true, division: true, subjects: true },
+    })
+    if (!teacher || !(await getTeacherFeedbackSubjects(prisma, teacher)).includes(subject)) {
+      return { allowed: false, reason, students: [], feedbackGroupId: null, feedbackCourseType, termId }
+    }
+
+    const students = await prisma.student.findMany({
+      where: {
+        id: { in: input.requestedStudentIds },
+        ...visibleStudentWhere,
+        division: teacher.division,
+        OR: [{ parentId: { not: null } }, { parentUserId: { not: null } }],
+      },
+      select: { ...studentSelect },
+    })
+    const parentIds = [...new Set(students.flatMap((student) => [student.parentId, student.parentUserId]).filter((id): id is string => Boolean(id)))]
+    const parents = parentIds.length
+      ? await prisma.user.findMany({
+          where: { id: { in: parentIds }, role: 'parent', status: { not: 'deleted' }, division: teacher.division },
+          select: { id: true },
+        })
+      : []
+    const linkedParentIds = new Set(parents.map((parent) => parent.id))
+    allowedStudents = students.filter((student) =>
+      Boolean((student.parentId && linkedParentIds.has(student.parentId)) || (student.parentUserId && linkedParentIds.has(student.parentUserId))),
+    )
+  } else if (input.requireLesson && !input.classLessonId) {
+    return { allowed: false, reason: 'lesson-required', students: [], feedbackGroupId, feedbackCourseType, termId }
+  }
+
+  if (input.isSingleSession) {
+    feedbackGroupId = null
+    termId = null
+  } else if (input.classLessonId) {
     reason = 'lesson'
     const lesson = await prisma.classLesson.findFirst({
       where: {
         id: input.classLessonId,
+        deletedAt: null,
+        status: { notIn: ['CANCELLED', 'POSTPONED'] },
         OR: [
           { teacherId: input.teacherId },
           { teacherId: null, group: { teacherId: input.teacherId } },
           { teacherId: null, group: { teacherAssignments: { some: { teacherId: input.teacherId } } } },
         ],
+        group: visibleClassGroupWhere,
       },
       include: {
         group: {
           include: {
             course: { select: { type: true, subject: true } },
             enrollments: {
-              where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
+              where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere },
               include: { student: { select: studentSelect } },
             },
             teacherAssignments: {
@@ -232,6 +285,7 @@ export async function resolveTeacherFeedbackCreationScope(
           },
         },
         lessonStudents: { include: { student: { select: studentSelect } } },
+        attendances: { where: { deletedAt: null }, select: { studentId: true } },
       },
     })
     if (!lesson) {
@@ -241,28 +295,65 @@ export async function resolveTeacherFeedbackCreationScope(
     // subject. Legacy groups with no assignment rows are limited to the course
     // subject instead of inheriting every subject in the group.
     const courseSubject = lesson.group.course.subject
-    const lessonSubject = lesson.subject || courseSubject
     const teacherAssignments = lesson.group.teacherAssignments
+    const assignedSubject = teacherAssignments.length === 1 ? teacherAssignments[0].subject : null
+    const lessonSubject = lesson.subject || assignedSubject || courseSubject
     const assignedSubjects = teacherAssignments
       .map((assignment) => assignment.subject)
       .filter((subject): subject is string => Boolean(subject))
     const ownsLessonByRelationship = lesson.teacherId === input.teacherId || lesson.group.teacherId === input.teacherId
     const ownsLessonSubject = assignedSubjects.includes(lessonSubject)
       || (teacherAssignments.length === 0 && ownsLessonByRelationship && lessonSubject === courseSubject)
+
+    // 防御性校验：若教师在系统档案中有明确登记的任教学科，必须包含该课次学科
+    const teacherProfile = typeof prisma.teacher?.findUnique === 'function'
+      ? await prisma.teacher.findUnique({
+          where: { id: input.teacherId },
+          select: { subjects: true },
+        })
+      : null
+    const teacherProfileSubjects = (teacherProfile?.subjects || '')
+      .split(/[,，、]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+    const profileAllowsSubject = teacherProfileSubjects.length === 0 || teacherProfileSubjects.includes(lessonSubject)
+
     if (!lessonSubject
       || !ownsLessonSubject
+      || !profileAllowsSubject
       || (input.requestedSubject?.trim() && input.requestedSubject.trim() !== lessonSubject)) {
       return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
     }
     // 按学科报名：课次快照只包含该学科的在读学生；历史快照为空时才用报名学科兜底。
-    const eligibleEnrollments = lesson.group.enrollments
-      .filter((row) => enrollmentIncludesSubject(row.subjects, lessonSubject))
-    const eligibleStudentIds = new Set(eligibleEnrollments.map((row) => row.studentId))
-    allowedStudents = lesson.lessonStudents.length
-      ? lesson.lessonStudents
-        .filter((row) => eligibleStudentIds.has(row.student.id))
-        .map((row) => row.student)
-      : eligibleEnrollments.map((row) => row.student)
+    const eligibleStudentIds = new Set(resolveSubjectLessonStudentIds(
+      lesson.lessonStudents.map((row) => row.student.id),
+      lesson.group.enrollments.map((row) => ({ studentId: row.studentId, subjects: row.subjects })),
+      lessonSubject,
+      lesson.lessonDate,
+    ))
+    if (input.requireAttendanceSubmitted && !hasSubmittedLessonAttendance({
+      attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+      status: lesson.status,
+      attendances: lesson.attendances,
+      expectedStudentIds: [...eligibleStudentIds],
+    })) {
+      return { allowed: false, reason: 'attendance-required', students: [], feedbackGroupId: lesson.groupId, feedbackCourseType, termId: lesson.group.termId }
+    }
+    allowedStudents = lesson.group.enrollments
+      .filter((row) => eligibleStudentIds.has(row.student.id))
+      .map((row) => row.student)
+    const blockReasonsByLesson = await loadLessonFeedbackBlockReasons(prisma, [{
+      id: lesson.id,
+      lessonDate: lesson.lessonDate,
+      studentIds: allowedStudents.map((student) => student.id),
+    }])
+    const blockedStudentIds = new Set(Object.keys(blockReasonsByLesson.get(lesson.id) || {}))
+    if (!input.expandClassTarget && input.requestedStudentIds.some((studentId) => blockedStudentIds.has(studentId))) {
+      return { allowed: false, reason: 'blocked', students: [], feedbackGroupId: lesson.groupId, feedbackCourseType, termId: lesson.group.termId }
+    }
+    if (input.expandClassTarget) {
+      allowedStudents = allowedStudents.filter((student) => !blockedStudentIds.has(student.id))
+    }
     feedbackGroupId = lesson.groupId
     termId = lesson.group.termId
     feedbackCourseType = lesson.group.intensiveMode === 'INTENSIVE' || lesson.group.course.type === 'ONE_ON_ONE'
@@ -273,7 +364,7 @@ export async function resolveTeacherFeedbackCreationScope(
     const group = await prisma.classGroup.findFirst({
       where: {
         id: input.feedbackGroupId,
-        status: { not: 'ARCHIVED' },
+        ...visibleClassGroupWhere,
         OR: [
           { teacherId: input.teacherId },
           { teacherAssignments: { some: { teacherId: input.teacherId } } },
@@ -283,7 +374,7 @@ export async function resolveTeacherFeedbackCreationScope(
         course: { select: { type: true, subject: true } },
         teacherAssignments: { where: { teacherId: input.teacherId }, select: { subject: true } },
         enrollments: {
-          where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
+          where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere },
           include: { student: { select: studentSelect } },
         },
       },
@@ -315,13 +406,13 @@ export async function resolveTeacherFeedbackCreationScope(
     const scopedRows = await prisma.student.findMany({
       where: {
         id: { in: input.requestedStudentIds },
-        status: { not: 'INACTIVE' },
+        ...visibleStudentWhere,
         enrollments: {
           some: {
             status: 'ACTIVE',
             deletedAt: null,
             group: {
-              status: { not: 'ARCHIVED' },
+              ...visibleClassGroupWhere,
               OR: [
                 { teacherId: input.teacherId },
                 { teacherAssignments: { some: { teacherId: input.teacherId } } },
@@ -336,7 +427,7 @@ export async function resolveTeacherFeedbackCreationScope(
           where: {
             status: 'ACTIVE',
             deletedAt: null,
-            group: { status: { not: 'ARCHIVED' } },
+            group: visibleClassGroupWhere,
           },
           select: {
             subjects: true,
@@ -521,6 +612,7 @@ export async function canAccessFeedbackImage(
       id: true,
       teacherId: true,
       status: true,
+      deletedAt: true,
       studentIds: true,
       imageUrls: true,
       classLesson: { select: { teacherId: true } },

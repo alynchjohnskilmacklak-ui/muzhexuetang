@@ -3,7 +3,9 @@ import { apiHandler } from '@/lib/api-handler'
 import { requireAdminUser } from '@/lib/auth/guards'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getLocalDayRange, localDateKey, todayLocal } from '@/lib/date/local-day'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 import { isWeekendLesson } from '@/lib/lesson-preview'
+import { lessonPreviewUploadGroupKey } from '@/lib/lesson-preview-groups'
 import {
   LessonPreviewPublishError,
   persistPreparedLessonPreviewMaterial,
@@ -58,6 +60,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
     },
     select: {
       id: true,
+      groupId: true,
       lessonDate: true,
       startTime: true,
       endTime: true,
@@ -73,7 +76,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
           course: { select: { subject: true } },
           enrollments: {
             where: { status: 'ACTIVE', deletedAt: null, student: { deletedAt: null, status: { not: 'INACTIVE' } } },
-            select: { studentId: true },
+            select: { studentId: true, subjects: true },
           },
         },
       },
@@ -94,6 +97,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
       const material = lesson.lessonPreviewMaterial?.status === 'DELETED' ? null : lesson.lessonPreviewMaterial
       return {
         id: lesson.id,
+        groupId: lesson.groupId,
         lessonDate: localDateKey(lesson.lessonDate),
         startTime: lesson.startTime,
         endTime: lesson.endTime,
@@ -101,13 +105,24 @@ export const GET = apiHandler(async (request: NextRequest) => {
         groupName: lesson.group.name,
         teacherId: teacher?.id || null,
         teacherName: teacher?.name || '教师待定',
-        studentCount: lesson.lessonStudents.length || lesson.group.enrollments.length,
+        studentCount: resolveSubjectLessonStudentIds(
+          lesson.lessonStudents.map((item) => item.studentId),
+          lesson.group.enrollments,
+          subject,
+          lesson.lessonDate,
+        ).length,
         material: material ? {
           id: material.id,
           fileName: material.fileName,
           uploadedByRole: material.uploadedByRole,
           createdAt: material.createdAt,
         } : null,
+        uploadGroupKey: lessonPreviewUploadGroupKey({
+          id: lesson.id,
+          groupId: lesson.groupId,
+          subject: subject || '',
+          teacherId: teacher?.id || null,
+        }),
       }
     })
 
@@ -116,7 +131,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   })
 })
 
-type Assignment = { fileKey?: unknown; lessonId?: unknown; title?: unknown }
+type Assignment = { fileKey?: unknown; lessonId?: unknown; lessonIds?: unknown; title?: unknown }
 
 export const POST = apiHandler(async (request: NextRequest) => {
   const admin = await requireAdminUser()
@@ -133,13 +148,16 @@ export const POST = apiHandler(async (request: NextRequest) => {
 
   const normalized = assignments.map((item) => ({
     fileKey: typeof item.fileKey === 'string' ? item.fileKey : '',
-    lessonId: typeof item.lessonId === 'string' ? item.lessonId : '',
+    lessonIds: Array.isArray(item.lessonIds)
+      ? item.lessonIds.filter((id): id is string => typeof id === 'string' && id.length > 0)
+      : typeof item.lessonId === 'string' ? [item.lessonId] : [],
     title: typeof item.title === 'string' ? item.title : '',
   }))
-  if (normalized.some((item) => !item.fileKey || !item.lessonId)) {
+  if (normalized.some((item) => !item.fileKey || !item.lessonIds.length)) {
     return NextResponse.json({ error: '存在尚未完成的文件分配' }, { status: 400 })
   }
-  if (new Set(normalized.map((item) => item.lessonId)).size !== normalized.length) {
+  const allLessonIds = normalized.flatMap((item) => item.lessonIds)
+  if (new Set(allLessonIds).size !== allLessonIds.length) {
     return NextResponse.json({ error: '同一个课次不能同时分配两份文件' }, { status: 409 })
   }
 
@@ -152,7 +170,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
   }
   try {
     files.forEach((file) => validateLessonPreviewFile(file as File))
-    const lessonIds = normalized.map((item) => item.lessonId)
+    const lessonIds = allLessonIds
     const lessons = await admin.prisma.classLesson.findMany({
       where: {
         id: { in: lessonIds },
@@ -163,6 +181,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
       },
       select: {
         id: true,
+        groupId: true,
         teacherId: true,
         subject: true,
         lessonDate: true,
@@ -176,20 +195,32 @@ export const POST = apiHandler(async (request: NextRequest) => {
         },
       },
     })
-    const validLessonIds = new Set(lessons.filter((lesson) => {
+    const lessonDetails = new Map(lessons.map((lesson) => {
       const subject = lesson.subject || lesson.group.course.subject
       const teacherId = lesson.teacherId
         || lesson.group.teacherAssignments.find((item) => item.subject === subject)?.teacherId
         || lesson.group.teacherId
-      return Boolean(
-        teacherId
-        && subject
-        && lesson.group.course.grade
-        && isWeekendLesson(lesson.lessonDate, lesson.group.term?.kind),
-      )
-    }).map((lesson) => lesson.id))
-    if (validLessonIds.size !== lessonIds.length) {
+      return [lesson.id, {
+        groupId: lesson.groupId,
+        subject: subject?.trim() || '',
+        teacherId,
+        grade: lesson.group.course.grade,
+        date: lesson.lessonDate.toISOString().slice(0, 10),
+        valid: Boolean(teacherId && subject && lesson.group.course.grade && isWeekendLesson(lesson.lessonDate, lesson.group.term?.kind)),
+      }] as const
+    }))
+    if (lessonDetails.size !== lessonIds.length || [...lessonDetails.values()].some((item) => !item.valid)) {
       return NextResponse.json({ error: '部分课次已失效或缺少教师、年级、学科信息，请刷新后重试' }, { status: 409 })
+    }
+    for (const assignment of normalized) {
+      const details = assignment.lessonIds.map((id) => lessonDetails.get(id))
+      if (details.some((item) => !item)) {
+        return NextResponse.json({ error: '分配的课次不属于当前学部或已失效，请刷新后重试' }, { status: 409 })
+      }
+      const identity = new Set(details.map((item) => `${item!.groupId}::${item!.date}::${item!.subject}::${item!.teacherId}`))
+      if (identity.size !== 1) {
+        return NextResponse.json({ error: '同一份讲义只能合并同班级、同一天、同学科、同任课教师的课次' }, { status: 400 })
+      }
     }
     const existing = await admin.prisma.studyMaterial.findMany({
       where: { classLessonId: { in: lessonIds }, status: { not: 'DELETED' } },
@@ -199,20 +230,37 @@ export const POST = apiHandler(async (request: NextRequest) => {
       return NextResponse.json({ error: '部分课次已有讲义，请刷新清单后重新选择' }, { status: 409 })
     }
 
-    const preparedMaterials: Awaited<ReturnType<typeof prepareLessonPreviewMaterial>>[] = []
+    const preparedMaterials: Array<{ prepared: Awaited<ReturnType<typeof prepareLessonPreviewMaterial>>; lessonIds: string[] }> = []
     for (const [index, item] of normalized.entries()) {
-      preparedMaterials.push(await prepareLessonPreviewMaterial({
+      const prepared = await prepareLessonPreviewMaterial({
         prisma: admin.prisma,
         actor: { role: 'ADMIN', userId: admin.id, division: admin.division },
-        classLessonId: item.lessonId,
+        classLessonId: item.lessonIds[0],
         file: files[index] as File,
         title: item.title,
-      }))
+      })
+      preparedMaterials.push({ prepared, lessonIds: item.lessonIds })
     }
-    const materials = await admin.prisma.$transaction((tx) => Promise.all(
-      preparedMaterials.map((prepared) => persistPreparedLessonPreviewMaterial(tx, prepared)),
-    ))
-    return NextResponse.json({ count: materials.length, materialIds: materials.map((item) => item.id) }, { status: 201 })
+    const materials = await admin.prisma.$transaction(async (tx) => {
+      const created = []
+      for (const { prepared, lessonIds: assignedIds } of preparedMaterials) {
+        created.push(await persistPreparedLessonPreviewMaterial(tx, prepared))
+        const additionalIds = assignedIds.filter((id) => id !== prepared.data.classLessonId)
+        for (const classLessonId of additionalIds) {
+          await tx.studyMaterial.upsert({
+            where: { classLessonId },
+            create: { ...prepared.data, classLessonId },
+            update: { ...prepared.data, classLessonId },
+          })
+        }
+      }
+      return created
+    })
+    return NextResponse.json({
+      count: materials.length,
+      sessionCount: allLessonIds.length,
+      materialIds: materials.map((item) => item.id),
+    }, { status: 201 })
   } catch (error) {
     if (error instanceof LessonPreviewPublishError) {
       return NextResponse.json({ error: error.message }, { status: error.status })

@@ -14,7 +14,7 @@ export const POST = apiHandler(async (_req: NextRequest, { params }: { params: P
 
   const { id } = await params
   const prisma = await getRequestPrisma()
-  if (!await isClassGroupInActiveTerm(prisma, id)) {
+  if (!await isClassGroupInActiveTerm(prisma, id, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能开班' }, { status: 409 })
   }
 

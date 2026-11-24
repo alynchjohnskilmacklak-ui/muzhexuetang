@@ -13,8 +13,11 @@ import {
   parentLinkedStudentWhere,
   parentVisibleExamPaperWhere,
   parentVisiblePerformancePostWhere,
+  visibleClassGroupWhere,
   visibleClassLessonWhere,
   visibleNotificationWhere,
+  visibleTeacherWhere,
+  parentActiveEnrollmentWhere,
 } from '@/lib/business-visibility'
 import { unreadNotificationWhere } from '@/lib/notification-read-state'
 import { summarizeParentMessageWorkflow } from '@/lib/parent-message-workflow'
@@ -106,6 +109,82 @@ export async function buildSystemDigest(user: UserLite, prisma: PrismaClient): P
     const total = sumParentUnreadItems({ papers, posts, notifications, feedbacks, messages })
     counts.total = total
     if (total === 0) lines.push('当前没有未读动态，一切正常')
+
+    // 最近课堂反馈明细：让 AI 能直接引用真实内容回答「帮我看看课堂反馈」
+    const feedbackRows = await prisma.classroomFeedback.findMany({
+      where: { status: 'PUBLISHED', studentIds: { hasSome: activeStudentIds } },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: {
+        id: true,
+        teacherId: true,
+        lessonContent: true,
+        summary: true,
+        overallComment: true,
+        mood: true,
+        badge: true,
+        tags: true,
+        createdAt: true,
+      },
+    })
+    if (feedbackRows.length > 0) {
+      const teacherIds = [...new Set(feedbackRows.map((f) => f.teacherId))]
+      const teachers = await prisma.teacher.findMany({
+        where: { id: { in: teacherIds } },
+        select: { id: true, name: true },
+      })
+      const teacherName = new Map(teachers.map((t) => [t.id, t.name]))
+      lines.push('【最近课堂反馈明细】')
+      for (const fb of feedbackRows) {
+        const who = teacherName.get(fb.teacherId) || '老师'
+        const day = new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric' }).format(fb.createdAt)
+        const body = (fb.summary || fb.overallComment || fb.lessonContent || '').replace(/\s+/g, ' ').trim()
+        const detail = `${who}·${day}：${body.slice(0, 60)}${body.length > 60 ? '…' : ''}${fb.badge ? `（${fb.badge}）` : ''}`
+        lines.push(detail)
+      }
+    }
+
+    // 今日课程明细：让 AI 能直接引用真实课程回答「今天孩子有什么安排」
+    const todayStart = startOfDay(new Date())
+    const todayEnd = nextDay(todayStart)
+    const todayLessonRows = await prisma.classLesson.findMany({
+      where: {
+        ...visibleClassLessonWhere,
+        status: { notIn: ['CANCELLED', 'POSTPONED'] },
+        lessonDate: { gte: todayStart, lt: todayEnd },
+        group: {
+          ...visibleClassGroupWhere,
+          teacher: visibleTeacherWhere,
+          enrollments: {
+            some: { studentId: { in: activeStudentIds }, ...parentActiveEnrollmentWhere(user.id) },
+          },
+        },
+      },
+      include: {
+        teacher: { select: { name: true } },
+        group: {
+          include: {
+            course: { select: { name: true, subject: true } },
+            teacher: { select: { name: true } },
+            room: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { startTime: 'asc' },
+      take: 12,
+    })
+    if (todayLessonRows.length > 0) {
+      lines.push('【今日课程安排】')
+      for (const l of todayLessonRows) {
+        const course = l.group.course?.name || l.group.name
+        const subject = l.group.course?.subject || l.subject || ''
+        const teacher = l.teacher?.name || l.group.teacher?.name || ''
+        const room = l.group.room?.name || ''
+        lines.push(`${l.startTime}-${l.endTime} ${course}${subject ? `（${subject}）` : ''}${teacher ? `·${teacher}老师` : ''}${room ? `·${room}` : ''}`)
+      }
+    } else {
+      lines.push('今日孩子没有排课（系统无当日课程安排），家长可按孩子实际作息安排学习')
+    }
   } else {
     // teacher / admin：今日课程数 + 未读通知
     const today = startOfDay(new Date())
@@ -133,6 +212,40 @@ export async function buildSystemDigest(user: UserLite, prisma: PrismaClient): P
     if (todayLessons > 0) lines.push(`今日共有 ${todayLessons} 节课`)
     if (notifications > 0) lines.push(`有 ${notifications} 条未读通知`)
     if (todayLessons === 0 && notifications === 0) lines.push('今日暂无课程和未读通知')
+
+    // 今日课程明细：让 AI 能直接引用真实课程回答「今天有哪些课」
+    if (lessonScope && todayLessons > 0) {
+      const lessonRows = await prisma.classLesson.findMany({
+        where: { ...lessonScope, lessonDate: { gte: today, lt: todayEnd } },
+        orderBy: { startTime: 'asc' },
+        take: 8,
+        select: { id: true, subject: true, startTime: true, endTime: true, groupId: true, status: true },
+      })
+      if (lessonRows.length > 0) {
+        const groupIds = [...new Set(lessonRows.map((l) => l.groupId))]
+        const groups = await prisma.classGroup.findMany({
+          where: { id: { in: groupIds } },
+          select: { id: true, name: true },
+        })
+        const groupName = new Map(groups.map((g) => [g.id, g.name]))
+        lines.push('【今日课程明细】')
+        for (const l of lessonRows) {
+          const statusText = l.status === 'COMPLETED' ? '已完成' : l.status === 'CANCELLED' ? '已取消' : '待上课'
+          lines.push(`${l.startTime}-${l.endTime} ${l.subject || '未定科目'} ${groupName.get(l.groupId) || ''}（${statusText}）`)
+        }
+      }
+    }
+
+    // 管理端核心统计
+    if (user.role !== 'teacher') {
+      const [studentCount, teacherCount, pendingFeedbackCount] = await Promise.all([
+        prisma.student.count(),
+        prisma.teacher.count(),
+        prisma.classroomFeedback.count({ where: { status: 'DRAFT' } }),
+      ])
+      Object.assign(counts, { studentCount, teacherCount, pendingFeedbackCount })
+      lines.push(`系统现有学员 ${studentCount} 人、教师 ${teacherCount} 人，草稿态课堂反馈 ${pendingFeedbackCount} 条待处理`)
+    }
   }
 
   return {

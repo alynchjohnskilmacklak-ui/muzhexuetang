@@ -1,0 +1,1418 @@
+[
+  {
+    "word": "watermelon",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 西瓜。可数名词；切开后可说 a slice/piece of watermelon。",
+    "collocations": "a slice of watermelon; watermelon juice; a ripe watermelon",
+    "commonMistake": "watermelon 可指一个完整的西瓜，也可指西瓜果肉；说一片时常用 a slice of watermelon。",
+    "example": {
+      "english": "We shared a slice of watermelon after the game.",
+      "chinese": "比赛后我们分吃了一片西瓜。"
+    },
+    "application": {
+      "prompt": "This large green fruit has red flesh and black seeds. It is a ___. (watermelon / cabbage)",
+      "solution": "watermelon"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: watermelon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/watermelon"
+      }
+    ]
+  },
+  {
+    "word": "cabbage",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 卷心菜。可数名词，复数 cabbages；做菜时也常说 some cabbage。",
+    "collocations": "a head of cabbage; cabbage soup; chopped cabbage",
+    "commonMistake": "cabbage 是可数名词，完整的一棵可说 a cabbage；一颗完整卷心菜也常说 a head of cabbage。",
+    "example": {
+      "english": "We add some cabbage to the soup.",
+      "chinese": "我们往汤里加一些卷心菜。"
+    },
+    "application": {
+      "prompt": "This leafy vegetable is often used in coleslaw. It is a ___. (cabbage / mutton)",
+      "solution": "cabbage"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cabbage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cabbage"
+      }
+    ]
+  },
+  {
+    "word": "mutton",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 羊肉。通常作不可数名词；表示一份可说 a piece of mutton。",
+    "collocations": "mutton soup; a piece of mutton; cook mutton slowly",
+    "commonMistake": "mutton 指羊肉时通常不可数，不说 a mutton 或 muttons；表示一只羊常用 sheep。",
+    "example": {
+      "english": "The restaurant serves mutton soup on cold days.",
+      "chinese": "这家餐馆在寒冷的日子里供应羊肉汤。"
+    },
+    "application": {
+      "prompt": "The soup is made with meat from a sheep: ___. (mutton / strawberry)",
+      "solution": "mutton"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mutton",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mutton"
+      }
+    ]
+  },
+  {
+    "word": "cookie",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 曲奇饼。可数名词，复数 cookies；在美式英语中常用 cookie，英式英语中 biscuit 也很常见。",
+    "collocations": "a chocolate-chip cookie; a cookie jar; bake cookies",
+    "commonMistake": "cookie 是可数名词，单数前通常要有 a/an/the；多个要用 cookies。",
+    "example": {
+      "english": "I packed two cookies for the school trip.",
+      "chinese": "我为学校旅行装了两块曲奇饼。"
+    },
+    "application": {
+      "prompt": "A small sweet biscuit with chocolate chips is a ___. (cookie / onion)",
+      "solution": "cookie"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cookie",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cookie"
+      }
+    ]
+  },
+  {
+    "word": "onion",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 洋葱；葱头。可数名词，复数 onions；切片可说 slices of onion。",
+    "collocations": "a red onion; chop an onion; onion soup",
+    "commonMistake": "onion 是可数名词；单数前用 a，因为 onion 以元音音素开头。",
+    "example": {
+      "english": "Please chop an onion for the salad.",
+      "chinese": "请切一个洋葱做沙拉。"
+    },
+    "application": {
+      "prompt": "This vegetable has layers and can make your eyes water when cut: an ___. (onion / porridge)",
+      "solution": "onion"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: onion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/onion"
+      }
+    ]
+  },
+  {
+    "word": "dumpling",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 饺子。可数名词，复数 dumplings；可指煮、蒸或煎的带馅面食。",
+    "collocations": "make dumplings; boil dumplings; a plate of dumplings",
+    "commonMistake": "dumpling 是可数名词；表示一盘时说 a plate of dumplings。",
+    "example": {
+      "english": "My family makes dumplings together on Sunday.",
+      "chinese": "星期天我们一家人一起包饺子。"
+    },
+    "application": {
+      "prompt": "A boiled or steamed parcel of dough with a filling is a ___. (dumpling / pear)",
+      "solution": "dumpling"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dumpling",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dumpling"
+      }
+    ]
+  },
+  {
+    "word": "coffee",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 咖啡。通常作不可数名词；a coffee 可表示一杯咖啡，a cup of coffee 也很常见。",
+    "collocations": "a cup of coffee; black coffee; drink coffee",
+    "commonMistake": "泛指咖啡饮料时通常不加 a；点一杯时可说 a coffee 或 a cup of coffee。",
+    "example": {
+      "english": "My father drinks a cup of coffee after breakfast.",
+      "chinese": "我爸爸早餐后喝一杯咖啡。"
+    },
+    "application": {
+      "prompt": "I drink a cup of ___ to wake up in the morning. (coffee / bean)",
+      "solution": "coffee"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: coffee",
+        "url": "https://dictionary.cambridge.org/dictionary/english/coffee"
+      }
+    ]
+  },
+  {
+    "word": "bean",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 豆。可数名词，复数 beans；常指一粒豆，也可用于 green beans 等食物名称。",
+    "collocations": "green beans; coffee beans; a can of beans",
+    "commonMistake": "bean 是可数名词，一粒豆说 a bean，多粒说 beans；泛指一份豆子也可说 some beans。",
+    "example": {
+      "english": "We put green beans in the vegetable salad.",
+      "chinese": "我们把青豆放进蔬菜沙拉里。"
+    },
+    "application": {
+      "prompt": "A coffee ___ is a seed used to make coffee. (bean / cookie)",
+      "solution": "bean"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bean",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bean"
+      }
+    ]
+  },
+  {
+    "word": "chip",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 炸薯条。英式英语中 chips 常指较粗的炸土豆条；美式英语中的 chip 常指薄脆薯片。",
+    "collocations": "fish and chips; a portion of chips; hot chips",
+    "commonMistake": "按本课英式用法，chips 指炸薯条；美式英语常把薄脆薯片叫 chips。",
+    "example": {
+      "english": "We ordered hot chips with our fish.",
+      "chinese": "我们点的鱼配了热薯条。"
+    },
+    "application": {
+      "prompt": "On a British menu, fish is often served with fried potato pieces called ___. (chips / cookies)",
+      "solution": "chips"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chip",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chip"
+      }
+    ]
+  },
+  {
+    "word": "fish and chips",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "短语名词，炸鱼薯条；通常作不可数的菜名，fish 指炸鱼，chips 指炸薯条。",
+    "collocations": "order fish and chips; a portion of fish and chips; fish-and-chips shop",
+    "commonMistake": "fish and chips 是固定菜名；泛指这道菜通常不把 fish 改成 fishes。",
+    "example": {
+      "english": "We had fish and chips for lunch by the sea.",
+      "chinese": "我们在海边吃了炸鱼薯条作午餐。"
+    },
+    "application": {
+      "prompt": "A meal of battered fried fish with fried potato strips is called ___. (fish and chips / salad)",
+      "solution": "fish and chips"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fish and chips",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fish-and-chips"
+      }
+    ]
+  },
+  {
+    "word": "salad",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 沙拉；色拉。可指一份沙拉，也可泛指沙拉食材；可数用法复数 salads。",
+    "collocations": "a fruit salad; a green salad; make a salad",
+    "commonMistake": "salad 可数时单数前要有冠词，如 a salad；泛指沙拉食材时也可说 some salad。",
+    "example": {
+      "english": "I made a fruit salad with apples and strawberries.",
+      "chinese": "我用苹果和草莓做了一份水果沙拉。"
+    },
+    "application": {
+      "prompt": "A cold dish made with mixed vegetables or fruit is a ___. (salad / mutton)",
+      "solution": "salad"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: salad",
+        "url": "https://dictionary.cambridge.org/dictionary/english/salad"
+      }
+    ]
+  },
+  {
+    "word": "porridge",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 粥；麦片粥。通常作不可数名词；表示一碗可说 a bowl of porridge。",
+    "collocations": "a bowl of porridge; eat porridge for breakfast; cook porridge",
+    "commonMistake": "porridge 通常不可数，不说 a porridge；要数一碗时说 a bowl of porridge。",
+    "example": {
+      "english": "We eat porridge for breakfast on cold mornings.",
+      "chinese": "寒冷的早晨我们早餐吃粥。"
+    },
+    "application": {
+      "prompt": "A warm breakfast made by cooking oats in water or milk is ___. (porridge / chips)",
+      "solution": "porridge"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: porridge",
+        "url": "https://dictionary.cambridge.org/dictionary/english/porridge"
+      }
+    ]
+  },
+  {
+    "word": "waiter",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. （男）服务员。可数名词，复数 waiters；server 是不强调性别的常见说法。",
+    "collocations": "ask the waiter; a restaurant waiter; waiter service",
+    "commonMistake": "waiter 按本词表指男服务员；waitress 指女服务员，server 可作不强调性别的称呼。",
+    "example": {
+      "english": "The waiter brought us the menu.",
+      "chinese": "服务员把菜单拿给了我们。"
+    },
+    "application": {
+      "prompt": "The male restaurant worker who takes your order is a ___. (waiter / customer)",
+      "solution": "waiter"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: waiter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/waiter"
+      }
+    ]
+  },
+  {
+    "word": "What about ...?",
+    "examTags": [
+      "词汇·餐饮情境表达",
+      "语法·短语结构与句型"
+    ],
+    "grammar": "短语，用于征求意见或提出建议；后接名词，也可接动词-ing，如 What about ordering soup?。",
+    "collocations": "What about some tea?; What about a salad?; What about trying the soup?",
+    "commonMistake": "What about 后接名词或动词-ing，不接 to do；提出建议时也可用 How about。",
+    "example": {
+      "english": "“What about some soup?” “That sounds good.”",
+      "chinese": "“来点汤怎么样？”“听起来不错。”"
+    },
+    "application": {
+      "prompt": "Suggest ordering a salad: “___ ordering a salad?” (What about / What to)",
+      "solution": "What about"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: What about ...?",
+        "url": "https://dictionary.cambridge.org/dictionary/english/what-about"
+      },
+      {
+        "label": "Cambridge Grammar: suggestions with what about",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/suggestions"
+      }
+    ]
+  },
+  {
+    "word": "taste",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "v. 有……味道；尝；n. 味道。作系动词时后接形容词，如 taste sweet；作名词时可用 a taste of。",
+    "collocations": "taste sweet; taste the soup; a salty taste",
+    "commonMistake": "taste 作系动词描述味道时用形容词，如 taste salty；味道是 salty，不说 taste salt。",
+    "example": {
+      "english": "The soup tastes salty, so I add some water.",
+      "chinese": "汤尝起来很咸，所以我加了些水。"
+    },
+    "application": {
+      "prompt": "The soup has a salty ___. (taste / menu)",
+      "solution": "taste"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: taste",
+        "url": "https://dictionary.cambridge.org/dictionary/english/taste"
+      }
+    ]
+  },
+  {
+    "word": "anything",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "pron. 某事物；任何事物。常用于疑问句和否定句；肯定句中可表示“任何东西”。",
+    "collocations": "anything else; don’t eat anything; anything you like",
+    "commonMistake": "anything 作代词，后面通常不再接 thing；形容词放在 anything 后，如 anything else。",
+    "example": {
+      "english": "Would you like anything else from the menu?",
+      "chinese": "菜单上你还想要别的什么吗？"
+    },
+    "application": {
+      "prompt": "We have no dessert left, so we don’t have ___ else to serve. (anything / something)",
+      "solution": "anything"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: anything",
+        "url": "https://dictionary.cambridge.org/dictionary/english/anything"
+      }
+    ]
+  },
+  {
+    "word": "dish",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 一道菜；盘子。可数名词，复数 dishes；具体含义由点餐或餐具语境判断。",
+    "collocations": "a chicken dish; wash the dishes; a dish of noodles",
+    "commonMistake": "dish 可指一道菜，也可指盛食物的盘子；复数 dishes 的结尾加 -es。",
+    "example": {
+      "english": "This restaurant is famous for a spicy chicken dish.",
+      "chinese": "这家餐馆以一道辣鸡肉菜闻名。"
+    },
+    "application": {
+      "prompt": "A prepared item of food on a menu, rather than the plate it is served on, is a ___. (dish / menu)",
+      "solution": "dish"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dish"
+      }
+    ]
+  },
+  {
+    "word": "choice",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 选择；可数名词，复数 choices。常用 make a choice、a choice between A and B、a choice of。",
+    "collocations": "make a choice; a healthy choice; a choice between tea and coffee",
+    "commonMistake": "choice 是名词，动词是 choose；选择某物说 choose sth，作名词说 make a choice。",
+    "example": {
+      "english": "Fruit is a good choice for an afternoon snack.",
+      "chinese": "水果是不错的下午点心选择。"
+    },
+    "application": {
+      "prompt": "You can have tea or coffee; you have a ___ to make. (choice / meal)",
+      "solution": "choice"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: choice",
+        "url": "https://dictionary.cambridge.org/dictionary/english/choice"
+      }
+    ]
+  },
+  {
+    "word": "meal",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 一餐所吃的食物；一餐。可数名词，常指早餐、午餐、晚餐或某次用餐。",
+    "collocations": "have a meal; a healthy meal; breakfast is a meal",
+    "commonMistake": "meal 指一餐或这一餐的食物；dish 指一道菜，二者不完全相同。",
+    "example": {
+      "english": "Breakfast is an important meal for many families.",
+      "chinese": "对许多家庭来说，早餐是一顿重要的餐食。"
+    },
+    "application": {
+      "prompt": "Breakfast, lunch, and dinner are each a ___. (meal / dish)",
+      "solution": "meal"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: meal",
+        "url": "https://dictionary.cambridge.org/dictionary/english/meal"
+      }
+    ]
+  },
+  {
+    "word": "pork",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 猪肉。通常作不可数名词；可说 a piece of pork 或 some pork。",
+    "collocations": "pork soup; a piece of pork; cook pork thoroughly",
+    "commonMistake": "pork 指猪肉时通常不可数，不说 a pork 或 porks；数份量时用 piece/pieces。",
+    "example": {
+      "english": "The menu has pork with rice and vegetables.",
+      "chinese": "菜单上有猪肉配米饭和蔬菜。"
+    },
+    "application": {
+      "prompt": "This soup contains meat from a pig: ___. (pork / mutton)",
+      "solution": "pork"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pork",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pork"
+      }
+    ]
+  },
+  {
+    "word": "strawberry",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 草莓。可数名词，复数 strawberries；辅音字母 + y 结尾变复数时 y 改为 ies。",
+    "collocations": "a strawberry; fresh strawberries; strawberry jam",
+    "commonMistake": "strawberry 的复数是 strawberries，不是 strawberrys；一个草莓说 a strawberry。",
+    "example": {
+      "english": "She put three strawberries on the cake.",
+      "chinese": "她在蛋糕上放了三颗草莓。"
+    },
+    "application": {
+      "prompt": "One berry is a strawberry; two are two ___. (strawberries / strawberrys)",
+      "solution": "strawberries"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: strawberry",
+        "url": "https://dictionary.cambridge.org/dictionary/english/strawberry"
+      }
+    ]
+  },
+  {
+    "word": "menu",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 菜单。可数名词，复数 menus；餐馆菜单列出可点的食物和饮料。",
+    "collocations": "read the menu; a lunch menu; on the menu",
+    "commonMistake": "menu 是可数名词，通常说 a menu 或 the menu；复数是 menus。",
+    "example": {
+      "english": "The soup of the day is on the menu.",
+      "chinese": "今日例汤在菜单上。"
+    },
+    "application": {
+      "prompt": "A list of food and drinks you can order at a restaurant is a ___. (menu / customer)",
+      "solution": "menu"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: menu",
+        "url": "https://dictionary.cambridge.org/dictionary/english/menu"
+      }
+    ]
+  },
+  {
+    "word": "customer",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 顾客。可数名词，复数 customers；指购买商品或服务的人。",
+    "collocations": "a regular customer; customer service; help a customer",
+    "commonMistake": "customer 是购买商品或服务的人；custom 是“习俗”或“定制”，词义和词性不同。",
+    "example": {
+      "english": "The customer asked the waiter for a glass of water.",
+      "chinese": "顾客向服务员要了一杯水。"
+    },
+    "application": {
+      "prompt": "The person who buys a meal at a restaurant is a ___. (customer / waiter)",
+      "solution": "customer"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: customer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/customer"
+      }
+    ]
+  },
+  {
+    "word": "serve",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "v. 提供；服务。serve—served—served；可用 serve sb sth 或 serve sth to sb。",
+    "collocations": "serve lunch; serve food to customers; serve a meal",
+    "commonMistake": "serve 可直接接人和食物：serve customers lunch；也可说 serve lunch to customers。",
+    "example": {
+      "english": "The café serves breakfast until ten o’clock.",
+      "chinese": "这家咖啡馆供应早餐到十点。"
+    },
+    "application": {
+      "prompt": "This restaurant ___ hot meals from noon to two. (serves / serve)",
+      "solution": "serves"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: serve",
+        "url": "https://dictionary.cambridge.org/dictionary/english/serve"
+      }
+    ]
+  },
+  {
+    "word": "waitress",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 女服务员。可数名词，复数 waitresses；不强调性别时可用 server。",
+    "collocations": "ask the waitress; a restaurant waitress; waitress service",
+    "commonMistake": "waitress 指女服务员；复数是 waitresses。waiter 是男服务员，server 可不强调性别。",
+    "example": {
+      "english": "The waitress brought our drinks to the table.",
+      "chinese": "女服务员把饮料端到了桌边。"
+    },
+    "application": {
+      "prompt": "The female restaurant worker who brings your food is a ___. (waitress / customer)",
+      "solution": "waitress"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: waitress",
+        "url": "https://dictionary.cambridge.org/dictionary/english/waitress"
+      }
+    ]
+  },
+  {
+    "word": "sir",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 先生；礼貌称呼男性顾客或陌生男子。直接称呼时常用在句末或句首。",
+    "collocations": "Yes, sir.; excuse me, sir; thank you, sir",
+    "commonMistake": "sir 作礼貌称呼时通常小写，如 Yes, sir；句首才首字母大写。",
+    "example": {
+      "english": "“Here is your menu, sir,” the waiter said.",
+      "chinese": "“先生，这是您的菜单。”服务员说道。"
+    },
+    "application": {
+      "prompt": "A waiter politely addresses a male customer: “Would you like some water, ___?” (sir / madam)",
+      "solution": "sir"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sir",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sir"
+      }
+    ]
+  },
+  {
+    "word": "go with",
+    "examTags": [
+      "词汇·餐饮情境表达",
+      "语法·短语结构与句型"
+    ],
+    "grammar": "短语动词，搭配；相配。主语为第三人称单数时用 goes with；可表示食物或颜色相配。",
+    "collocations": "go with soup; go well with rice; a dish that goes with salad",
+    "commonMistake": "go with 表示两样东西相配；主语是单数时用 goes with，如 This dish goes with rice。",
+    "example": {
+      "english": "This salad goes well with the soup.",
+      "chinese": "这份沙拉和汤很相配。"
+    },
+    "application": {
+      "prompt": "Soup often goes ___ bread. (with / from)",
+      "solution": "with"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: go with",
+        "url": "https://dictionary.cambridge.org/dictionary/english/go-with"
+      }
+    ]
+  },
+  {
+    "word": "instead",
+    "examTags": [
+      "词汇·餐饮情境表达",
+      "语法·短语结构与句型"
+    ],
+    "grammar": "adv. 反而；代替。可单独使用，常放在句末或句首；instead of 后接名词或动词-ing。",
+    "collocations": "use this instead; instead of sugar; stay home instead",
+    "commonMistake": "instead 单独使用；instead of 后接名词或动词-ing，不接动词原形直接构成不定式。",
+    "example": {
+      "english": "There was no pear pie, so we ordered apple pie instead.",
+      "chinese": "没有梨派，所以我们改点了苹果派。"
+    },
+    "application": {
+      "prompt": "The café has no soup today. ___, we can order a salad. (Instead / Among)",
+      "solution": "Instead"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: instead",
+        "url": "https://dictionary.cambridge.org/dictionary/english/instead"
+      }
+    ]
+  },
+  {
+    "word": "pear",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 梨。可数名词，复数 pears；常用于水果、果汁或甜点语境。",
+    "collocations": "a ripe pear; pear juice; a pear pie",
+    "commonMistake": "pear 是可数名词，单数前用 a；不要与同音词 pair（一双）混淆。",
+    "example": {
+      "english": "I packed a pear for my afternoon snack.",
+      "chinese": "我带了一个梨当下午点心。"
+    },
+    "application": {
+      "prompt": "A green or yellow fruit with a rounded bottom is a ___. (pear / bean)",
+      "solution": "pear"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pear"
+      }
+    ]
+  },
+  {
+    "word": "too much",
+    "examTags": [
+      "词汇·餐饮情境表达",
+      "语法·短语结构与句型"
+    ],
+    "grammar": "短语，太多；可修饰不可数名词，也可在动词后作数量代词。too much + 不可数名词；可数名词复数用 too many。",
+    "collocations": "too much sugar; eat too much; too much salt in soup",
+    "commonMistake": "too much 修饰不可数名词，如 too much salt；too many 修饰可数名词复数，如 too many cookies。",
+    "example": {
+      "english": "There is too much sugar in this drink.",
+      "chinese": "这杯饮料里的糖太多了。"
+    },
+    "application": {
+      "prompt": "There is ___ salt in this soup. (too much / too many)",
+      "solution": "too much"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: too much",
+        "url": "https://dictionary.cambridge.org/dictionary/english/too-much"
+      },
+      {
+        "label": "Cambridge Grammar: too and too much",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/too-enough"
+      }
+    ]
+  },
+  {
+    "word": "sugar",
+    "examTags": [
+      "词汇·饮食与健康",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 糖。通常作不可数名词；可说 a spoonful/cube of sugar。",
+    "collocations": "add sugar; a spoonful of sugar; sugar in tea",
+    "commonMistake": "泛指糖时 sugar 不可数，不说 sugars；表示具体种类时才可能用复数。",
+    "example": {
+      "english": "Would you like a little sugar in your tea?",
+      "chinese": "你的茶里要加一点糖吗？"
+    },
+    "application": {
+      "prompt": "Please add one spoonful of ___, not salt. (sugar / sugars)",
+      "solution": "sugar"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sugar",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sugar"
+      }
+    ]
+  },
+  {
+    "word": "improve",
+    "examTags": [
+      "词汇·饮食与健康",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "v. 改进；改善。可作及物或不及物动词；规则变化 improve—improved—improved。",
+    "collocations": "improve a habit; improve your health; improve over time",
+    "commonMistake": "improve 作动词，直接接被改进的事物；不说 improve about sth。",
+    "example": {
+      "english": "Small changes can improve our lunch choices.",
+      "chinese": "小小的改变可以改善我们的午餐选择。"
+    },
+    "application": {
+      "prompt": "We want to ___ our lunch choices by adding fruit. (improve / improving)",
+      "solution": "improve"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: improve",
+        "url": "https://dictionary.cambridge.org/dictionary/english/improve"
+      }
+    ]
+  },
+  {
+    "word": "habit",
+    "examTags": [
+      "词汇·饮食与健康",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 习惯。可数名词，复数 habits；常用 have/develop a habit of doing sth。",
+    "collocations": "a healthy habit; eating habits; break a habit",
+    "commonMistake": "habit 是可数名词，单数前通常要有 a/the；说“做某事的习惯”常用 a habit of doing。",
+    "example": {
+      "english": "Eating breakfast before school is a good habit.",
+      "chinese": "上学前吃早餐是个好习惯。"
+    },
+    "application": {
+      "prompt": "Brushing your teeth after meals is a healthy ___. (habit / weight)",
+      "solution": "habit"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: habit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/habit"
+      }
+    ]
+  },
+  {
+    "word": "fast food",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "短语名词，快餐。通常作不可数名词；fast-food 作复合形容词时可修饰 restaurant。",
+    "collocations": "eat fast food; a fast-food restaurant; fast-food meal",
+    "commonMistake": "泛指快餐时通常不说 a fast food；修饰名词时可写 fast-food restaurant。",
+    "example": {
+      "english": "We do not eat fast food every day.",
+      "chinese": "我们不是每天都吃快餐。"
+    },
+    "application": {
+      "prompt": "Burgers and fries sold ready to eat are often called ___. (fast food / soft drink)",
+      "solution": "fast food"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fast food",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fast-food"
+      }
+    ]
+  },
+  {
+    "word": "salt",
+    "examTags": [
+      "词汇·饮食与健康",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 盐。通常作不可数名词；可用 a pinch/spoonful of salt 表示少量。",
+    "collocations": "a pinch of salt; add salt to soup; salt and pepper",
+    "commonMistake": "salt 泛指盐时不可数，不说 a salt；需要表示具体量时用 a pinch of salt。",
+    "example": {
+      "english": "Add a pinch of salt to the soup.",
+      "chinese": "往汤里加一小撮盐。"
+    },
+    "application": {
+      "prompt": "The cook adds a pinch of ___ to the soup. (salt / cookie)",
+      "solution": "salt"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: salt",
+        "url": "https://dictionary.cambridge.org/dictionary/english/salt"
+      }
+    ]
+  },
+  {
+    "word": "fat",
+    "examTags": [
+      "词汇·饮食与健康",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 脂肪；adj. 肥胖的。作名词可指食物中的脂肪，通常不可数；形容人时 fat 可能显得冒犯，使用时注意语境。",
+    "collocations": "fat in food; low-fat milk; body fat",
+    "commonMistake": "fat 作名词表示脂肪，作形容词表示肥胖的；描述食物营养时常说 the fat in food，避免用它随意评价他人外形。",
+    "example": {
+      "english": "The label shows how much fat is in the food.",
+      "chinese": "标签上标明了食物含有多少脂肪。"
+    },
+    "application": {
+      "prompt": "A nutrition label can show how much ___ is in a food. (fat / thirsty)",
+      "solution": "fat"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fat"
+      }
+    ]
+  },
+  {
+    "word": "put on",
+    "examTags": [
+      "词汇·餐饮情境表达",
+      "语法·短语结构与句型"
+    ],
+    "grammar": "短语动词，增加（体重）；穿上。put—put—put；表示穿衣时可分开，代词宾语放中间，如 put it on；put on weight 表示体重增加。",
+    "collocations": "put on weight; put on a jacket; put your coat on",
+    "commonMistake": "表示“穿上”时可说 put on a coat 或 put it on；不能说 put on it。put on weight 不加冠词。",
+    "example": {
+      "english": "I put on my jacket before going outside.",
+      "chinese": "我出门前穿上了夹克。"
+    },
+    "application": {
+      "prompt": "If someone gains weight, we can say they ___ weight. (put on / go with)",
+      "solution": "put on"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: put on",
+        "url": "https://dictionary.cambridge.org/dictionary/english/put-on"
+      }
+    ]
+  },
+  {
+    "word": "weight",
+    "examTags": [
+      "词汇·饮食与健康",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 体重；重量。通常不可数；常用 the weight of sth、gain/lose weight。",
+    "collocations": "body weight; the weight of a bag; gain weight",
+    "commonMistake": "weight 是名词，weigh 是动词；说“体重增加”用 put on/gain weight。",
+    "example": {
+      "english": "The recipe lists the weight of each ingredient in grams.",
+      "chinese": "食谱用克标出了每种食材的重量。"
+    },
+    "application": {
+      "prompt": "The recipe lists the ___ of each ingredient in grams. (weight / weigh)",
+      "solution": "weight"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: weight",
+        "url": "https://dictionary.cambridge.org/dictionary/english/weight"
+      }
+    ]
+  },
+  {
+    "word": "hamburger",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 汉堡包。可数名词，复数 hamburgers；常见缩写 burger。",
+    "collocations": "a hamburger; a hamburger bun; order hamburgers",
+    "commonMistake": "hamburger 是可数名词，单数前通常用 a；hamburger 也可指汉堡肉饼，但点餐时常指整个汉堡。",
+    "example": {
+      "english": "He ordered a hamburger and a glass of water.",
+      "chinese": "他点了一个汉堡包和一杯水。"
+    },
+    "application": {
+      "prompt": "A cooked patty served inside a bun is a ___. (hamburger / salad)",
+      "solution": "hamburger"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hamburger",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hamburger"
+      }
+    ]
+  },
+  {
+    "word": "cause",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "v. 造成；导致。cause—caused—caused；常用 cause sth 或 cause sb/sth to do sth。",
+    "collocations": "cause a problem; cause a delay; cause sth to happen",
+    "commonMistake": "cause 后可接名词或宾语 + to do：cause a delay、cause the bus to be late；不要与 because 混淆。",
+    "example": {
+      "english": "The broken fridge caused the ice cream to melt.",
+      "chinese": "冰箱坏了，导致冰淇淋融化。"
+    },
+    "application": {
+      "prompt": "Heavy rain may ___ the outdoor meal to start late. (cause / result)",
+      "solution": "cause"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cause",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cause"
+      }
+    ]
+  },
+  {
+    "word": "heart",
+    "examTags": [
+      "词汇·饮食与健康",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 心脏；中心。可数名词，复数 hearts；heart 也可指某事物的中心或核心。",
+    "collocations": "a healthy heart; the heart of the city; from the heart",
+    "commonMistake": "heart 可指身体器官，也可比喻“中心”；不要与发音相近的 hear（听见）混淆。",
+    "example": {
+      "english": "The heart pumps blood around the body.",
+      "chinese": "心脏把血液泵送到全身。"
+    },
+    "application": {
+      "prompt": "The organ that pumps blood around the body is the ___. (heart / menu)",
+      "solution": "heart"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: heart",
+        "url": "https://dictionary.cambridge.org/dictionary/english/heart"
+      }
+    ]
+  },
+  {
+    "word": "balanced",
+    "examTags": [
+      "词汇·饮食与健康",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "adj. 均衡的；平衡的。由 balance + -ed 构成；常修饰 diet、meal 或 lifestyle。",
+    "collocations": "a balanced diet; a balanced meal; keep a balanced routine",
+    "commonMistake": "balanced 是形容词；说“均衡饮食”用 a balanced diet。饮食平衡可看一天或一周，不必每餐都完全相同。",
+    "example": {
+      "english": "We planned a balanced lunch with rice, vegetables, and beans.",
+      "chinese": "我们安排了一顿有米饭、蔬菜和豆类的均衡午餐。"
+    },
+    "application": {
+      "prompt": "A meal with a suitable mix of different foods is a ___ meal. (balanced / sleepy)",
+      "solution": "balanced"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: balanced",
+        "url": "https://dictionary.cambridge.org/dictionary/english/balanced"
+      },
+      {
+        "label": "NHS: The Eatwell Guide",
+        "url": "https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/the-eatwell-guide/"
+      }
+    ]
+  },
+  {
+    "word": "too ... to",
+    "examTags": [
+      "词汇·餐饮情境表达",
+      "语法·短语结构与句型"
+    ],
+    "grammar": "短语结构，太……以至于不能……：too + 形容词/副词 + to + 动词原形。",
+    "collocations": "too hot to eat; too full to move; too tired to cook",
+    "commonMistake": "too ... to 中两个部分都要有：too + adj. + to do；不要在 to 后用动词-ing。",
+    "example": {
+      "english": "The soup is too hot to eat now.",
+      "chinese": "这汤现在太烫了，不能吃。"
+    },
+    "application": {
+      "prompt": "The drink is ___ cold ___ drink quickly. Complete the “太……以至于不能……” pattern.",
+      "solution": "too ... to"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: too ... to",
+        "url": "https://dictionary.cambridge.org/dictionary/english/too"
+      },
+      {
+        "label": "Cambridge Grammar: too and too much",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/too-enough"
+      }
+    ]
+  },
+  {
+    "word": "sleepy",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "adj. 困倦的；想睡的。常用 feel/look sleepy；名词 sleep 表示睡眠。",
+    "collocations": "feel sleepy; look sleepy; a sleepy child",
+    "commonMistake": "sleepy 表示困倦，asleep 表示已经睡着；说 feel sleepy，不说 feel asleep。",
+    "example": {
+      "english": "I feel sleepy after staying up late.",
+      "chinese": "熬夜后我觉得困倦。"
+    },
+    "application": {
+      "prompt": "After a late night, I feel ___ during class. (sleepy / thirsty)",
+      "solution": "sleepy"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sleepy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sleepy"
+      }
+    ]
+  },
+  {
+    "word": "after all",
+    "examTags": [
+      "词汇·餐饮情境表达",
+      "语法·短语结构与句型"
+    ],
+    "grammar": "短语，毕竟；终归。常用来补充一个重要事实或解释前面的判断。",
+    "collocations": "after all, ...; it is not surprising after all; remember that, after all",
+    "commonMistake": "after all 在这里表示“毕竟”，不是“在所有事情之后”；常用来补充理由或提醒事实。",
+    "example": {
+      "english": "Let’s share the fruit salad; after all, there is enough for everyone.",
+      "chinese": "我们一起分水果沙拉吧，毕竟足够每个人吃。"
+    },
+    "application": {
+      "prompt": "We can share the fruit salad; ___, there is enough for everyone. (After all / Instead)",
+      "solution": "After all"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: after all",
+        "url": "https://dictionary.cambridge.org/dictionary/english/after-all"
+      }
+    ]
+  },
+  {
+    "word": "away",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "adv. 离开；在别处；相隔。常见 go away、put sth away、a short distance away。",
+    "collocations": "go away; two blocks away; put food away",
+    "commonMistake": "away 可表示不在此处或相隔一段距离；说明距离时常放在距离词后，如 two miles away。",
+    "example": {
+      "english": "The café is only two blocks away from the school.",
+      "chinese": "咖啡馆离学校只有两个街区。"
+    },
+    "application": {
+      "prompt": "The café is two blocks ___ from the school. (away / instead)",
+      "solution": "away"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: away",
+        "url": "https://dictionary.cambridge.org/dictionary/english/away"
+      }
+    ]
+  },
+  {
+    "word": "poor",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "adj. 不好的；贫穷的；可怜的。含义看语境；描述质量时可说 poor service/quality。",
+    "collocations": "poor quality; poor service; a poor family",
+    "commonMistake": "poor 可表示质量差或贫穷；描述服务或质量时可用 poor，但谈论人的经济状况时注意尊重。",
+    "example": {
+      "english": "The restaurant received poor reviews because its food was cold.",
+      "chinese": "这家餐馆因食物冷而收到差评。"
+    },
+    "application": {
+      "prompt": "The food was badly prepared; it was of ___ quality. (poor / balanced)",
+      "solution": "poor"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: poor",
+        "url": "https://dictionary.cambridge.org/dictionary/english/poor"
+      }
+    ]
+  },
+  {
+    "word": "result",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 后果；结果。可数名词，复数 results；常用 the result of sth、as a result。",
+    "collocations": "the result of a test; as a result; get a good result",
+    "commonMistake": "result 是名词；“导致”常用 result in，后接结果；“……的结果”用 the result of。",
+    "example": {
+      "english": "The result of the taste test was a tie.",
+      "chinese": "味觉测试的结果是平局。"
+    },
+    "application": {
+      "prompt": "The ___ of the taste test was a tie. (result / menu)",
+      "solution": "result"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: result",
+        "url": "https://dictionary.cambridge.org/dictionary/english/result"
+      }
+    ]
+  },
+  {
+    "word": "article",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "n. 文章；冠词。可数名词，复数 articles；语境可判断是报刊文章还是语法中的 a/an/the。",
+    "collocations": "a newspaper article; read an article; an article in English grammar",
+    "commonMistake": "article 可指文章，也可指冠词；a、an、the 是英语中的 articles。",
+    "example": {
+      "english": "I read an article about healthy school lunches.",
+      "chinese": "我读了一篇关于健康学校午餐的文章。"
+    },
+    "application": {
+      "prompt": "In “a pear,” the word “a” is an ___. (article / menu)",
+      "solution": "article"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: article",
+        "url": "https://dictionary.cambridge.org/dictionary/english/article"
+      },
+      {
+        "label": "Cambridge Grammar: a/an and the",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/the"
+      }
+    ]
+  },
+  {
+    "word": "common",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "adj. 共同的；普遍的。可表示许多人或事物共有，也可表示经常发生、不稀奇。",
+    "collocations": "a common mistake; a common problem; common interests",
+    "commonMistake": "common 表示常见或共同，不等于“普通质量差”；名词形式 commonness 较少用，常用名词是 community（共同体/社区）。",
+    "example": {
+      "english": "A common lunch choice at our school is rice with vegetables.",
+      "chinese": "我们学校常见的午餐选择是米饭配蔬菜。"
+    },
+    "application": {
+      "prompt": "A mistake made by many learners is a ___ mistake. (common / balanced)",
+      "solution": "common"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: common",
+        "url": "https://dictionary.cambridge.org/dictionary/english/common"
+      }
+    ]
+  },
+  {
+    "word": "among",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "prep. 在……中；……之一。常用于三者或更多的人、事物组成的群体中。",
+    "collocations": "among friends; among the choices; one among many",
+    "commonMistake": "among 后接一个群体；between 常用于两个对象之间的关系，但也可用于多个明确区分的对象。",
+    "example": {
+      "english": "Among the dishes, the salad is my favourite.",
+      "chinese": "这些菜中，沙拉是我最喜欢的。"
+    },
+    "application": {
+      "prompt": "___ all the dishes, the salad is my favourite. (Among / Before)",
+      "solution": "Among"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: among",
+        "url": "https://dictionary.cambridge.org/dictionary/english/among"
+      }
+    ]
+  },
+  {
+    "word": "soft",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "adj. 柔和的；柔软的。可描述触感、声音或食物质地；比较级 softer。",
+    "collocations": "soft bread; a soft voice; soft cheese",
+    "commonMistake": "soft 描述柔软或柔和；作副词通常用 softly，如 speak softly。",
+    "example": {
+      "english": "The bread is soft and easy to eat.",
+      "chinese": "面包很松软，容易吃。"
+    },
+    "application": {
+      "prompt": "A pillow that is not hard is ___. (soft / thirsty)",
+      "solution": "soft"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: soft",
+        "url": "https://dictionary.cambridge.org/dictionary/english/soft"
+      }
+    ]
+  },
+  {
+    "word": "soft drink",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "短语名词，软饮料（不含酒精）。可数名词，复数 soft drinks。",
+    "collocations": "a soft drink; cold soft drinks; order a soft drink",
+    "commonMistake": "soft drink 指不含酒精的饮料，不表示“口感柔软的饮料”；单数前要有 a/the。",
+    "example": {
+      "english": "Would you like a soft drink with your meal?",
+      "chinese": "你用餐时想要一杯软饮料吗？"
+    },
+    "application": {
+      "prompt": "Cola is a cold, non-alcoholic ___. (soft drink / mutton)",
+      "solution": "soft drink"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: soft drink",
+        "url": "https://dictionary.cambridge.org/dictionary/english/soft-drink"
+      }
+    ]
+  },
+  {
+    "word": "enough",
+    "examTags": [
+      "词汇·餐饮情境表达",
+      "语法·短语结构与句型"
+    ],
+    "grammar": "adj. 足够的；adv. 足够地、充分地；pron. 足够。enough + 名词；形容词/副词 + enough；也可单独作代词。",
+    "collocations": "enough food; warm enough; have had enough",
+    "commonMistake": "enough 放名词前，如 enough water；放形容词后，如 warm enough；不说 enough warm。",
+    "example": {
+      "english": "We have enough fruit for everyone.",
+      "chinese": "我们的水果够每个人吃。"
+    },
+    "application": {
+      "prompt": "The soup is cool ___ for a child to eat. (enough / too)",
+      "solution": "enough"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: enough",
+        "url": "https://dictionary.cambridge.org/dictionary/english/enough"
+      },
+      {
+        "label": "Cambridge Grammar: enough",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/enough"
+      }
+    ]
+  },
+  {
+    "word": "thirsty",
+    "examTags": [
+      "词汇·食物与点餐",
+      "语法·数量表达与搭配"
+    ],
+    "grammar": "adj. 渴的。常用 feel/be thirsty；thirsty for sth 也可表示“渴望得到某物”。",
+    "collocations": "feel thirsty; get thirsty; thirsty for knowledge",
+    "commonMistake": "thirsty 是形容词，常接 be/feel；名词是 thirst。",
+    "example": {
+      "english": "After PE, I felt thirsty and drank some water.",
+      "chinese": "体育课后我觉得口渴，喝了些水。"
+    },
+    "application": {
+      "prompt": "After running, I feel ___ and want a glass of water. (thirsty / sleepy)",
+      "solution": "thirsty"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thirsty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thirsty"
+      }
+    ]
+  },
+  {
+    "word": "Gongbao chicken",
+    "examTags": [
+      "词汇·文化与专有名词",
+      "语法·专有名词大小写"
+    ],
+    "grammar": "专有名词，宫保鸡丁；菜名中两个词首字母大写。也常见 Kung Pao chicken 的拼写。",
+    "collocations": "order Gongbao chicken; a plate of Gongbao chicken; Gongbao chicken with rice",
+    "commonMistake": "菜名按本词表写作 Gongbao chicken，Gongbao 首字母大写；也可见 Kung Pao chicken 这一拼法。",
+    "example": {
+      "english": "Gongbao chicken is on the menu today.",
+      "chinese": "今天的菜单上有宫保鸡丁。"
+    },
+    "application": {
+      "prompt": "Choose the correctly capitalized dish name: (Gongbao chicken / gongbao Chicken)",
+      "solution": "Gongbao chicken"
+    },
+    "sources": [
+      {
+        "label": "China Culture: Kung Pao chicken (Gong Bao chicken)",
+        "url": "https://en.chinaculture.org/focus/focus/2010spring/2010-01/25/content_367267.htm"
+      }
+    ]
+  },
+  {
+    "word": "America",
+    "examTags": [
+      "词汇·文化与专有名词",
+      "语法·专有名词大小写"
+    ],
+    "grammar": "专有名词，美国；美洲。首字母大写；语境通常可判断是美国还是美洲。",
+    "collocations": "in America; travel to America; North America",
+    "commonMistake": "America 是专有名词，首字母必须大写；在日常英语中常指美国，the Americas 指美洲。",
+    "example": {
+      "english": "My aunt lives in America and often visits us in summer.",
+      "chinese": "我姑妈住在美国，夏天常来看我们。"
+    },
+    "application": {
+      "prompt": "My aunt moved from China to the United States. She moved to ___. (America / Canada)",
+      "solution": "America"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: America",
+        "url": "https://dictionary.cambridge.org/dictionary/english/america"
+      }
+    ]
+  },
+  {
+    "word": "Dongpo pork",
+    "examTags": [
+      "词汇·文化与专有名词",
+      "语法·专有名词大小写"
+    ],
+    "grammar": "专有名词，东坡肉；杭州传统菜名，Dongpo 首字母大写，pork 小写。",
+    "collocations": "order Dongpo pork; a Hangzhou dish; Dongpo pork with rice",
+    "commonMistake": "按本词表写作 Dongpo pork，专有名称 Dongpo 大写，普通名词 pork 小写。",
+    "example": {
+      "english": "Dongpo pork is a well-known Hangzhou dish.",
+      "chinese": "东坡肉是杭州的知名菜肴。"
+    },
+    "application": {
+      "prompt": "Complete the name of this Hangzhou dish: Dongpo ___. (pork / chicken)",
+      "solution": "pork"
+    },
+    "sources": [
+      {
+        "label": "eHangzhou: Dongpo Pork",
+        "url": "https://ehangzhou.gov.cn/2018-06/14/c_271739.htm"
+      }
+    ]
+  }
+]

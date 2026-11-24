@@ -2,6 +2,8 @@ import type { Prisma } from '@prisma/client'
 import { TEACHER_LOG_ACTIONS } from '@/lib/teacher-log-actions'
 import { groupFeedbackNotificationRecipients } from './notifications'
 import { createNotification } from '@/lib/notifications'
+import { qywxEnabled } from '@/lib/qywx'
+import { getParentFeedbackDisplaySections } from './parent-feedback-content'
 
 type FeedbackStudent = {
   id: string
@@ -22,7 +24,9 @@ type CreateFeedbackInput = {
   detailFallback: string
   notificationLabel?: string
   notificationContent: string
+  manualRecipient?: { parentUserId: string; studentName: string }
   metadata?: Record<string, string | number | boolean | null>
+  additionalLessonIds?: string[]
 }
 
 function isMissingFeedbackContextColumn(error: unknown) {
@@ -63,6 +67,21 @@ export async function createClassroomFeedbackWithSideEffects(
   const teacherId = input.data.teacherId
   const badge = typeof input.data.badge === 'string' ? input.data.badge : ''
 
+  // For multi-period / consecutive class sessions (连堂小课), automatically mirror the feedback
+  // to sister small lessons so that the entire block is recorded as completed without
+  // spamming duplicate push notifications or creating duplicate badges.
+  if (input.additionalLessonIds && input.additionalLessonIds.length > 0) {
+    for (const sisterLessonId of input.additionalLessonIds) {
+      if (sisterLessonId && sisterLessonId !== input.data.classLessonId) {
+        await createClassroomFeedbackCompat(tx, {
+          ...input.data,
+          classLessonId: sisterLessonId,
+          notifySent: true,
+        })
+      }
+    }
+  }
+
   if (input.status === 'PUBLISHED' && badge) {
     for (const student of input.students) {
       await tx.achievementBadge.create({
@@ -77,7 +96,20 @@ export async function createClassroomFeedbackWithSideEffects(
   }
 
   if (input.status === 'PUBLISHED') {
-    const recipients = groupFeedbackNotificationRecipients(input.students)
+    const groupedRecipients = groupFeedbackNotificationRecipients(input.students)
+    const recipientMap = new Map<string, { studentIds: string[]; studentNames: string[] }>()
+    for (const recipient of groupedRecipients) {
+      recipientMap.set(recipient.parentUserId, {
+        studentIds: recipient.students.map((student) => student.id),
+        studentNames: recipient.students.map((student) => student.name),
+      })
+    }
+    if (input.manualRecipient) {
+      const current = recipientMap.get(input.manualRecipient.parentUserId) || { studentIds: [], studentNames: [] }
+      current.studentNames.push(input.manualRecipient.studentName)
+      recipientMap.set(input.manualRecipient.parentUserId, current)
+    }
+    const recipients = [...recipientMap.entries()].map(([parentUserId, value]) => ({ parentUserId, ...value }))
     if (recipients.length) {
       await tx.feedbackParentReadReceipt.createMany({
         data: recipients.map(({ parentUserId }) => ({
@@ -87,17 +119,30 @@ export async function createClassroomFeedbackWithSideEffects(
         skipDuplicates: true,
       })
     }
-    for (const { parentUserId, students } of recipients) {
+    for (const { parentUserId, studentIds, studentNames } of recipients) {
+      const parentSafeContent = studentNames.map((studentName) => {
+        const content = getParentFeedbackDisplaySections({
+          lessonContent: input.data.lessonContent,
+          overallComment: input.data.overallComment,
+          summary: input.data.summary,
+          knowledgePoints: input.knowledgePoints,
+          homework: input.data.homework,
+          tags: input.data.tags,
+          studentName,
+        }).map((section) => section.content).join(' ').replace(/\s+/g, ' ').trim()
+        return `${studentName}：${content || '老师已发布课堂反馈，请点击查看详情。'}`
+      }).join('；')
       await createNotification(tx, {
         userId: parentUserId,
         type: 'CLASSROOM_FEEDBACK',
-        title: `${input.teacherName}老师发布了${input.notificationLabel || '课堂反馈'}`,
-        content: `${students.map((student) => student.name).join('、')}: ${input.notificationContent}`.slice(0, 80),
-        studentId: students.length === 1 ? students[0].id : null,
+        title: `${input.teacherName}老师发布了${input.notificationLabel || (input.data.isSingleSession ? '单次课程反馈' : '课堂反馈')}`,
+        content: parentSafeContent.slice(0, 300),
+        studentId: studentIds.length === 1 ? studentIds[0] : null,
+        pushStatus: qywxEnabled() ? 'queued' : 'none',
         link: '/parent/class-feedback',
         relatedType: 'CLASSROOM_FEEDBACK',
         relatedId: created.id,
-        href: `/parent/class-feedback/${created.id}`,
+        href: `/parent/class-feedback/${created.id}${studentIds.length === 1 ? `?childId=${encodeURIComponent(studentIds[0])}` : ''}`,
       })
     }
   }
@@ -109,7 +154,7 @@ export async function createClassroomFeedbackWithSideEffects(
       action: input.status === 'PUBLISHED'
         ? TEACHER_LOG_ACTIONS.CLASSROOM_FEEDBACK_PUBLISH
         : TEACHER_LOG_ACTIONS.CLASSROOM_FEEDBACK_DRAFT,
-      detail: `${input.students.length}名学员 · ${input.knowledgePoints.join('/') || input.data.overallComment || input.data.lessonContent || input.detailFallback}`,
+      detail: `${input.data.studentNameSnapshot ? `${input.data.studentNameSnapshot} · 单次反馈` : `${input.students.length}名学员`} · ${input.knowledgePoints.join('/') || input.data.overallComment || input.data.lessonContent || input.detailFallback}`,
       entityType: 'ClassroomFeedback',
       entityId: created.id,
       metadata: {

@@ -3,8 +3,8 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { auth } from '@/lib/auth'
 import { getRequestDivision } from '@/lib/division'
+import { chineseToPinyin } from '@/lib/pinyin'
 import bcrypt from 'bcryptjs'
-import { generateTemporaryPassword } from '@/lib/temporary-password'
 import { normalizeLoginPhone } from '@/lib/login-accounts'
 
 export const dynamic = 'force-dynamic'
@@ -98,7 +98,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
             const parentEmail = `parent_${row.parentPhone}@parent.com`
             let parentUser = await tx.user.findUnique({ where: { email: parentEmail } })
             if (!parentUser) {
-              const initialPassword = generateTemporaryPassword()
+              const initialPassword = chineseToPinyin(row.name)
+              if (!initialPassword) throw new Error('学员姓名无法生成拼音初始密码')
               parentUser = await tx.user.create({
                 data: {
                   email: parentEmail,
@@ -172,7 +173,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
         continue
       }
 
-      const initialPassword = generateTemporaryPassword()
+      const initialPassword = chineseToPinyin(row.name)
+      if (!initialPassword) throw new Error('教师姓名无法生成拼音初始密码')
       await prisma.$transaction(async (tx) => {
         const teacher = await tx.teacher.create({
           data: {

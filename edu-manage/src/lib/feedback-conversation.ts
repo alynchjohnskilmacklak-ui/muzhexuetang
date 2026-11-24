@@ -18,6 +18,9 @@ export async function createParentFeedbackMessage(params: {
       id: true,
       teacherId: true,
       studentIds: true,
+      isSingleSession: true,
+      studentNameSnapshot: true,
+      subjectSnapshot: true,
       classLesson: {
         select: {
           subject: true,
@@ -35,9 +38,16 @@ export async function createParentFeedbackMessage(params: {
     },
     select: { id: true, name: true },
   })
-  if (!student) throw new Error('FEEDBACK_PARENT_FORBIDDEN')
+  const manualRecipient = !student && feedback.isSingleSession && feedback.studentIds.length === 0
+    ? await params.prisma.feedbackParentReadReceipt.findUnique({
+        where: { feedbackId_parentUserId: { feedbackId: feedback.id, parentUserId: params.parentId } },
+        select: { feedbackId: true },
+      })
+    : null
+  if (!student && !manualRecipient) throw new Error('FEEDBACK_PARENT_FORBIDDEN')
 
-  const subject = feedback.classLesson?.subject || feedback.classLesson?.group.course.subject || null
+  const studentName = student?.name || feedback.studentNameSnapshot || '学员'
+  const subject = feedback.classLesson?.subject || feedback.classLesson?.group.course.subject || feedback.subjectSnapshot || null
   return params.prisma.$transaction(async (tx) => {
     const now = new Date()
     const conversation = await tx.parentMessage.upsert({
@@ -46,11 +56,11 @@ export async function createParentFeedbackMessage(params: {
       },
       create: {
         parentId: params.parentId,
-        studentId: student.id,
+        studentId: student?.id || null,
         teacherId: feedback.teacherId,
         feedbackId: feedback.id,
         subject,
-        title: `${student.name}的课堂反馈留言`,
+        title: `${studentName}的课堂反馈留言`,
         status: 'OPEN',
         replies: {
           create: {
@@ -64,7 +74,7 @@ export async function createParentFeedbackMessage(params: {
         },
       },
       update: {
-        studentId: student.id,
+        studentId: student?.id || null,
         teacherId: feedback.teacherId,
         subject,
         status: 'OPEN',
@@ -97,8 +107,8 @@ export async function createParentFeedbackMessage(params: {
       teacherId: feedback.teacherId,
       messageId: conversation.id,
       parentName: params.parentName || '家长',
-      studentId: student.id,
-      studentName: student.name,
+      studentId: student?.id || null,
+      studentName,
       senderId: params.parentId,
     })
 

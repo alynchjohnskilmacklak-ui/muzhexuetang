@@ -14,7 +14,7 @@ import {
   triggerFeedbackBonus,
 } from './teacher-salary'
 
-type FeedbackSpec = { id: string; groupId: string; createdAt?: string }
+type FeedbackSpec = { id: string; groupId: string; createdAt?: string; termId?: string | null }
 
 function createFeedbackRewardHarness(specs: FeedbackSpec[]) {
   const ledger = new Set<string>()
@@ -34,31 +34,37 @@ function createFeedbackRewardHarness(specs: FeedbackSpec[]) {
     classLessonId: null,
     feedbackGroupId: groupId,
     feedbackCourseType: 'GROUP',
+    termId: null,
     classLesson: null,
     createdAt: new Date(createdAt || '2026-07-20T02:00:00.000Z'),
   }]))
   const groups: Record<string, any> = {
     'junior-math': {
+      termId: 'term-1',
       division: 'JUNIOR',
       course: { id: 'course-junior-math', name: '初中数学', subject: '数学', type: 'GROUP', division: 'JUNIOR' },
       teacherAssignments: [],
     },
     'junior-math-second-group': {
+      termId: 'term-1',
       division: 'JUNIOR',
       course: { id: 'course-junior-math-2', name: '初中数学提高班', subject: '数学', type: 'GROUP', division: 'JUNIOR' },
       teacherAssignments: [],
     },
     'junior-physics': {
+      termId: 'term-1',
       division: 'JUNIOR',
       course: { id: 'course-junior-physics', name: '初中物理', subject: '物理', type: 'GROUP', division: 'JUNIOR' },
       teacherAssignments: [],
     },
     'senior-math': {
+      termId: 'term-1',
       division: 'SENIOR',
       course: { id: 'course-senior-math', name: '高中数学', subject: '数学', type: 'GROUP', division: 'SENIOR' },
       teacherAssignments: [],
     },
     'junior-all-subjects': {
+      termId: 'term-1',
       division: 'JUNIOR',
       course: { id: 'course-junior-all', name: '初二全科班', subject: '物理、语文、数学、英语', type: 'GROUP', division: 'JUNIOR' },
       teacherAssignments: [{ subject: '物理' }],
@@ -82,6 +88,7 @@ function createFeedbackRewardHarness(specs: FeedbackSpec[]) {
     count: vi.fn(async () => ledger.size),
   }
   const tx: any = {
+    $queryRaw: vi.fn(async () => [{ id: 'feedback-1' }]),
     teacherSalaryConfig: { findUnique: vi.fn(async () => null) },
     feedbackRewardRecord: rewardModel,
     student: { findMany: vi.fn(async () => [{ id: 's1', name: '张三' }]) },
@@ -96,7 +103,12 @@ function createFeedbackRewardHarness(specs: FeedbackSpec[]) {
     },
     activityLog: { create: vi.fn(async () => ({ id: 'log' })) },
     classLesson: { findUnique: vi.fn(async () => null) },
-    classGroup: { findUnique: vi.fn(async ({ where }: any) => groups[where.id] || null) },
+    classGroup: { findUnique: vi.fn(async ({ where }: any) => {
+      const group = groups[where.id]
+      if (!group) return null
+      const spec = specs.find((item) => item.groupId === where.id)
+      return { ...group, termId: spec?.termId === undefined ? group.termId : spec.termId }
+    }) },
   }
   const prisma: any = {
     ...tx,
@@ -137,6 +149,40 @@ describe('teacher salary calculations', () => {
     expect(tx.teacherSalaryTransaction.create).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({ lessonId: 'lesson-1', lessonPayKey: 'lesson-1', type: 'LESSON_PAY' }),
     }))
+  })
+
+  it('does not create lesson pay when the class has no term attribution', async () => {
+    const tx: any = {
+      $queryRaw: vi.fn(async () => [{ id: 'lesson-1' }]),
+      classLesson: {
+        findUnique: vi.fn(async () => ({
+          id: 'lesson-1',
+          teacherId: 'teacher-1',
+          status: 'COMPLETED',
+          attendances: [{ status: 'PRESENT' }],
+          group: { teacherId: 'teacher-1', termId: null, course: { type: 'GROUP' } },
+        })),
+      },
+      teacherSalaryTransaction: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn() },
+    }
+
+    await expect(createLessonPayInTransaction(tx, 'lesson-1')).resolves.toEqual({
+      success: false,
+      error: 'LESSON_TERM_REQUIRED',
+    })
+    expect(tx.teacherSalaryTransaction.create).not.toHaveBeenCalled()
+  })
+
+  it('does not create a feedback bonus without a term attribution', async () => {
+    const { prisma, ledger, salaryCreates } = createFeedbackRewardHarness([
+      { id: 'f-no-term', groupId: 'junior-math', termId: null },
+    ])
+
+    const result = await triggerFeedbackBonus('f-no-term', prisma)
+
+    expect(result).toMatchObject({ success: false, error: expect.stringContaining('未关联教学批次') })
+    expect(ledger.size).toBe(0)
+    expect(salaryCreates).toHaveLength(0)
   })
 
   it('does not create lesson pay when every student is absent or on leave', async () => {

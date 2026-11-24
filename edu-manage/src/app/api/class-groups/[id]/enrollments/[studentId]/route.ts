@@ -4,7 +4,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { normalizeEnrollmentSubjects, validateEnrollmentSubjects } from '@/lib/enrollment-subjects'
-import { chinaClock, isEditableSubjectRosterLesson } from '@/lib/enrollment-subject-change'
+import { chinaClock, isEditableSubjectRosterLesson, resolveLessonSubjectForEnrollment } from '@/lib/enrollment-subject-change'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,8 +30,9 @@ async function planSubjectChange(
       group: {
         select: {
           name: true,
+          teacherId: true,
           course: { select: { subject: true } },
-          teacherAssignments: { select: { subject: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true } },
           classLessons: { where: { deletedAt: null }, select: { subject: true }, distinct: ['subject'] },
         },
       },
@@ -67,7 +68,7 @@ async function planSubjectChange(
       hoursDeductedAt: null,
     },
     select: {
-      id: true, subject: true, lessonDate: true, startTime: true,
+      id: true, subject: true, teacherId: true, lessonDate: true, startTime: true,
       lessonStudents: { where: { studentId }, select: { id: true } },
       attendances: { where: { studentId, deletedAt: null }, select: { id: true } },
       classroomFeedbacks: { where: { studentIds: { has: studentId }, deletedAt: null }, select: { id: true } },
@@ -81,10 +82,18 @@ async function planSubjectChange(
     hasFeedback: lesson.classroomFeedbacks.length > 0,
   }, now))
   const addLessonIds = editable
-    .filter((lesson) => selected.includes(lesson.subject || '') && lesson.lessonStudents.length === 0)
+    .filter((lesson) => selected.includes(resolveLessonSubjectForEnrollment(lesson, {
+      teacherId: enrollment.group.teacherId,
+      courseSubject: enrollment.group.course.subject,
+      teacherAssignments: enrollment.group.teacherAssignments,
+    }) || '') && lesson.lessonStudents.length === 0)
     .map((lesson) => lesson.id)
   const removeLessonIds = editable
-    .filter((lesson) => !selected.includes(lesson.subject || '') && lesson.lessonStudents.length > 0)
+    .filter((lesson) => !selected.includes(resolveLessonSubjectForEnrollment(lesson, {
+      teacherId: enrollment.group.teacherId,
+      courseSubject: enrollment.group.course.subject,
+      teacherAssignments: enrollment.group.teacherAssignments,
+    }) || '') && lesson.lessonStudents.length > 0)
     .map((lesson) => lesson.id)
 
   return {

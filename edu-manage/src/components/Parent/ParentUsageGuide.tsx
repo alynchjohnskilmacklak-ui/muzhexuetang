@@ -1,6 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useRef, useState } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
+import { flushSync } from 'react-dom'
 import {
   BellOutlined,
   BookOutlined,
@@ -8,14 +10,16 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CommentOutlined,
+  CompassOutlined,
   FileTextOutlined,
   IdcardOutlined,
   RightOutlined,
 } from '@ant-design/icons'
-import { Button, Drawer, Progress, Typography } from 'antd'
+import { Button, Drawer, Slider, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { BrandModal } from '@/components/Common/BrandModal'
+import { getRubberBandOffset, resolveDrawerSnapPoint, runDocumentViewTransition } from '@/lib/ui-motion'
 
 const { Text, Title } = Typography
 const GUIDE_VERSION = 'v2'
@@ -118,14 +122,14 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const [open, setOpen] = useState(false)
+  const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null)
+  const drawerPointerStart = useRef<{ y: number; time: number; snap: 'peek' | 'full' } | null>(null)
+  const drawerWasDragged = useRef(false)
 
   const current = GUIDE_STEPS[activeStep]
-  const progress = useMemo(
-    () => Math.round(((activeStep + 1) / GUIDE_STEPS.length) * 100),
-    [activeStep],
-  )
+  const progress = Math.round(((activeStep + 1) / GUIDE_STEPS.length) * 100)
 
   const rememberCompletion = () => {
     try {
@@ -137,7 +141,12 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
 
   const closeGuide = () => {
     rememberCompletion()
-    setOpen(false)
+    if (!runDocumentViewTransition(() => flushSync(() => setOpen(false)))) setOpen(false)
+  }
+
+  const setGuideOpen = (nextOpen: boolean) => {
+    const didStartTransition = runDocumentViewTransition(() => flushSync(() => setOpen(nextOpen)))
+    if (!didStartTransition) setOpen(nextOpen)
   }
 
   const navigateTo = (path: string) => {
@@ -151,24 +160,63 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
     navigateTo(path)
   }
 
+  const beginDrawerGesture = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    drawerPointerStart.current = { y: event.clientY, time: performance.now(), snap: drawerExpanded ? 'full' : 'peek' }
+    drawerWasDragged.current = false
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const moveDrawerGesture = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const start = drawerPointerStart.current
+    if (!start) return
+    const deltaY = event.clientY - start.y
+    const travel = Math.min(window.innerHeight * 0.52, 460)
+    const offset = start.snap === 'peek'
+      ? (deltaY < 0 ? Math.max(deltaY, -travel) : getRubberBandOffset(deltaY))
+      : (deltaY > 0 ? Math.min(deltaY, travel) : getRubberBandOffset(deltaY))
+    const root = event.currentTarget.closest<HTMLElement>('.parent-usage-guide-drawer')
+    root?.classList.add('is-dragging')
+    root?.style.setProperty('--parent-drawer-drag-offset', `${offset}px`)
+    if (Math.abs(deltaY) > 12) drawerWasDragged.current = true
+  }
+
+  const finishDrawerGesture = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const start = drawerPointerStart.current
+    if (!start) return
+    const deltaY = event.clientY - start.y
+    const elapsed = Math.max(1, performance.now() - start.time)
+    const velocityY = deltaY / elapsed
+    drawerPointerStart.current = null
+    const root = event.currentTarget.closest<HTMLElement>('.parent-usage-guide-drawer')
+    root?.classList.remove('is-dragging')
+    root?.style.removeProperty('--parent-drawer-drag-offset')
+    if (Math.abs(deltaY) < 12) return
+    drawerWasDragged.current = true
+    const next = resolveDrawerSnapPoint(start.snap, deltaY, velocityY)
+    if (next === 'closed') closeGuide()
+    else setDrawerExpanded(next === 'full')
+  }
+
   const guideBody = (
     <div style={{ width: '100%', maxWidth: '100%' }}>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
           <Text style={{ color: 'var(--color-ink-muted)', fontSize: 13 }}>
             第 {activeStep + 1} 项，共 {GUIDE_STEPS.length} 项
           </Text>
           <Text style={{ color: 'var(--color-primary)', fontSize: 13, fontWeight: 600 }}>
-            {current.section}
+            {current.section} · {progress}%
           </Text>
         </div>
-        <Progress
-          percent={progress}
-          showInfo={false}
-          strokeColor="var(--color-primary)"
-          trailColor="var(--color-surface-4)"
-          size="small"
-          style={{ marginTop: 8 }}
+        <Slider
+          aria-label="选择使用指南步骤"
+          className="parent-usage-guide-slider"
+          min={1}
+          max={GUIDE_STEPS.length}
+          step={1}
+          value={activeStep + 1}
+          tooltip={{ formatter: (value) => value == null ? '' : `${value} / ${GUIDE_STEPS.length}` }}
+          onChange={(value) => setActiveStep((typeof value === 'number' ? value : value[0] ?? 1) - 1)}
         />
       </div>
 
@@ -248,27 +296,116 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
 
   return (
     <>
-      <Button
-        block
+      <button
+        type="button"
         onClick={() => {
           setActiveStep(0)
-          setOpen(true)
+          setDrawerExpanded(false)
+          drawerWasDragged.current = false
+          setGuideOpen(true)
         }}
-        style={{ minHeight: 44, fontWeight: 650 }}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 10,
+          padding: '10px 13px',
+          borderRadius: 14,
+          background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF8F4 100%)',
+          border: '1px solid rgba(20, 87, 77, 0.12)',
+          boxShadow: 'inset 0 1px 0 #FFFFFF, 0 2px 6px rgba(20, 60, 50, 0.035)',
+          cursor: 'pointer',
+          userSelect: 'none',
+          viewTransitionName: open ? 'none' : 'parent-guide-panel',
+          transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+        }}
       >
-        使用指南
-      </Button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <span
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 8,
+              background: 'linear-gradient(135deg, rgba(201, 164, 92, 0.22) 0%, rgba(20, 87, 77, 0.12) 100%)',
+              color: '#8A6517',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+              flexShrink: 0,
+            }}
+          >
+            <CompassOutlined />
+          </span>
+          <div style={{ textAlign: 'left' }}>
+            <span style={{ display: 'block', fontSize: 13, fontWeight: 750, color: '#1A1201', lineHeight: 1.25 }}>
+              新手使用与功能指南
+            </span>
+            <span style={{ display: 'block', fontSize: 10.5, color: '#8C7E6A', marginTop: 2 }}>
+              系统全流程操作指引手册
+            </span>
+          </div>
+        </div>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: '#14574D',
+            padding: '2.5px 8px',
+            borderRadius: 6,
+            background: 'rgba(20, 87, 77, 0.08)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 2,
+            flexShrink: 0,
+          }}
+        >
+          <span>查阅</span>
+          <RightOutlined style={{ fontSize: 9 }} />
+        </span>
+      </button>
 
       {open && (isMobile ? (
         <Drawer
           title="牧哲学堂家长端使用指南"
           placement="bottom"
-          height="min(84vh, 700px)"
+          zIndex={1300}
+          height="min(88dvh, 760px)"
           open
           onClose={closeGuide}
           destroyOnHidden
-          styles={{ body: { padding: 14 }, header: { borderBottom: '1px solid var(--color-hairline)' } }}
+          rootClassName={`parent-usage-guide-drawer${drawerExpanded ? ' is-expanded' : ''}`}
+          styles={{
+            content: { borderRadius: '18px 18px 0 0', viewTransitionName: 'parent-guide-panel' },
+            body: { padding: '8px 14px 14px', overflowY: 'auto' },
+            header: { borderBottom: '1px solid var(--color-hairline)' },
+          }}
         >
+          <button
+            type="button"
+            className="parent-usage-guide-drawer__handle"
+            data-motion-ignore="true"
+            aria-label={drawerExpanded ? '收起到半屏' : '展开到全屏'}
+            aria-expanded={drawerExpanded}
+            onPointerDown={beginDrawerGesture}
+            onPointerMove={moveDrawerGesture}
+            onPointerUp={finishDrawerGesture}
+            onPointerCancel={() => {
+              drawerPointerStart.current = null
+              drawerWasDragged.current = false
+              const root = document.querySelector<HTMLElement>('.parent-usage-guide-drawer')
+              root?.classList.remove('is-dragging')
+              root?.style.removeProperty('--parent-drawer-drag-offset')
+            }}
+            onClick={() => {
+              if (drawerWasDragged.current) {
+                drawerWasDragged.current = false
+                return
+              }
+              setDrawerExpanded((expanded) => !expanded)
+            }}
+          />
           {guideBody}
         </Drawer>
       ) : (
@@ -279,6 +416,7 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
           footer={null}
           width={600}
           destroyOnHidden
+          styles={{ content: { viewTransitionName: 'parent-guide-panel' } }}
         >
           {guideBody}
         </BrandModal>

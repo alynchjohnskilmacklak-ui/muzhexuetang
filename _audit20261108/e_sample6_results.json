@@ -1,0 +1,147 @@
+{
+  "queries": {
+    "Q5_split": {
+      "sql": "SELECT count(*)::int AS total,\n            count(*) FILTER (WHERE e.\"totalHours\" = 0)::int AS accrual_mode,\n            count(*) FILTER (WHERE e.\"totalHours\" > 0 AND e.\"remainHours\" <= 0.05)::int AS prepaid_exhausted,\n            count(*) FILTER (WHERE e.\"totalHours\" > 0 AND e.\"remainHours\" > 0.05)::int AS prepaid_remain_positive,\n            count(*) FILTER (WHERE a.\"enrollmentId\" IS NULL)::int AS no_enrollment\n     FROM \"Attendance\" a\n     JOIN \"ClassLesson\" l ON l.id=a.\"lessonId\"\n     LEFT JOIN \"ClassGroup\" g ON g.id=l.\"groupId\"\n     LEFT JOIN \"Enrollment\" e ON e.id=a.\"enrollmentId\"\n     WHERE a.\"deletedAt\" IS NULL AND l.\"deletedAt\" IS NULL AND l.\"attendanceSubmittedAt\" IS NOT NULL\n       AND g.\"intensiveMode\"::text='INTENSIVE' AND l.\"intensiveReviewStatus\"='APPROVED'\n       AND a.status='PRESENT' AND COALESCE(a.\"hoursDeducted\",0)=0",
+      "rows": [
+        {
+          "total": 203,
+          "accrual_mode": 203,
+          "prepaid_exhausted": 0,
+          "prepaid_remain_positive": 0,
+          "no_enrollment": 0
+        }
+      ]
+    },
+    "Q1c_tx_check": {
+      "sql": "SELECT a.id, s.name AS student, l.\"lessonDate\", e.\"remainHours\" AS enr_remain, e.\"totalHours\", e.\"usedHours\",\n            (SELECT count(*) FROM \"HourTransaction\" h WHERE h.\"studentId\"=a.\"studentId\" AND h.\"lessonId\"=l.id AND h.\"deletedAt\" IS NULL)::int AS tx_count,\n            (SELECT array_agg(h.type) FROM \"HourTransaction\" h WHERE h.\"studentId\"=a.\"studentId\" AND h.\"lessonId\"=l.id AND h.\"deletedAt\" IS NULL) AS tx_types,\n            (SELECT array_agg(h.amount) FROM \"HourTransaction\" h WHERE h.\"studentId\"=a.\"studentId\" AND h.\"lessonId\"=l.id AND h.\"deletedAt\" IS NULL) AS tx_amounts\n     FROM \"Attendance\" a\n     JOIN \"ClassLesson\" l ON l.id=a.\"lessonId\"\n     LEFT JOIN \"ClassGroup\" g ON g.id=l.\"groupId\"\n     LEFT JOIN \"Enrollment\" e ON e.id=a.\"enrollmentId\"\n     LEFT JOIN \"Student\" s ON s.id=a.\"studentId\"\n     WHERE a.\"deletedAt\" IS NULL AND l.\"deletedAt\" IS NULL AND l.\"attendanceSubmittedAt\" IS NOT NULL\n       AND a.status='PRESENT' AND COALESCE(a.\"hoursDeducted\",0)=0\n       AND COALESCE(g.\"intensiveMode\"::text,'') <> 'INTENSIVE'\n       AND a.\"enrollmentId\" IS NOT NULL AND e.\"remainHours\" > 0.05\n     ORDER BY l.\"lessonDate\" DESC",
+      "rows": [
+        {
+          "id": "cmrej3keu021qevdtu7tjp5qa",
+          "student": "张**",
+          "lessonDate": "2026-07-10T00:00:00.000Z",
+          "enr_remain": 9.099999999999742,
+          "totalHours": 134.4,
+          "usedHours": 125.30000000000035,
+          "tx_count": 0,
+          "tx_types": null,
+          "tx_amounts": null
+        },
+        {
+          "id": "cmreqqwr003mwevdtpjqqsiba",
+          "student": "李**",
+          "lessonDate": "2026-07-10T00:00:00.000Z",
+          "enr_remain": 8.399999999999743,
+          "totalHours": 134.4,
+          "usedHours": 126.00000000000036,
+          "tx_count": 0,
+          "tx_types": null,
+          "tx_amounts": null
+        },
+        {
+          "id": "cmreqroyz03oqevdtgjopt9qw",
+          "student": "李**",
+          "lessonDate": "2026-07-10T00:00:00.000Z",
+          "enr_remain": 8.399999999999743,
+          "totalHours": 134.4,
+          "usedHours": 126.00000000000036,
+          "tx_count": 0,
+          "tx_types": null,
+          "tx_amounts": null
+        }
+      ]
+    },
+    "Q3_no_active_enrollment": {
+      "sql": "SELECT s.name AS student, s.\"remainHours\" AS student_remain, s.\"totalHours\" AS student_total,\n            s.status::text AS student_status,\n            count(e.id)::int AS all_enrollments,\n            count(e.id) FILTER (WHERE e.status='ACTIVE')::int AS active_enrollments,\n            count(e.id) FILTER (WHERE e.status='WITHDRAWN')::int AS withdrawn,\n            count(e.id) FILTER (WHERE e.status='COMPLETED')::int AS completed\n     FROM \"Student\" s\n     LEFT JOIN \"Enrollment\" e ON e.\"studentId\"=s.id AND e.\"deletedAt\" IS NULL\n     WHERE s.\"deletedAt\" IS NULL AND s.\"remainHours\" > 0.05\n       AND NOT EXISTS (SELECT 1 FROM \"Enrollment\" x WHERE x.\"studentId\"=s.id AND x.status='ACTIVE' AND x.\"deletedAt\" IS NULL)\n     GROUP BY s.id, s.name, s.\"remainHours\", s.\"totalHours\", s.status\n     ORDER BY s.\"remainHours\" DESC LIMIT 10",
+      "rows": [
+        {
+          "student": "李**",
+          "student_remain": 128.8,
+          "student_total": 134.4,
+          "student_status": "INACTIVE",
+          "all_enrollments": 1,
+          "active_enrollments": 0,
+          "withdrawn": 1,
+          "completed": 0
+        },
+        {
+          "student": "李**",
+          "student_remain": 128.8,
+          "student_total": 134.4,
+          "student_status": "INACTIVE",
+          "all_enrollments": 1,
+          "active_enrollments": 0,
+          "withdrawn": 1,
+          "completed": 0
+        },
+        {
+          "student": "刘**",
+          "student_remain": 86.8,
+          "student_total": 86.8,
+          "student_status": "ACTIVE",
+          "all_enrollments": 0,
+          "active_enrollments": 0,
+          "withdrawn": 0,
+          "completed": 0
+        },
+        {
+          "student": "马**",
+          "student_remain": 16,
+          "student_total": 16,
+          "student_status": "INACTIVE",
+          "all_enrollments": 1,
+          "active_enrollments": 0,
+          "withdrawn": 1,
+          "completed": 0
+        },
+        {
+          "student": "史**",
+          "student_remain": 16,
+          "student_total": 16,
+          "student_status": "INACTIVE",
+          "all_enrollments": 1,
+          "active_enrollments": 0,
+          "withdrawn": 1,
+          "completed": 0
+        },
+        {
+          "student": "马**",
+          "student_remain": 16,
+          "student_total": 16,
+          "student_status": "INACTIVE",
+          "all_enrollments": 1,
+          "active_enrollments": 0,
+          "withdrawn": 1,
+          "completed": 0
+        }
+      ]
+    },
+    "Q4_total_soft_deleted": {
+      "sql": "SELECT count(*)::int AS soft_deleted,\n            count(*) FILTER (WHERE \"deletionBatchId\" IS NOT NULL)::int AS has_batch\n     FROM \"Attendance\" WHERE \"deletedAt\" IS NOT NULL",
+      "rows": [
+        {
+          "soft_deleted": 0,
+          "has_batch": 0
+        }
+      ]
+    },
+    "Q2_deduct_vs_minutes": {
+      "sql": "SELECT a.status::text, count(*)::int AS n,\n            count(*) FILTER (WHERE ABS(a.\"hoursDeducted\" - ROUND(g.\"lessonMinutes\"::numeric/60, 1)) < 0.05)::int AS matches_minutes,\n            min(g.\"lessonMinutes\")::int AS min_min, max(g.\"lessonMinutes\")::int AS max_min\n     FROM \"Attendance\" a JOIN \"ClassLesson\" l ON l.id=a.\"lessonId\"\n     LEFT JOIN \"ClassGroup\" g ON g.id=l.\"groupId\"\n     WHERE a.\"deletedAt\" IS NULL AND l.\"deletedAt\" IS NULL AND l.\"attendanceSubmittedAt\" IS NOT NULL\n       AND a.status IN ('LEAVE','ABSENT') AND COALESCE(a.\"hoursDeducted\",0)>0\n     GROUP BY 1",
+      "rows": [
+        {
+          "status": "ABSENT",
+          "n": 9,
+          "matches_minutes": 9,
+          "min_min": 40,
+          "max_min": 40
+        },
+        {
+          "status": "LEAVE",
+          "n": 918,
+          "matches_minutes": 918,
+          "min_min": 40,
+          "max_min": 40
+        }
+      ]
+    }
+  }
+}

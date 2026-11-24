@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
-import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'
@@ -17,16 +16,16 @@ import { recordCourseChangeEvent } from '@/lib/course-change-events'
 export const dynamic = 'force-dynamic'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if ((session.user as { role?: string }).role !== 'admin') {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
   const { id } = await params
   const prisma = await getRequestPrisma()
 
   try {
-    if (!await isClassLessonInActiveTerm(prisma, id)) {
+    if (!await isClassLessonInActiveTerm(prisma, id, user.division)) {
       return NextResponse.json({ error: '历史批次只允许查看，不能修改排课' }, { status: 409 })
     }
     const body = await req.json()
@@ -59,8 +58,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         },
       },
     })
-    const user = await getCurrentUser()
-    if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
     if (!existing || existing.division !== user.division) return NextResponse.json({ error: '课次不存在' }, { status: 404 })
     if (status === 'CANCELLED') {
       try {
@@ -128,31 +125,78 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: '只能将课次调整到尚未开始的时段' }, { status: 400 })
     }
 
-    // Conflict check against ClassLesson
-    const allConflicts: Array<{ type: string; lessonId: string; courseName: string; timeRange: string }> = []
-    for (const sid of effectiveStudentIds.length > 0 ? effectiveStudentIds : [effectiveTeacherId]) {
-      const conflicts = await checkScheduleConflict({
-        teacherId: effectiveTeacherId,
-        studentId: effectiveStudentIds.includes(sid) ? sid : undefined,
-        roomId: roomId !== undefined ? (roomId || undefined) : (existing.group.roomId || undefined),
-        date: effectiveDate,
-        startTime: effectiveStart,
-        endTime: effectiveEnd,
-        excludeLessonId: id,
-        termId: existing.group.termId || undefined,
-      })
-      for (const c of conflicts) {
-        if (!allConflicts.some(e => e.lessonId === c.lessonId && e.type === c.type)) {
-          allConflicts.push(c)
+    const collectConflicts = async (client?: Parameters<typeof checkScheduleConflict>[1]) => {
+      const found: Array<{ type: string; lessonId: string; courseName: string; timeRange: string }> = []
+      for (const sid of effectiveStudentIds.length > 0 ? effectiveStudentIds : [effectiveTeacherId]) {
+        const conflicts = await checkScheduleConflict({
+          teacherId: effectiveTeacherId,
+          studentId: effectiveStudentIds.includes(sid) ? sid : undefined,
+          roomId: roomId !== undefined ? (roomId || undefined) : (existing.group.roomId || undefined),
+          date: effectiveDate,
+          startTime: effectiveStart,
+          endTime: effectiveEnd,
+          excludeLessonId: id,
+          termId: existing.group.termId || undefined,
+        }, client)
+        for (const conflict of conflicts) {
+          if (!found.some(item => item.lessonId === conflict.lessonId && item.type === conflict.type)) {
+            found.push(conflict)
+          }
         }
       }
+      return found
     }
+
+    // Keep a fast preflight for a helpful response, then repeat the check in
+    // the write transaction so two simultaneous edits cannot both pass it.
+    const allConflicts = await collectConflicts()
 
     if (allConflicts.length > 0) {
       return NextResponse.json({ error: '时间冲突', conflicts: allConflicts }, { status: 409 })
     }
 
-    const outcome = await prisma.$transaction(async (tx) => {
+    const updateSchedule = () => prisma.$transaction(async (tx) => {
+      const current = await tx.classLesson.findFirst({
+        where: {
+          id,
+          division: user.division,
+          deletedAt: null,
+          group: { deletedAt: null, term: { status: 'ACTIVE' } },
+        },
+        select: {
+          division: true,
+          teacherId: true,
+          subject: true,
+          lessonDate: true,
+          startTime: true,
+          endTime: true,
+          status: true,
+          groupId: true,
+          attendanceSubmittedAt: true,
+          hoursDeductedAt: true,
+          group: { select: { roomId: true } },
+        },
+      })
+      if (!current) throw { status: 409, message: '课次或运营批次已变化，请刷新后重试' }
+      if (current.status !== 'SCHEDULED' || current.attendanceSubmittedAt || current.hoursDeductedAt) {
+        throw { status: 409, message: '课次已开始或已处理，不能再调整' }
+      }
+      const stale = current.division !== existing.division
+        || current.teacherId !== existing.teacherId
+        || current.subject !== existing.subject
+        || current.lessonDate.getTime() !== existing.lessonDate.getTime()
+        || current.startTime !== existing.startTime
+        || current.endTime !== existing.endTime
+        || current.status !== existing.status
+        || current.groupId !== existing.groupId
+        || current.group.roomId !== existing.group.roomId
+      if (stale) throw { status: 409, message: '课次已被其他人修改，请刷新后重试' }
+
+      const transactionConflicts = await collectConflicts(tx)
+      if (transactionConflicts.length > 0) {
+        throw { status: 409, message: '时间冲突', conflicts: transactionConflicts }
+      }
+
       const activeTeacher = effectiveTeacherId && await tx.teacher.findFirst({
         where: { id: effectiveTeacherId, division: existing.division, status: 'ACTIVE' },
         select: { id: true },
@@ -265,10 +309,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         changeEventId = change.event.id
       }
       return { lesson: updatedLesson, changeEventId }
-    })
+    }, { isolationLevel: 'Serializable' })
+
+    let outcome: Awaited<ReturnType<typeof updateSchedule>> | undefined
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        outcome = await updateSchedule()
+        break
+      } catch (error) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2034' && attempt < 2) continue
+        throw error
+      }
+    }
+    if (!outcome) throw { status: 409, message: '排课正在变化，请刷新后重试' }
 
     revalidatePath('/schedule')
     revalidatePath('/teacher/schedule')
+    revalidatePath('/parent/schedule')
     return NextResponse.json({ success: true, ...outcome })
   } catch (e: unknown) {
     const routeError = e as { status?: number; message?: string; conflicts?: unknown }

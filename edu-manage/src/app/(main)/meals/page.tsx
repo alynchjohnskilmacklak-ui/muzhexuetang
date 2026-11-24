@@ -12,6 +12,7 @@ import {
 import dayjs, { Dayjs } from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
+import { PageLayout } from '@/components/Layout/PageLayout'
 import { StudentMealLedger } from './StudentMealLedger'
 
 const { Title, Text } = Typography
@@ -40,7 +41,7 @@ type MealReport = {
   totalCount: number
   riceSingle: number
   riceDouble: number
-  details: Array<{ studentId: string; studentName: string; portion: 'single' | 'double'; groupName?: string }>
+  details: Array<{ studentId: string; studentName: string; portion: 'single' | 'double'; groupName?: string; appended?: boolean }>
 }
 
 type TeacherSummary = { id?: string; name?: string; groupName?: string }
@@ -49,6 +50,7 @@ type MealSummary = {
   totalCount: number
   singleCount: number
   doubleCount: number
+  lateAddedCount?: number
   unreportedTeachers: TeacherSummary[]
   parentStats?: {
     eating: number
@@ -292,15 +294,16 @@ export default function MealsPage() {
   const exportToday = () => {
     const csvCell = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`
     const rows = [
-      ['班级', '学员姓名', '份数', '教师', '上报时间'],
+      ['班级', '学员姓名', '份数', '上报来源', '教师', '上报时间'],
       ...groupedMealDetails.flatMap((group) => group.details.map((detail) => [
         group.groupName,
         detail.studentName,
         detail.portion === 'double' ? '双份' : '单份',
+        detail.appended ? '后续课次追加' : '系统第一课节上报',
         detail.teacherName,
         dayjs(detail.submittedAt).format('YYYY-MM-DD HH:mm'),
       ])),
-      ['合计', '', groupedTotal, '', ''],
+      ['合计', '', groupedTotal, '', '', ''],
     ]
     const csvLines = rows.map((row) => row.map(csvCell).join(','))
     const blob = new Blob([`\uFEFF${csvLines.join('\r\n')}`], {
@@ -322,8 +325,10 @@ export default function MealsPage() {
   ]
 
   return (
-    <div>
-      <Title level={4} style={{ marginTop: 0 }}>就餐管理</Title>
+    <PageLayout
+      title="就餐管理"
+      subtitle="周期菜单维护 · 教师每日就餐上报统计 · 学生就餐台账"
+    >
       <Tabs
         activeKey={activeTab}
         onChange={(key) => {
@@ -448,6 +453,7 @@ export default function MealsPage() {
               )}
               <div className="meal-report-stat-grid">
                 <Card className="meal-report-stat-card"><Statistic title="总就餐人数" value={summary.totalCount || groupedTotal} suffix="人" /></Card>
+                <Card className="meal-report-stat-card"><Statistic title="后续追加就餐" value={summary.lateAddedCount || 0} suffix="人" /></Card>
                 <Card className="meal-report-stat-card"><Statistic title="未上报教师" value={summary.unreportedTeachers?.length || 0} suffix="位" /></Card>
               </div>
               {summary?.parentStats && (
@@ -494,7 +500,7 @@ export default function MealsPage() {
                         <div className="meal-report-class-details">
                           {group.details.map((detail) => (
                             <div key={`${group.groupName}-${detail.studentId}`}>
-                              <span>{detail.studentName}</span>
+                              <span>{detail.studentName}{detail.appended ? <Tag color="green" style={{ marginLeft: 6 }}>后续追加</Tag> : null}</span>
                               <span>{detail.portion === 'double' ? '双份' : '单份'} · {detail.teacherName}</span>
                             </div>
                           ))}
@@ -572,6 +578,6 @@ export default function MealsPage() {
           </Form.Item>
         </Form>
       </BrandModal>
-    </div>
+    </PageLayout>
   )
 }

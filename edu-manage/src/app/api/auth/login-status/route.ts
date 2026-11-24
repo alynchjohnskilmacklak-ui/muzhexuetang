@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getLoginStatus } from '@/lib/login-accounts'
 import { apiHandler } from '@/lib/api-handler'
+import { getTrustedClientIp } from '@/lib/request-ip'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,5 +12,5 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   if (!email) return NextResponse.json({ locked: false, failCount: 0, remaining: 5 })
 
-  return NextResponse.json(await getLoginStatus(email, division))
+  return NextResponse.json(await getLoginStatus(email, division, getTrustedClientIp(req.headers)))
 })

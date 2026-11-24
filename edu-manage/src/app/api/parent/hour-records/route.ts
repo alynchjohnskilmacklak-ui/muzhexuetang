@@ -4,6 +4,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { parentActiveEnrollmentWhere, parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
+import { findParentChild, getParentChildren } from '@/lib/parent-children'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,13 +40,26 @@ export const GET = apiHandler(async (req: NextRequest) => {
     },
     orderBy: { name: 'asc' },
   })
-  const scopedStudents = studentId ? students.filter((student) => student.id === studentId) : students
-  const scopedIds = scopedStudents.map((student) => student.id)
+  const parentChildren = await getParentChildren(prisma, user.id)
+  const selectedChild = studentId ? findParentChild(parentChildren, studentId) : null
+  if (studentId && !selectedChild) {
+    return NextResponse.json({ error: '未找到该孩子的档案，请刷新后重试' }, { status: 404 })
+  }
+  const visibleChildIds = new Set((selectedChild ? [selectedChild] : parentChildren).map((child) => child.id))
+  const scopedStudents = students.filter((student) => visibleChildIds.has(student.id))
+  const scopedIds = selectedChild
+    ? selectedChild.recordIds
+    : parentChildren.flatMap((child) => child.recordIds)
+
+  if (scopedIds.length === 0) {
+    return NextResponse.json({ students: scopedStudents, records: [] })
+  }
 
   const attendances = await prisma.attendance.findMany({
     where: {
       student: parentLinkedStudentWhere(user.id),
       studentId: scopedIds.length ? { in: scopedIds } : undefined,
+      deletedAt: null,
       OR: [
         { hoursDeducted: { gt: 0 } },
         {
@@ -79,6 +93,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     where: {
       student: parentLinkedStudentWhere(user.id),
       studentId: scopedIds.length ? { in: scopedIds } : undefined,
+      deletedAt: null,
     },
     include: {
       student: { select: { id: true, name: true } },

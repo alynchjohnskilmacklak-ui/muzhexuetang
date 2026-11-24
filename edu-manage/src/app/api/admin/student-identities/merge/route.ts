@@ -5,6 +5,12 @@ import { getRequestPrisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
+function adminDivision(user: { division?: string | null }) {
+  return user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+}
+
+class StudentIdentityMergeConflictError extends Error {}
+
 export const GET = apiHandler(async (request: NextRequest) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -12,9 +18,10 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const studentId = request.nextUrl.searchParams.get('studentId')?.trim()
   if (!studentId) return NextResponse.json({ error: '请提供学员 ID' }, { status: 400 })
   const prisma = await getRequestPrisma()
-  const current = await prisma.student.findUnique({
-    where: { id: studentId },
-    select: { id: true, identityId: true, name: true, parentId: true, parentUserId: true, birthYear: true, gender: true },
+  const division = adminDivision(user)
+  const current = await prisma.student.findFirst({
+    where: { id: studentId, division, deletedAt: null },
+    select: { id: true, identityId: true, division: true, name: true, parentId: true, parentUserId: true, birthYear: true, gender: true },
   })
   if (!current) return NextResponse.json({ error: '学员不存在' }, { status: 404 })
 
@@ -22,6 +29,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const candidates = parentOwnerIds.length
     ? await prisma.student.findMany({
         where: {
+          division,
+          deletedAt: null,
           OR: [{ parentId: { in: parentOwnerIds } }, { parentUserId: { in: parentOwnerIds } }],
           name: { equals: current.name, mode: 'insensitive' },
           identityId: { not: current.identityId },
@@ -62,35 +71,52 @@ export const POST = apiHandler(async (request: NextRequest) => {
   }
 
   const prisma = await getRequestPrisma()
-  const rows = await prisma.student.findMany({
-    where: { id: { in: studentIds } },
-    select: { id: true, identityId: true, name: true, parentId: true, parentUserId: true },
-  })
-  if (rows.length !== studentIds.length) return NextResponse.json({ error: '部分学员不存在或不属于当前学部' }, { status: 404 })
-  const canonical = rows.find((row) => row.id === canonicalStudentId)
-  const sharedOwners = new Set([canonical?.parentId, canonical?.parentUserId].filter((id): id is string => Boolean(id)))
-  for (const row of rows) {
-    for (const ownerId of [...sharedOwners]) {
-      if (row.parentId !== ownerId && row.parentUserId !== ownerId) sharedOwners.delete(ownerId)
-    }
-  }
-  if (!canonical || sharedOwners.size === 0) {
-    return NextResponse.json({ error: '只允许合并同一已绑定家长名下的学员档案' }, { status: 409 })
-  }
+  const division = adminDivision(user)
+  let outcome: { ok: true; identityId: string } | { ok: false; reason: 'NOT_FOUND' | 'PARENT_MISMATCH' }
+  try {
+    outcome = await prisma.$transaction(async (tx) => {
+      const rows = await tx.student.findMany({
+        where: { id: { in: studentIds }, division, deletedAt: null },
+        select: { id: true, identityId: true, name: true, parentId: true, parentUserId: true },
+      })
+      if (rows.length !== studentIds.length) return { ok: false, reason: 'NOT_FOUND' as const }
+      const canonical = rows.find((row) => row.id === canonicalStudentId)
+      const sharedOwners = new Set([canonical?.parentId, canonical?.parentUserId].filter((id): id is string => Boolean(id)))
+      for (const row of rows) {
+        for (const ownerId of [...sharedOwners]) {
+          if (row.parentId !== ownerId && row.parentUserId !== ownerId) sharedOwners.delete(ownerId)
+        }
+      }
+      if (!canonical || sharedOwners.size === 0) return { ok: false, reason: 'PARENT_MISMATCH' as const }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.student.updateMany({ where: { id: { in: studentIds } }, data: { identityId: canonical.identityId } })
-    await tx.activityLog.create({
-      data: {
-        userId: user.id,
-        action: '合并学员身份档案',
-        detail: `将 ${studentIds.length} 条学员档案关联为同一名学员`,
-        entityType: 'StudentIdentity',
-        entityId: canonical.identityId,
-        metadata: { canonicalStudentId, studentIds },
-      },
+      const updated = await tx.student.updateMany({
+        where: { id: { in: studentIds }, division, deletedAt: null },
+        data: { identityId: canonical.identityId },
+      })
+      if (updated.count !== studentIds.length) throw new StudentIdentityMergeConflictError()
+
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: '合并学员身份档案',
+          detail: `将 ${studentIds.length} 条学员档案关联为同一名学员`,
+          entityType: 'StudentIdentity',
+          entityId: canonical.identityId,
+          metadata: { canonicalStudentId, studentIds },
+        },
+      })
+      return { ok: true, identityId: canonical.identityId } as const
     })
-  })
+  } catch (error) {
+    if (error instanceof StudentIdentityMergeConflictError) {
+      return NextResponse.json({ error: '档案状态刚刚发生变化，请刷新后重新核对' }, { status: 409 })
+    }
+    throw error
+  }
+  if (!outcome.ok && outcome.reason === 'NOT_FOUND') {
+    return NextResponse.json({ error: '部分档案不存在、已删除或不属于当前学部' }, { status: 404 })
+  }
+  if (!outcome.ok) return NextResponse.json({ error: '只允许合并同一已绑定家长名下的学员档案' }, { status: 409 })
 
-  return NextResponse.json({ success: true, identityId: canonical.identityId, recordIds: studentIds })
+  return NextResponse.json({ success: true, identityId: outcome.identityId, recordIds: studentIds })
 })

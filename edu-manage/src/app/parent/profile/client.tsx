@@ -61,7 +61,7 @@ export function ParentProfileClient({
         <div style={{ position: 'absolute', top: -50, right: -40, width: 170, height: 170, borderRadius: 999, background: 'radial-gradient(circle,rgba(201,164,92,.30),transparent 65%)' }} />
         <div style={{ position: 'absolute', bottom: -70, left: -40, width: 150, height: 150, borderRadius: 999, background: 'radial-gradient(circle,rgba(255,255,255,.08),transparent 65%)' }} />
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <Image src="/images/logo-small.png" alt="牧哲学堂" width={52} height={52} style={{ borderRadius: 14, objectFit: 'cover', flexShrink: 0 }} preview={false} />
+          <Image src="/images/logo-small-128.webp" alt="牧哲学堂" width={52} height={52} style={{ borderRadius: 14, objectFit: 'cover', flexShrink: 0 }} preview={false} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,.68)', letterSpacing: .5 }}>家长端 · 个人中心</div>
             <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: .3, marginTop: 2 }}>{user.name}</div>
@@ -128,7 +128,7 @@ export function ParentProfileClient({
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {studentInfo.map((s, index) => (
-              <div key={s.id} style={{ borderRadius: 16, border: '1px solid #EEE7E1', background: '#fff', padding: 14, boxShadow: '0 2px 10px rgba(26,18,1,.04)' }}>
+              <div key={s.id} className="stagger-item" style={{ animationDelay: `${index * 40}ms`, borderRadius: 16, border: '1px solid #EEE7E1', background: '#fff', padding: 14, boxShadow: '0 2px 10px rgba(26,18,1,.04)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                     <StudentAvatar photoUrl={null} gender={s.gender} name={s.name} size={46} />

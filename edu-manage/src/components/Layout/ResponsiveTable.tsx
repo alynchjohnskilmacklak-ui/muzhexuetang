@@ -1,7 +1,8 @@
 'use client'
 
-import { Empty, Table } from 'antd'
+import { Empty } from 'antd'
 import type { TableProps } from 'antd'
+import { HorizontalScrollTable } from './HorizontalScrollTable'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 type ResponsiveTableProps<T extends object> = TableProps<T> & {
@@ -18,6 +19,7 @@ export function ResponsiveTable<T extends object>({
   scroll,
   ...tableProps
 }: ResponsiveTableProps<T>) {
+  // Tablet portrait views are too narrow for dense data tables; use the page's card renderer there too.
   const isMobile = useIsMobile() ?? false
   const records = Array.isArray(dataSource) ? dataSource : []
 
@@ -33,7 +35,7 @@ export function ResponsiveTable<T extends object>({
   }
 
   return (
-    <Table
+    <HorizontalScrollTable
       {...tableProps}
       dataSource={dataSource}
       scroll={scroll || { x: 720 }}

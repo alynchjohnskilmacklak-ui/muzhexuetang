@@ -1,0 +1,310 @@
+/* 管理端学员管理中心现代工艺样式 */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* ==============================================
+   顶部 KPI 运营大盘指标条
+   ============================================== */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 991px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .kpiCard {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .kpiLabel {
+    font-size: 11.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .kpiValue {
+    font-size: 19px;
+  }
+
+  .kpiSubText {
+    font-size: 10.5px;
+    margin-top: 2px;
+  }
+
+  .kpiIcon {
+    font-size: 14px;
+  }
+}
+
+.kpiCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.08));
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  min-width: 0;
+}
+
+.kpiCardInteractive {
+  cursor: pointer;
+}
+
+.kpiCardInteractive:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(20, 87, 77, 0.08);
+}
+
+.kpiCardActive {
+  border-color: #E03E2D !important;
+  background: #FFF8F6 !important;
+  box-shadow: 0 4px 14px rgba(224, 62, 45, 0.12) !important;
+}
+
+.kpiHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.kpiLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+.kpiIcon {
+  font-size: 16px;
+  color: var(--color-primary, #14574d);
+  opacity: 0.85;
+}
+
+.kpiValue {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-ink, #1a1201);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.kpiValueSuccess {
+  color: var(--color-success, #1D9E75);
+}
+
+.kpiValueWarning {
+  color: #E03E2D;
+}
+
+.kpiSubText {
+  font-size: 12px;
+  color: var(--color-ink-subtle, #756a58);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==============================================
+   紧凑智能筛选工作台 (Filter Card)
+   ============================================== */
+.filterCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.08));
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+/* 第一行：搜索框与主要操作按钮同行混排 */
+.filterTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 150px;
+}
+
+.actionsGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* 第二行：批次、状态、排序 紧凑单行 */
+.filterSelectsRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .filterSelectsRow {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 6px;
+  }
+}
+
+/* 年级与班型分段药丸栏：横向平滑滚动，不产生大块竖向堆叠 */
+.pillTabsRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--color-hairline, rgba(0, 0, 0, 0.06));
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.pillTabsRow::-webkit-scrollbar {
+  display: none;
+}
+
+.pillGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--color-surface-3, #f5f2ee);
+  padding: 2px 4px;
+  border-radius: 8px;
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.04));
+  flex-shrink: 0;
+}
+
+.pillBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-ink-muted, #5a4e3a);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.pillBtn:hover {
+  color: var(--color-ink, #1a1201);
+}
+
+.pillBtnActive {
+  background: var(--color-surface-1, #ffffff);
+  color: var(--color-primary, #14574d);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.filterSummaryText {
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.clearFilterLink {
+  color: var(--color-primary, #14574d);
+  font-size: 12px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+/* ==============================================
+   年级学员网格流 (Student Stream)
+   ============================================== */
+.gradeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gradeHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+.gradeTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gradeDivider {
+  height: 1px;
+  background: var(--color-hairline, rgba(0, 0, 0, 0.08));
+  flex: 1;
+}
+
+.gradeCountBadge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink-subtle, #756a58);
+  background: var(--color-surface-3, #f5f2ee);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.studentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .studentGrid {
+    grid-template-columns: 1fr;
+  }
+}

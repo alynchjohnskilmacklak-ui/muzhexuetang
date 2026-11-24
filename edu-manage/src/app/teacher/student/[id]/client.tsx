@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Button, Card, Divider, Empty, Image as AntImage, Input, InputNumber, List, Modal, Select, Space, Tag, Tabs, Typography, Upload } from 'antd'
+import { Button, Card, Divider, Empty, Image as AntImage, Input, InputNumber, List, Modal, Radio, Space, Tag, Tabs, Typography, Upload } from 'antd'
 import {
   BookOutlined, LineChartOutlined, PlusOutlined,
   RocketOutlined, SaveOutlined, ArrowLeftOutlined, SendOutlined,
@@ -140,7 +140,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
       return new Promise<void>((resolve) => {
         Modal.confirm({
           title: '覆盖已有内容',
-          content: '评语/寄语已有内容，AI 生成将覆盖当前文本，确定继续？',
+          content: '评语/寄语已有内容，重新生成将覆盖当前文本，确定继续？',
           okText: '确定覆盖',
           cancelText: '取消',
           okButtonProps: { danger: true },
@@ -162,9 +162,9 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
       const draft = res.draft
       if (draft) {
         setSummary(draft)
-        toast.success(`AI 草稿已生成（${draft.length} 字），请核对修改后发布`)
+        toast.success(`草稿已生成（${draft.length} 字），请核对修改后发布`)
       } else {
-        toast.warning('AI 未返回内容，请检查关键词或稍后重试')
+        toast.warning('未能返回内容，请检查关键词或稍后重试')
       }
     } catch (e: unknown) { toast.error(errorMessage(e)) }
     finally { setAiGenerating(false) }
@@ -288,7 +288,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             {/* ── AI Draft Generation ── */}
             <div style={{ marginTop: 14, padding: '10px 12px', background: '#faf8f5', borderRadius: 10, border: '1px dashed rgba(0,0,0,.1)' }}>
               <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
-                ✨ AI 辅助生成草稿 —— 基于真实出勤/掌握/薄弱点数据，关键词决定强调方向
+                ✨ 依托牧哲学堂数据库生成草稿 —— 基于真实出勤/掌握/薄弱点数据，关键词决定强调方向
               </Text>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <Input
@@ -307,7 +307,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
                   onClick={aiGenerate}
                   style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
-                  AI 生成草稿
+                  依托数据库生成
                 </Button>
               </div>
             </div>
@@ -325,19 +325,40 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             <Text strong style={{ display: 'block', marginBottom: 6, fontSize: 13 }}>反馈内容</Text>
             <TextArea rows={3} maxLength={300} showCount value={feedbackText} onChange={e => setFeedbackText(e.target.value)} placeholder="写一句话描述孩子的课堂表现或成长亮点..." />
 
-            <div style={{ marginTop: 12, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <div><Text type="secondary" style={{ fontSize: 12 }}>情绪</Text>
-                <Select size="small" value={feedbackMood} onChange={setFeedbackMood} style={{ width: 100 }}
+            <div style={{ marginTop: 12, display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+              <div style={{ display: 'grid', gap: 5, flex: '1 1 220px', minWidth: 0 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>情绪</Text>
+                <Radio.Group
+                  size="small"
+                  value={feedbackMood}
+                  onChange={(event) => setFeedbackMood(event.target.value)}
+                  optionType="button"
+                  buttonStyle="solid"
+                  aria-label="课堂情绪"
+                  style={{ display: 'flex', flexWrap: 'wrap' }}
                   options={[
-                    { value: 'GREAT', label: '😄 很棒' }, { value: 'GOOD', label: '🙂 良好' },
-                    { value: 'OKAY', label: '😐 平稳' }, { value: 'NEEDS_ATTENTION', label: '😟 需关注' },
-                  ]} />
+                    { value: 'GREAT', label: '很棒' }, { value: 'GOOD', label: '良好' },
+                    { value: 'OKAY', label: '平稳' }, { value: 'NEEDS_ATTENTION', label: '需关注' },
+                  ]}
+                />
               </div>
-              <div><Text type="secondary" style={{ fontSize: 12 }}>作业完成</Text>
-                <Select size="small" value={homeworkDone} onChange={setHomeworkDone} style={{ width: 80 }} allowClear placeholder="-"
-                  options={[{ value: true, label: '✅ 完成' }, { value: false, label: '❌ 未完成' }]} />
+              <div style={{ display: 'grid', gap: 5, flex: '1 1 180px', minWidth: 0 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>作业完成</Text>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Radio.Group
+                    size="small"
+                    value={homeworkDone ?? undefined}
+                    onChange={(event) => setHomeworkDone(event.target.value as boolean)}
+                    optionType="button"
+                    buttonStyle="solid"
+                    aria-label="作业完成状态"
+                    options={[{ value: true, label: '完成' }, { value: false, label: '未完成' }]}
+                  />
+                  {homeworkDone !== null && <Button type="link" size="small" onClick={() => setHomeworkDone(null)}>清除</Button>}
+                </div>
               </div>
-              <div><Text type="secondary" style={{ fontSize: 12 }}>课堂表现 1-5</Text>
+              <div style={{ display: 'grid', gap: 5 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>课堂表现 1-5</Text>
                 <InputNumber size="small" min={1} max={5} value={inClassRating} onChange={setInClassRating} style={{ width: 60 }} />
               </div>
             </div>
@@ -402,7 +423,14 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
           <Card bordered={false} style={cardStyle} title={<span><BookOutlined /> 知识点掌握推送</span>}>
             <Space direction="vertical" style={{ width: '100%' }}>
               <Input placeholder="知识点名称" value={kpInput} onChange={e => setKpInput(e.target.value)} />
-              <Select value={kpLevel} onChange={setKpLevel} options={MASTERY_LEVELS} />
+              <Radio.Group
+                value={kpLevel}
+                onChange={(event) => setKpLevel(event.target.value)}
+                optionType="button"
+                buttonStyle="solid"
+                aria-label="知识掌握度"
+                options={MASTERY_LEVELS.map(({ value, label }) => ({ value, label }))}
+              />
               <Input placeholder="备注（可选）" value={kpNote} onChange={e => setKpNote(e.target.value)} />
               <Button type="primary" icon={<PlusOutlined />} onClick={pushMastery}>推送到学习档案</Button>
             </Space>
@@ -458,7 +486,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', paddingBottom: 88 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => router.push('/teacher/students')}>返回</Button>
+        <Button type="text" className="mobile-shell-back" icon={<ArrowLeftOutlined />} onClick={() => router.push('/teacher/students')}>返回</Button>
         <Title level={3} style={{ margin: 0 }}>{studentName} · 学生工作台</Title>
       </div>
 

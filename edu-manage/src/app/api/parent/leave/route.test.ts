@@ -9,10 +9,10 @@ vi.mock('@/lib/parent-children', async (original) => ({
 }))
 import { POST } from './route'
 
-function request(studentId = 'a', lessonId = 'lesson') {
+function request(studentId = 'a', lessonId = 'lesson', leaveDate = '2026-10-15T00:00:00Z') {
   return new NextRequest('http://localhost/api/parent/leave', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ studentId, lessonId, reason: '家中有事', leaveDate: '2026-10-15T00:00:00Z' }),
+    body: JSON.stringify({ studentId, lessonId, reason: '家中有事', leaveDate }),
   })
 }
 
@@ -27,7 +27,13 @@ describe('leave requests for merged parent children', () => {
     const db = {
       classLesson: { findFirst: vi.fn().mockResolvedValue({
         id: 'lesson', isManual: true, subject: '数学', lessonStudents: roster.map((studentId) => ({ studentId })),
-        group: { intensiveMode: 'NORMAL', course: { subject: '数学' }, enrollments: [{ studentId: 'a-old', subjects: ['数学'] }] },
+        lessonDate: new Date('2026-10-15T00:00:00.000Z'),
+        group: {
+          intensiveMode: 'NORMAL',
+          teacherAssignments: [],
+          course: { subject: '数学' },
+          enrollments: [{ studentId: 'a-old', subjects: ['数学'] }],
+        },
       }) },
       student: { findUnique: vi.fn().mockResolvedValue({ id: 'a-old', name: '甲', mainTeacher: null }) },
       leaveRequest: { create: vi.fn().mockResolvedValue({
@@ -49,6 +55,46 @@ describe('leave requests for merged parent children', () => {
     const db = database()
     expect((await POST(request())).status).toBe(201)
     expect(db.leaveRequest.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ studentId: 'a-old', lessonId: 'lesson' }) }))
+    expect(db.leaveRequest.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ leaveDate: new Date('2026-10-14T16:00:00.000Z') }),
+    }))
+    expect(db.leaveRequest.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        leaveDate: { gte: new Date('2026-10-14T16:00:00.000Z'), lt: new Date('2026-10-15T16:00:00.000Z') },
+      }),
+    }))
+  })
+
+  it('rejects a leave date that does not match the selected lesson date', async () => {
+    const db = database()
+    const response = await POST(request('a', 'lesson', '2026-10-16T00:00:00Z'))
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({ error: '请假日期与所选课次日期不一致，请重新选择' })
+    expect(db.leaveRequest.create).not.toHaveBeenCalled()
+    expect(db.$transaction).not.toHaveBeenCalled()
+  })
+
+  it('rejects impossible calendar dates before reading or writing leave records', async () => {
+    const db = database()
+    const response = await POST(request('a', 'lesson', '2026-02-30T00:00:00Z'))
+    expect(response.status).toBe(400)
+    expect(db.classLesson.findFirst).not.toHaveBeenCalled()
+    expect(db.leaveRequest.create).not.toHaveBeenCalled()
+  })
+
+  it('rejects a future lesson when the child is not enrolled in that lesson subject', async () => {
+    const db = database()
+    db.classLesson.findFirst.mockResolvedValueOnce({
+      id: 'lesson', isManual: true, subject: '数学', lessonStudents: [{ studentId: 'a-old' }],
+      lessonDate: new Date('2026-12-15T00:00:00.000Z'),
+      group: {
+        intensiveMode: 'NORMAL', teacherAssignments: [], course: { subject: '数学' },
+        enrollments: [{ studentId: 'a-old', subjects: ['英语'] }],
+      },
+    } as never)
+    expect((await POST(request('a', 'lesson', '2026-12-15'))).status).toBe(400)
+    expect(db.leaveRequest.create).not.toHaveBeenCalled()
+    expect(db.$transaction).not.toHaveBeenCalled()
   })
 
   it('does not authorize a sibling or foreign record through shared class enrollment', async () => {
@@ -68,7 +114,11 @@ describe('leave requests for merged parent children', () => {
     const db = database()
     db.classLesson.findFirst.mockResolvedValueOnce({
       id: 'lesson', isManual: true, teacherId: 'actual', subject: '数学', lessonStudents: [{ studentId: 'a-old' }],
-      group: { teacherId: 'group-teacher', intensiveMode: 'NORMAL', course: { subject: '数学' }, enrollments: [] },
+      lessonDate: new Date('2026-10-15T00:00:00.000Z'),
+      group: {
+        teacherId: 'group-teacher', intensiveMode: 'NORMAL', teacherAssignments: [], course: { subject: '数学' },
+        enrollments: [{ studentId: 'a-old', subjects: ['数学'] }],
+      },
     } as never)
     db.user.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([{ id: 'custom-email-teacher' }] as never)
     expect((await POST(request())).status).toBe(201)

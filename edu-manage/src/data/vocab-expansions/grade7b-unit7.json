@@ -1,0 +1,502 @@
+[
+  {
+    "word": "meet up",
+    "examTags": ["词汇·旅行与社交", "语法·短语动词"],
+    "grammar": "短语动词，碰头；相聚。常用 meet up with sb，或 meet up at/in a place。",
+    "collocations": "meet up with friends; meet up at the museum; meet up after school",
+    "commonMistake": "meet up with 后接碰面的人；约定地点时用 at 或 in，如 meet up at the station。",
+    "example": {"english": "We will meet up with our guide at the museum gate.", "chinese": "我们将在博物馆门口和导游碰面。"},
+    "application": {"prompt": "Mia and Leo plan to see each other at the station. They will ___. (meet up / remove)", "solution": "meet up"},
+    "sources": [{"label": "Cambridge Dictionary: meet up", "url": "https://dictionary.cambridge.org/dictionary/english/meet-up"}]
+  },
+  {
+    "word": "museum",
+    "examTags": ["词汇·公共场所", "语法·可数名词"],
+    "grammar": "n. 博物馆。可数名词，单数前常用 a 或 the；复数为 museums。",
+    "collocations": "visit a museum; a history museum; museum ticket",
+    "commonMistake": "museum 是可数名词；表示去参观博物馆可说 visit a museum。",
+    "example": {"english": "Our class visited a small science museum on Friday.", "chinese": "我们班星期五参观了一家小型科学博物馆。"},
+    "application": {"prompt": "You can see old objects and paintings in a ___. (museum / factory)", "solution": "museum"},
+    "sources": [{"label": "Cambridge Dictionary: museum", "url": "https://dictionary.cambridge.org/dictionary/english/museum"}]
+  },
+  {
+    "word": "exhibition",
+    "examTags": ["词汇·文化活动", "语法·可数名词"],
+    "grammar": "n. 展览。可数名词，复数 exhibitions；常指在某处展出的作品或物品。",
+    "collocations": "an art exhibition; hold an exhibition; visit an exhibition",
+    "commonMistake": "exhibition 是可数名词，单数前要有冠词或其他限定词，如 an exhibition。",
+    "example": {"english": "The school exhibition shows pictures of local birds.", "chinese": "学校的展览展示了本地鸟类的图片。"},
+    "application": {"prompt": "The library is showing students' paintings this week. It is an art ___. (exhibition / direction)", "solution": "exhibition"},
+    "sources": [{"label": "Cambridge Dictionary: exhibition", "url": "https://dictionary.cambridge.org/dictionary/english/exhibition"}]
+  },
+  {
+    "word": "direction",
+    "examTags": ["词汇·问路指路", "语法·可数名词"],
+    "grammar": "n. 方向。常用 in the direction of；问路时常说 directions，表示路线指引。",
+    "collocations": "in the right direction; ask for directions; follow the directions",
+    "commonMistake": "问去某地的路线时常用复数 directions；direction 也可指一个方向。",
+    "example": {"english": "The sign points in the direction of the museum.", "chinese": "标志指向博物馆的方向。"},
+    "application": {"prompt": "I cannot find the station. I will ask a police officer for ___. (directions / cucumber)", "solution": "directions"},
+    "sources": [{"label": "Cambridge Dictionary: direction", "url": "https://dictionary.cambridge.org/dictionary/english/direction"}]
+  },
+  {
+    "word": "trip",
+    "examTags": ["词汇·旅行", "语法·可数名词"],
+    "grammar": "n. 旅行。可数名词；常指一次短途或有明确目的的行程，复数为 trips。",
+    "collocations": "a school trip; go on a trip; a trip to the coast",
+    "commonMistake": "表示“去某地旅行”常说 go on a trip to + 地点；trip 是可数名词。",
+    "example": {"english": "Our school trip to the farm starts at eight.", "chinese": "我们去农场的学校旅行八点出发。"},
+    "application": {"prompt": "The class is taking a two-day ___ to the mountains. (trip / germ)", "solution": "trip"},
+    "sources": [{"label": "Cambridge Dictionary: trip", "url": "https://dictionary.cambridge.org/dictionary/english/trip"}]
+  },
+  {
+    "word": "wastewater",
+    "examTags": ["词汇·环境保护", "语法·不可数名词"],
+    "grammar": "n. 废水。通常作不可数名词；指家庭、工厂等使用后排出的水。",
+    "collocations": "treat wastewater; wastewater treatment; clean wastewater",
+    "commonMistake": "wastewater 通常作不可数名词，不说 a wastewater；可说 wastewater from a factory。",
+    "example": {"english": "The plant treats wastewater before it enters the river.", "chinese": "这家工厂在废水流入河流前对其进行处理。"},
+    "application": {"prompt": "Used water from homes and factories is called ___. (wastewater / fresh water)", "solution": "wastewater"},
+    "sources": [{"label": "Cambridge Dictionary: wastewater", "url": "https://dictionary.cambridge.org/dictionary/english/wastewater"}]
+  },
+  {
+    "word": "plant",
+    "examTags": ["词汇·环境与生产", "语法·一词多义"],
+    "grammar": "n. 工厂；也可指植物。本单元语境中指工厂，是可数名词，复数为 plants。",
+    "collocations": "a paper plant; a water treatment plant; work at a plant",
+    "commonMistake": "plant 既可指“植物”也可指“工厂”，需根据 wastewater、machines 等上下文判断。",
+    "example": {"english": "The plant makes paper from used boxes.", "chinese": "这家工厂用旧纸箱造纸。"},
+    "application": {"prompt": "Workers make tools in this large building. It is a ___. (plant / leaf)", "solution": "plant"},
+    "sources": [{"label": "Cambridge Dictionary: plant", "url": "https://dictionary.cambridge.org/dictionary/english/plant"}]
+  },
+  {
+    "word": "into",
+    "examTags": ["词汇·方位与移动", "语法·介词辨析"],
+    "grammar": "prep. 到……里面；进入。强调从外部向内部移动，后接名词或代词。",
+    "collocations": "go into a room; put sth into a box; turn into",
+    "commonMistake": "into 表示进入的动作；in 表示已经在里面，如 walk into the tent / stay in the tent。",
+    "example": {"english": "Please put the empty bottles into this basket.", "chinese": "请把空瓶子放进这个篮子里。"},
+    "application": {"prompt": "The hikers walked ___ the tent to get out of the rain. (into / along)", "solution": "into"},
+    "sources": [{"label": "Cambridge Dictionary: into", "url": "https://dictionary.cambridge.org/dictionary/english/into"}]
+  },
+  {
+    "word": "remove",
+    "examTags": ["词汇·环保行动", "语法·动词搭配"],
+    "grammar": "v. 移开；拿走。规则变化 remove—removed—removed；常用 remove sth from a place。",
+    "collocations": "remove a label; remove rubbish; remove sth from a box",
+    "commonMistake": "表示从某处拿走某物用 remove sth from somewhere；remove 后不直接加 away。",
+    "example": {"english": "Please remove the plastic cover from the box.", "chinese": "请把塑料盖从盒子上拿下来。"},
+    "application": {"prompt": "Take the broken sign away from the path. Please ___ it. (remove / create)", "solution": "remove"},
+    "sources": [{"label": "Cambridge Dictionary: remove", "url": "https://dictionary.cambridge.org/dictionary/english/remove"}]
+  },
+  {
+    "word": "piece",
+    "examTags": ["词汇·数量表达", "语法·可数名词"],
+    "grammar": "n. 片；块。可数名词，常用 a piece of + 不可数名词表示一片或一块。",
+    "collocations": "a piece of paper; a piece of wood; two pieces of advice",
+    "commonMistake": "piece 本身可数；不可数名词前用 a piece of，复数数量用 pieces of。",
+    "example": {"english": "We found a piece of glass beside the road.", "chinese": "我们在路边发现了一块玻璃。"},
+    "application": {"prompt": "Cut one small ___ of paper for the model. (piece / process)", "solution": "piece"},
+    "sources": [{"label": "Cambridge Dictionary: piece", "url": "https://dictionary.cambridge.org/dictionary/english/piece"}]
+  },
+  {
+    "word": "waste",
+    "examTags": ["词汇·环境保护", "语法·名词与动词"],
+    "grammar": "n. 废弃物；v. 浪费。作名词可指不需要的材料；作动词后接被浪费的时间、资源等。",
+    "collocations": "reduce waste; food waste; waste water; waste time",
+    "commonMistake": "waste 作动词时不能与 wastewater 混淆；waste time 表示浪费时间，waste 可作名词或动词。",
+    "example": {"english": "We reuse old paper so we waste less.", "chinese": "我们再利用旧纸，因此浪费得更少。"},
+    "application": {"prompt": "Using a new sheet when the old one is clean can ___ paper. (waste / treat)", "solution": "waste"},
+    "sources": [{"label": "Cambridge Dictionary: waste", "url": "https://dictionary.cambridge.org/dictionary/english/waste"}]
+  },
+  {
+    "word": "machine",
+    "examTags": ["词汇·科技与生产", "语法·可数名词"],
+    "grammar": "n. 机器。可数名词，复数 machines；常指用电力或其他动力完成工作的设备。",
+    "collocations": "a washing machine; a machine for cutting paper; operate a machine",
+    "commonMistake": "machine 是可数名词，单数前通常需有限定词，如 a machine。",
+    "example": {"english": "This machine turns old bottles into small pieces.", "chinese": "这台机器把旧瓶子处理成小块。"},
+    "application": {"prompt": "A device that helps workers cut wood is a ___. (machine / exhibition)", "solution": "machine"},
+    "sources": [{"label": "Cambridge Dictionary: machine", "url": "https://dictionary.cambridge.org/dictionary/english/machine"}]
+  },
+  {
+    "word": "germ",
+    "examTags": ["词汇·健康与卫生", "语法·可数名词"],
+    "grammar": "n. 微生物；细菌。可数名词，复数 germs；常用于谈论可能引起疾病的微生物。",
+    "collocations": "kill germs; germs on hands; protect yourself from germs",
+    "commonMistake": "germ 是可数名词，常用 germs 泛指细菌；洗手可帮助减少手上的 germs。",
+    "example": {"english": "Wash your hands to remove germs before lunch.", "chinese": "午饭前洗手可以去除细菌。"},
+    "application": {"prompt": "Tiny organisms that may make people ill are called ___. (germs / grains)", "solution": "germs"},
+    "sources": [{"label": "Cambridge Dictionary: germ", "url": "https://dictionary.cambridge.org/dictionary/english/germ"}]
+  },
+  {
+    "word": "step",
+    "examTags": ["词汇·过程与顺序", "语法·一词多义"],
+    "grammar": "n. 步骤；脚步。可数名词；描述做事方法时常指一个步骤，也可指走路的一步。",
+    "collocations": "the first step; follow the steps; take a step forward",
+    "commonMistake": "step 可指“步骤”或“脚步”；制作说明中的 step 通常是一个操作环节。",
+    "example": {"english": "The first step is to wash and dry the bottle.", "chinese": "第一步是把瓶子洗净并晾干。"},
+    "application": {"prompt": "In a set of instructions, each action is a ___. (step / actor)", "solution": "step"},
+    "sources": [{"label": "Cambridge Dictionary: step", "url": "https://dictionary.cambridge.org/dictionary/english/step"}]
+  },
+  {
+    "word": "used to",
+    "examTags": ["词汇·过去与现在", "语法·used to 句型"],
+    "grammar": "used to + 动词原形，表示过去经常做或过去存在、现在已不同的情况。",
+    "collocations": "used to walk; used to live; didn't use to; Did ... use to ...?",
+    "commonMistake": "used to 后接动词原形；否定和疑问句中常用 did，写作 didn't use to / Did you use to ...?。",
+    "example": {"english": "This path used to lead to the old factory.", "chinese": "这条小路过去通向那家旧工厂。"},
+    "application": {"prompt": "In the past, the mill ___ make paper. (used to / use to)", "solution": "used to"},
+    "sources": [{"label": "Cambridge Grammar: used to", "url": "https://dictionary.cambridge.org/grammar/british-grammar/used-to"}]
+  },
+  {
+    "word": "realize",
+    "examTags": ["词汇·认知与表达", "语法·动词搭配"],
+    "grammar": "v. 认识到；实现。规则变化 realize—realized—realized；英式拼法常见 realise。",
+    "collocations": "realize a mistake; realize that ...; realize a dream",
+    "commonMistake": "realize 可表示“意识到”或“实现”；英式英语也常拼作 realise，含义相同。",
+    "example": {"english": "I realized that the map was upside down.", "chinese": "我意识到地图被倒着拿了。"},
+    "application": {"prompt": "When Sam saw the sign, he understood he was on the wrong road. He ___ his mistake. (realized / removed)", "solution": "realized"},
+    "sources": [{"label": "Cambridge Dictionary: realize", "url": "https://dictionary.cambridge.org/dictionary/english/realize"}]
+  },
+  {
+    "word": "inside",
+    "examTags": ["词汇·方位与旅行", "语法·介词与副词"],
+    "grammar": "prep. 在……里面；adv. 在里面。作介词后接地点名词，作副词时可单独使用。",
+    "collocations": "inside the museum; go inside; the inside of a tent",
+    "commonMistake": "inside 表示位置“在里面”；into 强调从外面进入的动作，如 wait inside / walk into the room。",
+    "example": {"english": "It was cold, so we waited inside the visitor centre.", "chinese": "天气很冷，所以我们在游客中心里面等候。"},
+    "application": {"prompt": "The rain has stopped. You can wait ___ the tent until the guide returns. (inside / along)", "solution": "inside"},
+    "sources": [{"label": "Cambridge Dictionary: inside", "url": "https://dictionary.cambridge.org/dictionary/english/inside"}]
+  },
+  {
+    "word": "go on a trip",
+    "examTags": ["词汇·旅行计划", "语法·固定搭配"],
+    "grammar": "短语，去旅行。go on a trip to + 地点；主语为第三人称单数时 go 变为 goes。",
+    "collocations": "go on a school trip; go on a trip to the coast; plan a trip",
+    "commonMistake": "trip 是可数名词，短语中通常说 go on a trip，不能漏掉 a。",
+    "example": {"english": "My cousins go on a trip to the lake each summer.", "chinese": "我的表兄妹每年夏天都去湖边旅行。"},
+    "application": {"prompt": "Next month the class will ___ to the science museum. (go on a trip / write down)", "solution": "go on a trip"},
+    "sources": [{"label": "Cambridge Dictionary: trip", "url": "https://dictionary.cambridge.org/dictionary/english/trip"}]
+  },
+  {
+    "word": "process",
+    "examTags": ["词汇·步骤与变化", "语法·可数名词"],
+    "grammar": "n. 过程。可数名词，复数 processes；常指一系列逐步完成的变化或操作。",
+    "collocations": "the process of recycling; a long process; in the process",
+    "commonMistake": "process 是可数名词；单数前常用 the/a，复数拼写为 processes。",
+    "example": {"english": "The process of making paper takes several steps.", "chinese": "造纸的过程需要几个步骤。"},
+    "application": {"prompt": "Making new paper from old paper is a ___. (process / direction)", "solution": "process"},
+    "sources": [{"label": "Cambridge Dictionary: process", "url": "https://dictionary.cambridge.org/dictionary/english/process"}]
+  },
+  {
+    "word": "theatre",
+    "examTags": ["词汇·文化与场所", "语法·拼写变体"],
+    "grammar": "n. 戏院；剧场；电影院。可数名词；theater 是常见的美式拼法。",
+    "collocations": "go to the theatre; a theatre ticket; a theatre performance",
+    "commonMistake": "theatre 是英式拼法，美式英语常写 theater；两种拼法都表示剧场等场所。",
+    "example": {"english": "We saw a play at the theatre near the river.", "chinese": "我们在河边的剧场看了一场戏。"},
+    "application": {"prompt": "People sit here to watch a play on stage. It is a ___. (theatre / factory)", "solution": "theatre"},
+    "sources": [{"label": "Cambridge Dictionary: theatre", "url": "https://dictionary.cambridge.org/dictionary/english/theatre"}]
+  },
+  {
+    "word": "factory",
+    "examTags": ["词汇·生产与环保", "语法·可数名词"],
+    "grammar": "n. 工厂。可数名词，复数 factories；辅音字母 + y 结尾的名词变复数时通常改 y 为 ies。",
+    "collocations": "a paper factory; work in a factory; factory workers",
+    "commonMistake": "factory 的复数是 factories，不是 factorys；不要与意为“植物”的 plant 混淆。",
+    "example": {"english": "The factory uses less water than before.", "chinese": "这家工厂比以前用水少了。"},
+    "application": {"prompt": "The town has two paper ___. (factories / factorys)", "solution": "factories"},
+    "sources": [{"label": "Cambridge Dictionary: factory", "url": "https://dictionary.cambridge.org/dictionary/english/factory"}]
+  },
+  {
+    "word": "terrible",
+    "examTags": ["词汇·感受与评价", "语法·形容词"],
+    "grammar": "adj. 糟糕的；令人不快的。可修饰 weather、noise、journey 等名词。",
+    "collocations": "terrible weather; a terrible mistake; feel terrible",
+    "commonMistake": "terrible 是形容词，修饰名词；副词形式是 terribly，如 terribly cold。",
+    "example": {"english": "The road was terrible after the heavy rain.", "chinese": "大雨过后，这条路状况很糟。"},
+    "application": {"prompt": "The bus was late and the road was flooded. It was a ___ journey. (terrible / fresh)", "solution": "terrible"},
+    "sources": [{"label": "Cambridge Dictionary: terrible", "url": "https://dictionary.cambridge.org/dictionary/english/terrible"}]
+  },
+  {
+    "word": "actor",
+    "examTags": ["词汇·职业与表演", "语法·可数名词"],
+    "grammar": "n. 演员。可数名词，复数 actors；actor 可指男演员，也可泛指演员，女性演员也可称 actress。",
+    "collocations": "a film actor; a famous actor; play an actor",
+    "commonMistake": "actor 是名词；表示“扮演”时用动词 act，如 act in a play。",
+    "example": {"english": "The actor spoke clearly in the school play.", "chinese": "这位演员在学校话剧中说得很清楚。"},
+    "application": {"prompt": "The person who performs a role in a play is an ___. (actor / visitor)", "solution": "actor"},
+    "sources": [{"label": "Cambridge Dictionary: actor", "url": "https://dictionary.cambridge.org/dictionary/english/actor"}]
+  },
+  {
+    "word": "gun",
+    "examTags": ["词汇·场景词汇", "语法·可数名词"],
+    "grammar": "n. 枪。可数名词，复数 guns；本词常出现在故事、历史或安全语境中。",
+    "collocations": "a toy gun; a water gun; a gun in a display",
+    "commonMistake": "gun 是可数名词，单数前要有 a/the 等限定词；不要把它与 gum（口香糖）混淆。",
+    "example": {"english": "The old toy gun is behind the glass in the museum.", "chinese": "这把旧玩具枪陈列在博物馆的玻璃柜后。"},
+    "application": {"prompt": "The museum label says the object is a model ___. (gun / grain)", "solution": "gun"},
+    "sources": [{"label": "Cambridge Dictionary: gun", "url": "https://dictionary.cambridge.org/dictionary/english/gun"}]
+  },
+  {
+    "word": "try on",
+    "examTags": ["词汇·购物与旅行", "语法·可分短语动词"],
+    "grammar": "短语动词，试穿。可说 try on a jacket，也可说 try a jacket on；代词宾语放中间。",
+    "collocations": "try on a coat; try a hat on; try it on",
+    "commonMistake": "宾语是代词时放在中间：try it on；不能说 try on it。",
+    "example": {"english": "Can I try on this raincoat before the trip?", "chinese": "旅行前我可以试穿这件雨衣吗？"},
+    "application": {"prompt": "The jacket may be too large. Please ___ before buying it. (try it on / try on it)", "solution": "try it on"},
+    "sources": [{"label": "Cambridge Dictionary: try on", "url": "https://dictionary.cambridge.org/dictionary/english/try-on"}]
+  },
+  {
+    "word": "along",
+    "examTags": ["词汇·方位与路线", "语法·介词搭配"],
+    "grammar": "prep. 沿着；顺着。后接道路、河流、海岸等名词，表示沿某条线移动。",
+    "collocations": "along the road; walk along the river; trees along the street",
+    "commonMistake": "along 后接路线名词，如 along the road；表示进入道路则用 onto 或 into，含义不同。",
+    "example": {"english": "We walked along the river to the old bridge.", "chinese": "我们沿着河边走到那座老桥。"},
+    "application": {"prompt": "Follow the path beside the river. Walk ___ the river to the bridge. (along / inside)", "solution": "along"},
+    "sources": [{"label": "Cambridge Dictionary: along", "url": "https://dictionary.cambridge.org/dictionary/english/along"}]
+  },
+  {
+    "word": "road",
+    "examTags": ["词汇·旅行与路线", "语法·可数名词"],
+    "grammar": "n. 道路。可数名词，复数 roads；常和 on、along、across 等介词连用。",
+    "collocations": "along the road; cross the road; a busy road",
+    "commonMistake": "road 指供车辆或行人通行的道路；常说 on the road，沿着道路说 along the road。",
+    "example": {"english": "A new bike path runs beside the main road.", "chinese": "一条新的自行车道沿着主干道旁边延伸。"},
+    "application": {"prompt": "Cars and buses travel on this way between towns. It is a ___. (road / basket)", "solution": "road"},
+    "sources": [{"label": "Cambridge Dictionary: road", "url": "https://dictionary.cambridge.org/dictionary/english/road"}]
+  },
+  {
+    "word": "create",
+    "examTags": ["词汇·创造与制作", "语法·动词形式"],
+    "grammar": "v. 创造；创作。规则变化 create—created—created；名词形式 creation。",
+    "collocations": "create a model; create a design; create a new place",
+    "commonMistake": "create 的过去式和过去分词均为 created；不要漏掉词尾的 e 后再多写一个 e。",
+    "example": {"english": "The students created a map of the nature park.", "chinese": "学生们绘制了一张自然公园地图。"},
+    "application": {"prompt": "The club wants to ___ a poster for its trip. (create / remove)", "solution": "create"},
+    "sources": [{"label": "Cambridge Dictionary: create", "url": "https://dictionary.cambridge.org/dictionary/english/create"}]
+  },
+  {
+    "word": "record",
+    "examTags": ["词汇·记录与表达", "语法·名词与动词"],
+    "grammar": "v. 记录；n. 记录。作动词可说 record information；作名词常说 keep a record of sth。",
+    "collocations": "record a trip; keep a record; a school record",
+    "commonMistake": "record 既可作动词也可作名词，句中位置可帮助判断词性；动词 record sth，名词 a record。",
+    "example": {"english": "I recorded the bird names in my notebook.", "chinese": "我把鸟的名称记录在笔记本里。"},
+    "application": {"prompt": "To remember what happened, Maya will ___ the trip in her diary. (record / explore)", "solution": "record"},
+    "sources": [{"label": "Cambridge Dictionary: record", "url": "https://dictionary.cambridge.org/dictionary/english/record"}]
+  },
+  {
+    "word": "skill",
+    "examTags": ["词汇·能力与学习", "语法·可数名词"],
+    "grammar": "n. 技能。可数名词，复数 skills；常指通过学习或练习获得的能力。",
+    "collocations": "learn a skill; develop a skill; communication skills",
+    "commonMistake": "skill 是可数名词，单数前通常用 a；形容词 skilled 表示“熟练的”。",
+    "example": {"english": "Making a paper basket is a useful skill.", "chinese": "制作纸篮是一项有用的技能。"},
+    "application": {"prompt": "After practising for weeks, Leo learned a new cooking ___. (skill / wastewater)", "solution": "skill"},
+    "sources": [{"label": "Cambridge Dictionary: skill", "url": "https://dictionary.cambridge.org/dictionary/english/skill"}]
+  },
+  {
+    "word": "write down",
+    "examTags": ["词汇·学习与记录", "语法·可分短语动词"],
+    "grammar": "短语动词，写下；记下。可说 write down a name，也可说 write a name down；代词宾语放中间。",
+    "collocations": "write down an address; write down the steps; write it down",
+    "commonMistake": "宾语是代词时必须放在 write 与 down 之间，如 write it down。",
+    "example": {"english": "Write down the bus number before we leave.", "chinese": "我们出发前把公交车号码记下来。"},
+    "application": {"prompt": "I may forget the meeting time, so I will ___. (write it down / write down it)", "solution": "write it down"},
+    "sources": [{"label": "Cambridge Dictionary: write down", "url": "https://dictionary.cambridge.org/dictionary/english/write-down"}]
+  },
+  {
+    "word": "explore",
+    "examTags": ["词汇·旅行与自然", "语法·动词搭配"],
+    "grammar": "v. 探索；考察。规则变化 explore—explored—explored；后接地点或事物作宾语。",
+    "collocations": "explore a cave; explore the countryside; explore an idea",
+    "commonMistake": "explore 后可直接接地点，不需要加介词 in，如 explore the forest。",
+    "example": {"english": "The group explored the forest with a local guide.", "chinese": "小组在当地向导带领下探索了森林。"},
+    "application": {"prompt": "On the nature walk, the students will ___ the old woodland. (explore / fill)", "solution": "explore"},
+    "sources": [{"label": "Cambridge Dictionary: explore", "url": "https://dictionary.cambridge.org/dictionary/english/explore"}]
+  },
+  {
+    "word": "tent",
+    "examTags": ["词汇·户外旅行", "语法·可数名词"],
+    "grammar": "n. 帐篷。可数名词，复数 tents；可用 put up a tent 表示搭帐篷。",
+    "collocations": "put up a tent; sleep in a tent; a camping tent",
+    "commonMistake": "tent 是可数名词；表示搭起帐篷常说 put up a tent，不能按字面说 build a tent。",
+    "example": {"english": "We put up the tent before the sun went down.", "chinese": "太阳下山前我们搭好了帐篷。"},
+    "application": {"prompt": "Campers sleep in this portable shelter. It is a ___. (tent / machine)", "solution": "tent"},
+    "sources": [{"label": "Cambridge Dictionary: tent", "url": "https://dictionary.cambridge.org/dictionary/english/tent"}]
+  },
+  {
+    "word": "cucumber",
+    "examTags": ["词汇·食物与自然", "语法·可数名词"],
+    "grammar": "n. 黄瓜。可数名词，复数 cucumbers；常作蔬菜食用。",
+    "collocations": "a cucumber salad; slice a cucumber; fresh cucumbers",
+    "commonMistake": "cucumber 是可数名词，复数直接加 s：cucumbers。",
+    "example": {"english": "We picked a cucumber from the garden for lunch.", "chinese": "我们从菜园摘了一根黄瓜当午餐。"},
+    "application": {"prompt": "This long green vegetable is often sliced for salad. It is a ___. (cucumber / grain)", "solution": "cucumber"},
+    "sources": [{"label": "Cambridge Dictionary: cucumber", "url": "https://dictionary.cambridge.org/dictionary/english/cucumber"}]
+  },
+  {
+    "word": "from ... to ...",
+    "examTags": ["词汇·时间与范围", "语法·介词结构"],
+    "grammar": "短语结构，从……到……。from 和 to 分别引出起点与终点，可用于地点、时间或数字范围。",
+    "collocations": "from Monday to Friday; from the station to the museum; from 8 to 10",
+    "commonMistake": "表示起点到终点时 from 与 to 配对使用；不要把 from 和 for 混用。",
+    "example": {"english": "The museum is open from Tuesday to Sunday.", "chinese": "博物馆从星期二开放到星期日。"},
+    "application": {"prompt": "Choose the pair showing the starting and ending points: ___ Monday ___ Friday. (from, to / into, along)", "solution": "from, to"},
+    "sources": [{"label": "Cambridge Dictionary: from", "url": "https://dictionary.cambridge.org/dictionary/english/from"}, {"label": "Cambridge Dictionary: to", "url": "https://dictionary.cambridge.org/dictionary/english/to"}]
+  },
+  {
+    "word": "straight",
+    "examTags": ["词汇·问路与路线", "语法·形容词与副词"],
+    "grammar": "adv. 笔直地；立即；adj. 直的。常用 go straight ahead 指一直向前走。",
+    "collocations": "go straight ahead; a straight road; straight after school",
+    "commonMistake": "straight 作副词时形式不变，不加 -ly；straight ahead 表示径直向前。",
+    "example": {"english": "Go straight ahead, and the theatre will be on your left.", "chinese": "一直往前走，剧场就在你的左边。"},
+    "application": {"prompt": "At the next crossing, do not turn; continue ___. (straight ahead / inside)", "solution": "straight ahead"},
+    "sources": [{"label": "Cambridge Dictionary: straight", "url": "https://dictionary.cambridge.org/dictionary/english/straight"}]
+  },
+  {
+    "word": "fill",
+    "examTags": ["词汇·日常操作", "语法·动词搭配"],
+    "grammar": "v. 装满；盛满。常用 fill sth with sth；也可用 fill a basket with leaves。",
+    "collocations": "fill a bottle with water; fill a basket; fill in a form",
+    "commonMistake": "表示用某物装满容器说 fill the basket with apples；容器作主语时可说 the basket is full of apples。",
+    "example": {"english": "She filled the basket with fresh leaves.", "chinese": "她把新鲜的叶子装进篮子里。"},
+    "application": {"prompt": "Use water to make the bottle full. You ___ the bottle ___ water. (fill ... with / remove ... from)", "solution": "fill ... with"},
+    "sources": [{"label": "Cambridge Dictionary: fill", "url": "https://dictionary.cambridge.org/dictionary/english/fill"}]
+  },
+  {
+    "word": "basket",
+    "examTags": ["词汇·物品与制作", "语法·可数名词"],
+    "grammar": "n. 篮子；筐。可数名词，复数 baskets；常用 a basket of + 复数名词或不可数名词。",
+    "collocations": "a basket of apples; a picnic basket; put sth in a basket",
+    "commonMistake": "basket 是可数名词，单数前通常要有 a/the；篮子里装什么可用 a basket of ... 表达。",
+    "example": {"english": "The children carried a basket of apples to the picnic.", "chinese": "孩子们带了一篮苹果去野餐。"},
+    "application": {"prompt": "You can carry vegetables in a ___. (basket / theatre)", "solution": "basket"},
+    "sources": [{"label": "Cambridge Dictionary: basket", "url": "https://dictionary.cambridge.org/dictionary/english/basket"}]
+  },
+  {
+    "word": "teach",
+    "examTags": ["词汇·学习与技能", "语法·动词搭配"],
+    "grammar": "v. 教。teach—taught—taught；常用 teach sb sth 或 teach sb to do sth。",
+    "collocations": "teach English; teach a skill; teach sb to make a model",
+    "commonMistake": "teach 的过去式和过去分词是 taught，不是 teached；常说 teach someone how to do sth。",
+    "example": {"english": "Mr Lee taught us how to make a paper boat.", "chinese": "李老师教我们如何制作纸船。"},
+    "application": {"prompt": "Last week, Aunt May ___ me to plant seeds. (taught / teach)", "solution": "taught"},
+    "sources": [{"label": "Cambridge Dictionary: teach", "url": "https://dictionary.cambridge.org/dictionary/english/teach"}]
+  },
+  {
+    "word": "branch",
+    "examTags": ["词汇·自然与机构", "语法·一词多义"],
+    "grammar": "n. 树枝；分支。可数名词，复数 branches；在植物语境指树枝，在机构或学科语境指分支。",
+    "collocations": "a tree branch; a branch of a bank; a branch of science",
+    "commonMistake": "branch 的复数是 branches；本课自然语境中通常指树枝。",
+    "example": {"english": "A small bird sat on a branch above the path.", "chinese": "一只小鸟停在小路上方的树枝上。"},
+    "application": {"prompt": "A part that grows from the trunk of a tree is a ___. (branch / basket)", "solution": "branch"},
+    "sources": [{"label": "Cambridge Dictionary: branch", "url": "https://dictionary.cambridge.org/dictionary/english/branch"}]
+  },
+  {
+    "word": "leaf",
+    "examTags": ["词汇·自然与拼写", "语法·不规则复数"],
+    "grammar": "n. 叶；叶子。可数名词，复数为 leaves；通常把 f 变为 v 再加 -es。",
+    "collocations": "a green leaf; fall leaves; a leaf of paper",
+    "commonMistake": "leaf 的复数是 leaves，不是 leafs；类似变化还有 knife—knives。",
+    "example": {"english": "One yellow leaf fell onto my notebook.", "chinese": "一片黄叶落在我的笔记本上。"},
+    "application": {"prompt": "In autumn, the tree loses many ___. (leaves / leafs)", "solution": "leaves"},
+    "sources": [{"label": "Cambridge Dictionary: leaf", "url": "https://dictionary.cambridge.org/dictionary/english/leaf"}]
+  },
+  {
+    "word": "finally",
+    "examTags": ["词汇·顺序与叙事", "语法·副词位置"],
+    "grammar": "adv. 终于；最后。可用于叙述一连串步骤的最后一步，也可表示等待后终于发生。",
+    "collocations": "finally arrive; finally finish; first ... next ... finally ...",
+    "commonMistake": "finally 常用于最后完成或等待后发生的事；句首使用时后面通常加逗号。",
+    "example": {"english": "After an hour, we finally reached the lake.", "chinese": "一个小时后，我们终于到达了湖边。"},
+    "application": {"prompt": "We washed the jars, dried them, and ___ put them away. (finally / inside)", "solution": "finally"},
+    "sources": [{"label": "Cambridge Dictionary: finally", "url": "https://dictionary.cambridge.org/dictionary/english/finally"}]
+  },
+  {
+    "word": "think of",
+    "examTags": ["词汇·思考与表达", "语法·短语动词"],
+    "grammar": "短语动词，考虑；想起。常用 think of an idea/person；think of 后接名词或动名词。",
+    "collocations": "think of a plan; think of someone; think of doing sth",
+    "commonMistake": "think of 可表示想到或考虑；后接动作时常用动词-ing，如 think of visiting the museum。",
+    "example": {"english": "Can you think of a name for our recycling project?", "chinese": "你能为我们的回收项目想个名字吗？"},
+    "application": {"prompt": "We need a new idea for the poster. Can you ___ one? (think of / go into)", "solution": "think of"},
+    "sources": [{"label": "Cambridge Dictionary: think of", "url": "https://dictionary.cambridge.org/dictionary/english/think-of"}]
+  },
+  {
+    "word": "grain",
+    "examTags": ["词汇·自然与食物", "语法·可数名词"],
+    "grammar": "n. 谷物；谷粒。通常作可数名词，指谷物种子或一粒粒的颗粒；复数 grains。",
+    "collocations": "a grain of rice; grains of sand; whole grains",
+    "commonMistake": "grain 可指谷物作物或单个颗粒；表示一粒米时说 a grain of rice。",
+    "example": {"english": "A single grain of rice was left in the bowl.", "chinese": "碗里还剩下一粒米。"},
+    "application": {"prompt": "The smallest single piece of rice is a grain of ___. (rice / branch)", "solution": "rice"},
+    "sources": [{"label": "Cambridge Dictionary: grain", "url": "https://dictionary.cambridge.org/dictionary/english/grain"}]
+  },
+  {
+    "word": "fresh",
+    "examTags": ["词汇·自然与食物", "语法·形容词搭配"],
+    "grammar": "adj. 新鲜的；也可表示新近的。常修饰 food、fruit、air 等名词。",
+    "collocations": "fresh fruit; fresh air; fresh vegetables",
+    "commonMistake": "fresh 是形容词，修饰名词时直接放在名词前，如 fresh cucumber；副词形式为 freshly。",
+    "example": {"english": "We bought fresh vegetables at the farm shop.", "chinese": "我们在农场商店买了新鲜蔬菜。"},
+    "application": {"prompt": "These cucumbers were picked this morning, so they are ___. (fresh / terrible)", "solution": "fresh"},
+    "sources": [{"label": "Cambridge Dictionary: fresh", "url": "https://dictionary.cambridge.org/dictionary/english/fresh"}]
+  },
+  {
+    "word": "certainly",
+    "examTags": ["词汇·肯定与回应", "语法·副词用法"],
+    "grammar": "adv. 肯定地；当然。可用于表示确定或礼貌答应，常放在动词前或独立作答。",
+    "collocations": "certainly true; certainly help; Certainly!",
+    "commonMistake": "certainly 是副词；形容词是 certain。表示“当然”也可以单独说 Certainly!。",
+    "example": {"english": "Certainly, I can show you the way to the museum.", "chinese": "当然，我可以给你指去博物馆的路。"},
+    "application": {"prompt": "“Can you help us carry the baskets?” “___!” (Certainly / Terrible)", "solution": "Certainly"},
+    "sources": [{"label": "Cambridge Dictionary: certainly", "url": "https://dictionary.cambridge.org/dictionary/english/certainly"}]
+  },
+  {
+    "word": "diary",
+    "examTags": ["词汇·写作与记录", "语法·可数名词拼写"],
+    "grammar": "n. 日记；日记本。可数名词，复数 diaries；记录日常经历可说 keep/write a diary。",
+    "collocations": "write in a diary; keep a diary; a diary entry",
+    "commonMistake": "diary 的复数是 diaries，辅音字母 + y 结尾变复数时 y 改为 ies。",
+    "example": {"english": "I write a short note in my diary every night.", "chinese": "我每天晚上在日记里写一则简短记录。"},
+    "application": {"prompt": "Ella writes about her day in a ___. (diary / machine)", "solution": "diary"},
+    "sources": [{"label": "Cambridge Dictionary: diary", "url": "https://dictionary.cambridge.org/dictionary/english/diary"}]
+  },
+  {
+    "word": "entry",
+    "examTags": ["词汇·写作与记录", "语法·可数名词"],
+    "grammar": "n. （日记的）一则；入口。可数名词，复数 entries；含义按 diary、door 等上下文判断。",
+    "collocations": "a diary entry; write an entry; the main entry",
+    "commonMistake": "entry 的复数是 entries；在 diary entry 中表示日记的一则，不是“入口”。",
+    "example": {"english": "My first diary entry is about our visit to the museum.", "chinese": "我的第一则日记写的是我们参观博物馆的经历。"},
+    "application": {"prompt": "A dated note in a diary is a diary ___. (entry / germ)", "solution": "entry"},
+    "sources": [{"label": "Cambridge Dictionary: entry", "url": "https://dictionary.cambridge.org/dictionary/english/entry"}]
+  },
+  {
+    "word": "agree",
+    "examTags": ["词汇·观点与交流", "语法·动词搭配"],
+    "grammar": "v. 赞成；同意。agree with sb/an opinion；agree to a plan/request；agree on a date。",
+    "collocations": "agree with a person; agree to a plan; agree on a time",
+    "commonMistake": "agree with + 人/观点；agree to + 计划或建议；agree on + 双方商定的具体事项。",
+    "example": {"english": "We agreed to meet at the station at nine.", "chinese": "我们同意九点在车站碰面。"},
+    "application": {"prompt": "Both students say the clean-up should start at 9:00. They ___ on the time. (agree / remove)", "solution": "agree"},
+    "sources": [{"label": "Cambridge Dictionary: agree", "url": "https://dictionary.cambridge.org/dictionary/english/agree"}]
+  },
+  {
+    "word": "agree with",
+    "examTags": ["词汇·观点与交流", "语法·介词搭配"],
+    "grammar": "短语，赞成；同意。agree with 后接人或观点；第三人称单数为 agrees with。",
+    "collocations": "agree with me; agree with an idea; don't agree with",
+    "commonMistake": "表示赞成某人的看法用 agree with；不说 agree to a person。",
+    "example": {"english": "I agree with Nina that we should reuse the jars.", "chinese": "我赞同妮娜的看法，我们应该重复利用这些罐子。"},
+    "application": {"prompt": "Tom thinks the path should stay clean, and I have the same opinion. I ___ Tom. (agree with / agree on)", "solution": "agree with"},
+    "sources": [{"label": "Cambridge Dictionary: agree with", "url": "https://dictionary.cambridge.org/dictionary/english/agree-with"}]
+  }
+]

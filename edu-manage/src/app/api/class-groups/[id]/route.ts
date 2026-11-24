@@ -125,13 +125,32 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const prisma = await getRequestPrisma()
 
   const { id } = await params
-  if (!await isClassGroupInActiveTerm(prisma, id)) {
+  if (!await isClassGroupInActiveTerm(prisma, id, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能修改班级' }, { status: 409 })
   }
   const body = await req.json()
   const { name, teacherId, roomId, maxStudents, status, note } = body
   const normalizedAssignments = normalizeTeacherAssignments(body)
   const primaryTeacherId = typeof teacherId === 'string' && teacherId ? teacherId : normalizedAssignments[0]?.teacherId
+
+  if (normalizedAssignments.length > 0) {
+    const tIds = [...new Set(normalizedAssignments.map((a) => a.teacherId))]
+    const teacherRecords = await prisma.teacher.findMany({
+      where: { id: { in: tIds } },
+      select: { id: true, name: true, subjects: true },
+    })
+    const tMap = new Map(teacherRecords.map((t) => [t.id, t]))
+    for (const a of normalizedAssignments) {
+      if (!a.subject) continue
+      const t = tMap.get(a.teacherId)
+      const subs = (t?.subjects || '').split(/[,，、]/).map((s) => s.trim()).filter(Boolean)
+      if (subs.length > 0 && !subs.includes(a.subject)) {
+        return NextResponse.json({
+          error: `教师（${t?.name || '未知'}）档案中未登记任教【${a.subject}】（已登记：${subs.join('、')}），请核对任课安排`,
+        }, { status: 400 })
+      }
+    }
+  }
 
   const group = await prisma.$transaction(async (tx) => {
     const previous = await tx.classGroup.findUnique({
@@ -360,7 +379,7 @@ export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params:
   const prisma = await getRequestPrisma()
 
   const { id } = await params
-  if (!await isClassGroupInActiveTerm(prisma, id)) {
+  if (!await isClassGroupInActiveTerm(prisma, id, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能删除班级' }, { status: 409 })
   }
   const group = await prisma.classGroup.findUnique({ where: { id } })

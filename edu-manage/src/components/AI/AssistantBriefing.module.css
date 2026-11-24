@@ -1,0 +1,1598 @@
+.preview {
+  /* 等级主题色由悬浮助手根注入（家长会员等级/教师等级），此处不再自声明 */
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 14px;
+  color: var(--color-ink);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: 18px;
+  box-shadow: var(--shadow-overlay);
+  animation: briefing-enter 220ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+/* A small corner tail makes the reminder read as the pet's speech bubble. */
+.previewTail {
+  position: absolute;
+  z-index: 0;
+  width: 14px;
+  height: 14px;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: 3px;
+  pointer-events: none;
+  transform: rotate(45deg);
+}
+
+.previewMascot,
+.previewContent {
+  position: relative;
+  z-index: 1;
+}
+
+.preview[data-attachment-side='right'] .previewTail {
+  right: -7px;
+}
+
+.preview[data-attachment-side='left'] .previewTail {
+  left: -7px;
+}
+
+.preview[data-attachment-position='top'] .previewTail {
+  top: -7px;
+}
+
+.preview[data-attachment-position='bottom'] .previewTail {
+  bottom: -7px;
+}
+
+.petLauncher {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  perspective: 760px;
+  transform-style: preserve-3d;
+}
+
+.petLauncher:hover .petLauncherArt,
+.petLauncherHitArea:hover ~ .petLauncherArt {
+  filter: drop-shadow(0 8px 14px rgba(26, 18, 1, .26));
+}
+
+.petLauncherHitArea:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.petLauncherPopped .petLauncherArt {
+  animation: none;
+  transform: perspective(760px) translate3d(0, -10px, 12px) rotateX(-5deg) rotateY(0) scale(1.08);
+  transform-origin: 50% 80%;
+}
+
+.petLauncherDragging {
+  --pet-motion: paused;
+}
+
+.petLauncherArt {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  background: transparent;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(26, 18, 1, .2));
+  animation: pet-idle 3.6s ease-in-out infinite;
+  animation-play-state: var(--pet-motion, running);
+  transform-origin: 50% 80%;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+  transition: transform 220ms cubic-bezier(.2, .8, .2, 1);
+}
+
+/* The art sits outside the clipped hit area, so the viewport edge—not a card—masks it. */
+.petLauncherPeeking[data-peek-side='right'] .petLauncherArt {
+  transform: perspective(620px) translate3d(8px, 2px, -16px) rotateY(-22deg) rotateX(5deg) rotateZ(-7deg) scale(.94);
+  transform-origin: 98% 82%;
+  animation: pet-sneak-peek-right 6.8s cubic-bezier(.4, 0, .2, 1) infinite;
+  animation-play-state: var(--pet-motion, running);
+}
+
+.petLauncherPeeking[data-peek-side='left'] .petLauncherArt {
+  transform: perspective(620px) translate3d(-8px, 2px, -16px) rotateY(22deg) rotateX(5deg) rotateZ(7deg) scale(.94);
+  transform-origin: 2% 82%;
+  animation: pet-sneak-peek-left 6.8s cubic-bezier(.4, 0, .2, 1) infinite;
+  animation-play-state: var(--pet-motion, running);
+}
+
+.previewMascot,
+.panelMascot {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+  color: var(--assistant-accent);
+  background: var(--assistant-tint);
+  border: 1px solid var(--color-hairline);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.previewMascot {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-xl);
+}
+
+.previewMascot:hover,
+.panelMascot:hover {
+  border-color: var(--assistant-accent);
+}
+
+.previewMascot:focus-visible,
+.panelMascot:focus-visible,
+.dismiss:focus-visible,
+.previewOpen:focus-visible,
+.taskRow:focus-visible,
+.panelFooter button:focus-visible,
+.syncNotice button:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.previewContent {
+  min-width: 0;
+  flex: 1;
+}
+
+.previewHeading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 26px;
+}
+
+.previewHeading strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewRole {
+  flex: 0 0 auto;
+  max-width: 44%;
+  overflow: hidden;
+  color: var(--color-ink-subtle);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 3px 7px;
+  background: var(--color-surface-3);
+  border-radius: 999px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dismiss {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-height: 0;
+  padding: 0;
+  color: var(--color-ink-subtle);
+  font-size: 17px;
+  line-height: 1;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* 视觉 32px，伪元素把热区扩到 44px；双类提高特异性覆盖全局 button 44px 强制 */
+.dismiss.dismiss {
+  min-height: 0 !important;
+}
+.dismiss::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+.dismiss:hover {
+  color: var(--color-ink);
+  background: var(--color-surface-3);
+}
+
+.previewSummary {
+  display: -webkit-box;
+  margin: 2px 0 5px;
+  overflow: hidden;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.previewMeta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-ink-subtle);
+  font-size: 11.5px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.previewMeta > span:first-child {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .2px;
+}
+
+.previewMeta > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metaDivider {
+  width: 3px;
+  height: 3px;
+  flex: 0 0 3px;
+  background: var(--assistant-accent);
+  border-radius: 50%;
+}
+
+.previewOpen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 10px;
+  padding: 0 12px;
+  color: var(--assistant-accent);
+  font-size: 12.5px;
+  font-weight: 700;
+  background: var(--assistant-tint);
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.previewOpen:hover {
+  color: var(--assistant-accent);
+  background: var(--color-surface-3);
+  transform: translateY(-1px);
+}
+
+.panel {
+  /* 等级主题色由弹窗根注入（家长会员等级/教师等级），此处不再自声明 */
+  max-height: none;
+  margin: 8px 12px 8px;
+  padding: 10px 12px 8px;
+  overflow: visible;
+  color: var(--color-ink);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: 16px;
+}
+
+.panelCompact {
+  max-height: none;
+  overflow: visible;
+}
+
+/* 手机紧凑态：压扁简报区，把空间让给对话区 */
+.panelCompact .panelHeading h2,
+.panelCompact .panelHeading .roleLabel,
+.panelCompact .greeting,
+.panelCompact .actionHint {
+  display: none;
+}
+
+.panelCompact .panelMascot {
+  width: 42px;
+  height: 42px;
+}
+
+.panelCompact .contextRow {
+  display: none;
+}
+
+.panelCompact .weatherRow {
+  margin: 0 0 4px;
+  padding: 0;
+  font-size: 10px;
+}
+
+.panelCompact .metricRow {
+  margin: 0 0 6px;
+}
+
+.panelCompact .metric {
+  padding: 5px 4px 4px;
+}
+
+.panelCompact .metric strong {
+  font-size: 15px;
+}
+
+.panelCompact .metric span {
+  font-size: 9px;
+  margin-top: 2px;
+}
+
+.panelCompact .metric em {
+  font-size: 8px;
+  margin-top: 1px;
+}
+
+.panelCompact .summary {
+  margin: 0 0 4px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.panelCompact .panelFooter {
+  margin-top: 4px;
+}
+
+.panelCompact .contextRow {
+  min-height: 20px;
+  margin-top: 2px;
+}
+
+.panelCompact .levelList {
+  margin: 0 0 2px;
+}
+
+.panelCompact .weatherRow {
+  min-height: 20px;
+  margin-top: 0;
+}
+
+.panelCompact .summary {
+  display: -webkit-box;
+  max-height: 36px;
+  margin: 4px 0 2px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.panelCompact .panelFooter {
+  margin-top: 0;
+}
+
+.panelTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.panelHeading {
+  min-width: 0;
+  flex: 1;
+}
+
+.roleLabel {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 20px;
+  padding: 1px 7px;
+  overflow: hidden;
+  color: var(--assistant-accent);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--assistant-tint);
+  border-radius: 999px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panelHeading h2 {
+  margin: 4px 0 1px;
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.greeting {
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panelMascot {
+  width: 64px;
+  height: 64px;
+  flex-direction: column;
+  gap: 0;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-lg);
+}
+
+.panelMascot img {
+  border-radius: var(--radius-lg);
+}
+
+.actionHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 20px;
+  margin-top: -4px;
+  padding: 1px 5px;
+  color: var(--assistant-accent);
+  font-size: 12px;
+  line-height: 1;
+  background: var(--assistant-tint);
+  border-radius: 999px;
+}
+
+.contextRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 22px;
+  margin-top: 4px;
+}
+
+.contextDate,
+.contextTime {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.contextTime {
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.tierBadge,
+.levelBadge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  max-width: 100%;
+  min-height: 20px;
+  padding: 1px 7px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.levelList {
+  display: flex;
+  gap: 5px;
+  max-width: 100%;
+  margin: 0 0 3px;
+  overflow: auto hidden;
+  scrollbar-width: none;
+}
+
+.levelList::-webkit-scrollbar {
+  display: none;
+}
+
+.weatherRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 22px;
+  margin-top: 1px;
+  overflow: hidden;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.weatherRow > span:first-of-type {
+  flex: 0 0 auto;
+}
+
+.weatherTip {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-ink-subtle);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary {
+  margin: 5px 0 4px;
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+/* 四指标卡（家长端今日/本周汇总） */
+.metricRow {
+  display: flex;
+  gap: 7px;
+  margin: 2px 0 6px;
+}
+
+.metric {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-surface-card, #FFFDF9);
+  border: 1px solid rgba(14, 59, 46, .07);
+  border-radius: 12px;
+  padding: 6px 5px 6px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(14, 59, 46, .05);
+}
+
+.metric strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--assistant-accent, #0E3B2E);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.metric span {
+  display: block;
+  font-size: 10px;
+  color: #6B6257;
+  margin-top: 3px;
+}
+
+.metric em {
+  display: block;
+  font-style: normal;
+  font-size: 9px;
+  color: var(--assistant-gold, #B4652E);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 本周小结卡 */
+.weekSummary {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FFFDF9, #FBF3E7);
+  border: 1px solid #EFE3CE;
+}
+
+.weekSummary strong {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--assistant-gold, #B4652E);
+}
+
+.weekSummary p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #6B6257;
+}
+
+.taskList {
+  border-top: 1px solid var(--color-hairline);
+}
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 4px 2px;
+  color: var(--color-ink);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-hairline-tertiary);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.taskRow:hover {
+  background: var(--assistant-tint);
+}
+
+.taskIcon {
+  display: inline-flex;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--assistant-accent);
+  font-size: 14px;
+  background: var(--assistant-tint);
+  border-radius: var(--radius-md);
+}
+
+.taskCopy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.taskCopy strong {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskCopy > span {
+  overflow: hidden;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskCount {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 6px;
+  color: var(--assistant-accent);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  background: var(--assistant-tint);
+  border-radius: 999px;
+}
+
+.taskArrow {
+  flex: 0 0 auto;
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+}
+
+.teacherWorkbench {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(145deg, var(--color-surface-1), var(--color-surface-2));
+  border: 1px solid var(--color-hairline);
+  border-radius: 16px;
+}
+
+.teacherWorkbenchHeader,
+.teacherSectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.teacherWorkbenchHeader > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.teacherWorkbenchHeader strong,
+.teacherSectionHeading strong {
+  color: var(--assistant-accent, var(--color-primary));
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.teacherWorkbenchHeader > div > span,
+.teacherSectionHeading > span {
+  color: var(--color-ink-subtle);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.teacherWorkbenchHeader button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 8px;
+  color: var(--assistant-accent, var(--color-primary));
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--assistant-tint, var(--color-primary-bg));
+  border: 1px solid var(--color-hairline);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.teacherMetricRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.teacherMetric {
+  display: flex;
+  min-width: 0;
+  min-height: 66px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 7px 5px;
+  text-align: center;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-tertiary);
+  border-radius: 11px;
+}
+
+.teacherMetric strong {
+  color: var(--assistant-accent, var(--color-primary));
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.teacherMetric span {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 10px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacherMetric em {
+  margin-top: 1px;
+  color: var(--color-ink-subtle);
+  font-size: 9px;
+  font-style: normal;
+  line-height: 1.2;
+}
+
+.teacherScheduleSection,
+.teacherProgressSection {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.teacherLessonList {
+  display: grid;
+  gap: 5px;
+}
+
+.teacherLessonRow {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  padding: 7px 8px;
+  color: var(--color-ink);
+  text-align: left;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-tertiary);
+  border-radius: 11px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.teacherLessonRow:hover {
+  border-color: var(--assistant-accent, var(--color-primary));
+}
+
+.teacherLessonTime {
+  color: var(--assistant-accent, var(--color-primary));
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+.teacherLessonCopy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.teacherLessonCopy strong,
+.teacherLessonCopy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacherLessonCopy strong {
+  color: var(--color-ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.teacherLessonCopy span {
+  color: var(--color-ink-subtle);
+  font-size: 9.5px;
+}
+
+.teacherLessonStatus {
+  max-width: 76px;
+  overflow: hidden;
+  padding: 3px 6px;
+  color: var(--assistant-accent, var(--color-primary));
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--assistant-tint, var(--color-primary-bg));
+  border-radius: 999px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacherScheduleEmpty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 10px;
+  color: var(--assistant-accent, var(--color-primary));
+  background: var(--assistant-tint, var(--color-primary-bg));
+  border-radius: 11px;
+}
+
+.teacherScheduleEmpty > :global(.anticon) {
+  flex: 0 0 auto;
+  font-size: 15px;
+}
+
+.teacherScheduleEmpty > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.teacherScheduleEmpty strong {
+  color: var(--color-ink);
+  font-size: 11px;
+}
+
+.teacherScheduleEmpty small {
+  color: var(--color-ink-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.teacherProgressGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.teacherProgressCard {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 8px;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-tertiary);
+  border-radius: 11px;
+}
+
+.teacherProgressCard > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+}
+
+.teacherProgressCard > div span {
+  overflow: hidden;
+  color: var(--color-ink-muted);
+  font-size: 9.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacherProgressCard > div strong {
+  color: var(--assistant-accent, var(--color-primary));
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.teacherProgressTrack {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  background: var(--color-surface-3);
+  border-radius: 999px;
+}
+
+.teacherProgressTrack i {
+  display: block;
+  height: 100%;
+  background: var(--assistant-accent, var(--color-primary));
+  border-radius: inherit;
+  transition: width 200ms ease;
+}
+
+.teacherProgressCard small {
+  color: var(--color-ink-subtle);
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+.teacherFeedbackTip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 10px;
+  color: var(--color-ink-muted);
+  background: var(--color-brand-gold-bg);
+  border: 1px solid rgba(138, 101, 23, .16);
+  border-radius: 11px;
+}
+
+.teacherFeedbackTip > span {
+  flex: 0 0 auto;
+  color: var(--color-brand-gold);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.teacherFeedbackTip > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.teacherFeedbackTip strong {
+  color: var(--color-ink);
+  font-size: 10.5px;
+}
+
+.teacherFeedbackTip p {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.parentWorkbench,
+.adminWorkbench {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(145deg, var(--color-surface-1), var(--color-surface-2));
+  border: 1px solid var(--color-hairline);
+  border-radius: 16px;
+}
+
+.parentStudentList,
+.parentScheduleList,
+.adminTeacherList {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.parentStudentCard {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-tertiary);
+  border-radius: 12px;
+}
+
+.parentStudentHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.parentStudentHeader > div,
+.parentScheduleCopy,
+.parentEmptyState > span,
+.adminTeacherCopy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.parentStudentHeader strong,
+.parentScheduleCopy strong,
+.parentEmptyState strong,
+.adminTeacherCopy strong {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 11px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parentStudentHeader strong {
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.parentStudentHeader > div > span,
+.parentScheduleCopy small,
+.parentEmptyState small,
+.adminTeacherCopy small {
+  overflow: hidden;
+  color: var(--color-ink-subtle);
+  font-size: 9.5px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parentMembership {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 3px 7px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.parentStudentSignals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.parentStudentSignals span {
+  max-width: 100%;
+  padding: 3px 6px;
+  overflow: hidden;
+  color: var(--color-ink-muted);
+  font-size: 9px;
+  background: var(--color-surface-2);
+  border-radius: 999px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parentStudentSignals .parentUnreadSignal {
+  color: var(--assistant-accent, var(--color-primary));
+  background: var(--assistant-tint, var(--color-primary-bg));
+}
+
+.parentScheduleRow {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 12px;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 42px;
+  padding: 6px 8px;
+  color: var(--color-ink-subtle);
+  text-align: left;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-tertiary);
+  border-radius: 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.parentScheduleRow:hover,
+.parentScheduleRow:focus-visible,
+.adminTeacherRow:hover,
+.adminTeacherRow:focus-visible {
+  border-color: var(--assistant-accent, var(--color-primary));
+  outline: none;
+}
+
+.parentScheduleTime {
+  color: var(--assistant-accent, var(--color-primary));
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+.parentScheduleCopy small {
+  font-size: 9px;
+}
+
+.parentMoreSchedules {
+  color: var(--color-ink-subtle);
+  font-size: 9px;
+  text-align: right;
+}
+
+.parentNoSchedule,
+.parentEmptyState {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 8px 10px;
+  color: var(--assistant-accent, var(--color-primary));
+  background: var(--assistant-tint, var(--color-primary-bg));
+  border-radius: 11px;
+}
+
+.parentNoSchedule {
+  justify-content: flex-start;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.parentEmptyState > span {
+  flex: 1 1 auto;
+}
+
+.parentEmptyState small {
+  white-space: normal;
+}
+
+.parentEmptyState button,
+.parentFollowUpGrid button,
+.adminActionGrid button {
+  min-width: 0;
+  color: var(--assistant-accent, var(--color-primary));
+  text-align: left;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-tertiary);
+  border-radius: 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.parentEmptyState button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.parentFollowUpGrid,
+.adminActionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  min-width: 0;
+}
+
+.parentFollowUpGrid button,
+.adminActionGrid button {
+  display: grid;
+  gap: 4px;
+  min-height: 48px;
+  padding: 8px 9px;
+}
+
+.parentFollowUpGrid button > span,
+.adminActionGrid button > span {
+  overflow: hidden;
+  color: var(--color-ink-subtle);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parentFollowUpGrid button > strong,
+.adminActionGrid button > strong {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 10px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adminMetricRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.adminTeacherRow {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 12px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 7px 8px;
+  color: var(--color-ink-subtle);
+  text-align: left;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-tertiary);
+  border-radius: 11px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.adminTeacherAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--assistant-accent, var(--color-primary));
+  font-size: 11px;
+  font-weight: 750;
+  background: var(--assistant-tint, var(--color-primary-bg));
+  border-radius: 9px;
+}
+
+.adminTeacherCopy small {
+  white-space: normal;
+}
+
+.completeState {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  margin-top: 5px;
+  padding: 7px 9px;
+  color: var(--color-success-action);
+  background: var(--color-success-bg);
+  border-radius: 12px;
+}
+
+.completeState > :global(.anticon) {
+  flex: 0 0 auto;
+  font-size: 18px;
+}
+
+.completeState > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.completeState strong {
+  color: var(--color-ink);
+  font-size: 12px;
+}
+
+.completeState span {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.loadingLine,
+.syncNotice {
+  margin-top: 6px;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.syncNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  color: var(--color-warning-text);
+  background: var(--color-warning-bg);
+  border-radius: var(--radius-md);
+}
+
+.syncNotice button,
+.panelFooter button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 44px;
+  padding: 0 8px;
+  color: var(--assistant-accent);
+  font-size: 12px;
+  font-weight: 700;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.syncNotice button:disabled,
+.panelFooter button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.panelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+}
+
+.footerActions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+}
+
+.panelFooter button {
+  min-height: 44px;
+}
+
+@keyframes briefing-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .preview {
+    gap: 9px;
+    padding: 11px 12px;
+    border-radius: 16px;
+  }
+
+  .previewMascot {
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-lg);
+  }
+
+  .previewHeading strong {
+    font-size: 12.5px;
+  }
+
+  .previewRole {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .previewSummary {
+    margin-bottom: 4px;
+    font-size: 11.5px;
+    -webkit-line-clamp: 2;
+  }
+
+  .previewMeta {
+    display: grid;
+    gap: 2px;
+    align-items: start;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .previewMeta > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .previewMeta > span:last-child {
+    min-height: 18px;
+    max-width: 100%;
+    color: var(--color-ink-muted);
+  }
+
+  .metaDivider {
+    display: none;
+  }
+
+  .previewOpen {
+    min-height: 40px;
+    margin-top: 9px;
+    font-size: 12px;
+  }
+
+  .panel {
+    max-height: none;
+    margin: 7px 10px 6px;
+    padding: 9px 10px 6px;
+    border-radius: var(--radius-lg);
+  }
+
+  .panel.panelCompact {
+    max-height: none;
+    margin: 6px 10px 4px;
+    padding: 8px 10px 2px;
+  }
+
+  .panelMascot {
+    width: 66px;
+    height: 66px;
+  }
+
+  .panelHeading h2 {
+    font-size: 16px;
+  }
+
+  .summary {
+    margin: 4px 0;
+    font-size: 12px;
+  }
+
+  .taskRow {
+    min-height: 44px;
+  }
+
+  .teacherWorkbench {
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px;
+  }
+
+  .teacherMetric {
+    min-height: 62px;
+  }
+
+  .teacherLessonRow {
+    grid-template-columns: 43px minmax(0, 1fr) auto;
+    gap: 6px;
+    padding-inline: 7px;
+  }
+
+  .teacherLessonStatus {
+    max-width: 64px;
+  }
+
+  .teacherProgressCard {
+    padding: 7px 6px;
+  }
+
+  .weatherTip {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .teacherMetricRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-height: 620px) {
+  .panel {
+    max-height: none;
+  }
+
+  .panel.panelCompact {
+    max-height: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview {
+    animation: none;
+  }
+
+  .aiPanelEnter {
+    animation: none;
+  }
+
+  .previewMascot,
+  .panelMascot {
+    transition: none;
+  }
+
+  .petLauncherArt {
+    animation: none;
+  }
+
+  .petLauncherPeeking[data-peek-side='right'] .petLauncherArt,
+  .petLauncherPeeking[data-peek-side='left'] .petLauncherArt {
+    animation: none;
+  }
+
+  .petLauncherArt {
+    transition: none;
+  }
+}
+
+@keyframes pet-idle {
+  0%, 100% { transform: perspective(900px) translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(-1deg) scale(1); }
+  50% { transform: perspective(900px) translate3d(0, -4px, 4px) rotateX(-2deg) rotateY(3deg) rotateZ(1deg) scale(1.01); }
+}
+
+@keyframes pet-sneak-peek-right {
+  0%, 18%, 76%, 100% { transform: perspective(620px) translate3d(8px, 2px, -16px) rotateY(-22deg) rotateX(5deg) rotateZ(-7deg) scale(.94); }
+  35%, 60% { transform: perspective(620px) translate3d(-7px, -2px, 5px) rotateY(-7deg) rotateX(-2deg) rotateZ(-2deg) scale(1.02); }
+}
+
+@keyframes pet-sneak-peek-left {
+  0%, 18%, 76%, 100% { transform: perspective(620px) translate3d(-8px, 2px, -16px) rotateY(22deg) rotateX(5deg) rotateZ(7deg) scale(.94); }
+  35%, 60% { transform: perspective(620px) translate3d(7px, -2px, 5px) rotateY(7deg) rotateX(-2deg) rotateZ(2deg) scale(1.02); }
+}
+
+/* 双端居中弹窗入场：淡入 + 轻微缩放（配合内联 transform translate(-50%,-50%)） */
+.aiPanelEnter {
+  animation: aiPanelIn .24s cubic-bezier(.2, 0, 0, 1);
+}
+
+@keyframes aiPanelIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.98); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}

@@ -53,6 +53,7 @@ services:
       APP_TIMEZONE: Asia/Shanghai
       TZ: Asia/Shanghai
       APP_ROOT: /app
+      RATE_LIMIT_DRIVER: redis
       BACKUP_DIR: /data/backups/edu-manage
       BACKUP_SCRIPT: /app/scripts/backup-now.sh
       UPLOAD_DIR: /app/public/uploads
@@ -65,6 +66,7 @@ services:
     ports:
       - 127.0.0.1:3000:3000
     volumes:
+      - /srv/edu-manage/shared/public/home.html:/app/public/home.html
       - /srv/edu-manage/shared/public/uploads:/app/public/uploads
       - /srv/edu-manage/shared/public/services:/app/public/services
       - /srv/edu-manage/shared/public/marketing:/app/public/marketing

@@ -5,6 +5,8 @@ import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
 import { checkScheduleConflict, type ConflictInfo } from '@/lib/schedule-conflict'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { recordCourseChangeEvent } from '@/lib/course-change-events'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { visibleStudentWhere } from '@/lib/business-visibility'
 import {
   calculatePlannedMinutes,
   canTeacherEditIntensiveLesson,
@@ -34,6 +36,7 @@ export const GET = apiHandler(async () => {
       termId: activeTerms.length ? { in: activeTerms.map((term) => term.id) } : '__NO_ACTIVE_TERM__',
       intensiveMode: 'INTENSIVE',
       status: { not: 'ARCHIVED' },
+      deletedAt: null,
       course: { isActive: true },
       OR: [
         { teacherId: teacher.id },
@@ -47,7 +50,7 @@ export const GET = apiHandler(async () => {
         select: { teacherId: true, subject: true },
       },
       enrollments: {
-        where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
+        where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere },
         include: { student: { select: { id: true, name: true, grade: true } } },
         orderBy: { enrolledAt: 'asc' },
       },
@@ -55,15 +58,16 @@ export const GET = apiHandler(async () => {
         where: {
           teacherId: teacher.id,
           status: { notIn: ['CANCELLED', 'POSTPONED'] },
+          deletedAt: null,
         },
         include: {
           lessonStudents: {
             include: { student: { select: { id: true, name: true } } },
             orderBy: { createdAt: 'asc' },
           },
-          attendances: { select: { id: true, status: true } },
+          attendances: { where: { deletedAt: null }, select: { id: true, status: true } },
           classroomFeedbacks: {
-            where: { teacherId: teacher.id, status: 'PUBLISHED' },
+            where: { teacherId: teacher.id, status: 'PUBLISHED', deletedAt: null },
             select: { id: true, studentIds: true },
           },
           intensiveReviews: {
@@ -106,6 +110,7 @@ export const GET = apiHandler(async () => {
           where: {
             groupId: { in: groupIds },
             teacherId: teacher.id,
+            deletedAt: null,
             intensiveReviewStatus: 'APPROVED',
             settlementStatus: { in: ['SETTLED', 'ADJUSTED'] },
             status: 'COMPLETED',
@@ -115,14 +120,14 @@ export const GET = apiHandler(async () => {
             groupId: true,
             subject: true,
             actualMinutes: true,
-            attendances: { select: { studentId: true, status: true } },
+            attendances: { where: { deletedAt: null }, select: { studentId: true, status: true } },
           },
         }),
         prisma.intensiveLessonReview.findMany({
           where: {
             teacherId: teacher.id,
             status: 'PENDING',
-            lesson: { groupId: { in: groupIds } },
+            lesson: { groupId: { in: groupIds }, deletedAt: null },
           },
           select: {
             actualMinutes: true,
@@ -130,7 +135,7 @@ export const GET = apiHandler(async () => {
               select: {
                 groupId: true,
                 subject: true,
-                attendances: { select: { studentId: true, status: true } },
+                attendances: { where: { deletedAt: null }, select: { studentId: true, status: true } },
               },
             },
           },
@@ -288,8 +293,8 @@ export const POST = apiHandler(async (request: NextRequest) => {
       room: { select: { id: true, name: true } },
       teacherAssignments: { select: { teacherId: true, subject: true } },
       enrollments: {
-        where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
-        include: { student: { select: { id: true, name: true } } },
+        where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' }, deletedAt: null } },
+        select: { studentId: true, subjects: true, student: { select: { id: true, name: true } } },
       },
     },
   })
@@ -310,9 +315,12 @@ export const POST = apiHandler(async (request: NextRequest) => {
   const teachingType = parseTeacherIntensiveTeachingType(group.teachingType)
   if (!teachingType) return NextResponse.json({ error: '该个性化课程未配置班型，请联系管理员' }, { status: 409 })
 
-  const selectedStudentIds = studentIds.length
-    ? studentIds
-    : group.enrollments.map((enrollment) => enrollment.studentId)
+  const subjectEnrollments = group.enrollments.filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, subject))
+  const subjectEnrollmentIds = new Set(subjectEnrollments.map((enrollment) => enrollment.studentId))
+  const selectedStudentIds = studentIds.length ? studentIds : [...subjectEnrollmentIds]
+  if (selectedStudentIds.some((studentId) => !subjectEnrollmentIds.has(studentId))) {
+    return NextResponse.json({ error: '只能选择已报名该学科的有效学员' }, { status: 403 })
+  }
   const validationError = validateTeacherIntensiveSchedule({
     lessonDate,
     startTime,
@@ -326,10 +334,6 @@ export const POST = apiHandler(async (request: NextRequest) => {
     return NextResponse.json({ error: '补录历史课程时请填写补录说明' }, { status: 400 })
   }
 
-  const enrollmentByStudent = new Map(group.enrollments.map((enrollment) => [enrollment.studentId, enrollment]))
-  if (selectedStudentIds.some((studentId) => !enrollmentByStudent.has(studentId))) {
-    return NextResponse.json({ error: '只能选择该课程中有效报名的学生' }, { status: 403 })
-  }
   const conflicts: ConflictInfo[] = []
   for (const studentId of selectedStudentIds) {
     const current = await checkScheduleConflict({

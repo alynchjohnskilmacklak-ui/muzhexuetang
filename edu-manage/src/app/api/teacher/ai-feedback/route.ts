@@ -360,7 +360,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const { teacher, prisma } = await requireCurrentTeacher()
 
   if (!checkTeacherAILimit(teacher.id)) {
-    return NextResponse.json({ error: 'AI 生成请求过于频繁，请 1 分钟后再试' }, { status: 429 })
+    return NextResponse.json({ error: '反馈生成请求过于频繁，请 1 分钟后再试' }, { status: 429 })
   }
 
   const body = await req.json() as {
@@ -565,7 +565,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const text = await callDeepSeek({ system: sysPrompt, user: userPrompt, maxTokens: 350 })
     return NextResponse.json({ draft: (text || '').trim() })
   } catch (error) {
-    if (error instanceof AIProviderError) return NextResponse.json({ error: 'AI 服务暂不可用' }, { status: 502 })
-    return NextResponse.json({ error: 'AI 生成失败' }, { status: 500 })
+    if (error instanceof AIProviderError) return NextResponse.json({ error: '学堂数据库服务暂不可用' }, { status: 502 })
+    return NextResponse.json({ error: '反馈生成失败' }, { status: 500 })
   }
 })

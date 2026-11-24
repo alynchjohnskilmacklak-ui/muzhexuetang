@@ -1,59 +1,54 @@
 'use client'
 
+import { useState } from 'react'
+import { AIClientOverview, type AIOverviewAction } from '@/components/AI/AIClientOverview'
 import { AIChatPanel } from '@/components/AI/AIChatPanel'
-import { MODEL_CONFIG } from '@/data/ai-prompts'
-import { Tag } from 'antd'
+import {
+  BellOutlined,
+  CheckSquareOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 
 const SUGGESTED = [
-  '2025年石家庄中考一统线和二统线有什么区别',
-  '新乐市高中分配生政策是怎么运作的',
-  '寒暑假辅导班如何制定科学的课程计划',
-  '家长投诉如何妥善处理，有哪些沟通技巧',
-  '河北省2025年中考政策有哪些重要新变化',
+  '请给我一份校务周会复盘框架，覆盖招生、出勤、教学反馈、家校沟通和续费。',
+  '设计一套教师课堂反馈质量检查清单，要求具体、便于执行。',
+  '向家长解释一统线与二统线时，怎样说明年份、招生范围和官方来源？',
+  '遇到家长集中反映课程安排问题时，如何先核实事实、再制定沟通方案？',
+  '帮我把一个运营目标拆解成负责人、步骤、时间节点和复盘指标。',
+  '如何建立教师反馈、考勤和家校沟通的日常协作流程？',
+]
+
+const QUESTION_GROUPS = [{ title: '校务运营', questions: SUGGESTED }]
+
+const ACTIONS: AIOverviewAction[] = [
+  { href: '/students', icon: <UserOutlined />, label: '学员管理', description: '维护学员与报名信息' },
+  { href: '/teachers', icon: <TeamOutlined />, label: '教师档案', description: '查看教师资料与状态' },
+  { href: '/attendance', icon: <CheckSquareOutlined />, label: '考勤管理', description: '核对课堂考勤数据' },
+  { href: '/communication-center', icon: <BellOutlined />, label: '沟通中心', description: '跟进家校消息与通知' },
 ]
 
 export default function AdminAIPage() {
+  const [quickAsk, setQuickAsk] = useState<string | null>(null)
+
   return (
-    <div>
-      <div style={{
-        borderRadius: 8,
-        marginBottom: 20,
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #1a0a00 0%, #2d1200 50%, #3d1a00 100%)',
-        boxShadow: '0 8px 32px rgba(0,0,0,.2)',
-        position: 'relative',
-      }}>
-        <div style={{ position: 'relative', padding: '24px 28px 20px' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 10 }}>
-            AI 管理助手
-          </div>
-          <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,.75)', lineHeight: 1.9, marginBottom: 16 }}>
-            整合<span style={{ color: '#E87545', fontWeight: 600 }}> DeepSeek · MiMo · Kimi </span>
-            三大顶尖模型，为牧哲学堂管理者提供教育政策咨询、机构运营建议和学科知识支持，
-            让管理决策更智慧、更高效。
-          </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {MODEL_CONFIG.map((model) => (
-              <div key={model.id} style={{
-                padding: '6px 12px',
-                borderRadius: 8,
-                backgroundColor: 'rgba(255,255,255,.06)',
-                border: `1px solid ${model.color}40`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-              }}>
-                <span style={{ color: model.color, fontWeight: 800 }}>{model.icon}</span>
-                <span style={{ fontSize: 12, color: '#fff', fontWeight: 600 }}>{model.label}</span>
-                <Tag style={{ backgroundColor: model.badgeColor, color: '#fff', border: 'none', fontSize: 10, padding: '0 4px' }}>
-                  {model.badge}
-                </Tag>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <AIChatPanel aiRole="admin" suggestedQuestions={SUGGESTED} />
+    <div style={{ width: '100%', maxWidth: '100%' }}>
+      <AIClientOverview
+        role="admin"
+        eyebrow="校务运营参谋"
+        title="把校务问题梳理清楚，再落到可执行动作"
+        description="小牧适合整理运营方案、政策要点、教师协作清单与家长沟通话术。请以系统管理页面的实时记录为准，AI 提供的建议需要结合校情核对。"
+        capabilities={['运营复盘', '政策梳理', '流程优化', '家长沟通']}
+        actionsTitle="管理端常用入口"
+        actions={ACTIONS}
+        questionGroups={QUESTION_GROUPS}
+        onAskQuestion={setQuickAsk}
+      />
+      <AIChatPanel
+        aiRole="admin"
+        quickAsk={quickAsk}
+        onQuickAskHandled={() => setQuickAsk(null)}
+      />
     </div>
   )
 }

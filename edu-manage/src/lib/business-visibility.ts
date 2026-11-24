@@ -90,6 +90,28 @@ export function parentLinkedStudentWhere(parentId: string): Prisma.StudentWhereI
 }
 
 /**
+ * Notifications may be general (no student) or belong to a child currently
+ * linked to this parent. This keeps historical notices from following a
+ * parent account after the child has been unlinked or deactivated.
+ */
+export function parentVisibleNotificationWhere(parentId: string): Prisma.NotificationWhereInput {
+  return {
+    OR: [
+      { studentId: null },
+      { student: { is: parentLinkedStudentWhere(parentId) } },
+    ],
+  }
+}
+
+/** Parent-owned student records used when reading a linked child's history. */
+export function parentStudentHistoryWhere(parentId: string): Prisma.StudentWhereInput {
+  return {
+    OR: [{ parentId }, { parentUserId: parentId }],
+    deletedAt: null,
+  }
+}
+
+/**
  * Filter for active students belonging to a parent.
  * Deleted students are excluded from all parent business views.
  */
@@ -113,13 +135,18 @@ export function parentActiveEnrollmentWhere(parentId: string): Prisma.Enrollment
 /**
  * Filter for lessons visible to a parent (based on their children's active enrollments).
  */
-export function parentVisibleLessonWhere(parentId: string): Prisma.ClassLessonWhereInput {
+export function parentVisibleLessonWhere(parentId: string, studentIds?: string[]): Prisma.ClassLessonWhereInput {
   return {
     ...visibleClassLessonWhere,
     group: {
       ...visibleClassGroupWhere,
       teacher: visibleTeacherWhere,
-      enrollments: { some: parentActiveEnrollmentWhere(parentId) },
+      enrollments: {
+        some: {
+          ...parentActiveEnrollmentWhere(parentId),
+          ...(studentIds?.length ? { studentId: { in: studentIds } } : {}),
+        },
+      },
     },
   }
 }

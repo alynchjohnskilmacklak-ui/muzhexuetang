@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
 import { Button, Card, Col, Descriptions, Empty, Row, Space, Spin, Statistic, Tag } from 'antd'
-import { ArrowLeftOutlined, CalendarOutlined, FileTextOutlined, TeamOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, AuditOutlined, CalendarOutlined, DollarOutlined, FileTextOutlined, SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { materialAudienceLabel, materialStatusLabel } from '@/lib/material-format'
 
@@ -27,10 +27,7 @@ export default function TeacherDetailPage() {
     <PageLayout
       title={teacher.name}
       subtitle={`${teacher.employmentType === 'FULL_TIME' ? '全职' : '兼职'} · ${teacher.phone || '未填写电话'}`}
-      actions={<Space wrap>
-        <Button onClick={() => router.push(`/teacher-logs/${params.id}`)}>查看行为日志</Button>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/teachers')}>返回教师管理</Button>
-      </Space>}
+      actions={<Button className="mobile-shell-back" icon={<ArrowLeftOutlined />} onClick={() => router.push('/teachers')}>返回教师管理</Button>}
     >
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} lg={6}><Metric title="负责学员" value={teacher._count?.students || 0} /></Col>

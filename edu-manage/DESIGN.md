@@ -396,3 +396,29 @@ The parent growth page (成长动态) uses a warm brown sub-palette derived from
 | growth-badge-locked | `#f3eee8` | surface-3 |
 
 These are defined in `globals.css` under `.growth-*` classes. Do NOT use these values outside the growth feature. All other pages use the main design tokens.
+
+## Motion Language (persistent project rule)
+
+### Reference-directed login opening
+
+The 7-second `Muzhe Joy` opening uses the warm canvas and the supplied school mark. The intro-only background is `--color-intro-canvas:#faf8f5` with paper light `--color-intro-paper:#fffdf9`, a faint orange wash at the upper left, a faint teal wash at the lower right, and two book-page arcs along the bottom. These restrained SVG washes are an explicit exception for this brand opening; application pages retain the standard solid surfaces. Handwriting uses deeper rose `#bd526b`, peach `#bc633b`, gold `#977024`, mint `#258979`, sky `#347f9f`, and lilac `#8763aa` for legibility on the light field. The original mark retains orange `#ff773d` and teal `#00bcb2`, enlarged at the visual centre, with the school name and existing motto beneath. The always-visible skip button uses brand orange with dark text and a deeper orange outline. Reduced motion shows the static mark and signature and exits within 900ms. All colours are isolated `--color-intro-*` tokens in globals.css.
+
+Use motion to make state and navigation easier to read. Keep it quiet, quick, and physically coherent; avoid a collection of decorative effects that competes with learning content. Apply the patterns below to the relevant controls and flows, not indiscriminately to every card.
+
+1. **Pressable controls**: press to `scale(.96)` with a brief inset shadow; release with one small overshoot and settle. Keep the click ripple anchored to the actual pointer position.
+2. **Switches and checkboxes**: stretch the switch thumb briefly while it travels; draw a checked mark from its lower-left stroke. Do not alter the control's hit area.
+3. **Card tilt and reflected light**: opt in only for a small number of focal, tactile cards. Limit tilt to roughly 4–5 degrees, follow pointer/touch position, and spring back when released. Keep the radial reflection and rotating conic border low contrast; never put them on every card or use them as a card background.
+4. **Pill-to-panel and shared-element transitions**: use a stable shared name for the source and destination. Preserve the element's identity through size and corner-radius changes. Feature-detect browser support and leave navigation fully functional without animation.
+5. **Charts**: snap the pointer to real data points and synchronize the selected date and value. Animate the value with a decelerating count; retain a readable tooltip and keyboard/touch access.
+6. **Bottom drawers**: support a half-height preview and a full-height state. Follow the active gesture, resist overscroll with a rubber-band curve, and settle based on both displacement and release velocity.
+7. **Lists**: stagger only newly revealed, short lists; use a small vertical offset and restrained spring easing. Do not replay long-list animations on every render.
+8. **Accessibility and performance**: honor `prefers-reduced-motion`; do not prevent normal page scrolling to get touch tilt; clean up pointer state on cancel/unmount. Prefer CSS and existing platform APIs over adding a motion dependency for these effects.
+9. **Card-to-detail flow**: let a selected content card become the matching full-screen detail hero. Keep the same stable shared-element identity in both views, stagger only the supporting content, and use the same transition in reverse when returning so the original list position is restored.
+10. **Stacked study cards**: show depth with small scale and offset differences; expand cards in a short sequence and use a soft spring to restore the stack. Keep the active card clearly on top and avoid making hidden cards look actionable.
+11. **Card drag expansion**: where a card expands by dragging its bottom edge, let the gesture drive both content height and cover size; resist overscroll and snap by distance plus release velocity.
+12. **Horizontal card rails**: use a consistent gap, partial adjacent-card preview, and mandatory scroll snapping. Leave room for keyboard scrolling and do not hijack vertical page scroll.
+13. **Perspective flip cards**: keep both faces opaque with backface visibility enabled; follow pointer position with a soft radial highlight, and return the light to center when the pointer leaves.
+
+When extending motion, check the interaction on a narrow touch viewport and desktop pointer input. Verify the reduced-motion path and ensure that content layout does not jump before or after the animation.
+
+Current reference implementations: parent learning-material covers open into the full-screen preview and return to their prior list/cover view; the preview cover's lower grip changes cover height while the reading area resizes; the parent archive timeline shares its selected card with the entry hero; vocabulary review uses the expandable three-card stack and opaque, perspective-flipped cards; lesson-preview history is the mobile horizontal snap rail. Extend these patterns before creating another interaction system.

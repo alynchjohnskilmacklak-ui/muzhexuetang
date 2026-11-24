@@ -1,0 +1,183 @@
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  padding: 15px;
+  border: 1px solid #e4e9e5;
+  border-radius: 15px;
+  background: #fff;
+  color: #1a1201;
+  box-shadow: 0 3px 12px rgba(31, 45, 39, .045);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: #eaf3ef;
+  color: #0e5e4e;
+  font-size: 15px;
+}
+
+.heading strong {
+  display: block;
+  color: #183d35;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.heading small {
+  display: block;
+  margin-top: 3px;
+  color: #8a8173;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.topic {
+  margin-bottom: 9px;
+  padding: 7px 10px;
+  border: 1px solid #eadbb8;
+  border-radius: 10px;
+  background: #faf5e9;
+  color: #65512d;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.reviewFocus {
+  padding: 10px 11px;
+  border-radius: 10px;
+  background: #f8f7f3;
+}
+
+.reviewFocus span,
+.reviewResult span {
+  color: #877b68;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.reviewFocus p {
+  margin: 4px 0 0;
+  color: #383326;
+  font-size: 11px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.reviewResult {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+  padding: 9px 10px;
+  border: 1px solid #edf0eb;
+  border-radius: 10px;
+  background: #fcfcfa;
+}
+
+.reviewResult strong {
+  color: #0e5e4e;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.option {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 7px;
+  border: 1px solid #e8e5df;
+  border-radius: 9px;
+  background: #fff;
+  color: #6d6558;
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.selected {
+  border-color: #9ec8b9;
+  background: #eaf3ef;
+  color: #0e5e4e;
+  font-weight: 750;
+}
+
+.privacyNote,
+.communicationHint {
+  margin: 10px 0 0;
+  color: #817866;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.message {
+  padding: 10px 11px;
+  border: 1px solid #ece7dd;
+  border-radius: 11px;
+}
+
+.message + .message {
+  margin-top: 8px;
+}
+
+.parentMessage {
+  border-color: #f1dfcd;
+  background: #fff8f1;
+}
+
+.teacherMessage {
+  border-color: #dcebe5;
+  background: #f2f8f5;
+}
+
+.messageMeta {
+  margin-bottom: 4px;
+  color: #8a6d3b;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.message p {
+  margin: 0;
+  color: #40392e;
+  font-size: 11px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 380px) {
+  .card {
+    padding: 12px;
+  }
+
+  .options {
+    gap: 6px;
+  }
+}

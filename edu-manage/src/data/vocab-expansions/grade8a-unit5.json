@@ -1,0 +1,1586 @@
+[
+  {
+    "word": "pepper",
+    "examTags": [
+      "词汇·食材",
+      "阅读·辨认食物"
+    ],
+    "grammar": "n. 胡椒粉，通常不可数；菜椒、甜椒时为可数名词，复数 peppers。",
+    "collocations": "black pepper; red peppers; add pepper to the soup",
+    "commonMistake": "pepper 可指胡椒粉或菜椒；胡椒粉常不可数，指多个菜椒时用 peppers。",
+    "example": {
+      "english": "Add a little black pepper to the soup.",
+      "chinese": "往汤里加一点黑胡椒。"
+    },
+    "application": {
+      "prompt": "The recipe asks for a little salt and ___. A. pepper B. pancake",
+      "solution": "A。解析：pepper 可指调味用的胡椒粉。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pepper",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pepper"
+      }
+    ]
+  },
+  {
+    "word": "cut up",
+    "examTags": [
+      "词汇·烹饪动作",
+      "语法·可分短语动词"
+    ],
+    "grammar": "phr. 切碎；剁碎。是可分短语动词，名词宾语可置于 up 前后，代词必须放中间。",
+    "collocations": "cut up an onion; cut the vegetables up; cut it up",
+    "commonMistake": "宾语是代词时说 cut it up，不说 cut up it；cut up 后接食材表示切碎。",
+    "example": {
+      "english": "Cut up the carrots before you put them in the pot.",
+      "chinese": "把胡萝卜切碎后再放进锅里。"
+    },
+    "application": {
+      "prompt": "The apples are too large for the salad. Please cut ___ up. A. them B. up them",
+      "solution": "A。解析：可分短语动词后接代词时，代词放在 cut 和 up 之间。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cut",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cut"
+      }
+    ]
+  },
+  {
+    "word": "mix",
+    "examTags": [
+      "词汇·烹饪动作与材料",
+      "语法·动词与名词"
+    ],
+    "grammar": "v.（使）混合；调配；n. 混合物；混杂。动词常用 mix A with B 或 mix A and B together。",
+    "collocations": "mix flour with water; mix the ingredients; a cake mix",
+    "commonMistake": "表示把 A 和 B 混合可说 mix A with B；mix 作名词时表示混合物或混合料。",
+    "example": {
+      "english": "Mix the eggs with the flour in a large bowl.",
+      "chinese": "在大碗里把鸡蛋和面粉混合。"
+    },
+    "application": {
+      "prompt": "First, ___ the flour with some water. A. slice B. mix",
+      "solution": "B。解析：把两种食材混合用 mix A with B。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mix",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mix"
+      }
+    ]
+  },
+  {
+    "word": "bake",
+    "examTags": [
+      "词汇·烹饪方式",
+      "语法·动词词形"
+    ],
+    "grammar": "v. 烘焙；烤制。规则变化 bake—baked—baked；常指用烤箱加热制作食物。",
+    "collocations": "bake a cake; bake bread; bake in the oven",
+    "commonMistake": "bake 常指用烤箱烘烤；bake 的过去式为 baked，不要与 boil（煮）混淆。",
+    "example": {
+      "english": "We baked a cake for the school fair.",
+      "chinese": "我们为学校义卖会烤了一个蛋糕。"
+    },
+    "application": {
+      "prompt": "Put the bread in the oven and ___ it for 20 minutes. A. mash B. bake",
+      "solution": "B。解析：在烤箱中烤面包用 bake。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bake",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bake"
+      }
+    ]
+  },
+  {
+    "word": "oven",
+    "examTags": [
+      "词汇·厨房用品",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 烤箱；烤炉。可数名词，复数 ovens；通常说 in the oven 或 turn the oven on。",
+    "collocations": "a hot oven; preheat the oven; cook it in the oven",
+    "commonMistake": "oven 是可数名词；表示把食物放进烤箱通常用 in the oven，不用 on the oven。",
+    "example": {
+      "english": "The potatoes are cooking in the oven.",
+      "chinese": "土豆正在烤箱里烤。"
+    },
+    "application": {
+      "prompt": "You bake a cake in an ___. A. island B. oven",
+      "solution": "B。解析：烘烤蛋糕使用 oven（烤箱）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: oven",
+        "url": "https://dictionary.cambridge.org/dictionary/english/oven"
+      }
+    ]
+  },
+  {
+    "word": "pour sth into sth",
+    "examTags": [
+      "词汇·烹饪动作",
+      "语法·动词与介词"
+    ],
+    "grammar": "phr. 把某物倒入某处。pour + 液体 + into + 容器；pour...out of... 表示从某处倒出。",
+    "collocations": "pour milk into a cup; pour the soup into a bowl; pour water into the pot",
+    "commonMistake": "表示倒入用 pour sth into sth；into 强调进入容器内部，不要和 onto（到表面上）混淆。",
+    "example": {
+      "english": "Pour the warm milk into the bowl slowly.",
+      "chinese": "把温牛奶慢慢倒进碗里。"
+    },
+    "application": {
+      "prompt": "Carefully ___ the water ___ the glass. A. boil; with B. pour; into",
+      "solution": "B。解析：把水倒入杯中用 pour the water into the glass。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pour",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pour"
+      }
+    ]
+  },
+  {
+    "word": "flour",
+    "examTags": [
+      "词汇·食材",
+      "语音·易混词辨析"
+    ],
+    "grammar": "n. 面粉；通常不可数。a bag of flour 表示一袋面粉。",
+    "collocations": "plain flour; a bag of flour; mix flour with water",
+    "commonMistake": "flour（面粉）与 flower（花）同音，拼写和词义不同；面粉通常不加 a。",
+    "example": {
+      "english": "We need flour, eggs, and milk to make pancakes.",
+      "chinese": "做薄饼需要面粉、鸡蛋和牛奶。"
+    },
+    "application": {
+      "prompt": "The white powder used to make bread is ___. A. flour B. flower",
+      "solution": "A。解析：制作面包用 flour（面粉）；flower 是花。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flour",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flour"
+      }
+    ]
+  },
+  {
+    "word": "boil",
+    "examTags": [
+      "词汇·烹饪动作",
+      "语法·动词与名词"
+    ],
+    "grammar": "v. 煮沸；烧开；沸腾；n. 沸腾（较少用）。规则变化 boil—boiled—boiled；表示水沸腾可说 water boils。",
+    "collocations": "boil water; boil an egg; bring the water to a boil",
+    "commonMistake": "boil 作动词表示煮沸；说“把水烧开”可用 boil the water，水本身沸腾也可作主语。",
+    "example": {
+      "english": "Boil the potatoes until they are soft.",
+      "chinese": "把土豆煮到变软。"
+    },
+    "application": {
+      "prompt": "Heat the water until it starts to ___. A. boil B. slice",
+      "solution": "A。解析：液体达到沸腾状态用 boil。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: boil",
+        "url": "https://dictionary.cambridge.org/dictionary/english/boil"
+      }
+    ]
+  },
+  {
+    "word": "butter",
+    "examTags": [
+      "词汇·食材",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 黄油；通常不可数。表示一块或一份可说 a piece of butter；butter 也可作动词表示涂黄油。",
+    "collocations": "a little butter; butter and bread; melt the butter",
+    "commonMistake": "食材 butter 通常不可数，不说 a butter；可说 some butter 或 a piece of butter。",
+    "example": {
+      "english": "Melt a little butter in the pan.",
+      "chinese": "在平底锅里融化一点黄油。"
+    },
+    "application": {
+      "prompt": "Add a small amount of ___ to the pan. A. butter B. instructions",
+      "solution": "A。解析：黄油用量可说 a little butter。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: butter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/butter"
+      }
+    ]
+  },
+  {
+    "word": "cheese",
+    "examTags": [
+      "词汇·食材",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 奶酪；通常不可数。表示一块奶酪可说 a piece of cheese；不同种类时可用 cheeses。",
+    "collocations": "a piece of cheese; cheese sandwich; grated cheese",
+    "commonMistake": "泛指奶酪时通常不可数；不要说 a cheese 表示一块奶酪，可说 a piece of cheese。",
+    "example": {
+      "english": "She put some cheese on top of the potatoes.",
+      "chinese": "她在土豆上放了一些奶酪。"
+    },
+    "application": {
+      "prompt": "Would you like ___ on your baked potatoes? A. some cheese B. a cheese",
+      "solution": "A。解析：泛指奶酪时用不可数形式 some cheese。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cheese",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cheese"
+      }
+    ]
+  },
+  {
+    "word": "cut sth in / into sth",
+    "examTags": [
+      "词汇·烹饪步骤",
+      "语法·动词与介词"
+    ],
+    "grammar": "phr. 把某物切成某种形状或大小。cut sth into pieces/slices；cut sth in half 表示切成两半。",
+    "collocations": "cut the onion into pieces; cut the cake in half; cut carrots into thin slices",
+    "commonMistake": "表示切成若干块常用 cut...into pieces；固定说 cut in half（切成两半）。",
+    "example": {
+      "english": "Cut the apple into four small pieces.",
+      "chinese": "把苹果切成四小块。"
+    },
+    "application": {
+      "prompt": "Before cooking, cut the potatoes ___ small pieces. A. during B. into",
+      "solution": "B。解析：切成某种形状或大小用 cut sth into...。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cut",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cut"
+      }
+    ]
+  },
+  {
+    "word": "tablespoon",
+    "examTags": [
+      "词汇·烹饪度量",
+      "阅读·食谱数量"
+    ],
+    "grammar": "n. 汤匙；一汤匙的量。可数名词，复数 tablespoons；食谱中常用 tbsp 作缩写。",
+    "collocations": "a tablespoon of sugar; two tablespoons of oil; a tablespoon measure",
+    "commonMistake": "表示一汤匙某种食材说 a tablespoon of...；具体容量会因量匙标准而异，不把它当重量单位。",
+    "example": {
+      "english": "Add one tablespoon of oil to the pan.",
+      "chinese": "往锅里加一汤匙油。"
+    },
+    "application": {
+      "prompt": "The recipe needs two ___ of butter. A. tablespoons B. tablespoon's",
+      "solution": "A。解析：two 后用复数 tablespoons；of 后接食材。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tablespoon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tablespoon"
+      }
+    ]
+  },
+  {
+    "word": "mash",
+    "examTags": [
+      "词汇·烹饪动作",
+      "语法·动词词形"
+    ],
+    "grammar": "v. 捣烂；捣碎。规则变化 mash—mashed—mashed；常接 potatoes、fruit 等作宾语。",
+    "collocations": "mash potatoes; mash a banana; mash the vegetables with a fork",
+    "commonMistake": "mash 强调用力压碎成糊状；其过去式加 -ed：mashed。",
+    "example": {
+      "english": "Mash the cooked potatoes with a fork.",
+      "chinese": "用叉子把煮熟的土豆捣碎。"
+    },
+    "application": {
+      "prompt": "Use a fork to ___ the soft potatoes. A. mash B. pour",
+      "solution": "A。解析：把煮软的土豆压碎用 mash。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mash",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mash"
+      }
+    ]
+  },
+  {
+    "word": "mashed potatoes",
+    "examTags": [
+      "词汇·菜肴名称",
+      "语法·过去分词作定语"
+    ],
+    "grammar": "n. 土豆泥。固定菜名，通常用复数 potatoes；mashed 是过去分词作定语，表示捣碎后的土豆。",
+    "collocations": "a bowl of mashed potatoes; serve mashed potatoes; mashed potatoes with butter",
+    "commonMistake": "菜名固定说 mashed potatoes，potato 变复数为 potatoes；potatoes 前不加 a，但可说 a bowl of mashed potatoes。",
+    "example": {
+      "english": "We served mashed potatoes with the baked fish.",
+      "chinese": "我们把土豆泥和烤鱼一起端上桌。"
+    },
+    "application": {
+      "prompt": "Boiled potatoes crushed until smooth are called ___. A. sour soup B. mashed potatoes",
+      "solution": "B。解析：捣碎的土豆菜肴是 mashed potatoes（土豆泥）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: potato",
+        "url": "https://dictionary.cambridge.org/dictionary/english/potato"
+      }
+    ]
+  },
+  {
+    "word": "stir-fry",
+    "examTags": [
+      "词汇·烹饪方式",
+      "语法·动词与名词"
+    ],
+    "grammar": "v. 翻炒；炒；煸。作动词时 stir-fry—stir-fried—stir-fried；也可作名词指一道炒菜。",
+    "collocations": "stir-fry vegetables; stir-fry the chicken; a vegetable stir-fry",
+    "commonMistake": "过去式在词尾加 -ed 并把 y 变 i：stir-fried；烹饪动作用 stir-fry，不是 stir and fry 的任意拼写。",
+    "example": {
+      "english": "Stir-fry the vegetables over high heat for two minutes.",
+      "chinese": "用大火把蔬菜翻炒两分钟。"
+    },
+    "application": {
+      "prompt": "Use a little oil to ___ the vegetables quickly in a pan. A. bake B. stir-fry",
+      "solution": "B。解析：在锅里快速翻炒用 stir-fry。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stir-fry",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stir-fry"
+      }
+    ]
+  },
+  {
+    "word": "do with",
+    "examTags": [
+      "词汇·固定搭配",
+      "语法·疑问词与不定式"
+    ],
+    "grammar": "phr. 处理；应付。常见结构为 what to do with sth/sb；do with 也见于 have something to do with（与……有关）。",
+    "collocations": "what to do with leftovers; do something with the ingredients; have nothing to do with",
+    "commonMistake": "what to do with sth 强调如何处理或使用某物；what to do about sth 强调针对问题采取措施，两种表达都正确，按语义选择。",
+    "example": {
+      "english": "What should we do with the extra vegetables?",
+      "chinese": "这些多出来的蔬菜我们该怎么处理？"
+    },
+    "application": {
+      "prompt": "There is some soup left. What should we ___ it? A. warm up with B. do with",
+      "solution": "B。解析：询问“如何处理某物”用 what to do with。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: do",
+        "url": "https://dictionary.cambridge.org/dictionary/english/do"
+      }
+    ]
+  },
+  {
+    "word": "bowl",
+    "examTags": [
+      "词汇·厨房用品与量词",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 碗；钵；盆。可数名词，复数 bowls；a bowl of + 食物表示“一碗……”。",
+    "collocations": "a bowl of soup; a mixing bowl; two bowls of rice",
+    "commonMistake": "表示一碗某物用 a bowl of；数量词 bowl 后接 of，不直接说 a bowl soup。",
+    "example": {
+      "english": "He ate a bowl of hot soup after the walk.",
+      "chinese": "散步后他喝了一碗热汤。"
+    },
+    "application": {
+      "prompt": "Please put the flour in a large ___. A. bowl B. oven",
+      "solution": "A。解析：混合食材通常放在 bowl（碗、钵）里。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bowl",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bowl"
+      }
+    ]
+  },
+  {
+    "word": "heat",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与动词"
+    ],
+    "grammar": "v. 加热；变热；n. 热；高温。heat sth 表示加热某物；heat up 表示（使）热起来。",
+    "collocations": "heat the oil; heat up the soup; in the heat of summer",
+    "commonMistake": "heat 作动词通常直接接被加热的物品；heat 是名词时不可数，表示热量或炎热。",
+    "example": {
+      "english": "Heat the pan before adding the oil.",
+      "chinese": "加油之前先把锅加热。"
+    },
+    "application": {
+      "prompt": "___ the milk gently before you pour it into the cup. A. Slice B. Heat",
+      "solution": "B。解析：让牛奶变热用动词 heat。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: heat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/heat"
+      }
+    ]
+  },
+  {
+    "word": "oil",
+    "examTags": [
+      "词汇·食材与物质",
+      "语法·不可数名词与熟词多义"
+    ],
+    "grammar": "n. 食用油；石油；燃油。通常不可数；可用 cooking oil 指食用油，oils 可指不同种类的油。",
+    "collocations": "a little oil; cooking oil; oil the pan",
+    "commonMistake": "泛指食用油或石油时通常不可数，不说 an oil；不同种类或作品中的油可用 oils。",
+    "example": {
+      "english": "Put a little oil in the pan before cooking.",
+      "chinese": "烹饪前在锅里放一点油。"
+    },
+    "application": {
+      "prompt": "Use a small amount of cooking ___ to fry the eggs. A. oil B. bowl",
+      "solution": "A。解析：煎蛋会用 cooking oil（食用油）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: oil",
+        "url": "https://dictionary.cambridge.org/dictionary/english/oil"
+      }
+    ]
+  },
+  {
+    "word": "pan",
+    "examTags": [
+      "词汇·厨房用品",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 平底锅；烤盘。可数名词，复数 pans；frying pan 常指煎锅。",
+    "collocations": "a frying pan; heat a pan; cook in a pan",
+    "commonMistake": "pan 是可数名词；表示用锅烹饪说 in a pan 或 on a pan 的具体用法依食物和动作而定。",
+    "example": {
+      "english": "She warmed the oil in a pan.",
+      "chinese": "她在平底锅里把油加热。"
+    },
+    "application": {
+      "prompt": "Use a frying ___ to cook the eggs on the stove. A. spoon B. pan",
+      "solution": "B。解析：煎蛋常用 frying pan（煎锅）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pan",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pan"
+      }
+    ]
+  },
+  {
+    "word": "put sth back",
+    "examTags": [
+      "词汇·日常动作",
+      "语法·可分短语动词"
+    ],
+    "grammar": "phr. 把某物放回原处。是可分短语动词；代词宾语必须放在 put 和 back 之间。",
+    "collocations": "put the jar back; put it back on the shelf; put the book back",
+    "commonMistake": "宾语是代词时说 put it back，不说 put back it；back 后常用地点介词短语说明放回哪里。",
+    "example": {
+      "english": "After using the flour, put it back in the cupboard.",
+      "chinese": "面粉用完后把它放回橱柜里。"
+    },
+    "application": {
+      "prompt": "The spoon belongs in the drawer. Please put ___ back. A. back it B. it",
+      "solution": "B。解析：代词宾语放在可分短语动词中间：put it back。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: put",
+        "url": "https://dictionary.cambridge.org/dictionary/english/put"
+      }
+    ]
+  },
+  {
+    "word": "mix ... with ...",
+    "examTags": [
+      "词汇·食材搭配",
+      "语法·动词结构"
+    ],
+    "grammar": "phr. 把……和……混合。结构为 mix A with B，也可说 mix A and B together。",
+    "collocations": "mix flour with water; mix sugar with butter; mix the two ingredients together",
+    "commonMistake": "mix A with B 两部分都要有；with 后接被混合的另一种材料。",
+    "example": {
+      "english": "Mix the sugar with the melted butter.",
+      "chinese": "把糖和融化的黄油混合。"
+    },
+    "application": {
+      "prompt": "To make the dough, ___ the flour ___ water. A. cut; into B. mix; with",
+      "solution": "B。解析：把面粉和水混合用 mix A with B。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mix",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mix"
+      }
+    ]
+  },
+  {
+    "word": "simple",
+    "examTags": [
+      "词汇·形容词",
+      "语法·形容词与副词辨析"
+    ],
+    "grammar": "adj. 简单的；朴素的。可修饰名词或作表语；副词为 simply，比较级 simpler。",
+    "collocations": "a simple recipe; a simple question; keep it simple",
+    "commonMistake": "simple 是形容词，修饰名词；修饰动词需用 simply。",
+    "example": {
+      "english": "This simple recipe needs only four ingredients.",
+      "chinese": "这个简单的食谱只需要四种食材。"
+    },
+    "application": {
+      "prompt": "The instructions are easy to follow, so the recipe is ___. A. simple B. sour",
+      "solution": "A。解析：simple 表示“简单的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: simple",
+        "url": "https://dictionary.cambridge.org/dictionary/english/simple"
+      }
+    ]
+  },
+  {
+    "word": "ingredient",
+    "examTags": [
+      "词汇·食谱与食材",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 食材；成分。可数名词，复数 ingredients；常用 ingredient in/of a dish。",
+    "collocations": "fresh ingredients; list the ingredients; an ingredient in the soup",
+    "commonMistake": "ingredient 是可数名词；列出多种食材时用复数 ingredients。",
+    "example": {
+      "english": "Read the recipe and prepare all the ingredients first.",
+      "chinese": "先读食谱并准备好所有食材。"
+    },
+    "application": {
+      "prompt": "Eggs and flour are two ___ in this cake. A. ingredients B. instructions",
+      "solution": "A。解析：鸡蛋和面粉是蛋糕的食材，ingredient 的复数为 ingredients。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ingredient",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ingredient"
+      }
+    ]
+  },
+  {
+    "word": "instruction",
+    "examTags": [
+      "词汇·说明与步骤",
+      "语法·可数名词复数"
+    ],
+    "grammar": "n. 用法说明；指示；操作指南。可数名词，食谱步骤中常用复数 instructions。",
+    "collocations": "follow the instructions; read the cooking instructions; give clear instructions",
+    "commonMistake": "表示一组操作步骤通常用 instructions；instruction 也可指一条指示。",
+    "example": {
+      "english": "Follow the instructions carefully when you use the oven.",
+      "chinese": "使用烤箱时要仔细按照说明操作。"
+    },
+    "application": {
+      "prompt": "Read the recipe ___ before you start cooking. A. ingredients of B. instructions",
+      "solution": "B。解析：食谱的操作步骤常说 instructions。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: instruction",
+        "url": "https://dictionary.cambridge.org/dictionary/english/instruction"
+      }
+    ]
+  },
+  {
+    "word": "steamed fish",
+    "examTags": [
+      "词汇·菜肴名称",
+      "语法·过去分词作定语"
+    ],
+    "grammar": "n. 清蒸鱼。steamed 是 steam 的过去分词作定语，表示用蒸汽烹制；fish 作菜名时通常不变形。",
+    "collocations": "a plate of steamed fish; cook steamed fish; steamed fish with ginger",
+    "commonMistake": "steamed fish 是“蒸鱼”这道菜；fish 作鱼肉或泛指鱼时通常不加复数 -s。",
+    "example": {
+      "english": "We ordered steamed fish with rice for dinner.",
+      "chinese": "晚饭我们点了清蒸鱼和米饭。"
+    },
+    "application": {
+      "prompt": "Fish cooked with steam is called ___. A. steamed fish B. fried flour",
+      "solution": "A。解析：用蒸汽做的鱼是 steamed fish。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: steam",
+        "url": "https://dictionary.cambridge.org/dictionary/english/steam"
+      }
+    ]
+  },
+  {
+    "word": "sour",
+    "examTags": [
+      "词汇·味觉与形容词",
+      "语法·形容词作表语"
+    ],
+    "grammar": "adj. 酸的；有酸味的。可作定语或表语；sour 也可作动词表示变酸。",
+    "collocations": "sour fruit; taste sour; sweet and sour",
+    "commonMistake": "sour 描述味道“酸”；表示“酸辣”时按顺序说 hot and sour。",
+    "example": {
+      "english": "The lemon tasted very sour.",
+      "chinese": "这个柠檬尝起来很酸。"
+    },
+    "application": {
+      "prompt": "A lemon usually has a ___ taste. A. visible B. sour",
+      "solution": "B。解析：柠檬常有酸味，sour 表示“酸的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sour",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sour"
+      }
+    ]
+  },
+  {
+    "word": "hot and sour soup",
+    "examTags": [
+      "词汇·菜肴名称",
+      "语法·并列形容词"
+    ],
+    "grammar": "n. 酸辣汤。hot and sour 两个并列形容词共同修饰 soup；作为菜名通常不可数或按份数计。",
+    "collocations": "a bowl of hot and sour soup; make hot and sour soup; order the soup",
+    "commonMistake": "hot and sour soup 是菜名；表示一碗时说 a bowl of hot and sour soup，不说 a soup（若非一份/一种）。",
+    "example": {
+      "english": "My father ordered a bowl of hot and sour soup.",
+      "chinese": "我爸爸点了一碗酸辣汤。"
+    },
+    "application": {
+      "prompt": "A soup that tastes both spicy and sour is ___. A. mashed potatoes B. hot and sour soup",
+      "solution": "B。解析：酸辣汤的英文是 hot and sour soup。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: soup",
+        "url": "https://dictionary.cambridge.org/dictionary/english/soup"
+      }
+    ]
+  },
+  {
+    "word": "mess",
+    "examTags": [
+      "词汇·状态描述",
+      "语法·可数与不可数用法"
+    ],
+    "grammar": "n. 脏乱；凌乱；一团糟。常用 make a mess、in a mess；作“混乱状态”时常见可数表达 a mess。",
+    "collocations": "make a mess; a messy kitchen; clean up the mess",
+    "commonMistake": "mess 是名词；形容“凌乱的”用 messy。固定搭配 in a mess 常有冠词 a。",
+    "example": {
+      "english": "The kitchen was a mess after we made the cake.",
+      "chinese": "做完蛋糕后，厨房一片凌乱。"
+    },
+    "application": {
+      "prompt": "There is flour on the table and dishes everywhere. What a ___! A. mess B. recipe",
+      "solution": "A。解析：mess 可表示脏乱或一团糟。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mess",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mess"
+      }
+    ]
+  },
+  {
+    "word": "pretty",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·形容词与程度副词"
+    ],
+    "grammar": "adj. 漂亮的；adv. 相当、十分。作副词时常修饰形容词或副词，如 pretty good。",
+    "collocations": "a pretty dress; a pretty garden; pretty good; pretty quickly",
+    "commonMistake": "pretty 可表示“漂亮的”或口语中的“相当”；句中位置和修饰对象决定词性。",
+    "example": {
+      "english": "The pumpkin pie was pretty good.",
+      "chinese": "南瓜派相当好吃。"
+    },
+    "application": {
+      "prompt": "The soup is ___ hot, so let it cool for a minute. A. prettyly B. pretty",
+      "solution": "B。解析：pretty 作程度副词表示“相当”，形式不变。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pretty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pretty"
+      }
+    ]
+  },
+  {
+    "word": "Christmas",
+    "examTags": [
+      "词汇·节日与文化",
+      "拼写·节日名称大写"
+    ],
+    "grammar": "n. 圣诞节。节日名称首字母大写；常用 at Christmas、on Christmas Day。",
+    "collocations": "at Christmas; Christmas Day; a Christmas tree",
+    "commonMistake": "Christmas 是节日专名，首字母必须大写；节日期间常说 at Christmas。",
+    "example": {
+      "english": "We bake cookies together at Christmas.",
+      "chinese": "圣诞节期间我们一起烤饼干。"
+    },
+    "application": {
+      "prompt": "The family decorates a tree ___ Christmas. A. at B. in",
+      "solution": "A。解析：表示圣诞节期间常用 at Christmas。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Christmas",
+        "url": "https://dictionary.cambridge.org/dictionary/english/christmas"
+      }
+    ]
+  },
+  {
+    "word": "pancake",
+    "examTags": [
+      "词汇·食物名称",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 烙饼；薄煎饼。可数名词，复数 pancakes；常用 a pancake 或 a stack of pancakes。",
+    "collocations": "make pancakes; a pancake with fruit; a stack of pancakes",
+    "commonMistake": "pancake 是可数名词；表示多个薄饼时用 pancakes。",
+    "example": {
+      "english": "We made pancakes for breakfast on Sunday.",
+      "chinese": "星期天早餐我们做了薄煎饼。"
+    },
+    "application": {
+      "prompt": "A thin round cake cooked in a pan is a ___. A. pancake B. tablespoon",
+      "solution": "A。解析：在平底锅里烙制的薄饼是 pancake。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pancake",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pancake"
+      }
+    ]
+  },
+  {
+    "word": "dream",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与动词词形"
+    ],
+    "grammar": "n. 梦；梦想；v. 做梦；梦想。过去式和过去分词可为 dreamed 或 dreamt；dream of/about doing 表示梦想做某事。",
+    "collocations": "have a dream; dream about a place; dream of becoming a cook",
+    "commonMistake": "dream of/about 后表示梦想做某事常接动名词；dreamed 和 dreamt 都可作过去式。",
+    "example": {
+      "english": "She dreams of opening a small bakery one day.",
+      "chinese": "她梦想有一天开一家小面包店。"
+    },
+    "application": {
+      "prompt": "He wants to be a chef and often ___ of making new dishes. A. dreams to B. dreams",
+      "solution": "B。解析：dream of 后常接名词或动名词；主语 he 用 dreams。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dream",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dream"
+      }
+    ]
+  },
+  {
+    "word": "university",
+    "examTags": [
+      "词汇·教育与升学",
+      "语法·冠词与动词搭配"
+    ],
+    "grammar": "n.（综合性）大学；可数名词，复数 universities。a university 中 a 依据辅音音素 /j/，不是元音字母 u。",
+    "collocations": "go to university; a university student; study at a university",
+    "commonMistake": "university 虽以元音字母 u 开头，但读音以 /j/ 开始，所以说 a university。",
+    "example": {
+      "english": "Her brother studies biology at a university in the city.",
+      "chinese": "她哥哥在城里的一所大学学习生物。"
+    },
+    "application": {
+      "prompt": "My sister hopes to study at ___ university abroad. A. a B. an",
+      "solution": "A。解析：university 的首音为辅音音素 /j/，前用 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: university",
+        "url": "https://dictionary.cambridge.org/dictionary/english/university"
+      }
+    ]
+  },
+  {
+    "word": "go boating",
+    "examTags": [
+      "词汇·休闲活动",
+      "语法·go 加动名词"
+    ],
+    "grammar": "phr. 去划船；去乘船游玩。go 后接 boating 这一活动名词（动名词形式）。",
+    "collocations": "go boating on the lake; go boating with friends; go boating at the weekend",
+    "commonMistake": "表示参加户外活动常用 go + doing：go boating；不要说 go to boating。",
+    "example": {
+      "english": "We went boating on the lake during the holiday.",
+      "chinese": "假期里我们在湖上划船游玩。"
+    },
+    "application": {
+      "prompt": "The weather is calm, so let's ___ on the lake. A. go boating B. go to boating",
+      "solution": "A。解析：go 后直接接活动动名词 boating。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: boat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/boat"
+      }
+    ]
+  },
+  {
+    "word": "memory",
+    "examTags": [
+      "词汇·名词与词形变化",
+      "语法·可数与不可数用法"
+    ],
+    "grammar": "n. 回忆；记忆力。表示一段回忆时可数，复数 memories；表示记忆能力时常不可数。",
+    "collocations": "a happy memory; childhood memories; have a good memory",
+    "commonMistake": "memory 指一段回忆时是可数名词；复数为 memories（y 变 i 加 -es）。",
+    "example": {
+      "english": "Cooking with my grandmother is a happy memory.",
+      "chinese": "和奶奶一起做饭是一段快乐的回忆。"
+    },
+    "application": {
+      "prompt": "The trip gave us many wonderful ___. A. memories B. memorys",
+      "solution": "A。解析：memory 的复数为 memories。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: memory",
+        "url": "https://dictionary.cambridge.org/dictionary/english/memory"
+      }
+    ]
+  },
+  {
+    "word": "visible",
+    "examTags": [
+      "词汇·形容词与感知",
+      "语法·系表结构"
+    ],
+    "grammar": "adj. 看得见的；可见的。常用 be visible to sb；反义词为 invisible。",
+    "collocations": "clearly visible; visible from the road; be visible to the eye",
+    "commonMistake": "visible 是形容词，常与 be 连用；副词“明显地”可用 visibly，不能用 visible 修饰动词。",
+    "example": {
+      "english": "The island was visible from the top of the hill.",
+      "chinese": "从山顶可以看到那座岛。"
+    },
+    "application": {
+      "prompt": "The sign can be seen clearly from far away. It is ___. A. visible B. simple",
+      "solution": "A。解析：visible 表示“看得见的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: visible",
+        "url": "https://dictionary.cambridge.org/dictionary/english/visible"
+      }
+    ]
+  },
+  {
+    "word": "along with sb / sth",
+    "examTags": [
+      "词汇·伴随与补充",
+      "语法·主谓一致"
+    ],
+    "grammar": "phr. 与……一起；连同……。作主语补充成分时，谓语通常与 along with 前的核心主语保持一致。",
+    "collocations": "along with my family; bring a spoon along with a bowl; along with the recipe",
+    "commonMistake": "along with 连接的附加成分不改变核心主语的数；The cook, along with her helpers, is ready。",
+    "example": {
+      "english": "She brought the recipe along with a list of ingredients.",
+      "chinese": "她带来了食谱和一份食材清单。"
+    },
+    "application": {
+      "prompt": "The cook, along with two helpers, ___ ready to begin. A. is B. are",
+      "solution": "A。解析：along with 短语不改变核心主语 the cook，谓语用 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: along",
+        "url": "https://dictionary.cambridge.org/dictionary/english/along"
+      }
+    ]
+  },
+  {
+    "word": "pumpkin",
+    "examTags": [
+      "词汇·食材与节日食物",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 南瓜；可数名词，复数 pumpkins。",
+    "collocations": "a pumpkin pie; carve a pumpkin; pumpkin seeds",
+    "commonMistake": "pumpkin 是可数名词，单数前通常要有 a/the 或其他限定词；复数加 -s。",
+    "example": {
+      "english": "They carved a pumpkin for the autumn festival.",
+      "chinese": "他们为秋季节庆雕刻了一个南瓜。"
+    },
+    "application": {
+      "prompt": "A large orange vegetable used to make pie is a ___. A. pumpkin B. cinnamon",
+      "solution": "A。解析：南瓜派的主要食材是 pumpkin。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pumpkin",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pumpkin"
+      }
+    ]
+  },
+  {
+    "word": "pie",
+    "examTags": [
+      "词汇·食物名称",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "n. 果馅饼；肉馅饼。可数名词，复数 pies；常用 a piece of pie 表示一块。",
+    "collocations": "pumpkin pie; apple pie; a piece of pie",
+    "commonMistake": "pie 是可数名词；表示一块馅饼可说 a piece of pie，不能把 piece 漏掉。",
+    "example": {
+      "english": "We shared an apple pie after dinner.",
+      "chinese": "晚饭后我们分吃了一个苹果派。"
+    },
+    "application": {
+      "prompt": "A baked dish with fruit inside is an apple ___. A. spoon B. pie",
+      "solution": "B。解析：苹果馅饼是 apple pie。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pie",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pie"
+      }
+    ]
+  },
+  {
+    "word": "warm up",
+    "examTags": [
+      "词汇·短语动词多义",
+      "语法·可分结构"
+    ],
+    "grammar": "phr.（使）变暖；热身；预热；也可表示使气氛活跃。宾语为代词时常放在 warm 与 up 之间。",
+    "collocations": "warm up the soup; warm the food up; warm up before exercise",
+    "commonMistake": "代词宾语放中间：warm it up；warm up 也可不接宾语，表示自己热身。",
+    "example": {
+      "english": "Warm up the soup before serving it.",
+      "chinese": "上桌前把汤热一热。"
+    },
+    "application": {
+      "prompt": "The soup is cold. Please warm ___ up before lunch. A. it B. up it",
+      "solution": "A。解析：warm up 是可分短语动词，代词必须放中间。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: warm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/warm"
+      }
+    ]
+  },
+  {
+    "word": "cinnamon",
+    "examTags": [
+      "词汇·香料与食材",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 肉桂皮；桂皮香料。作香料时通常不可数；表示一根肉桂棒可说 a cinnamon stick。",
+    "collocations": "ground cinnamon; cinnamon sticks; add cinnamon to the pie",
+    "commonMistake": "cinnamon 作香料通常不可数；不要说 a cinnamon 表示一些肉桂粉。",
+    "example": {
+      "english": "A little cinnamon gives the pie a warm smell.",
+      "chinese": "少许肉桂让馅饼散发出温暖的香气。"
+    },
+    "application": {
+      "prompt": "This brown spice is often added to apple pie. It is ___. A. butter B. cinnamon",
+      "solution": "B。解析：肉桂是常用于苹果派的香料。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cinnamon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cinnamon"
+      }
+    ]
+  },
+  {
+    "word": "fill ... with ...",
+    "examTags": [
+      "词汇·固定搭配",
+      "语法·动词与介词"
+    ],
+    "grammar": "phr.（使）充满；（使）填满。结构为 fill A with B，A 是被装满的容器或空间，B 是填入的东西。",
+    "collocations": "fill a bowl with water; fill the room with music; fill a pie with fruit",
+    "commonMistake": "固定结构是 fill A with B；不要把被填入的内容放在 fill 后、地点宾语前而漏掉 with。",
+    "example": {
+      "english": "Fill the pie with pumpkin before you bake it.",
+      "chinese": "烘烤前把南瓜馅装进派里。"
+    },
+    "application": {
+      "prompt": "We ___ the bowl ___ fresh fruit. A. pour; of B. fill; with",
+      "solution": "B。解析：把容器装满某物用 fill A with B。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fill",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fill"
+      }
+    ]
+  },
+  {
+    "word": "sweetness",
+    "examTags": [
+      "词汇·形容词派生名词",
+      "语法·抽象名词"
+    ],
+    "grammar": "n. 甜；甜味；也可指温柔或悦耳。通常不可数，由 sweet 加 -ness 构成。",
+    "collocations": "the sweetness of the fruit; add sweetness; natural sweetness",
+    "commonMistake": "sweetness 是抽象名词，通常不加 a；描述食物“甜的”用形容词 sweet。",
+    "example": {
+      "english": "The apples add natural sweetness to the pie.",
+      "chinese": "苹果给馅饼增添了天然甜味。"
+    },
+    "application": {
+      "prompt": "The fruit gives the sauce a little natural ___. A. sweetness B. sweet",
+      "solution": "A。解析：a little 后接不可数名词 sweetness；sweet 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sweetness",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sweetness"
+      }
+    ]
+  },
+  {
+    "word": "college",
+    "examTags": [
+      "词汇·教育与升学",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 学院；大学。可数名词，复数 colleges；不同国家对 college 和 university 的范围用法不同。",
+    "collocations": "go to college; a college student; a college of music",
+    "commonMistake": "college 与 university 都可指高等教育机构，但具体制度因国家而异；注意二者前均可用 a。",
+    "example": {
+      "english": "Her sister hopes to study cooking at college.",
+      "chinese": "她姐姐希望在大学学习烹饪。"
+    },
+    "application": {
+      "prompt": "After high school, he plans to go to ___. A. college B. cinnamon",
+      "solution": "A。解析：完成高中学业后可以 go to college（上大学/学院）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: college",
+        "url": "https://dictionary.cambridge.org/dictionary/english/college"
+      }
+    ]
+  },
+  {
+    "word": "host",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与动词"
+    ],
+    "grammar": "n. 主人；东道主；v. 主办；主持（活动）。作名词可数，复数 hosts；过去式 hosted。",
+    "collocations": "a kind host; host a dinner; host a cooking show",
+    "commonMistake": "host 作名词指主人或主持人，作动词指主办、主持；过去式直接加 -ed：hosted。",
+    "example": {
+      "english": "Our neighbor will host a dinner for the cooking club.",
+      "chinese": "邻居将为烹饪社团举办一场晚餐活动。"
+    },
+    "application": {
+      "prompt": "The school will ___ a food festival next month. A. separate B. host",
+      "solution": "B。解析：主办活动用动词 host。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: host",
+        "url": "https://dictionary.cambridge.org/dictionary/english/host"
+      }
+    ]
+  },
+  {
+    "word": "hostess",
+    "examTags": [
+      "词汇·职业与人物",
+      "构词·名词词尾"
+    ],
+    "grammar": "n. 女主人；女房东；也可指女主持人。复数 hostesses；现代语境中 host 常可泛指不同性别的主人或主持人。",
+    "collocations": "the hostess of the party; a restaurant hostess; welcome guests as a hostess",
+    "commonMistake": "hostess 是传统女性形式；host 可作不特指性别的主人或主持人。",
+    "example": {
+      "english": "The hostess welcomed everyone into the kitchen.",
+      "chinese": "女主人把大家迎进厨房。"
+    },
+    "application": {
+      "prompt": "The woman who welcomed guests to the dinner was the ___. A. ingredient B. hostess",
+      "solution": "B。解析：hostess 可指女主人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hostess",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hostess"
+      }
+    ]
+  },
+  {
+    "word": "recipe",
+    "examTags": [
+      "词汇·食谱与步骤",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 食谱；烹饪法。可数名词，复数 recipes；常包括食材清单和制作步骤。",
+    "collocations": "a recipe for soup; follow a recipe; a family recipe",
+    "commonMistake": "recipe 是可数名词，单数前通常要有 a/the；复数拼写为 recipes。",
+    "example": {
+      "english": "This recipe shows how to make a simple pumpkin pie.",
+      "chinese": "这份食谱介绍了如何制作简单的南瓜派。"
+    },
+    "application": {
+      "prompt": "Read the ___ to find out how much flour you need. A. recipe B. memory",
+      "solution": "A。解析：食谱 recipe 会列出所需食材和用量。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: recipe",
+        "url": "https://dictionary.cambridge.org/dictionary/english/recipe"
+      }
+    ]
+  },
+  {
+    "word": "cream",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词用法"
+    ],
+    "grammar": "n. 奶油；护肤霜。作食品原料通常不可数；指一罐护肤霜或具体品种时可数。",
+    "collocations": "whipped cream; a carton of cream; face cream",
+    "commonMistake": "cream 作奶油时通常不可数，不说 a cream；表示一份或一罐时可用 some cream/a carton of cream。",
+    "example": {
+      "english": "We served the pie with a little cream.",
+      "chinese": "我们在馅饼旁配了一点奶油。"
+    },
+    "application": {
+      "prompt": "Add some ___ to the fruit if you want a richer dessert. A. cream B. crusts",
+      "solution": "A。解析：奶油可作为甜点配料，cream 常作不可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cream",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cream"
+      }
+    ]
+  },
+  {
+    "word": "crust",
+    "examTags": [
+      "词汇·食物组成部分",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 糕饼酥皮；面包皮；可数名词，复数 crusts。",
+    "collocations": "pie crust; a slice of bread with the crust; a crispy crust",
+    "commonMistake": "crust 指面包外皮或派的酥皮；不要与表示“地壳”的 crust 混淆语境。",
+    "example": {
+      "english": "The pie has a crisp crust and a soft filling.",
+      "chinese": "这个派外皮酥脆，馅料松软。"
+    },
+    "application": {
+      "prompt": "The hard outside layer of a pie is its ___. A. sweetness B. crust",
+      "solution": "B。解析：派的外层酥皮叫 crust。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: crust",
+        "url": "https://dictionary.cambridge.org/dictionary/english/crust"
+      }
+    ]
+  },
+  {
+    "word": "mixture",
+    "examTags": [
+      "词汇·动词派生名词",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 混合物；混合；结合体。可数名词，复数 mixtures；由 mix 加后缀 -ture 构成。",
+    "collocations": "a mixture of flour and water; stir the mixture; a mixture of colors",
+    "commonMistake": "mixture 是名词，指混合后的物质；mix 可作动词或名词表示混合、混合料。",
+    "example": {
+      "english": "Pour the mixture into the baking dish.",
+      "chinese": "把混合物倒入烤盘。"
+    },
+    "application": {
+      "prompt": "After you mix the eggs and flour, pour the ___ into the pan. A. instruction B. mixture",
+      "solution": "B。解析：混合后的材料叫 mixture。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mixture",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mixture"
+      }
+    ]
+  },
+  {
+    "word": "least",
+    "examTags": [
+      "词汇·最高级与数量",
+      "语法·副词和代词"
+    ],
+    "grammar": "adv./pron. 最少；最小。是 little 的最高级形式之一；可与 the 连用，也常见 at least。",
+    "collocations": "the least amount; at least one; least of all",
+    "commonMistake": "least 常与 the 连用作最高级；at least 表示“至少”，不要误解为“最少地”。",
+    "example": {
+      "english": "Use the least amount of salt that still tastes good.",
+      "chinese": "在味道仍合适的前提下尽量少放盐。"
+    },
+    "application": {
+      "prompt": "Which amount is the smallest? Choose the ___. A. most B. least",
+      "solution": "B。解析：least 表示“最少”，most 表示“最多”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: least",
+        "url": "https://dictionary.cambridge.org/dictionary/english/least"
+      }
+    ]
+  },
+  {
+    "word": "at least",
+    "examTags": [
+      "词汇·数量表达",
+      "语法·固定副词短语"
+    ],
+    "grammar": "phr. 至少；不低于某个数量或程度。常放在数量、时间或程度表达前。",
+    "collocations": "at least two eggs; wait at least ten minutes; at least once a week",
+    "commonMistake": "at least 表示“不少于、至少”；其反义表达之一是 at most（至多）。",
+    "example": {
+      "english": "Bake the pie for at least thirty minutes.",
+      "chinese": "这个派至少要烤三十分钟。"
+    },
+    "application": {
+      "prompt": "The recipe needs ___ three eggs, so buy four to be safe. A. at least B. at most",
+      "solution": "A。解析：需要三只或更多表示 at least three；at most 是至多。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: least",
+        "url": "https://dictionary.cambridge.org/dictionary/english/least"
+      }
+    ]
+  },
+  {
+    "word": "secret",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与形容词"
+    ],
+    "grammar": "n. 秘密；诀窍；adj. 秘密的；保密的。作名词可数，复数 secrets；常用 the secret to/of...。",
+    "collocations": "a family secret; the secret to good bread; keep a secret",
+    "commonMistake": "表示“……的诀窍”常说 the secret to...；secret 作形容词时放在名词前，如 a secret recipe。",
+    "example": {
+      "english": "The secret to a soft pie crust is cold butter.",
+      "chinese": "酥软派皮的诀窍是使用冷黄油。"
+    },
+    "application": {
+      "prompt": "The cook shared the ___ to making her pumpkin pie. A. island B. secret",
+      "solution": "B。解析：the secret to... 表示“……的诀窍”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: secret",
+        "url": "https://dictionary.cambridge.org/dictionary/english/secret"
+      }
+    ]
+  },
+  {
+    "word": "according to",
+    "examTags": [
+      "词汇·信息来源表达",
+      "语法·介词短语"
+    ],
+    "grammar": "phr. 根据；依照。后接名词、代词或名词性短语，说明信息、规则或来源。",
+    "collocations": "according to the recipe; according to the instructions; according to my teacher",
+    "commonMistake": "according to 后接来源或规则；不能直接接完整主谓句，可改用 according to what...。",
+    "example": {
+      "english": "According to the recipe, the pie needs one cup of flour.",
+      "chinese": "根据食谱，这个派需要一杯面粉。"
+    },
+    "application": {
+      "prompt": "___ the instructions, bake the cake for 25 minutes. A. Along with to B. According to",
+      "solution": "B。解析：表示“根据说明”用 according to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: according",
+        "url": "https://dictionary.cambridge.org/dictionary/english/according"
+      }
+    ]
+  },
+  {
+    "word": "whenever",
+    "examTags": [
+      "词汇·时间连词",
+      "语法·时间状语从句"
+    ],
+    "grammar": "adv./conj. 每当；在任何时候。引导时间状语从句，表示每次某事发生；从句可用一般现在时表达将来时间。",
+    "collocations": "whenever you need help; call whenever you like; whenever I cook",
+    "commonMistake": "whenever 引导时间从句时，表示将来常用一般现在时：Whenever you arrive, call me。",
+    "example": {
+      "english": "Whenever I bake, I read the recipe twice first.",
+      "chinese": "每当烘焙时，我都会先把食谱读两遍。"
+    },
+    "application": {
+      "prompt": "You can ask me for the recipe ___ you need it. A. whenever B. unless of",
+      "solution": "A。解析：whenever 表示“在任何需要的时候”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: whenever",
+        "url": "https://dictionary.cambridge.org/dictionary/english/whenever"
+      }
+    ]
+  },
+  {
+    "word": "item",
+    "examTags": [
+      "词汇·清单与物品",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 项目；一件物品；一条。可数名词，复数 items；常指清单中的一项或一件商品。",
+    "collocations": "a shopping item; a list of items; each item on the menu",
+    "commonMistake": "item 是可数名词；清单中多项用 items，不要与表示“食材”的 ingredient 混淆。",
+    "example": {
+      "english": "Check each item on the shopping list before you leave.",
+      "chinese": "出门前检查购物清单上的每一项。"
+    },
+    "application": {
+      "prompt": "Write every food you need as an ___ on the list. A. island B. item",
+      "solution": "B。解析：清单中的一项可称为 item。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: item",
+        "url": "https://dictionary.cambridge.org/dictionary/english/item"
+      }
+    ]
+  },
+  {
+    "word": "spaghetti",
+    "examTags": [
+      "词汇·食物名称",
+      "语法·不可数名词与量词"
+    ],
+    "grammar": "n. 意大利细面条；通常作不可数名词。可说 a plate/bowl of spaghetti；也可表示一根面条时用 a strand of spaghetti。",
+    "collocations": "a plate of spaghetti; cook spaghetti; spaghetti with tomato sauce",
+    "commonMistake": "spaghetti 通常不可数，不说 a spaghetti；表示一份可说 a plate of spaghetti。",
+    "example": {
+      "english": "We had spaghetti with tomato sauce for lunch.",
+      "chinese": "午饭我们吃了番茄酱意大利面。"
+    },
+    "application": {
+      "prompt": "For dinner, they cooked a large plate of ___. A. spaghetti B. spaghettis",
+      "solution": "A。解析：spaghetti 通常作不可数名词，不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spaghetti",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spaghetti"
+      }
+    ]
+  },
+  {
+    "word": "spoon",
+    "examTags": [
+      "词汇·餐具与数量",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 勺；一勺的量。可数名词，复数 spoons；a spoonful of 表示“一勺……”。",
+    "collocations": "a teaspoon; a spoonful of sugar; stir with a spoon",
+    "commonMistake": "spoon 指勺子；要表达一勺食材可用 a spoonful of，不能用 spoon 直接修饰不可数名词。",
+    "example": {
+      "english": "Add one spoonful of sugar and stir with a spoon.",
+      "chinese": "加一勺糖，再用勺子搅拌。"
+    },
+    "application": {
+      "prompt": "Use a ___ to stir the tea. A. spoon B. crust",
+      "solution": "A。解析：搅拌茶水的餐具是 spoon（勺子）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spoon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spoon"
+      }
+    ]
+  },
+  {
+    "word": "slice",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与动词"
+    ],
+    "grammar": "n. 薄片；片；v. 把……切成薄片；切。slice sth into slices 表示把某物切成片。",
+    "collocations": "a slice of bread; slice the apple; slice the cheese thinly",
+    "commonMistake": "slice 作名词时可说 a slice of bread；作动词时直接接被切的食物作宾语。",
+    "example": {
+      "english": "Slice the tomatoes and put them on the bread.",
+      "chinese": "把西红柿切成片并放在面包上。"
+    },
+    "application": {
+      "prompt": "Cut the cucumber into thin pieces. Please ___ it. A. boil B. slice",
+      "solution": "B。解析：把黄瓜切成薄片用 slice。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: slice",
+        "url": "https://dictionary.cambridge.org/dictionary/english/slice"
+      }
+    ]
+  },
+  {
+    "word": "couple",
+    "examTags": [
+      "词汇·数量与人物关系",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 夫妻；情侣；两人；a couple of + 复数名词表示“两三个/一对”，依语境理解。",
+    "collocations": "a young couple; a couple of eggs; a couple of days",
+    "commonMistake": "a couple of 后接复数名词；在日常表达中常指两个或少量几个，具体数量看语境。",
+    "example": {
+      "english": "The couple made dinner together at home.",
+      "chinese": "这对夫妻在家一起做了晚饭。"
+    },
+    "application": {
+      "prompt": "Add a ___ of eggs to the mixture. A. bowl B. couple",
+      "solution": "B。解析：a couple of eggs 表示两个鸡蛋。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: couple",
+        "url": "https://dictionary.cambridge.org/dictionary/english/couple"
+      }
+    ]
+  },
+  {
+    "word": "island",
+    "examTags": [
+      "词汇·自然地理",
+      "语法·可数名词与冠词"
+    ],
+    "grammar": "n. 岛；可数名词，复数 islands。首字母 s 不发音，单数前用 an。",
+    "collocations": "a small island; live on an island; an island in the lake",
+    "commonMistake": "island 的 s 不发音，因此说 an island；表示住在岛上常用 on an island。",
+    "example": {
+      "english": "They grow pumpkins on a small island.",
+      "chinese": "他们在一座小岛上种南瓜。"
+    },
+    "application": {
+      "prompt": "We took a boat to ___ island in the lake. A. a B. an",
+      "solution": "B。解析：island 的首音是元音音素，前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: island",
+        "url": "https://dictionary.cambridge.org/dictionary/english/island"
+      }
+    ]
+  },
+  {
+    "word": "wife",
+    "examTags": [
+      "词汇·家庭成员",
+      "语法·不规则名词复数"
+    ],
+    "grammar": "n. 妻子；可数名词，复数 wives（f 变 v 加 -es）。",
+    "collocations": "his wife; a husband and wife; wives and husbands",
+    "commonMistake": "wife 的复数是 wives，不是 wifes；类似变化还有 knife—knives。",
+    "example": {
+      "english": "His wife made a pie for the family.",
+      "chinese": "他的妻子为家人做了一个派。"
+    },
+    "application": {
+      "prompt": "The two men and their ___ prepared dinner together. A. wives B. wifes",
+      "solution": "A。解析：wife 的不规则复数为 wives。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wife",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wife"
+      }
+    ]
+  },
+  {
+    "word": "separate",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·形容词与动词"
+    ],
+    "grammar": "adj. 分开的；独立的；v.（使）分开。常用 separate A from B；副词 separately。",
+    "collocations": "separate bowls; separate the eggs; separate A from B",
+    "commonMistake": "separate 作动词时常用 separate A from B；拼写中有两个 a，不要写成 seperate。",
+    "example": {
+      "english": "Separate the dry ingredients from the wet ones.",
+      "chinese": "把干性食材和湿性食材分开。"
+    },
+    "application": {
+      "prompt": "Keep the raw eggs ___ from the cooked food. A. separate B. visiblely",
+      "solution": "A。解析：be separate from 表示“与……分开”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: separate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/separate"
+      }
+    ]
+  },
+  {
+    "word": "born",
+    "examTags": [
+      "词汇·出生与天赋",
+      "语法·被动结构"
+    ],
+    "grammar": "v./adj. 出生；天生的。是 bear 的过去分词，常用于 be born；be born with sth 表示天生具有某特点。",
+    "collocations": "be born in 2012; be born on Monday; be born with a talent",
+    "commonMistake": "“出生于”用 be born in/on；born 不能单独作主动动词说 I born。",
+    "example": {
+      "english": "My grandmother was born on an island.",
+      "chinese": "我奶奶出生在一座岛上。"
+    },
+    "application": {
+      "prompt": "He ___ born in a small town in 2012. A. did B. was",
+      "solution": "B。解析：出生用被动结构 be born，主语 he 配 was。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: born",
+        "url": "https://dictionary.cambridge.org/dictionary/english/born"
+      }
+    ]
+  },
+  {
+    "word": "one by one",
+    "examTags": [
+      "词汇·顺序表达",
+      "语法·副词短语"
+    ],
+    "grammar": "phr. 逐个地；逐一地。常作状语，说明动作依次发生；同义表达 one after another。",
+    "collocations": "read the steps one by one; add ingredients one by one; answer one by one",
+    "commonMistake": "固定表达为 one by one，表示依次；不说 one by ones。",
+    "example": {
+      "english": "Add the ingredients to the bowl one by one.",
+      "chinese": "把食材逐个放进碗里。"
+    },
+    "application": {
+      "prompt": "The students came into the kitchen ___ to wash their hands. A. at least B. one by one",
+      "solution": "B。解析：表示“逐个地”用 one by one。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: one",
+        "url": "https://dictionary.cambridge.org/dictionary/english/one"
+      }
+    ]
+  }
+]

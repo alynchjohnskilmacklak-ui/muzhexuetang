@@ -5,7 +5,7 @@ vi.mock('@/lib/auth', () => ({ auth: vi.fn() }))
 vi.mock('@/lib/prisma', () => ({ getPrismaForDivision: vi.fn() }))
 
 import { auth } from '@/lib/auth'
-import { proxy } from './proxy'
+import { config, proxy } from './proxy'
 
 describe('proxy cron routing', () => {
   beforeEach(() => {
@@ -23,5 +23,23 @@ describe('proxy cron routing', () => {
     const response = await proxy(new NextRequest('https://example.test/api/cronfoo'))
 
     expect(response.status).toBe(401)
+  })
+
+  it('rewrites legacy upload URLs through the authenticated file handler', async () => {
+    vi.mocked(auth).mockClear()
+    const response = await proxy(new NextRequest('https://example.test/uploads/feedback/photo%20one.jpg?variant=thumbnail'))
+    const rewritten = response.headers.get('x-middleware-rewrite')
+
+    expect(response.status).toBe(200)
+    expect(rewritten).toBeTruthy()
+    expect(new URL(rewritten!).pathname).toBe('/api/uploads/feedback%2Fphoto%20one.jpg')
+    expect(new URL(rewritten!).searchParams.get('variant')).toBe('thumbnail')
+    expect(auth).not.toHaveBeenCalled()
+  })
+
+  it('runs the proxy matcher for legacy upload paths', () => {
+    const matcher = config.matcher[0]
+
+    expect(new RegExp(matcher).test('/uploads/feedback/photo.jpg')).toBe(true)
   })
 })

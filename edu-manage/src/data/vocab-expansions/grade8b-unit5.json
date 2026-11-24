@@ -1,0 +1,1658 @@
+[
+  {
+    "word": "temper",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 脾气。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "lose one's temper; have a short temper",
+    "commonMistake": "常用 lose one's temper 表示“发脾气”；temper 本身不是形容词。",
+    "example": {
+      "english": "He lost his temper when the storm broke his window.",
+      "chinese": "暴风雨打破窗户时，他发了脾气。"
+    },
+    "application": {
+      "prompt": "Read this sentence: He lost his temper when the storm broke his window. In this sentence, what does “temper” mean? A. 脾气  B. 野火",
+      "solution": "A。解析：句中 “temper” 表示“脾气”，符合语境；另一项“野火”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: temper",
+        "url": "https://dictionary.cambridge.org/dictionary/english/temper"
+      }
+    ]
+  },
+  {
+    "word": "earthquake",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 地震。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a strong earthquake; earthquake damage",
+    "commonMistake": "earthquake 是合成词，一个词写完；可说 a strong earthquake 或 earthquake damage。",
+    "example": {
+      "english": "The earthquake shook buildings across the city.",
+      "chinese": "地震使整座城市的建筑都摇晃起来。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The earthquake shook buildings across the city. In this sentence, what does “earthquake” mean? A. 海啸  B. 地震",
+      "solution": "B。解析：句中 “earthquake” 表示“地震”，符合语境；另一项“海啸”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: earthquake",
+        "url": "https://dictionary.cambridge.org/dictionary/english/earthquake"
+      }
+    ]
+  },
+  {
+    "word": "typhoon",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 台风。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a typhoon warning; a powerful typhoon",
+    "commonMistake": "typhoon 是热带风暴的一种名称；可数，复数 typhoons。",
+    "example": {
+      "english": "Schools closed before the typhoon reached the coast.",
+      "chinese": "台风到达海岸前，学校就停课了。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Schools closed before the typhoon reached the coast. In this sentence, what does “typhoon” mean? A. 台风  B. 亲戚",
+      "solution": "A。解析：句中 “typhoon” 表示“台风”，符合语境；另一项“亲戚”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: typhoon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/typhoon"
+      }
+    ]
+  },
+  {
+    "word": "wildfire",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 野火。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "wildfire spread; fight a wildfire",
+    "commonMistake": "wildfire 表示野火，通常合写；不要误拆成 wild fire。",
+    "example": {
+      "english": "Firefighters worked through the night to stop the wildfire.",
+      "chinese": "消防员彻夜工作以控制野火。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Firefighters worked through the night to stop the wildfire. In this sentence, what does “wildfire” mean? A. 电力供应  B. 野火",
+      "solution": "B。解析：句中 “wildfire” 表示“野火”，符合语境；另一项“电力供应”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wildfire",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wildfire"
+      }
+    ]
+  },
+  {
+    "word": "snowstorm",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 雪暴。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a heavy snowstorm; during a snowstorm",
+    "commonMistake": "snowstorm 是合成词；暴风雪期间可说 during a snowstorm。",
+    "example": {
+      "english": "The snowstorm covered the roads and delayed the buses.",
+      "chinese": "暴风雪覆盖了道路，公交车因此晚点。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The snowstorm covered the roads and delayed the buses. In this sentence, what does “snowstorm” mean? A. 雪暴  B. 泡",
+      "solution": "A。解析：句中 “snowstorm” 表示“雪暴”，符合语境；另一项“泡”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: snowstorm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/snowstorm"
+      }
+    ]
+  },
+  {
+    "word": "flood",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n./v. 水灾；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "a serious flood; flood the streets",
+    "commonMistake": "flood 可作名词或动词；表示“淹没某地”时 flood 后直接接地点。",
+    "example": {
+      "english": "Heavy rain may flood the fields near the river.",
+      "chinese": "大雨可能会淹没河边的田地。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Heavy rain may flood the fields near the river. In this sentence, what does “flood” mean? A. 卫兵  B. 淹没",
+      "solution": "B。解析：句中 “flood” 表示“淹没”，符合语境；另一项“卫兵”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flood",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flood"
+      }
+    ]
+  },
+  {
+    "word": "drought",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 旱灾。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a long drought; severe drought",
+    "commonMistake": "drought 是名词，意为长期干旱；形容词 dry 不能直接替代该名词。",
+    "example": {
+      "english": "The long drought left the farms without enough water.",
+      "chinese": "长期干旱使农场缺水。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The long drought left the farms without enough water. In this sentence, what does “drought” mean? A. 旱灾  B. 洪水",
+      "solution": "A。解析：句中 “drought” 表示“旱灾”，符合语境；另一项“洪水”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: drought",
+        "url": "https://dictionary.cambridge.org/dictionary/english/drought"
+      }
+    ]
+  },
+  {
+    "word": "warn",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 警告。作谓语时注意主谓一致和时态；warn–warned–warned",
+    "collocations": "warn someone of danger; warn someone not to do something",
+    "commonMistake": "warn sb to do / warn sb not to do；也可用 warn sb about/of sth。",
+    "example": {
+      "english": "Officials warned residents to leave the area.",
+      "chinese": "官员警告居民离开该地区。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Officials warned residents to leave the area. In this sentence, what does “warn” mean? A. 尖叫  B. 警告",
+      "solution": "B。解析：句中 “warn” 表示“警告”，符合语境；另一项“尖叫”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: warn",
+        "url": "https://dictionary.cambridge.org/dictionary/english/warn"
+      }
+    ]
+  },
+  {
+    "word": "do chores",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 做家务。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "do household chores; do chores around the house",
+    "commonMistake": "do chores 中 chores 通常用复数；不说 do a chore 表示日常家务总称。",
+    "example": {
+      "english": "I do chores every Saturday before I meet my friends.",
+      "chinese": "我每周六都会先做家务，然后再去见朋友。"
+    },
+    "application": {
+      "prompt": "Read this sentence: I do chores every Saturday before I meet my friends. In this sentence, what does “do chores” mean? A. 做家务  B. 一……就……",
+      "solution": "A。解析：句中 “do chores” 表示“做家务”，符合语境；另一项“一……就……”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chore (do chores)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chore"
+      }
+    ]
+  },
+  {
+    "word": "wave",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 波浪；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "a huge wave; wave to someone",
+    "commonMistake": "wave 作名词是“波浪”，作动词可表示“挥手”；注意按句法判断。",
+    "example": {
+      "english": "A huge wave crashed against the harbour wall.",
+      "chinese": "一个巨浪拍打着港口的堤墙。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A huge wave crashed against the harbour wall. In this sentence, what does “wave” mean? A. 救援  B. 波浪",
+      "solution": "B。解析：句中 “wave” 表示“波浪”，符合语境；另一项“救援”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wave",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wave"
+      }
+    ]
+  },
+  {
+    "word": "tsunami",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 海啸。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a tsunami warning; a tsunami reaches the coast",
+    "commonMistake": "tsunami 指海啸；复数常写 tsunamis，描述预警可用 tsunami warning。",
+    "example": {
+      "english": "The warning gave people time to move away from the coast before the tsunami arrived.",
+      "chinese": "海啸到来前，警报给了人们时间撤离海岸。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The warning gave people time to move away from the coast before the tsunami arrived. In this sentence, what does “tsunami” mean? A. 海啸  B. 旱灾",
+      "solution": "A。解析：句中 “tsunami” 表示“海啸”，符合语境；另一项“旱灾”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tsunami",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tsunami"
+      }
+    ]
+  },
+  {
+    "word": "interview",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n./v. 采访；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "a job interview; interview someone",
+    "commonMistake": "interview 可作名词或动词；“采访某人”直接说 interview sb，不加 about。",
+    "example": {
+      "english": "The reporter will interview the firefighter this afternoon.",
+      "chinese": "记者今天下午将采访这名消防员。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The reporter will interview the firefighter this afternoon. In this sentence, what does “interview” mean? A. 报道  B. 采访",
+      "solution": "B。解析：句中 “interview” 表示“采访”，符合语境；另一项“报道”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: interview",
+        "url": "https://dictionary.cambridge.org/dictionary/english/interview"
+      }
+    ]
+  },
+  {
+    "word": "slow down",
+    "examTags": [
+      "词汇·短语",
+      "中考·词形与词性"
+    ],
+    "grammar": "phr. （使）慢下来。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "slow down a car; slow down when driving",
+    "commonMistake": "slow down 可不带宾语，也可说 slow a car down；宾语是代词时放在 slow 和 down 之间。",
+    "example": {
+      "english": "Drivers should slow down when the road is wet.",
+      "chinese": "路面湿滑时，司机应该减速。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Drivers should slow down when the road is wet. In this sentence, what does “slow down” mean? A. （使）慢下来  B. 闹钟",
+      "solution": "A。解析：句中 “slow down” 表示“（使）慢下来”，符合语境；另一项“闹钟”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: slow down",
+        "url": "https://dictionary.cambridge.org/dictionary/english/slow-down"
+      }
+    ]
+  },
+  {
+    "word": "neighbourhood",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 街区。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "in the neighbourhood; a neighbourhood school",
+    "commonMistake": "neighbourhood 是英式拼法，美式常写 neighborhood；按本词表记 neighbourhood。",
+    "example": {
+      "english": "Everyone in our neighbourhood helped after the storm.",
+      "chinese": "暴风雨过后，我们街区的每个人都伸出了援手。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Everyone in our neighbourhood helped after the storm. In this sentence, what does “neighbourhood” mean? A. 泡  B. 街区",
+      "solution": "B。解析：句中 “neighbourhood” 表示“街区”，符合语境；另一项“泡”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: neighbourhood",
+        "url": "https://dictionary.cambridge.org/dictionary/english/neighbourhood"
+      }
+    ]
+  },
+  {
+    "word": "roof",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 屋顶。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "on the roof; the roof of a house",
+    "commonMistake": "roof 的常见复数是 roofs；不要按 leaf 的变化误写成 rooves。",
+    "example": {
+      "english": "Strong winds blew several tiles off the roof.",
+      "chinese": "强风把屋顶上的几块瓦吹了下来。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Strong winds blew several tiles off the roof. In this sentence, what does “roof” mean? A. 屋顶  B. 思考",
+      "solution": "A。解析：句中 “roof” 表示“屋顶”，符合语境；另一项“思考”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: roof",
+        "url": "https://dictionary.cambridge.org/dictionary/english/roof"
+      }
+    ]
+  },
+  {
+    "word": "nearly",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "v. 几乎。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "nearly finished; nearly reached the top",
+    "commonMistake": "nearly 表示“几乎、差不多”，不等于 not nearly（远非）。",
+    "example": {
+      "english": "The river nearly reached the top of the flood wall.",
+      "chinese": "河水差点涨到防洪墙顶部。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The river nearly reached the top of the flood wall. In this sentence, what does “nearly” mean? A. 躲藏  B. 几乎",
+      "solution": "B。解析：句中 “nearly” 表示“几乎”，符合语境；另一项“躲藏”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nearly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nearly"
+      }
+    ]
+  },
+  {
+    "word": "come off",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 从（某物上）脱落。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "come off the wall; a button comes off",
+    "commonMistake": "come off 表示“脱落”时是不及物短语动词，主语是脱落的物品。",
+    "example": {
+      "english": "The sign may come off the wall in strong wind.",
+      "chinese": "大风可能会把牌子从墙上吹下来。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The sign may come off the wall in strong wind. In this sentence, what does “come off” mean? A. 从（某物上）脱落  B. （警报器等）发出响声",
+      "solution": "A。解析：句中 “come off” 表示“从（某物上）脱落”，符合语境；另一项“（警报器等）发出响声”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: come off",
+        "url": "https://dictionary.cambridge.org/dictionary/english/come-off"
+      }
+    ]
+  },
+  {
+    "word": "report",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n./v. 报道；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "a weather report; report an accident",
+    "commonMistake": "report 可作名词或动词；“报道某事”可说 report on sth，“向某人报告”可说 report sth to sb。",
+    "example": {
+      "english": "The newspaper published a report about the storm.",
+      "chinese": "报纸刊登了一篇关于这场风暴的报道。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The newspaper published a report about the storm. In this sentence, what does “report” mean? A. 复习  B. 报道",
+      "solution": "B。解析：句中 “report” 表示“报道”，符合语境；另一项“复习”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: report",
+        "url": "https://dictionary.cambridge.org/dictionary/english/report"
+      }
+    ]
+  },
+  {
+    "word": "trouble",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 苦恼；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "get into trouble; have trouble doing something",
+    "commonMistake": "have trouble doing sth 中 doing 用动名词，不用 to do。",
+    "example": {
+      "english": "The fallen tree caused trouble for the morning traffic.",
+      "chinese": "倒下的树给早间交通带来了麻烦。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The fallen tree caused trouble for the morning traffic. In this sentence, what does “trouble” mean? A. 苦恼  B. 波浪",
+      "solution": "A。解析：句中 “trouble” 表示“苦恼”，符合语境；另一项“波浪”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: trouble",
+        "url": "https://dictionary.cambridge.org/dictionary/english/trouble"
+      }
+    ]
+  },
+  {
+    "word": "relative",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 亲戚。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a close relative; visit relatives",
+    "commonMistake": "relative 指亲戚；relation 也可表示亲属关系，别把 relative 与 relatively（相对地）混淆。",
+    "example": {
+      "english": "My relatives came to stay with us during the flood.",
+      "chinese": "洪水期间，我的亲戚来和我们住在一起。"
+    },
+    "application": {
+      "prompt": "Read this sentence: My relatives came to stay with us during the flood. In this sentence, what does “relative” mean? A. 旱灾  B. 亲戚",
+      "solution": "B。解析：句中 “relative” 表示“亲戚”，符合语境；另一项“旱灾”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: relative",
+        "url": "https://dictionary.cambridge.org/dictionary/english/relative"
+      }
+    ]
+  },
+  {
+    "word": "truck",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 卡车。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a delivery truck; truck driver",
+    "commonMistake": "truck 是美式英语常用词，英式英语常说 lorry；按题目语境辨认同义词。",
+    "example": {
+      "english": "A truck delivered drinking water to the village.",
+      "chinese": "一辆卡车把饮用水送到了村里。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A truck delivered drinking water to the village. In this sentence, what does “truck” mean? A. 卡车  B. 屋顶",
+      "solution": "A。解析：句中 “truck” 表示“卡车”，符合语境；另一项“屋顶”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: truck",
+        "url": "https://dictionary.cambridge.org/dictionary/english/truck"
+      }
+    ]
+  },
+  {
+    "word": "supply",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 供应（量）；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "supply someone with something; supply something to someone",
+    "commonMistake": "常用 supply sb with sth 或 supply sth to sb；不要把两个结构混搭。",
+    "example": {
+      "english": "Volunteers supplied the shelter with blankets.",
+      "chinese": "志愿者为避难所提供了毯子。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Volunteers supplied the shelter with blankets. In this sentence, what does “supply” mean? A. 雷  B. 供应（量）",
+      "solution": "B。解析：句中 “supply” 表示“供应（量）”，符合语境；另一项“雷”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: supply",
+        "url": "https://dictionary.cambridge.org/dictionary/english/supply"
+      }
+    ]
+  },
+  {
+    "word": "preparation",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 准备（工作）。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "in preparation for; careful preparation",
+    "commonMistake": "preparation 作准备时常用不可数；具体准备事项可用 preparations。",
+    "example": {
+      "english": "Good preparation can help families stay safe.",
+      "chinese": "充分准备能帮助家庭保障安全。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Good preparation can help families stay safe. In this sentence, what does “preparation” mean? A. 准备（工作）  B. 泡",
+      "solution": "A。解析：句中 “preparation” 表示“准备（工作）”，符合语境；另一项“泡”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: preparation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/preparation"
+      }
+    ]
+  },
+  {
+    "word": "make preparations",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 作准备。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "make preparations for a trip; make preparations in advance",
+    "commonMistake": "固定说 make preparations for sth；prepare 是动词，preparations 是名词复数。",
+    "example": {
+      "english": "We must make preparations for the coming storm.",
+      "chinese": "我们必须为即将到来的风暴做好准备。"
+    },
+    "application": {
+      "prompt": "Read this sentence: We must make preparations for the coming storm. In this sentence, what does “make preparations” mean? A. 闹钟  B. 作准备",
+      "solution": "B。解析：句中 “make preparations” 表示“作准备”，符合语境；另一项“闹钟”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: preparation (make preparations)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/preparation"
+      }
+    ]
+  },
+  {
+    "word": "power",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 电力供应。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "power supply; lose power",
+    "commonMistake": "power 可指电力或力量；断电常说 the power goes out / is cut off。",
+    "example": {
+      "english": "The storm cut off the power for several hours.",
+      "chinese": "风暴造成停电，持续了好几个小时。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The storm cut off the power for several hours. In this sentence, what does “power” mean? A. 电力供应  B. 洪水",
+      "solution": "A。解析：句中 “power” 表示“电力供应”，符合语境；另一项“洪水”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: power",
+        "url": "https://dictionary.cambridge.org/dictionary/english/power"
+      }
+    ]
+  },
+  {
+    "word": "soundly",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. （睡觉）酣畅地。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "sleep soundly; sleep soundly through the night",
+    "commonMistake": "soundly 可表示睡得沉；常见搭配 sleep soundly，不要与 sound（声音）混淆词性。",
+    "example": {
+      "english": "After the rescue, the tired children slept soundly.",
+      "chinese": "获救后，疲惫的孩子们睡得很沉。"
+    },
+    "application": {
+      "prompt": "Read this sentence: After the rescue, the tired children slept soundly. In this sentence, what does “soundly” mean? A. 尖叫  B. （睡觉）酣畅地",
+      "solution": "B。解析：句中 “soundly” 表示“（睡觉）酣畅地”，符合语境；另一项“尖叫”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: soundly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/soundly"
+      }
+    ]
+  },
+  {
+    "word": "thick",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 厚的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "thick smoke; thick fog",
+    "commonMistake": "thick 可形容厚度或浓密程度，如 a thick wall / thick smoke；thin 是反义词。",
+    "example": {
+      "english": "Thick smoke made it hard to see the road.",
+      "chinese": "浓烟使人很难看清道路。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Thick smoke made it hard to see the road. In this sentence, what does “thick” mean? A. 厚的  B. 西南的",
+      "solution": "A。解析：句中 “thick” 表示“厚的”，符合语境；另一项“西南的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thick",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thick"
+      }
+    ]
+  },
+  {
+    "word": "beat",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 敲打；beat—beat—beaten，过去式与原形同形。",
+    "collocations": "heart beats fast; beat someone at a game",
+    "commonMistake": "beat 的过去式仍是 beat，过去分词是 beaten；不要误写为 beated。",
+    "example": {
+      "english": "Her heart began to beat faster as the wind grew stronger.",
+      "chinese": "风势增强时，她的心跳开始加快。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Her heart began to beat faster as the wind grew stronger. In this sentence, what does “beat” mean? A. 卫兵  B. 跳动",
+      "solution": "B。解析：句中 “beat” 表示“跳动”，符合语境；另一项“卫兵”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: beat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/beat"
+      }
+    ]
+  },
+  {
+    "word": "hide",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 躲藏；hide—hid—hidden，注意过去式和过去分词。",
+    "collocations": "hide from danger; hide something under a table",
+    "commonMistake": "hide 的过去式为 hid，过去分词为 hidden。",
+    "example": {
+      "english": "Hide under a strong table during an earthquake.",
+      "chinese": "地震时要躲在结实的桌子下面。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Hide under a strong table during an earthquake. In this sentence, what does “hide” mean? A. 躲藏  B. 尖叫",
+      "solution": "A。解析：句中 “hide” 表示“躲藏”，符合语境；另一项“尖叫”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hide",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hide"
+      }
+    ]
+  },
+  {
+    "word": "tornado",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 龙卷风。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a powerful tornado; tornado warning",
+    "commonMistake": "tornado 是可数名词；复数常写 tornadoes。",
+    "example": {
+      "english": "The tornado damaged several houses near the town.",
+      "chinese": "龙卷风损坏了城镇附近的几栋房屋。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The tornado damaged several houses near the town. In this sentence, what does “tornado” mean? A. 屋顶  B. 龙卷风",
+      "solution": "B。解析：句中 “tornado” 表示“龙卷风”，符合语境；另一项“屋顶”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tornado",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tornado"
+      }
+    ]
+  },
+  {
+    "word": "worst",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "adj./adv. 最坏（的）。bad、badly 的最高级；注意最高级形式和语境。",
+    "collocations": "the worst storm; at its worst",
+    "commonMistake": "worst 是 bad/badly 的最高级；常与 the 连用作形容词最高级。",
+    "example": {
+      "english": "That was the worst storm the village had seen in years.",
+      "chinese": "那是这个村庄多年来遭遇的最严重的一场风暴。"
+    },
+    "application": {
+      "prompt": "Read this sentence: That was the worst storm the village had seen in years. In this sentence, what does “worst” mean? A. 最坏（的）  B. 附近的",
+      "solution": "A。解析：句中 “worst” 表示“最坏（的）”，符合语境；另一项“附近的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: worst",
+        "url": "https://dictionary.cambridge.org/dictionary/english/worst"
+      }
+    ]
+  },
+  {
+    "word": "schoolgirl",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. （学校的）女生。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a young schoolgirl; schoolgirl uniform",
+    "commonMistake": "schoolgirl 指女学生，是合成词；不要与 schoolboy 混淆性别含义。",
+    "example": {
+      "english": "The schoolgirl carried water to the shelter.",
+      "chinese": "那个女学生把水送到了避难所。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The schoolgirl carried water to the shelter. In this sentence, what does “schoolgirl” mean? A. 泡  B. （学校的）女生",
+      "solution": "B。解析：句中 “schoolgirl” 表示“（学校的）女生”，符合语境；另一项“泡”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: schoolgirl",
+        "url": "https://dictionary.cambridge.org/dictionary/english/schoolgirl"
+      }
+    ]
+  },
+  {
+    "word": "froth",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 泡。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "milk froth; a cup topped with froth",
+    "commonMistake": "froth 表示泡沫时通常作不可数名词；可说 white froth 或 a layer of froth。",
+    "example": {
+      "english": "The strong river carried white froth past the bridge.",
+      "chinese": "湍急的河水带着白色泡沫流过桥边。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The strong river carried white froth past the bridge. In this sentence, what does “froth” mean? A. 泡  B. 思考",
+      "solution": "A。解析：句中 “froth” 表示“泡”，符合语境；另一项“思考”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: froth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/froth"
+      }
+    ]
+  },
+  {
+    "word": "unfortunately",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "v. 不幸地。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "unfortunately for someone; unfortunately, ...",
+    "commonMistake": "unfortunately 是副词，可修饰整句；形容词是 unfortunate。",
+    "example": {
+      "english": "Unfortunately, the bridge was closed after the flood.",
+      "chinese": "不幸的是，洪水过后这座桥关闭了。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Unfortunately, the bridge was closed after the flood. In this sentence, what does “unfortunately” mean? A. （睡觉）酣畅地  B. 不幸地",
+      "solution": "B。解析：句中 “unfortunately” 表示“不幸地”，符合语境；另一项“（睡觉）酣畅地”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: unfortunately",
+        "url": "https://dictionary.cambridge.org/dictionary/english/unfortunately"
+      }
+    ]
+  },
+  {
+    "word": "refuse",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 拒绝。作谓语时注意主谓一致和时态；refuse–refused–refused",
+    "collocations": "refuse to do something; refuse an offer",
+    "commonMistake": "refuse 后接 to do，不接 doing。",
+    "example": {
+      "english": "Never refuse help during an emergency.",
+      "chinese": "遇到紧急情况时，不要拒绝帮助。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Never refuse help during an emergency. In this sentence, what does “refuse” mean? A. 拒绝  B. 尖叫",
+      "solution": "A。解析：句中 “refuse” 表示“拒绝”，符合语境；另一项“尖叫”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: refuse",
+        "url": "https://dictionary.cambridge.org/dictionary/english/refuse"
+      }
+    ]
+  },
+  {
+    "word": "security",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 安全。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "improve security; a security camera",
+    "commonMistake": "security 通常作不可数名词表示安全保障；表示保安人员时用 security guard。",
+    "example": {
+      "english": "The school improved security after the nearby fire.",
+      "chinese": "附近发生火灾后，学校加强了安全防护。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The school improved security after the nearby fire. In this sentence, what does “security” mean? A. 暴风雨  B. 安全",
+      "solution": "B。解析：句中 “security” 表示“安全”，符合语境；另一项“暴风雨”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: security",
+        "url": "https://dictionary.cambridge.org/dictionary/english/security"
+      }
+    ]
+  },
+  {
+    "word": "guard",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 卫兵；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "guard a building; a security guard",
+    "commonMistake": "guard 可作守卫或看守；表示保护某处可说 guard a place，注意不要与 garden 混淆。",
+    "example": {
+      "english": "A guard watched the entrance to the emergency shelter.",
+      "chinese": "一名守卫看守着应急避难所的入口。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A guard watched the entrance to the emergency shelter. In this sentence, what does “guard” mean? A. 卫兵  B. 水灾",
+      "solution": "A。解析：句中 “guard” 表示“卫兵”，符合语境；另一项“水灾”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: guard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/guard"
+      }
+    ]
+  },
+  {
+    "word": "security guard",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 保安人员。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "a security guard; work as a security guard",
+    "commonMistake": "security guard 是两个词；指一名保安时前面用 a/an，不能合写成一个词。",
+    "example": {
+      "english": "The security guard opened the school gate for the rescue team.",
+      "chinese": "保安为救援队打开了学校大门。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The security guard opened the school gate for the rescue team. In this sentence, what does “security guard” mean? A. 作准备  B. 保安人员",
+      "solution": "B。解析：句中 “security guard” 表示“保安人员”，符合语境；另一项“作准备”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: security guard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/security-guard"
+      }
+    ]
+  },
+  {
+    "word": "nearby",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 附近的。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "a nearby town; live nearby",
+    "commonMistake": "nearby 作形容词通常放在名词前；作副词时可独立使用。",
+    "example": {
+      "english": "A nearby school became a temporary shelter.",
+      "chinese": "附近的一所学校成了临时避难所。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A nearby school became a temporary shelter. In this sentence, what does “nearby” mean? A. 附近的  B. 最坏（的）",
+      "solution": "A。解析：句中 “nearby” 表示“附近的”，符合语境；另一项“最坏（的）”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nearby",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nearby"
+      }
+    ]
+  },
+  {
+    "word": "scream",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "v. 尖叫。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "scream for help; scream loudly",
+    "commonMistake": "scream 表示尖叫，常用 scream for help；不要与较普通的 speak 混淆。",
+    "example": {
+      "english": "Scream for help if you are trapped.",
+      "chinese": "如果被困住，就大声呼救。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Scream for help if you are trapped. In this sentence, what does “scream” mean? A. （睡觉）酣畅地  B. 尖叫",
+      "solution": "B。解析：句中 “scream” 表示“尖叫”，符合语境；另一项“（睡觉）酣畅地”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: scream",
+        "url": "https://dictionary.cambridge.org/dictionary/english/scream"
+      }
+    ]
+  },
+  {
+    "word": "thankfully",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 幸运地。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "thankfully, ...; thankfully for someone",
+    "commonMistake": "thankfully 是副词“幸好/感激地”；形容词 thankful 常用 be thankful for。",
+    "example": {
+      "english": "Thankfully, everyone had left the house before the tree fell.",
+      "chinese": "幸好，树倒下之前所有人都离开了房子。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Thankfully, everyone had left the house before the tree fell. In this sentence, what does “thankfully” mean? A. 幸运地  B. 拒绝",
+      "solution": "A。解析：句中 “thankfully” 表示“幸运地”，符合语境；另一项“拒绝”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thankfully",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thankfully"
+      }
+    ]
+  },
+  {
+    "word": "knowledge",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 知识。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "knowledge of first aid; gain knowledge",
+    "commonMistake": "knowledge 通常是不可数名词；说某方面知识用 knowledge of，不说 a knowledge。",
+    "example": {
+      "english": "First-aid knowledge can help you save a life.",
+      "chinese": "急救知识能帮助你挽救生命。"
+    },
+    "application": {
+      "prompt": "Read this sentence: First-aid knowledge can help you save a life. In this sentence, what does “knowledge” mean? A. 思考  B. 知识",
+      "solution": "B。解析：句中 “knowledge” 表示“知识”，符合语境；另一项“思考”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: knowledge",
+        "url": "https://dictionary.cambridge.org/dictionary/english/knowledge"
+      }
+    ]
+  },
+  {
+    "word": "thinking",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 思考。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "quick thinking; critical thinking",
+    "commonMistake": "thinking 作名词可指思考或想法；“快速思考”常说 quick thinking。",
+    "example": {
+      "english": "Quick thinking helped the driver avoid the fallen tree.",
+      "chinese": "司机反应迅速，避开了倒下的树。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Quick thinking helped the driver avoid the fallen tree. In this sentence, what does “thinking” mean? A. 思考  B. 洪水",
+      "solution": "A。解析：句中 “thinking” 表示“思考”，符合语境；另一项“洪水”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thinking",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thinking"
+      }
+    ]
+  },
+  {
+    "word": "as soon as",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 一……就……。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "as soon as possible; as soon as someone arrives",
+    "commonMistake": "as soon as 引导时间状语从句，谈将来时主句用一般将来时，从句常用一般现在时。",
+    "example": {
+      "english": "Call your family as soon as you reach a safe place.",
+      "chinese": "一到安全地点就给家人打电话。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Call your family as soon as you reach a safe place. In this sentence, what does “as soon as” mean? A. 因此  B. 一……就……",
+      "solution": "B。解析：句中 “as soon as” 表示“一……就……”，符合语境；另一项“因此”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: as soon as",
+        "url": "https://dictionary.cambridge.org/dictionary/english/as-soon-as"
+      }
+    ]
+  },
+  {
+    "word": "hero",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 英雄。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a local hero; heroes of the rescue",
+    "commonMistake": "hero 的复数通常为 heroes，注意词尾 -o 加 -es。",
+    "example": {
+      "english": "The firefighter became a local hero after the rescue.",
+      "chinese": "救援之后，这名消防员成了当地英雄。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The firefighter became a local hero after the rescue. In this sentence, what does “hero” mean? A. 英雄  B. 暴风雨",
+      "solution": "A。解析：句中 “hero” 表示“英雄”，符合语境；另一项“暴风雨”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hero",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hero"
+      }
+    ]
+  },
+  {
+    "word": "landslide",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 滑坡。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a landslide warning; cause a landslide",
+    "commonMistake": "landslide 是合成词，表示滑坡或塌方；也可表示压倒性胜利，按语境判断。",
+    "example": {
+      "english": "Heavy rain caused a landslide on the mountain road.",
+      "chinese": "大雨导致山路发生滑坡。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Heavy rain caused a landslide on the mountain road. In this sentence, what does “landslide” mean? A. 台风  B. 滑坡",
+      "solution": "B。解析：句中 “landslide” 表示“滑坡”，符合语境；另一项“台风”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: landslide",
+        "url": "https://dictionary.cambridge.org/dictionary/english/landslide"
+      }
+    ]
+  },
+  {
+    "word": "safeguard",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 保护。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "safeguard someone from danger; safeguard the environment",
+    "commonMistake": "safeguard 可作动词“保护”；常说 safeguard sb/sth from danger，不与 safe 作同一词性使用。",
+    "example": {
+      "english": "The new wall will safeguard the village from floods.",
+      "chinese": "这道新墙将保护村庄免受洪水侵袭。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The new wall will safeguard the village from floods. In this sentence, what does “safeguard” mean? A. 保护  B. 拒绝",
+      "solution": "A。解析：句中 “safeguard” 表示“保护”，符合语境；另一项“拒绝”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: safeguard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/safeguard"
+      }
+    ]
+  },
+  {
+    "word": "floodwater",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 洪水。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "rising floodwater; floodwater levels",
+    "commonMistake": "floodwater 通常作不可数名词；谈洪水水位可说 floodwater level。",
+    "example": {
+      "english": "The floodwater rose above the steps of the school.",
+      "chinese": "洪水涨过了学校门前的台阶。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The floodwater rose above the steps of the school. In this sentence, what does “floodwater” mean? A. 屋顶  B. 洪水",
+      "solution": "B。解析：句中 “floodwater” 表示“洪水”，符合语境；另一项“屋顶”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: floodwater",
+        "url": "https://dictionary.cambridge.org/dictionary/english/floodwater"
+      }
+    ]
+  },
+  {
+    "word": "manpower",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 劳动力。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "lack of manpower; need more manpower",
+    "commonMistake": "manpower 通常作不可数名词，不加复数 -s。",
+    "example": {
+      "english": "The large rescue operation needed more manpower.",
+      "chinese": "这次大型救援行动需要更多人力。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The large rescue operation needed more manpower. In this sentence, what does “manpower” mean? A. 劳动力  B. 准备（工作）",
+      "solution": "A。解析：句中 “manpower” 表示“劳动力”，符合语境；另一项“准备（工作）”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: manpower",
+        "url": "https://dictionary.cambridge.org/dictionary/english/manpower"
+      }
+    ]
+  },
+  {
+    "word": "heartbeat",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 心跳（声）。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a rapid heartbeat; check someone's heartbeat",
+    "commonMistake": "heartbeat 是合成词；指心跳声或心跳，注意不要误拆为 heart beat 作名词。",
+    "example": {
+      "english": "The doctor checked the child's heartbeat.",
+      "chinese": "医生检查了孩子的心跳。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The doctor checked the child's heartbeat. In this sentence, what does “heartbeat” mean? A. （学校的）女生  B. 心跳（声）",
+      "solution": "B。解析：句中 “heartbeat” 表示“心跳（声）”，符合语境；另一项“（学校的）女生”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: heartbeat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/heartbeat"
+      }
+    ]
+  },
+  {
+    "word": "rescue",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n./v. 救援；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "rescue someone from danger; a rescue operation",
+    "commonMistake": "rescue 可作名词或动词；动词常用 rescue sb from danger，不能说 rescue sb out of。",
+    "example": {
+      "english": "The rescue took several hours because the road was blocked.",
+      "chinese": "由于道路被堵，救援花了好几个小时。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The rescue took several hours because the road was blocked. In this sentence, what does “rescue” mean? A. 救援  B. 复习",
+      "solution": "A。解析：句中 “rescue” 表示“救援”，符合语境；另一项“复习”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rescue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rescue"
+      }
+    ]
+  },
+  {
+    "word": "heatwave",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 热浪。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "during a heatwave; a severe heatwave",
+    "commonMistake": "heatwave 可合写，heat wave 也可见；写作时遵循本词表的合写形式。",
+    "example": {
+      "english": "The heatwave made it dangerous to work outdoors.",
+      "chinese": "热浪使户外工作变得危险。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The heatwave made it dangerous to work outdoors. In this sentence, what does “heatwave” mean? A. 滑坡  B. 热浪",
+      "solution": "B。解析：句中 “heatwave” 表示“热浪”，符合语境；另一项“滑坡”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: heatwave",
+        "url": "https://dictionary.cambridge.org/dictionary/english/heatwave"
+      }
+    ]
+  },
+  {
+    "word": "southwestern",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 西南的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "southwestern China; the southwestern region",
+    "commonMistake": "southwestern 是合写的方向形容词，通常小写；名词方向为 southwest。",
+    "example": {
+      "english": "The southwestern villages received heavy rain.",
+      "chinese": "西南部的村庄遭遇了暴雨。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The southwestern villages received heavy rain. In this sentence, what does “southwestern” mean? A. 西南的  B. 通常的",
+      "solution": "A。解析：句中 “southwestern” 表示“西南的”，符合语境；另一项“通常的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: southwestern",
+        "url": "https://dictionary.cambridge.org/dictionary/english/southwestern"
+      }
+    ]
+  },
+  {
+    "word": "firefighter",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 消防队员。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a team of firefighters; call the firefighters",
+    "commonMistake": "firefighter 是合成词；指消防队员，复数 firefighters。",
+    "example": {
+      "english": "A firefighter carried the child out of the burning house.",
+      "chinese": "一名消防员把孩子从着火的房子里救了出来。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A firefighter carried the child out of the burning house. In this sentence, what does “firefighter” mean? A. 暴风雨  B. 消防队员",
+      "solution": "B。解析：句中 “firefighter” 表示“消防队员”，符合语境；另一项“暴风雨”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: firefighter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/firefighter"
+      }
+    ]
+  },
+  {
+    "word": "volunteer",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 志愿者；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "volunteer to help; volunteer for a task",
+    "commonMistake": "volunteer to do sth 表示自愿做某事；volunteer 也可作名词。",
+    "example": {
+      "english": "A volunteer brought food to the emergency shelter.",
+      "chinese": "一名志愿者把食物送到了应急避难所。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A volunteer brought food to the emergency shelter. In this sentence, what does “volunteer” mean? A. 志愿者  B. 雷",
+      "solution": "A。解析：句中 “volunteer” 表示“志愿者”，符合语境；另一项“雷”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: volunteer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/volunteer"
+      }
+    ]
+  },
+  {
+    "word": "terribly",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 非常糟地。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "terribly sorry; terribly worried",
+    "commonMistake": "terribly 是副词，可表示“非常”或“糟糕地”；修饰名词时应改用形容词 terrible。",
+    "example": {
+      "english": "I felt terribly worried when I could not reach my family.",
+      "chinese": "联系不上家人时，我非常担心。"
+    },
+    "application": {
+      "prompt": "Read this sentence: I felt terribly worried when I could not reach my family. In this sentence, what does “terribly” mean? A. 拒绝  B. 非常糟地",
+      "solution": "B。解析：句中 “terribly” 表示“非常糟地”，符合语境；另一项“拒绝”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: terribly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/terribly"
+      }
+    ]
+  },
+  {
+    "word": "alarm",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 警报（器）。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a fire alarm; raise the alarm",
+    "commonMistake": "alarm 可指警报器或惊恐；闹钟/警报器响起常用 go off，而不是 be off。",
+    "example": {
+      "english": "The fire alarm rang, and everyone left the building.",
+      "chinese": "火警警报响起后，所有人都离开了大楼。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The fire alarm rang, and everyone left the building. In this sentence, what does “alarm” mean? A. 警报（器）  B. 屋顶",
+      "solution": "A。解析：句中 “alarm” 表示“警报（器）”，符合语境；另一项“屋顶”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: alarm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/alarm"
+      }
+    ]
+  },
+  {
+    "word": "alarm clock",
+    "examTags": [
+      "词汇·短语",
+      "中考·词形与词性"
+    ],
+    "grammar": "phr. 闹钟。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "set an alarm clock; an alarm clock goes off",
+    "commonMistake": "alarm clock 是两个词；通常说 set an alarm clock，铃响用 the alarm clock goes off。",
+    "example": {
+      "english": "My alarm clock goes off at six each morning.",
+      "chinese": "我的闹钟每天早上六点响。"
+    },
+    "application": {
+      "prompt": "Read this sentence: My alarm clock goes off at six each morning. In this sentence, what does “alarm clock” mean? A. 到……的时候  B. 闹钟",
+      "solution": "B。解析：句中 “alarm clock” 表示“闹钟”，符合语境；另一项“到……的时候”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: alarm clock",
+        "url": "https://dictionary.cambridge.org/dictionary/english/alarm-clock"
+      }
+    ]
+  },
+  {
+    "word": "go off",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. （警报器等）发出响声。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "an alarm goes off; the lights go off",
+    "commonMistake": "go off 可表示闹钟或警报“响起”；不能按字面理解成“离开”。",
+    "example": {
+      "english": "The alarm may go off if smoke reaches the sensor.",
+      "chinese": "烟雾到达传感器时，警报可能会响。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The alarm may go off if smoke reaches the sensor. In this sentence, what does “go off” mean? A. （警报器等）发出响声  B. 做家务",
+      "solution": "A。解析：句中 “go off” 表示“（警报器等）发出响声”，符合语境；另一项“做家务”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: go off",
+        "url": "https://dictionary.cambridge.org/dictionary/english/go-off"
+      }
+    ]
+  },
+  {
+    "word": "review",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n./v. 复习；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "review a lesson; review an emergency plan",
+    "commonMistake": "review 可作“复习、回顾”；review a lesson 不用 review about a lesson。",
+    "example": {
+      "english": "The class reviewed its emergency plan before the trip.",
+      "chinese": "出发前，全班复习了应急预案。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The class reviewed its emergency plan before the trip. In this sentence, what does “review” mean? A. 报道  B. 复习",
+      "solution": "B。解析：句中 “review” 表示“复习”，符合语境；另一项“报道”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: review",
+        "url": "https://dictionary.cambridge.org/dictionary/english/review"
+      }
+    ]
+  },
+  {
+    "word": "sudden",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与词性"
+    ],
+    "grammar": "adj. 突然的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "a sudden change; a sudden storm",
+    "commonMistake": "sudden 是形容词，常说 a sudden change；副词形式 suddenly 用于修饰动作。",
+    "example": {
+      "english": "A sudden change in the wind warned us of danger.",
+      "chinese": "风向突然变化，提醒我们有危险。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A sudden change in the wind warned us of danger. In this sentence, what does “sudden” mean? A. 突然的  B. 通常的",
+      "solution": "A。解析：句中 “sudden” 表示“突然的”，符合语境；另一项“通常的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sudden",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sudden"
+      }
+    ]
+  },
+  {
+    "word": "all of a sudden",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 突然。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "all of a sudden, ...; happen all of a sudden",
+    "commonMistake": "固定表达 all of a sudden 表示“突然”；不要漏掉介词 of。",
+    "example": {
+      "english": "All of a sudden, the lights went out.",
+      "chinese": "突然，灯全灭了。"
+    },
+    "application": {
+      "prompt": "Read this sentence: All of a sudden, the lights went out. In this sentence, what does “all of a sudden” mean? A. 上气不接下气  B. 突然",
+      "solution": "B。解析：句中 “all of a sudden” 表示“突然”，符合语境；另一项“上气不接下气”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: all of a sudden",
+        "url": "https://dictionary.cambridge.org/dictionary/english/all-of-a-sudden"
+      }
+    ]
+  },
+  {
+    "word": "thunder",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n./v. 雷；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "hear thunder; thunder and lightning",
+    "commonMistake": "thunder 可作名词“雷声”或动词“打雷”；闪电是 lightning，二者不要混淆。",
+    "example": {
+      "english": "We heard thunder and hurried inside.",
+      "chinese": "我们听见了雷声，赶紧进了屋。"
+    },
+    "application": {
+      "prompt": "Read this sentence: We heard thunder and hurried inside. In this sentence, what does “thunder” mean? A. 雷  B. 波浪",
+      "solution": "A。解析：句中 “thunder” 表示“雷”，符合语境；另一项“波浪”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thunder",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thunder"
+      }
+    ]
+  },
+  {
+    "word": "by the time",
+    "examTags": [
+      "词汇·短语",
+      "中考·词形与词性"
+    ],
+    "grammar": "phr. 到……的时候。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "by the time someone arrives; by the time + clause",
+    "commonMistake": "by the time 引导时间从句，搭配时态需看主句事件发生的先后。",
+    "example": {
+      "english": "By the time help arrived, the rain had stopped.",
+      "chinese": "救援到达时，雨已经停了。"
+    },
+    "application": {
+      "prompt": "Read this sentence: By the time help arrived, the rain had stopped. In this sentence, what does “by the time” mean? A. 保安人员  B. 到……的时候",
+      "solution": "B。解析：句中 “by the time” 表示“到……的时候”，符合语境；另一项“保安人员”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: by the time",
+        "url": "https://dictionary.cambridge.org/dictionary/english/by-the-time"
+      }
+    ]
+  },
+  {
+    "word": "usual",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 通常的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "as usual; the usual place",
+    "commonMistake": "usual 是形容词；副词“通常”是 usually，注意不能用 usual 修饰动词。",
+    "example": {
+      "english": "The river was higher than usual after the storm.",
+      "chinese": "暴风雨过后，河水比平时高。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The river was higher than usual after the storm. In this sentence, what does “usual” mean? A. 通常的  B. 突然的",
+      "solution": "A。解析：句中 “usual” 表示“通常的”，符合语境；另一项“突然的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: usual",
+        "url": "https://dictionary.cambridge.org/dictionary/english/usual"
+      }
+    ]
+  },
+  {
+    "word": "out of breath",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 上气不接下气。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "be out of breath; get out of breath",
+    "commonMistake": "固定说 out of breath，意为“上气不接下气”；不要说 out of breathe。",
+    "example": {
+      "english": "After running uphill, we were out of breath.",
+      "chinese": "跑上坡后，我们都气喘吁吁。"
+    },
+    "application": {
+      "prompt": "Read this sentence: After running uphill, we were out of breath. In this sentence, what does “out of breath” mean? A. 因此  B. 上气不接下气",
+      "solution": "B。解析：句中 “out of breath” 表示“上气不接下气”，符合语境；另一项“因此”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: out of breath",
+        "url": "https://dictionary.cambridge.org/dictionary/english/out-of-breath"
+      }
+    ]
+  },
+  {
+    "word": "rainstorm",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 暴风雨。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a heavy rainstorm; during a rainstorm",
+    "commonMistake": "rainstorm 是一个词；形容暴雨常用 a heavy rainstorm。",
+    "example": {
+      "english": "The rainstorm flooded several streets overnight.",
+      "chinese": "暴雨一夜之间淹没了几条街道。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The rainstorm flooded several streets overnight. In this sentence, what does “rainstorm” mean? A. 暴风雨  B. 准备（工作）",
+      "solution": "A。解析：句中 “rainstorm” 表示“暴风雨”，符合语境；另一项“准备（工作）”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rainstorm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rainstorm"
+      }
+    ]
+  },
+  {
+    "word": "as a result",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 因此。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "as a result of; as a result, ...",
+    "commonMistake": "as a result 表示“因此”；as a result of 后接名词或名词短语。",
+    "example": {
+      "english": "The road was closed; as a result, buses were delayed.",
+      "chinese": "道路封闭了，因此公交车晚点了。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The road was closed; as a result, buses were delayed. In this sentence, what does “as a result” mean? A. 一……就……  B. 因此",
+      "solution": "B。解析：句中 “as a result” 表示“因此”，符合语境；另一项“一……就……”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: as a result",
+        "url": "https://dictionary.cambridge.org/dictionary/english/as-a-result"
+      }
+    ]
+  },
+  {
+    "word": "unlucky",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 不幸的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "an unlucky day; feel unlucky",
+    "commonMistake": "unlucky 是形容词，unluckily 是副词；按修饰对象选择词形。",
+    "example": {
+      "english": "The unlucky camper woke up to a broken tent after the storm.",
+      "chinese": "这个倒霉的露营者醒来时发现帐篷被风暴刮坏了。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The unlucky camper woke up to a broken tent after the storm. In this sentence, what does “unlucky” mean? A. 不幸的  B. 突然的",
+      "solution": "A。解析：句中 “unlucky” 表示“不幸的”，符合语境；另一项“突然的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: unlucky",
+        "url": "https://dictionary.cambridge.org/dictionary/english/unlucky"
+      }
+    ]
+  }
+]

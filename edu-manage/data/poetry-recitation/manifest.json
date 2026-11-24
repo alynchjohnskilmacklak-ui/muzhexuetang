@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "muzhe-poetry-recitation-v1",
+  "dataset": "七至九年级教材古诗词（人教版/统编版）",
+  "editionNote": "按用户提供的六册教材PDF录入；版本以每册sourceBook为准，不作地区统一必背承诺。",
+  "totalItems": 81,
+  "matchedTo53MainBook": 39,
+  "notMatchedTo53MainBook": 42,
+  "itemCountsByVolume": {
+    "七年级上册": 12,
+    "七年级下册": 14,
+    "八年级上册": 18,
+    "八年级下册": 13,
+    "九年级上册": 16,
+    "九年级下册": 8
+  },
+  "files": [
+    {
+      "file": "volumes/g7-1.json",
+      "volume": "七年级上册",
+      "itemCount": 12,
+      "matchedTo53MainBook": 5,
+      "sourcePageLocatorsFound": 12,
+      "unmatchedTitles": []
+    },
+    {
+      "file": "volumes/g7-2.json",
+      "volume": "七年级下册",
+      "itemCount": 14,
+      "matchedTo53MainBook": 7,
+      "sourcePageLocatorsFound": 14,
+      "unmatchedTitles": []
+    },
+    {
+      "file": "volumes/g8-1.json",
+      "volume": "八年级上册",
+      "itemCount": 18,
+      "matchedTo53MainBook": 9,
+      "sourcePageLocatorsFound": 18,
+      "unmatchedTitles": []
+    },
+    {
+      "file": "volumes/g8-2.json",
+      "volume": "八年级下册",
+      "itemCount": 13,
+      "matchedTo53MainBook": 5,
+      "sourcePageLocatorsFound": 13,
+      "unmatchedTitles": []
+    },
+    {
+      "file": "volumes/g9-1.json",
+      "volume": "九年级上册",
+      "itemCount": 16,
+      "matchedTo53MainBook": 9,
+      "sourcePageLocatorsFound": 16,
+      "unmatchedTitles": []
+    },
+    {
+      "file": "volumes/g9-2.json",
+      "volume": "九年级下册",
+      "itemCount": 8,
+      "matchedTo53MainBook": 4,
+      "sourcePageLocatorsFound": 0,
+      "unmatchedTitles": []
+    }
+  ],
+  "sourceCrosswalk": "01-语文/古诗词/教材对应提取_人教版初中语文_20261113/教材篇目与53必背古诗文逐篇对照表.md",
+  "assignmentPolicy": "内容入库不等于自动要求背诵；以教师布置和学校/本地范围为准。",
+  "publicationStatus": "所有内容待教师二次校对；九年级下册PDF为扫描页，需对照原页逐字核验。"
+}

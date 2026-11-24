@@ -21,8 +21,11 @@ function createClient(url: string | undefined): PrismaClient {
   client.$use(async (params, next) => {
     const startedAt = Date.now()
     let outcome: 'success' | 'failure' = 'success'
+    let returnedRows: number | undefined
     try {
-      return await next(params)
+      const result = await next(params)
+      if (Array.isArray(result)) returnedRows = result.length
+      return result
     } catch (error) {
       outcome = 'failure'
       throw error
@@ -35,6 +38,7 @@ function createClient(url: string | undefined): PrismaClient {
           operation: params.action,
           durationMs,
           outcome,
+          ...(returnedRows === undefined ? {} : { rows: returnedRows }),
           at: new Date().toISOString(),
         }))
       }

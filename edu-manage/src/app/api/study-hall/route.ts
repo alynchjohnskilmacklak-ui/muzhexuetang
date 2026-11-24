@@ -119,6 +119,20 @@ export const GET = apiHandler(async (request: NextRequest) => {
   })
   const selectedTermId = user.role === 'admin' ? scopedTerm?.id : searchParams.get('termId') || terms.find((term) => term.status === 'ACTIVE')?.id
   if (!selectedTermId) return NextResponse.json({ terms, classes: [], students: [], teachers: [], studyDate, contextState: 'NO_ACTIVE_TERM', contextMessage: '当前尚未启用运营期。' })
+  if (searchParams.get('options') === '1') {
+    const classes = await user.prisma.studyHallClass.findMany({
+      where: {
+        termId: selectedTermId,
+        division: user.division,
+        status: 'ACTIVE',
+        ...(user.role === 'teacher' ? { teachers: { some: { teacherId: user.id, active: true } } } : {}),
+      },
+      select: { id: true, name: true, scheduleType: true, gradeScope: true, status: true },
+      orderBy: { name: 'asc' },
+    })
+    return NextResponse.json({ terms, classes, selectedTermId, studyDate, contextState: 'READY' })
+  }
+
   const classes = await user.prisma.studyHallClass.findMany({
     where: { termId: selectedTermId, division: user.division, ...(user.role === 'teacher' ? { status: 'ACTIVE', teachers: { some: { teacherId: user.id, active: true } } } : {}) },
     include: {

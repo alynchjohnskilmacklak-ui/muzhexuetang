@@ -1,0 +1,269 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.assignmentCard {
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid rgba(20, 87, 77, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 3px 12px rgba(20, 60, 50, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease;
+}
+
+.assignmentCard:hover {
+  box-shadow: 0 6px 18px rgba(20, 60, 50, 0.07);
+  transform: translateY(-1px);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #17352F;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.statusReviewed {
+  background: #dff5e8;
+  color: #1e7a3c;
+  border: 1px solid rgba(30, 122, 60, 0.2);
+}
+
+.statusSubmitted {
+  background: #ebf3fc;
+  color: #185fa5;
+  border: 1px solid rgba(24, 95, 165, 0.2);
+}
+
+.statusPending {
+  background: #fff2d9;
+  color: #a06e0b;
+  border: 1px solid rgba(160, 110, 11, 0.2);
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-ink-muted, #73695b);
+}
+
+.metaDot {
+  opacity: 0.4;
+}
+
+.instructionsBox {
+  background: #faf7f2;
+  border: 1px solid rgba(201, 164, 92, 0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-ink, #2a241b);
+  white-space: pre-wrap;
+}
+
+.submissionWell {
+  background: rgba(20, 87, 77, 0.03);
+  border: 1px solid rgba(20, 87, 77, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.submissionLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary, #14574d);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.submissionContent {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-ink, #1a1201);
+  white-space: pre-wrap;
+}
+
+.photoGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.photoThumb {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.deletePhotoBtn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.teacherReviewAlert {
+  background: #f4faf6;
+  border: 1px solid rgba(20, 87, 77, 0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scoreBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scoreText {
+  font-size: 14px;
+  font-weight: 700;
+  color: #14574d;
+}
+
+.teacherComment {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #2e4d41;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.studentSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.studentChip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(60, 80, 72, 0.14);
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2A3F38;
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.studentChip:active {
+  transform: scale(0.95);
+}
+
+.studentChipActive {
+  background: var(--color-primary, #14574d);
+  color: #ffffff;
+  border-color: var(--color-primary, #14574d);
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(20, 87, 77, 0.25);
+}
+
+.uploadAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1.5px dashed rgba(201, 164, 92, 0.65);
+  border-radius: 12px;
+  background: rgba(201, 164, 92, 0.06);
+  color: #8a6517;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 180ms ease;
+  user-select: none;
+}
+
+.uploadAction:hover {
+  background: rgba(201, 164, 92, 0.12);
+  border-color: #8a6517;
+  transform: translateY(-1px);
+}
+
+.uploadAction:active {
+  transform: scale(0.96);
+}
+
+.submitBtn {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #14574D 0%, #0E483F 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(20, 87, 77, 0.22);
+  transition: all 180ms ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgba(20, 87, 77, 0.3);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}

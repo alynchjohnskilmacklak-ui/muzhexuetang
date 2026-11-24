@@ -9,11 +9,13 @@ export function PageLayout({
   subtitle,
   children,
   actions,
+  eyebrow = '牧哲学堂 · 管理工作台',
 }: {
   title: string
   subtitle?: string
   children: ReactNode
   actions?: ReactNode
+  eyebrow?: string
 }) {
   const isMobile = useIsMobile() ?? false
 
@@ -38,7 +40,7 @@ export function PageLayout({
       />
 
       <WorkspacePageHeader
-        eyebrow="牧哲学堂 · 管理工作台"
+        eyebrow={eyebrow}
         title={title}
         subtitle={subtitle}
         actions={actions}

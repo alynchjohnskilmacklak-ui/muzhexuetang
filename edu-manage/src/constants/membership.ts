@@ -175,33 +175,97 @@ export const MEMBERSHIP_HERO_THEME: Record<MembershipLevel, {
   border?: string
   shadow?: string
   shine?: boolean
+  patternType: 'svip' | 'vip' | 'normal'
+  glowColor: string
+  avatarHalo: string
+  statNumberGradient: string
+  statBorder: string
+  statHighlight: string
+  statWatermarkColor: string
+  quoteBorder: string
+  reportBarBg: string
+  reportBarBorder: string
+  reportBarShadow: string
+  reportIconBg: string
+  reportIconColor: string
+  reportBtnBg: string
+  reportBtnColor: string
+  reportBtnShadow: string
 }> = {
   NORMAL: {
-    background: 'linear-gradient(135deg, #2C6E52 0%, #2D7256 100%)',
+    background: 'linear-gradient(145deg, #1E5C46 0%, #154534 100%)',
     badgeBg: 'rgba(255,255,255,.22)',
-    statBg: 'rgba(255,255,255,.16)',
-    quoteBg: 'rgba(255,255,255,.16)',
-    border: '1px solid rgba(62,142,110,.35)',
-    shadow: '0 10px 28px rgba(62,142,110,.18)',
-    shine: true,
-  },
-  VIP: {
-    background: 'linear-gradient(135deg, #A9512A 0%, #B94F25 100%)',
-    badgeBg: 'rgba(255,255,255,.24)',
-    statBg: 'rgba(255,255,255,.18)',
-    quoteBg: 'rgba(255,255,255,.18)',
-    border: '1px solid rgba(240,135,91,.45)',
-    shadow: '0 10px 30px rgba(232,120,74,.22)',
-    shine: true,
-  },
-  SVIP: {
-    background: '#123C35',
-    badgeBg: 'rgba(255,255,255,.16)',
     statBg: 'rgba(255,255,255,.12)',
     quoteBg: 'rgba(255,255,255,.12)',
-    border: '1px solid rgba(201,164,92,.65)',
-    shadow: '0 10px 30px rgba(18,60,53,.25)',
+    border: '1px solid rgba(62,142,110,.4)',
+    shadow: '0 12px 32px rgba(21, 69, 52, 0.32), inset 0 1px 0 rgba(255,255,255,.14)',
     shine: true,
+    patternType: 'normal',
+    glowColor: 'rgba(74, 222, 128, 0.20)',
+    avatarHalo: '0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 4.5px rgba(62, 142, 110, 0.75), 0 0 12px rgba(62, 142, 110, 0.35)',
+    statNumberGradient: 'linear-gradient(180deg, #FFFFFF 40%, #E6FAF0 100%)',
+    statBorder: '1px solid rgba(74, 222, 128, 0.22)',
+    statHighlight: 'inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 14px rgba(0, 0, 0, 0.16)',
+    statWatermarkColor: 'rgba(74, 222, 128, 0.18)',
+    quoteBorder: '1px solid rgba(255, 255, 255, 0.18)',
+    reportBarBg: 'linear-gradient(135deg, rgba(62, 142, 110, 0.25) 0%, rgba(21, 69, 52, 0.75) 100%)',
+    reportBarBorder: '1px solid rgba(167, 243, 208, 0.35)',
+    reportBarShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 16px rgba(0, 0, 0, 0.2)',
+    reportIconBg: 'linear-gradient(135deg, #A7F3D0 0%, #059669 100%)',
+    reportIconColor: '#FFFFFF',
+    reportBtnBg: 'linear-gradient(135deg, #34D399 0%, #059669 100%)',
+    reportBtnColor: '#FFFFFF',
+    reportBtnShadow: '0 2px 8px rgba(5, 150, 105, 0.35)',
+  },
+  VIP: {
+    background: 'linear-gradient(145deg, #144D44 0%, #0D332D 100%)',
+    badgeBg: 'rgba(255,255,255,.24)',
+    statBg: 'rgba(255,255,255,.14)',
+    quoteBg: 'rgba(232, 120, 74, 0.12)',
+    border: '1px solid rgba(232, 120, 74, 0.55)',
+    shadow: '0 14px 36px rgba(13, 51, 45, 0.4), inset 0 1px 0 rgba(255, 236, 222, 0.25)',
+    shine: true,
+    patternType: 'vip',
+    glowColor: 'rgba(245, 158, 11, 0.28)',
+    avatarHalo: '0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 4.5px rgba(232, 120, 74, 0.85), 0 0 14px rgba(232, 120, 74, 0.45)',
+    statNumberGradient: 'linear-gradient(180deg, #FFFFFF 20%, #FFD6BA 75%, #FF9A62 100%)',
+    statBorder: '1px solid rgba(232, 120, 74, 0.35)',
+    statHighlight: 'inset 0 1px 0 rgba(255, 236, 222, 0.4), 0 4px 14px rgba(0, 0, 0, 0.2)',
+    statWatermarkColor: 'rgba(232, 120, 74, 0.24)',
+    quoteBorder: '1px solid rgba(232, 120, 74, 0.32)',
+    reportBarBg: 'linear-gradient(135deg, rgba(232, 120, 74, 0.24) 0%, rgba(13, 51, 45, 0.8) 100%)',
+    reportBarBorder: '1px solid rgba(255, 215, 195, 0.45)',
+    reportBarShadow: 'inset 0 1px 0 rgba(255, 236, 222, 0.3), 0 4px 16px rgba(0, 0, 0, 0.22)',
+    reportIconBg: 'linear-gradient(135deg, #FFD2B8 0%, #E8784A 100%)',
+    reportIconColor: '#FFFFFF',
+    reportBtnBg: 'linear-gradient(135deg, #FFB288 0%, #E8784A 100%)',
+    reportBtnColor: '#FFFFFF',
+    reportBtnShadow: '0 2px 8px rgba(232, 120, 74, 0.4)',
+  },
+  SVIP: {
+    background: 'linear-gradient(145deg, #0F3731 0%, #0A2925 100%)',
+    badgeBg: 'rgba(255,255,255,.16)',
+    statBg: 'rgba(201, 164, 92, 0.12)',
+    quoteBg: 'rgba(201, 164, 92, 0.12)',
+    border: '1px solid rgba(201, 164, 92, 0.75)',
+    shadow: '0 16px 42px rgba(10, 41, 37, 0.52), inset 0 1px 0 rgba(255, 248, 230, 0.3)',
+    shine: true,
+    patternType: 'svip',
+    glowColor: 'rgba(201, 164, 92, 0.36)',
+    avatarHalo: '0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 4.5px rgba(201, 164, 92, 0.95), 0 0 18px rgba(201, 164, 92, 0.55)',
+    statNumberGradient: 'linear-gradient(180deg, #FFFFFF 15%, #F8E7C0 68%, #D8B467 100%)',
+    statBorder: '1px solid rgba(201, 164, 92, 0.45)',
+    statHighlight: 'inset 0 1px 0 rgba(246, 233, 200, 0.5), 0 4px 16px rgba(0, 0, 0, 0.25)',
+    statWatermarkColor: 'rgba(201, 164, 92, 0.26)',
+    quoteBorder: '1px solid rgba(201, 164, 92, 0.4)',
+    reportBarBg: 'linear-gradient(135deg, rgba(201, 164, 92, 0.26) 0%, rgba(10, 41, 37, 0.85) 100%)',
+    reportBarBorder: '1px solid rgba(246, 233, 200, 0.55)',
+    reportBarShadow: 'inset 0 1px 0 rgba(246, 233, 200, 0.4), 0 4px 18px rgba(0, 0, 0, 0.28)',
+    reportIconBg: 'linear-gradient(135deg, #F8E7C0 0%, #D8B467 100%)',
+    reportIconColor: '#0A2925',
+    reportBtnBg: 'linear-gradient(135deg, #F5E2B3 0%, #D8B467 50%, #B89246 100%)',
+    reportBtnColor: '#0A2925',
+    reportBtnShadow: '0 2px 10px rgba(201, 164, 92, 0.5)',
   },
 }
 

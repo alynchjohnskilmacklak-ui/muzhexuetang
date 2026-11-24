@@ -1,14 +1,24 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeftOutlined, CameraOutlined, EnvironmentOutlined, StarFilled, ClockCircleOutlined, BookOutlined, TeamOutlined, CalendarOutlined, RightOutlined } from '@ant-design/icons'
-import { Button, Image, Typography } from 'antd'
+import {
+  ArrowLeftOutlined,
+  BookOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+  EnvironmentOutlined,
+  ReadOutlined,
+  RightOutlined,
+  StarFilled,
+  TeamOutlined,
+} from '@ant-design/icons'
+import { Button, Image } from 'antd'
 import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { fmtDateTime } from '@/lib/format-date'
 import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
-
-const { Title, Text, Paragraph } = Typography
+import styles from './lesson-detail.module.css'
 
 /** 家长端隐藏教师填写的关键字/提示词，只展示 AI 生成的反馈正文 */
 function parentVisibleComment(comment: string) {
@@ -22,6 +32,14 @@ function parentVisibleComment(comment: string) {
 function gradeFromCourse(course: string) {
   const match = course.match(/(初一|初二|初三|高一|高二|高三)/)
   return match ? match[1] : ''
+}
+
+function fmtDateToday() {
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const day = now.getDate()
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  return `${month}月${day}日 · ${weekdays[now.getDay()]}`
 }
 
 type LessonTeacher = {
@@ -94,6 +112,8 @@ export function LessonDetailClient({
   const tierTheme = TIER_THEME[tier]
   const images = (signed.urls || []).filter(Boolean) as string[]
 
+  const [bioExpanded, setBioExpanded] = useState(false)
+
   const grade = gradeFromCourse(course)
   const subject = feedback?.classLesson?.subject || ''
   const timeText = time || (feedback?.classLesson?.startTime
@@ -101,7 +121,7 @@ export function LessonDetailClient({
     : '')
   const roomName = room || feedback?.classLesson?.group?.room?.name || ''
 
-  // 判断课程日期是否为今天
+  // 判断课程日期是否为今天或未来
   const lessonDateObj = lessonDate ? new Date(lessonDate) : null
   const now = new Date()
   const isToday = lessonDateObj
@@ -110,153 +130,250 @@ export function LessonDetailClient({
     && lessonDateObj.getDate() === now.getDate()
   const isFuture = lessonDateObj ? lessonDateObj.getTime() > now.getTime() : false
   const dateLabel = lessonDateObj
-    ? `${lessonDateObj.getMonth() + 1}月${lessonDateObj.getDate()}日 · 周${['日','一','二','三','四','五','六'][lessonDateObj.getDay()]}`
+    ? `${lessonDateObj.getMonth() + 1}月${lessonDateObj.getDate()}日 · 周${['日', '一', '二', '三', '四', '五', '六'][lessonDateObj.getDay()]}`
     : fmtDateToday()
-  const heroTag = isToday ? '今日课程' : isFuture ? '即将上课' : '历史课程'
+  const heroTag = isToday ? '今日课程' : isFuture ? '即将上课' : '已完课'
+
+  const subjectsList = teacher?.subjects
+    ? teacher.subjects.split(/[,，]/).map((s) => s.trim()).filter(Boolean)
+    : []
 
   return (
-    <div className="lesson-detail">
-      <button type="button" className="lesson-detail__back" onClick={() => router.back()}>
+    <div className={styles.container}>
+      <button
+        type="button"
+        className={`${styles.backBtn} mobile-shell-back`}
+        onClick={() => router.back()}
+        aria-label="返回上一页"
+      >
         <ArrowLeftOutlined /> 返回
       </button>
 
-      <div className="lesson-detail__hero">
-        <div className="lesson-detail__hero-top">
-          <span className="lesson-detail__hero-tag">{heroTag}</span>
-          <span className="lesson-detail__hero-date"><CalendarOutlined /> {dateLabel}</span>
+      {/* 课程主信息 Hero 卡片 */}
+      <div className={`${styles.heroCard} stagger-item`} style={{ animationDelay: '0ms' }}>
+        <div className={styles.heroTopRow}>
+          <span className={styles.heroStatusPill}>{heroTag}</span>
+          <span className={styles.heroDate}>
+            <CalendarOutlined /> {dateLabel}
+          </span>
         </div>
-        <div className="lesson-detail__hero-title">{course || teacher?.name || '课程'}</div>
-        <div className="lesson-detail__hero-tags">
-          {grade && <span className="lesson-detail__hero-tag2"><TeamOutlined /> {grade}</span>}
-          {subject && <span className="lesson-detail__hero-tag2"><BookOutlined /> {subject}</span>}
-          {timeText && <span className="lesson-detail__hero-tag2"><ClockCircleOutlined /> {timeText}</span>}
-          {roomName && <span className="lesson-detail__hero-tag2"><EnvironmentOutlined /> {roomName}</span>}
+
+        <h1 className={styles.heroCourseTitle}>{course || teacher?.name || '课程详情'}</h1>
+
+        <div className={styles.heroPillsRow}>
+          {grade && (
+            <span className={styles.heroPill}>
+              <TeamOutlined /> {grade}
+            </span>
+          )}
+          {subject && (
+            <span className={styles.heroPill}>
+              <BookOutlined /> {subject}
+            </span>
+          )}
+          {timeText && (
+            <span className={styles.heroPill}>
+              <ClockCircleOutlined /> {timeText}
+            </span>
+          )}
+          {roomName && (
+            <span className={styles.heroPill}>
+              <EnvironmentOutlined /> {roomName}
+            </span>
+          )}
         </div>
+
         {teacher?.name && (
-          <div className="lesson-detail__hero-teacher">
-            <span className="lesson-detail__hero-dot" style={{ background: tierTheme.accent }} />
-            {teacher.name}老师{grade ? ` · ${grade}` : ''}
+          <div className={styles.heroTeacherTag}>
+            <span className={styles.heroTeacherDot} style={{ background: tierTheme.accent }} />
+            <span>主讲教师：{teacher.name}老师</span>
           </div>
         )}
       </div>
 
+      {/* 教师信息名片 */}
       {teacher && (
-        <section className="lesson-detail-card lesson-detail-teacher">
-          <div className="lesson-detail-card__title">教师信息</div>
-          <div className="lesson-detail-teacher__body">
-            <div className="lesson-detail-teacher__avatar">
+        <section className={`${styles.sectionCard} stagger-item`} style={{ animationDelay: '60ms' }}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionTitleDot} /> 授课教师
+            </h2>
+            {teacher.rating ? (
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#C9A45C', display: 'flex', alignItems: 'center', gap: 3 }}>
+                <StarFilled /> {teacher.rating.toFixed(1)} 分
+              </span>
+            ) : null}
+          </div>
+
+          <div className={styles.teacherGrid}>
+            <div className={styles.teacherAvatarFrame}>
               <Image
                 src={getTeacherAvatarUrl(teacher.avatar, teacher.gender, teacher.name)}
                 fallback={getTeacherAvatarUrl(null, teacher.gender, teacher.name)}
                 alt={teacher.name}
-                preview={{ mask: '点击查看大图' }}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }}
+                preview={{ mask: '查看' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
-            <div className="lesson-detail-teacher__info">
-              <div className="lesson-detail-teacher__name">
-                <strong>{teacher.name}老师</strong>
+
+            <div className={styles.teacherMainInfo}>
+              <div className={styles.teacherNameRow}>
+                <span className={styles.teacherName}>{teacher.name}老师</span>
                 {teacher.tierLevel && (
                   <span
-                    className="lesson-detail-teacher__tier"
-                    style={{ color: tierTheme.accent, background: tierTheme.bg, border: `1px solid ${tierTheme.border}` }}
+                    className={styles.tierPill}
+                    style={{
+                      color: tierTheme.accent,
+                      background: tierTheme.bg,
+                      border: `1px solid ${tierTheme.border}`,
+                    }}
                   >
                     {tierTheme.label}
                   </span>
                 )}
               </div>
-              <div className="lesson-detail-teacher__meta">
-                {teacher.subjects && <span>{teacher.subjects.replace(/[,，]/g, ' · ')}</span>}
-                {teacher.university && <span>{teacher.university}</span>}
-                {teacher.education && <span>{teacher.education}</span>}
+
+              <div className={styles.teacherEduRow}>
+                <span>{teacher.university || teacher.currentUnit || '牧哲学堂教师'}</span>
+                {teacher.education && <span>· {teacher.education}</span>}
               </div>
-              {teacher.rating ? (
-                <div className="lesson-detail-teacher__rating"><StarFilled /> {teacher.rating.toFixed(1)}（{teacher.ratingCount || 0} 人评价）</div>
-              ) : null}
-              {teacher.bio && <Paragraph className="lesson-detail-teacher__bio">{teacher.bio}</Paragraph>}
+
+              {subjectsList.length > 0 && (
+                <div className={styles.subjectChipsRow}>
+                  {subjectsList.map((sub) => (
+                    <span key={sub} className={styles.subjectChip}>
+                      {sub}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+
+          {teacher.bio && (
+            <div className={styles.bioContainer}>
+              <span className={styles.bioLabel}>
+                <BookOutlined /> 教学风格与师资履历
+              </span>
+              <p
+                className={`${styles.bioText} ${!bioExpanded && teacher.bio.length > 90 ? styles.bioTextClamped : ''}`}
+              >
+                {teacher.bio}
+              </p>
+              {teacher.bio.length > 90 && (
+                <button
+                  type="button"
+                  className={styles.expandBioBtn}
+                  onClick={() => setBioExpanded(!bioExpanded)}
+                >
+                  {bioExpanded ? '收起简介 ▲' : '展开查看完整履历 ▼'}
+                </button>
+              )}
+            </div>
+          )}
         </section>
       )}
 
-      <section className="lesson-detail-card">
-        <div className="lesson-detail-card__title">课堂反馈</div>
+      {/* 课堂学情与反馈（统合为一个清晰板块，消灭双卡撞车） */}
+      <section className={`${styles.sectionCard} stagger-item`} style={{ animationDelay: '120ms' }}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionTitleDot} /> 课堂学情与反馈
+          </h2>
+          {feedback?.createdAt && (
+            <span className={styles.feedbackTime}>
+              发布于 {fmtDateTime(feedback.createdAt)}
+            </span>
+          )}
+        </div>
+
         {feedback ? (
-          <>
-            {feedback.createdAt && (
-              <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>发布于 {fmtDateTime(feedback.createdAt)}</Text>
-            )}
+          <div className={styles.feedbackBox}>
             {(() => {
-              const text = String(feedback.lessonContent || parentVisibleComment(feedback.overallComment || '') || feedback.summary || '').trim()
+              const text = String(
+                feedback.lessonContent
+                  || parentVisibleComment(feedback.overallComment || '')
+                  || feedback.summary
+                  || '',
+              ).trim()
+
               return text ? (
-                <Paragraph
-                  className="lesson-detail-block__text"
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    WebkitLineClamp: 3,
-                    display: '-webkit-box',
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}
-                >
+                <div className={styles.feedbackContent}>
                   {text}
-                </Paragraph>
+                </div>
               ) : (
-                <Text type="secondary" style={{ fontSize: 12.5, display: 'block', marginBottom: 8 }}>老师已发布本节课课堂反馈，点击下方按钮查看完整内容。</Text>
+                <div style={{ fontSize: 13, color: 'var(--color-ink-muted)' }}>
+                  老师已发布本节课学情反馈，点击下方可查看详细测评与知识点。
+                </div>
               )
             })()}
+
             <Button
               type="primary"
-              icon={<RightOutlined />}
+              icon={<ReadOutlined />}
               onClick={() => router.push(`/parent/class-feedback/${feedback.id}${childId ? `?childId=${encodeURIComponent(childId)}` : ''}`)}
-              style={{ marginTop: 8, background: '#0E5E4E', border: 'none', borderRadius: 10, height: 40, fontWeight: 600 }}
+              className={styles.fullFeedbackBtn}
             >
-              查看完整课堂反馈
+              查看完整学情报告与随堂测评 <RightOutlined />
             </Button>
-          </>
+          </div>
+        ) : isFuture ? (
+          /* 未来课次温和备课提示 */
+          <div className={styles.standbyCard}>
+            <div className={`${styles.standbyIconBox} ${styles.standbyIconUpcoming}`}>
+              <CalendarOutlined />
+            </div>
+            <div className={styles.standbyTitle}>本节课尚未开课</div>
+            <p className={styles.standbyDesc}>
+              开课时间：{dateLabel} {timeText}。上课期间老师将专注课堂互动教学，课后会为您梳理本节课的重难点吸收情况与课堂照片。
+            </p>
+            <span className={styles.standbyTip}>
+              💡 提醒：请督促孩子按时出勤，带齐课本讲义
+            </span>
+          </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '24px 0', color: '#999', fontSize: 13 }}>
-            {isFuture ? '本节课还未上课，课后老师会发布课堂反馈' : '本节课暂未发布课堂反馈'}
+          /* 今日课后或近期整理提示 */
+          <div className={styles.standbyCard}>
+            <div className={`${styles.standbyIconBox} ${styles.standbyIconOrganizing}`}>
+              <ClockCircleOutlined />
+            </div>
+            <div className={styles.standbyTitle}>老师正在整理今日学情</div>
+            <p className={styles.standbyDesc}>
+              本节课授课已结束。老师将在课后整理孩子在堂上的掌握进度、练习完成度与精彩照片，预计今晚发布，请稍候查看。
+            </p>
+            <span className={styles.standbyTip}>
+              🌙 建议：晚间 19:00 后可返回查看当天学情报告
+            </span>
           </div>
         )}
       </section>
 
+      {/* 随堂实拍照片 */}
       {images.length > 0 && (
-        <section className="lesson-detail-card">
-          <div className="lesson-detail-card__title">课堂照片</div>
+        <section className={`${styles.sectionCard} stagger-item`} style={{ animationDelay: '180ms' }}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionTitleDot} /> 随堂实拍记录
+            </h2>
+            <span style={{ fontSize: 12, color: 'var(--color-ink-subtle)' }}>
+              共 {images.length} 张
+            </span>
+          </div>
           <Image.PreviewGroup>
-            <div className="lesson-detail-photos">
+            <div className={styles.photoGallery}>
               {images.map((url, index) => (
-                <Image key={index} src={url} alt={`课堂照片${index + 1}`} width={110} height={110} style={{ objectFit: 'cover', borderRadius: 10 }} />
+                <div key={url} className={styles.photoFrame}>
+                  <Image
+                    src={url}
+                    alt={`随堂照片 ${index + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
               ))}
             </div>
           </Image.PreviewGroup>
         </section>
       )}
-
-      {!feedback && (
-        <section className="lesson-detail-card">
-          <div className="lesson-detail-card__title">今日课堂反馈</div>
-          <div className="lesson-detail-empty">
-            <div className="lesson-detail-empty__title">老师还在整理今天的课堂反馈</div>
-            <p className="lesson-detail-empty__desc">
-              老师当天还未完成反馈，预计今晚 7 点左右更新。
-              <br />
-              每天课后，老师需要为每个孩子整理课堂反馈和课堂照片，还要批改作业、备课，非常辛苦。
-              <br />
-              请您耐心等待，晚上再来查看孩子今天的课堂动态。
-            </p>
-          </div>
-        </section>
-      )}
     </div>
   )
-}
-
-function fmtDateToday() {
-  const now = new Date()
-  const month = now.getMonth() + 1
-  const day = now.getDate()
-  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-  return `${month}月${day}日 ${weekdays[now.getDay()]}`
 }

@@ -69,8 +69,8 @@ function VipIntroCard() {
             { t: '想要培优拔高', d: '课堂"吃不饱"，希望提前学、拓展深度，冲刺更高目标' },
             { t: '上课时间不固定', d: '临时有事、请假频繁，一对一可以按孩子时间灵活约课补上' },
             { t: '需要更多关注与陪伴', d: '性格内向不敢提问、专注力易分散，一对一老师全程贴身引导' },
-          ].map((item) => (
-            <div key={item.t} style={{ display: 'flex', gap: 8 }}>
+          ].map((item, itemIndex) => (
+            <div key={item.t} className="stagger-item" style={{ animationDelay: `${Math.min(itemIndex, 8) * 40}ms`, display: 'flex', gap: 8 }}>
               <span style={{ color: '#1D9E75', fontWeight: 700, flexShrink: 0 }}>✓</span>
               <span><strong style={{ color: '#123C35' }}>{item.t}：</strong>{item.d}</span>
             </div>
@@ -112,11 +112,13 @@ function VipIntroCard() {
           {[
             { name: '任老师', phone: '15930114500' },
             { name: '马老师', phone: '18031264903' },
-          ].map((contact) => (
+          ].map((contact, contactIndex) => (
             <a
               key={contact.name}
               href={`tel:${contact.phone}`}
+              className="stagger-item"
               style={{
+                animationDelay: `${Math.min(contactIndex, 8) * 40}ms`,
                 flex: '1 1 120px', display: 'flex', alignItems: 'center', gap: 8,
                 padding: '8px 11px', borderRadius: 10, textDecoration: 'none',
                 background: '#fff', border: '1px solid rgba(232,120,74,.25)',
@@ -200,7 +202,7 @@ export function IntensiveListClient({
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '12px 14px 24px', display: 'grid', gap: 10 }}>
       {/* 学生切换（全部孩子都展示） */}
       {students.length > 1 && (
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
           {students.map((student) => {
             const hasVip = (student.enrollments || []).some((enrollment) => enrollment.group?.intensiveMode === 'INTENSIVE')
             const active = selectedStudent?.id === student.id
@@ -208,19 +210,22 @@ export function IntensiveListClient({
               <button
                 key={student.id}
                 type="button"
+                aria-pressed={active}
                 onClick={() => handleSelectStudent(student.id)}
                 style={{
-                  flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, minHeight: 44,
-                  padding: '7px 13px', borderRadius: 999, fontSize: 13,
-                  border: active ? '1px solid #C9A45C' : '1px solid #E8E2D5',
-                  background: active ? '#0E5E4E' : '#fff',
-                  color: active ? '#F2E3B6' : '#7A6A45',
-                  fontWeight: active ? 600 : 400,
+                  flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, minHeight: 38,
+                  padding: '6px 14px', borderRadius: 999, fontSize: 13,
+                  border: active ? '1px solid #C9A45C' : '1px solid rgba(60,80,72,.14)',
+                  background: active ? '#0E5E4E' : '#ffffff',
+                  color: active ? '#F2E3B6' : '#2A3F38',
+                  fontWeight: active ? 700 : 500,
                   cursor: 'pointer',
+                  boxShadow: active ? '0 3px 10px rgba(14,94,78,.25)' : '0 1px 4px rgba(0,0,0,.02)',
+                  transition: 'all .2s cubic-bezier(.2,.8,.2,1)',
                 }}
               >
                 {student.name}
-                {hasVip && <CrownOutlined style={{ fontSize: 10, color: active ? '#F2E3B6' : '#C9A45C' }} />}
+                {hasVip && <CrownOutlined style={{ fontSize: 11, color: active ? '#F2E3B6' : '#C9A45C' }} />}
               </button>
             )
           })}
@@ -234,7 +239,7 @@ export function IntensiveListClient({
         <>
           {/* 组切换（一个学生多学科多老师时） */}
           {currentGroups.length > 1 && (
-            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
               {currentGroups.map((enrollment) => {
                 const group = enrollment.group
                 const teacherName = group?.teacher?.name || '老师'
@@ -244,15 +249,18 @@ export function IntensiveListClient({
                   <button
                     key={enrollment.id}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => setSelectedGroupId(group?.id || '')}
                     style={{
-                      flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, minHeight: 44,
-                      padding: '6px 12px', borderRadius: 999, fontSize: 12.5,
-                      border: active ? '1px solid #C9A45C' : '1px solid #E8E2D5',
-                      background: active ? '#0E5E4E' : '#fff',
-                      color: active ? '#F2E3B6' : '#7A6A45',
-                      fontWeight: active ? 600 : 400,
+                      flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, minHeight: 36,
+                      padding: '5px 12px', borderRadius: 999, fontSize: 12.5,
+                      border: active ? '1px solid #C9A45C' : '1px solid rgba(60,80,72,.14)',
+                      background: active ? '#0E5E4E' : '#ffffff',
+                      color: active ? '#F2E3B6' : '#2A3F38',
+                      fontWeight: active ? 700 : 500,
                       cursor: 'pointer',
+                      boxShadow: active ? '0 3px 10px rgba(14,94,78,.25)' : '0 1px 4px rgba(0,0,0,.02)',
+                      transition: 'all .2s cubic-bezier(.2,.8,.2,1)',
                     }}
                   >
                     <CrownOutlined style={{ fontSize: 11 }} />

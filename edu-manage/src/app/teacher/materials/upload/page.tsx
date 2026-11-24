@@ -10,6 +10,9 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { GRADE_SUBJECTS, GRADES } from '@/data/subjects'
 
+import useSWR from 'swr'
+import { resolveTier, TIER_THEME, type TeacherTier } from '@/constants/teacher-tier'
+
 const { Title, Text } = Typography
 const { TextArea } = Input
 
@@ -26,8 +29,14 @@ function fileKindLabel(name: string): string {
   return map[ext] || ext.toUpperCase() || '文件'
 }
 
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
+
 export default function TeacherMaterialUploadPage() {
   const router = useRouter()
+  const { data: dashData } = useSWR('/api/teacher/dashboard', fetcher)
+  const currentTier: TeacherTier = resolveTier(dashData?.teacher?.tierLevel)
+  const theme = TIER_THEME[currentTier]
+
   const [uploading, setUploading] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [form] = Form.useForm()
@@ -67,7 +76,7 @@ export default function TeacherMaterialUploadPage() {
         toast.error(err.error || '上传失败')
         return
       }
-      toast.success('上传成功，已进入资料库')
+      toast.success('上传成功，已收录至校区资料库')
       router.push('/teacher/materials?tab=mine')
     } catch {
       toast.error('网络异常，请稍后重试')
@@ -78,29 +87,82 @@ export default function TeacherMaterialUploadPage() {
 
   return (
     <div className="teacher-upload-page">
-      <div className="upload-page-header">
-        <Button type="text" className="upload-back" icon={<ArrowLeftOutlined />} onClick={() => router.back()} aria-label="返回" />
+      {/* 沉浸式梯队主题 Header */}
+      <div
+        className="upload-page-header"
+        style={{
+          background: theme.heroBg,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+        }}
+      >
+        <Button
+          type="text"
+          className="upload-back mobile-shell-back"
+          icon={<ArrowLeftOutlined style={{ color: '#ffffff', fontSize: 18 }} />}
+          onClick={() => router.back()}
+          aria-label="返回"
+        />
         <div className="upload-page-title">
-          <Title level={5}>上传普通资料</Title>
-          <Text type="secondary">资料将进入学习资料库，可按年级与科目分类查看</Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ color: '#ffffff', fontSize: 17, fontWeight: 750, letterSpacing: '0.3px' }}>
+              上传教学资料
+            </span>
+            <span
+              style={{
+                fontSize: 11,
+                padding: '2px 8px',
+                borderRadius: 999,
+                background: 'rgba(255,255,255,0.18)',
+                color: '#ffffff',
+                border: '1px solid rgba(255,255,255,0.28)',
+                backdropFilter: 'blur(4px)',
+                fontWeight: 600,
+              }}
+            >
+              {theme.roleTag || theme.name}
+            </span>
+          </div>
+          <span style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.80)', marginTop: 2 }}>
+            资料入库后将同步支持教师备课下载与家长端微课自学
+          </span>
         </div>
       </div>
 
       <div className="upload-body">
-        <Form form={form} layout="vertical" initialValues={{ audience: 'BOTH', materialType: 'HANDOUT' }} className="upload-page-form">
-          <Form.Item name="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}>
-            <Input maxLength={80} showCount placeholder="例如：二次函数图象与性质复习讲义" />
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{ audience: 'BOTH', materialType: 'HANDOUT' }}
+          className="upload-page-form"
+        >
+          <Form.Item name="title" label="资料标题" rules={[{ required: true, message: '请输入资料标题' }]}>
+            <Input maxLength={80} showCount placeholder="例如：二次函数图象与性质常考题型专练讲义" style={{ borderRadius: 10, padding: '9px 12px' }} />
           </Form.Item>
 
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item name="grade" label="年级" rules={[{ required: true, message: '请选择年级' }]}>
-                <Select virtual={false} listHeight={220} getPopupContainer={(node) => node.parentElement} options={GRADES.map((item) => ({ label: item, value: item }))} onChange={() => form.setFieldValue('subject', undefined)} />
+              <Form.Item name="grade" label="适用年级" rules={[{ required: true, message: '请选择年级' }]}>
+                <Select
+                  virtual={false}
+                  listHeight={220}
+                  placeholder="选择年级"
+                  getPopupContainer={(node) => node.parentElement}
+                  options={GRADES.map((item) => ({ label: item, value: item }))}
+                  onChange={() => form.setFieldValue('subject', undefined)}
+                  style={{ height: 40 }}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="subject" label="科目" rules={[{ required: true, message: '请选择科目' }]}>
-                <Select virtual={false} listHeight={220} getPopupContainer={(node) => node.parentElement} options={uploadSubjects} />
+              <Form.Item name="subject" label="所属科目" rules={[{ required: true, message: '请选择科目' }]}>
+                <Select
+                  virtual={false}
+                  listHeight={220}
+                  placeholder="选择科目"
+                  getPopupContainer={(node) => node.parentElement}
+                  options={uploadSubjects}
+                  style={{ height: 40 }}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -111,31 +173,53 @@ export default function TeacherMaterialUploadPage() {
               listHeight={220}
               getPopupContainer={(node) => node.parentElement}
               options={[
-                { label: '课本（电子教材）', value: 'TEXTBOOK' },
-                { label: '讲义（老师整理）', value: 'HANDOUT' },
-                { label: '题库（练习题）', value: 'EXERCISE' },
-                { label: '试卷（考试卷）', value: 'EXAM' },
-                { label: '答案（参考答案）', value: 'ANSWER' },
-                { label: '参考（其他资料）', value: 'REFERENCE' },
+                { label: '讲义（名师整理 / 课前预习导学案）', value: 'HANDOUT' },
+                { label: '题库（精选分层习题 / 变式训练）', value: 'EXERCISE' },
+                { label: '课本（官方教材 / 同步教参）', value: 'TEXTBOOK' },
+                { label: '试卷（月考 / 期中 / 期末 / 中考真题）', value: 'EXAM' },
+                { label: '答案（解析与得分步骤）', value: 'ANSWER' },
+                { label: '参考（思维导图 / 公式定律速记）', value: 'REFERENCE' },
               ]}
+              style={{ height: 40 }}
             />
           </Form.Item>
 
-          <Form.Item name="audience" label="谁可以查看" rules={[{ required: true }]}>
+          <Form.Item name="audience" label="开放受众" rules={[{ required: true }]}>
             <div className="audience-grid">
               <Button.Group className="audience-group">
-                <Button value="BOTH" onClick={() => form.setFieldValue('audience', 'BOTH')} type={form.getFieldValue('audience') === 'BOTH' ? 'primary' : 'default'}>家长和教师</Button>
-                <Button value="STUDENT" onClick={() => form.setFieldValue('audience', 'STUDENT')} type={form.getFieldValue('audience') === 'STUDENT' ? 'primary' : 'default'}>仅家长</Button>
-                <Button value="TEACHER" onClick={() => form.setFieldValue('audience', 'TEACHER')} type={form.getFieldValue('audience') === 'TEACHER' ? 'primary' : 'default'}>仅教师</Button>
+                <Button
+                  value="BOTH"
+                  onClick={() => form.setFieldValue('audience', 'BOTH')}
+                  type={form.getFieldValue('audience') === 'BOTH' ? 'primary' : 'default'}
+                  style={form.getFieldValue('audience') === 'BOTH' ? { background: theme.primary, borderColor: theme.primary } : {}}
+                >
+                  双端互通（家长和教师）
+                </Button>
+                <Button
+                  value="STUDENT"
+                  onClick={() => form.setFieldValue('audience', 'STUDENT')}
+                  type={form.getFieldValue('audience') === 'STUDENT' ? 'primary' : 'default'}
+                  style={form.getFieldValue('audience') === 'STUDENT' ? { background: theme.primary, borderColor: theme.primary } : {}}
+                >
+                  仅家长端可见
+                </Button>
+                <Button
+                  value="TEACHER"
+                  onClick={() => form.setFieldValue('audience', 'TEACHER')}
+                  type={form.getFieldValue('audience') === 'TEACHER' ? 'primary' : 'default'}
+                  style={form.getFieldValue('audience') === 'TEACHER' ? { background: theme.primary, borderColor: theme.primary } : {}}
+                >
+                  仅教师内部教研
+                </Button>
               </Button.Group>
             </div>
           </Form.Item>
 
-          <Form.Item name="description" label="说明">
-            <TextArea rows={3} maxLength={200} showCount placeholder="选填，简单说明资料用途（会展示在资料详情里）" />
+          <Form.Item name="description" label="教学说明与使用建议">
+            <TextArea rows={3} maxLength={200} showCount placeholder="选填，如：适合九年级二轮冲刺，建议打印后让学生先闭卷自测30分钟…" style={{ borderRadius: 10 }} />
           </Form.Item>
 
-          <Form.Item label="文件" required className="file-field">
+          <Form.Item label="上传文件" required className="file-field">
             <Upload
               beforeUpload={() => false}
               maxCount={1}
@@ -150,28 +234,62 @@ export default function TeacherMaterialUploadPage() {
               accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z"
               className="upload-page-picker"
             >
-              <div className="file-drop-zone">
-                <InboxOutlined className="file-drop-icon" />
-                <div className="file-drop-title">{fileList[0] ? fileList[0].name : '点击选择文件或从聊天中选择'}</div>
+              <div
+                className="file-drop-zone"
+                style={{
+                  borderColor: fileList.length > 0 ? theme.primary : 'rgba(0,0,0,0.15)',
+                  background: fileList.length > 0 ? `linear-gradient(180deg, ${theme.secondary}12, #ffffff)` : '#ffffff',
+                }}
+              >
+                <InboxOutlined className="file-drop-icon" style={{ color: theme.primary }} />
+                <div className="file-drop-title">
+                  {fileList[0] ? fileList[0].name : '点击选择或将教学文件拖曳至此'}
+                </div>
                 <div className="file-drop-sub">
-                  {fileList[0]
-                    ? <>已选文件 · <Tag className="file-kind-tag">{fileKindLabel(fileList[0].name)}</Tag> · 点击可更换</>
-                    : '支持 PDF / Word / 图片 / 表格 / 演示文稿 / 压缩包'}
+                  {fileList[0] ? (
+                    <>已选课件 · <Tag style={{ color: theme.primary, borderColor: `${theme.primary}40`, background: `${theme.primary}10`, borderRadius: 6, fontWeight: 600 }}>{fileKindLabel(fileList[0].name)}</Tag> · 点击可替换</>
+                  ) : (
+                    '支持 PDF / Word / PPT / Excel / 图片 / 课件压缩包'
+                  )}
                 </div>
               </div>
             </Upload>
           </Form.Item>
 
-          <div className="upload-tip">
-            <CheckCircleOutlined /> 上传后立即可用：家长可在「学习资料」中在线预览，教师端可随时下载复用。
+          <div
+            className="upload-tip"
+            style={{
+              background: `${theme.primary}08`,
+              borderColor: `${theme.primary}25`,
+              color: '#332a18',
+            }}
+          >
+            <CheckCircleOutlined style={{ color: theme.primary, marginTop: 3 }} />
+            <div>
+              <strong>智能资源归档：</strong>
+              资料保存后将根据学科自动生成分类索引。家长端可直接在手机端全屏查阅，教师可在电脑端或备课平板随时一键投屏或下载。
+            </div>
           </div>
         </Form>
       </div>
 
       <div className="upload-page-footer">
-        <Button className="upload-cancel" onClick={() => router.back()} disabled={uploading}>取消</Button>
-        <Button type="primary" className="upload-submit" icon={<UploadOutlined />} loading={uploading} onClick={handleUpload}>
-          {uploading ? '上传中…' : '上传到资料库'}
+        <Button className="upload-cancel" onClick={() => router.back()} disabled={uploading}>
+          取消
+        </Button>
+        <Button
+          type="primary"
+          className="upload-submit"
+          icon={<UploadOutlined />}
+          loading={uploading}
+          onClick={handleUpload}
+          style={{
+            background: `linear-gradient(135deg, ${theme.secondary}, ${theme.primary})`,
+            borderColor: 'transparent',
+            boxShadow: `0 6px 18px ${theme.primary}35`,
+          }}
+        >
+          {uploading ? '正在归档上传…' : '确认上传并入库'}
         </Button>
       </div>
 
@@ -187,53 +305,41 @@ export default function TeacherMaterialUploadPage() {
         .upload-page-header {
           display: flex;
           align-items: center;
-          gap: 6px;
-          padding: 12px 16px 10px;
+          gap: 12px;
+          padding: 14px 18px 12px;
           position: sticky;
           top: 0;
-          z-index: 5;
-          background: #faf8f5;
-          border-bottom: 1px solid rgba(0, 0, 0, .05);
+          z-index: 20;
+          backdrop-filter: blur(10px);
         }
 
         .upload-back {
-          width: 40px;
-          height: 40px;
-          flex: 0 0 40px;
-          font-size: 18px;
+          width: 38px;
+          height: 38px;
+          flex: 0 0 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.16) !important;
+          border-radius: 10px;
         }
 
         .upload-page-title {
           min-width: 0;
         }
 
-        .upload-page-title :global(.ant-typography) {
-          margin: 0 !important;
-        }
-
-        .upload-page-title h5 {
-          font-size: 17px !important;
-          color: #1a1201 !important;
-        }
-
-        .upload-page-title span {
-          display: block;
-          font-size: 12px;
-          margin-top: 2px;
-        }
-
         .upload-body {
           flex: 1;
-          padding: 14px 16px 20px;
+          padding: 16px 16px 24px;
         }
 
         .upload-page-form :global(.ant-form-item) {
-          margin-bottom: 16px;
+          margin-bottom: 18px;
         }
 
         .upload-page-form :global(.ant-form-item-label > label) {
           font-size: 13.5px;
-          font-weight: 600;
+          font-weight: 650;
           color: #1a1201;
         }
 
@@ -245,8 +351,10 @@ export default function TeacherMaterialUploadPage() {
 
         .audience-grid :global(.ant-btn) {
           text-align: center;
-          padding-inline: 6px;
-          font-size: 13px;
+          padding-inline: 4px;
+          font-size: 12.5px;
+          height: 38px;
+          border-radius: 8px;
         }
 
         .upload-page-picker,
@@ -261,27 +369,20 @@ export default function TeacherMaterialUploadPage() {
           justify-content: center;
           gap: 8px;
           min-height: 140px;
-          padding: 20px 14px;
-          border: 1.5px dashed rgba(30, 60, 50, .30);
+          padding: 22px 14px;
+          border: 1.5px dashed rgba(0, 0, 0, 0.15);
           border-radius: 14px;
-          background: linear-gradient(180deg, #EFF7F2, #F7FBF8);
-          transition: border-color .18s ease, background .18s ease;
+          transition: all 0.2s ease;
           cursor: pointer;
         }
 
-        .file-drop-zone:hover {
-          border-color: #3E8E6E;
-          background: #EDF6F0;
-        }
-
         .file-drop-icon {
-          font-size: 32px;
-          color: #3E8E6E;
+          font-size: 34px;
         }
 
         .file-drop-title {
           font-size: 14.5px;
-          font-weight: 600;
+          font-weight: 650;
           color: #1a1201;
           text-align: center;
           word-break: break-all;
@@ -297,58 +398,41 @@ export default function TeacherMaterialUploadPage() {
           text-align: center;
         }
 
-        .file-kind-tag {
-          border-radius: 6px;
-          margin-inline-end: 0;
-          color: #3E8E6E;
-          background: rgba(62, 142, 110, .12);
-          border: 1px solid rgba(62, 142, 110, .20);
-        }
-
         .upload-tip {
           display: flex;
           align-items: flex-start;
-          gap: 7px;
-          padding: 10px 12px;
-          border-radius: 10px;
-          background: #FFF8E8;
-          border: 1px solid rgba(220, 170, 60, .30);
-          color: #6B5B2E;
+          gap: 9px;
+          padding: 12px 14px;
+          border-radius: 12px;
+          border-width: 1px;
+          border-style: solid;
           font-size: 12.5px;
           line-height: 1.6;
         }
 
-        .upload-tip :global(.anticon) {
-          margin-top: 3px;
-          color: #C9A45C;
-        }
-
         .upload-page-footer {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
-          gap: 10px;
-          padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-          border-top: 1px solid rgba(0, 0, 0, .05);
-          background: #faf8f5;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+          gap: 12px;
+          padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
+          border-top: 1px solid rgba(0, 0, 0, .06);
+          background: #ffffff;
           position: sticky;
           bottom: 0;
+          z-index: 20;
+          box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
         }
 
         .upload-page-footer :global(.ant-btn) {
           min-height: 46px;
           border-radius: 12px;
-          font-weight: 600;
+          font-weight: 650;
         }
 
         .upload-cancel {
-          background: #fff !important;
-          border-color: rgba(0, 0, 0, .12) !important;
-        }
-
-        .upload-submit {
-          background: linear-gradient(135deg, #2C6E52, #285247) !important;
-          border-color: transparent !important;
-          box-shadow: 0 6px 16px rgba(40, 82, 71, .30);
+          background: #f7f5f0 !important;
+          border-color: rgba(0, 0, 0, .08) !important;
+          color: #554a3a !important;
         }
       `}</style>
     </div>

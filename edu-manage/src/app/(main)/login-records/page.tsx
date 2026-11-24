@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, Input, message, Modal, Select, Space, Statistic, Table, Tag, Typography } from 'antd'
+import { Button, Card, Col, Empty, Input, message, Modal, Pagination, Row, Segmented, Space, Statistic, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { ReloadOutlined, SafetyOutlined, SearchOutlined } from '@ant-design/icons'
+import { PageLayout } from '@/components/Layout/PageLayout'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { isUserDisabled } from '@/lib/user-status'
 
-const { Text, Title } = Typography
+const { Text } = Typography
 
 type LoginRecordRow = {
   id: string
@@ -32,6 +34,7 @@ type Stats = {
 }
 
 export default function LoginRecordsPage() {
+  const isMobile = useIsMobile() ?? false
   const [records, setRecords] = useState<LoginRecordRow[]>([])
   const [stats, setStats] = useState<Stats>({ todayTotal: 0, todayFail: 0, lockedCount: 0 })
   const [total, setTotal] = useState(0)
@@ -226,29 +229,58 @@ export default function LoginRecordsPage() {
   ]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <div>
-          <Title level={3} style={{ margin: 0 }}>登录记录</Title>
-          <Text type="secondary">查看登录成功、失败、锁定和设备信息</Text>
-        </div>
-        <Button icon={<ReloadOutlined />} onClick={() => fetchRecords()} loading={loading}>刷新</Button>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
-        <Card size="small"><Statistic title="今日成功访问" value={stats.todayTotal} prefix={<SafetyOutlined />} /></Card>
-        <Card size="small"><Statistic title="今日失败次数" value={stats.todayFail} valueStyle={{ color: '#cf1322' }} /></Card>
-        <Card size="small"><Statistic title="当前锁定账号" value={stats.lockedCount} valueStyle={{ color: '#d46b08' }} /></Card>
-      </div>
+    <PageLayout
+      title="登录记录"
+      subtitle="查看全校管理员、教师及家长的登录访问明细、安全状态与设备审计"
+      actions={
+        <Button icon={<ReloadOutlined />} onClick={() => fetchRecords()} loading={loading}>
+          刷新
+        </Button>
+      }
+    >
+      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+        <Col xs={8}>
+          <Card bordered={false} style={{ borderRadius: 10, border: '1px solid #EDE9E1', background: '#fff' }}>
+            <Statistic
+              title={<span style={{ fontSize: isMobile ? 11 : 12, color: '#8C827A' }}>今日成功访问</span>}
+              value={stats.todayTotal}
+              suffix={<span style={{ fontSize: 12, color: '#8C827A' }}>次</span>}
+              valueStyle={{ fontWeight: 700, color: '#14574D', fontSize: isMobile ? 20 : 24 }}
+              prefix={<SafetyOutlined style={{ fontSize: 16, color: '#14574D' }} />}
+            />
+          </Card>
+        </Col>
+        <Col xs={8}>
+          <Card bordered={false} style={{ borderRadius: 10, border: `1px solid ${stats.todayFail > 0 ? '#F3D2BA' : '#EDE9E1'}`, background: stats.todayFail > 0 ? '#FFF7F0' : '#fff' }}>
+            <Statistic
+              title={<span style={{ fontSize: isMobile ? 11 : 12, color: stats.todayFail > 0 ? '#C45724' : '#8C827A' }}>今日失败次数</span>}
+              value={stats.todayFail}
+              suffix={<span style={{ fontSize: 12, color: stats.todayFail > 0 ? '#C45724' : '#8C827A' }}>次</span>}
+              valueStyle={{ fontWeight: 700, color: stats.todayFail > 0 ? '#E8784A' : '#17352F', fontSize: isMobile ? 20 : 24 }}
+            />
+          </Card>
+        </Col>
+        <Col xs={8}>
+          <Card bordered={false} style={{ borderRadius: 10, border: `1px solid ${stats.lockedCount > 0 ? '#FCD3D1' : '#EDE9E1'}`, background: stats.lockedCount > 0 ? '#FFF5F5' : '#fff' }}>
+            <Statistic
+              title={<span style={{ fontSize: isMobile ? 11 : 12, color: stats.lockedCount > 0 ? '#CF1322' : '#8C827A' }}>当前锁定账号</span>}
+              value={stats.lockedCount}
+              suffix={<span style={{ fontSize: 12, color: stats.lockedCount > 0 ? '#CF1322' : '#8C827A' }}>个</span>}
+              valueStyle={{ fontWeight: 700, color: stats.lockedCount > 0 ? '#CF1322' : '#17352F', fontSize: isMobile ? 20 : 24 }}
+            />
+          </Card>
+        </Col>
+      </Row>
 
       <Card
         size="small"
         title="登录明细"
         extra={
           <Space wrap>
-            <Select
+            <Segmented
+              size="small"
+              aria-label="登录记录学部筛选"
               value={division}
-              style={{ width: 110 }}
               onChange={setDivision}
               options={[
                 { value: 'ALL', label: '全部学部' },
@@ -256,9 +288,10 @@ export default function LoginRecordsPage() {
                 { value: 'SENIOR', label: '高中部' },
               ]}
             />
-            <Select
+            <Segmented
+              size="small"
+              aria-label="登录结果筛选"
               value={success}
-              style={{ width: 120 }}
               onChange={setSuccess}
               options={[
                 { value: '', label: '全部' },
@@ -273,26 +306,107 @@ export default function LoginRecordsPage() {
               onSearch={() => fetchRecords(1)}
               placeholder="搜索邮箱或姓名"
               prefix={<SearchOutlined />}
-              style={{ width: 220 }}
+              style={{ width: isMobile ? '100%' : 200 }}
             />
           </Space>
         }
       >
-        <Table
-          rowKey={(row) => `${row.division}:${row.id}`}
-          loading={loading}
-          columns={columns}
-          dataSource={records}
-          scroll={{ x: 900 }}
-          pagination={{
-            current: page,
-            pageSize: 50,
-            total,
-            showSizeChanger: false,
-            onChange: (nextPage) => fetchRecords(nextPage),
-          }}
-        />
+        {isMobile ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {records.length > 0 ? (
+              records.map((row) => {
+                const isDisabled = isUserDisabled(row.userStatus)
+                return (
+                  <Card
+                    key={`${row.division}:${row.id}`}
+                    size="small"
+                    style={{ borderRadius: 10, border: '1px solid #EDE9E1', background: '#FAFAF8' }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Text strong style={{ fontSize: 14 }}>{row.userName || row.email}</Text>
+                          {row.userStatus && isDisabled && (
+                            <Tag color="error" style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>已禁用</Tag>
+                          )}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{row.email}</Text>
+                      </div>
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <Tag color={row.division === 'JUNIOR' ? 'orange' : 'blue'} style={{ margin: 0 }}>
+                          {row.division === 'JUNIOR' ? '初中' : '高中'}
+                        </Tag>
+                        {row.success ? (
+                          <Tag color={row.failReason === 'session_resume' ? 'processing' : 'success'} style={{ margin: 0 }}>
+                            {row.failReason === 'session_resume' ? '免密' : '成功'}
+                          </Tag>
+                        ) : (
+                          <Tag color="error" style={{ margin: 0 }}>
+                            {({ wrong_password: '密码错', not_found: '不存在', locked: '锁定', disabled: '禁用' } as Record<string, string>)[row.failReason || ''] || '失败'}
+                          </Tag>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 8, fontSize: 12, color: '#5A6578', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 8px' }}>
+                      <div>设备：{row.device || '未知设备'}</div>
+                      <div>系统：{row.os || row.browser || '未知'}</div>
+                      <div>IP：<span style={{ fontFamily: 'monospace' }}>{row.ip || '-'}</span></div>
+                      <div>时间：{new Date(row.createdAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+
+                    {row.userId && (
+                      <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px dashed #EDE9E1', display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                          size="small"
+                          danger={!isDisabled}
+                          style={{
+                            fontSize: 12,
+                            color: isDisabled ? '#27a644' : undefined,
+                            borderColor: isDisabled ? '#27a644' : undefined,
+                          }}
+                          onClick={() => handleToggleStatus(row)}
+                        >
+                          {isDisabled ? '恢复账号' : '禁用账号'}
+                        </Button>
+                      </div>
+                    )}
+                  </Card>
+                )
+              })
+            ) : (
+              <Empty description="暂无登录记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            )}
+            {total > 50 && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
+                <Pagination
+                  size="small"
+                  current={page}
+                  pageSize={50}
+                  total={total}
+                  showSizeChanger={false}
+                  onChange={(nextPage) => fetchRecords(nextPage)}
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <Table
+            rowKey={(row) => `${row.division}:${row.id}`}
+            loading={loading}
+            columns={columns}
+            dataSource={records}
+            scroll={{ x: 900 }}
+            pagination={{
+              current: page,
+              pageSize: 50,
+              total,
+              showSizeChanger: false,
+              onChange: (nextPage) => fetchRecords(nextPage),
+            }}
+          />
+        )}
       </Card>
-    </div>
+    </PageLayout>
   )
 }

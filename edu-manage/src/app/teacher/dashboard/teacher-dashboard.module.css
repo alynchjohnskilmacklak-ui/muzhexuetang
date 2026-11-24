@@ -1,0 +1,1659 @@
+/* ==========================================================================
+   Teacher Dashboard - High Craft & Heritage Forest-Gold Theme
+   Designed for Muzhe Academy (牧哲学堂) Teacher Workbench
+   ========================================================================== */
+
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4px 2px 32px;
+}
+
+/* --------------------------------------------------------------------------
+   1. Hero Section (深林墨玉 + 暖金点缀)
+   -------------------------------------------------------------------------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  color: #ffffff !important;
+  padding: 24px 24px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 装饰性环境光芒 */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -40px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.heroHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.heroTeacherPhotoWrap {
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.heroTeacherPhotoWrap:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.heroTeacherPhotoWrap:active {
+  transform: scale(0.96);
+}
+
+.heroIdentity {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.heroDateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82) !important;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.heroTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff !important;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45) !important;
+}
+
+.heroTierBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.heroSubtext {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9) !important;
+  line-height: 1.5;
+  margin-top: 2px;
+  letter-spacing: 0.01em;
+}
+
+/* 4 个可点击磁吸指标小卡 */
+.heroKpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(84px, 1fr));
+  gap: 8px;
+  flex: 1 1 380px;
+  max-width: 520px;
+}
+
+.heroKpiPod {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 8px 9px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  user-select: none;
+}
+
+.heroKpiPod:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.heroKpiPod:active {
+  transform: scale(0.96);
+}
+
+.heroKpiWatermark {
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  font-size: 24px;
+  pointer-events: none;
+  line-height: 1;
+  opacity: 0.85;
+  transition: transform 0.2s ease;
+}
+
+.heroKpiPod:hover .heroKpiWatermark {
+  transform: scale(1.12);
+}
+
+.heroKpiValue {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #ffffff !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.heroKpiSuffix {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.76) !important;
+}
+
+.heroKpiLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.82) !important;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.heroKpiAlertDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.3);
+  animation: pulseAlert 2s infinite ease-in-out;
+}
+
+@keyframes pulseAlert {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.8; }
+}
+
+.heroWeatherStrip {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   2. 双列平衡栅格 (Main Grid)
+   -------------------------------------------------------------------------- */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.mainColumn,
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   3. 通用卡片容器 (Card Container)
+   -------------------------------------------------------------------------- */
+.card {
+  position: relative;
+  background: linear-gradient(175deg, #fffdfa 0%, #faf6ee 100%);
+  border: 1px solid rgba(201, 164, 92, 0.28);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(58, 50, 39, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: rgba(201, 164, 92, 0.42);
+  box-shadow: 0 6px 20px rgba(58, 50, 39, 0.07);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 18px 13px;
+  border-bottom: 1px solid rgba(201, 164, 92, 0.16);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.cardTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 750;
+  color: #1a1201;
+  letter-spacing: -0.01em;
+}
+
+.cardSubtitle {
+  font-size: 12px;
+  color: #756a58;
+  font-weight: 500;
+}
+
+.cardActionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #14574d;
+  background: rgba(20, 87, 77, 0.05);
+  border: 1px solid rgba(20, 87, 77, 0.1);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 999px;
+  transition: all 0.16s ease;
+  user-select: none;
+}
+
+.cardActionLink:hover {
+  background: rgba(20, 87, 77, 0.1);
+  color: #0d3732;
+  border-color: rgba(20, 87, 77, 0.22);
+}
+
+.cardActionLink:active {
+  transform: scale(0.96);
+}
+
+.cardBody {
+  padding: 16px 18px;
+}
+
+/* --------------------------------------------------------------------------
+   4. 核心日程：主焦点课卡 + 折叠时间线 (Schedule Focus & Rollup)
+   -------------------------------------------------------------------------- */
+.upcomingNoticeBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba(254, 252, 246, 0.98) 0%, rgba(248, 241, 222, 0.85) 100%);
+  border: 1px solid rgba(201, 164, 92, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(138, 101, 23, 0.05);
+}
+
+.upcomingNoticeLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: #725213;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.upcomingNoticeText {
+  white-space: nowrap;
+}
+
+.upcomingNoticeIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(201, 164, 92, 0.22);
+  color: #8a6517;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.upcomingNoticeCountdown {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  flex-shrink: 0;
+  padding: 3px 11px;
+  background: linear-gradient(135deg, #f8e7be 0%, #f1d78f 100%);
+  border: 1px solid rgba(138, 101, 23, 0.28);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(138, 101, 23, 0.1);
+}
+
+.upcomingHighlightNum {
+  font-size: 16px;
+  font-weight: 850;
+  color: #5c4415;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.upcomingUnit {
+  font-size: 11px;
+  font-weight: 700;
+  color: #725213;
+}
+
+.upcomingNoticeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  background: linear-gradient(135deg, #f7e4af 0%, #f1d78f 100%);
+  border: 1px solid rgba(138, 101, 23, 0.22);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #5c4415;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(138, 101, 23, 0.08);
+}
+
+/* 首焦点课程卡 (Featured Lesson Card - 东方雅韵温润微光) */
+.featuredLessonCard {
+  position: relative;
+  background: linear-gradient(155deg, #fffdf8 0%, #fbf7ee 60%, #f5efe3 100%);
+  border: 1px solid rgba(201, 164, 92, 0.32);
+  border-radius: 16px;
+  padding: 16px 16px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(58, 50, 39, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.featuredLessonTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 11px;
+  flex-wrap: wrap;
+}
+
+.featuredLessonSubjectTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(20, 87, 77, 0.08);
+  color: #14574d;
+  border: 1px solid rgba(20, 87, 77, 0.22);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 等级尊荣微标栏 */
+.tierHonorStripe {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.tierHonorTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.featuredLessonHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.featuredLessonTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.featuredLessonTimeText {
+  font-size: 20px;
+  font-weight: 800;
+  color: #14574d;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.featuredLessonDuration {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  background: rgba(20, 87, 77, 0.07);
+  border: 1px solid rgba(20, 87, 77, 0.12);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #14574d;
+}
+
+.featuredLessonStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulseDot 2.4s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statusDot {
+    animation: none;
+  }
+}
+
+.featuredLessonTitle {
+  font-size: 17.5px;
+  font-weight: 750;
+  color: #1a1201;
+  margin-bottom: 11px;
+  line-height: 1.35;
+  word-break: break-word;
+  letter-spacing: -0.01em;
+}
+
+/* 一体化温润信息通栏条 (替代零散小灰块) */
+.featuredLessonInfoBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(20, 87, 77, 0.04);
+  border: 1px solid rgba(20, 87, 77, 0.08);
+  border-radius: 9px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #5a4e3a;
+  overflow: hidden;
+}
+
+.infoBarItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.infoBarIcon {
+  font-size: 12px;
+  color: #14574d;
+  opacity: 0.85;
+}
+
+.infoBarText {
+  color: #5a4e3a;
+}
+
+.infoBarText strong {
+  color: #1a1201;
+  font-weight: 700;
+}
+
+.infoBarDivider {
+  color: rgba(20, 87, 77, 0.25);
+  font-weight: 700;
+  user-select: none;
+}
+
+.infoBarItemSynced {
+  color: #12634a;
+  margin-left: auto;
+}
+
+.infoBarItemSynced .infoBarIcon {
+  color: #1d9e75;
+  font-size: 12px;
+}
+
+.featuredLessonActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.featuredLessonActions > button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* 折叠其余课次按钮条 (防折行整洁版) */
+.rollupToggleBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 13px;
+  background: linear-gradient(135deg, #faf8f5 0%, #f5f2ea 100%);
+  border: 1px solid rgba(20, 87, 77, 0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: #4a3e2a;
+  font-weight: 600;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(26, 18, 1, 0.02);
+}
+
+.rollupToggleBar:hover {
+  background: #f0ebe0;
+  border-color: rgba(20, 87, 77, 0.24);
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.06);
+}
+
+.rollupToggleBar:active {
+  transform: scale(0.985);
+}
+
+.rollupToggleLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.rollupToggleIcon {
+  color: #14574d;
+  font-size: 13px;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.rollupToggleTitle {
+  font-weight: 650;
+  color: #4a3e2a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rollupToggleTime {
+  font-size: 11.5px;
+  color: #756a58;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.95;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rollupBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  background: linear-gradient(180deg, #fffdf8 0%, #f4ede0 100%);
+  border: 1px solid rgba(20, 87, 77, 0.18);
+  border-radius: 999px;
+  font-size: 11px;
+  color: #14574d;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(20, 87, 77, 0.05);
+}
+
+/* 紧凑时间线列表（高自适应排版，长课名不截断，状态不换行） */
+.compactTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.compactTimelineItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: linear-gradient(145deg, #fffdf9 0%, #f7f2e8 100%);
+  border: 1px solid rgba(201, 164, 92, 0.22);
+  border-radius: 10px;
+  transition: all 0.16s ease;
+  box-shadow: 0 1px 3px rgba(58, 50, 39, 0.02);
+}
+
+.compactTimelineItem:hover {
+  background: linear-gradient(145deg, #ffffff 0%, #f6efe1 100%);
+  border-color: rgba(20, 87, 77, 0.28);
+  box-shadow: 0 3px 10px rgba(20, 87, 77, 0.06);
+  transform: translateY(-1px);
+}
+
+.compactTimelineLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* 精致小日历时间盒 */
+.compactTimeBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  flex-shrink: 0;
+  padding: 4px 6px;
+  background: linear-gradient(180deg, #eaf4f1 0%, #def0eb 100%);
+  border-radius: 7px;
+  border: 1px solid rgba(20, 87, 77, 0.14);
+}
+
+.compactTimeStart {
+  font-size: 13px;
+  font-weight: 800;
+  color: #14574d;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.compactTimeEnd {
+  font-size: 10px;
+  font-weight: 500;
+  color: #4a776c;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+/* 课程信息区，支持长课名舒展折行 */
+.compactInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 3px;
+}
+
+.compactName {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1201;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.compactMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #756a58;
+}
+
+/* 状态徽标：强制单行，决不折行 */
+.compactStatusBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap !important;
+  flex-shrink: 0;
+}
+
+/* 按钮规范 (东方雅韵轻奢触感微动效) */
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #186358 0%, #10483f 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: 0 3px 10px rgba(20, 87, 77, 0.22);
+  user-select: none;
+}
+
+.btnPrimary:hover {
+  background: linear-gradient(135deg, #1b6d61 0%, #0d3732 100%);
+  box-shadow: 0 5px 14px rgba(20, 87, 77, 0.28);
+  transform: translateY(-1px);
+}
+
+.btnPrimary:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 4px rgba(20, 87, 77, 0.18);
+}
+
+.btnGold {
+  background: linear-gradient(135deg, #d4ae60 0%, #b89146 100%);
+  box-shadow: 0 3px 10px rgba(201, 164, 92, 0.28);
+}
+
+.btnGold:hover {
+  background: linear-gradient(135deg, #dda64f 0%, #a8823b 100%);
+  box-shadow: 0 5px 14px rgba(201, 164, 92, 0.35);
+}
+
+.btnGold:active {
+  transform: scale(0.96);
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, #fffdf8 0%, #f5efe3 100%);
+  color: #14574d;
+  border: 1px solid rgba(20, 87, 77, 0.26);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 1px 3px rgba(26, 18, 1, 0.03);
+  user-select: none;
+}
+
+.btnSecondary:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #ece3d4 100%);
+  border-color: #14574d;
+  transform: translateY(-1px);
+}
+
+.btnSecondary:active {
+  transform: scale(0.96);
+}
+
+/* --------------------------------------------------------------------------
+   5. 常用教学工作流 (Quick Actions Grid & Tier Segmented Tabs)
+   -------------------------------------------------------------------------- */
+.workflowSegmented {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background: rgba(20, 87, 77, 0.07);
+  border: 1px solid rgba(20, 87, 77, 0.14);
+  border-radius: 999px;
+  gap: 2px;
+}
+
+.workflowSegmentItem {
+  border: none;
+  background: transparent;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a4e3a;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.workflowSegmentItem:hover:not(.workflowSegmentItemActive) {
+  color: #14574d;
+  background: rgba(20, 87, 77, 0.05);
+}
+
+.workflowSegmentItemActive {
+  background: linear-gradient(135deg, #186358 0%, #10483f 100%);
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.28);
+  font-weight: 700;
+}
+
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.quickTile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 13px;
+  background: linear-gradient(145deg, #fffdf8 0%, #f6f0e3 100%);
+  border: 1px solid rgba(201, 164, 92, 0.32);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(58, 50, 39, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.quickTile:hover {
+  background: linear-gradient(145deg, #ffffff 0%, #fbf5ea 100%);
+  border-color: rgba(20, 87, 77, 0.38);
+  box-shadow: 0 6px 18px rgba(20, 87, 77, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px);
+}
+
+.quickTile:active {
+  transform: scale(0.96);
+  box-shadow: 0 1px 3px rgba(20, 87, 77, 0.04);
+}
+
+.quickIconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 17px;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+
+.quickTile:hover .quickIconBox {
+  transform: scale(1.05);
+}
+
+.quickIconBoxGreen {
+  background: linear-gradient(135deg, #eaf5f2 0%, #d8ece6 100%);
+  color: #14574d;
+  border: 1px solid rgba(20, 87, 77, 0.12);
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.06);
+}
+
+.quickIconBoxGold {
+  background: linear-gradient(135deg, #fbf4e3 0%, #f5e6c1 100%);
+  color: #8a6517;
+  border: 1px solid rgba(201, 164, 92, 0.2);
+  box-shadow: 0 2px 6px rgba(138, 101, 23, 0.06);
+}
+
+.quickIconBoxOrange {
+  background: linear-gradient(135deg, #fff2e8 0%, #feddc7 100%);
+  color: #c45e1a;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  box-shadow: 0 2px 6px rgba(196, 94, 26, 0.06);
+}
+
+.quickIconBoxBlue {
+  background: linear-gradient(135deg, #ebf3fc 0%, #d8e7fa 100%);
+  color: #1d5a9c;
+  border: 1px solid rgba(29, 90, 156, 0.2);
+  box-shadow: 0 2px 6px rgba(29, 90, 156, 0.06);
+}
+
+.quickIconBoxPurple {
+  background: linear-gradient(135deg, #f3edf8 0%, #e5daf3 100%);
+  color: #5b47a8;
+  border: 1px solid rgba(91, 71, 168, 0.2);
+  box-shadow: 0 2px 6px rgba(91, 71, 168, 0.06);
+}
+
+.quickTileContent {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 2px;
+}
+
+.quickTileHeader {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.quickTileTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1a1201;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.quickTileBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px;
+  height: 16px;
+  background: rgba(201, 164, 92, 0.15);
+  border: 1px solid rgba(201, 164, 92, 0.32);
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #8a6517;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.quickTileDesc {
+  font-size: 11px;
+  color: #756a58;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.quickTileArrow {
+  font-size: 10px;
+  color: rgba(20, 87, 77, 0.28);
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.quickTile:hover .quickTileArrow {
+  color: #14574d;
+  transform: translateX(2px);
+}
+
+/* --------------------------------------------------------------------------
+   6. 本周完成度闭环 (Completion Metrics)
+   -------------------------------------------------------------------------- */
+.completionBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.completionEmptyState {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #f4f8f6;
+  border: 1px solid #d4e7e1;
+  border-radius: 10px;
+  color: #14574d;
+  font-size: 12px;
+}
+
+.completionRingsRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.completionRingItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.completionRingLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1201;
+}
+
+.completionRingSub {
+  font-size: 11px;
+  color: #756a58;
+}
+
+/* --------------------------------------------------------------------------
+   7. 教学数据分析 (Analytics & Chart)
+   -------------------------------------------------------------------------- */
+.analyticsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.analyticsSegmented {
+  display: inline-flex;
+  padding: 3px;
+  background: rgba(20, 87, 77, 0.07);
+  border: 1px solid rgba(20, 87, 77, 0.14);
+  border-radius: 999px;
+  gap: 2px;
+}
+
+.analyticsSegmentItem {
+  border: none;
+  background: transparent;
+  padding: 4px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a4e3a;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.analyticsSegmentItem:hover:not(.analyticsSegmentItemActive) {
+  color: #14574d;
+  background: rgba(20, 87, 77, 0.05);
+}
+
+.analyticsSegmentItemActive {
+  background: linear-gradient(135deg, #186358 0%, #10483f 100%);
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.28);
+  font-weight: 700;
+}
+
+.tierDataPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  white-space: nowrap;
+}
+
+.monthSelect {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(20, 87, 77, 0.2);
+  background: linear-gradient(180deg, #fffdf8 0%, #f5efe3 100%);
+  color: #1a1201;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(26, 18, 1, 0.03);
+  transition: all 0.16s ease;
+}
+
+.monthSelect:hover {
+  border-color: #14574d;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.08);
+}
+
+.statChipsRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.statChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background: linear-gradient(145deg, #fffdf9 0%, #f7f2e8 100%);
+  border: 1px solid rgba(201, 164, 92, 0.24);
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: #756a58;
+}
+
+.statChip strong {
+  color: #14574d;
+  font-weight: 700;
+}
+
+.statChipTier {
+  background: linear-gradient(135deg, #fbf7ee 0%, #f7efdc 100%);
+  border-color: rgba(201, 164, 92, 0.35);
+}
+
+.statChipTier strong {
+  color: #8a6517;
+}
+
+.tierInsightBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #faf7f2 0%, #f4eee3 100%);
+  border: 1px solid rgba(201, 164, 92, 0.22);
+  border-radius: 9px;
+  font-size: 11.5px;
+  color: #6d5225;
+}
+
+.tierInsightIcon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.tierInsightText {
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   8. 教学概览 4 宫格 (Overview 4-Grid)
+   -------------------------------------------------------------------------- */
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.overviewTile {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  background: linear-gradient(145deg, #fffdf8 0%, #f7f1e5 100%);
+  border: 1px solid rgba(201, 164, 92, 0.28);
+  border-radius: 12px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(58, 50, 39, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.overviewTile:hover {
+  background: linear-gradient(145deg, #ffffff 0%, #f9f4ea 100%);
+  border-color: rgba(20, 87, 77, 0.35);
+  box-shadow: 0 4px 14px rgba(20, 87, 77, 0.08);
+  transform: translateY(-1px);
+}
+
+.overviewTileHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #756a58;
+}
+
+.overviewIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(20, 87, 77, 0.08);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.overviewTileValue {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.overviewActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  margin-top: 14px;
+  background: linear-gradient(135deg, #eef6f3 0%, #dfefe9 100%);
+  border: 1px solid rgba(20, 87, 77, 0.24);
+  border-radius: 10px;
+  color: #14574d;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(20, 87, 77, 0.05);
+}
+
+.overviewActionBtn:hover {
+  background: linear-gradient(135deg, #186358 0%, #10483f 100%);
+  color: #ffffff;
+  border-color: #14574d;
+  box-shadow: 0 4px 12px rgba(20, 87, 77, 0.2);
+  transform: translateY(-1px);
+}
+
+.overviewActionBtn:active {
+  transform: scale(0.98);
+}
+
+/* --------------------------------------------------------------------------
+   9. 移动端自适应 (Responsive Adjustments)
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroKpiGrid {
+    max-width: 100%;
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .quickGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 18px 16px 14px;
+    border-radius: 16px;
+  }
+
+  .heroTitle {
+    font-size: 19px;
+  }
+
+  .heroKpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cardHead {
+    padding: 13px 14px 11px;
+    gap: 8px;
+  }
+
+  .cardTitleGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .cardTitle {
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  .cardSubtitle {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .cardBody {
+    padding: 14px;
+  }
+
+  .featuredLessonCard {
+    padding: 14px 14px 16px;
+    border-radius: 14px;
+  }
+
+  .featuredLessonTimeText {
+    font-size: 18px;
+  }
+
+  .featuredLessonActions {
+    gap: 8px;
+  }
+
+  .btnPrimary,
+  .btnSecondary {
+    height: 36px;
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+
+  .quickGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .quickTile {
+    padding: 10px 10px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+
+  .quickIconBox {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+
+  .quickTileHeader {
+    gap: 4px;
+  }
+
+  .quickTileTitle {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .quickTileBadge {
+    padding: 0 3px;
+    height: 15px;
+    font-size: 9px;
+    border-radius: 3px;
+  }
+
+  .quickTileDesc {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .quickTileArrow {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   完成度荣誉勋章卡 (Completion Trophy Card)
+   -------------------------------------------------------------------------- */
+.completionTrophyCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(20, 87, 77, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.completionTrophyCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(20, 87, 77, 0.09);
+}
+
+.trophySealWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.trophySealRing {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbf2dc 0%, #edd8a6 100%);
+  border: 1.5px solid rgba(201, 164, 92, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(201, 164, 92, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.trophySealIcon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.trophySealText {
+  font-size: 10px;
+  font-weight: 700;
+  color: #785319;
+  letter-spacing: 0.5px;
+}
+
+.trophyBody {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.trophyHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trophyTitle {
+  font-size: 12.5px;
+  font-weight: 750;
+  color: #1a1201;
+  line-height: 1.3;
+}
+
+.trophyInfoIcon {
+  color: #8a6517;
+  font-size: 12px;
+  cursor: help;
+  opacity: 0.85;
+}
+
+.trophyDesc {
+  margin: 0;
+  font-size: 11px;
+  color: #63533b;
+  line-height: 1.35;
+}
+
+.trophyMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 3px;
+}
+
+.trophyRewardBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(20, 87, 77, 0.1);
+  color: #14574d;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.trophyClearHint {
+  font-size: 10.5px;
+  color: #756a58;
+  cursor: help;
+  font-weight: 500;
+}
+
+.ringTooltipBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #8a6517;
+  font-size: 11px;
+}
+
+.titleInfoTip {
+  color: #756a58;
+  font-size: 13px;
+  cursor: help;
+  transition: color 0.15s ease;
+}
+
+.titleInfoTip:hover {
+  color: #14574d;
+}
+
+/* --------------------------------------------------------------------------
+   财务课酬核准数据罗盘 (Analytics Compass)
+   -------------------------------------------------------------------------- */
+.analyticsCompass {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(145deg, #fffdf8 0%, #f4eee2 100%);
+  border: 1px solid rgba(201, 164, 92, 0.32);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 8px rgba(58, 50, 39, 0.03);
+}
+
+.compassCol {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.compassLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: #756a58;
+  font-weight: 500;
+}
+
+.compassInfoIcon {
+  font-size: 11px;
+  color: #8a6517;
+  cursor: help;
+  opacity: 0.85;
+}
+
+.compassValueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.compassValueRow strong {
+  font-size: 20px;
+  font-weight: 850;
+  color: #14574d;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.compassUnit {
+  font-size: 11.5px;
+  color: #756a58;
+  font-weight: 600;
+}
+
+.compassStatusTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  color: #14574d;
+  font-weight: 600;
+}
+
+.compassRewardTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  color: #8a6517;
+  font-weight: 700;
+}
+
+.compassDivider {
+  width: 1px;
+  height: 44px;
+  background: rgba(20, 87, 77, 0.12);
+  margin: 0 12px;
+  flex-shrink: 0;
+}

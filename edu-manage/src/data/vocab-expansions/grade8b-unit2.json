@@ -1,0 +1,1922 @@
+[
+  {
+    "word": "ourselves",
+    "examTags": [
+      "词汇·代词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "pron. 我们自己；与主语 we 对应。by ourselves 可表示独自完成。",
+    "collocations": "by ourselves; enjoy ourselves; help ourselves to sth",
+    "commonMistake": "ourselves 是 we 的反身代词；表示“我们自己”时不可写成 ourself，也不要误用宾格 us。",
+    "example": {
+      "english": "We prepared the first-aid poster ourselves.",
+      "chinese": "我们自己制作了这张急救海报。"
+    },
+    "application": {
+      "prompt": "We made this first-aid poster by ____. A. ourselves B. themselves",
+      "solution": "A。解析：主语 We 对应反身代词 ourselves，by ourselves 表示“我们自己”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ourselves",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ourselves"
+      }
+    ]
+  },
+  {
+    "word": "sore",
+    "examTags": [
+      "词汇·形容词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 疼痛的；酸痛的。可作定语或表语。",
+    "collocations": "a sore throat; sore muscles; feel sore",
+    "commonMistake": "sore 常修饰身体部位（a sore throat）或作表语（feel sore）；表示持续疼痛也可用 hurt/ache，按句型选词。",
+    "example": {
+      "english": "My throat is sore after the long speech.",
+      "chinese": "长时间演讲后，我的喉咙很痛。"
+    },
+    "application": {
+      "prompt": "After giving three speeches, my throat felt ____. A. sorely B. sore",
+      "solution": "B。解析：felt 后接形容词 sore，表示喉咙酸痛；sorely 是副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sore",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sore"
+      }
+    ]
+  },
+  {
+    "word": "throat",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 喉咙。常见搭配 a sore throat、clear one’s throat；表示颈部外侧通常用 neck。",
+    "collocations": "a sore throat; clear one’s throat; a dry throat",
+    "commonMistake": "throat 指喉咙，neck 指颈部；a sore throat 是常见搭配，别把两处身体部位混淆。",
+    "example": {
+      "english": "Drink some water if your throat feels dry.",
+      "chinese": "如果你觉得喉咙干，就喝些水。"
+    },
+    "application": {
+      "prompt": "I drink warm tea when my ____ feels dry. A. throat B. stomach",
+      "solution": "A。解析：dry throat 指喉咙干；stomach 是胃。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: throat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/throat"
+      }
+    ]
+  },
+  {
+    "word": "stomachache",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 胃痛；肚子疼。常用 have/get a stomachache，单数前通常加 a。",
+    "collocations": "have a stomachache; get a stomachache; a bad stomachache",
+    "commonMistake": "常用 have/get a stomachache；表达胃部疼痛时不要误写成 stomachache pain。",
+    "example": {
+      "english": "He stayed home because he had a stomachache.",
+      "chinese": "他因为胃痛待在了家里。"
+    },
+    "application": {
+      "prompt": "After eating too much, he complained of a ____. A. earache B. stomachache",
+      "solution": "B。解析：吃得过多后肚子疼，对应 stomachache。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stomachache",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stomachache"
+      }
+    ]
+  },
+  {
+    "word": "headache",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 头痛。常用 have/get a headache；headache 前通常用 a。",
+    "collocations": "have a headache; get a headache; a bad headache",
+    "commonMistake": "表示头痛常说 have/get a headache；headache 是可数名词，单数前通常加 a。",
+    "example": {
+      "english": "She took a rest because she had a headache.",
+      "chinese": "她因为头痛休息了一会儿。"
+    },
+    "application": {
+      "prompt": "After staring at the screen all day, she had a ____. A. headache B. backache",
+      "solution": "A。解析：长时间看屏幕后头痛，对应 headache。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: headache",
+        "url": "https://dictionary.cambridge.org/dictionary/english/headache"
+      }
+    ]
+  },
+  {
+    "word": "toothache",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 牙痛。常用 have/get a toothache；牙齿疼也可说 one’s tooth hurts。",
+    "collocations": "have a toothache; get a toothache; a bad toothache",
+    "commonMistake": "toothache 指牙痛；说“我牙疼”可用 have a toothache，不能把 toothache 当作疼痛动作的动词。",
+    "example": {
+      "english": "He made a dentist’s appointment because of a toothache.",
+      "chinese": "他因为牙痛预约了牙医。"
+    },
+    "application": {
+      "prompt": "The dentist treated my ____ because one tooth hurt. A. stomachache B. toothache",
+      "solution": "B。解析：牙齿疼需要看牙，对应 toothache。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: toothache",
+        "url": "https://dictionary.cambridge.org/dictionary/english/toothache"
+      }
+    ]
+  },
+  {
+    "word": "backache",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 背痛；腰痛。常说 have a backache 或 suffer from backache。",
+    "collocations": "have a backache; suffer from backache; a bad backache",
+    "commonMistake": "backache 指背部或腰部疼痛；注意它与 back（背部）本身不是同一词性。",
+    "example": {
+      "english": "After lifting the box, she had a backache.",
+      "chinese": "搬完箱子后，她腰背疼。"
+    },
+    "application": {
+      "prompt": "After carrying heavy boxes, she had a ____ in her lower back. A. backache B. headache",
+      "solution": "A。解析：lower back 疼对应 backache（腰背痛）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: backache",
+        "url": "https://dictionary.cambridge.org/dictionary/english/backache"
+      }
+    ]
+  },
+  {
+    "word": "suffer",
+    "examTags": [
+      "词汇·动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "v. 受苦；遭受。可直接接 pain/loss，也可用 suffer from + 疾病/困扰。",
+    "collocations": "suffer pain; suffer a loss; suffer from an illness",
+    "commonMistake": "suffer pain/a loss 直接接宾语；疾病或困扰常用 suffer from，不要把两种结构混写。",
+    "example": {
+      "english": "Many people suffer during a long drought.",
+      "chinese": "长期干旱期间，许多人遭受苦难。"
+    },
+    "application": {
+      "prompt": "Many families ____ heavy losses in the flood last year. A. suffer B. suffered",
+      "solution": "B。解析：last year 表示过去，suffer 的过去式为 suffered；suffer a loss 不加 from。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suffer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suffer"
+      }
+    ]
+  },
+  {
+    "word": "suffer from",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 遭受；受……折磨。后接名词，常指疾病、疼痛或困难。",
+    "collocations": "suffer from a disease; suffer from stress; suffer from a lack of sleep",
+    "commonMistake": "suffer from 后接疾病、疼痛或问题名词；主语为 he/she/it 时现在时用 suffers from。",
+    "example": {
+      "english": "He suffers from asthma and carries medicine with him.",
+      "chinese": "他患有哮喘，随身带着药。"
+    },
+    "application": {
+      "prompt": "He often ____ asthma, so he always carries an inhaler. A. suffers from B. suffer from",
+      "solution": "A。解析：suffer from 后接疾病，主语 he 用 suffers；第三人称单数动词要加 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suffer (suffer from)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suffer"
+      }
+    ]
+  },
+  {
+    "word": "press",
+    "examTags": [
+      "词汇·动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "v. 按；压。一般现在时第三人称单数为 presses，过去式和过去分词为 pressed。",
+    "collocations": "press a button; press hard; press the doorbell",
+    "commonMistake": "press a button 表示按按钮；press on 可表示继续施压，不能在普通按钮搭配中随意加 on。",
+    "example": {
+      "english": "Press the green button to start the machine.",
+      "chinese": "按下绿色按钮启动机器。"
+    },
+    "application": {
+      "prompt": "To start the machine, ____ the green button once. A. turn B. press",
+      "solution": "B。解析：启动机器要按按钮，用 press a button。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: press",
+        "url": "https://dictionary.cambridge.org/dictionary/english/press"
+      }
+    ]
+  },
+  {
+    "word": "nosebleed",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 鼻出血。常说 have/get a nosebleed；可数名词单数前通常加 a。",
+    "collocations": "have a nosebleed; get a nosebleed; stop a nosebleed",
+    "commonMistake": "nosebleed 是可数名词，常说 have/get a nosebleed；表示流鼻血也可说 one’s nose is bleeding。",
+    "example": {
+      "english": "The nurse helped the boy when he had a nosebleed.",
+      "chinese": "男孩流鼻血时，护士帮助了他。"
+    },
+    "application": {
+      "prompt": "The boy had a ____ after the ball hit his nose. A. nosebleed B. cough",
+      "solution": "A。解析：鼻子被球撞后流鼻血，对应 a nosebleed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nosebleed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nosebleed"
+      }
+    ]
+  },
+  {
+    "word": "dentist",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 牙科医生。常用 see/visit a dentist；定期看牙也可说 see the dentist。",
+    "collocations": "see a dentist; visit the dentist; a children’s dentist",
+    "commonMistake": "dentist 指牙医；去看牙医常说 see/visit a dentist 或 the dentist，不说 look a dentist。",
+    "example": {
+      "english": "I visit the dentist twice a year.",
+      "chinese": "我每年看两次牙医。"
+    },
+    "application": {
+      "prompt": "You should see a ____ twice a year to keep your teeth healthy. A. patient B. dentist",
+      "solution": "B。解析：定期检查牙齿要看 dentist（牙医）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dentist",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dentist"
+      }
+    ]
+  },
+  {
+    "word": "fever",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 发烧。常见表达 have a fever、run a fever、a high fever。",
+    "collocations": "have a fever; a high fever; run a fever",
+    "commonMistake": "常用 have a fever 或 run a fever；表达发烧时 fever 前通常有 a。",
+    "example": {
+      "english": "She has a fever, so she will stay home today.",
+      "chinese": "她发烧了，所以今天会待在家里。"
+    },
+    "application": {
+      "prompt": "Her temperature is 39°C. She has a ____. A. fever B. nosebleed",
+      "solution": "A。解析：高体温对应 fever；nosebleed 是鼻出血。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fever",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fever"
+      }
+    ]
+  },
+  {
+    "word": "stomach",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 胃；腹部。stomach pain 表示胃痛，stomachache 表示胃痛这一症状。",
+    "collocations": "an upset stomach; stomach pain; an empty stomach",
+    "commonMistake": "stomach 是胃/腹部，stomachache 才是胃痛；两者不要互换。",
+    "example": {
+      "english": "The doctor asked where his stomach hurt.",
+      "chinese": "医生问他胃的哪里疼。"
+    },
+    "application": {
+      "prompt": "The doctor asked which part of his ____ hurt after the meal. A. forehead B. stomach",
+      "solution": "B。解析：饭后腹部不适，医生询问 stomach（胃/腹部）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stomach",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stomach"
+      }
+    ]
+  },
+  {
+    "word": "avoid",
+    "examTags": [
+      "词汇·动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "v. 避免；防止。avoid 后接名词或动名词，不接不定式。",
+    "collocations": "avoid a mistake; avoid doing sth; avoid danger",
+    "commonMistake": "avoid 后接名词或动名词，不能接 to do；例如 avoid making the same mistake。",
+    "example": {
+      "english": "To avoid getting sick, wash your hands often.",
+      "chinese": "为了避免生病，要经常洗手。"
+    },
+    "application": {
+      "prompt": "To avoid catching a cold, remember to ____ sharing cups. A. avoid B. enjoy",
+      "solution": "A。解析：avoid 后接动名词 sharing，表示避免共用杯子。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: avoid",
+        "url": "https://dictionary.cambridge.org/dictionary/english/avoid"
+      }
+    ]
+  },
+  {
+    "word": "gas",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 气体；燃气。通常作不可数名词。",
+    "collocations": "gas station; natural gas; gas stove",
+    "commonMistake": "gas 表示气体/燃气时通常不可数；加油站语境中的 gas 也可指汽油，依上下文判断。",
+    "example": {
+      "english": "We turned off the gas before leaving the kitchen.",
+      "chinese": "离开厨房前，我们关掉了燃气。"
+    },
+    "application": {
+      "prompt": "The old stove burns natural ____. A. flame B. gas",
+      "solution": "B。解析：natural gas 是“天然气”的固定搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: gas",
+        "url": "https://dictionary.cambridge.org/dictionary/english/gas"
+      }
+    ]
+  },
+  {
+    "word": "ache",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. & v. 疼痛。作动词可说 My legs ache；作名词常见于 headache/toothache。",
+    "collocations": "a stomachache; a toothache; aches and pains",
+    "commonMistake": "ache 作动词时可说 My head aches；作名词常见于 headache/toothache 等复合词，注意句中位置。",
+    "example": {
+      "english": "After the long walk, my legs began to ache.",
+      "chinese": "长途步行后，我的腿开始疼。"
+    },
+    "application": {
+      "prompt": "My legs have been ____ since the long walk. A. aching B. ached",
+      "solution": "A。解析：have been 后用现在分词 aching，表示腿一直在疼。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ache",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ache"
+      }
+    ]
+  },
+  {
+    "word": "X-ray",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. X 光检查；X 光片。X-ray 读音以元音音素开头，单数前用 an。",
+    "collocations": "have an X-ray; an X-ray image; an X-ray machine",
+    "commonMistake": "X-ray 读音以元音音素开头，单数前用 an；常说 have/get an X-ray。",
+    "example": {
+      "english": "The doctor ordered an X-ray of his wrist.",
+      "chinese": "医生安排给他的手腕拍一张 X 光片。"
+    },
+    "application": {
+      "prompt": "The doctor ordered an ____ to check for a broken wrist. A. operation B. X-ray",
+      "solution": "B。解析：检查手腕是否骨折可拍 X-ray（X 光片）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: X-ray",
+        "url": "https://dictionary.cambridge.org/dictionary/english/x-ray"
+      }
+    ]
+  },
+  {
+    "word": "careless",
+    "examTags": [
+      "词汇·形容词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 不小心的；粗心的。可作定语或表语。",
+    "collocations": "a careless mistake; be careless with; careless driving",
+    "commonMistake": "careless 是形容词，可修饰 mistake；副词形式 carefully/carelessly 要修饰动词。",
+    "example": {
+      "english": "He forgot to check his work and made a careless mistake.",
+      "chinese": "他忘了检查作业，犯了一个粗心的错误。"
+    },
+    "application": {
+      "prompt": "He didn't check his work and made a ____ mistake. A. careless B. carefully",
+      "solution": "A。解析：修饰名词 mistake 要用形容词 careless。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: careless",
+        "url": "https://dictionary.cambridge.org/dictionary/english/careless"
+      }
+    ]
+  },
+  {
+    "word": "runny",
+    "examTags": [
+      "词汇·形容词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 流鼻涕的；流眼泪的。可作定语或表语。",
+    "collocations": "a runny nose; runny eyes; have a runny nose",
+    "commonMistake": "runny 是形容词，常见搭配 a runny nose；不能用副词 runnily 修饰 nose。",
+    "example": {
+      "english": "She has a runny nose because of her cold.",
+      "chinese": "她感冒了，流鼻涕。"
+    },
+    "application": {
+      "prompt": "My cold gives me a ____ nose. A. run B. runny",
+      "solution": "B。解析：名词 nose 前用形容词 runny，构成 runny nose（流鼻涕）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: runny",
+        "url": "https://dictionary.cambridge.org/dictionary/english/runny"
+      }
+    ]
+  },
+  {
+    "word": "cough",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. & v. 咳嗽。作名词常说 have a cough；作动词可直接接副词，如 cough loudly。",
+    "collocations": "have a cough; cough loudly; a bad cough",
+    "commonMistake": "作名词常说 have a cough；作动词时直接说 cough，不要把名词搭配套进动词句。",
+    "example": {
+      "english": "He covered his mouth when he began to cough.",
+      "chinese": "他开始咳嗽时捂住了嘴。"
+    },
+    "application": {
+      "prompt": "The doctor asked whether I had a dry ____ that kept me awake. A. cough B. cold",
+      "solution": "A。解析：a dry cough（干咳）会影响睡眠；cold 通常指感冒。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cough",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cough"
+      }
+    ]
+  },
+  {
+    "word": "bruised",
+    "examTags": [
+      "词汇·形容词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 受了擦伤的。可作定语或表语。",
+    "collocations": "a bruised knee; bruised skin; feel bruised",
+    "commonMistake": "bruised 是 bruise 的过去分词/形容词，描述青紫或挫伤状态；名词/动词原形 bruise 不能直接作表语。",
+    "example": {
+      "english": "She fell off her bike and bruised her knee.",
+      "chinese": "她从自行车上摔下来，膝盖擦伤了。"
+    },
+    "application": {
+      "prompt": "The fall left her knee badly ____. A. bruise B. bruised",
+      "solution": "B。解析：left + 宾语 + 形容词/分词作宾补；此处用 bruised 描述膝盖受伤状态。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bruised",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bruised"
+      }
+    ]
+  },
+  {
+    "word": "take a seat",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 请坐；坐下。常用于礼貌邀请。",
+    "collocations": "take a seat; take a seat by the window; please take a seat",
+    "commonMistake": "take a seat 是礼貌的“请坐”；不要按中文直译成 sit a seat。",
+    "example": {
+      "english": "Please take a seat while you wait for the doctor.",
+      "chinese": "等医生时请坐下。"
+    },
+    "application": {
+      "prompt": "Please ____ while you wait for the doctor. A. take a seat B. take your temperature",
+      "solution": "A。解析：请候诊时坐下，用礼貌表达 take a seat。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: seat (take a seat)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/seat"
+      }
+    ]
+  },
+  {
+    "word": "take sb’s temperature",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 给某人量体温。sb’s 要换成相应的所有格，如 my, his, her。",
+    "collocations": "take a patient’s temperature; take someone’s temperature; check a child’s temperature",
+    "commonMistake": "sb’s 要换成实际所有格（take her temperature）；不能把被量体温者写成宾语代词 her。",
+    "example": {
+      "english": "The nurse took my temperature before the doctor saw me.",
+      "chinese": "医生给我看诊前，护士先给我量了体温。"
+    },
+    "application": {
+      "prompt": "Before the consultation, the nurse ____ to check if I had a fever. A. took my seat B. took my temperature",
+      "solution": "B。解析：量“我的体温”用 take my temperature，所有格要对应被量体温的人。"
+    },
+    "sources": [
+      {
+        "label": "Collins English Dictionary: take someone’s temperature",
+        "url": "https://www.collinsdictionary.com/us/dictionary/english/take-someones-temperature"
+      }
+    ]
+  },
+  {
+    "word": "test",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 测验；检查；v. 测试、检查。说“参加测验”用 take a test，说“检查某物”用 test sth。",
+    "collocations": "take a test; test a machine; a medical test",
+    "commonMistake": "test sth 表示检查/测试某物；参加测验通常说 take a test，注意两个搭配的动词不同。",
+    "example": {
+      "english": "The doctor will test his eyes tomorrow.",
+      "chinese": "医生明天会检查他的眼睛。"
+    },
+    "application": {
+      "prompt": "The eye doctor will ____ his eyesight tomorrow. A. test B. testing",
+      "solution": "A。解析：will 后接动词原形 test；test one’s eyesight 表示检查视力。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: test",
+        "url": "https://dictionary.cambridge.org/dictionary/english/test"
+      }
+    ]
+  },
+  {
+    "word": "flu",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 流行性感冒。通常作不可数名词。",
+    "collocations": "have the flu; catch the flu; flu symptoms",
+    "commonMistake": "通常说 have/catch the flu，flu 前用 the；不要照搬 have a cold 的冠词。",
+    "example": {
+      "english": "Many students stayed home with the flu last week.",
+      "chinese": "上周许多学生因流感待在家里。"
+    },
+    "application": {
+      "prompt": "The doctor said she had ____ after examining her symptoms. A. a flu B. the flu",
+      "solution": "B。解析：常说 have the flu，flu 前用定冠词 the。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flu",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flu"
+      }
+    ]
+  },
+  {
+    "word": "medicine",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 药；医学。通常作不可数名词。",
+    "collocations": "take medicine; cough medicine; a bottle of medicine",
+    "commonMistake": "表示药物时 medicine 通常不可数，可说 take medicine/a medicine 的不同语义需按语境辨别；本单元“服药”用 take medicine。",
+    "example": {
+      "english": "Take this medicine after meals, as the doctor advised.",
+      "chinese": "按照医生的建议，饭后服用这种药。"
+    },
+    "application": {
+      "prompt": "The label says to take this ____ after meals. A. medicine B. sick",
+      "solution": "A。解析：take medicine 表示服药；medicine 在“药物”义通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: medicine",
+        "url": "https://dictionary.cambridge.org/dictionary/english/medicine"
+      }
+    ]
+  },
+  {
+    "word": "mask",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 口罩；面具。常说 wear/put on a mask，可数名词单数前通常加 a。",
+    "collocations": "wear a mask; a face mask; put on a mask",
+    "commonMistake": "表示戴口罩用 wear/put on a mask；wear 强调佩戴状态，put on 强调动作。",
+    "example": {
+      "english": "Please wear a mask if you have a cough.",
+      "chinese": "如果你咳嗽，请戴上口罩。"
+    },
+    "application": {
+      "prompt": "If you have a cough, please ____ to protect people around you. A. wear mask B. wear a mask",
+      "solution": "B。解析：表示戴口罩用 wear a mask；单数可数名词 mask 前需要冠词 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mask",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mask"
+      }
+    ]
+  },
+  {
+    "word": "stop ... from doing",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 阻止……做某事。结构为 stop + 宾语 + (from) doing；被动结构通常保留 from。",
+    "collocations": "stop sb from doing sth; prevent sth from happening; stop the spread of a virus",
+    "commonMistake": "stop sb from doing sth 中 from 可省略，但后面的动词仍用 -ing；不要写成 stop sb to do 来表达“阻止”。",
+    "example": {
+      "english": "The mask helps stop germs from spreading.",
+      "chinese": "口罩有助于阻止细菌传播。"
+    },
+    "application": {
+      "prompt": "A mask can stop germs ____ from one person to another. A. spreading B. to spread",
+      "solution": "A。解析：stop germs from spreading 符合 stop + 宾语 + from doing 结构。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stop ... from doing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stop"
+      }
+    ]
+  },
+  {
+    "word": "virus",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 病毒。复数为 viruses；可说 a virus spreads 或 spread a virus。",
+    "collocations": "a computer virus; a flu virus; spread a virus",
+    "commonMistake": "virus 的复数是 viruses；不要误写成不规则拼法 virii。",
+    "example": {
+      "english": "The doctor explained how the virus spreads.",
+      "chinese": "医生解释了这种病毒如何传播。"
+    },
+    "application": {
+      "prompt": "A ____ can spread between people and make them ill. A. vitamin B. virus",
+      "solution": "B。解析：能在人与人之间传播并致病的是 virus（病毒）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: virus",
+        "url": "https://dictionary.cambridge.org/dictionary/english/virus"
+      }
+    ]
+  },
+  {
+    "word": "description",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 描写；形容。动词为 describe，常用 a description of sth。",
+    "collocations": "give a description; a clear description of; describe sth clearly",
+    "commonMistake": "description 是名词，常用 a description of sth；describe 是对应动词，别混用冠词 a。",
+    "example": {
+      "english": "The witness gave a clear description of the lost bag.",
+      "chinese": "目击者清楚地描述了那个丢失的包。"
+    },
+    "application": {
+      "prompt": "The witness gave a clear ____ of the missing bag. A. description B. describe",
+      "solution": "A。解析：give a description of 是名词搭配；describe 是动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: description",
+        "url": "https://dictionary.cambridge.org/dictionary/english/description"
+      }
+    ]
+  },
+  {
+    "word": "patient",
+    "examTags": [
+      "词汇·名词与形容词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 病人；adj. 有耐心的。patient 作名词指病人，作形容词常用 be patient with sb。",
+    "collocations": "a patient with a fever; be patient with sb; patient care",
+    "commonMistake": "patient 作名词是“病人”，作形容词是“有耐心的”；be patient with sb 是后者的搭配。",
+    "example": {
+      "english": "The doctor spoke kindly to the patient.",
+      "chinese": "医生和蔼地对病人说话。"
+    },
+    "application": {
+      "prompt": "The doctor spoke kindly to the ____ in Room 4. A. illness B. patient",
+      "solution": "B。解析：to 后需要名词，Room 4 里的病人是 patient。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: patient",
+        "url": "https://dictionary.cambridge.org/dictionary/english/patient"
+      }
+    ]
+  },
+  {
+    "word": "injury",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 伤害；损伤。常说 a knee/head injury；动词“使受伤”为 injure。",
+    "collocations": "a serious injury; a head injury; recover from an injury",
+    "commonMistake": "injury 是名词，injure 是动词；a knee injury 与 injure one’s knee 结构不同。",
+    "example": {
+      "english": "He missed the game because of a knee injury.",
+      "chinese": "他因膝盖受伤错过了比赛。"
+    },
+    "application": {
+      "prompt": "He missed the game because of a knee ____. A. injury B. injure",
+      "solution": "A。解析：a knee 后接名词 injury；injure 是动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: injury",
+        "url": "https://dictionary.cambridge.org/dictionary/english/injury"
+      }
+    ]
+  },
+  {
+    "word": "illness",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 疾病。常见搭配 a serious illness、recover from an illness；ill 是形容词。",
+    "collocations": "a serious illness; recover from an illness; prevent illness",
+    "commonMistake": "illness 是名词；be ill/get ill 用形容词 ill，不能说 an ill 表示一种疾病。",
+    "example": {
+      "english": "She returned to school after her illness.",
+      "chinese": "病愈后，她回到了学校。"
+    },
+    "application": {
+      "prompt": "After a serious ____, she returned to school. A. ill B. illness",
+      "solution": "B。解析：serious 修饰名词 illness；ill 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: illness",
+        "url": "https://dictionary.cambridge.org/dictionary/english/illness"
+      }
+    ]
+  },
+  {
+    "word": "knife",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 刀；可数名词，复数为 knives。",
+    "collocations": "a sharp knife; cut with a knife; a kitchen knife",
+    "commonMistake": "knife 的复数为 knives，变复数时 f 变 v 再加 -es。",
+    "example": {
+      "english": "Use a clean knife to cut the fruit.",
+      "chinese": "用一把干净的刀切水果。"
+    },
+    "application": {
+      "prompt": "Please use a sharp ____ to cut the apple. A. knife B. fork",
+      "solution": "A。解析：切苹果通常用 knife（刀），sharp 也与刀具搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: knife",
+        "url": "https://dictionary.cambridge.org/dictionary/english/knife"
+      }
+    ]
+  },
+  {
+    "word": "safety",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 安全；安全处所。通常作不可数名词。",
+    "collocations": "road safety; safety rules; for your safety",
+    "commonMistake": "safety 是名词，safe 是形容词；safety rules 与 keep sb safe 的词性不要混淆。",
+    "example": {
+      "english": "Always follow the safety rules in the science lab.",
+      "chinese": "在科学实验室里一定要遵守安全规则。"
+    },
+    "application": {
+      "prompt": "Everyone must follow the lab ____ rules. A. safely B. safety",
+      "solution": "B。解析：名词 safety 作定语构成 safety rules（安全规则）；safely 是副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: safety",
+        "url": "https://dictionary.cambridge.org/dictionary/english/safety"
+      }
+    ]
+  },
+  {
+    "word": "clear",
+    "examTags": [
+      "词汇·词汇",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 清晰的；v. 清理、清除。根据句中位置判断词性。",
+    "collocations": "clear instructions; clear a table; make sth clear",
+    "commonMistake": "clear 可作形容词（clear instructions）或动词（clear the table）；修饰动词时用 clearly。",
+    "example": {
+      "english": "Please make your answer clear and easy to understand.",
+      "chinese": "请把答案说清楚，让人容易理解。"
+    },
+    "application": {
+      "prompt": "The instructions were so ____ that every student understood them. A. clear B. clearly",
+      "solution": "A。解析：be 后作表语、说明 instructions 的性质，用形容词 clear。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: clear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/clear"
+      }
+    ]
+  },
+  {
+    "word": "pain",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 疼痛；痛苦。通常作不可数名词。",
+    "collocations": "feel pain; in pain; cause pain",
+    "commonMistake": "pain 作“疼痛”通常不可数，常说 be in pain/feel pain；具体疼痛类型常用 a pain in...。",
+    "example": {
+      "english": "He felt pain in his ankle after the fall.",
+      "chinese": "摔倒后，他的脚踝感到疼痛。"
+    },
+    "application": {
+      "prompt": "After the fall, he was in great ____ but could still walk. A. painful B. pain",
+      "solution": "B。解析：in great pain 是“疼痛难忍”的搭配，空格需要名词 pain。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pain",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pain"
+      }
+    ]
+  },
+  {
+    "word": "what’s more",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 更为重要的是；而且。常用于句首补充信息。",
+    "collocations": "what’s more, ...; and what’s more; what is more",
+    "commonMistake": "What’s more 用来补充或递进信息，句首常接逗号；不要把它当成举例标记。",
+    "example": {
+      "english": "The library is quiet and, what’s more, it is open late.",
+      "chinese": "图书馆很安静，而且开放到很晚。"
+    },
+    "application": {
+      "prompt": "This library has quiet rooms. ____, it stays open until 10 p.m. A. What’s more B. At first",
+      "solution": "A。解析：后句补充图书馆的另一个优点，用 What’s more（而且）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: what’s more",
+        "url": "https://dictionary.cambridge.org/dictionary/english/what-s-more"
+      }
+    ]
+  },
+  {
+    "word": "brightness",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 亮度。通常作不可数名词。",
+    "collocations": "screen brightness; adjust the brightness; brightness level",
+    "commonMistake": "brightness 是 bright 加 -ness 构成的名词，表示亮度；不能用 bright 直接替换名词位置。",
+    "example": {
+      "english": "I lowered the screen brightness before bed.",
+      "chinese": "睡前我调低了屏幕亮度。"
+    },
+    "application": {
+      "prompt": "I turned down the screen ____ so it was easier to read at night. A. bright B. brightness",
+      "solution": "B。解析：turn down 后接名词 brightness（亮度）；bright 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: brightness",
+        "url": "https://dictionary.cambridge.org/dictionary/english/brightness"
+      }
+    ]
+  },
+  {
+    "word": "environment",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 环境。通常作不可数名词。",
+    "collocations": "protect the environment; a healthy environment; environmental protection",
+    "commonMistake": "environment 通常作可数名词谈一种环境，也常用 the environment 指自然环境；environmental 是形容词。",
+    "example": {
+      "english": "We should keep the environment clean by recycling paper.",
+      "chinese": "我们应该通过回收纸张来保持环境清洁。"
+    },
+    "application": {
+      "prompt": "We should protect the natural ____ by recycling paper. A. environment B. environmental",
+      "solution": "A。解析：protect the natural environment 是“保护自然环境”；environmental 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: environment",
+        "url": "https://dictionary.cambridge.org/dictionary/english/environment"
+      }
+    ]
+  },
+  {
+    "word": "cross",
+    "examTags": [
+      "词汇·动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "v. 穿越；横过；cross 是动词，across 常作介词或副词。",
+    "collocations": "cross the road; cross a bridge; cross one’s arms",
+    "commonMistake": "cross 是动词，后可直接接 road/street；across 是介词/副词，不能说 across the road 作谓语。",
+    "example": {
+      "english": "Always look both ways before you cross the road.",
+      "chinese": "过马路前一定要向两边看。"
+    },
+    "application": {
+      "prompt": "Look both ways before you ____ the road. A. across B. cross",
+      "solution": "B。解析：before you 后接句子，空格需用动词 cross；across 通常作介词/副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cross",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cross"
+      }
+    ]
+  },
+  {
+    "word": "catch fire",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 着火；起火。catch—caught—caught。",
+    "collocations": "catch fire suddenly; a building catches fire; prevent a fire",
+    "commonMistake": "catch fire 表示开始着火，fire 前一般不加 a；be on fire 表示处于燃烧状态。",
+    "example": {
+      "english": "The dry leaves caught fire quickly.",
+      "chinese": "干燥的树叶很快着了火。"
+    },
+    "application": {
+      "prompt": "Dry leaves can ____ quickly in hot weather. A. catch fire B. catch a fire",
+      "solution": "A。解析：catch fire 表示“着火”，fire 前通常不加 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: catch fire",
+        "url": "https://dictionary.cambridge.org/dictionary/english/catch-fire"
+      }
+    ]
+  },
+  {
+    "word": "themselves",
+    "examTags": [
+      "词汇·代词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "pron. 他们/她们/它们自己；与主语 they 对应。",
+    "collocations": "by themselves; enjoy themselves; introduce themselves",
+    "commonMistake": "themselves 对应复数主语 they；单数主语应根据人称改用 himself/herself/itself。",
+    "example": {
+      "english": "The children made the model themselves.",
+      "chinese": "孩子们自己做了这个模型。"
+    },
+    "application": {
+      "prompt": "The children built the model by ____. A. ourselves B. themselves",
+      "solution": "B。解析：主语 The children 对应 themselves；by themselves 表示“他们自己”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: themselves",
+        "url": "https://dictionary.cambridge.org/dictionary/english/themselves"
+      }
+    ]
+  },
+  {
+    "word": "fry",
+    "examTags": [
+      "词汇·动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "v. 油炸；油煎；油炒。fry—fried—fried；现在分词 frying。",
+    "collocations": "fry an egg; fried rice; deep-fry food",
+    "commonMistake": "fry 的过去式和过去分词是 fried；现在分词 frying，注意 y 前为辅音时的拼写变化。",
+    "example": {
+      "english": "Dad fried some eggs for breakfast.",
+      "chinese": "爸爸煎了几个鸡蛋当早餐。"
+    },
+    "application": {
+      "prompt": "Dad ____ two eggs for breakfast this morning. A. fried B. fryed",
+      "solution": "A。解析：this morning 的动作已完成，fry 的过去式为 fried，变 y 为 i 再加 -ed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fry",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fry"
+      }
+    ]
+  },
+  {
+    "word": "turn on",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 打开电器、水或煤气。代词作宾语时放中间：turn it on。",
+    "collocations": "turn on the light; turn on the tap; turn the radio on",
+    "commonMistake": "turn on 是可分离短语动词；宾语是代词时必须放中间（turn it on），不能说 turn on it。",
+    "example": {
+      "english": "Turn on the light so we can read.",
+      "chinese": "把灯打开，这样我们就能看书了。"
+    },
+    "application": {
+      "prompt": "It is dark in here. Please ____ the light. A. turn off B. turn on",
+      "solution": "B。解析：房间很暗，需要打开灯，用 turn on。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: turn on",
+        "url": "https://dictionary.cambridge.org/dictionary/english/turn-on"
+      }
+    ]
+  },
+  {
+    "word": "stove",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 厨房灶具；炉子。常说 a gas stove、turn off the stove。",
+    "collocations": "a gas stove; a kitchen stove; turn off the stove",
+    "commonMistake": "stove 指炉灶/火炉；gas stove 是燃气灶，不要和 stove top 上的 flame（火焰）混为一词。",
+    "example": {
+      "english": "Turn off the stove after you finish cooking.",
+      "chinese": "做完饭后把炉子关掉。"
+    },
+    "application": {
+      "prompt": "She cooked soup on the gas ____. A. stove B. flame",
+      "solution": "A。解析：gas stove 是“燃气灶”；flame 是火焰。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stove",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stove"
+      }
+    ]
+  },
+  {
+    "word": "happily",
+    "examTags": [
+      "词汇·副词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adv. 快乐地；高兴地。通常修饰动词、形容词或整句。",
+    "collocations": "live happily; smile happily; play happily",
+    "commonMistake": "happily 是副词，修饰动作；形容词 happy 可作表语或修饰名词，注意 -y 到 -ily 的拼写。",
+    "example": {
+      "english": "The children played happily in the garden.",
+      "chinese": "孩子们在花园里开心地玩耍。"
+    },
+    "application": {
+      "prompt": "The children played ____ in the garden all afternoon. A. happy B. happily",
+      "solution": "B。解析：修饰动词 played 要用副词 happily。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: happily",
+        "url": "https://dictionary.cambridge.org/dictionary/english/happily"
+      }
+    ]
+  },
+  {
+    "word": "no way",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 不可能；没门，也可表示“没有办法”，结合语境理解。",
+    "collocations": "no way!; there is no way to do sth; no way of knowing",
+    "commonMistake": "No way! 可表示强烈拒绝；there is no way to do sth 则表示“没有办法做”，需按语境辨义。",
+    "example": {
+      "english": "“Can I borrow your bike?” “No way; I need it today.”",
+      "chinese": "“我能借你的自行车吗？”“不行，我今天要用。”"
+    },
+    "application": {
+      "prompt": "Can I borrow your bike? ____! I need it today. A. No way B. Of course",
+      "solution": "A。解析：这里是在拒绝借车，No way 表示“绝不/没门”；Of course 表示同意。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: no way",
+        "url": "https://dictionary.cambridge.org/dictionary/english/no-way"
+      }
+    ]
+  },
+  {
+    "word": "burn",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n./v. 燃烧；烧伤。过去式和过去分词可为 burnt 或 burned。",
+    "collocations": "burn wood; get burned; burn down",
+    "commonMistake": "burn 的过去式和过去分词可用 burned 或 burnt；不规则变化与规则变化都可见，保持全文用法一致。",
+    "example": {
+      "english": "Be careful not to burn your hand on the hot pan.",
+      "chinese": "小心别被热锅烫伤手。"
+    },
+    "application": {
+      "prompt": "Be careful not to ____ your hand on the hot pan. A. burned B. burn",
+      "solution": "B。解析：not to 后接动词原形 burn；burned 是过去式/过去分词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: burn",
+        "url": "https://dictionary.cambridge.org/dictionary/english/burn"
+      }
+    ]
+  },
+  {
+    "word": "on fire",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 着火；起火。be on fire 描述正在燃烧的状态。",
+    "collocations": "be on fire; a house on fire; put out a fire",
+    "commonMistake": "be on fire 描述正在着火；catch fire 表示开始着火，注意状态与起始动作的区别。",
+    "example": {
+      "english": "The firefighters saw that the roof was on fire.",
+      "chinese": "消防员看到屋顶着火了。"
+    },
+    "application": {
+      "prompt": "The firefighters saw that the roof was ____. A. on fire B. on flame",
+      "solution": "A。解析：描述屋顶正在燃烧用 be on fire。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: on fire",
+        "url": "https://dictionary.cambridge.org/dictionary/english/on-fire"
+      }
+    ]
+  },
+  {
+    "word": "flame",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 火焰。可数名词，单数前通常加 a/an；复数 flames。",
+    "collocations": "a bright flame; a candle flame; put out the flames",
+    "commonMistake": "flame 指可见的火焰，fire 可指火或火灾；讲火焰的形状/颜色时通常选 flame。",
+    "example": {
+      "english": "A small flame appeared when he lit the match.",
+      "chinese": "他划火柴时出现了一小簇火焰。"
+    },
+    "application": {
+      "prompt": "A small ____ rose from the candle wick. A. firework B. flame",
+      "solution": "B。解析：蜡烛芯上升起的是一小簇 flame（火焰）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flame",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flame"
+      }
+    ]
+  },
+  {
+    "word": "panic",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 惊恐；恐慌；v. 惊慌。作动词过去式为 panicked，注意双写 c。",
+    "collocations": "panic about sth; in a panic; panic and run",
+    "commonMistake": "panic 可作名词或动词；作动词时过去式、过去分词常写 panicked，注意双写 c 后加 -ed。",
+    "example": {
+      "english": "Do not panic if the fire alarm rings; follow the teacher.",
+      "chinese": "如果火警响起，不要慌张，要听从老师安排。"
+    },
+    "application": {
+      "prompt": "When the alarm rings, don't ____. Follow the teacher's instructions. A. panic B. panicly",
+      "solution": "A。解析：don't 后用动词原形 panic；panicly 不是正确拼法。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: panic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/panic"
+      }
+    ]
+  },
+  {
+    "word": "onto",
+    "examTags": [
+      "词汇·介词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "prep. 向……上；到……上。强调移动到表面，和表示进入内部的 into 区分。",
+    "collocations": "onto; use the expression in context; keep the word order",
+    "commonMistake": "onto 表示向某个表面移动并到达其上；into 强调进入内部空间，结合动作终点判断。",
+    "example": {
+      "english": "The teacher wrote “onto” on the board during the health lesson.",
+      "chinese": "健康课上，老师把“onto”写在了黑板上。"
+    },
+    "application": {
+      "prompt": "She stepped ____ the platform and sat down. A. into B. onto",
+      "solution": "B。解析：step onto 表示踏上一个表面/平台；into 强调进入内部空间。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: onto",
+        "url": "https://dictionary.cambridge.org/dictionary/english/onto"
+      }
+    ]
+  },
+  {
+    "word": "throw",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n./v. 扔；抛；投。throw—threw—thrown。",
+    "collocations": "throw a ball; throw sth away; throw sth to sb",
+    "commonMistake": "throw—threw—thrown 是不规则变化；扔给某人常说 throw sth to sb，扔掉用 throw sth away。",
+    "example": {
+      "english": "She threw the ball to her teammate.",
+      "chinese": "她把球扔给了队友。"
+    },
+    "application": {
+      "prompt": "Don't ____ rubbish into the river. A. throw B. roll",
+      "solution": "A。解析：把垃圾扔进河里用 throw；roll 表示滚动。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: throw",
+        "url": "https://dictionary.cambridge.org/dictionary/english/throw"
+      }
+    ]
+  },
+  {
+    "word": "roll",
+    "examTags": [
+      "词汇·动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "v. （使）滚动；翻滚。过去式和过去分词 rolled；也可作名词表示一卷/一小面包。",
+    "collocations": "roll down a hill; roll up a sleeve; a roll of paper",
+    "commonMistake": "roll 可表示滚动，也可接 up 表示卷起；“roll up one’s sleeves”中宾语位置不能漏。",
+    "example": {
+      "english": "The ball rolled under the table.",
+      "chinese": "球滚到了桌子下面。"
+    },
+    "application": {
+      "prompt": "The ball began to ____ down the hill. A. rolled B. roll",
+      "solution": "B。解析：begin to 后接动词原形 roll。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: roll",
+        "url": "https://dictionary.cambridge.org/dictionary/english/roll"
+      }
+    ]
+  },
+  {
+    "word": "quick",
+    "examTags": [
+      "词汇·形容词与副词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 快的；迅速的，也可作副词；副词通常用 quickly。",
+    "collocations": "a quick answer; a quick look; be quick to do sth",
+    "commonMistake": "quick 主要作形容词，修饰名词；正式写作中修饰动词通常用 quickly。",
+    "example": {
+      "english": "We had a quick lunch before the meeting.",
+      "chinese": "开会前我们匆匆吃了午饭。"
+    },
+    "application": {
+      "prompt": "We had a ____ lunch before the meeting. A. quick B. quickly",
+      "solution": "A。解析：名词 lunch 前用形容词 quick；副词 quickly 不能直接修饰名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: quick",
+        "url": "https://dictionary.cambridge.org/dictionary/english/quick"
+      }
+    ]
+  },
+  {
+    "word": "be about to",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 即将；正要做某事。be about to + 动词原形，常与 when 连用。",
+    "collocations": "be about to leave; be about to start; be just about to do sth",
+    "commonMistake": "be about to 后接动词原形，表示眼看就要发生；通常不与具体将来时间点连用。",
+    "example": {
+      "english": "We were about to leave when the phone rang.",
+      "chinese": "我们正要离开，这时电话响了。"
+    },
+    "application": {
+      "prompt": "We were ____ leave when the phone rang. A. about B. about to",
+      "solution": "B。解析：be about to do 表示“正要做……”，to 后接动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: be about to",
+        "url": "https://dictionary.cambridge.org/dictionary/english/be-about-to"
+      }
+    ]
+  },
+  {
+    "word": "stop short",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 突然停下；也可指险些做某事但没有做，结合上下文判断。",
+    "collocations": "stop short; stop short of doing sth; come to a sudden stop",
+    "commonMistake": "stop short of doing sth 表示差一点做某事但没有做；stop short 单独用可表示突然停下。",
+    "example": {
+      "english": "The cyclist stopped short when a child ran into the road.",
+      "chinese": "一个孩子跑到路上时，骑车人猛地停了下来。"
+    },
+    "application": {
+      "prompt": "The cyclist saw a child run into the road and had to ____. A. stop short B. stopped short",
+      "solution": "A。解析：had to 后接动词原形 stop；stop short 表示突然停下。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stop short",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stop-short"
+      }
+    ]
+  },
+  {
+    "word": "aid",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. & v. 援助；帮助。常见名词搭配 first aid、come to sb’s aid；作动词可直接接受助者。",
+    "collocations": "first aid; provide aid; come to sb’s aid",
+    "commonMistake": "aid 可作名词或动词；first aid 指急救，come to sb’s aid 指前去帮助某人，含义不同。",
+    "example": {
+      "english": "The neighbors came to the injured man’s aid.",
+      "chinese": "邻居们前来帮助受伤的男子。"
+    },
+    "application": {
+      "prompt": "When her neighbor fell, she came to his ____. A. first aid B. aid",
+      "solution": "B。解析：come to someone’s aid 是“前来帮助某人”；first aid 指急救。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: aid",
+        "url": "https://dictionary.cambridge.org/dictionary/english/aid"
+      }
+    ]
+  },
+  {
+    "word": "first aid",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 急救；通常作不可数名词。first-aid 可作复合形容词修饰名词。",
+    "collocations": "give first aid; first-aid kit; first-aid training",
+    "commonMistake": "first aid 通常作不可数名词，不说 a first aid；修饰名词时常写 first-aid kit。",
+    "example": {
+      "english": "The teacher learned first aid before leading the school trip.",
+      "chinese": "带领学校旅行前，老师学习了急救知识。"
+    },
+    "application": {
+      "prompt": "A first-aid kit is useful when someone needs ____. A. first aid B. an aid",
+      "solution": "A。解析：needs first aid 表示需要急救；first aid 通常作不可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: first aid",
+        "url": "https://dictionary.cambridge.org/dictionary/english/first-aid"
+      }
+    ]
+  },
+  {
+    "word": "extinguisher",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 灭火器。常用 fire extinguisher；可数名词单数前通常加限定词。",
+    "collocations": "a fire extinguisher; use an extinguisher; extinguisher training",
+    "commonMistake": "extinguisher 是可数名词，常见完整说法 fire extinguisher；单数前通常要有 a/an/the。",
+    "example": {
+      "english": "The fire extinguisher is beside the exit.",
+      "chinese": "灭火器在出口旁边。"
+    },
+    "application": {
+      "prompt": "Use a fire ____ to put out a small fire. A. alarm B. extinguisher",
+      "solution": "B。解析：能扑灭小火的是 fire extinguisher（灭火器），alarm 只发出警报。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: extinguisher",
+        "url": "https://dictionary.cambridge.org/dictionary/english/extinguisher"
+      }
+    ]
+  },
+  {
+    "word": "eat out",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 上馆子吃饭；在外用餐。eat 按时态变化。",
+    "collocations": "eat out with friends; eat out tonight; prefer to eat out",
+    "commonMistake": "eat out 指在餐馆等外出用餐；eat out 与 eat at home 对照，不等于把饭吃完（eat up）。",
+    "example": {
+      "english": "We eat out once a week, usually on Friday.",
+      "chinese": "我们每周出去吃一次，通常在星期五。"
+    },
+    "application": {
+      "prompt": "We don't feel like cooking, so let's ____ tonight. A. eat out B. eat up",
+      "solution": "A。解析：不想做饭就去餐馆吃，用 eat out；eat up 是吃完。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eat out",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eat-out"
+      }
+    ]
+  },
+  {
+    "word": "tonight",
+    "examTags": [
+      "词汇·副词与名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adv. & n. 今晚；今夜。作时间副词时常直接置于句末，不加 on/at。",
+    "collocations": "tonight’s dinner; see you tonight; work tonight",
+    "commonMistake": "tonight 作时间副词时前面通常不加介词 on/at；可说 tonight’s dinner 表示今晚的晚餐。",
+    "example": {
+      "english": "I will finish my homework tonight.",
+      "chinese": "我今晚会完成作业。"
+    },
+    "application": {
+      "prompt": "I will finish the project ____ and hand it in tomorrow. A. at tonight B. tonight",
+      "solution": "B。解析：tonight 作时间副词前通常不加 at。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tonight",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tonight"
+      }
+    ]
+  },
+  {
+    "word": "sadly",
+    "examTags": [
+      "词汇·副词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adv. 伤心地；令人遗憾地。通常修饰动词、形容词或整句。",
+    "collocations": "sadly, ...; smile sadly; end sadly",
+    "commonMistake": "sadly 可作方式副词，也可作句子副词表达遗憾；句首作句子副词时常用逗号隔开。",
+    "example": {
+      "english": "Sadly, the old playground will close next month.",
+      "chinese": "令人遗憾的是，旧操场下个月就要关闭了。"
+    },
+    "application": {
+      "prompt": "____, the old playground will close next month. A. Sadly B. Sad",
+      "solution": "A。解析：句首修饰整句、表达遗憾，用副词 Sadly。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sadly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sadly"
+      }
+    ]
+  },
+  {
+    "word": "smoke",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 烟；v. 吸烟、冒烟。表示烟时通常不可数；作动词可用 smoke from... 描述烟源。",
+    "collocations": "smoke from a fire; smoke a cigarette; smoke detector",
+    "commonMistake": "smoke 表示烟时通常不可数；作动词可表示吸烟/冒烟，判断词性看冠词和句法位置。",
+    "example": {
+      "english": "Smoke came from the pan when the oil got too hot.",
+      "chinese": "油太热时，锅里冒出了烟。"
+    },
+    "application": {
+      "prompt": "A thick cloud of ____ came from the kitchen. A. smoker B. smoke",
+      "solution": "B。解析：a cloud of 后接名词 smoke（烟）；smoker 指吸烟者/烟具。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: smoke",
+        "url": "https://dictionary.cambridge.org/dictionary/english/smoke"
+      }
+    ]
+  },
+  {
+    "word": "luckily",
+    "examTags": [
+      "词汇·副词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adv. 幸运地。通常修饰动词、形容词或整句。",
+    "collocations": "luckily, ...; luckily for sb; luckily, everyone ...",
+    "commonMistake": "luckily 是句子副词，表达“幸好”；句首常用逗号，别误写成形容词 lucky 修饰整句。",
+    "example": {
+      "english": "Luckily, the firefighters arrived in time.",
+      "chinese": "幸好，消防员及时赶到了。"
+    },
+    "application": {
+      "prompt": "____, the firefighters arrived before the flames spread. A. Luckily B. Lucky",
+      "solution": "A。解析：修饰整句说明“幸好”，用副词 Luckily。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: luckily",
+        "url": "https://dictionary.cambridge.org/dictionary/english/luckily"
+      }
+    ]
+  },
+  {
+    "word": "badly",
+    "examTags": [
+      "词汇·副词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adv. 严重地；差地；非常。比较级 worse，最高级 worst。",
+    "collocations": "be badly hurt; behave badly; need sth badly",
+    "commonMistake": "badly 是 bad 的副词，比较级和最高级是不规则的 worse、worst；不要写 badder。",
+    "example": {
+      "english": "The storm badly damaged several houses.",
+      "chinese": "暴风雨严重损坏了几所房子。"
+    },
+    "application": {
+      "prompt": "The storm ____ damaged several houses. A. bad B. badly",
+      "solution": "B。解析：修饰动词 damaged 要用副词 badly。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: badly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/badly"
+      }
+    ]
+  },
+  {
+    "word": "harm",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 伤害；损害，通常不可数；v. 伤害。常用 do harm to。",
+    "collocations": "do harm to; cause harm; be harmed by sth",
+    "commonMistake": "harm 作“伤害”通常不可数，常用 do harm to；形容词形式 harmful 常见搭配 be harmful to。",
+    "example": {
+      "english": "Too much smoke can harm your lungs.",
+      "chinese": "烟雾太多会损害你的肺部。"
+    },
+    "application": {
+      "prompt": "Too much smoke can do ____ to your lungs. A. harm B. harmful",
+      "solution": "A。解析：do harm to 是固定搭配，do 后用名词 harm。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: harm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/harm"
+      }
+    ]
+  },
+  {
+    "word": "pill",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 药丸；药片。可数名词，常说 take a pill/one pill。",
+    "collocations": "take a pill; a sleeping pill; swallow a pill",
+    "commonMistake": "pill 是可数名词，表示一片药时说 a pill/one pill；medicine 泛指药物时常不可数。",
+    "example": {
+      "english": "The doctor told him to take one pill after lunch.",
+      "chinese": "医生让他午饭后吃一片药。"
+    },
+    "application": {
+      "prompt": "The doctor told him to take one ____ after lunch. A. pills B. pill",
+      "solution": "B。解析：one 后接可数名词单数 pill。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pill",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pill"
+      }
+    ]
+  },
+  {
+    "word": "harmful",
+    "examTags": [
+      "词汇·形容词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 有害的。常用 be harmful to；名词 harm。",
+    "collocations": "be harmful to health; harmful effects; harmful chemicals",
+    "commonMistake": "harmful 是形容词，常说 be harmful to；harm 是名词/动词，不可直接放在 be 后作形容词。",
+    "example": {
+      "english": "Smoking is harmful to your health.",
+      "chinese": "吸烟有害健康。"
+    },
+    "application": {
+      "prompt": "Smoking is ____ to your health. A. harmful B. harm",
+      "solution": "A。解析：be 动词后作表语需用形容词 harmful；常见搭配 harmful to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: harmful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/harmful"
+      }
+    ]
+  },
+  {
+    "word": "hit",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n./v. 碰撞；击；打；hit—hit—hit；现在分词 hitting。",
+    "collocations": "hit a ball; hit the ground; hit sb on the head",
+    "commonMistake": "hit 的过去式、过去分词仍为 hit；现在分词需双写 t：hitting。",
+    "example": {
+      "english": "The ball hit the window, but the glass did not break.",
+      "chinese": "球打到了窗户，但玻璃没有碎。"
+    },
+    "application": {
+      "prompt": "The ball ____ the window, but the glass didn't break. A. hitted B. hit",
+      "solution": "B。解析：句子用一般过去时；hit 的过去式仍是 hit，不加 -ed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hit"
+      }
+    ]
+  },
+  {
+    "word": "shock",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n./v. 震惊；使震惊。shocked 描述人的感受，shocking 描述事物。",
+    "collocations": "be in shock; a great shock; shock sb",
+    "commonMistake": "人感到震惊用 shocked，令人震惊的事物用 shocking；不要仅根据中文“震惊”选词。",
+    "example": {
+      "english": "We were shocked by the sudden news.",
+      "chinese": "我们对这个突然的消息感到震惊。"
+    },
+    "application": {
+      "prompt": "We were ____ by the sudden news. A. shocked B. shocking",
+      "solution": "A。解析：人感到震惊用 shocked；令人震惊的消息可说 shocking news。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shock",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shock"
+      }
+    ]
+  },
+  {
+    "word": "bleed",
+    "examTags": [
+      "词汇·动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "v. 流血；出血。bleed—bled—bled。",
+    "collocations": "bleed from the nose; bleed badly; stop the bleeding",
+    "commonMistake": "bleed 的过去式和过去分词均为 bled；流血状态可说 be bleeding。",
+    "example": {
+      "english": "His finger began to bleed after he cut it.",
+      "chinese": "他割伤手指后，手指开始流血。"
+    },
+    "application": {
+      "prompt": "His finger ____ after he cut it. A. bleed B. bled",
+      "solution": "B。解析：after 表示过去情境，bleed 的过去式是 bled。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bleed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bleed"
+      }
+    ]
+  },
+  {
+    "word": "check",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 检查；v. 检查、核对。check sth 表示检查某物，check on sb 表示查看某人情况。",
+    "collocations": "check a patient; check the answer; check for sth",
+    "commonMistake": "check sth 表示检查某物；check on sb/sth 表示查看其情况，介词会改变搭配侧重点。",
+    "example": {
+      "english": "The nurse checked his temperature again.",
+      "chinese": "护士又给他量了一次体温。"
+    },
+    "application": {
+      "prompt": "The nurse will ____ his temperature again. A. check B. checks",
+      "solution": "A。解析：will 后接动词原形；check one’s temperature 表示量体温。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: check",
+        "url": "https://dictionary.cambridge.org/dictionary/english/check"
+      }
+    ]
+  },
+  {
+    "word": "tight",
+    "examTags": [
+      "词汇·形容词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 憋气的；紧的；牢固的。可作定语或表语。",
+    "collocations": "a tight shirt; hold on tight; tight shoes",
+    "commonMistake": "tight 是形容词，描述衣物、绷带等松紧；副词 tightly 用来修饰 hold/grip 等动作。",
+    "example": {
+      "english": "The bandage was too tight around his wrist.",
+      "chinese": "绷带缠在他的手腕上太紧了。"
+    },
+    "application": {
+      "prompt": "The bandage is too ____ around my wrist; please loosen it. A. tightly B. tight",
+      "solution": "B。解析：be too 后接形容词 tight 描述绷带松紧。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tight",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tight"
+      }
+    ]
+  },
+  {
+    "word": "peanut",
+    "examTags": [
+      "词汇·名词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "n. 花生。可数名词；单数前通常加 a/one，复数 peanuts。",
+    "collocations": "peanut butter; a peanut allergy; a handful of peanuts",
+    "commonMistake": "peanut 是可数名词，单数前用 a/one；peanuts 也常用于泛指食物或过敏原。",
+    "example": {
+      "english": "This snack contains peanuts, so read the label carefully.",
+      "chinese": "这种零食含有花生，所以要仔细看标签。"
+    },
+    "application": {
+      "prompt": "He picked up one ____ from the bowl. A. peanut B. peanuts",
+      "solution": "A。解析：one 后用可数名词单数 peanut。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: peanut",
+        "url": "https://dictionary.cambridge.org/dictionary/english/peanut"
+      }
+    ]
+  },
+  {
+    "word": "nervously",
+    "examTags": [
+      "词汇·副词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adv. 紧张不安地。通常修饰动词、形容词或整句。",
+    "collocations": "smile nervously; wait nervously; look around nervously",
+    "commonMistake": "nervously 是副词，修饰 wait/smile 等动作；形容词 nervous 用来描述人的状态。",
+    "example": {
+      "english": "He waited nervously outside the doctor’s room.",
+      "chinese": "他在医生诊室外紧张地等待。"
+    },
+    "application": {
+      "prompt": "He waited ____ outside the doctor's office. A. nervous B. nervously",
+      "solution": "B。解析：修饰动词 waited 要用副词 nervously。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nervously",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nervously"
+      }
+    ]
+  },
+  {
+    "word": "allergic",
+    "examTags": [
+      "词汇·形容词",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "adj. 过敏的。常用 be allergic to + 名词；名词 allergy。",
+    "collocations": "be allergic to peanuts; allergic reaction; severely allergic",
+    "commonMistake": "固定搭配是 be allergic to + 过敏原；不要把介词 to 换成 with/for。",
+    "example": {
+      "english": "My brother is allergic to peanuts.",
+      "chinese": "我弟弟对花生过敏。"
+    },
+    "application": {
+      "prompt": "My brother is ____ peanuts, so he never eats them. A. allergic to B. allergic with",
+      "solution": "A。解析：固定搭配 be allergic to，to 后接过敏原。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: allergic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/allergic"
+      }
+    ]
+  },
+  {
+    "word": "from now on",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·健康与安全语境"
+    ],
+    "grammar": "phr. 从现在起；用于说明从现在开始持续的新习惯或决定。",
+    "collocations": "from now on, ...; follow a rule from now on; from then on",
+    "commonMistake": "from now on 指从现在开始并延续；from then on 指从过去某一时点开始，时态也要相应配合。",
+    "example": {
+      "english": "From now on, I will keep a first-aid kit in the car.",
+      "chinese": "从现在起，我会在车里放一个急救包。"
+    },
+    "application": {
+      "prompt": "____, I will keep a first-aid kit in the car. A. From then on B. From now on",
+      "solution": "B。解析：从现在开始的新习惯用 from now on；from then on 指从过去某时起。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: from now on",
+        "url": "https://dictionary.cambridge.org/dictionary/english/from-now-on"
+      }
+    ]
+  }
+]

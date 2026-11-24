@@ -1,0 +1,1274 @@
+[
+  {
+    "word": "calligraphy",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 书法，通常作不可数名词；常说 practise/study calligraphy。",
+    "collocations": "Chinese calligraphy; practise calligraphy; a calligraphy class",
+    "commonMistake": "calligraphy 通常作不可数名词；说练习书法可用 practise/study calligraphy，不给 calligraphy 本身加 a 或复数词尾。",
+    "example": {
+      "english": "My grandmother taught me Chinese calligraphy during the summer holiday.",
+      "chinese": "暑假期间，奶奶教我中国书法。"
+    },
+    "application": {
+      "prompt": "She studied the art of writing beautiful Chinese characters with a brush. The class was learning ___. A. calligraphy  B. sculpture",
+      "solution": "A。解析：题干中的毛笔和汉字提示这门艺术是 calligraphy（书法）；该词通常作不可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: calligraphy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/calligraphy"
+      }
+    ]
+  },
+  {
+    "word": "ski",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "v. 滑雪；过去式和过去分词为 skied，现在分词为 skiing；参加这项活动常说 go skiing。",
+    "collocations": "go skiing; ski down a slope; ski safely",
+    "commonMistake": "ski 的过去式和过去分词是 skied；表示参加滑雪活动常说 go skiing。",
+    "example": {
+      "english": "We learned to ski on a gentle slope.",
+      "chinese": "我们在平缓的斜坡上学滑雪。"
+    },
+    "application": {
+      "prompt": "With skis on their feet, the children learned to ___ down the snowy slope. A. hike  B. ski",
+      "solution": "B。解析：句中孩子脚上穿着 skis 并沿雪坡滑行，所以 ski 表示“滑雪”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ski",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ski"
+      }
+    ]
+  },
+  {
+    "word": "program",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n./v. a computer program（计算机程序）；program a computer（给计算机编程）。根据冠词、宾语和谓语位置判断词性。",
+    "collocations": "a computer program; a TV program; program a computer",
+    "commonMistake": "computer program 指计算机程序，programmer 指编写程序的人；注意词尾 -er 会改变词义和词性。",
+    "example": {
+      "english": "The students wrote a simple program to solve the problem.",
+      "chinese": "学生们编写了一个简单程序来解决这个问题。"
+    },
+    "application": {
+      "prompt": "The students wrote a computer ___ to sort the library books. A. program  B. poem",
+      "solution": "A。解析：sort the books 的指令写进了 computer program（计算机程序）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: program",
+        "url": "https://dictionary.cambridge.org/dictionary/english/program"
+      }
+    ]
+  },
+  {
+    "word": "express",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "v. 表达；常用 express sth to sb 或 express oneself；名词形式是 expression。",
+    "collocations": "express an idea; express feelings; express oneself",
+    "commonMistake": "express sth to sb / express oneself 表示表达；名词“表达、表情”常用 expression。",
+    "example": {
+      "english": "It is important to express your feelings politely.",
+      "chinese": "礼貌地表达自己的感受很重要。"
+    },
+    "application": {
+      "prompt": "When she explained how she felt, she tried to ___ her feelings clearly. A. hide  B. express",
+      "solution": "B。解析：把感受清楚地说出来是 express her feelings（表达感受）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: express",
+        "url": "https://dictionary.cambridge.org/dictionary/english/express"
+      }
+    ]
+  },
+  {
+    "word": "ice skating",
+    "examTags": [
+      "词汇·活动表达",
+      "中考·词形与语境"
+    ],
+    "grammar": "活动名词短语，常用 go ice skating / learn ice skating；作活动名词时通常不加冠词。",
+    "collocations": "go ice skating; an ice-skating rink; learn ice skating",
+    "commonMistake": "活动前常用 go ice skating；ice skating 本身作活动名称，不说 go to ice skating。",
+    "example": {
+      "english": "We went ice skating at the new rink on Saturday.",
+      "chinese": "星期六我们去新溜冰场滑冰了。"
+    },
+    "application": {
+      "prompt": "We put on skates and glided around the rink. We were ___. A. ice skating  B. hiking",
+      "solution": "A。解析：skates 和 rink 表明他们在滑冰；ice skating 表示“滑冰”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ice skating",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ice-skating"
+      }
+    ]
+  },
+  {
+    "word": "instructor",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 教练；指导者。作名词时注意单复数和冠词。",
+    "collocations": "a ski instructor; a driving instructor; an experienced instructor",
+    "commonMistake": "instructor 是可数名词；单数前用 a/an，因开头是元音音素，常说 an instructor。",
+    "example": {
+      "english": "The instructor showed us how to stop safely.",
+      "chinese": "教练向我们示范了如何安全停下来。"
+    },
+    "application": {
+      "prompt": "A person who teaches beginners how to ski is a ski ___. A. student  B. instructor",
+      "solution": "B。解析：教初学者滑雪的人是 ski instructor（滑雪教练）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: instructor",
+        "url": "https://dictionary.cambridge.org/dictionary/english/instructor"
+      }
+    ]
+  },
+  {
+    "word": "give up",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "短语动词，后接名词或动名词；代词宾语放在中间，如 give it up。",
+    "collocations": "give up a habit; give up trying; never give up",
+    "commonMistake": "give up 后可接名词或动名词；宾语是代词时放中间，如 give it up，不说 give up it。",
+    "example": {
+      "english": "Although the climb was difficult, they did not give up.",
+      "chinese": "虽然攀登很困难，他们还是没有放弃。"
+    },
+    "application": {
+      "prompt": "Ben was ready to stop trying the difficult puzzle. He thought he might ___. A. give up  B. give directions",
+      "solution": "A。解析：stop trying 与 give up 的意思相符，都是“放弃”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: give up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/give-up"
+      }
+    ]
+  },
+  {
+    "word": "scared",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adj. 害怕的；对……感到惊慌的。可作定语或表语。",
+    "collocations": "feel scared; look scared; be scared of sth",
+    "commonMistake": "scared 描述人的害怕感受，常说 feel scared 或 be scared of；引起害怕的事物用 scary。",
+    "example": {
+      "english": "The little boy felt scared during the storm.",
+      "chinese": "暴风雨期间，小男孩感到害怕。"
+    },
+    "application": {
+      "prompt": "The sudden thunder made the little boy feel ___. A. relaxed  B. scared",
+      "solution": "B。解析：雷声让男孩感到害怕；scared 描述人的害怕感受。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: scared",
+        "url": "https://dictionary.cambridge.org/dictionary/english/scared"
+      }
+    ]
+  },
+  {
+    "word": "scared of",
+    "examTags": [
+      "词汇·形容词短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "形容词短语 be scared of + 名词/代词/动名词；be 是系动词，of 后接对象。",
+    "collocations": "be scared of dogs; be scared of the dark; look scared of sth",
+    "commonMistake": "be scared of 后接名词、代词或动名词；人感到害怕用 scared，令人害怕的事物用 scary。",
+    "example": {
+      "english": "My sister is scared of flying, so she prefers to travel by train.",
+      "chinese": "我姐姐害怕坐飞机，所以她更喜欢乘火车出行。"
+    },
+    "application": {
+      "prompt": "Whenever a dog comes near, he hides behind his father because he is ___ dogs. A. scared of  B. interested in",
+      "solution": "A。解析：躲到父亲身后说明他害怕狗；be scared of dogs 表示“害怕狗”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: scared (scared of)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/scared"
+      }
+    ]
+  },
+  {
+    "word": "fear",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n./v. 作名词常用 fear of + 名词/动名词；作动词可直接接宾语，如 fear failure。",
+    "collocations": "fear of heights; feel fear; face one’s fear",
+    "commonMistake": "fear 可作名词或动词；名词常用 fear of + 名词/动名词，动词可直接接宾语。",
+    "example": {
+      "english": "She tried to face her fear of speaking in public.",
+      "chinese": "她努力克服自己在公众面前讲话的恐惧。"
+    },
+    "application": {
+      "prompt": "Her ___ of speaking in public kept her from joining the debate club. A. joy  B. fear",
+      "solution": "B。解析：担心在公众面前讲话的感觉是 fear（恐惧）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fear"
+      }
+    ]
+  },
+  {
+    "word": "get over",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "短语动词，后接疾病、困难或恐惧，表示“克服/康复”；代词作宾语时说 get over it。",
+    "collocations": "get over a difficulty; get over an illness; get over one’s fear",
+    "commonMistake": "get over 可接困难、疾病或恐惧；表示“克服/康复”时说 get over it，不说 get over from it。",
+    "example": {
+      "english": "With practice, she got over her fear of speaking English.",
+      "chinese": "通过练习，她克服了说英语的恐惧。"
+    },
+    "application": {
+      "prompt": "After practicing every day, she was able to ___ her fear of speaking English. A. get over  B. turn on",
+      "solution": "A。解析：她克服了说英语的恐惧；get over a fear 表示“克服恐惧”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: get over",
+        "url": "https://dictionary.cambridge.org/dictionary/english/get-over"
+      }
+    ]
+  },
+  {
+    "word": "up to",
+    "examTags": [
+      "词汇·固定搭配",
+      "中考·词形与语境"
+    ],
+    "grammar": "be up to sb 表示“由某人决定”；be up to sth/doing 还可表示“正在做某事”，按语境辨义。",
+    "collocations": "It is up to you; be up to something; up to now",
+    "commonMistake": "up to sb 表示“由某人决定”，be up to sth 还可表示“正在做某事”；按后接成分判断意思。",
+    "example": {
+      "english": "You can choose the game; it is up to you.",
+      "chinese": "你可以选择玩什么游戏，由你决定。"
+    },
+    "application": {
+      "prompt": "You may choose the activity; the decision is ___. A. in return  B. up to you",
+      "solution": "B。解析：决定由你作出；be up to you 表示“由你决定”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: up to",
+        "url": "https://dictionary.cambridge.org/dictionary/english/up-to"
+      }
+    ]
+  },
+  {
+    "word": "poem",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 诗。作名词时注意单复数和冠词。",
+    "collocations": "write a poem; read a poem; a poem about nature",
+    "commonMistake": "poem 是诗，poet 才是写诗的人；可数，常说 write/read a poem。",
+    "example": {
+      "english": "Lily wrote a short poem about the moon.",
+      "chinese": "莉莉写了一首关于月亮的短诗。"
+    },
+    "application": {
+      "prompt": "Lily wrote a short ___ with four lines and a rhythm about the moon. A. poem  B. user manual",
+      "solution": "A。解析：有诗行和韵律的短篇作品是 poem（诗）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: poem",
+        "url": "https://dictionary.cambridge.org/dictionary/english/poem"
+      }
+    ]
+  },
+  {
+    "word": "single",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adj. 单个的；单身的。可作定语或表语。",
+    "collocations": "a single room; a single question; remain single",
+    "commonMistake": "single 可表示“单个的”或“未婚的”；single room/ticket 与单身人士的 single 意义不同。",
+    "example": {
+      "english": "Please write one clear sentence on a single line.",
+      "chinese": "请在一行上写一个清楚的句子。"
+    },
+    "application": {
+      "prompt": "He booked a room for one guest, not two. He needed a ___ room. A. double  B. single",
+      "solution": "B。解析：只住一位客人对应 single room（单人间）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: single",
+        "url": "https://dictionary.cambridge.org/dictionary/english/single"
+      }
+    ]
+  },
+  {
+    "word": "stroke",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 笔画；击球。作名词时注意单复数和冠词。",
+    "collocations": "a brush stroke; a stroke of luck; a swimming stroke",
+    "commonMistake": "表示笔画或一次笔触时是可数名词，常用 a brush stroke；注意 stroke 也可指击球等动作。",
+    "example": {
+      "english": "Each brush stroke made the picture more beautiful.",
+      "chinese": "每一笔都让这幅画更美。"
+    },
+    "application": {
+      "prompt": "Each brush ___ left a dark line of ink on the paper. A. stroke  B. eraser",
+      "solution": "A。解析：毛笔留下的一笔可称 a brush stroke（笔触/一笔）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stroke",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stroke"
+      }
+    ]
+  },
+  {
+    "word": "ink",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 墨水。通常作不可数名词。",
+    "collocations": "black ink; a bottle of ink; write in ink",
+    "commonMistake": "ink 表示墨水时通常不可数；表达数量可说 a bottle of ink，不说 two inks。",
+    "example": {
+      "english": "He signed the card with blue ink.",
+      "chinese": "他用蓝墨水在卡片上签了名。"
+    },
+    "application": {
+      "prompt": "The pen was empty, so we filled it with blue ___. A. paper  B. ink",
+      "solution": "B。解析：钢笔中用来书写的蓝色液体是 ink（墨水），通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ink",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ink"
+      }
+    ]
+  },
+  {
+    "word": "return",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n./v. 作动词可 return to a place 或 return sth to sb/place；return home 前不加 to。",
+    "collocations": "return a book; return home; return to school",
+    "commonMistake": "return sth to sb/place 表示归还；return home 前不加 to，也避免重复说 return back。",
+    "example": {
+      "english": "Please return the library book by Friday.",
+      "chinese": "请在星期五前归还这本图书馆的书。"
+    },
+    "application": {
+      "prompt": "The library book is due tomorrow. Please ___ it to the library today. A. return  B. borrow",
+      "solution": "A。解析：把借来的书送回图书馆是 return the book（归还书）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: return",
+        "url": "https://dictionary.cambridge.org/dictionary/english/return"
+      }
+    ]
+  },
+  {
+    "word": "in return",
+    "examTags": [
+      "词汇·介词短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "介词短语，常作状语表示“作为回报”；后接回报对象时用 in return for + 名词/代词。",
+    "collocations": "give sth in return; in return for help; expect nothing in return",
+    "commonMistake": "表示回报常说 in return for + 名词/代词；不要把 for 换成 to。",
+    "example": {
+      "english": "He helped me with homework, and I thanked him in return.",
+      "chinese": "他帮我做作业，我向他表示感谢作为回报。"
+    },
+    "application": {
+      "prompt": "Leo helped me carry the books, and I brought him a snack ___ to thank him. A. by mistake  B. in return",
+      "solution": "B。解析：带零食是对他帮忙的回报；in return 表示“作为回报”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in return",
+        "url": "https://dictionary.cambridge.org/dictionary/english/in-return"
+      }
+    ]
+  },
+  {
+    "word": "deal",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 交易；协议；v. 处理；对付。作动词时 deal—dealt—dealt；deal with 后接要处理的事。",
+    "collocations": "deal with a problem; a great deal of; make a deal",
+    "commonMistake": "deal 作动词的过去式、过去分词是 dealt；表示“处理”时常用 deal with。",
+    "example": {
+      "english": "Our teacher dealt with the problem calmly.",
+      "chinese": "老师平静地处理了这个问题。"
+    },
+    "application": {
+      "prompt": "We need to ___ with the problem before the concert starts. A. deal  B. decorate",
+      "solution": "A。解析：deal with a problem 表示“处理问题”；此处 deal 必须与 with 搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: deal",
+        "url": "https://dictionary.cambridge.org/dictionary/english/deal"
+      }
+    ]
+  },
+  {
+    "word": "manage",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "v. manage to do sth 表示“设法做成”；manage + 名词可表示“管理/安排”。",
+    "collocations": "manage to do sth; manage a team; manage one’s time",
+    "commonMistake": "表示“设法做成”用 manage to do sth；不要写 manage doing 来表达同一意思。",
+    "example": {
+      "english": "We managed to finish the project before dinner.",
+      "chinese": "我们设法在晚饭前完成了这个项目。"
+    },
+    "application": {
+      "prompt": "Although the walk was tiring, they managed ___ the summit before sunset. A. reach  B. to reach",
+      "solution": "B。解析：manage to do sth 表示“设法做成某事”；故用 to reach。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: manage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/manage"
+      }
+    ]
+  },
+  {
+    "word": "ice-skate",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "v. 滑冰；过去式和过去分词为 ice-skated；活动表达常用 go ice skating。",
+    "collocations": "learn to ice-skate; go ice-skating; ice-skate at a rink",
+    "commonMistake": "ice-skate 是动词，过去式 ice-skated；说参加滑冰活动常用 go ice skating。",
+    "example": {
+      "english": "Tom learned to ice-skate when he was ten.",
+      "chinese": "汤姆十岁时学会了滑冰。"
+    },
+    "application": {
+      "prompt": "At the rink, Tom learned to ___ across the ice without holding the rail. A. ice-skate  B. surf",
+      "solution": "A。解析：在冰场上沿冰面滑行是 ice-skate（滑冰）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ice-skate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ice-skate"
+      }
+    ]
+  },
+  {
+    "word": "get into",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "短语动词，get into + 名词；表示养成习惯时用 get into the habit of + 名词/动名词。",
+    "collocations": "get into a car; get into the habit of; get into trouble",
+    "commonMistake": "get into the habit of 后接名词或动名词；get into a car 表示“进入汽车”，要结合宾语辨义。",
+    "example": {
+      "english": "She got into the habit of reading before bed.",
+      "chinese": "她养成了睡前阅读的习惯。"
+    },
+    "application": {
+      "prompt": "After she began reading every night, she soon ___ the habit of reading before bed. A. gave up  B. got into",
+      "solution": "B。解析：她养成了睡前阅读的习惯；get into the habit of 表示“养成……习惯”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: get into",
+        "url": "https://dictionary.cambridge.org/dictionary/english/get-into"
+      }
+    ]
+  },
+  {
+    "word": "give it a go",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "phr. 试一试。结构为 give it/sth a go，宾语放在 give 与 a go 之间。",
+    "collocations": "give it a go; give sth a go; be willing to give it a go",
+    "commonMistake": "固定结构为 give it/sth a go；不要漏掉宾语 it 或随意改变词序。",
+    "example": {
+      "english": "I have never tried calligraphy, but I will give it a go.",
+      "chinese": "我从未尝试过书法，不过我会试一试。"
+    },
+    "application": {
+      "prompt": "I have never tried calligraphy, but I will ___ this weekend. A. give it a go  B. give it away",
+      "solution": "A。解析：准备尝试新活动可说 give it a go（试一试）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: give it a go",
+        "url": "https://dictionary.cambridge.org/dictionary/english/give-a-go"
+      }
+    ]
+  },
+  {
+    "word": "kung fu",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 功夫。通常作不可数名词。",
+    "collocations": "learn kung fu; practise kung fu; a kung fu teacher",
+    "commonMistake": "kung fu 通常作不可数名词，常说 learn/practise kung fu；一堂课可数的是 a kung fu class。",
+    "example": {
+      "english": "He has practised kung fu for three years.",
+      "chinese": "他练习功夫已经三年了。"
+    },
+    "application": {
+      "prompt": "He trains in a Chinese martial art with set moves and forms; he practises ___. A. yoga  B. kung fu",
+      "solution": "B。解析：带有套路招式的中国武术是 kung fu（功夫）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: kung fu",
+        "url": "https://dictionary.cambridge.org/dictionary/english/kung-fu"
+      }
+    ]
+  },
+  {
+    "word": "push",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n./v. 作动词可 push sth open 或 push sb to do sth；作名词可用 give sth a push。",
+    "collocations": "push a door open; push sb to do sth; push hard",
+    "commonMistake": "push 和 pull 方向相反；常用 push sb to do sth 表示督促/施压某人做某事。",
+    "example": {
+      "english": "Her parents encouraged her but did not push her to win.",
+      "chinese": "她的父母鼓励她，但没有逼她非要获胜。"
+    },
+    "application": {
+      "prompt": "Her parents wanted her to enjoy the game, so they did not ___ her to win every contest. A. push  B. pull",
+      "solution": "A。解析：push someone to do sth 表示“督促/施压某人做某事”，这里是不逼她获胜。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: push",
+        "url": "https://dictionary.cambridge.org/dictionary/english/push"
+      }
+    ]
+  },
+  {
+    "word": "once in a while",
+    "examTags": [
+      "词汇·时间短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "时间副词短语，修饰动作发生的频率，表示“偶尔”；常置于句尾或句首。",
+    "collocations": "visit once in a while; go out once in a while; every once in a while",
+    "commonMistake": "固定时间短语 once in a while 表示“偶尔”；按原词序整体记忆，不要漏掉 a。",
+    "example": {
+      "english": "We eat at that restaurant once in a while.",
+      "chinese": "我们偶尔会去那家餐馆吃饭。"
+    },
+    "application": {
+      "prompt": "We do not eat at that restaurant often; we go there ___. A. all the time  B. once in a while",
+      "solution": "B。解析：不常去、偶尔才去对应 once in a while（偶尔）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: once in a while",
+        "url": "https://dictionary.cambridge.org/dictionary/english/every-once-in-a-while"
+      }
+    ]
+  },
+  {
+    "word": "chat",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n./v. 作动词常用 chat with sb/about sth，过去式 chatted；作名词常用 have a chat。",
+    "collocations": "chat with a friend; chat about school; have a chat",
+    "commonMistake": "chat 可作名词或动词；常说 chat with sb/about sth，过去式和过去分词为 chatted。",
+    "example": {
+      "english": "I chatted with my cousin about our holiday plans.",
+      "chinese": "我和表姐聊了我们的假期计划。"
+    },
+    "application": {
+      "prompt": "After the show, the friends laughed together and had a ___ about their favorite scenes. A. chat  B. appointment",
+      "solution": "A。解析：朋友开心地谈论喜欢的场景，是 have a chat（闲聊）；appointment 指预约/约会，不合语境。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chat"
+      }
+    ]
+  },
+  {
+    "word": "outing",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 出外游玩；远足。作名词时注意单复数和冠词。",
+    "collocations": "a school outing; go on an outing; a day outing",
+    "commonMistake": "outing 是可数名词；常说 go on an outing，outing 前用 an，不说 go outing。",
+    "example": {
+      "english": "Our class enjoyed a picnic during the school outing.",
+      "chinese": "班级出游时，我们开心地野餐了。"
+    },
+    "application": {
+      "prompt": "The class spent the day at the science museum instead of having lessons; the teacher called it a school ___. A. exam  B. outing",
+      "solution": "B。解析：班级外出参观一天是 a school outing（学校出游）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: outing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/outing"
+      }
+    ]
+  },
+  {
+    "word": "go on an outing",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "动词短语结构为 go on an outing (to + 地点)；outing 是可数名词，前用 an。",
+    "collocations": "go on a school outing; go on an outing to the park; a family outing",
+    "commonMistake": "go on an outing 表示“出游”；说去某地出游可用 go on an outing to + 地点，不要漏掉 an。",
+    "example": {
+      "english": "Our class will go on an outing to the museum next Friday.",
+      "chinese": "我们班下周五要去博物馆游玩。"
+    },
+    "application": {
+      "prompt": "The forecast promised clear skies, so the family decided to ___ to the lake for a picnic. A. go on an outing  B. stay indoors",
+      "solution": "A。解析：一家人计划去湖边野餐，符合 go on an outing（出游）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: go on an outing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/outing"
+      }
+    ]
+  },
+  {
+    "word": "reduce",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "v. 及物动词，reduce sth by + 数量表示减少幅度，reduce sth to + 数值表示减少后的结果。",
+    "collocations": "reduce stress; reduce the risk; reduce the number of sth",
+    "commonMistake": "reduce sth by + 数量表示“减少了多少”，reduce sth to + 数值表示“减少到多少”，注意 by/to 区别。",
+    "example": {
+      "english": "Taking short breaks can reduce stress.",
+      "chinese": "短暂休息可以减轻压力。"
+    },
+    "application": {
+      "prompt": "Turning off unused lights can ___ the amount of electricity a home uses. A. increase  B. reduce",
+      "solution": "B。解析：关掉不用的灯会减少用电量；reduce 表示“减少”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reduce",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reduce"
+      }
+    ]
+  },
+  {
+    "word": "stress",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 精神压力；紧张。通常作不可数名词。",
+    "collocations": "feel stress; reduce stress; under stress",
+    "commonMistake": "stress 表示精神压力时通常不可数；人感到有压力用 stressed，令人有压力的事用 stressful。",
+    "example": {
+      "english": "Walking after school helps me deal with stress.",
+      "chinese": "放学后散步有助于我应对压力。"
+    },
+    "application": {
+      "prompt": "The exam was tomorrow and she could not stop worrying. She was under a lot of ___. A. stress  B. relief",
+      "solution": "A。解析：因考试而担忧、感到压力大，对应 stress（精神压力）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stress",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stress"
+      }
+    ]
+  },
+  {
+    "word": "yoga",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 瑜伽。通常作不可数名词。",
+    "collocations": "do yoga; a yoga class; practise yoga",
+    "commonMistake": "yoga 通常作不可数名词，常说 do/practise yoga；可数的是 a yoga class，不是 a yoga。",
+    "example": {
+      "english": "My aunt does yoga every morning.",
+      "chinese": "我姑姑每天早上练瑜伽。"
+    },
+    "application": {
+      "prompt": "The class practiced poses and breathing exercises on mats in a ___ class. A. boxing  B. yoga",
+      "solution": "B。解析：在垫子上练体式和呼吸练习对应 yoga（瑜伽）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yoga",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yoga"
+      }
+    ]
+  },
+  {
+    "word": "object",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 物品；在句法中也指宾语。宾语通常回答动作作用到谁/什么，常位于及物动词后。",
+    "collocations": "a small object; an object in a sentence; object to sth",
+    "commonMistake": "object 可指具体物品，也可指句子中的宾语；做语法题时要找动作作用到的人或物。",
+    "example": {
+      "english": "In “Sam kicked the ball,” the ball is the object.",
+      "chinese": "在“Sam kicked the ball”这句话中，ball 是宾语。"
+    },
+    "application": {
+      "prompt": "In “Mia opened the window,” the ___ of the verb is “the window.” A. object  B. subject",
+      "solution": "A。解析：“the window”承受 opened 这一动作，是句子的 object（宾语）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: object",
+        "url": "https://dictionary.cambridge.org/dictionary/english/object"
+      }
+    ]
+  },
+  {
+    "word": "Italian",
+    "examTags": [
+      "词汇·形容词与名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adj./n. 表示“意大利的、意大利人或意大利语”；国籍形容词和语言名均大写，Italian food 中作形容词。",
+    "collocations": "Italian food; Italian music; an Italian city",
+    "commonMistake": "Italian 作国籍形容词、语言名或国籍名词时首字母大写；an Italian 可指一位意大利人。",
+    "example": {
+      "english": "We tried Italian food at a small restaurant.",
+      "chinese": "我们在一家小餐馆尝了意大利菜。"
+    },
+    "application": {
+      "prompt": "Pizza and pasta are dishes from Italy, so they are ___ dishes. A. Japanese  B. Italian",
+      "solution": "B。解析：来自意大利的菜肴是 Italian dishes；Italian 在这里作“意大利的”形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Italian",
+        "url": "https://dictionary.cambridge.org/dictionary/english/italian"
+      }
+    ]
+  },
+  {
+    "word": "programmer",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 程序设计员。作名词时注意单复数和冠词。",
+    "collocations": "a computer programmer; work as a programmer; a skilled programmer",
+    "commonMistake": "programmer 是“程序员”，program 是“程序”或动词“编写程序”；不要把人和软件混为一词。",
+    "example": {
+      "english": "The programmer wrote an app for the school library.",
+      "chinese": "这名程序员为学校图书馆编写了一个应用程序。"
+    },
+    "application": {
+      "prompt": "A computer ___ writes and tests code for apps. A. programmer  B. painter",
+      "solution": "A。解析：编写和测试应用程序代码的人是 programmer（程序员）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: programmer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/programmer"
+      }
+    ]
+  },
+  {
+    "word": "allow",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与语境"
+    ],
+    "grammar": "v. 允许；使……成为可能。常用 allow sb to do sth；被动结构为 be allowed to do sth。",
+    "collocations": "allow sb to do sth; allow time for; allow access",
+    "commonMistake": "allow 后可接宾语再接 to do；不要说 allow sb do，也不要漏掉被动结构中的 to。",
+    "example": {
+      "english": "Our school allows students to use the library after class.",
+      "chinese": "我们学校允许学生课后使用图书馆。"
+    },
+    "application": {
+      "prompt": "The teacher gave us permission to leave early, so she ___ us to go. A. stopped  B. allowed",
+      "solution": "B。解析：gave us permission 表明她允许我们离开；allow sb to do sth，过去式为 allowed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: allow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/allow"
+      }
+    ]
+  },
+  {
+    "word": "achievement",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 成就。作名词时注意单复数和冠词。",
+    "collocations": "a great achievement; academic achievement; achieve a goal",
+    "commonMistake": "achievement 是名词，动词是 achieve；常说 achieve a goal 或 make an achievement，别把 achieve 当名词。",
+    "example": {
+      "english": "Finishing the race was a great achievement for him.",
+      "chinese": "完成这场比赛对他来说是一项了不起的成就。"
+    },
+    "application": {
+      "prompt": "After months of training, finishing the race was a great ___. A. achievement  B. mistake",
+      "solution": "A。解析：完成比赛是一项值得肯定的成就；achievement 表示“成就”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: achievement",
+        "url": "https://dictionary.cambridge.org/dictionary/english/achievement"
+      }
+    ]
+  },
+  {
+    "word": "coin",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 硬币。作名词时注意单复数和冠词。",
+    "collocations": "a gold coin; collect coins; a coin in one’s pocket",
+    "commonMistake": "coin 是可数的单枚硬币；泛指钱财通常用不可数名词 money。",
+    "example": {
+      "english": "She found a coin under the desk.",
+      "chinese": "她在桌子下面发现了一枚硬币。"
+    },
+    "application": {
+      "prompt": "He paid for the snack with a metal ___ from his pocket. A. stamp  B. coin",
+      "solution": "B。解析：从口袋取出的金属钱币是 coin（硬币）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: coin",
+        "url": "https://dictionary.cambridge.org/dictionary/english/coin"
+      }
+    ]
+  },
+  {
+    "word": "stamp",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 邮票。作名词时注意单复数和冠词。",
+    "collocations": "a postage stamp; collect stamps; put a stamp on an envelope",
+    "commonMistake": "stamp 可指邮票，也可指印记或盖章动作；寄信语境常说 put a stamp on an envelope。",
+    "example": {
+      "english": "Please put a stamp on the envelope before mailing it.",
+      "chinese": "寄信前请在信封上贴一张邮票。"
+    },
+    "application": {
+      "prompt": "To mail the postcard, put a ___ on the envelope. A. stamp  B. coin",
+      "solution": "A。解析：寄明信片前贴在信封上的邮资凭证是 stamp（邮票）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stamp",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stamp"
+      }
+    ]
+  },
+  {
+    "word": "teenage",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adj. 青少年的。可作定语或表语。",
+    "collocations": "teenage students; teenage years; a teenage daughter",
+    "commonMistake": "teenage 是形容词，如 teenage students；指青少年这个人时用名词 teenager。",
+    "example": {
+      "english": "The club offers free activities for teenage students.",
+      "chinese": "这个俱乐部为青少年学生提供免费活动。"
+    },
+    "application": {
+      "prompt": "Their ___ son is fifteen and starting high school. A. elderly  B. teenage",
+      "solution": "B。解析：十五岁的儿子属于青少年；teenage 修饰 son，表示“青少年的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: teenage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/teenage"
+      }
+    ]
+  },
+  {
+    "word": "postcard",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 明信片。作名词时注意单复数和冠词。",
+    "collocations": "send a postcard; a picture postcard; write on a postcard",
+    "commonMistake": "postcard 是一个合成词；常说 send a postcard to someone 或 write on a postcard。",
+    "example": {
+      "english": "We sent our grandparents a postcard from the seaside.",
+      "chinese": "我们从海边给祖父母寄了一张明信片。"
+    },
+    "application": {
+      "prompt": "We wrote a short message on a picture card and mailed it from the seaside. We sent our grandparents a ___. A. postcard  B. passport",
+      "solution": "A。解析：从旅行地寄出的图片卡片是 postcard（明信片）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: postcard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/postcard"
+      }
+    ]
+  },
+  {
+    "word": "rather",
+    "examTags": [
+      "词汇·副词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adv. 可表示“相当、确切地说”；would rather do A than do B 表示“宁愿 A 而不愿 B”。",
+    "collocations": "would rather do sth; rather than; or rather",
+    "commonMistake": "would rather do A than do B 表示“宁愿做 A 而不愿做 B”；rather 后接动词原形，不加 to。",
+    "example": {
+      "english": "I would rather walk than wait for the bus.",
+      "chinese": "我宁愿步行，也不愿等公共汽车。"
+    },
+    "application": {
+      "prompt": "I would ___ walk home than wait in the cold rain. A. so  B. rather",
+      "solution": "B。解析：would rather do A than do B 表示“宁愿做 A 而不愿做 B”；rather 后接动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rather",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rather"
+      }
+    ]
+  },
+  {
+    "word": "old-fashioned",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adj. 过时的；守旧的。可作定语或表语。",
+    "collocations": "old-fashioned clothes; an old-fashioned idea; look old-fashioned",
+    "commonMistake": "old-fashioned 是带连字符的形容词；修饰名词时放在名词前，如 old-fashioned clothes。",
+    "example": {
+      "english": "He wore an old-fashioned coat to the school play.",
+      "chinese": "他在学校演出时穿了一件过时风格的大衣。"
+    },
+    "application": {
+      "prompt": "The museum displayed an ___ radio from the 1940s, not a digital one. A. old-fashioned  B. modern",
+      "solution": "A。解析：来自 20 世纪 40 年代、非数字式的收音机具有 old-fashioned（过时/老式）风格。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: old-fashioned",
+        "url": "https://dictionary.cambridge.org/dictionary/english/old-fashioned"
+      }
+    ]
+  },
+  {
+    "word": "foreign",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adj. 外国的；国外的。可作定语或表语。",
+    "collocations": "a foreign language; foreign visitors; a foreign country",
+    "commonMistake": "foreign 修饰国家、语言等名词；指“外国人”用名词 foreigner，不说 foreigner language。",
+    "example": {
+      "english": "She is learning a foreign language at school.",
+      "chinese": "她正在学校学习一门外语。"
+    },
+    "application": {
+      "prompt": "She is learning a ___ language because it is spoken in another country. A. local  B. foreign",
+      "solution": "B。解析：在另一个国家使用的语言可称 foreign language（外语）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: foreign",
+        "url": "https://dictionary.cambridge.org/dictionary/english/foreign"
+      }
+    ]
+  },
+  {
+    "word": "dream of",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "phr. 梦想；希望。of 是介词，后接名词或动名词。",
+    "collocations": "dream of becoming; dream of doing sth; a dream of success",
+    "commonMistake": "dream of 中 of 是介词，后接名词或动名词，不接动词原形。",
+    "example": {
+      "english": "He dreams of becoming a football coach one day.",
+      "chinese": "他梦想有一天成为一名足球教练。"
+    },
+    "application": {
+      "prompt": "She has always ___ becoming a pilot and reads about planes every night. A. dreamed of  B. dream of",
+      "solution": "A。解析：has always 后用过去分词；dream of doing sth 表示“梦想做某事”，故用 dreamed of becoming。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dream of",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dream-of"
+      }
+    ]
+  },
+  {
+    "word": "suggestion",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 建议；提议。作名词时注意单复数和冠词。",
+    "collocations": "give a suggestion; make a suggestion; a suggestion for improvement",
+    "commonMistake": "suggestion 是名词，suggest 是动词；常说 make a suggestion，也可说 suggest doing，不说 suggest sb to do。",
+    "example": {
+      "english": "My teacher gave me a useful suggestion about my essay.",
+      "chinese": "老师就我的作文给了我一条有用的建议。"
+    },
+    "application": {
+      "prompt": "If you have an idea that could improve our plan, please make a ___. A. decision  B. suggestion",
+      "solution": "B。解析：能帮助改进计划的想法是 suggestion（建议）；常说 make a suggestion。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suggestion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suggestion"
+      }
+    ]
+  },
+  {
+    "word": "failure",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 失败。作名词时注意单复数和冠词。",
+    "collocations": "fear of failure; a complete failure; fail a test",
+    "commonMistake": "failure 是名词，fail 是动词；表示“未能做成”常用 fail to do sth。",
+    "example": {
+      "english": "Making a mistake is not always a failure; it can help us learn.",
+      "chinese": "犯错并不总是失败，它也能帮助我们学习。"
+    },
+    "application": {
+      "prompt": "Their first attempt did not work, but they learned from the ___ and tried again. A. failure  B. success",
+      "solution": "A。解析：没有成功的尝试是 failure（失败）；他们从失败中吸取了经验。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: failure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/failure"
+      }
+    ]
+  },
+  {
+    "word": "inspiration",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 鼓舞人心或启发灵感的人（或事物）；灵感。作名词时注意单复数和冠词。",
+    "collocations": "find inspiration; a source of inspiration; draw inspiration from sth",
+    "commonMistake": "inspiration 是名词，inspire 是动词；人感到受鼓舞用 inspired，令人鼓舞的事物用 inspiring。",
+    "example": {
+      "english": "Her story was an inspiration to the whole team.",
+      "chinese": "她的故事鼓舞了整个团队。"
+    },
+    "application": {
+      "prompt": "Her courage gave the whole team hope; her story became an ___. A. obstacle  B. inspiration",
+      "solution": "B。解析：鼓舞团队、给人希望的故事是 inspiration（鼓舞人心的人或事物）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: inspiration",
+        "url": "https://dictionary.cambridge.org/dictionary/english/inspiration"
+      }
+    ]
+  },
+  {
+    "word": "strict",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adj. 严厉的；严格的。可作定语或表语。",
+    "collocations": "be strict with sb; be strict about rules; strict rules",
+    "commonMistake": "常说 be strict with sb（对某人严格）和 be strict about sth（对某事要求严格），介词随搭配变化。",
+    "example": {
+      "english": "Our coach is strict about arriving on time.",
+      "chinese": "我们的教练严格要求准时到场。"
+    },
+    "application": {
+      "prompt": "Our coach expects everyone to arrive on time and never changes this rule. She is ___ about punctuality. A. strict  B. careless",
+      "solution": "A。解析：严格要求准时对应 be strict about punctuality。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: strict",
+        "url": "https://dictionary.cambridge.org/dictionary/english/strict"
+      }
+    ]
+  },
+  {
+    "word": "surprisingly",
+    "examTags": [
+      "词汇·副词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adv. 出人意料地；惊人地。常修饰动词、形容词或整句。",
+    "collocations": "surprisingly easy; surprisingly well; surprisingly, ...",
+    "commonMistake": "surprisingly 是副词，可修饰形容词或整句；人感到惊讶用 surprised，事物令人惊讶用 surprising。",
+    "example": {
+      "english": "Surprisingly, the shy student spoke first.",
+      "chinese": "令人惊讶的是，那位害羞的学生先开了口。"
+    },
+    "application": {
+      "prompt": "We expected the question to be difficult, but it was ___ easy. A. carefully  B. surprisingly",
+      "solution": "B。解析：出乎意料地简单对应 surprisingly easy；surprisingly 修饰形容词 easy。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: surprisingly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/surprisingly"
+      }
+    ]
+  },
+  {
+    "word": "so far",
+    "examTags": [
+      "词汇·时间短语",
+      "中考·词形与语境"
+    ],
+    "grammar": "phr. 到目前为止。常与现在完成时连用，表示截至现在的情况。",
+    "collocations": "so far so good; the best result so far; so far this year",
+    "commonMistake": "so far 表示“到目前为止”时常与现在完成时连用。",
+    "example": {
+      "english": "So far, our team has won three games.",
+      "chinese": "到目前为止，我们队已经赢了三场比赛。"
+    },
+    "application": {
+      "prompt": "___, the team has won three games this month, and the season is not over. A. so far  B. last year",
+      "solution": "A。解析：截至现在的战绩对应 so far（到目前为止），常与现在完成时连用。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: so far",
+        "url": "https://dictionary.cambridge.org/dictionary/english/so-far"
+      }
+    ]
+  },
+  {
+    "word": "stage",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与语境"
+    ],
+    "grammar": "n. 舞台；阶段。作名词时注意单复数和冠词。",
+    "collocations": "on stage; a stage of life; at an early stage",
+    "commonMistake": "演出时常说 on stage（通常不加 the）；stage 也可指人生或发展过程中的“阶段”，按语境区分。",
+    "example": {
+      "english": "The students performed a short play on stage.",
+      "chinese": "学生们在舞台上表演了一出短剧。"
+    },
+    "application": {
+      "prompt": "The singer waited in the wings, then walked onto the ___ when the music began. A. kitchen  B. stage",
+      "solution": "B。解析：演员候场后走上表演的舞台；stage 表示“舞台”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stage"
+      }
+    ]
+  },
+  {
+    "word": "importantly",
+    "examTags": [
+      "词汇·副词",
+      "中考·词形与语境"
+    ],
+    "grammar": "adv. 作句子副词可引出重要信息，常见 more/most importantly；修饰名词时需用形容词 important。",
+    "collocations": "most importantly; more importantly; importantly, ...",
+    "commonMistake": "importantly 常作句子副词，常见表达是 more/most importantly；important 是形容词，不能直接修饰动词。",
+    "example": {
+      "english": "Most importantly, everyone arrived home safely.",
+      "chinese": "最重要的是，大家都平安到家了。"
+    },
+    "application": {
+      "prompt": "The guide gives one final reminder: ___, stay with your group. A. importantly  B. important",
+      "solution": "A。解析：此处用句子副词 importantly 引出重要提醒，意为“重要的是”；important 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: importantly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/importantly"
+      }
+    ]
+  }
+]

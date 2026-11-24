@@ -1,6 +1,10 @@
 export type AttendanceRecordStatus = 'PRESENT' | 'LEAVE' | 'ABSENT' | 'MAKEUP'
 export type AttendanceDisplayStatus = 'PRESENT' | 'LEAVE'
 
+export function canSubmitTeacherAttendance(rosterReady: boolean, studentCount: number): boolean {
+  return rosterReady && Number.isFinite(studentCount) && studentCount > 0
+}
+
 const VALID_ATTENDANCE_STATUSES = new Set<AttendanceRecordStatus>([
   'PRESENT',
   'LEAVE',
@@ -23,6 +27,27 @@ export function parseAttendanceRecordStatus(value: unknown): AttendanceRecordSta
 export function toAttendanceDisplayStatus(value: unknown): AttendanceDisplayStatus {
   const normalized = normalizeAttendanceRecordStatus(value)
   return normalized === 'LEAVE' || normalized === 'ABSENT' ? 'LEAVE' : 'PRESENT'
+}
+
+/** Mark unblocked students present while preserving visible leave/absence states. */
+export function markAllPresentPreservingLeave(
+  studentIds: string[],
+  currentStatuses: ReadonlyMap<string, AttendanceDisplayStatus>,
+) {
+  const statuses = new Map(currentStatuses)
+  const updatedStudentIds: string[] = []
+  const preservedStudentIds: string[] = []
+
+  for (const studentId of studentIds) {
+    if (currentStatuses.get(studentId) === 'LEAVE') {
+      preservedStudentIds.push(studentId)
+      continue
+    }
+    statuses.set(studentId, 'PRESENT')
+    updatedStudentIds.push(studentId)
+  }
+
+  return { statuses, updatedStudentIds, preservedStudentIds }
 }
 
 /**

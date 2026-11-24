@@ -5,10 +5,12 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { recordCourseChangeEvent } from '@/lib/course-change-events'
-import { hasTimeOverlap } from '@/lib/schedule-conflict'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getRequestDivision } from '@/lib/division'
-import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { dateRangeDays, getLocalDayRange, isValidDateKey, localDateColumnValue } from '@/lib/date/local-day'
+import { findClassLessonCopyConflicts, type CopyScheduleSlot } from '@/lib/class-lesson-copy-conflicts'
+import { isSerializationConflict, runSerializableWithRetry } from '@/lib/serializable-retry'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,14 +30,6 @@ interface PreviewItem {
   endTime: string
 }
 
-interface ConflictInfo {
-  type: 'teacher' | 'room' | 'student'
-  teacherName?: string
-  groupName?: string
-  timeRange: string
-  message: string
-}
-
 export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -48,7 +42,6 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
   const body = await req.json().catch(() => ({}))
   const fridayDate = typeof body.fridayDate === 'string' && body.fridayDate.trim() ? body.fridayDate.trim() : ''
-  const targetDivision = typeof body.division === 'string' && body.division ? body.division : undefined
   const groupIds: string[] = Array.isArray(body.groupIds)
     ? body.groupIds.filter((id: unknown): id is string => typeof id === 'string' && id.length > 0)
     : []
@@ -56,41 +49,33 @@ export const POST = apiHandler(async (req: NextRequest) => {
     ? body.teacherIds.filter((id: unknown): id is string => typeof id === 'string' && id.length > 0)
     : []
   const dryRun = body.dryRun === true
-  const overwrite = body.overwrite === true
 
-  if (!fridayDate || !/^\d{4}-\d{2}-\d{2}$/.test(fridayDate)) {
+  if (!isValidDateKey(fridayDate)) {
     return NextResponse.json({ error: '请提供有效日期 (yyyy-MM-dd)' }, { status: 400 })
   }
 
   // Validate it's Friday
-  const fridayDateObj = new Date(`${fridayDate}T00:00:00`)
-  if (Number.isNaN(fridayDateObj.getTime())) {
-    return NextResponse.json({ error: '日期格式不正确' }, { status: 400 })
-  }
-  if (fridayDateObj.getDay() !== 5) {
+  const fridayDateObj = new Date(`${fridayDate}T00:00:00Z`)
+  if (fridayDateObj.getUTCDay() !== 5) {
     return NextResponse.json({ error: '请选择周五日期，系统会复制该日课程到周六' }, { status: 400 })
   }
 
   // Saturday = Friday + 1
-  const saturdayDateObj = new Date(fridayDateObj)
-  saturdayDateObj.setDate(saturdayDateObj.getDate() + 1)
-  const saturdayDate = saturdayDateObj.toISOString().slice(0, 10)
-
-  const fridayDayStart = new Date(`${fridayDate}T00:00:00`)
-  const fridayDayEnd = new Date(`${fridayDate}T23:59:59.999`)
+  const saturdayDate = dateRangeDays(fridayDate, 2)[1]
+  const { start: fridayDayStart, end: fridayDayEnd } = getLocalDayRange(fridayDate)
+  const { start: saturdayDayStart } = getLocalDayRange(saturdayDate)
 
   // Build where clause for Friday lessons
   const where: Prisma.ClassLessonWhereInput = {
-    lessonDate: { gte: fridayDayStart, lte: fridayDayEnd },
-    status: { not: 'CANCELLED' },
+    lessonDate: { gte: fridayDayStart, lt: fridayDayEnd },
+    deletedAt: null,
+    status: { notIn: ['CANCELLED', 'POSTPONED'] },
+    division,
     group: {
       termId: selectedTerm.id,
       status: { not: 'ARCHIVED' },
       course: { isActive: true },
     },
-  }
-  if (targetDivision) {
-    where.division = targetDivision as 'JUNIOR' | 'SENIOR'
   }
   if (groupIds.length) {
     where.groupId = { in: groupIds }
@@ -108,9 +93,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     include: {
       group: {
         include: {
-          course: { select: { name: true } },
+          course: { select: { name: true, subject: true } },
           room: { select: { id: true, name: true } },
-          enrollments: { where: { status: 'ACTIVE' }, select: { studentId: true, subjects: true } },
+          teacher: { select: { id: true, name: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true, teacher: { select: { id: true, name: true } } } },
+          enrollments: { where: { status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } },
         },
       },
       teacher: { select: { id: true, name: true } },
@@ -134,34 +121,61 @@ export const POST = apiHandler(async (req: NextRequest) => {
     })
   }
 
-  // Build preview
-  const preview: PreviewItem[] = fridayLessons.map((lesson) => ({
-    sourceLessonId: lesson.id,
-    groupId: lesson.groupId,
-    groupName: lesson.group.name,
-    courseName: lesson.group.course.name,
-    teacherId: lesson.teacherId || lesson.group.teacherId || '',
-    teacherName: lesson.teacher?.name || '',
-    roomId: lesson.group.room?.id || null,
-    roomName: lesson.group.room?.name || null,
-    studentCount: lesson.lessonStudents.length || lesson.group.enrollments.filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject)).length,
-    oldDate: fridayDate,
-    newDate: saturdayDate,
-    startTime: lesson.startTime,
-    endTime: lesson.endTime,
-  }))
+  // Resolve each lesson against its saved subject roster. A current/future
+  // lesson without a roster snapshot is not safe to copy from group enrollment.
+  const rosterBySourceId = new Map<string, string[]>()
+  const skipped: { sourceLessonId: string; reason: string }[] = []
+  const preview: PreviewItem[] = fridayLessons.map((lesson) => {
+    const subject = lesson.subject || lesson.group.course.subject
+    const studentIds = resolveSubjectLessonStudentIds(
+      lesson.lessonStudents.map((student) => student.studentId),
+      lesson.group.enrollments,
+      subject,
+      lesson.lessonDate,
+    )
+    rosterBySourceId.set(lesson.id, studentIds)
+    if (studentIds.length === 0) {
+      skipped.push({ sourceLessonId: lesson.id, reason: '该课次没有有效的本学科报名名单快照，请先核对课次名单' })
+    }
+    return {
+      sourceLessonId: lesson.id,
+      groupId: lesson.groupId,
+      groupName: lesson.group.name,
+      courseName: lesson.group.course.name,
+      teacherId: lesson.teacherId || lesson.group.teacherAssignments.find((assignment) => assignment.subject === subject)?.teacherId || lesson.group.teacherId || '',
+      teacherName: lesson.teacher?.name || lesson.group.teacherAssignments.find((assignment) => assignment.subject === subject)?.teacher.name || lesson.group.teacher?.name || '',
+      roomId: lesson.group.room?.id || null,
+      roomName: lesson.group.room?.name || null,
+      studentCount: studentIds.length,
+      oldDate: fridayDate,
+      newDate: saturdayDate,
+      startTime: lesson.startTime,
+      endTime: lesson.endTime,
+    }
+  })
 
   // Check existing Saturday lessons for duplicate detection
-  const saturdayDayStart = new Date(`${saturdayDate}T00:00:00`)
-  const saturdayDayEnd = new Date(`${saturdayDate}T23:59:59.999`)
-
   const saturdayExisting = await prisma.classLesson.findMany({
     where: {
-      lessonDate: { gte: saturdayDayStart, lte: saturdayDayEnd },
-      status: { not: 'CANCELLED' },
-      group: { termId: selectedTerm.id },
+      lessonDate: { gte: saturdayDayStart, lt: getLocalDayRange(saturdayDate).end },
+      deletedAt: null,
+      status: { notIn: ['CANCELLED', 'POSTPONED'] },
+      division,
+      group: { termId: selectedTerm.id, deletedAt: null, status: { not: 'ARCHIVED' } },
     },
-    select: { groupId: true, startTime: true, endTime: true, id: true },
+    include: {
+      teacher: { select: { id: true, name: true } },
+      lessonStudents: { select: { studentId: true } },
+      group: {
+        include: {
+          course: { select: { name: true, subject: true } },
+          room: { select: { id: true, name: true } },
+          teacher: { select: { id: true, name: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true, teacher: { select: { id: true, name: true } } } },
+          enrollments: { where: { status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } },
+        },
+      },
+    },
   })
 
   // Build a set of existing Saturday slots: `${groupId}::${startTime}::${endTime}`
@@ -171,9 +185,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   // Separate: toCreate vs skipped (duplicate)
   const toCreate: typeof preview = []
-  const skipped: { sourceLessonId: string; reason: string }[] = []
-
   for (const item of preview) {
+    if ((rosterBySourceId.get(item.sourceLessonId)?.length || 0) === 0) continue
+    if (!item.teacherId) {
+      skipped.push({ sourceLessonId: item.sourceLessonId, reason: '该课次未配置授课教师，请先完善排课信息' })
+      continue
+    }
     const key = `${item.groupId}::${item.startTime}::${item.endTime}`
     if (saturdaySlots.has(key)) {
       skipped.push({ sourceLessonId: item.sourceLessonId, reason: '周六已存在相同班级同时间课程' })
@@ -183,73 +200,35 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   // Conflict checking
-  const conflicts: ConflictInfo[] = []
-  for (const item of toCreate) {
-    // Teacher conflict — check against existing Saturday lessons AND other to-be-created lessons
-    const allSaturdayLessons = [
-      ...saturdayExisting,
-      ...toCreate
-        .filter((c) => c !== item)
-        .map((c) => ({
-          id: 'new',
-          groupId: c.groupId,
-          teacherId: c.teacherId,
-          startTime: c.startTime,
-          endTime: c.endTime,
-          group: { course: { name: c.courseName }, room: { name: c.roomName } },
-          teacher: { name: c.teacherName },
-        })),
-    ]
-
-    for (const existing of allSaturdayLessons) {
-      const existingTId = 'teacherId' in existing && existing.teacherId
-      const existingStart = existing.startTime
-      const existingEnd = existing.endTime
-      if (existingTId === item.teacherId && hasTimeOverlap(item.startTime, item.endTime, existingStart, existingEnd)) {
-        const dup = conflicts.some(
-          (c) => c.type === 'teacher' && c.teacherName === item.teacherName && c.timeRange === `${existingStart}-${existingEnd}`
-        )
-        if (!dup) {
-          conflicts.push({
-            type: 'teacher',
-            teacherName: item.teacherName,
-            groupName: item.groupName,
-            timeRange: `${existingStart}-${existingEnd}`,
-            message: `教师 ${item.teacherName} 周六 ${existingStart}-${existingEnd} 已有课程`,
-          })
-        }
-      }
-    }
-
-    // Room conflict
-    if (item.roomId) {
-      const roomConflicts = await prisma.classLesson.findMany({
-        where: {
-          lessonDate: { gte: saturdayDayStart, lte: saturdayDayEnd },
-          status: { not: 'CANCELLED' },
-          group: { roomId: item.roomId, termId: selectedTerm.id },
-        },
-        include: { group: { include: { room: { select: { name: true } } } }, teacher: { select: { name: true } } },
-      })
-
-      for (const existing of roomConflicts) {
-        if (existing.startTime === item.startTime && existing.endTime === item.endTime) continue // Same slot pattern, different group
-        if (hasTimeOverlap(item.startTime, item.endTime, existing.startTime, existing.endTime)) {
-          const dup = conflicts.some(
-            (c) => c.type === 'room' && c.groupName === (existing.group?.room?.name || '') && c.timeRange === `${existing.startTime}-${existing.endTime}`
-          )
-          if (!dup) {
-            conflicts.push({
-              type: 'room',
-              groupName: item.groupName,
-              timeRange: `${existing.startTime}-${existing.endTime}`,
-              message: `教室 ${item.roomName} 周六 ${existing.startTime}-${existing.endTime} 已被占用`,
-            })
-          }
-        }
-      }
-    }
+  const sourceById = new Map(fridayLessons.map((lesson) => [lesson.id, lesson]))
+  const makeTargetSlot = (item: PreviewItem): CopyScheduleSlot => {
+    const studentIds = rosterBySourceId.get(item.sourceLessonId) || []
+    return { ...item, id: `copy:${item.sourceLessonId}`, studentIds }
   }
+  const targetSlots = toCreate.map(makeTargetSlot)
+  const existingSlots: CopyScheduleSlot[] = saturdayExisting.map((lesson) => {
+    const subject = lesson.subject || lesson.group.course.subject
+    const assignment = lesson.group.teacherAssignments.find((item) => item.subject === subject)
+    const studentIds = resolveSubjectLessonStudentIds(
+      lesson.lessonStudents.map((student) => student.studentId),
+      lesson.group.enrollments,
+      subject,
+      lesson.lessonDate,
+    )
+    return {
+      id: lesson.id,
+      groupId: lesson.groupId,
+      groupName: lesson.group.name,
+      teacherId: lesson.teacherId || assignment?.teacherId || lesson.group.teacherId,
+      teacherName: lesson.teacher?.name || assignment?.teacher.name || lesson.group.teacher?.name || '',
+      roomId: lesson.group.room?.id || null,
+      roomName: lesson.group.room?.name || null,
+      studentIds,
+      startTime: lesson.startTime,
+      endTime: lesson.endTime,
+    }
+  })
+  const conflicts = findClassLessonCopyConflicts(targetSlots, existingSlots)
 
   if (dryRun) {
     return NextResponse.json({
@@ -267,81 +246,218 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   // Real execution (dryRun = false)
-  if (conflicts.length && !overwrite) {
+  if (conflicts.length) {
     return NextResponse.json({ ok: false, error: '周六复制后存在冲突', conflicts }, { status: 409 })
   }
 
-  const saturdayDayStartForCreate = new Date(`${saturdayDate}T00:00:00`)
-  const changeEvents = await prisma.$transaction(async (tx) => {
-    const ids: string[] = []
-    const affectedByGroup = new Map<string, { lessonIds: string[]; studentIds: Set<string> }>()
-
-    for (const item of toCreate) {
-      const newLesson = await tx.classLesson.create({
-        data: {
-          groupId: item.groupId,
-          teacherId: item.teacherId,
-          subject: fridayLessons.find((l) => l.id === item.sourceLessonId)?.subject || null,
-          lessonDate: saturdayDayStartForCreate,
-          startTime: item.startTime,
-          endTime: item.endTime,
-          status: 'SCHEDULED',
-          note: `周六补开：复制自 ${fridayDate}`,
-          isManual: true,
-          division: targetDivision as 'JUNIOR' | 'SENIOR',
+  const saturdayDayStartForCreate = localDateColumnValue(saturdayDate)
+  let changeEvents: {
+    ids: string[]
+    events: Awaited<ReturnType<typeof recordCourseChangeEvent>>[]
+    skippedCount: number
+  }
+  try {
+    changeEvents = await runSerializableWithRetry(() => prisma.$transaction(async (tx) => {
+      // The preview check above is intentionally repeated inside the write
+      // transaction. Two admins can submit the same dry-run result at once.
+      const transactionSources = await tx.classLesson.findMany({
+        where: {
+          id: { in: toCreate.map((item) => item.sourceLessonId) },
+          lessonDate: { gte: fridayDayStart, lt: fridayDayEnd },
+          deletedAt: null,
+          status: { notIn: ['CANCELLED', 'POSTPONED'] },
+          division,
+          group: {
+            termId: selectedTerm.id,
+            deletedAt: null,
+            status: { not: 'ARCHIVED' },
+            course: { isActive: true },
+          },
+        },
+        include: {
+          lessonStudents: { select: { studentId: true } },
+          group: {
+            include: {
+              course: { select: { subject: true } },
+              room: { select: { id: true } },
+              teacherAssignments: { select: { teacherId: true, subject: true } },
+              enrollments: { where: { status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } },
+            },
+          },
         },
       })
-      ids.push(newLesson.id)
+      const transactionSourcesById = new Map(transactionSources.map((lesson) => [lesson.id, lesson]))
+      const sourceChangedAfterPreview = toCreate.some((item) => {
+        const original = sourceById.get(item.sourceLessonId)
+        const current = transactionSourcesById.get(item.sourceLessonId)
+        if (!original || !current) return true
 
-      const source = fridayLessons.find((lesson) => lesson.id === item.sourceLessonId)
-      const rosterStudentIds = source?.lessonStudents.length
-        ? source.lessonStudents.map((student) => student.studentId)
-        : source?.group.enrollments
-          .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, source.subject))
-          .map((enrollment) => enrollment.studentId) || []
-      if (rosterStudentIds.length) {
-        await tx.classLessonStudent.createMany({
-          data: rosterStudentIds.map((studentId) => ({ lessonId: newLesson.id, studentId })),
-          skipDuplicates: true,
+        const currentSubject = current.subject || current.group.course.subject
+        const currentTeacherId = current.teacherId
+          || current.group.teacherAssignments.find((assignment) => assignment.subject === currentSubject)?.teacherId
+          || current.group.teacherId
+          || ''
+        const currentRoster = resolveSubjectLessonStudentIds(
+          current.lessonStudents.map((student) => student.studentId),
+          current.group.enrollments,
+          currentSubject,
+          current.lessonDate,
+        ).sort()
+        const plannedRoster = [...(rosterBySourceId.get(item.sourceLessonId) || [])].sort()
+        const originalSubject = original.subject || original.group.course.subject
+
+        return currentSubject !== originalSubject
+          || currentTeacherId !== item.teacherId
+          || (current.group.room?.id || null) !== item.roomId
+          || current.startTime !== item.startTime
+          || current.endTime !== item.endTime
+          || currentRoster.length !== plannedRoster.length
+          || currentRoster.some((studentId, index) => studentId !== plannedRoster[index])
+      })
+      if (sourceChangedAfterPreview) {
+        throw Object.assign(new Error('周五课程名单或安排已变化，请重新预览后重试'), { status: 409 })
+      }
+
+      const transactionExisting = await tx.classLesson.findMany({
+        where: {
+          lessonDate: { gte: saturdayDayStart, lt: getLocalDayRange(saturdayDate).end },
+          deletedAt: null,
+          status: { notIn: ['CANCELLED', 'POSTPONED'] },
+          division,
+          group: { termId: selectedTerm.id, deletedAt: null, status: { not: 'ARCHIVED' } },
+        },
+        include: {
+          teacher: { select: { id: true, name: true } },
+          lessonStudents: { select: { studentId: true } },
+          group: {
+            include: {
+              course: { select: { name: true, subject: true } },
+              room: { select: { id: true, name: true } },
+              teacher: { select: { id: true, name: true } },
+              teacherAssignments: { select: { teacherId: true, subject: true, teacher: { select: { id: true, name: true } } } },
+              enrollments: { where: { status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } },
+            },
+          },
+        },
+      })
+
+      const existingKeys = new Set(transactionExisting.map((lesson) =>
+        `${lesson.groupId}::${lesson.startTime}::${lesson.endTime}`,
+      ))
+      const transactionItems = toCreate.filter((item) =>
+        !existingKeys.has(`${item.groupId}::${item.startTime}::${item.endTime}`),
+      )
+      const transactionSkippedCount = toCreate.length - transactionItems.length
+      const transactionExistingSlots: CopyScheduleSlot[] = transactionExisting.map((lesson) => {
+        const subject = lesson.subject || lesson.group.course.subject
+        const assignment = lesson.group.teacherAssignments.find((item) => item.subject === subject)
+        const studentIds = resolveSubjectLessonStudentIds(
+          lesson.lessonStudents.map((student) => student.studentId),
+          lesson.group.enrollments,
+          subject,
+          lesson.lessonDate,
+        )
+        return {
+          id: lesson.id,
+          groupId: lesson.groupId,
+          groupName: lesson.group.name,
+          teacherId: lesson.teacherId || assignment?.teacherId || lesson.group.teacherId,
+          teacherName: lesson.teacher?.name || assignment?.teacher.name || lesson.group.teacher?.name || '',
+          roomId: lesson.group.room?.id || null,
+          roomName: lesson.group.room?.name || null,
+          studentIds,
+          startTime: lesson.startTime,
+          endTime: lesson.endTime,
+        }
+      })
+      const transactionConflicts = findClassLessonCopyConflicts(
+        transactionItems.map(makeTargetSlot),
+        transactionExistingSlots,
+      )
+      if (transactionConflicts.length) {
+        throw Object.assign(new Error('周六复制后存在冲突'), {
+          status: 409,
+          conflicts: transactionConflicts,
         })
       }
-      const affected = affectedByGroup.get(item.groupId) || { lessonIds: [], studentIds: new Set<string>() }
-      affected.lessonIds.push(newLesson.id)
-      rosterStudentIds.forEach((studentId) => affected.studentIds.add(studentId))
-      affectedByGroup.set(item.groupId, affected)
 
-      await tx.classGroup.update({
-        where: { id: item.groupId },
-        data: { totalLessons: { increment: 1 } },
-      })
-    }
+      const ids: string[] = []
+      const affectedByGroup = new Map<string, { lessonIds: string[]; studentIds: Set<string> }>()
 
-    const events: Awaited<ReturnType<typeof recordCourseChangeEvent>>[] = []
-    for (const [groupId, affected] of affectedByGroup) {
-      const groupName = fridayLessons.find((source) => source.groupId === groupId)?.group.name || '班级'
-      events.push(await recordCourseChangeEvent(tx, {
-        eventType: 'MAKEUP_ADDED',
-        actorUserId: user.id,
-        groupId,
-        lessonIds: affected.lessonIds,
-        studentIds: [...affected.studentIds],
-        title: `${groupName}周六补课已安排`,
-        summary: `${saturdayDate}补开课程，课次已按周五安排复制，请查看家长端最新课表。`,
-      }))
-    }
+      for (const item of transactionItems) {
+        const newLesson = await tx.classLesson.create({
+          data: {
+            groupId: item.groupId,
+            teacherId: item.teacherId,
+            subject: (() => {
+              const source = sourceById.get(item.sourceLessonId)
+              return source?.subject || source?.group.course.subject || null
+            })(),
+            lessonDate: saturdayDayStartForCreate,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            status: 'SCHEDULED',
+            note: `周六补开：复制自 ${fridayDate}`,
+            isManual: true,
+            division,
+          },
+        })
+        ids.push(newLesson.id)
+
+        const rosterStudentIds = rosterBySourceId.get(item.sourceLessonId) || []
+        if (rosterStudentIds.length) {
+          await tx.classLessonStudent.createMany({
+            data: rosterStudentIds.map((studentId) => ({ lessonId: newLesson.id, studentId })),
+            skipDuplicates: true,
+          })
+        }
+        const affected = affectedByGroup.get(item.groupId) || { lessonIds: [], studentIds: new Set<string>() }
+        affected.lessonIds.push(newLesson.id)
+        rosterStudentIds.forEach((studentId) => affected.studentIds.add(studentId))
+        affectedByGroup.set(item.groupId, affected)
+
+        await tx.classGroup.update({
+          where: { id: item.groupId },
+          data: { totalLessons: { increment: 1 } },
+        })
+      }
+
+      const events: Awaited<ReturnType<typeof recordCourseChangeEvent>>[] = []
+      for (const [groupId, affected] of affectedByGroup) {
+        const groupName = fridayLessons.find((source) => source.groupId === groupId)?.group.name || '班级'
+        events.push(await recordCourseChangeEvent(tx, {
+          eventType: 'MAKEUP_ADDED',
+          actorUserId: user.id,
+          groupId,
+          lessonIds: affected.lessonIds,
+          studentIds: [...affected.studentIds],
+          title: `${groupName}周六补课已安排`,
+          summary: `${saturdayDate}补开课程，课次已按周五安排复制，请查看家长端最新课表。`,
+        }))
+      }
 
     if (ids.length > 0) {
       await tx.activityLog.create({
         data: {
           userId: user.id,
           action: '周六补开',
-          detail: `复制 ${fridayDate} 课程到 ${saturdayDate}，创建 ${ids.length} 节，跳过 ${skipped.length} 节`,
+          detail: `复制 ${fridayDate} 课程到 ${saturdayDate}，创建 ${ids.length} 节，跳过 ${skipped.length + transactionSkippedCount} 节`,
         },
       })
     }
 
-    return { ids, events }
-  })
+      return { ids, events, skippedCount: skipped.length + transactionSkippedCount }
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }))
+  } catch (error) {
+    const routeError = error as { status?: number; message?: string; conflicts?: unknown }
+    if (routeError.status === 409) {
+      return NextResponse.json({ ok: false, error: routeError.message || '周六复制后存在冲突', conflicts: routeError.conflicts }, { status: 409 })
+    }
+    if (isSerializationConflict(error)) {
+      return NextResponse.json({ ok: false, error: '课程安排正在被其他操作更新，请刷新后重试' }, { status: 409 })
+    }
+    throw error
+  }
   const createdCount = changeEvents.ids.length
   const notifiedParents = changeEvents.events.reduce((total, item) => total + item.recipientCount, 0)
 
@@ -356,7 +472,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     createdCount,
     notifiedParents,
     changeEventIds: changeEvents.events.map((item) => item.event.id),
-    skippedCount: skipped.length,
+    skippedCount: changeEvents.skippedCount,
     createdLessonIds: changeEvents.ids,
   })
 })

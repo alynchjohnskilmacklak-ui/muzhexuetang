@@ -1,5 +1,7 @@
 'use client'
 
+import '@ant-design/v5-patch-for-react-19'
+
 import { useEffect, useState } from 'react'
 import { NextAuthProvider } from './NextAuthProvider'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
@@ -8,6 +10,7 @@ import zhCN from 'antd/locale/zh_CN'
 import { SWRConfig } from 'swr'
 import { Toaster } from 'sonner'
 import { ANTD_THEME } from '@/constants/theme'
+import { InteractionMotionLayer } from '@/components/Common/InteractionMotionLayer'
 
 const swrConfig = {
   revalidateOnFocus: false,
@@ -55,14 +58,29 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         <NextAuthProvider>
           <AntdApp>
+            <InteractionMotionLayer />
             {children}
           </AntdApp>
         </NextAuthProvider>
         <Toaster
           position={toastPos}
+          visibleToasts={3}
+          expand={false}
           richColors
           closeButton
-          toastOptions={{ duration: 2200 }}
+          gap={12}
+          toastOptions={{
+            duration: 3500,
+            className: 'mz-sonner-toast',
+            classNames: {
+              toast: 'mz-toast',
+              title: 'mz-toast-title',
+              description: 'mz-toast-desc',
+              actionButton: 'mz-toast-action',
+              cancelButton: 'mz-toast-cancel',
+              closeButton: 'mz-toast-close',
+            },
+          }}
           style={{ zIndex: 10000 }}
         />
       </ConfigProvider>

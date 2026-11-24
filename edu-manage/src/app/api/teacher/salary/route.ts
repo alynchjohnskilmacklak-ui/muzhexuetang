@@ -3,6 +3,7 @@ import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { classifySalaryBucket } from '@/lib/salary-bucket'
 import { salaryPeriodStart, pendingSalaryTransactions } from '@/lib/salary-settlement'
+import { getTeacherSalaryConfig } from '@/lib/teacher-salary'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,11 +12,14 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const { teacher, prisma } = await requireCurrentTeacher()
     const period = req.nextUrl.searchParams.get('period') || 'month'
     const since = salaryPeriodStart(period)
-    const activeTerm = await prisma.academicTerm.findFirst({
-      where: { division: teacher.division, status: 'ACTIVE' },
-      orderBy: { startDate: 'desc' },
-      select: { id: true, name: true },
-    })
+    const [activeTerm, salaryConfig] = await Promise.all([
+      prisma.academicTerm.findFirst({
+        where: { division: teacher.division, status: 'ACTIVE' },
+        orderBy: { startDate: 'desc' },
+        select: { id: true, name: true },
+      }),
+      getTeacherSalaryConfig(teacher.id, prisma),
+    ])
 
     const transactions = await prisma.teacherSalaryTransaction.findMany({
       where: {
@@ -25,6 +29,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
         deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
+      // Read only fields consumed by this response. New idempotency/audit
+      // columns may not be present yet on every division database.
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        lessonId: true,
+        feedbackId: true,
+        description: true,
+        lessonDate: true,
+        settledAt: true,
+        settlementBatchId: true,
+        createdAt: true,
+      },
     })
 
     const lessonIds = [...new Set(transactions.map((item) => item.lessonId).filter((id): id is string => Boolean(id)))]
@@ -97,6 +115,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({
       period,
       term: activeTerm,
+      salaryConfig,
       total: Number(total.toFixed(2)),
       pendingCount: earnTransactions.length,
       totalSmallClass: Number(totalSmallClass.toFixed(2)),

@@ -80,18 +80,29 @@ export function buildParentEngagementOption(engagement: { readRate: number; reac
   }
 }
 
-export function buildFinanceOption(finance: { month: string; income: number; expense: number; profit: number }[]) {
+export function buildFinanceOption(finance: { month: string; income: number; expense: number | null; profit: number | null }[]) {
+  const costsAreRecorded = finance.length > 0 && finance.some((item) => item.expense !== null)
+  const profitIsAvailable = costsAreRecorded && finance.every((item) => item.profit !== null)
+  const series: Array<{
+    name: string
+    type: 'line'
+    data: (number | null)[]
+    smooth: boolean
+    symbol: string
+    lineStyle: { color: string; width: number; type?: string }
+    itemStyle: { color: string }
+  }> = [
+    { name: '收费收入', type: 'line', data: finance.map((f) => f.income), smooth: true, symbol: 'circle', lineStyle: { color: '#1D9E75', width: 2 }, itemStyle: { color: '#1D9E75' } },
+  ]
+  if (costsAreRecorded) series.push({ name: '已登记支出', type: 'line', data: finance.map((f) => f.expense), smooth: true, symbol: 'diamond', lineStyle: { color: '#E8784A', width: 2 }, itemStyle: { color: '#E8784A' } })
+  if (profitIsAvailable) series.push({ name: '利润', type: 'line', data: finance.map((f) => f.profit), smooth: true, symbol: 'triangle', lineStyle: { color: '#f5a623', width: 2, type: 'dashed' }, itemStyle: { color: '#f5a623' } })
   return {
     tooltip: { trigger: 'axis' },
-    legend: { data: ['收入', '支出', '利润'], bottom: 0, textStyle: { color: '#5a4e3a' } },
+    legend: { data: series.map((item) => item.name), bottom: 0, textStyle: { color: '#5a4e3a' } },
     grid: { top: 20, right: 40, bottom: 40, left: 60 },
     xAxis: { type: 'category', data: finance.map((f) => f.month), axisLabel: { color: '#5a4e3a' } },
     yAxis: { type: 'value', name: '金额(元)', nameTextStyle: { color: '#5a4e3a' }, axisLabel: { color: '#5a4e3a' } },
-    series: [
-      { name: '收入', type: 'line', data: finance.map((f) => f.income), smooth: true, symbol: 'circle', lineStyle: { color: '#1D9E75', width: 2 }, itemStyle: { color: '#1D9E75' } },
-      { name: '支出', type: 'line', data: finance.map((f) => f.expense), smooth: true, symbol: 'diamond', lineStyle: { color: '#E8784A', width: 2 }, itemStyle: { color: '#E8784A' } },
-      { name: '利润', type: 'line', data: finance.map((f) => f.profit), smooth: true, symbol: 'triangle', lineStyle: { color: '#f5a623', width: 2, type: 'dashed' }, itemStyle: { color: '#f5a623' } },
-    ],
+    series,
   }
 }
 

@@ -32,12 +32,12 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
       orderBy: { createdAt: 'desc' }, take: 3,
     }),
     prisma.masteryRecord.findMany({
-      where: { studentId, createdAt: { gte: activeTerm.startDate, lte: activeTerm.endDate } },
+      where: { studentId, termId: activeTerm.id, createdAt: { gte: activeTerm.startDate, lte: activeTerm.endDate } },
       select: { id: true, knowledgePoint: true, level: true, note: true, createdAt: true },
       orderBy: { createdAt: 'desc' }, take: 5,
     }).catch(() => []),
     prisma.learningGoal.findMany({
-      where: { studentId, isAchieved: false, createdAt: { gte: activeTerm.startDate, lte: activeTerm.endDate } },
+      where: { studentId, deletedAt: null, isAchieved: false, createdAt: { gte: activeTerm.startDate, lte: activeTerm.endDate } },
       select: { id: true, subject: true, goalDesc: true, deadline: true },
       orderBy: { createdAt: 'desc' }, take: 5,
     }),

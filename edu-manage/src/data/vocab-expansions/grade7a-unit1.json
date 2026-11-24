@@ -1,0 +1,1866 @@
+[
+  {
+    "word": "full",
+    "examTags": [
+      "词汇·形容词语境义",
+      "阅读·根据描述判断状态"
+    ],
+    "grammar": "adj. 满的；完整的。可作表语 be full，也可作定语修饰名词；full of 表示“装满……”。",
+    "collocations": "a full glass; be full of books; a full name。",
+    "commonMistake": "full of 后接名词；描述东西已经满了可说 be full，不要误用 fullly。",
+    "example": {
+      "english": "The box is full of old books.",
+      "chinese": "这个箱子里装满了旧书。"
+    },
+    "application": {
+      "prompt": "There is no space for another book in the box. The box is ___. A. full B. empty",
+      "solution": "A。解析：没有多余空间说明箱子是满的，full 表示“满的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: full",
+        "url": "https://dictionary.cambridge.org/dictionary/english/full"
+      }
+    ]
+  },
+  {
+    "word": "grade",
+    "examTags": [
+      "词汇·校园场景",
+      "听读·获取年级信息"
+    ],
+    "grammar": "n. 年级；等级。可数，复数 grades。表示几年级时可说 in Grade 7；Grade 作年级名称时常大写。",
+    "collocations": "in Grade 7; a good grade; grade six/seventh grade。",
+    "commonMistake": "表示“七年级”可说 in Grade 7；不要把 grade（年级/等级）和 class（班级/课）混为一谈。",
+    "example": {
+      "english": "My cousin is in Grade 7 this year.",
+      "chinese": "我表弟今年上七年级。"
+    },
+    "application": {
+      "prompt": "Mina is in Grade 7. This tells us her school ___. A. grade B. country",
+      "solution": "A。解析：Grade 7 表示七年级，说明她所在的年级。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grade",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grade"
+      }
+    ]
+  },
+  {
+    "word": "classmate",
+    "examTags": [
+      "词汇·校园人物",
+      "阅读·人物关系理解"
+    ],
+    "grammar": "n. 同班同学；可数，复数 classmates。classmate 是由 class + mate 构成的合成词。",
+    "collocations": "a classmate of mine; my classmates; talk with a classmate。",
+    "commonMistake": "classmate 是可数名词，单数前要有 a、the 或 my 等限定词；复数为 classmates。",
+    "example": {
+      "english": "I often read with my classmate Mei.",
+      "chinese": "我常和同班同学小梅一起读书。"
+    },
+    "application": {
+      "prompt": "Leo and I study in the same class. Leo is my ___. A. classmate B. country",
+      "solution": "A。解析：同一个班里的同学是 classmate。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: classmate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/classmate"
+      }
+    ]
+  },
+  {
+    "word": "mistake",
+    "examTags": [
+      "词汇·可数名词与固定搭配",
+      "写作·表达错误与改正"
+    ],
+    "grammar": "n. 错误；失误。可数，复数 mistakes。也可作 v. mistake—mistook—mistaken，表示“误认”。",
+    "collocations": "make a mistake; by mistake; learn from a mistake。",
+    "commonMistake": "常说 make a mistake，不说 do a mistake；mistake 作名词时单数前通常有 a。",
+    "example": {
+      "english": "I made a mistake in the first question.",
+      "chinese": "我在第一题中犯了一个错误。"
+    },
+    "application": {
+      "prompt": "I wrote 17, but the correct number is 71. I made a ___. A. mistake B. hobby",
+      "solution": "A。解析：把数字写错是 mistake，表示“错误”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mistake",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mistake"
+      }
+    ]
+  },
+  {
+    "word": "country",
+    "examTags": [
+      "词汇·名词词形变化",
+      "阅读·国家与人物信息"
+    ],
+    "grammar": "n. 国家；乡村。可数，复数 countries：辅音字母 + y 结尾时，变 y 为 i 再加 -es。",
+    "collocations": "a big country; different countries; come from a country。",
+    "commonMistake": "country 的复数是 countries，不是 countrys；country 表示“国家”时通常是可数名词。",
+    "example": {
+      "english": "China is a large country.",
+      "chinese": "中国是一个幅员辽阔的国家。"
+    },
+    "application": {
+      "prompt": "Japan is a ___. A. country B. classmate",
+      "solution": "A。解析：Japan 是一个国家，country 表示“国家”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: country",
+        "url": "https://dictionary.cambridge.org/dictionary/english/country"
+      }
+    ]
+  },
+  {
+    "word": "same",
+    "examTags": [
+      "语法·形容词与限定词",
+      "语言运用·比较共同点"
+    ],
+    "grammar": "adj./det. 相同的；通常说 the same + 名词，也可说 the same as ...。",
+    "collocations": "the same class; the same colour; the same as mine。",
+    "commonMistake": "same 前通常要有 the：the same book；不要漏掉 the。",
+    "example": {
+      "english": "We have the same English teacher.",
+      "chinese": "我们有同一位英语老师。"
+    },
+    "application": {
+      "prompt": "Ming and I are in ___ class. A. the same B. same",
+      "solution": "A。解析：same 前通常用定冠词 the，构成 the same class。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: same",
+        "url": "https://dictionary.cambridge.org/dictionary/english/same"
+      }
+    ]
+  },
+  {
+    "word": "twin",
+    "examTags": [
+      "词汇·名词与形容词",
+      "阅读·人物关系理解"
+    ],
+    "grammar": "n. 双胞胎之一；adj. 双胞胎的。作名词时可数：a twin、twins；作形容词时修饰名词，如 twin sisters。",
+    "collocations": "a twin brother; twin sisters; identical twins。",
+    "commonMistake": "twin 作名词表示双胞胎中的一个，复数 twins；twin sisters 中 twin 作形容词，不加 -s。",
+    "example": {
+      "english": "Ella has a twin brother named Evan.",
+      "chinese": "Ella 有一个名叫 Evan 的双胞胎兄弟。"
+    },
+    "application": {
+      "prompt": "Nina and Tina were born together and are sisters. They are ___. A. twins B. twin",
+      "solution": "A。解析：They 指两个人，作名词时用复数 twins。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: twin",
+        "url": "https://dictionary.cambridge.org/dictionary/english/twin"
+      }
+    ]
+  },
+  {
+    "word": "both",
+    "examTags": [
+      "语法·代词与限定词",
+      "语法·主谓一致"
+    ],
+    "grammar": "det./pron. 两个都。both + 复数名词；both of + 限定词/代词；作主语时谓语通常用复数。",
+    "collocations": "both friends; both of us; both ... and ...。",
+    "commonMistake": "both 指两者，后接复数名词；Both students are ...，不要用单数 is。",
+    "example": {
+      "english": "Both of my classmates like tennis.",
+      "chinese": "我的两位同班同学都喜欢网球。"
+    },
+    "application": {
+      "prompt": "Both students ___ in Grade 7. A. is B. are",
+      "solution": "B。解析：both 表示两者都，后面的主语 students 是复数，用 are。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: both",
+        "url": "https://dictionary.cambridge.org/dictionary/english/both"
+      }
+    ]
+  },
+  {
+    "word": "band",
+    "examTags": [
+      "词汇·可数名词",
+      "听读·音乐与兴趣主题"
+    ],
+    "grammar": "n. 乐队；可数，复数 bands。表示音乐组合时可说 a band 或 a music band。",
+    "collocations": "a school band; a rock band; play in a band。",
+    "commonMistake": "band 表示“乐队”时是可数名词：a band、two bands；不要和表示带子的 band 混淆上下文。",
+    "example": {
+      "english": "Our school band plays music on Fridays.",
+      "chinese": "我们学校的乐队每周五演奏音乐。"
+    },
+    "application": {
+      "prompt": "A group of musicians who play songs together is a ___. A. band B. page",
+      "solution": "A。解析：band 可指一起演奏音乐的乐队。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: band",
+        "url": "https://dictionary.cambridge.org/dictionary/english/band"
+      }
+    ]
+  },
+  {
+    "word": "pot",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·日常物品识别"
+    ],
+    "grammar": "n. 锅；罐。可数，复数 pots。具体含义可根据搭配判断，如 cooking pot 或 flower pot。",
+    "collocations": "a cooking pot; a pot of soup; a flower pot。",
+    "commonMistake": "pot 的复数直接加 -s：pots；a pot of soup 中 pot 可数，soup 表示锅里的汤。",
+    "example": {
+      "english": "Dad cooks the soup in a large pot.",
+      "chinese": "爸爸用一口大锅煮汤。"
+    },
+    "application": {
+      "prompt": "Mum cooks noodles in a ___. A. pot B. page",
+      "solution": "A。解析：煮面条用锅，pot 表示“锅”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pot",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pot"
+      }
+    ]
+  },
+  {
+    "word": "tofu",
+    "examTags": [
+      "词汇·食物主题",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 豆腐；通常作不可数名词，不加复数 -s。需要计量时可说 a piece/block of tofu。",
+    "collocations": "some tofu; a block of tofu; cook tofu。",
+    "commonMistake": "tofu 通常不可数，不说 a tofu 或 tofus；可用 some tofu 或 a piece of tofu。",
+    "example": {
+      "english": "We have tofu and rice for lunch.",
+      "chinese": "我们午餐吃豆腐和米饭。"
+    },
+    "application": {
+      "prompt": "There is ___ tofu in the bowl. A. some B. a",
+      "solution": "A。解析：tofu 通常作不可数名词，some 可修饰不可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tofu",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tofu"
+      }
+    ]
+  },
+  {
+    "word": "parrot",
+    "examTags": [
+      "词汇·可数名词与复数",
+      "阅读·动物信息理解"
+    ],
+    "grammar": "n. 鹦鹉；可数，复数 parrots。单数前通常有 a、the 或物主限定词。",
+    "collocations": "a pet parrot; a green parrot; parrots can talk。",
+    "commonMistake": "parrot 是可数名词，单数前要有冠词或限定词；复数直接加 -s：parrots。",
+    "example": {
+      "english": "Their parrot can say a few English words.",
+      "chinese": "他们的鹦鹉会说几个英语单词。"
+    },
+    "application": {
+      "prompt": "This colourful bird can copy some words. It is a ___. A. parrot B. tennis",
+      "solution": "A。解析：parrot 是鹦鹉，符合会模仿说话的鸟这一描述。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: parrot",
+        "url": "https://dictionary.cambridge.org/dictionary/english/parrot"
+      }
+    ]
+  },
+  {
+    "word": "guitar",
+    "examTags": [
+      "词汇·可数名词与冠词",
+      "语言运用·音乐兴趣表达"
+    ],
+    "grammar": "n. 吉他；可数，复数 guitars。表示演奏乐器时常用 play the guitar。",
+    "collocations": "play the guitar; a guitar lesson; an electric guitar。",
+    "commonMistake": "表示“弹吉他”常说 play the guitar；play 后直接接球类运动名词时通常不加 the，如 play tennis。",
+    "example": {
+      "english": "My friend can play the guitar very well.",
+      "chinese": "我的朋友吉他弹得很好。"
+    },
+    "application": {
+      "prompt": "Which phrase names the activity of playing this instrument? A. play the guitar B. play the tennis",
+      "solution": "A。解析：表示演奏吉他常说 play the guitar；球类运动 tennis 前通常不加 the。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: guitar",
+        "url": "https://dictionary.cambridge.org/dictionary/english/guitar"
+      }
+    ]
+  },
+  {
+    "word": "tennis",
+    "examTags": [
+      "词汇·运动主题",
+      "语法·零冠词搭配"
+    ],
+    "grammar": "n. 网球；表示运动项目时通常作不可数名词。球类运动常用 play + 运动名称，不加 the。",
+    "collocations": "play tennis; a tennis player; a tennis racket。",
+    "commonMistake": "表示“打网球”说 play tennis，不说 play the tennis；tennis 作运动名称时通常不加冠词。",
+    "example": {
+      "english": "We play tennis after school on Fridays.",
+      "chinese": "我们每周五放学后打网球。"
+    },
+    "application": {
+      "prompt": "My classmates and I play ___ after school. A. tennis B. the tennis",
+      "solution": "A。解析：play + 球类运动名称时通常不用 the。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tennis",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tennis"
+      }
+    ]
+  },
+  {
+    "word": "forum",
+    "examTags": [
+      "词汇·网络与交流场景",
+      "阅读·根据语境判断场所"
+    ],
+    "grammar": "n. 论坛；讨论会。可数，复数 forums（也可见 fora）。online forum 表示网络论坛。",
+    "collocations": "an online forum; a discussion forum; post a question on a forum。",
+    "commonMistake": "forum 是可数名词，单数前通常用 a/an；因开头发音为辅音音素，常说 a forum。",
+    "example": {
+      "english": "I found an answer to my question on an online forum.",
+      "chinese": "我在一个网络论坛上找到了问题的答案。"
+    },
+    "application": {
+      "prompt": "People post questions and discuss topics on an online ___. A. forum B. guitar",
+      "solution": "A。解析：online forum 是供人发帖讨论的网络论坛。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: forum",
+        "url": "https://dictionary.cambridge.org/dictionary/english/forum"
+      }
+    ]
+  },
+  {
+    "word": "page",
+    "examTags": [
+      "词汇·可数名词与数字信息",
+      "阅读·定位书面信息"
+    ],
+    "grammar": "n. 页面；书页。可数，复数 pages。页码前常用 on page 5 或 turn to page 5。",
+    "collocations": "page 10; the first page; turn to the next page。",
+    "commonMistake": "说 turn to page 5 时，页码前通常不加 the；泛指某一页时可说 a page。",
+    "example": {
+      "english": "Please turn to page twelve and read the story.",
+      "chinese": "请翻到第十二页并阅读这个故事。"
+    },
+    "application": {
+      "prompt": "The teacher says, “Open your books and turn to ___.” A. page 12 B. country 12",
+      "solution": "A。解析：page 12 表示第 12 页，符合翻书的课堂指令。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: page",
+        "url": "https://dictionary.cambridge.org/dictionary/english/page"
+      }
+    ]
+  },
+  {
+    "word": "even",
+    "examTags": [
+      "词汇·副词语境义",
+      "阅读·理解强调信息"
+    ],
+    "grammar": "adv. 甚至；连。常放在要强调的词或短语前；even 可以加强语气，不改变句子主干。",
+    "collocations": "even a child; even better; not even one。",
+    "commonMistake": "even 是副词，不是形容词；常放在被强调的词前，如 Even Tom can do it。",
+    "example": {
+      "english": "Even my little sister knows this song.",
+      "chinese": "甚至我妹妹都知道这首歌。"
+    },
+    "application": {
+      "prompt": "All the students can play the game. ___ the youngest student can play it. A. Even B. Both",
+      "solution": "A。解析：强调“连最小的学生也会”，用 even；both 表示两者都。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: even",
+        "url": "https://dictionary.cambridge.org/dictionary/english/even"
+      }
+    ]
+  },
+  {
+    "word": "hey",
+    "examTags": [
+      "语言能力·日常交际",
+      "文化意识·语气与场合"
+    ],
+    "grammar": "interj. 嘿；喂。常用于引起注意或非正式问候；词形不变，书写时常用逗号隔开称呼对象。",
+    "collocations": "Hey, Sam!; Hey there!; Hey, look at this!。",
+    "commonMistake": "hey 语气较随意，适合同学朋友间；正式场合可用 Hello 或 Good morning。",
+    "example": {
+      "english": "Hey, Max! Are you free after class?",
+      "chinese": "嘿，Max！你下课后有空吗？"
+    },
+    "application": {
+      "prompt": "You see your friend at school. Which is a casual greeting? A. Hey, Ben! B. Good night, Ben!",
+      "solution": "A。解析：Hey 可作随意的见面问候；Good night 通常用于晚上道别或睡前。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hey",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hey"
+      }
+    ]
+  },
+  {
+    "word": "would",
+    "examTags": [
+      "语法·情态动词",
+      "语言能力·礼貌邀请与回应"
+    ],
+    "grammar": "modal v. 可用于礼貌邀请或提供：Would you like + 名词/to do? 后接名词或 to + 动词原形；would 本身不随主语变化。",
+    "collocations": "Would you like some tea?; Would you like to join us?; I'd like ...。",
+    "commonMistake": "Would you like 后接名词或 to do，不说 Would you like play；would 后也不加 -s。",
+    "example": {
+      "english": "Would you like to play tennis with us?",
+      "chinese": "你愿意和我们一起打网球吗？"
+    },
+    "application": {
+      "prompt": "___ you like to join our school band? A. Would B. Are",
+      "solution": "A。解析：Would you like to do...? 是礼貌邀请的常用表达。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: would",
+        "url": "https://dictionary.cambridge.org/dictionary/english/would"
+      }
+    ]
+  },
+  {
+    "word": "information",
+    "examTags": [
+      "词汇·不可数名词",
+      "阅读·获取与整理信息"
+    ],
+    "grammar": "n. 信息；消息。通常作不可数名词，不加复数 -s；表示一条信息可说 a piece of information。",
+    "collocations": "some information; a piece of information; information about the club。",
+    "commonMistake": "information 通常不可数，不说 an information 或 informations；可说 some information / a piece of information。",
+    "example": {
+      "english": "We need more information about the tennis club.",
+      "chinese": "我们需要更多关于网球俱乐部的信息。"
+    },
+    "application": {
+      "prompt": "There is ___ information about the new class online. A. some B. many",
+      "solution": "A。解析：information 通常不可数，用 some 修饰；many 修饰可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: information",
+        "url": "https://dictionary.cambridge.org/dictionary/english/information"
+      }
+    ]
+  },
+  {
+    "word": "hobby",
+    "examTags": [
+      "词汇·名词词形变化",
+      "语言运用·介绍兴趣爱好"
+    ],
+    "grammar": "n. 业余爱好；可数，复数 hobbies：辅音字母 + y 结尾时，变 y 为 i 再加 -es。",
+    "collocations": "my hobby; have a hobby; hobbies include reading and tennis。",
+    "commonMistake": "hobby 的复数是 hobbies，不是 hobbys；询问爱好可说 What is your hobby? 或 What are your hobbies?",
+    "example": {
+      "english": "My hobby is playing the guitar.",
+      "chinese": "我的爱好是弹吉他。"
+    },
+    "application": {
+      "prompt": "Ben likes drawing in his free time. Drawing is his ___. A. hobby B. mistake",
+      "solution": "A。解析：业余时间喜欢做的活动是 hobby，表示“爱好”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hobby",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hobby"
+      }
+    ]
+  },
+  {
+    "word": "we",
+    "examTags": [
+      "语法·人称代词主格",
+      "阅读·人物指代"
+    ],
+    "grammar": "pron. 我们；第一人称复数主格，作主语。宾格是 us，形容词性物主代词是 our。",
+    "collocations": "we are classmates; we both like ...; we have ...; we can ...。",
+    "commonMistake": "作主语用 we，作动词或介词宾语用 us：We help them；They help us。",
+    "example": {
+      "english": "We are classmates in Grade 7.",
+      "chinese": "我们是七年级的同班同学。"
+    },
+    "application": {
+      "prompt": "Amy and I are classmates. ___ are both in Grade 7. A. We B. Us",
+      "solution": "A。解析：空格处作句子主语，应使用主格 we。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: we",
+        "url": "https://dictionary.cambridge.org/dictionary/english/we"
+      }
+    ]
+  },
+  {
+    "word": "make",
+    "examTags": [
+      "词汇·不规则动词词形",
+      "语法·动词搭配与使役结构"
+    ],
+    "grammar": "v. 制作；使成为。make—made—made—making。可用 make + 名词；make + 宾语 + 形容词表示“使……变得……”。",
+    "collocations": "make a poster; make friends; make sb. happy; make a mistake。",
+    "commonMistake": "过去式和过去分词是 made；make + 人 + 形容词时不加 be，如 make me happy。",
+    "example": {
+      "english": "We make a poster for the school band every month.",
+      "chinese": "我们每个月为学校乐队制作一张海报。"
+    },
+    "application": {
+      "prompt": "We ___ a card for our classmate every year. A. make B. makes",
+      "solution": "A。解析：主语 we 是复数，一般现在时用动词原形 make。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: make",
+        "url": "https://dictionary.cambridge.org/dictionary/english/make"
+      }
+    ]
+  },
+  {
+    "word": "friend",
+    "examTags": [
+      "词汇·名词单复数",
+      "语言运用·介绍朋友与关系"
+    ],
+    "grammar": "n. 朋友；可数，复数 friends。friendly 是形容词“友好的”，不要与 friend 混淆。",
+    "collocations": "a good friend; make friends with sb.; a friend of mine。",
+    "commonMistake": "friend 是名词，friendly 是形容词；说“一个朋友”用 a friend。",
+    "example": {
+      "english": "Kai is a friend of mine from the tennis club.",
+      "chinese": "Kai 是我在网球俱乐部认识的一位朋友。"
+    },
+    "application": {
+      "prompt": "Lily is a ___ of mine. A. friend B. friendly",
+      "solution": "A。解析：a 后需要名词，friend 是名词；friendly 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: friend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/friend"
+      }
+    ]
+  },
+  {
+    "word": "get",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·祈使句与动词原形"
+    ],
+    "grammar": "v. 去取；得到。get—got—got（英式常用）/gotten（美式也用）—getting。get + 名词表示拿到或取来某物。",
+    "collocations": "get a book; get some water; get home; get to school。",
+    "commonMistake": "祈使句开头用动词原形：Get the guitar, please；不要在 please 后写 gets。",
+    "example": {
+      "english": "Can you get my tennis racket from the classroom?",
+      "chinese": "你能帮我从教室里拿一下网球拍吗？"
+    },
+    "application": {
+      "prompt": "Your guitar is in the music room. Please ___ it before class. A. get B. gets",
+      "solution": "A。解析：please 引导的祈使句用动词原形 get。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: get",
+        "url": "https://dictionary.cambridge.org/dictionary/english/get"
+      }
+    ]
+  },
+  {
+    "word": "know",
+    "examTags": [
+      "语法·一般现在时",
+      "语言运用·表达认知"
+    ],
+    "grammar": "表示知道或认识，通常作状态动词，不常用于进行时；过去式 knew，过去分词 known。主语为 he/she/it 时用 knows。",
+    "collocations": "know a person；know about sth；know how to do sth",
+    "commonMistake": "一般不说 I am knowing；表示“我认识她”用 I know her。",
+    "example": {
+      "english": "I know our new English teacher, Ms Lin.",
+      "chinese": "我认识我们的新英语老师林老师。"
+    },
+    "application": {
+      "prompt": "Daming has met Mr Liu before. He ___ him. (know)",
+      "solution": "knows"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: know",
+        "url": "https://dictionary.cambridge.org/dictionary/english/know"
+      },
+      {
+        "label": "Cambridge Grammar: know",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/know"
+      }
+    ]
+  },
+  {
+    "word": "from",
+    "examTags": [
+      "语法·介词",
+      "语言运用·来源与起点"
+    ],
+    "grammar": "介词，表示来源、出发点或时间起点；常用于 be/come from 和 from...to...。",
+    "collocations": "be from a place；come from；from Monday to Friday",
+    "commonMistake": "表示“来自某地”用 be from；from 后接地点或时间起点。",
+    "example": {
+      "english": "Mia is from China, and her cousin is from Canada.",
+      "chinese": "米娅来自中国，她的表姐来自加拿大。"
+    },
+    "application": {
+      "prompt": "Leo travels ___ Beijing ___ Shanghai. Complete the pair.",
+      "solution": "from; to"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: from",
+        "url": "https://dictionary.cambridge.org/dictionary/english/from"
+      },
+      {
+        "label": "Cambridge Grammar: from",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/from"
+      }
+    ]
+  },
+  {
+    "word": "old",
+    "examTags": [
+      "语法·形容词",
+      "语言运用·年龄表达"
+    ],
+    "grammar": "形容词，可表示年龄大或物品旧；询问年龄常用 How old...?；年龄表达为数字 + years old。",
+    "collocations": "How old...?；... years old；an old book",
+    "commonMistake": "表示“我12岁”说 I am 12 years old，不说 I have 12 years。",
+    "example": {
+      "english": "My bicycle is three years old, but it still works well.",
+      "chinese": "我的自行车有三年了，但仍然很好用。"
+    },
+    "application": {
+      "prompt": "Ella is twelve. She is twelve years ___.",
+      "solution": "old"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: old",
+        "url": "https://dictionary.cambridge.org/dictionary/english/old"
+      }
+    ]
+  },
+  {
+    "word": "last",
+    "examTags": [
+      "语法·形容词与时间短语",
+      "语言运用·时间顺序"
+    ],
+    "grammar": "作形容词时可表示“上一个的”或“最后的”；last year/week 常表示刚过去的一年/一周。",
+    "collocations": "last year；last week；the last lesson",
+    "commonMistake": "表示“去年”通常直接说 last year，不在 last 前加 in。",
+    "example": {
+      "english": "We met at the school library last year.",
+      "chinese": "我们去年在学校图书馆见过面。"
+    },
+    "application": {
+      "prompt": "I am in Grade 7 now. ___ year I was in Grade 6. (last / next)",
+      "solution": "last"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: last",
+        "url": "https://dictionary.cambridge.org/dictionary/english/last"
+      }
+    ]
+  },
+  {
+    "word": "year",
+    "examTags": [
+      "语法·可数名词",
+      "语言运用·时间表达"
+    ],
+    "grammar": "可数名词，复数为 years；前有具体数字时通常用复数，如 two years。",
+    "collocations": "this year；next year；a school year；all year",
+    "commonMistake": "表示“两个年”要用 two years；one year 用单数。",
+    "example": {
+      "english": "A school year has many busy days.",
+      "chinese": "一个学年里有许多忙碌的日子。"
+    },
+    "application": {
+      "prompt": "There are twelve months in a ___.",
+      "solution": "year"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: year",
+        "url": "https://dictionary.cambridge.org/dictionary/english/year"
+      }
+    ]
+  },
+  {
+    "word": "yes",
+    "examTags": [
+      "语言运用·肯定回答",
+      "交际·日常应答"
+    ],
+    "grammar": "感叹词，用于肯定回答或表示同意；回答含 be 动词的一般疑问句时，后面可重复 be 动词。",
+    "collocations": "Yes, I am.；Yes, please.；say yes",
+    "commonMistake": "回答 Are you...? 时可说 Yes, I am，不能只把问句中的 are 原样重复。",
+    "example": {
+      "english": "‘Are you in Class 2?’ ‘Yes, I am.’",
+      "chinese": "“你在二班吗？”“是的，我在。”"
+    },
+    "application": {
+      "prompt": "‘Would you like some water?’ ‘___, please.’ (Yes / No)",
+      "solution": "Yes"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yes",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yes"
+      },
+      {
+        "label": "Cambridge Grammar: yes",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/yes"
+      }
+    ]
+  },
+  {
+    "word": "Mr",
+    "examTags": [
+      "语言运用·称谓",
+      "书写·专有称谓大小写"
+    ],
+    "grammar": "对男性的称谓，通常放在姓氏或全名之前，首字母大写；英式英语常写 Mr，部分美式英语写 Mr.。",
+    "collocations": "Mr Chen；Mr Brown；Dear Mr Lee",
+    "commonMistake": "Mr 放在人名之前且首字母大写；通常不单独放在姓氏之后。",
+    "example": {
+      "english": "Mr Chen is our English teacher.",
+      "chinese": "陈先生是我们的英语老师。"
+    },
+    "application": {
+      "prompt": "___ Chen is a male teacher. Choose the correct title: Mr / Ms.",
+      "solution": "Mr"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Mr",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mr"
+      }
+    ]
+  },
+  {
+    "word": "our",
+    "examTags": [
+      "语法·物主限定词",
+      "语言运用·代词指代"
+    ],
+    "grammar": "形容词性物主代词，表示“我们的”，后面通常接名词；单独作名词性成分时用 ours。",
+    "collocations": "our class；our school；our English teacher",
+    "commonMistake": "our 后接名词，如 our desk；不接名词时用 ours，如 The desk is ours。",
+    "example": {
+      "english": "Our class has a new English teacher.",
+      "chinese": "我们班有一位新英语老师。"
+    },
+    "application": {
+      "prompt": "This is ___ desk; it belongs to our group. (our / ours)",
+      "solution": "our"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Learner’s Dictionary: our",
+        "url": "https://dictionary.cambridge.org/dictionary/learner-english/our"
+      },
+      {
+        "label": "Cambridge Grammar: possessive determiners and pronouns",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/pronouns-possessive-my-mine-your-yours-etc"
+      }
+    ]
+  },
+  {
+    "word": "English",
+    "examTags": [
+      "语言运用·学科与语言",
+      "书写·专有名词大写"
+    ],
+    "grammar": "作语言名称时是不可数名词；也可作形容词，表示“英语的”。English 首字母要大写。",
+    "collocations": "study English；speak English；English class；an English book",
+    "commonMistake": "表示学科或语言时通常说 study English，不加 an，也不写成小写 english。",
+    "example": {
+      "english": "We read an English story in class.",
+      "chinese": "我们在课堂上读了一个英语故事。"
+    },
+    "application": {
+      "prompt": "We study ___ on Monday. (English / an English)",
+      "solution": "English"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Learner’s Dictionary: English",
+        "url": "https://dictionary.cambridge.org/dictionary/learner-english/english"
+      }
+    ]
+  },
+  {
+    "word": "teacher",
+    "examTags": [
+      "词法·名词后缀",
+      "语法·可数名词"
+    ],
+    "grammar": "可数名词，复数为 teachers；由动词 teach 加后缀 -er 构成，表示“教的人”。",
+    "collocations": "an English teacher；a science teacher；class teacher",
+    "commonMistake": "teacher 是表示“教师”的名词，teach 是动词；表示“一位教师”用 a teacher。",
+    "example": {
+      "english": "Our English teacher asks clear questions.",
+      "chinese": "我们的英语老师提问清楚。"
+    },
+    "application": {
+      "prompt": "A person who teaches a class is a ___. (teach / teacher)",
+      "solution": "teacher"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: teacher",
+        "url": "https://dictionary.cambridge.org/dictionary/english/teacher"
+      }
+    ]
+  },
+  {
+    "word": "which",
+    "examTags": [
+      "语法·疑问代词与限定词",
+      "阅读·从选项中定位"
+    ],
+    "grammar": "用于在有限范围内询问“哪一个/哪些”；可单独作代词，也可放在名词前作限定词。",
+    "collocations": "which one；which book；which colour",
+    "commonMistake": "在几个明确的人或物中选择时常用 which；询问人物身份时通常用 who。",
+    "example": {
+      "english": "Which colour do you like, blue or green?",
+      "chinese": "蓝色和绿色，你喜欢哪一种颜色？"
+    },
+    "application": {
+      "prompt": "Three pandas are in the picture. ___ one is eating? (Which / Who)",
+      "solution": "Which"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: which",
+        "url": "https://dictionary.cambridge.org/dictionary/english/which"
+      },
+      {
+        "label": "Cambridge Grammar: which",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/which"
+      }
+    ]
+  },
+  {
+    "word": "who",
+    "examTags": [
+      "语法·疑问代词",
+      "阅读·人物信息提取"
+    ],
+    "grammar": "疑问代词，询问或指代人；作主语时，谓语动词要与其所指的人在语境中保持一致。",
+    "collocations": "Who is...?；Who are...?；the student who...",
+    "commonMistake": "询问“谁”用 who；which 通常用于在有限的人或物中选择。",
+    "example": {
+      "english": "Who is your new classmate?",
+      "chinese": "谁是你的新同学？"
+    },
+    "application": {
+      "prompt": "___ is at the door? It is my brother. (Who / Which)",
+      "solution": "Who"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: who",
+        "url": "https://dictionary.cambridge.org/dictionary/english/who"
+      },
+      {
+        "label": "Cambridge Grammar: which or who",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/word-choice-which-or-who"
+      }
+    ]
+  },
+  {
+    "word": "job",
+    "examTags": [
+      "语法·可数名词",
+      "词汇辨析·job 与 work"
+    ],
+    "grammar": "可数名词，表示一份工作或职位；work 通常作不可数名词表示工作这一活动。",
+    "collocations": "have a job；get a job；a full-time job",
+    "commonMistake": "表示一份工作时说 a job；通常不说 a work。",
+    "example": {
+      "english": "My aunt has a job at a school.",
+      "chinese": "我姑姑在一所学校有一份工作。"
+    },
+    "application": {
+      "prompt": "My father has a ___ at the hospital. (job / work)",
+      "solution": "job"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: job",
+        "url": "https://dictionary.cambridge.org/dictionary/english/job"
+      },
+      {
+        "label": "Cambridge Dictionary: work",
+        "url": "https://dictionary.cambridge.org/dictionary/english/work"
+      }
+    ]
+  },
+  {
+    "word": "student",
+    "examTags": [
+      "语法·可数名词与复数",
+      "词法·名词后缀"
+    ],
+    "grammar": "可数名词，表示学生；复数通常加 -s：students。",
+    "collocations": "a student；a middle school student；student card",
+    "commonMistake": "表示两名或更多学生时用 students；不要漏掉复数词尾 -s。",
+    "example": {
+      "english": "The students in our class enjoy reading.",
+      "chinese": "我们班的学生喜欢阅读。"
+    },
+    "application": {
+      "prompt": "There are thirty ___ in our class. (student)",
+      "solution": "students"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: student",
+        "url": "https://dictionary.cambridge.org/dictionary/english/student"
+      }
+    ]
+  },
+  {
+    "word": "age",
+    "examTags": [
+      "语法·名词短语",
+      "语言运用·年龄表达"
+    ],
+    "grammar": "名词，表示年龄；可用于 at the age of + 数字。询问年龄也常用 How old...?。",
+    "collocations": "at the age of ten；your age；people of all ages",
+    "commonMistake": "询问年龄常用 How old are you?；age 是名词，old 是形容词。",
+    "example": {
+      "english": "At the age of six, Nina joined the school music club.",
+      "chinese": "六岁时，妮娜加入了学校音乐社团。"
+    },
+    "application": {
+      "prompt": "Nina started learning the piano at the ___ of six. (age / old)",
+      "solution": "age"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: age",
+        "url": "https://dictionary.cambridge.org/dictionary/english/age"
+      },
+      {
+        "label": "Cambridge Grammar: age",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/age"
+      }
+    ]
+  },
+  {
+    "word": "she",
+    "examTags": [
+      "语法·人称代词主格",
+      "阅读·代词指代"
+    ],
+    "grammar": "第三人称单数女性人称代词主格，在句中通常作主语；宾格形式是 her，物主限定词是 her。",
+    "collocations": "she is；she has；she and her friend",
+    "commonMistake": "she 作主语；动词 be 通常用 is，如 She is a student。",
+    "example": {
+      "english": "Lily is from Beijing. She is a student.",
+      "chinese": "莉莉来自北京。她是一名学生。"
+    },
+    "application": {
+      "prompt": "Mia is my classmate. ___ is from China. (She / Her)",
+      "solution": "She"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: she",
+        "url": "https://dictionary.cambridge.org/dictionary/english/she"
+      }
+    ]
+  },
+  {
+    "word": "favourite",
+    "examTags": [
+      "语法·形容词作定语",
+      "语言运用·表达喜好"
+    ],
+    "grammar": "形容词，表示“最喜欢的”；可放在名词前，也可在 be 动词后作表语。英式拼法 favourite，美式常拼 favorite。",
+    "collocations": "favourite animal；favourite subject；my favourite is...",
+    "commonMistake": "英式拼法 favourite 含 ou；写作时注意同一篇文章拼法保持一致。",
+    "example": {
+      "english": "My favourite animal is the panda.",
+      "chinese": "我最喜欢的动物是熊猫。"
+    },
+    "application": {
+      "prompt": "I like blue best. Blue is my ___ colour. (favourite)",
+      "solution": "favourite"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: favourite",
+        "url": "https://dictionary.cambridge.org/dictionary/english/favourite"
+      }
+    ]
+  },
+  {
+    "word": "pet",
+    "examTags": [
+      "语法·可数名词",
+      "阅读·语境猜词"
+    ],
+    "grammar": "可数名词，指人饲养的动物；复数为 pets。",
+    "collocations": "have a pet；pet dog；pet shop",
+    "commonMistake": "表示一只宠物时用 a pet；表示多只时用 pets。",
+    "example": {
+      "english": "They have a pet rabbit at home.",
+      "chinese": "他们家里养了一只宠物兔。"
+    },
+    "application": {
+      "prompt": "An animal kept at home for company can be called a ___. (pet / student)",
+      "solution": "pet"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pet",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pet"
+      }
+    ]
+  },
+  {
+    "word": "very",
+    "examTags": [
+      "语法·程度副词",
+      "语言运用·描述程度"
+    ],
+    "grammar": "程度副词，常放在形容词或副词前加强程度，如 very cute、very carefully。",
+    "collocations": "very good；very cute；very well；thank you very much",
+    "commonMistake": "very 通常修饰形容词或副词；表达“非常喜欢”说 like...very much，不说 very like。",
+    "example": {
+      "english": "The puppy is very small.",
+      "chinese": "这只小狗非常小。"
+    },
+    "application": {
+      "prompt": "The puppy is ___ cute. (very / much)",
+      "solution": "very"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: very",
+        "url": "https://dictionary.cambridge.org/dictionary/english/very"
+      }
+    ]
+  },
+  {
+    "word": "cute",
+    "examTags": [
+      "语法·形容词作表语",
+      "语言运用·人物与动物描写"
+    ],
+    "grammar": "形容词，表示可爱的；可放在名词前，也可放在 be、look 等系动词后。",
+    "collocations": "a cute puppy；look cute；a cute face",
+    "commonMistake": "look 作系动词时后接形容词，如 The puppy looks cute。",
+    "example": {
+      "english": "The baby panda looks cute in the photo.",
+      "chinese": "照片里的熊猫宝宝看起来很可爱。"
+    },
+    "application": {
+      "prompt": "The puppy looks ___. (cute / cutely)",
+      "solution": "cute"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cute",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cute"
+      }
+    ]
+  },
+  {
+    "word": "much",
+    "examTags": [
+      "语法·数量表达",
+      "词汇辨析·much 与 many"
+    ],
+    "grammar": "可作限定词、代词或副词；修饰不可数名词常用 much，询问数量常见 How much...?；many 修饰可数名词复数。",
+    "collocations": "how much water；much time；very much；much better",
+    "commonMistake": "much 通常与不可数名词搭配；many 通常与可数名词复数搭配。",
+    "example": {
+      "english": "How much water is in your bottle?",
+      "chinese": "你的水瓶里有多少水？"
+    },
+    "application": {
+      "prompt": "There isn't ___ juice in the glass. (much / many)",
+      "solution": "much"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: much",
+        "url": "https://dictionary.cambridge.org/dictionary/english/much"
+      },
+      {
+        "label": "Cambridge Grammar: much and many with a noun",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/much-many-with-a-noun"
+      }
+    ]
+  },
+  {
+    "word": "school",
+    "examTags": [
+      "语法·可数名词与冠词",
+      "语言运用·校园生活"
+    ],
+    "grammar": "可数名词，表示学校；复数为 schools。表示上学这一日常活动时常用 go to school；指具体校舍时可说 go to the school。",
+    "collocations": "go to school；at school；school life；school uniform",
+    "commonMistake": "表示“去上学”通常说 go to school；谈到某一所具体学校或校舍时可用 the school。",
+    "example": {
+      "english": "My school has a small library.",
+      "chinese": "我的学校有一个小图书馆。"
+    },
+    "application": {
+      "prompt": "Our town has two ___. (school)",
+      "solution": "schools"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: school",
+        "url": "https://dictionary.cambridge.org/dictionary/english/school"
+      }
+    ]
+  },
+  {
+    "word": "China",
+    "examTags": [
+      "书写·国家名称大写",
+      "语言运用·国家与来源"
+    ],
+    "grammar": "专有名词，表示中国，首字母大写，通常不加 the；形容词或语言/国籍表达常用 Chinese。",
+    "collocations": "in China；from China；China and Canada",
+    "commonMistake": "国家名 China 首字母大写；Chinese 可表示“中国的/中国人/中文”，不能互换充当国名。",
+    "example": {
+      "english": "My pen pal lives in China.",
+      "chinese": "我的笔友住在中国。"
+    },
+    "application": {
+      "prompt": "Ken is from ___. It is a country in East Asia. (China / Chinese)",
+      "solution": "China"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: China",
+        "url": "https://dictionary.cambridge.org/dictionary/english/china"
+      }
+    ]
+  },
+  {
+    "word": "panda",
+    "examTags": [
+      "语法·可数名词与复数",
+      "阅读·动物主题词汇"
+    ],
+    "grammar": "可数名词，表示熊猫；复数通常为 pandas。",
+    "collocations": "a giant panda；panda cub；see pandas",
+    "commonMistake": "表示两只或更多熊猫时用 pandas；不要漏写复数 -s。",
+    "example": {
+      "english": "The panda eats bamboo in the forest.",
+      "chinese": "熊猫在森林里吃竹子。"
+    },
+    "application": {
+      "prompt": "We saw three ___ at the zoo. (panda)",
+      "solution": "pandas"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: panda",
+        "url": "https://dictionary.cambridge.org/dictionary/english/panda"
+      }
+    ]
+  },
+  {
+    "word": "hot",
+    "examTags": [
+      "语法·形容词比较级",
+      "语言运用·天气与温度"
+    ],
+    "grammar": "形容词，表示热的或炎热的；比较级 hotter、最高级 hottest，词尾辅音字母 t 双写后再加 -er/-est。",
+    "collocations": "hot weather；hot tea；a hot day",
+    "commonMistake": "hot 的比较级写 hotter，需双写 t；不要写成 hoter。",
+    "example": {
+      "english": "It is hot today, so we drink cold water.",
+      "chinese": "今天很热，所以我们喝凉水。"
+    },
+    "application": {
+      "prompt": "Today is 35°C and yesterday was 30°C. Today is ___ than yesterday. (hot)",
+      "solution": "hotter"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hot",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hot"
+      }
+    ]
+  },
+  {
+    "word": "also",
+    "examTags": [
+      "语法·副词位置",
+      "语篇·衔接"
+    ],
+    "grammar": "also 是副词，表示“也、而且”；通常放在实义动词前，be 动词后，也可放在情态动词或第一个助动词后。",
+    "collocations": "also like music; is also from China; can also play",
+    "commonMistake": "常见位置是主语后、实义动词前（I also like music）；be 动词后（She is also here）。",
+    "example": {
+      "english": "I like birds, and I also like horses.",
+      "chinese": "我喜欢鸟，也喜欢马。"
+    },
+    "application": {
+      "prompt": "选词填空：I like birds. I ___ like music. A. also  B. very",
+      "solution": "A. also。also 表示“也”；very 不能直接修饰动词 like。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: also",
+        "url": "https://dictionary.cambridge.org/dictionary/english/also"
+      },
+      {
+        "label": "Cambridge Grammar: Also, as well or too?",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/also-as-well-or-too"
+      }
+    ]
+  },
+  {
+    "word": "live",
+    "examTags": [
+      "语言运用·动词搭配",
+      "语法·主谓一致"
+    ],
+    "grammar": "live 表示“居住、生活”时常作不及物动词；一般现在时第三人称单数为 lives，过去式和过去分词为 lived。表示居住地常用 live in + 城市/国家。",
+    "collocations": "live in China; live with my family; live on a farm; live a happy life",
+    "commonMistake": "表示“住在某地”时常需介词，如 live in Beijing；主语是 he/she/it 时一般现在时用 lives。",
+    "example": {
+      "english": "My grandparents live in Hangzhou.",
+      "chinese": "我的祖父母住在杭州。"
+    },
+    "application": {
+      "prompt": "选词填空：My grandparents ___ in Beijing. A. live  B. lives",
+      "solution": "A. live。主语 grandparents 是复数，谓语用动词原形 live。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: live",
+        "url": "https://dictionary.cambridge.org/dictionary/english/live"
+      }
+    ]
+  },
+  {
+    "word": "with",
+    "examTags": [
+      "语法·介词搭配",
+      "语法·代词格"
+    ],
+    "grammar": "with 是介词，可表示和某人一起、带有某物或使用某工具；介词后接名词或宾格代词。",
+    "collocations": "with my parents; a house with a garden; write with a pen; play with friends",
+    "commonMistake": "with 后接宾格代词，如 with me、with them；不能说 with I 或 with they。",
+    "example": {
+      "english": "I often play football with my sister.",
+      "chinese": "我常和姐姐/妹妹一起踢足球。"
+    },
+    "application": {
+      "prompt": "选词填空：I play sports with ___. A. them  B. they",
+      "solution": "A. them。with 是介词，后接宾格代词 them。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: With",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/with"
+      }
+    ]
+  },
+  {
+    "word": "parent",
+    "examTags": [
+      "话题语境·家庭",
+      "词法·名词单复数"
+    ],
+    "grammar": "parent 是可数名词，指父亲或母亲中的一位；复数 parents 常指父母双方。",
+    "collocations": "a parent; my parents; parent and child; meet her parents",
+    "commonMistake": "parent 是单数，parents 是复数；表示父母双方时通常用 my/your/his/her parents。",
+    "example": {
+      "english": "Both my parents love music.",
+      "chinese": "我的父母都喜欢音乐。"
+    },
+    "application": {
+      "prompt": "选词填空：Both my ___ are at home. A. parent  B. parents",
+      "solution": "B. parents。both 表示两者都，后面用复数 parents。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: parent",
+        "url": "https://dictionary.cambridge.org/dictionary/english/parent"
+      }
+    ]
+  },
+  {
+    "word": "Chinese",
+    "examTags": [
+      "书写·专有名词大小写",
+      "词汇辨析·词性"
+    ],
+    "grammar": "Chinese 可作形容词，表示“中国的、中国人的”；也可作名词表示汉语或中国人。表示汉语时通常作不可数名词；词首字母要大写。",
+    "collocations": "Chinese food; Chinese music; speak Chinese; Chinese people",
+    "commonMistake": "国名 China 和国籍/语言 Chinese 不同；Chinese 必须大写。表达“一位中国人”可说 a Chinese person。",
+    "example": {
+      "english": "My parents speak Chinese at home.",
+      "chinese": "我父母在家说汉语。"
+    },
+    "application": {
+      "prompt": "选词填空：We speak ___ at home. A. Chinese  B. China",
+      "solution": "A. Chinese。speak 后接语言名称 Chinese；China 是国名。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Chinese",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chinese"
+      }
+    ]
+  },
+  {
+    "word": "food",
+    "examTags": [
+      "词法·名词可数性",
+      "语法·数量表达"
+    ],
+    "grammar": "food 通常作不可数名词，表示食物总称；表示不同种类的食物时可用 foods。",
+    "collocations": "some food; a lot of food; food and drink; a kind of food",
+    "commonMistake": "表示一般的食物时通常不说 a food 或 foods；可说 some food、much food 或 a piece of food。",
+    "example": {
+      "english": "There is some food for the birds near the wall.",
+      "chinese": "墙边有一些给鸟吃的食物。"
+    },
+    "application": {
+      "prompt": "选词填空：We don’t have much ___ for lunch. A. food  B. foods",
+      "solution": "A. food。much 修饰不可数名词；food 表示食物总称时通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: food",
+        "url": "https://dictionary.cambridge.org/dictionary/english/food"
+      }
+    ]
+  },
+  {
+    "word": "lot",
+    "examTags": [
+      "语法·数量表达",
+      "词法·名词可数性"
+    ],
+    "grammar": "表示“大量、许多”时常用整体表达 a lot (of)；a lot of 后可接可数名词复数或不可数名词，名词已知时可省略。",
+    "collocations": "a lot of birds; a lot of food; a lot to do; like music a lot",
+    "commonMistake": "表达“大量的……”时通常要说 a lot of + 名词，不能漏掉 a 或 of；可说 a lot of birds/a lot of food。",
+    "example": {
+      "english": "There are a lot of birds on the wall.",
+      "chinese": "墙上有很多鸟。"
+    },
+    "application": {
+      "prompt": "选词填空：There are a lot of ___ in the tree. A. birds  B. bird",
+      "solution": "A. birds。a lot of 后接可数名词复数 birds。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: a lot (of)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lot-of"
+      },
+      {
+        "label": "Cambridge Grammar: A lot of and lots of",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/determiners-a-lot-of-and-lots-of"
+      }
+    ]
+  },
+  {
+    "word": "about",
+    "examTags": [
+      "词汇辨析·介词",
+      "语境理解·上下文"
+    ],
+    "grammar": "about 作介词可表示“关于”，后接名词、代词或动名词；作副词可表示“大约”，常放在数字或时间前。",
+    "collocations": "a book about music; talk about family; about two hours; about ten years ago",
+    "commonMistake": "talk about sth 表示“谈论某事”；但 discuss 是及物动词，直接接宾语，不说 discuss about sth。",
+    "example": {
+      "english": "We are talking about our family.",
+      "chinese": "我们正在谈论我们的家庭。"
+    },
+    "application": {
+      "prompt": "选词填空：The book is ___ birds. A. about  B. ago",
+      "solution": "A. about。about 作介词表示“关于”，后接名词 birds；ago 放在时间表达后。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: About",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/about"
+      }
+    ]
+  },
+  {
+    "word": "wall",
+    "examTags": [
+      "词法·名词单复数",
+      "语法·介词搭配"
+    ],
+    "grammar": "wall 是可数名词，单数前常用 a/the，复数为 walls；物品贴在墙面上常用 on the wall。",
+    "collocations": "a high wall; on the wall; behind the wall; a wall of a house",
+    "commonMistake": "说照片、钟表挂在墙面上时通常用 on the wall；不要把 wall 的复数写成 wall’s。",
+    "example": {
+      "english": "There is a picture of my family on the wall.",
+      "chinese": "墙上有一张我家的照片。"
+    },
+    "application": {
+      "prompt": "选词填空：There is a clock ___ the wall. A. on  B. at",
+      "solution": "A. on。表示钟表挂在墙面上，使用 on the wall。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wall"
+      }
+    ]
+  },
+  {
+    "word": "all",
+    "examTags": [
+      "语法·限定词与代词",
+      "语法·主谓一致"
+    ],
+    "grammar": "all 可作限定词放在名词前，也可作代词独立指代整体；常见结构有 all the students、all of them。",
+    "collocations": "all my family; all the birds; all of us; all day",
+    "commonMistake": "all of 后接代词时要用宾格，如 all of them；修饰名词时可说 all students 或 all the students。",
+    "example": {
+      "english": "All the birds are in the tree.",
+      "chinese": "所有的鸟都在树上。"
+    },
+    "application": {
+      "prompt": "选词填空：All the birds ___ in the tree. A. are  B. is",
+      "solution": "A. are。all 修饰复数名词 birds，谓语用 are。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: all",
+        "url": "https://dictionary.cambridge.org/dictionary/english/all"
+      },
+      {
+        "label": "Cambridge Grammar: All",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/all"
+      }
+    ]
+  },
+  {
+    "word": "hour",
+    "examTags": [
+      "词法·名词单复数",
+      "语法·冠词"
+    ],
+    "grammar": "hour 是可数名词，表示一小时；单数前用 an，因为 h 不发音，hour 以元音音素开头。",
+    "collocations": "an hour; half an hour; two hours; an hour ago",
+    "commonMistake": "hour 的 h 不发音，因此说 an hour，不说 a hour；复数为 hours。",
+    "example": {
+      "english": "It takes about an hour to visit the farm.",
+      "chinese": "参观这个农场大约需要一小时。"
+    },
+    "application": {
+      "prompt": "选词填空：It takes me ___ hour to get to school. A. an  B. a",
+      "solution": "A. an。hour 的 h 不发音，首音是元音音素，前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hour",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hour"
+      }
+    ]
+  },
+  {
+    "word": "ago",
+    "examTags": [
+      "语境理解·时间表达",
+      "语法·一般过去时"
+    ],
+    "grammar": "ago 是副词，放在表示时间长度的词语后，表示“距今……以前”；通常与一般过去时连用。",
+    "collocations": "two days ago; an hour ago; a long time ago; years ago",
+    "commonMistake": "ago 放在时间表达后，如 three years ago；不能放在时间表达前，也不与一般现在时搭配表示过去。",
+    "example": {
+      "english": "My family moved here two years ago.",
+      "chinese": "我家两年前搬到了这里。"
+    },
+    "application": {
+      "prompt": "选词填空：We visited the farm three days ___. A. ago  B. after",
+      "solution": "A. ago。ago 放在时间长度 three days 后，表示“……以前”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ago",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ago"
+      }
+    ]
+  },
+  {
+    "word": "family",
+    "examTags": [
+      "话题语境·家庭",
+      "词法·名词单复数"
+    ],
+    "grammar": "family 是可数集体名词，复数为 families；把家庭看作整体时谓语常用单数，强调成员时英式英语也可用复数。",
+    "collocations": "my family; a large family; family members; family life",
+    "commonMistake": "family 的复数是 families（辅音字母 + y 变 y 为 ies）；单数前可用 a，如 a family。",
+    "example": {
+      "english": "My family has five people.",
+      "chinese": "我家有五口人。"
+    },
+    "application": {
+      "prompt": "选词填空：There are two ___ in this story. A. families  B. family",
+      "solution": "A. families。two 后接可数名词复数；family 的复数拼作 families。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: family",
+        "url": "https://dictionary.cambridge.org/dictionary/english/family"
+      }
+    ]
+  },
+  {
+    "word": "bird",
+    "examTags": [
+      "词法·名词单复数",
+      "话题语境·动物"
+    ],
+    "grammar": "bird 是可数名词，复数为 birds；表示一只鸟时，单数前通常用 a。",
+    "collocations": "a small bird; a bird on the wall; feed the birds; birds in a tree",
+    "commonMistake": "表示多只鸟时要用 birds；不要把 bird 的复数写成 bird’s，后者通常表示“鸟的”。",
+    "example": {
+      "english": "A small bird is sitting on the wall.",
+      "chinese": "一只小鸟正停在墙上。"
+    },
+    "application": {
+      "prompt": "选词填空：The ___ is singing in the tree. A. bird  B. birds",
+      "solution": "A. bird。谓语 is 为单数，此处主语用 bird。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bird",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bird"
+      }
+    ]
+  },
+  {
+    "word": "speak",
+    "examTags": [
+      "词法·动词词形",
+      "语言运用·动词搭配"
+    ],
+    "grammar": "speak 表示说话或说某种语言；第三人称单数为 speaks，过去式 spoke，过去分词 spoken。表示会某种语言时，speak 后直接接语言名。",
+    "collocations": "speak Chinese; speak English; speak to my parent; speak with friends",
+    "commonMistake": "表示“会说某种语言”时直接说 speak English，不必加 in；注意 speak–spoke–spoken 的不规则变化。",
+    "example": {
+      "english": "They speak Chinese at home.",
+      "chinese": "他们在家说汉语。"
+    },
+    "application": {
+      "prompt": "选词填空：They ___ English after class. A. speak  B. speaks",
+      "solution": "A. speak。主语 they 是复数，谓语用动词原形 speak。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: speak",
+        "url": "https://dictionary.cambridge.org/dictionary/english/speak"
+      }
+    ]
+  },
+  {
+    "word": "sport",
+    "examTags": [
+      "词法·名词可数性",
+      "话题语境·运动"
+    ],
+    "grammar": "sport 可数时表示一种运动项目，复数为 sports；英式英语中 sport 也可作不可数名词表示一般体育活动，美式英语常用 sports。",
+    "collocations": "a team sport; play sports; do sport; sports and music",
+    "commonMistake": "表示一种运动项目时用 a sport；表示一般运动活动时英式英语可用 sport，美式英语常用 sports。",
+    "example": {
+      "english": "Basketball is a team sport.",
+      "chinese": "篮球是一项团队运动。"
+    },
+    "application": {
+      "prompt": "选词填空：Basketball is a team ___. A. sport  B. sports",
+      "solution": "A. sport。a team 后需接单数可数名词 sport。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sport",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sport"
+      }
+    ]
+  },
+  {
+    "word": "often",
+    "examTags": [
+      "语法·频度副词",
+      "语法·语序"
+    ],
+    "grammar": "often 是频度副词，常放在实义动词前、be 动词后，也可放在句末；how often 用于询问频率。",
+    "collocations": "often play sports; often listen to music; how often; not often",
+    "commonMistake": "一般把 often 放在实义动词前，如 I often play；be 动词后，如 She is often at home。",
+    "example": {
+      "english": "I often listen to music with my family.",
+      "chinese": "我常和家人一起听音乐。"
+    },
+    "application": {
+      "prompt": "选出自然的语序：A. I often play basketball.  B. I play often basketball.",
+      "solution": "A。频度副词 often 通常放在实义动词 play 前。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: often",
+        "url": "https://dictionary.cambridge.org/dictionary/english/often"
+      },
+      {
+        "label": "Cambridge Grammar: Often",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/often"
+      }
+    ]
+  },
+  {
+    "word": "play",
+    "examTags": [
+      "语言运用·动词搭配",
+      "语法·名词与冠词"
+    ],
+    "grammar": "play 表示参加运动、游戏或演奏乐器；一般现在时第三人称单数为 plays，过去式和过去分词为 played。运动项目前通常不加冠词，乐器前常用 the。",
+    "collocations": "play basketball; play with friends; play a game; play the piano",
+    "commonMistake": "表示进行球类运动时通常说 play basketball/football，不说 play a basketball；演奏乐器常说 play the piano。",
+    "example": {
+      "english": "We play sports with our friends after school.",
+      "chinese": "放学后我们和朋友一起运动。"
+    },
+    "application": {
+      "prompt": "选词填空：They ___ football every Friday. A. play  B. play a",
+      "solution": "A. play。表示参加足球运动时说 play football，运动名称前通常不加 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: play",
+        "url": "https://dictionary.cambridge.org/dictionary/english/play"
+      },
+      {
+        "label": "Cambridge Grammar: Play or game?",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/play-or-game"
+      }
+    ]
+  },
+  {
+    "word": "after",
+    "examTags": [
+      "词汇辨析·介词与连词",
+      "语法·时间状语从句"
+    ],
+    "grammar": "after 作介词时后接名词或动名词；作连词时后接完整句子（主语 + 谓语）。表示将来时，after 从句通常用一般现在时。",
+    "collocations": "after school; after dinner; after playing sport; after we get home",
+    "commonMistake": "after + 名词/动名词，或 after + 主语 + 谓语；表示将来时，从句用一般现在时，如 after we get home。",
+    "example": {
+      "english": "We play sports after we finish our homework.",
+      "chinese": "我们做完作业后运动。"
+    },
+    "application": {
+      "prompt": "选词填空：We eat dinner after ___. A. we get home  B. home",
+      "solution": "A. we get home。after 作连词时后接主语 we 和谓语 get；after home 结构不完整。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: After, afterwards",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/after"
+      }
+    ]
+  },
+  {
+    "word": "want",
+    "examTags": [
+      "语言运用·动词搭配",
+      "语法·动词不定式"
+    ],
+    "grammar": "want 表示想要，可接名词/代词作宾语，也可用 want to do sth；第三人称单数为 wants，过去式为 wanted。",
+    "collocations": "want some food; want to play; want to write; want sb to do sth",
+    "commonMistake": "want 后接动词时通常要用 to，如 want to play；不能说 want play。",
+    "example": {
+      "english": "I want to write a letter to my grandpa.",
+      "chinese": "我想给爷爷/外公写一封信。"
+    },
+    "application": {
+      "prompt": "选词填空：I want ___ my grandparents this weekend. A. to visit  B. visit",
+      "solution": "A. to visit。want 后接动词时用 to + 动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: want",
+        "url": "https://dictionary.cambridge.org/dictionary/english/want"
+      },
+      {
+        "label": "Cambridge Grammar: Word patterns: want",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/word-patterns-want"
+      }
+    ]
+  },
+  {
+    "word": "be",
+    "examTags": [
+      "语法·动词变形",
+      "语法·主谓一致"
+    ],
+    "grammar": "be 是系动词和助动词；一般现在时 am/is/are 随主语变化，过去式为 was/were，过去分词 been，现在分词 being。",
+    "collocations": "be happy; be at home; be from China; be a student",
+    "commonMistake": "be 动词要与主语一致：I am，he/she/it is，you/we/they are；不要把 he is 和 they are 混用。",
+    "example": {
+      "english": "We are in the same class.",
+      "chinese": "我们在同一个班。"
+    },
+    "application": {
+      "prompt": "选词填空：He ___ my classmate. A. is  B. are",
+      "solution": "A. is。主语 he 是第三人称单数，对应 be 动词 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: be",
+        "url": "https://dictionary.cambridge.org/dictionary/english/be"
+      },
+      {
+        "label": "Cambridge Grammar: Be",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/verb-be"
+      }
+    ]
+  },
+  {
+    "word": "place",
+    "examTags": [
+      "词法·名词单复数",
+      "语法·不定式搭配"
+    ],
+    "grammar": "place 作“地方、地点”时是可数名词，复数为 places；可用 a place to do sth 表示“做某事的地方”。",
+    "collocations": "a nice place; a place to live; place of interest; in this place",
+    "commonMistake": "place 是可数名词，单数前通常要有 a/the/物主限定词；不要漏掉冠词说 It is good place。",
+    "example": {
+      "english": "The park is a good place to play sports.",
+      "chinese": "公园是运动的好地方。"
+    },
+    "application": {
+      "prompt": "选词填空：The park is a good ___ to play football. A. place  B. music",
+      "solution": "A. place。a good place to play football 表示“踢足球的好地方”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: place",
+        "url": "https://dictionary.cambridge.org/dictionary/english/place"
+      }
+    ]
+  },
+  {
+    "word": "music",
+    "examTags": [
+      "词法·不可数名词",
+      "语言运用·动词搭配"
+    ],
+    "grammar": "music 表示音乐时通常是不可数名词，不用 a，也通常没有复数形式；表示一首乐曲可说 a piece of music。",
+    "collocations": "listen to music; play music; Chinese music; a piece of music",
+    "commonMistake": "表示一般的音乐时不说 a music 或 musics；listen 后接音乐时要用 listen to music。",
+    "example": {
+      "english": "I often listen to music with my parents.",
+      "chinese": "我常和父母一起听音乐。"
+    },
+    "application": {
+      "prompt": "选词填空：There is some ___ playing in the room. A. music  B. musics",
+      "solution": "A. music。music 表示一般的音乐时是不可数名词，不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: music",
+        "url": "https://dictionary.cambridge.org/dictionary/english/music"
+      }
+    ]
+  },
+  {
+    "word": "love",
+    "examTags": [
+      "词汇辨析·词性",
+      "语言运用·动词搭配"
+    ],
+    "grammar": "love 可作动词表示“喜爱、爱”，也可作名词表示“爱”；作动词时可接名词/代词或 to do/doing。",
+    "collocations": "love music; love my family; love doing sports; love for music",
+    "commonMistake": "love 作动词时可直接接宾语，如 love music；love 作名词时常用 love for sth 表示对某事物的热爱。",
+    "example": {
+      "english": "My friends love music and sports.",
+      "chinese": "我的朋友们喜欢音乐和运动。"
+    },
+    "application": {
+      "prompt": "选词填空：My friends ___ music. A. love  B. loves",
+      "solution": "A. love。主语 friends 是复数，谓语用动词原形 love。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: love",
+        "url": "https://dictionary.cambridge.org/dictionary/english/love"
+      }
+    ]
+  },
+  {
+    "word": "write",
+    "examTags": [
+      "词法·动词词形",
+      "语言运用·动词搭配"
+    ],
+    "grammar": "write 表示写；过去式 wrote，过去分词 written。可接写的内容作宾语，也可用 write to sb 表示给某人写信/消息。",
+    "collocations": "write a letter; write a story; write to my parent; write down a name",
+    "commonMistake": "write–wrote–written 是不规则变化；表示“给某人写信”常用 write to sb。",
+    "example": {
+      "english": "I write about my family in my notebook.",
+      "chinese": "我在笔记本里写我的家庭。"
+    },
+    "application": {
+      "prompt": "选词填空：Yesterday, I ___ a note to my mom. A. wrote  B. write",
+      "solution": "A. wrote。Yesterday 表示过去，write 的过去式是 wrote。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: write",
+        "url": "https://dictionary.cambridge.org/dictionary/english/write"
+      }
+    ]
+  }
+]

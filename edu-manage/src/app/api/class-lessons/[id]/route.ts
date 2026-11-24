@@ -18,7 +18,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const prisma = await getRequestPrisma()
 
   const { id } = await params
-  if (!await isClassLessonInActiveTerm(prisma, id)) {
+  if (!await isClassLessonInActiveTerm(prisma, id, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能调整课次' }, { status: 409 })
   }
   const body = await req.json()
@@ -164,7 +164,114 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
     }
   }
 
-  const updated = await prisma.$transaction(async (tx) => {
+  const updateLesson = () => prisma.$transaction(async (tx) => {
+    const current = await tx.classLesson.findFirst({
+      where: {
+        id,
+        division: user.division,
+        deletedAt: null,
+        group: { deletedAt: null, term: { status: 'ACTIVE' } },
+      },
+      select: {
+        teacherId: true,
+        subject: true,
+        lessonDate: true,
+        startTime: true,
+        endTime: true,
+        status: true,
+        groupId: true,
+        attendanceSubmittedAt: true,
+        hoursDeductedAt: true,
+      },
+    })
+    if (!current) throw { status: 409, message: '课次或运营批次已变化，请刷新后重试' }
+    if (current.status !== 'SCHEDULED' || current.attendanceSubmittedAt || current.hoursDeductedAt) {
+      throw { status: 409, message: '课次已开始或已处理，不能再调整' }
+    }
+    const stale = current.teacherId !== lesson.teacherId
+      || current.subject !== lesson.subject
+      || current.lessonDate.getTime() !== lesson.lessonDate.getTime()
+      || current.startTime !== lesson.startTime
+      || current.endTime !== lesson.endTime
+      || current.status !== lesson.status
+      || current.groupId !== lesson.groupId
+    if (stale) throw { status: 409, message: '课次已被其他人修改，请刷新后重试' }
+
+    if (teacherId !== undefined || subject !== undefined) {
+      const assignments = await tx.classGroupTeacher.findMany({
+        where: { groupId: lesson.groupId },
+        select: { teacherId: true, subject: true },
+      })
+      const assigned = assignments.some((item) => item.teacherId === targetTeacherId && item.subject === targetSubject)
+        || (assignments.length === 0 && lesson.group.teacherId === targetTeacherId && targetSubject === lesson.group.course.subject)
+      if (!assigned) throw { status: 400, message: '本次课的教师和学科须属于该班已分配的任课关系' }
+    }
+
+    // Repeat teacher, room and student conflict checks in the same
+    // serializable transaction as the update to close the parallel-edit race.
+    const transactionDayLessons = await tx.classLesson.findMany({
+      where: {
+        id: { not: id },
+        lessonDate: targetDate,
+        status: { not: 'CANCELLED' },
+        deletedAt: null,
+        group: { deletedAt: null },
+        division: lesson.division,
+        OR: [
+          ...(targetTeacherId ? [
+            { teacherId: targetTeacherId },
+            { teacherId: null, group: { teacherId: targetTeacherId } },
+            { teacherId: null, group: { teacherAssignments: { some: { teacherId: targetTeacherId } } } },
+          ] : []),
+          ...(lesson.group.roomId ? [{ group: { roomId: lesson.group.roomId } }] : []),
+        ],
+      },
+      include: { group: { select: { name: true, roomId: true, teacherId: true, teacherAssignments: { select: { teacherId: true } } } } },
+    })
+    const transactionMoveConflicts = findScheduleMoveConflicts(targetStart, targetEnd, transactionDayLessons.map((candidate) => ({
+      id: candidate.id,
+      startTime: candidate.startTime,
+      endTime: candidate.endTime,
+      label: candidate.group.name,
+      teacherConflict: Boolean(targetTeacherId) && (
+        candidate.teacherId === targetTeacherId
+        || (!candidate.teacherId && candidate.group.teacherId === targetTeacherId)
+        || (!candidate.teacherId && candidate.group.teacherAssignments.some((item) => item.teacherId === targetTeacherId))
+      ),
+      roomConflict: Boolean(lesson.group.roomId) && candidate.group.roomId === lesson.group.roomId,
+    })))
+    if (transactionMoveConflicts.length) {
+      const conflict = transactionMoveConflicts[0]
+      const reasons = [conflict.teacherConflict ? '教师' : '', conflict.roomConflict ? '教室' : ''].filter(Boolean).join('和')
+      throw { status: 409, message: `${reasons}时间冲突：${conflict.label || '已有课程'} ${conflict.startTime}-${conflict.endTime}` }
+    }
+
+    let transactionStudentIds = (await tx.classLessonStudent.findMany({
+      where: { lessonId: id },
+      select: { studentId: true },
+    })).map((record) => record.studentId)
+    if (subject !== undefined && subject !== lesson.subject) transactionStudentIds = []
+    if (!transactionStudentIds.length) {
+      transactionStudentIds = (await tx.enrollment.findMany({
+        where: { groupId: lesson.groupId, status: 'ACTIVE', deletedAt: null },
+        select: { studentId: true, subjects: true },
+      })).filter((record) => enrollmentIncludesSubject(record.subjects, targetSubject)).map((record) => record.studentId)
+    }
+    if (transactionStudentIds.length) {
+      const transactionStudentConflicts = await findStudentLessonConflicts(tx, {
+        studentIds: transactionStudentIds,
+        date: targetDate,
+        startTime: targetStart,
+        endTime: targetEnd,
+        excludeLessonId: id,
+        termId: lesson.group.termId || undefined,
+      })
+      if (transactionStudentConflicts.length) {
+        const conflict = transactionStudentConflicts[0]
+        throw { status: 409, message: `学生冲突：${conflict.studentName} 在 ${conflict.timeRange} 已有【${conflict.courseName}】课程` }
+      }
+    }
+
     const record = await tx.classLesson.update({
       where: { id },
       data: {
@@ -248,7 +355,25 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
       },
     })
     return record
-  })
+  }, { isolationLevel: 'Serializable' })
+
+  let updated: Awaited<ReturnType<typeof updateLesson>> | undefined
+  try {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        updated = await updateLesson()
+        break
+      } catch (error) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2034' && attempt < 2) continue
+        throw error
+      }
+    }
+    if (!updated) throw { status: 409, message: '排课正在变化，请刷新后重试' }
+  } catch (error) {
+    const routeError = error as { status?: number; message?: string }
+    if (routeError.status) return NextResponse.json({ error: routeError.message }, { status: routeError.status })
+    throw error
+  }
 
   revalidatePath('/schedule')
   revalidatePath('/teacher/schedule')

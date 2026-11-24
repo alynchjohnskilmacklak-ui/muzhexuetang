@@ -1,0 +1,342 @@
+[
+  {
+    "word": "reuse",
+    "examTags": ["词汇·动词派生", "阅读·循环利用"],
+    "grammar": "v. 再次使用；重复使用。reuse—reused—reused；名词 reuse 表示再利用，前缀 re- 表示“再、重新”。",
+    "collocations": "reuse a bottle; reuse old materials; reuse shopping bags; reuse and recycle",
+    "commonMistake": "reuse 表示把原物再次使用，recycle 表示加工后回收利用；旧瓶直接装水是 reuse，熔化再制则是 recycle。",
+    "example": {"english": "We reuse glass jars to store pencils instead of throwing them away.", "chinese": "我们重复使用玻璃罐来装铅笔，而不是把它们扔掉。"},
+    "application": {"prompt": "We ___ glass jars to store pencils instead of throwing them away. A. reuse B. refuse", "solution": "A。解析：把旧玻璃罐继续拿来装铅笔是 reuse（重复使用）；refuse 是拒绝。"},
+    "sources": [{"label": "Cambridge Dictionary: reuse", "url": "https://dictionary.cambridge.org/dictionary/english/reuse"}]
+  },
+  {
+    "word": "recycle",
+    "examTags": ["词汇·动词派生", "阅读·环保行动"],
+    "grammar": "v. 回收利用。recycle—recycled—recycled；名词 recycling 表示回收利用这一过程。",
+    "collocations": "recycle paper; recycle plastic bottles; recycle household waste; recycling bin",
+    "commonMistake": "recycle 的过去式去掉词尾不发音的 e，再加 -ed：recycled；名词“回收利用”常写 recycling。",
+    "example": {"english": "Our school recycles paper and cans in separate bins.", "chinese": "我们学校把纸张和易拉罐分类回收。"},
+    "application": {"prompt": "Please ___ the paper rather than put it in the bin for general waste. A. retell B. recycle", "solution": "B。解析：把纸张分类处理以制成可再用材料是 recycle（回收利用）。"},
+    "sources": [{"label": "Cambridge Dictionary: recycle", "url": "https://dictionary.cambridge.org/dictionary/english/recycle"}]
+  },
+  {
+    "word": "pollution",
+    "examTags": ["词汇·名词派生", "阅读·环境问题"],
+    "grammar": "n. 污染；污染物，通常作不可数名词。动词 pollute，形容词 polluted（受污染的）和 polluting（造成污染的）。",
+    "collocations": "air pollution; water pollution; noise pollution; reduce pollution",
+    "commonMistake": "pollution 是名词，描述“污染严重”可说 severe pollution；pollute 才是动词，不能说 factories pollution the river。",
+    "example": {"english": "Air pollution can make it harder for people with asthma to breathe.", "chinese": "空气污染会让哮喘患者呼吸更加困难。"},
+    "application": {"prompt": "The river was closed to swimmers because of severe ___. A. pollution B. pollute", "solution": "A。解析：because of 后接名词 pollution；pollute 是动词，表示“污染”。"},
+    "sources": [{"label": "Cambridge Dictionary: pollution", "url": "https://dictionary.cambridge.org/dictionary/english/pollution"}]
+  },
+  {
+    "word": "chemical",
+    "examTags": ["词汇·名词与形容词", "阅读·科学与环境"],
+    "grammar": "n. 化学品；化学制品；adj. 化学的。名词可数时复数 chemicals；名词化学为 chemistry，化学家为 chemist。",
+    "collocations": "a dangerous chemical; household chemicals; chemical waste; chemical reaction",
+    "commonMistake": "chemical 作名词指化学品，chemistry 指学科“化学”；the chemical 可指某一种化学物质。",
+    "example": {"english": "The label warns that this chemical can irritate your skin.", "chinese": "标签警告说，这种化学品可能刺激皮肤。"},
+    "application": {"prompt": "The label warns that this ___ can irritate your skin. A. chemically B. chemical", "solution": "B。解析：this 后需要名词 chemical，指这种化学品；chemically 是副词。"},
+    "sources": [{"label": "Cambridge Dictionary: chemical", "url": "https://dictionary.cambridge.org/dictionary/english/chemical"}]
+  },
+  {
+    "word": "smog",
+    "examTags": ["词汇·环境名词", "阅读·空气质量"],
+    "grammar": "n. 烟雾；烟雾污染，通常作不可数名词。由 smoke 与 fog 合成，可说 a thick layer of smog。",
+    "collocations": "thick smog; smog pollution; a smog alert; reduce smog",
+    "commonMistake": "smog 特指烟尘造成的污染性烟雾；fog 通常指雾气本身，不能把工厂排放形成的 smog 简单译作普通雾。",
+    "example": {"english": "Traffic and factory fumes created a layer of smog over the city.", "chinese": "交通和工厂废气在城市上空形成了一层烟雾。"},
+    "application": {"prompt": "The report linked the gray haze over the city to traffic and factory emissions; it was ___. A. smog B. mist", "solution": "A。解析：由交通和工厂排放造成的污染性烟雾是 smog；mist 是薄雾。"},
+    "sources": [{"label": "Cambridge Dictionary: smog", "url": "https://dictionary.cambridge.org/dictionary/english/smog"}]
+  },
+  {
+    "word": "global",
+    "examTags": ["词汇·形容词派生", "阅读·世界与环境"],
+    "grammar": "adj. 全球的；全世界的。名词 globe 指地球或球体，副词 globally 表示“在全球范围内”。",
+    "collocations": "global issues; global market; global population; a global problem",
+    "commonMistake": "global 是形容词，可说 global warming；globe 是名词，表示地球或球体，不能直接修饰 warming。",
+    "example": {"english": "The charity works with schools around the world on global issues.", "chinese": "这家慈善机构与世界各地的学校合作，关注全球性问题。"},
+    "application": {"prompt": "The charity works with schools around the world on ___ issues. A. globe B. global", "solution": "B。解析：修饰名词 issues 需要形容词 global（全球的）；globe 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: global", "url": "https://dictionary.cambridge.org/dictionary/english/global"}]
+  },
+  {
+    "word": "global warming",
+    "examTags": ["词汇·环境名词短语", "阅读·气候变化"],
+    "grammar": "短语名词：全球变暖，通常作不可数名词。global 修饰 warming；讨论成因常用 gases contribute to global warming。",
+    "collocations": "slow global warming; the effects of global warming; contribute to global warming; tackle global warming",
+    "commonMistake": "global warming 是固定名词短语；不要漏写 warming 的 -ing，也不要把它拆成 global warm。",
+    "example": {"english": "Using less fossil fuel can help slow global warming.", "chinese": "少用化石燃料有助于减缓全球变暖。"},
+    "application": {"prompt": "Cutting greenhouse-gas emissions can help slow ___. A. global warming B. global warm", "solution": "A。解析：表示“全球变暖”的固定名词短语是 global warming；warm 不能在此作名词。"},
+    "sources": [{"label": "Cambridge Dictionary: global warming", "url": "https://dictionary.cambridge.org/dictionary/english/global-warming"}]
+  },
+  {
+    "word": "pollute",
+    "examTags": ["词汇·动词派生", "语法·动词词形"],
+    "grammar": "v. 污染；弄脏。pollute—polluted—polluted；名词 pollution，形容词 polluted。",
+    "collocations": "pollute the air; pollute a river; pollute the environment; heavily polluted",
+    "commonMistake": "pollute 是动词，句中需按主语和时态变化：smoke pollutes the air；名词“污染”才用 pollution。",
+    "example": {"english": "Plastic bags can pollute the sea if people leave them on the beach.", "chinese": "如果人们把塑料袋留在海滩上，它们就会污染海洋。"},
+    "application": {"prompt": "Oil spills can ___ the sea and harm wildlife. A. pollution B. pollute", "solution": "B。解析：can 后接动词原形 pollute，表示“污染”海洋；pollution 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: pollute", "url": "https://dictionary.cambridge.org/dictionary/english/pollute"}]
+  },
+  {
+    "word": "disposal",
+    "examTags": ["词汇·名词派生", "阅读·垃圾处理"],
+    "grammar": "n. 处置；清理。常用 disposal of sth；动词为 dispose，dispose of 表示“处理、处置”。",
+    "collocations": "the disposal of waste; waste disposal; safe disposal; at someone's disposal",
+    "commonMistake": "disposal 是名词，后常接 of；动词搭配则是 dispose of，不能把 disposal of 与 dispose of 混用词性。",
+    "example": {"english": "The safe disposal of batteries requires a special collection point.", "chinese": "电池的安全处置需要专门的回收点。"},
+    "application": {"prompt": "The safe ___ of batteries requires a special collection point. A. disposal B. dispose", "solution": "A。解析：形容词 safe 后需要名词 disposal；dispose 是动词，通常用 dispose of。"},
+    "sources": [{"label": "Cambridge Dictionary: disposal", "url": "https://dictionary.cambridge.org/dictionary/english/disposal"}]
+  },
+  {
+    "word": "package",
+    "examTags": ["词汇·名词与动词", "语法·动词词形变化"],
+    "grammar": "n. 包裹；包装；v. 把……包装好。package—packaged—packaged；包装材料可说 packaging。",
+    "collocations": "a package of books; package a gift; package food safely; package design",
+    "commonMistake": "package 可作名词也可作动词；作动词变过去式时词尾 e 保留后加 -d，写 packaged，不写 packeged。",
+    "example": {"english": "The workers packaged the glass carefully before sending it.", "chinese": "工人们寄出玻璃制品前仔细地把它们包装好。"},
+    "application": {"prompt": "Yesterday, we ___ the glass carefully before sending it. A. package B. packaged", "solution": "B。解析：Yesterday 表示过去，package 的过去式为 packaged，意为“把……包装好”。"},
+    "sources": [{"label": "Cambridge Dictionary: package", "url": "https://dictionary.cambridge.org/dictionary/english/package"}]
+  },
+  {
+    "word": "environmental",
+    "examTags": ["词汇·形容词派生", "阅读·环境保护"],
+    "grammar": "adj. 自然环境的；生态环境的。名词 environment；副词 environmentally；常作定语修饰问题、保护或组织。",
+    "collocations": "environmental protection; environmental problems; environmental damage; environmental group",
+    "commonMistake": "environmental 是形容词，environment 是名词；environmental protection 表示“环境保护”，不能漏掉形容词后缀 -al。",
+    "example": {"english": "Our class joined an environmental project to clean the riverbank.", "chinese": "我们班参加了一个清理河岸的环保项目。"},
+    "application": {"prompt": "The school invited an ___ expert to speak about waste and climate. A. environmental B. environment", "solution": "A。解析：修饰 expert 要用形容词 environmental；environment 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: environmental", "url": "https://dictionary.cambridge.org/dictionary/english/environmental"}]
+  },
+  {
+    "word": "well-known",
+    "examTags": ["词汇·复合形容词", "阅读·人物评价"],
+    "grammar": "adj. 广为人知的；著名的。常作定语或表语；比较级 better-known，最高级 best-known。",
+    "collocations": "a well-known writer; well-known for; a well-known fact; become well-known",
+    "commonMistake": "well-known 作前置定语时通常加连字符；well-known for 后接出名的原因，well-known as 后接身份。",
+    "example": {"english": "The well-known scientist gave a talk that attracted reporters.", "chinese": "这位著名科学家做了一场吸引记者到场的演讲。"},
+    "application": {"prompt": "The ___ scientist gave a talk that attracted reporters from many newspapers. A. well-know B. well-known", "solution": "B。解析：复合形容词 well-known 的拼写需要词尾 n 和连字符，修饰 scientist。"},
+    "sources": [{"label": "Cambridge Dictionary: well-known", "url": "https://dictionary.cambridge.org/dictionary/english/well-known"}]
+  },
+  {
+    "word": "disturb",
+    "examTags": ["词汇·动词派生", "语法·否定祈使句"],
+    "grammar": "v. 打扰；扰乱；使焦虑。disturb—disturbed—disturbed；名词 disturbance，形容词 disturbed/disturbing。",
+    "collocations": "disturb someone; disturb the peace; be disturbed by noise; a disturbing sight",
+    "commonMistake": "disturbed 描述人的感受（受到困扰的），disturbing 描述令人不安的事物；不要把两类分词形容词互换。",
+    "example": {"english": "Please do not disturb the birds while they are nesting.", "chinese": "鸟儿筑巢期间，请不要打扰它们。"},
+    "application": {"prompt": "Please do not ___ the birds while they are nesting. A. disturb B. disturbance", "solution": "A。解析：do not 后接动词原形 disturb；disturbance 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: disturb", "url": "https://dictionary.cambridge.org/dictionary/english/disturb"}]
+  },
+  {
+    "word": "trap",
+    "examTags": ["词汇·名词与动词", "语法·双写辅音变化"],
+    "grammar": "n. 陷阱；v. 设陷阱捕捉；使困住。trap—trapped—trapped；现在分词 trapping，词尾辅音 p 双写。",
+    "collocations": "set a trap; trap an animal; be trapped in a lift; a mouse trap",
+    "commonMistake": "trap 变过去式或现在分词时要双写 p：trapped、trapping；不要写成 traped 或 traping。",
+    "example": {"english": "The mouse was caught in a trap baited with cheese.", "chinese": "这只老鼠被一个放了奶酪作诱饵的捕鼠夹夹住了。"},
+    "application": {"prompt": "The mouse was caught in a ___ baited with cheese. A. trapped B. trap", "solution": "B。解析：a 后面需要名词 trap（陷阱）；trapped 是动词过去式或过去分词。"},
+    "sources": [{"label": "Cambridge Dictionary: trap", "url": "https://dictionary.cambridge.org/dictionary/english/trap"}]
+  },
+  {
+    "word": "lamp",
+    "examTags": ["词汇·可数名词", "阅读·家居与照明"],
+    "grammar": "n. 灯；台灯。可数名词，复数 lamps；常指有灯泡和灯罩的照明器具，lamp 可由 desk、bedside 等修饰。",
+    "collocations": "a desk lamp; a bedside lamp; switch on a lamp; a lamp shade",
+    "commonMistake": "lamp 指灯具，light 可指光线或灯；说“挪动台灯”用 lamp，说“房间里没有光”常用 light。",
+    "example": {"english": "I moved the desk lamp closer so I could read the small print.", "chinese": "我把台灯挪近了一些，这样就能看清小字。"},
+    "application": {"prompt": "Could you move this ___ closer to my book? A. lamp B. lamps", "solution": "A。解析：this 后接单数名词 lamp，指这盏灯；lamps 是复数。"},
+    "sources": [{"label": "Cambridge Dictionary: lamp", "url": "https://dictionary.cambridge.org/dictionary/english/lamp"}]
+  },
+  {
+    "word": "bother",
+    "examTags": ["词汇·动词搭配", "语法·不定式结构"],
+    "grammar": "v. 使烦恼；打扰；费心。常用 bother someone；bother to do sth 表示“费心做某事”。",
+    "collocations": "bother someone; bother to ask; don't bother; it bothers me that...",
+    "commonMistake": "bother 作“使某人烦恼”时直接接人作宾语：The noise bothers me；不要说 bothers to me。",
+    "example": {"english": "The repeated phone calls began to bother the family during dinner.", "chinese": "晚餐时，反复打来的电话开始让这一家人心烦。"},
+    "application": {"prompt": "The repeated phone calls began to ___ the family during dinner. A. bothers B. bother", "solution": "B。解析：begin to 后接动词原形 bother；此处指电话打扰了这一家人。"},
+    "sources": [{"label": "Cambridge Dictionary: bother", "url": "https://dictionary.cambridge.org/dictionary/english/bother"}]
+  },
+  {
+    "word": "loss",
+    "examTags": ["词汇·名词派生", "语法·词形辨析"],
+    "grammar": "n. 丧失；损失；亏损。动词为 lose，过去式 lost；形容词 lost 常表示迷路或失去的。",
+    "collocations": "a loss of power; suffer a loss; a great loss; loss of life",
+    "commonMistake": "loss 是名词，lose 是动词：the loss of a key（钥匙的丢失），lose a key（丢钥匙）；不要写成 lose of。",
+    "example": {"english": "The sudden loss of electricity stopped the factory's machines.", "chinese": "突然断电使工厂的机器停了下来。"},
+    "application": {"prompt": "The sudden ___ of electricity stopped the factory's machines. A. loss B. lose", "solution": "A。解析：the sudden 后需要名词 loss，表示“突然断电”；lose 是动词。"},
+    "sources": [{"label": "Cambridge Dictionary: loss", "url": "https://dictionary.cambridge.org/dictionary/english/loss"}]
+  },
+  {
+    "word": "guardian",
+    "examTags": ["词汇·人物名词派生", "阅读·家庭与责任"],
+    "grammar": "n. 监护人；保护者；守卫者。可数名词，复数 guardians；动词 guard 表示守卫，名词 guard 也可指警卫。",
+    "collocations": "a legal guardian; guardian of a child; guardian angel; act as a guardian",
+    "commonMistake": "guardian 通常指负有保护或监护责任的人；guard 更常指看守者或守卫行为，法律文件中不要混用。",
+    "example": {"english": "A legal guardian signed the form for the child.", "chinese": "一位法定监护人为这个孩子签了表格。"},
+    "application": {"prompt": "A legal ___ signed the form for the child. A. guard B. guardian", "solution": "B。解析：替孩子签署法定文件的人是 guardian（监护人）；guard 通常指警卫。"},
+    "sources": [{"label": "Cambridge Dictionary: guardian", "url": "https://dictionary.cambridge.org/dictionary/english/guardian"}]
+  },
+  {
+    "word": "smelly",
+    "examTags": ["词汇·形容词派生", "阅读·感官描写"],
+    "grammar": "adj. 有难闻气味的。由 smell + -y 构成；比较级 smellier，最高级 smelliest，变形时 y 改为 i。",
+    "collocations": "smelly socks; smelly rubbish; a smelly fish; smell bad",
+    "commonMistake": "smelly 是形容词，smell 可作名词或动词；比较级写 smellier，不写 more smelly 在基础词形题中容易漏掉 y 的变化。",
+    "example": {"english": "We threw away the smelly fish that had been left in the sun.", "chinese": "我们把那条被遗忘在太阳下、已经发臭的鱼扔掉了。"},
+    "application": {"prompt": "We threw away the ___ fish because it had been left in the sun. A. smelly B. smell", "solution": "A。解析：修饰 fish 需要形容词 smelly，描述鱼有难闻的气味；smell 在此是名词或动词。"},
+    "sources": [{"label": "Cambridge Dictionary: smelly", "url": "https://dictionary.cambridge.org/dictionary/english/smelly"}]
+  },
+  {
+    "word": "ban",
+    "examTags": ["词汇·名词与动词", "语法·双写辅音变化"],
+    "grammar": "n. 禁令；v. 明令禁止。ban—banned—banned；现在分词 banning，词尾 n 双写。",
+    "collocations": "ban plastic bags; impose a ban on; a smoking ban; be banned from doing sth",
+    "commonMistake": "ban 的过去式和现在分词都双写 n：banned、banning；名词搭配常用 a ban on sth。",
+    "example": {"english": "The city plans to ban plastic bags in supermarkets next year.", "chinese": "市政府计划明年禁止超市使用塑料袋。"},
+    "application": {"prompt": "The city plans to ___ plastic bags in supermarkets next year. A. ban B. banned", "solution": "A。解析：plan to 后接动词原形 ban，表示“禁止”；banned 是过去式或过去分词。"},
+    "sources": [{"label": "Cambridge Dictionary: ban", "url": "https://dictionary.cambridge.org/dictionary/english/ban"}]
+  },
+  {
+    "word": "riverbank",
+    "examTags": ["词汇·复合名词", "阅读·河流与地貌"],
+    "grammar": "n. 河岸；河堤。可数，复数 riverbanks；也可分写为 river bank。",
+    "collocations": "a muddy riverbank; sit on the riverbank; along the riverbank; riverbank plants",
+    "commonMistake": "riverbank 是河流两侧的岸地；riverbed 指河床，位于河水流经的底部，二者位置不同。",
+    "example": {"english": "We sat on the riverbank and watched the boats pass.", "chinese": "我们坐在河岸边看船只经过。"},
+    "application": {"prompt": "A path followed the river's edge along the muddy ___. A. riverbed B. riverbank", "solution": "B。解析：沿河边的小路在泥泞的河岸 riverbank 上；riverbed 是水下的河床。"},
+    "sources": [{"label": "Cambridge Dictionary: riverbank", "url": "https://dictionary.cambridge.org/dictionary/english/riverbank"}]
+  },
+  {
+    "word": "steady",
+    "examTags": ["词汇·形容词与副词派生", "阅读·变化趋势"],
+    "grammar": "adj. 稳定的；持续的；平稳的。副词 steadily；比较级 steadier，最高级 steadiest。",
+    "collocations": "steady progress; a steady increase; keep a steady pace; hold something steady",
+    "commonMistake": "steady 作名词前定语或宾语补足语时用形容词，如 steady progress、hold it steady；steadily 才修饰动词。",
+    "example": {"english": "She has made steady progress in reading throughout the term.", "chinese": "整个学期里，她的阅读水平稳步提高。"},
+    "application": {"prompt": "She has made ___ progress in reading all term. A. steadiness B. steady", "solution": "B。解析：修饰名词 progress 需要形容词 steady；steadiness 是名词“稳定性”。"},
+    "sources": [{"label": "Cambridge Dictionary: steady", "url": "https://dictionary.cambridge.org/dictionary/english/steady"}]
+  },
+  {
+    "word": "income",
+    "examTags": ["词汇·名词", "阅读·工作与经济"],
+    "grammar": "n. 收入；收益。通常作不可数名词；表示个人或家庭收入时可说 monthly income 或 income from a job。",
+    "collocations": "monthly income; a steady income; income tax; earn an income",
+    "commonMistake": "income 通常不可数，不说 an income 或 incomes 表示一个人的收入；需要强调不同来源时才可能用复数。",
+    "example": {"english": "Her monthly income covers rent, food, and bus fares.", "chinese": "她每月的收入足以支付房租、食物和公交车费。"},
+    "application": {"prompt": "Her monthly ___ covers rent, food, and bus fares. A. income B. incoming", "solution": "A。解析：支付各项开支的钱是 income（收入）；incoming 常作形容词，表示“即将到来的”。"},
+    "sources": [{"label": "Cambridge Dictionary: income", "url": "https://dictionary.cambridge.org/dictionary/english/income"}]
+  },
+  {
+    "word": "clean-up",
+    "examTags": ["词汇·复合名词", "语法·动词短语与名词辨析"],
+    "grammar": "n. 清扫；清理；善后。常用于 a clean-up；动词短语 clean up 表示打扫或清理，书写时不加连字符。",
+    "collocations": "a beach clean-up; a community clean-up; organize a clean-up; clean up a river",
+    "commonMistake": "名词 clean-up 常带连字符，动词短语 clean up 分写：join a clean-up，但 clean up the beach。",
+    "example": {"english": "The community organized a beach clean-up after the storm.", "chinese": "暴风雨过后，社区组织了一次海滩清理活动。"},
+    "application": {"prompt": "After the storm, the volunteers planned a ___ of the beach. A. cleanly B. clean-up", "solution": "B。解析：a 后需要名词 clean-up（清理活动）；cleanly 是副词，不能作此处的宾语。"},
+    "sources": [{"label": "Cambridge Dictionary: clean-up", "url": "https://dictionary.cambridge.org/dictionary/english/clean-up"}]
+  },
+  {
+    "word": "generation",
+    "examTags": ["词汇·名词派生", "阅读·社会与代际"],
+    "grammar": "n. 一代人；产生；发电。可数，复数 generations；动词 generate，形容词 generational。",
+    "collocations": "the younger generation; future generations; a generation gap; power generation",
+    "commonMistake": "generation 是名词，可说 the next generation；generate 是动词“产生”，不要把动词原形放在冠词后。",
+    "example": {"english": "This generation grew up with smartphones and online classes.", "chinese": "这一代人伴随着智能手机和线上课程成长。"},
+    "application": {"prompt": "The next ___ may have different ideas about travel. A. generation B. generating", "solution": "A。解析：the next 后需要名词 generation，指“下一代人”；generating 是动名词或现在分词。"},
+    "sources": [{"label": "Cambridge Dictionary: generation", "url": "https://dictionary.cambridge.org/dictionary/english/generation"}]
+  },
+  {
+    "word": "protection",
+    "examTags": ["词汇·名词派生", "阅读·安全与环保"],
+    "grammar": "n. 保护；保护物。动词 protect，过去式 protected；形容词 protective（保护性的）、protected（受保护的）。",
+    "collocations": "environmental protection; eye protection; protection from the sun; under someone's protection",
+    "commonMistake": "protection 是名词，protect 是动词；provide protection from danger 中 from 引出保护所针对的危险。",
+    "example": {"english": "Sunglasses provide eye protection from strong sunlight.", "chinese": "太阳镜可以保护眼睛免受强烈阳光照射。"},
+    "application": {"prompt": "Sunglasses provide eye ___ from strong sunlight. A. protect B. protection", "solution": "B。解析：eye 后需要名词 protection；protect 是动词“保护”。"},
+    "sources": [{"label": "Cambridge Dictionary: protection", "url": "https://dictionary.cambridge.org/dictionary/english/protection"}]
+  },
+  {
+    "word": "tyre",
+    "examTags": ["词汇·英美拼写", "阅读·交通与汽车"],
+    "grammar": "n. 轮胎。英式拼写 tyre，美式拼写 tire；复数 tyres/tires。作动词 tire 表示“使疲劳”，拼写相同但含义不同。",
+    "collocations": "a flat tyre; change a tyre; a tyre pressure; a spare tyre",
+    "commonMistake": "tyre 是英式英语中“轮胎”的拼法，tire 是美式拼法；两者都正确，需按文章采用的英语变体保持一致。",
+    "example": {"english": "The car stopped because one tyre had lost all its air.", "chinese": "汽车停了下来，因为有一个轮胎完全没气了。"},
+    "application": {"prompt": "The mechanic replaced the punctured rubber ___ around the wheel. A. tyre B. wheel", "solution": "A。解析：车轮外侧被扎破的橡胶部分是 tyre（英式“轮胎”）；wheel 指车轮整体。"},
+    "sources": [{"label": "Cambridge Dictionary: tyre", "url": "https://dictionary.cambridge.org/dictionary/english/tyre"}]
+  },
+  {
+    "word": "bury",
+    "examTags": ["词汇·动词变化", "语法·不定式与过去式"],
+    "grammar": "v. 埋葬；掩埋；埋头于。bury—buried—buried；现在分词 burying。",
+    "collocations": "bury a bone; bury treasure; be buried in a book; bury one's face in one's hands",
+    "commonMistake": "bury 变过去式时 y 改为 i 再加 -ed：buried；在 to bury 中保留原形 y。",
+    "example": {"english": "The dog began to bury its bone in the soft soil.", "chinese": "那只狗开始把骨头埋进松软的土里。"},
+    "application": {"prompt": "The dog began to ___ its bone in the soft soil. A. buried B. bury", "solution": "B。解析：begin to 后接动词原形 bury；buried 是过去式或过去分词。"},
+    "sources": [{"label": "Cambridge Dictionary: bury", "url": "https://dictionary.cambridge.org/dictionary/english/bury"}]
+  },
+  {
+    "word": "landfill",
+    "examTags": ["词汇·复合名词", "阅读·固体废弃物处理"],
+    "grammar": "n. 垃圾填埋场；垃圾填埋。可数时复数 landfills；垃圾被送去填埋常说 be sent to a landfill。",
+    "collocations": "a landfill site; send waste to landfill; landfill waste; landfill gas",
+    "commonMistake": "landfill 是废弃物填埋的场所或处理方式；landform 指地貌，二者虽共享 land 但词义不同。",
+    "example": {"english": "Waste that cannot be recycled is often sent to a landfill.", "chinese": "无法回收的垃圾通常会被送往填埋场。"},
+    "application": {"prompt": "Most waste that cannot be recycled is sent to a ___. A. landfill B. landform", "solution": "A。解析：无法回收的垃圾会送去 landfill（垃圾填埋场）；landform 指地貌。"},
+    "sources": [{"label": "Cambridge Dictionary: landfill", "url": "https://dictionary.cambridge.org/dictionary/english/landfill"}]
+  },
+  {
+    "word": "leave behind",
+    "examTags": ["词汇·动词短语", "阅读·遗忘与结果"],
+    "grammar": "短语动词：leave sth behind，把某物遗忘在某处或留下；若宾语是代词，必须放在 leave 与 behind 之间：leave it behind。",
+    "collocations": "leave a bag behind; leave someone behind; leave the past behind; leave it behind",
+    "commonMistake": "leave behind 后接代词时要说 leave it behind，不能说 leave behind it；名词宾语两种位置都常见。",
+    "example": {"english": "I left my umbrella behind on the bus yesterday.", "chinese": "我昨天把伞落在公交车上了。"},
+    "application": {"prompt": "Check your seat before getting off the bus so you don't ___ your bag. A. leave out B. leave behind", "solution": "B。解析：下车时把包忘在车上是 leave behind；leave out 表示遗漏或排除。"},
+    "sources": [{"label": "Cambridge Dictionary: leave behind", "url": "https://dictionary.cambridge.org/dictionary/english/leave-behind-leave-behind"}]
+  },
+  {
+    "word": "come up with",
+    "examTags": ["词汇·动词短语", "语法·短语动词时态"],
+    "grammar": "短语动词：come up with sth，想出主意或提出方案；come 是不规则动词，过去式 came，过去分词 come。",
+    "collocations": "come up with an idea; come up with a plan; come up with a solution; come up with a name",
+    "commonMistake": "come up with 表示“想出、提出”，with 后接想出的内容；come up to 则常表示“达到标准”，意义不同。",
+    "example": {"english": "The class came up with a practical way to save water.", "chinese": "全班想出了一个节约用水的实用办法。"},
+    "application": {"prompt": "The team needed to ___ a plan before the deadline. A. come up with B. come up to", "solution": "A。解析：在截止日期前“想出”计划用 come up with；come up to 常表示达到标准。"},
+    "sources": [{"label": "Cambridge Dictionary: come up with", "url": "https://dictionary.cambridge.org/dictionary/english/come-up-with"}]
+  },
+  {
+    "word": "outdoor",
+    "examTags": ["词汇·形容词", "语法·词性与位置"],
+    "grammar": "adj. 户外的；室外的，通常作定语。对应副词短语 outdoors（在户外）；反义词 indoor。",
+    "collocations": "outdoor activities; an outdoor concert; outdoor furniture; outdoor sports",
+    "commonMistake": "outdoor 作形容词放在名词前，如 outdoor activities；表示“在户外”作副词时用 outdoors，不说 stay outdoor。",
+    "example": {"english": "The school canceled the outdoor concert because of heavy rain.", "chinese": "学校因大雨取消了户外音乐会。"},
+    "application": {"prompt": "The school canceled the ___ concert because of heavy rain. A. outdoors B. outdoor", "solution": "B。解析：修饰名词 concert 要用形容词 outdoor；outdoors 是副词“在户外”。"},
+    "sources": [{"label": "Cambridge Dictionary: outdoor", "url": "https://dictionary.cambridge.org/dictionary/english/outdoor"}]
+  },
+  {
+    "word": "wash up",
+    "examTags": ["词汇·动词短语多义", "阅读·家务与海岸环境"],
+    "grammar": "短语动词 wash up：英式英语中可指洗餐具；也可指被水冲到岸上。美式英语常用 wash up 表示洗手。",
+    "collocations": "wash up the dishes; wash the plates up; wash up before dinner; be washed up on the beach",
+    "commonMistake": "宾语是代词时放在 wash 与 up 中间：wash them up；若表示物品被水冲上岸，常用被动 be washed up on shore。",
+    "example": {"english": "After dinner, we washed up the plates and stacked them by the sink.", "chinese": "晚饭后，我们洗好盘子，把它们叠放在水槽旁。"},
+    "application": {"prompt": "After dinner, we ___ the plates and stacked them by the sink. A. washed up B. washed out", "solution": "A。解析：晚饭后清洗盘子用 wash up；wash out 通常表示洗净内部、冲掉或洗掉。"},
+    "sources": [{"label": "Cambridge Dictionary: wash up", "url": "https://dictionary.cambridge.org/dictionary/english/wash-up"}]
+  },
+  {
+    "word": "bin",
+    "examTags": ["词汇·可数名词", "阅读·垃圾分类"],
+    "grammar": "n. 垃圾箱；有盖的大容器。可数，复数 bins；英式英语常用 bin 表示垃圾桶，美式英语常说 trash can。",
+    "collocations": "a recycling bin; a rubbish bin; put something in the bin; wheelie bin",
+    "commonMistake": "bin 是容器名词，put sth in the bin 表示把东西扔进垃圾桶；动词 bind（捆绑）多一个 d，意思不同。",
+    "example": {"english": "Put the empty bottle in the recycling bin by the door.", "chinese": "把空瓶放进门边的回收箱里。"},
+    "application": {"prompt": "Put the empty bottle in the recycling ___ beside the door. A. bind B. bin", "solution": "B。解析：放空瓶的回收容器是 bin（箱、桶）；bind 是动词“捆绑”。"},
+    "sources": [{"label": "Cambridge Dictionary: bin", "url": "https://dictionary.cambridge.org/dictionary/english/bin"}]
+  }
+]

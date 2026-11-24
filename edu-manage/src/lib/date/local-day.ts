@@ -7,16 +7,43 @@ export interface DayRange {
   end: Date
 }
 
+export function isValidDateKey(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const [year, month, day] = value.split('-').map(Number)
+  const check = new Date(0)
+  check.setUTCFullYear(year, month - 1, day)
+  check.setUTCHours(0, 0, 0, 0)
+  return check.getUTCFullYear() === year
+    && check.getUTCMonth() === month - 1
+    && check.getUTCDate() === day
+}
+
 /**
  * 返回 dateString 在中国本地时区下的 00:00:00 ~ 次日 00:00:00 区间。
  * dateString 格式: "YYYY-MM-DD"。
  */
 export function getLocalDayRange(dateString: string, _timezone = DEFAULT_TIMEZONE): DayRange {
+  if (!isValidDateKey(dateString)) throw new Error('Invalid date string')
   const d = new Date(`${dateString}T00:00:00+08:00`)
   if (isNaN(d.getTime())) throw new Error(`Invalid date string: ${dateString}`)
   const start = new Date(d)
   const end = new Date(d.getTime() + 86400000)
   return { start, end }
+}
+
+/** 返回输入时刻所在中国本地周（周一至下周一）的半开区间。 */
+export function getLocalWeekRange(input: Date | string = new Date(), timezone = DEFAULT_TIMEZONE): DayRange {
+  const currentKey = localDateKey(input, timezone)
+  const [year, month, day] = currentKey.split('-').map(Number)
+  const monday = new Date(Date.UTC(year, month - 1, day))
+  const weekday = monday.getUTCDay()
+  monday.setUTCDate(monday.getUTCDate() - (weekday === 0 ? 6 : weekday - 1))
+  const nextMonday = new Date(monday)
+  nextMonday.setUTCDate(nextMonday.getUTCDate() + 7)
+  return {
+    start: getLocalDayRange(monday.toISOString().slice(0, 10), timezone).start,
+    end: getLocalDayRange(nextMonday.toISOString().slice(0, 10), timezone).start,
+  }
 }
 
 /** 将各种日期输入标准化为 "YYYY-MM-DD" */
@@ -27,7 +54,10 @@ export function normalizeDateOnly(input: string | Date | unknown): string {
   }
   if (typeof input === 'string') {
     // 已经是 YYYY-MM-DD
-    if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input
+    if (/^\d{4}-\d{2}-\d{2}$/.test(input)) {
+      if (isValidDateKey(input)) return input
+      throw new Error('Invalid date format')
+    }
     // ISO 字符串
     const d = new Date(input)
     if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10)
@@ -76,6 +106,9 @@ export function todayLocal(timezone = DEFAULT_TIMEZONE): string {
 
 /** 将任意时刻转换为指定时区下的本地日期 YYYY-MM-DD。 */
 export function localDateKey(input: Date | string = new Date(), timezone = DEFAULT_TIMEZONE): string {
+  if (typeof input === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input) && !isValidDateKey(input)) {
+    throw new Error('Invalid date input')
+  }
   const date = input instanceof Date ? input : new Date(input)
   if (isNaN(date.getTime())) throw new Error('Invalid date input')
   const fmt = new Intl.DateTimeFormat('en-CA', {
@@ -98,11 +131,14 @@ export function localDateColumnValue(input: Date | string = new Date(), timezone
 
 /** 返回从 startDate 开始连续 n 天的日期字符串数组 */
 export function dateRangeDays(startDate: string, count: number): string[] {
-  const start = new Date(`${startDate}T00:00:00+08:00`)
-  if (isNaN(start.getTime())) throw new Error(`Invalid startDate: ${startDate}`)
+  if (!isValidDateKey(startDate)) throw new Error('Invalid startDate')
+  if (!Number.isInteger(count) || count < 0) throw new Error('Invalid day count')
+  const [year, month, day] = startDate.split('-').map(Number)
+  const start = new Date(Date.UTC(year, month - 1, day))
   const result: string[] = []
   for (let i = 0; i < count; i++) {
-    const d = new Date(start.getTime() + i * 86400000)
+    const d = new Date(start)
+    d.setUTCDate(d.getUTCDate() + i)
     result.push(d.toISOString().slice(0, 10))
   }
   return result

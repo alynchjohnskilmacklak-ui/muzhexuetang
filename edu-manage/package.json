@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "predev": "node scripts/check-local-schema.mjs",
+    "dev": "next dev --hostname localhost",
     "build": "next build --webpack",
     "start": "next start",
     "type-check": "tsc --noEmit",
@@ -12,6 +13,12 @@
     "db:push": "prisma db push",
     "db:sync:all": "bash scripts/db-sync-all.sh",
     "db:generate": "prisma generate",
+    "import:vocab:g7a": "tsx scripts/import-grade7a-vocab.ts",
+    "import:vocab:g7b": "tsx scripts/import-grade7b-vocab.ts",
+    "import:vocab:g8a": "tsx scripts/import-grade8a-vocab.ts",
+    "import:vocab:g8b": "tsx scripts/import-grade8b-vocab.ts",
+    "import:vocab:g9a": "tsx scripts/import-grade9a-vocab.ts",
+    "import:vocab:g9b": "tsx scripts/import-grade9b-vocab.ts",
     "migrate:all": "bash scripts/migrate-all.sh",
     "db:seed": "tsx prisma/seed.ts",
     "export:data": "tsx scripts/export-business-data.ts",
@@ -21,6 +28,8 @@
     "normalize:hours": "tsx scripts/normalize-hours.ts",
     "fix:duplicate-attendance": "tsx scripts/fix-duplicate-attendance.ts",
     "check:data": "tsx scripts/check-data-integrity.ts",
+    "audit:hour-snapshots": "tsx scripts/audit-hour-snapshots.ts",
+    "backfill:future-rosters": "tsx scripts/backfill-empty-future-lesson-rosters.ts",
     "audit:parent-students": "tsx scripts/audit-parent-students.ts",
     "audit:legacy-schedules": "tsx scripts/audit-legacy-schedules.ts",
     "create-admin": "tsx scripts/create-admin.ts",
@@ -39,6 +48,7 @@
     "import:enrollment": "tsx scripts/import-enrollment.ts",
     "check:garbled": "tsx scripts/check-garbled-text.ts",
     "assets:export-brand": "node scripts/generate-export-brand-assets.mjs",
+    "assets:export-brand-backgrounds": "tsx scripts/export-brand-backgrounds.ts",
     "teacher-accounts:audit-bindings": "tsx scripts/backfill-teacher-account-bindings.ts",
     "images:generate-previews": "tsx scripts/generate-image-preview.ts",
     "test": "vitest run"
@@ -70,7 +80,7 @@
     "pdfjs-dist": "^6.3.289",
     "pinyin": "^4.0.0",
     "prisma": "^5.22.0",
-    "proxy-agent": "^6.5.0",
+    "proxy-agent": "^5.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",
@@ -83,7 +93,7 @@
     "sonner": "^2.0.7",
     "swr": "^2.4.1",
     "tsx": "^4.22.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

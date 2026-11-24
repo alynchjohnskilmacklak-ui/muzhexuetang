@@ -19,9 +19,11 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 import { MODEL_CONFIG, type AIRole, type ModelId } from '@/data/ai-prompts'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeAIAnswer } from '@/lib/ai/normalize-answer'
+import { type IntentCardData } from '@/lib/ai/intent'
 import {
   readSensitiveSessionValue,
   removeLegacySensitiveStorage,
@@ -63,6 +65,8 @@ interface Message {
   modelName?: string
   modelIcon?: string
   modelColor?: string
+  /** 意图操作卡：命中意图时由 AI 侧插入，渲染为确认卡片 */
+  intent?: IntentCardData
 }
 
 type Conversations = Record<ModelId, Message[]>
@@ -148,9 +152,101 @@ interface AIChatPanelProps {
   suggestedQuestions?: string[]
   quickAsk?: string | null
   onQuickAskHandled?: () => void
+  /** 意图操作卡「前往查看」跳转回调（由悬浮助手传入：关闭弹窗 + 路由跳转） */
+  onNavigate?: (href: string) => void
 }
 
-export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuickAskHandled }: AIChatPanelProps) {
+const ROLE_WELCOME: Record<AIRole, { title: string; description: string; toolHint: string }> = {
+  parent: {
+    title: '从孩子的学习问题开始',
+    description: '讲题、规划复习，或一起读懂老师反馈。',
+    toolHint: '课表与正式记录请从家长端入口查看。',
+  },
+  teacher: {
+    title: '让备课与反馈表达更高效',
+    description: '整理教学设计、分层练习和课堂反馈草稿。',
+    toolHint: 'AI 内容用于教学参考；考勤和反馈请核对后在业务页面提交。',
+  },
+  admin: {
+    title: '先梳理问题，再形成管理动作',
+    description: '生成运营复盘框架、政策要点和沟通方案。',
+    toolHint: 'AI 建议需要结合校情核对；实时业务数据以管理页面为准。',
+  },
+}
+
+const ROLE_COLORS: Record<AIRole, { accent: string; tint: string }> = {
+  parent: { accent: 'var(--color-role-parent, #B64F28)', tint: 'var(--color-role-parent-bg, #fff3ec)' },
+  teacher: { accent: 'var(--color-role-teacher, #137A5A)', tint: 'var(--color-role-teacher-bg, #eaf7f1)' },
+  admin: { accent: 'var(--color-role-admin, #534AB7)', tint: 'var(--color-role-admin-bg, #f0effb)' },
+}
+
+/** 意图操作卡：AI 已理解用户意图，确认后执行跳转 */
+function IntentActionCard({
+  data,
+  onNavigate,
+  onDismiss,
+}: {
+  data: IntentCardData
+  onNavigate?: (href: string) => void
+  onDismiss: () => void
+}) {
+  return (
+    <div
+      style={{
+        border: '1px solid rgba(180,101,46,.35)',
+        borderRadius: 12,
+        background: 'linear-gradient(135deg, #FFFDF9, #FBF3E7)',
+        padding: '10px 12px',
+      }}
+    >
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#0E3B2E', letterSpacing: .3 }}>
+        ⚙️ AI 已理解你的意图
+      </div>
+      <div style={{ fontSize: 13, color: '#1a1201', marginTop: 6, lineHeight: 1.7 }}>
+        <b style={{ color: '#B4652E' }}>{data.title}</b>
+        <span style={{ color: '#6B6257' }}> —— {data.desc}</span>
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button
+          type="button"
+          onClick={() => onNavigate?.(data.href)}
+          style={{
+            flex: 1,
+            background: '#0E3B2E',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 10,
+            padding: '8px 0',
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer',
+            minHeight: 36,
+          }}
+        >
+          前往查看 →
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          style={{
+            background: '#fff',
+            color: '#9A9083',
+            border: '1px solid #E5DCCB',
+            borderRadius: 10,
+            padding: '8px 14px',
+            fontSize: 12,
+            cursor: 'pointer',
+            minHeight: 36,
+          }}
+        >
+          取消
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuickAskHandled, onNavigate }: AIChatPanelProps) {
   const { data: session, status: sessionStatus } = useSession()
   const isMobile = useIsMobile() ?? false
   const [conversations, setConversations] = useState<Conversations>(EMPTY_CONVERSATIONS)
@@ -164,10 +260,12 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const handledQuickAskRef = useRef<string | null>(null)
+  const pendingQuickAsksRef = useRef<string[]>([])
   const userId = session?.user?.id || ''
   const storageKey = userId ? `muzhe_ai_conversations_${userId}_${aiRole}` : ''
   const messages = useMemo(() => conversations[modelId] || [], [conversations, modelId])
   const currentModel = MODEL_CONFIG.find((model) => model.id === modelId) || MODEL_CONFIG[0]
+  const roleColors = ROLE_COLORS[aiRole]
 
   const updateConversation = useCallback((targetModelId: ModelId, updater: (prev: Message[]) => Message[]) => {
     setConversations((prev) => ({
@@ -184,11 +282,12 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
     if (sessionStatus !== 'authenticated' || !storageKey) return
     removeLegacySensitiveStorage()
     const parsed = readSensitiveSessionValue<Partial<Conversations>>(storageKey, 8 * 60 * 60 * 1000)
-    setConversations({
-      deepseek: Array.isArray(parsed?.deepseek) ? parsed.deepseek : [],
-      mimo: Array.isArray(parsed?.mimo) ? parsed.mimo : [],
-      kimi: Array.isArray(parsed?.kimi) ? parsed.kimi : [],
-    })
+    // 合并恢复：历史会话在前，保留挂载后已插入的新消息（避免 quickAsk 竞态被覆盖）
+    setConversations((prev) => ({
+      deepseek: [...(Array.isArray(parsed?.deepseek) ? parsed.deepseek : []), ...(prev.deepseek?.length ? prev.deepseek : [])],
+      mimo: [...(Array.isArray(parsed?.mimo) ? parsed.mimo : []), ...(prev.mimo?.length ? prev.mimo : [])],
+      kimi: [...(Array.isArray(parsed?.kimi) ? parsed.kimi : []), ...(prev.kimi?.length ? prev.kimi : [])],
+    }))
     setHydratedStorageKey(storageKey)
   }, [sessionStatus, storageKey])
 
@@ -408,11 +507,27 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
   }, [aiRole, attachment, conversations, input, loading, modelId, updateConversation])
 
   useEffect(() => {
-    if (!quickAsk || handledQuickAskRef.current === quickAsk) return
+    if (!quickAsk) {
+      handledQuickAskRef.current = null
+      return
+    }
+    if (handledQuickAskRef.current === quickAsk) return
     handledQuickAskRef.current = quickAsk
+    if (loading) {
+      // 用户在回答生成期间继续点快捷问题时排队，避免新问题覆盖旧问题。
+      pendingQuickAsksRef.current.push(quickAsk)
+      onQuickAskHandled?.()
+      return
+    }
     void sendMessage(quickAsk)
     onQuickAskHandled?.()
-  }, [onQuickAskHandled, quickAsk, sendMessage])
+  }, [loading, onQuickAskHandled, quickAsk, sendMessage])
+
+  useEffect(() => {
+    if (loading || pendingQuickAsksRef.current.length === 0) return
+    const nextQuestion = pendingQuickAsksRef.current.shift()
+    if (nextQuestion) void sendMessage(nextQuestion)
+  }, [loading, sendMessage])
 
   const modelMessageCounts = useMemo(() => ({
     deepseek: conversations.deepseek.length,
@@ -525,8 +640,8 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <img
-                src={aiLogo.src}
+              <NextImage
+                src={aiLogo}
                 alt="小牧AI"
                 width={isMobile ? 40 : 52}
                 height={isMobile ? 40 : 52}
@@ -534,23 +649,24 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
               />
             </div>
             <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 700, color: '#1a1201', marginBottom: 6 }}>
-              小牧 AI 助手
+              {ROLE_WELCOME[aiRole].title}
             </div>
-            <div style={{ fontSize: 13, color: '#9a8e7a', marginBottom: 4 }}>
-              当前：<span style={{ color: currentModel.color, fontWeight: 600 }}>{currentModel.name}</span>
+            <div style={{ fontSize: 13, color: '#5a4e3a', marginBottom: 4 }}>
+              {ROLE_WELCOME[aiRole].description}
             </div>
-            <div style={{ fontSize: 12, color: '#c0b8ae', marginBottom: 20 }}>
-              支持直接粘贴题目 · 上传图片拍照解题 · 上传PDF/Word文档分析
+            <div style={{ fontSize: 11, color: '#756a58', margin: '0 auto 14px', maxWidth: 460, lineHeight: 1.55 }}>
+              {ROLE_WELCOME[aiRole].toolHint} · 图片识别{currentModel.supportsVision ? '可用' : '请切换视觉模型'} · PDF/Word 可上传 · 当前：<span style={{ color: currentModel.color, fontWeight: 600 }}>{currentModel.name}</span>
             </div>
 
             {suggestedQuestions.length > 0 && (
               <div style={{ textAlign: 'left', maxWidth: 520, margin: '0 auto' }}>
                 <button
                   type="button"
-                  onClick={() => setShowQuick(v => !v)}
-                  style={{ fontSize: 12, color: '#9a8e7a', marginBottom: 10, textAlign: 'center', border: 'none', background: 'transparent', cursor: 'pointer', width: '100%', display: 'block', padding: 0 }}
+                  onClick={() => setShowQuick((value) => !value)}
+                  aria-expanded={showQuick}
+                  style={{ fontSize: 12, color: roleColors.accent, marginBottom: 10, textAlign: 'center', border: 'none', background: 'transparent', cursor: 'pointer', width: '100%', display: 'block', padding: 0 }}
                 >
-                  {showQuick ? '收起快捷提问 ▲' : '点击快速提问 ▼'}
+                  {showQuick ? '收起快捷提问 ▲' : '查看快捷提问 ▼'}
                 </button>
                 {showQuick && (
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 8 }}>
@@ -559,13 +675,15 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
                       key={question}
                       type="button"
                       onClick={() => sendMessage(question)}
+                      disabled={loading}
                       style={{
                         padding: '10px 14px',
                         borderRadius: 8,
-                        cursor: 'pointer',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        opacity: loading ? .6 : 1,
                         textAlign: 'left',
                         backgroundColor: '#fff',
-                        border: '1px solid rgba(232,117,69,.2)',
+                        border: `1px solid color-mix(in srgb, ${roleColors.accent} 20%, transparent)`,
                         fontSize: 13,
                         color: '#5a4e3a',
                         lineHeight: 1.5,
@@ -573,11 +691,12 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
                         transition: 'all 0.15s',
                       }}
                       onMouseEnter={(event) => {
-                        event.currentTarget.style.borderColor = '#E87545'
-                        event.currentTarget.style.backgroundColor = 'rgba(232,117,69,.04)'
+                        if (loading) return
+                        event.currentTarget.style.borderColor = roleColors.accent
+                        event.currentTarget.style.backgroundColor = roleColors.tint
                       }}
                       onMouseLeave={(event) => {
-                        event.currentTarget.style.borderColor = 'rgba(232,117,69,.2)'
+                        event.currentTarget.style.borderColor = `color-mix(in srgb, ${roleColors.accent} 20%, transparent)`
                         event.currentTarget.style.backgroundColor = '#fff'
                       }}
                     >
@@ -667,6 +786,12 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
 
               {item.loading && contentToText(item.content) === '' ? (
                 <Spin indicator={<LoadingOutlined style={{ color: bubbleModelColor }} spin />} size="small" />
+              ) : item.role === 'assistant' && item.intent ? (
+                <IntentActionCard
+                  data={item.intent}
+                  onNavigate={onNavigate}
+                  onDismiss={() => updateCurrentConversation((prev) => prev.filter((m) => m.id !== item.id))}
+                />
               ) : item.role === 'assistant' ? (
                 <div className="ai-markdown" style={{ color: '#1a1201' }}>
                   <ReactMarkdown
@@ -767,7 +892,7 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
                 </span>
               )}
 
-              {item.role === 'assistant' && !item.loading && (
+              {item.role === 'assistant' && !item.loading && !item.intent && (
                 <div style={{ marginTop: 8, opacity: 0.5, fontSize: 11 }}>
                   {bubbleModelIcon} {bubbleModelName}
                 </div>

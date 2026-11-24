@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
@@ -18,7 +19,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (!student) return NextResponse.json({ error: '无权操作该学员' }, { status: 403 })
 
   const goals = await prisma.learningGoal.findMany({
-    where: { studentId },
+    where: { studentId, deletedAt: null },
     orderBy: [{ isAchieved: 'asc' }, { createdAt: 'desc' }],
   })
   return NextResponse.json({ goals })
@@ -65,7 +66,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   const id = typeof body.id === 'string' ? body.id : ''
   if (!id) return NextResponse.json({ error: '缺少目标 id' }, { status: 400 })
 
-  const existing = await prisma.learningGoal.findUnique({ where: { id } })
+  const existing = await prisma.learningGoal.findFirst({ where: { id, deletedAt: null } })
   if (!existing) return NextResponse.json({ error: '目标不存在' }, { status: 404 })
   const student = await requireOwnedStudent(teacher.id, existing.studentId, prisma)
   if (!student) return NextResponse.json({ error: '无权操作该学员' }, { status: 403 })
@@ -102,12 +103,17 @@ export const DELETE = apiHandler(async (req: NextRequest) => {
   const id = req.nextUrl.searchParams.get('id') || ''
   if (!id) return NextResponse.json({ error: '缺少目标 id' }, { status: 400 })
 
-  const existing = await prisma.learningGoal.findUnique({ where: { id } })
+  const existing = await prisma.learningGoal.findFirst({ where: { id, deletedAt: null } })
   if (!existing) return NextResponse.json({ error: '目标不存在' }, { status: 404 })
   const student = await requireOwnedStudent(teacher.id, existing.studentId, prisma)
   if (!student) return NextResponse.json({ error: '无权操作该学员' }, { status: 403 })
 
-  await prisma.learningGoal.delete({ where: { id } })
+  const deletedAt = new Date()
+  const deleted = await prisma.learningGoal.updateMany({
+    where: { id, deletedAt: null },
+    data: { deletedAt, deletionBatchId: randomUUID() },
+  })
+  if (!deleted.count) return NextResponse.json({ error: '目标已被删除，请刷新后重试' }, { status: 409 })
   await prisma.activityLog.create({
     data: {
       userId: user.id,

@@ -4,8 +4,9 @@ import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestPrisma } from '@/lib/prisma'
 import { isUserActive } from '@/lib/user-status'
-import { generateTemporaryPassword } from '@/lib/temporary-password'
+import { chineseToPinyin } from '@/lib/pinyin'
 import { getPasswordPolicyError } from '@/lib/password-policy'
+import { AUTO_DISABLED_PARENT_SESSION_TOKEN } from '@/lib/parent-account-validity'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,11 +35,18 @@ export const POST = apiHandler(async (
 
     const parentUser = await prisma.user.findFirst({
       where: { id: existingParentUserId, role: 'parent', status: { not: 'deleted' } },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, status: true, currentSessionToken: true },
     })
     if (!parentUser) return NextResponse.json({ error: '家长账号不存在' }, { status: 404 })
 
     await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${parentUser.id} FOR UPDATE`
+      if (parentUser.status === 'disabled' && parentUser.currentSessionToken === AUTO_DISABLED_PARENT_SESSION_TOKEN) {
+        await tx.user.updateMany({
+          where: { id: parentUser.id, role: 'parent', status: 'disabled', currentSessionToken: AUTO_DISABLED_PARENT_SESSION_TOKEN },
+          data: { status: 'active', currentSessionToken: null },
+        })
+      }
       await tx.student.update({
         where: { id },
         data: { parentId: parentUser.id, parentUserId: parentUser.id },
@@ -73,8 +81,9 @@ export const POST = apiHandler(async (
       return NextResponse.json({ error: '该邮箱已被其他角色使用' }, { status: 409 })
     }
 
-    const initialPassword = existing ? null : (password || generateTemporaryPassword())
-    if (initialPassword) {
+    const initialPassword = existing ? null : (password || chineseToPinyin(student.name))
+    if (!existing && !initialPassword) return NextResponse.json({ error: '学员姓名无法生成拼音初始密码，请检查姓名后重试' }, { status: 400 })
+    if (password && initialPassword) {
       const passwordError = getPasswordPolicyError(initialPassword, { identifiers: [email, name, student.name] })
       if (passwordError) return NextResponse.json({ error: passwordError }, { status: 400 })
     }
@@ -139,13 +148,62 @@ export const DELETE = apiHandler(async (
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
 
-  const student = await prisma.student.findUnique({ where: { id }, select: { id: true } })
+  const student = await prisma.student.findUnique({
+    where: { id },
+    select: { id: true, division: true, parentId: true, parentUserId: true, name: true },
+  })
   if (!student) return NextResponse.json({ error: '学员不存在' }, { status: 404 })
 
-  await prisma.student.update({
-    where: { id },
-    data: { parentId: null, parentUserId: null },
+  const parentIds = [...new Set([student.parentId, student.parentUserId].filter((parentId): parentId is string => Boolean(parentId)))].sort()
+  let disabledCount = 0
+  await prisma.$transaction(async (tx) => {
+    for (const parentId of parentIds) {
+      await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${parentId} FOR UPDATE`
+    }
+    await tx.student.update({ where: { id }, data: { parentId: null, parentUserId: null } })
+
+    const activeTerm = await tx.academicTerm.findFirst({
+      where: { division: student.division, status: 'ACTIVE' },
+      select: { id: true },
+      orderBy: { startDate: 'desc' },
+    })
+
+    for (const parentId of parentIds) {
+      const account = await tx.user.findFirst({
+        where: { id: parentId, role: 'parent', division: student.division },
+        select: { id: true, status: true },
+      })
+      if (!account || account.status !== 'active') continue
+
+      const remainingChild = await tx.student.findFirst({
+        where: {
+          division: student.division,
+          OR: [{ parentId }, { parentUserId: parentId }],
+          status: { notIn: ['INACTIVE', 'ARCHIVED'] },
+          deletedAt: null,
+          ...(activeTerm ? { termMemberships: { some: { termId: activeTerm.id, status: 'ACTIVE' } } } : {}),
+        },
+        select: { id: true },
+      })
+      if (remainingChild) continue
+
+      const disabled = await tx.user.updateMany({
+        where: { id: parentId, role: 'parent', division: student.division, status: 'active' },
+        data: { status: 'disabled', currentSessionToken: AUTO_DISABLED_PARENT_SESSION_TOKEN },
+      })
+      disabledCount += disabled.count
+    }
+
+    await tx.activityLog.create({
+      data: {
+        userId: (session.user as { id: string }).id,
+        action: 'PARENT_ACCOUNT_UNBOUND',
+        detail: `解除学生 ${student.name} 的家长账号绑定${disabledCount ? '，无其他在册子女的家长账号已停用' : ''}`,
+        entityType: 'Student',
+        entityId: student.id,
+      },
+    })
   })
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true, parentAccountDisabled: disabledCount > 0 })
 })

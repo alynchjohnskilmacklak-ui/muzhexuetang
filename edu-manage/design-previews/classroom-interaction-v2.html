@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>课堂互动 v2 · 可交互原型</title>
+<style>
+:root{--p:#14574d;--bd:#e6ded5;--bg:#faf8f5;--ink:#1a1201;--mu:#5a4e3a;--ok:#2e7d5b;--okb:#edf6f1;--am:#8a5e10;--amb:#fdf7ec;--rd:#b4452f;--rdb:#fdf3f0;--bl:#f2f5f7}
+*{box-sizing:border-box}button{font-family:inherit;cursor:pointer}
+body{margin:0;background:#efece6;color:var(--ink);font:14px/1.5 -apple-system,"Noto Sans SC","Microsoft YaHei",sans-serif;display:flex;flex-direction:column;align-items:center;padding:16px 0}
+.sw{display:flex;gap:6px;margin-bottom:12px}.sw button{border:1px solid var(--bd);background:#fff;border-radius:999px;padding:6px 16px;font-size:13px;color:var(--mu)}.sw .on{background:var(--p);color:#fff;border-color:var(--p)}
+.phone{width:390px;max-width:100%;height:780px;max-height:calc(100vh - 80px);background:var(--bg);border-radius:26px;border:1px solid #d9d1c7;box-shadow:0 10px 34px rgba(58,50,39,.14);display:flex;flex-direction:column;overflow:hidden}
+.top{background:#fff;padding:10px 14px 8px;border-bottom:1px solid var(--bd)}
+.r1{display:flex;justify-content:space-between;align-items:center;gap:8px}.r1 h1{font-size:16px;margin:0}.r1 small{color:var(--mu);font-size:12px}
+.chips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.c{font-size:12px;padding:1px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--bd);color:var(--mu)}.c.w{background:var(--amb);color:var(--am)}.c.t{background:var(--p);color:#fff;border-color:var(--p);font-variant-numeric:tabular-nums}
+.body{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+.nav{display:flex;background:#fff;border-top:1px solid var(--bd);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));gap:4px}
+.nav button{flex:1;min-height:46px;border:0;background:none;border-radius:10px;font-size:14px;color:var(--mu)}.nav .on{background:var(--p);color:#fff;font-weight:600}
+.card{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:12px 14px}
+.seg{display:flex;background:#fff;border:1px solid var(--bd);border-radius:12px;padding:3px}.seg button{flex:1;min-height:36px;border:0;border-radius:9px;background:none;font-size:14px;color:var(--mu)}.seg .on{background:var(--p);color:#fff}
+.big{width:100%;min-height:64px;border:0;border-radius:16px;background:var(--p);color:#fff;font-size:17px;font-weight:600}.big.s{min-height:44px;font-size:15px}
+.who{text-align:center;font-size:15px;margin:0}.who b{font-size:28px;color:var(--p);margin:0 4px}
+.rg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}.rb{min-height:46px;border:1px solid #d3cabe;background:#fff;border-radius:10px;font-size:14px}
+.rb.on{color:#fff;border-color:transparent}.rb.on.a{background:var(--ok)}.rb.on.b{background:#b7791f}.rb.on.c{background:var(--rd)}.rb.on.d{background:#6b7280}
+.qc{display:flex;gap:6px;flex-wrap:wrap}.qc button{min-height:34px;border:1px solid var(--bd);background:var(--bg);border-radius:999px;padding:0 12px;font-size:13px;color:var(--mu)}.qc .on{background:#e3f0ec;border-color:var(--p);color:var(--p)}
+.hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}.hd b{font-size:15px}.hd span,.hint{font-size:13px;color:var(--mu)}.hint{margin:8px 0 0;line-height:1.6}
+.ros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cell{position:relative;min-height:60px;border:1px solid var(--bd);background:#fbfaf8;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:15px;color:var(--ink)}
+.cell small{font-size:12px;color:var(--mu)}.cell.x{background:var(--rdb);border-color:#e8c4bb}.cell.x small{color:var(--rd)}.cell.l{background:var(--amb);border-color:#e6d3ac}.cell.l small{color:var(--am)}.cell.v{background:var(--bl);color:#6b7280}.cell.p{background:var(--okb);border-color:#cfe7db}.cell.sel{outline:2px solid var(--p)}.cell:disabled{opacity:.55}
+.cell i{position:absolute;top:5px;right:7px;font-style:normal;font-size:12px;color:var(--p);font-weight:600}
+.li{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--bd);font-size:14px;cursor:pointer}.li:last-child{border:0}.li.on{outline:1.5px solid var(--p);border-radius:8px;background:#f3f8f6;padding:7px 8px}.li.pend{opacity:.62}.li em{flex:1;font-style:normal;font-size:13px;color:var(--mu)}.li time{font-size:12px;color:var(--mu)}
+.tag{font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--bd)}.tag.a{background:var(--okb);color:var(--ok)}.tag.b{background:var(--amb);color:var(--am)}.tag.c{background:var(--rdb);color:var(--rd)}.tag.d{background:#eee;color:#555}
+.x1{border:0;background:none;color:#8b7f6b;font-size:18px;min-width:32px;min-height:32px}
+.sb{position:sticky;bottom:0;background:#fff;border:1px solid var(--bd);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-shadow:0 -6px 16px rgba(26,18,1,.06)}
+.sm{border:1px solid #d3cabe;background:#fff;border-radius:9px;min-height:34px;padding:0 12px;font-size:13px}
+.td{font-size:60px;font-weight:700;text-align:center;color:var(--p);font-variant-numeric:tabular-nums;line-height:1.1}.td.z{color:var(--rd)}
+.tk{height:6px;background:#f0eae2;border-radius:9px;overflow:hidden;margin:10px 0}.tk div{height:100%;background:var(--p);transition:width .3s}
+.dl{color:var(--rd);border:0;background:none;font-size:14px;min-height:36px;text-align:left;padding:0}
+.pf{max-width:390px;width:100%}
+</style></head><body>
+<div class="sw"><button id="vt" class="on" onclick="view('t')">教师端</button><button id="vp" onclick="view('p')">家长端预览</button></div>
+<div class="phone"><div class="top" id="top"></div><div class="body" id="body"></div><div class="nav" id="nav"></div></div>
+<script>
+const N=['张昊然','李思远','王凯','赵一诺','孙梦琪','周子涵','陈嘉禾','刘博文','吴雨桐','郑欣然','马晨曦','何佳怡'];
+const S=N.map(n=>({n,st:n=='马晨曦'?'请假':''}));
+S[4].st='缺勤';
+let tab='q',mode='r',cur=null,locked=false,rolls=[],view_='t',pv=0,nid=3;
+let R=[{id:1,i:2,t:'19:04',r:'c',cm:['符号错误'],src:'叫'},{id:2,i:0,t:'19:08',r:'b',cm:[],src:'抽'}];
+const RL={a:'答对了',b:'部分对',c:'需订正',d:'未作答'},QC=['思路清晰','步骤完整','计算失误','符号错误','概念不清'];
+let T={dur:300,end:0,left:300,run:false,tick:null},ac=null;
+const $=id=>document.getElementById(id),ok=i=>!['缺勤','请假'].includes(S[i].st);
+const cnt=i=>R.filter(x=>x.i==i&&x.r).length,now=()=>{const d=new Date();return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')};
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function view(v){view_=v;$('vt').className=v=='t'?'on':'';$('vp').className=v=='p'?'on':'';render()}
+function head(){const pr=S.filter(s=>s.st=='到课'||s.st=='迟到').length,lt=S.filter(s=>s.st=='迟到').length,un=S.filter((s,i)=>ok(i)&&!cnt(i)).length;
+return `<div class="r1"><div><h1>初二数学 A 班</h1><small>19:00–20:30 · 数学提高</small></div>${T.run||T.left<T.dur?`<span class="c t" onclick="go('t')">⏱ ${fmt(T.left)}</span>`:''}</div>
+<div class="chips"><span class="c">已点到 ${pr}/11</span>${lt?`<span class="c w">迟到 ${lt}</span>`:''}<span class="c">未提问 ${un} 人</span></div>`}
+function render(){
+if(view_=='p'){$('top').innerHTML=`<div class="r1"><h1>课堂反馈</h1><small>家长端 · 预览</small></div>`;$('nav').innerHTML='';$('body').innerHTML=parent();return}
+$('top').innerHTML=head();
+$('nav').innerHTML=[['q','提问'],['r','点名'],['t','计时']].map(([k,l])=>`<button class="${tab==k?'on':''}" onclick="go('${k}')">${l}</button>`).join('');
+$('body').innerHTML=tab=='q'?ask():tab=='r'?roll():timer()}
+function go(k){tab=k;render()}
+/* ---- 提问 ---- */
+function ask(){const rec=R.find(x=>x.id==cur);if(rec&&rec.dr===undefined){rec.dr=rec.r;rec.dcm=[...rec.cm]}
+let h=`<div class="seg"><button class="${mode=='r'?'on':''}" onclick="mode='r';render()">🎲 随机抽人</button><button class="${mode=='l'?'on':''}" onclick="mode='l';render()">👆 点名单</button></div>`;
+if(mode=='r')h+=`<button class="${rec?'big s':'big'}" onclick="draw()">${rec?'再抽一位':'随机抽人提问'}</button><p class="hint" style="margin:-4px 0 0;text-align:center">优先抽提问次数少的学员 · 缺勤/请假自动跳过 · 可重复抽到</p>`;
+else h+=`<div class="card"><div class="ros">${S.map((s,i)=>`<button class="cell ${cur&&rec.i==i?'sel':''} ${ok(i)?'':'v'}" ${ok(i)?'':'disabled'} onclick="pick(${i})">${s.n}<small>${ok(i)?(cnt(i)?'':'未提问'):s.st}</small>${cnt(i)?`<i>×${cnt(i)}</i>`:''}</button>`).join('')}</div></div>`;
+if(rec)h+=`<div class="card" style="border:2px solid var(--p)"><p class="who">请 <b>${S[rec.i].n}</b> 回答</p>
+<div class="rg">${Object.keys(RL).map(k=>`<button class="rb ${k} ${rec.dr==k?'on '+k:''}" onclick="rate('${k}')">${RL[k]}</button>`).join('')}</div>
+<div class="qc">${QC.map(q=>`<button class="${rec.dcm.includes(q)?'on':''}" onclick="qc('${q}')">${q}</button>`).join('')}</div>
+<div class="sb"><button class="big s" ${!rec.dr?'disabled style="opacity:.4"':''} onclick="submitQ()">提交本次评价</button><button class="sm" onclick="resetQ()">重置</button></div>
+<p class="hint">结果与点评点「提交本次评价」后才写入；不提交就切换学员或离开，本次选择不会保存。家长端只展示「答对/部分对/需订正」。</p></div>`;
+h+=`<div class="card"><div class="hd"><b>本节提问记录</b><span>共 ${R.filter(x=>x.r).length} 次${R.some(x=>!x.r)?` · ${R.filter(x=>!x.r).length} 条待提交`:''}</span></div>${R.slice().reverse().map(x=>`<div class="li ${x.id==cur?'on':''} ${x.r?'':'pend'}" onclick="cur=${x.id};render()"><b>${S[x.i].n}</b><time>${x.t} ${x.src}</time>${x.r?`<span class="tag ${x.r}">${RL[x.r]}</span>`:'<span class="tag">待评</span>'}<em>${x.cm.join(' · ')}</em><button class="x1" onclick="event.stopPropagation();del(${x.id})">×</button></div>`).join('')||'<p class="hint">还没有提问</p>'}</div>`;return h}
+function draw(){const c=S.map((s,i)=>i).filter(ok);if(!c.length)return;const w=c.map(i=>1/(1+cnt(i)));let r=Math.random()*w.reduce((a,b)=>a+b),k=0;while(r>w[k]&&k<c.length-1){r-=w[k];k++}add(c[k],'抽')}
+function pick(i){add(i,'叫')}
+function add(i,src){const x={id:nid++,i,t:now(),r:'',cm:[],dr:'',dcm:[],src};R.push(x);cur=x.id;render()}
+function rate(k){const x=R.find(y=>y.id==cur);x.dr=x.dr==k?'':k;render()}
+function qc(q){const x=R.find(y=>y.id==cur),j=x.dcm.indexOf(q);j<0?x.dcm.push(q):x.dcm.splice(j,1);render()}
+function submitQ(){const x=R.find(y=>y.id==cur);x.r=x.dr;x.cm=[...x.dcm];render()}
+function resetQ(){const x=R.find(y=>y.id==cur);x.dr=x.r;x.dcm=[...x.cm];render()}
+function del(id){R=R.filter(x=>x.id!=id);if(cur==id)cur=null;render()}
+/* ---- 点名 ---- */
+const CY={'':'到课','到课':'迟到','迟到':'缺勤','缺勤':'到课'};
+function roll(){const m=S.filter(s=>s.st!=='请假'),d=m.filter(s=>s.st).length,un=m.length-d;
+let h=`<div class="card"><div class="hd"><b>点名</b><button class="sm" ${locked?'disabled':''} onclick="allp()">未点的全部到课</button></div>
+<div class="chips" style="margin:0 0 10px"><span class="c">已点 ${d}/${m.length}</span><span class="c">请假 1（家长已提交，不可改）</span></div>
+<div class="ros">${S.map((s,i)=>{const cl=s.st=='缺勤'?'x':s.st=='迟到'?'l':s.st=='请假'?'v':s.st=='到课'?'p':'',dis=s.st=='请假'||(locked&&s.st!='缺勤');return `<button class="cell ${cl}" ${dis?'disabled':''} onclick="cyc(${i})">${s.n}<small>${s.st||'未点'}</small></button>`}).join('')}</div>
+<p class="hint">${locked?'已提交。学员后到时，点「缺勤」格可补记为迟到，无需撤销整次点名。':'点一下切换：到课 → 迟到 → 缺勤 → 到课。提交前不写入考勤。'}</p></div>`;
+h+=locked?`<div class="sb"><span class="hint" style="margin:0">点名已于 ${locked} 提交，已同步考勤页。课时仍在考勤提交时结算。</span><button class="dl" onclick="undo()">撤销提交（考勤页提交前有效）</button></div>`
+:`<div class="sb"><span class="hint" style="margin:0">${un?`还有 ${un} 人未点，不能提交`:'全部已点，可以提交'}</span><button class="big s" ${un?'disabled style="opacity:.4"':''} onclick="sub()">提交点名</button></div>`;return h}
+function cyc(i){if(locked){if(S[i].st=='缺勤')S[i].st='迟到'}else S[i].st=CY[S[i].st];render()}
+function allp(){S.forEach(s=>{if(!s.st)s.st='到课'});render()}
+function sub(){locked=now();render()}
+function undo(){if(confirm('撤销后需重新提交点名，确定吗？')){locked=false;render()}}
+/* ---- 计时 ---- */
+function timer(){const p=T.dur?Math.round((1-T.left/T.dur)*100):0;
+return `<div class="card"><div class="td ${T.left<=30&&T.left>0?'z':''}">${fmt(T.left)}</div><div class="tk"><div style="width:${p}%"></div></div>
+<div class="qc" style="justify-content:center">${[3,5,10,15].map(m=>`<button class="${T.dur==m*60?'on':''}" onclick="setd(${m*60})">${m} 分钟</button>`).join('')}<button onclick="addt(60)">+1 分钟</button></div>
+<div style="display:flex;gap:10px;margin-top:14px"><button class="big s" onclick="toggle()">${T.run?'暂停':T.left<T.dur&&T.left>0?'继续':'开始计时'}</button><button class="sm" onclick="setd(T.dur)">归零</button></div>
+<p class="hint">切换到其他页面计时不会中断，顶部会显示剩余时间。计时以结束时刻为准，息屏后再回来也不会走慢。</p></div>
+<div class="card"><div class="hd"><b>提醒</b></div><p class="hint" style="margin:0">时间到会响三声短铃；安卓支持震动，<b>iPhone 浏览器不支持网页震动</b>，只靠铃声和屏幕闪烁。首次需点一次「开始计时」才能出声。</p><button class="sm" style="margin-top:8px" onclick="beep()">试听一次</button></div>`}
+function setd(s){stop();T.dur=s;T.left=s;render()}
+function addt(s){T.dur+=s;T.left+=s;if(T.run)T.end+=s*1000;render()}
+function stop(){T.run=false;clearInterval(T.tick)}
+function toggle(){if(T.run){T.left=Math.max(0,Math.round((T.end-Date.now())/1000));stop()}else{if(T.left<=0)T.left=T.dur;beep(true);T.end=Date.now()+T.left*1000;T.run=true;T.tick=setInterval(()=>{T.left=Math.max(0,Math.round((T.end-Date.now())/1000));if(T.left<=0){stop();beep();navigator.vibrate&&navigator.vibrate([300,150,300])}render()},500)}render()}
+function beep(silent){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(silent)return;[0,.25,.5].forEach(t=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.2;o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.15)})}catch(e){}}
+/* ---- 家长端 ---- */
+function parent(){const sel=`<div class="chips" style="margin:0 0 4px">${S.filter((s,i)=>cnt(i)).map(s=>`<button class="sm" style="${S.indexOf(s)==pv?'background:var(--p);color:#fff':''}" onclick="pv=${S.indexOf(s)};render()">${s.n}</button>`).join('')}</div>`;
+const rs=R.filter(x=>x.i==pv&&['a','b','c'].includes(x.r));if(!cnt(pv)&&R.length)pv=R[0].i;
+return `<p class="hint" style="margin:0">选择学员预览（家长只能看到自己孩子）</p>${sel}<div class="card"><b style="font-size:15px">初二数学 · 一元二次方程</b><p class="hint" style="margin:2px 0 10px">${S[pv].n} · 今日 19:00–20:30</p>
+<div class="hd"><b>本节课课堂提问</b><span>共 ${rs.length} 次 · 答对 ${rs.filter(x=>x.r=='a').length} · 部分对 ${rs.filter(x=>x.r=='b').length} · 需订正 ${rs.filter(x=>x.r=='c').length}</span></div>
+${rs.map((x,k)=>`<div class="li"><span>第 ${k+1} 次</span><span class="tag ${x.r}">${RL[x.r]}</span><em>${x.cm.join('、')}</em></div>`).join('')||'<p class="hint">本节课暂无可展示的提问记录</p>'}
+<p class="hint" style="font-size:12px">只显示自己孩子的记录，不与同学比较；「未作答」不对家长展示。</p></div>`}
+render();
+</script></body></html>

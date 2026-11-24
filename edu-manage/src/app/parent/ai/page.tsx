@@ -1,150 +1,67 @@
 'use client'
 
 import { useState } from 'react'
+import { AIClientOverview, type AIOverviewAction } from '@/components/AI/AIClientOverview'
 import { AIChatPanel } from '@/components/AI/AIChatPanel'
-import { Typography } from 'antd'
+import {
+  BookOutlined,
+  CalendarOutlined,
+  CommentOutlined,
+  ReadOutlined,
+} from '@ant-design/icons'
 
-const { Text } = Typography
-
-const SUGGESTED = [
-  '请帮我解这道题：一元一次方程 3(x-2) = 2x+1',
-  '初三物理：欧姆定律 I=U/R 怎么理解，有例题吗',
-  '帮我分析：铁和稀盐酸反应的化学方程式',
-  '初一生物：光合作用和呼吸作用的区别',
-  '英语：被动语态怎么构成，举三个例子',
-  '河北中考语文作文高分技巧有哪些',
+const SUGGESTED_GROUPS = [
+  {
+    title: '孩子学习',
+    questions: [
+      '请用初中生听得懂的话讲清楚欧姆定律，并给一道同类练习题。',
+      '帮孩子安排一份7天复习计划，请先问清年级、目标和每天可用时间。',
+      '老师的课堂反馈通常要看哪些内容？请给我一个家长阅读清单。',
+      '孩子最近不愿意复习，家长怎样沟通更容易让他愿意开始？',
+      '我贴出一段课堂反馈后，请帮我整理成进步、待加强和下一步建议。',
+    ],
+  },
+  {
+    title: '了解牧哲学堂',
+    questions: [
+      '牧哲学堂是什么样的机构？请介绍课程与服务，不确定的信息注明以校区确认为准。',
+      '牧哲学堂的校区在哪里、如何联系？没有准确地址时请提示联系管理员核实。',
+      '课程、收费和课时怎样了解？请明确标出需要校区确认的内容。',
+      '师资资质有哪些官方核实渠道？不确定的内容请明确说明。',
+      '家长如何通过系统了解孩子的课程安排和老师反馈？',
+      '牧哲学堂和普通补习班有哪些不同？',
+    ],
+  },
 ]
 
-const ABOUT_SUGGESTED = [
-  '牧哲学堂是什么样的机构？简单介绍一下',
-  '牧哲学堂的校区都在哪里？怎么联系',
-  '牧哲学堂有什么课程？怎么收费',
-  '牧哲学堂的老师怎么样？资质如何',
-  '牧哲学堂和家长怎么沟通？能实时了解孩子情况吗',
-  '牧哲学堂和普通补习班有什么不同',
+const ACTIONS: AIOverviewAction[] = [
+  { href: '/parent/schedule', icon: <CalendarOutlined />, label: '课程表', description: '查看近期上课安排' },
+  { href: '/parent/class-feedback', icon: <BookOutlined />, label: '课堂反馈', description: '了解老师课后记录' },
+  { href: '/parent/study-hall', icon: <ReadOutlined />, label: '晚托作业', description: '查看作业与完成情况' },
+  { href: '/parent/messages', icon: <CommentOutlined />, label: '家校沟通', description: '查看留言与老师交流' },
 ]
 
 export default function ParentAIPage() {
   const [quickAsk, setQuickAsk] = useState<string | null>(null)
-  const [showMoreAbout, setShowMoreAbout] = useState(false)
 
   return (
-    <div style={{ padding: '0 4px' }}>
-      <div style={{
-        borderRadius: 14,
-        marginBottom: 12,
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #FFF6F1 0%, #FFFBF7 100%)',
-        border: '1px solid rgba(232,120,74,.2)',
-      }}>
-        <div style={{ padding: '16px 18px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <div style={{
-              width: 42,
-              height: 42,
-              borderRadius: 8,
-              background: 'linear-gradient(135deg, #E87545, #764ba2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 22,
-              color: '#fff',
-              fontWeight: 800,
-            }}>
-              AI
-            </div>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1201', letterSpacing: 0 }}>
-                牧哲学堂 · AI 智学中心
-              </div>
-              <div style={{ fontSize: 11, color: '#9a8e7a', marginTop: 2 }}>
-                MUZHE AI LEARNING CENTER
-              </div>
-            </div>
-          </div>
-
-          <Text style={{ fontSize: 13, color: '#5a4e3a', lineHeight: 1.75, display: 'block' }}>
-            汇聚 DeepSeek、MiMo、Kimi 多个大模型，为孩子提供 7×24 小时智能辅导：题目解析、知识梳理、拍照解题。
-          </Text>
-        </div>
-      </div>
-
-      {/* 了解牧哲学堂 — 快捷提问 */}
-      <div style={{
-        borderRadius: 12,
-        marginBottom: 12,
-        padding: '14px 16px',
-        background: 'linear-gradient(135deg, #FFF6F1 0%, #FFFBF7 100%)',
-        border: '1px solid rgba(232,120,74,.2)',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          marginBottom: 10,
-        }}>
-          <span style={{ fontSize: 20 }}>🏫</span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: '#E8784A' }}>了解牧哲学堂</span>
-          <span style={{ fontSize: 11, color: '#9a8e7a' }}>点击问题，AI 为你详细介绍</span>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {ABOUT_SUGGESTED.slice(0, showMoreAbout ? ABOUT_SUGGESTED.length : 3).map((q) => (
-            <button
-              key={q}
-              type="button"
-              onClick={() => setQuickAsk(q)}
-              style={{
-                padding: '7px 12px',
-                borderRadius: 14,
-                cursor: 'pointer',
-                backgroundColor: '#fff',
-                border: '1px solid rgba(232,120,74,.25)',
-                fontSize: 13,
-                color: '#5a4e3a',
-                fontWeight: 500,
-                transition: 'all 0.15s',
-                outline: 'none',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(232,120,74,.08)'
-                e.currentTarget.style.borderColor = '#E8784A'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#fff'
-                e.currentTarget.style.borderColor = 'rgba(232,120,74,.25)'
-              }}
-            >
-              {q}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => setShowMoreAbout(value => !value)}
-            aria-expanded={showMoreAbout}
-            style={{
-              padding: '7px 12px',
-              borderRadius: 14,
-              cursor: 'pointer',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(232,120,74,.18)',
-              fontSize: 12,
-              color: '#E8784A',
-              fontWeight: 600,
-            }}
-          >
-            {showMoreAbout ? '收起问题 ⌃' : '更多问题 ⌄'}
-          </button>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: 12 }}>
-        <AIChatPanel
-          aiRole="parent"
-          suggestedQuestions={SUGGESTED}
-          quickAsk={quickAsk}
-          onQuickAskHandled={() => setQuickAsk(null)}
-        />
-      </div>
+    <div style={{ width: '100%', maxWidth: '100%', padding: '0 4px' }}>
+      <AIClientOverview
+        role="parent"
+        eyebrow="家长学习陪伴"
+        title="看懂孩子的学习进展，知道下一步怎么陪"
+        description="小牧可以讲解题目、整理复习思路，也能帮你读懂老师反馈。课程、考勤和正式反馈请从下方系统入口查看，AI 不会替代老师的实际记录。"
+        capabilities={['题目讲解', '复习规划', '反馈梳理']}
+        actionsTitle="家长常用入口"
+        actions={ACTIONS}
+        questionGroups={SUGGESTED_GROUPS}
+        onAskQuestion={setQuickAsk}
+      />
+      <AIChatPanel
+        aiRole="parent"
+        quickAsk={quickAsk}
+        onQuickAskHandled={() => setQuickAsk(null)}
+      />
     </div>
   )
 }

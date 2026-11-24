@@ -208,7 +208,7 @@ export default function StudentFeedbackArchivePage() {
     <PageLayout
       title={data?.student ? `${data.student.name} · 课堂反馈档案` : '课堂反馈档案'}
       subtitle={data?.student?.grade || '按学科、教师和时间查看完整课堂反馈'}
-      actions={<Button icon={<ArrowLeftOutlined />} onClick={() => router.push(`/students/${id}`)}>返回学生详情</Button>}
+      actions={<Button className="mobile-shell-back" icon={<ArrowLeftOutlined />} onClick={() => router.push(`/students/${id}`)}>返回学生详情</Button>}
     >
       {isLoading ? <div style={{ display: 'grid', placeItems: 'center', minHeight: 320 }}><Spin size="large" /></div> : error ? (
         <Card bordered={false}><Empty description={error.message || '档案加载失败'} /></Card>

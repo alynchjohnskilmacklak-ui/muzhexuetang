@@ -1,0 +1,189 @@
+{
+  "q1a_studentSnapshot": [
+    {
+      "students": 191,
+      "remainpositive": 151,
+      "remainzero": 40,
+      "sumremain": 18104.499999999956,
+      "sumtotal": 19718.000000000004
+    }
+  ],
+  "q1b_enrollmentActive": [
+    {
+      "enrollments": 163,
+      "remainpositive": 114,
+      "remainzero": 49,
+      "sumremain": 2647.3999999999737,
+      "sumtotal": 19314.400000000005,
+      "sumused": 16667.000000000015
+    }
+  ],
+  "q1c_studentLevelZeroWithActiveEnroll": [
+    {
+      "cnt": 9
+    }
+  ],
+  "q1d_snapshotVsEnrollmentMismatch": [
+    {
+      "activeenrollments": 163,
+      "rowmismatch": 149,
+      "snapshotonlypositive": 35
+    }
+  ],
+  "q1e_perStudentMismatch": [
+    {
+      "studentswithactiveenr": 191,
+      "balancemismatch": 151,
+      "snapshothigher": 149,
+      "enrollmenthigher": 2
+    }
+  ],
+  "q2_classroomFeedback": [
+    {
+      "total": 5372,
+      "published": 5335,
+      "publishedlive": 5335,
+      "deleted": 2
+    }
+  ],
+  "q2_weakness": [
+    {
+      "total": 1,
+      "students": 1
+    }
+  ],
+  "q2_mastery": [
+    {
+      "total": 0,
+      "students": 0
+    }
+  ],
+  "q2_performancePost": [
+    {
+      "total": 0,
+      "live": 0,
+      "parentvisible": 0
+    }
+  ],
+  "q2_examPaper": [
+    {
+      "total": 15,
+      "published": 15,
+      "publishedlive": 15,
+      "deleted": 0
+    }
+  ],
+  "q2_gradeRecord": [
+    {
+      "total": 0,
+      "students": 0
+    }
+  ],
+  "q2_stageSummary": [
+    {
+      "total": 0,
+      "published": 0
+    }
+  ],
+  "q2_badge": [
+    {
+      "total": 160
+    }
+  ],
+  "q2_paperQuestionMastery": [],
+  "q3_bindRows": [
+    {
+      "students": 194,
+      "byparentuserid": 183,
+      "byparentid": 183,
+      "bothset": 183,
+      "bothnull": 11,
+      "activestudents": 160
+    }
+  ],
+  "q3_bindFieldConsistency": [
+    {
+      "bothsetdiffer": 0,
+      "bothsetequal": 180,
+      "useridonly": 0,
+      "legacyidonly": 0
+    }
+  ],
+  "q3_parentUserIdOrphan": [
+    {
+      "cnt": 0
+    }
+  ],
+  "q3_parentIdOrphan": [
+    {
+      "cnt": 0
+    }
+  ],
+  "q3b_notificationMismatch": [
+    {
+      "cnt": 56
+    }
+  ],
+  "q3b_notificationMismatchByType": [
+    {
+      "rtype": "PARENT_MESSAGE",
+      "cnt": 44
+    },
+    {
+      "rtype": "leave",
+      "cnt": 8
+    },
+    {
+      "rtype": "CLASSROOM_FEEDBACK_REVIEW",
+      "cnt": 4
+    }
+  ],
+  "q3b_notificationNullStudent": [
+    {
+      "cnt": 10424,
+      "unread": 8303
+    }
+  ],
+  "q3b_notificationTotalActive": [
+    {
+      "total": 10524,
+      "withstudent": 100,
+      "unread": 8363
+    }
+  ],
+  "q3b_mismatchReceiverOrphan": [
+    {
+      "cnt": 0
+    }
+  ],
+  "q4_teachers": [
+    {
+      "status": "ACTIVE",
+      "cnt": 29,
+      "withphone": 29
+    },
+    {
+      "status": "RESIGNED",
+      "cnt": 4,
+      "withphone": 4
+    }
+  ],
+  "q5_feedbackCoverage": [
+    {
+      "feedbacks": 10283,
+      "students": 160
+    }
+  ],
+  "q5_feedbackStudentIdEmpty": [
+    {
+      "cnt": 0
+    }
+  ],
+  "q6_parentAccounts": [
+    {
+      "parents": 168,
+      "boundqywx": 1,
+      "boundwxpusher": 1
+    }
+  ]
+}

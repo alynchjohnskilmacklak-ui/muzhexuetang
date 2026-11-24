@@ -1,0 +1,1214 @@
+[
+  {
+    "word": "biology",
+    "examTags": [
+      "词汇·学科名称",
+      "语言运用·介绍课程"
+    ],
+    "grammar": "n. 生物学；学科名称通常作不可数名词，不加 a/an 或复数 -s。",
+    "collocations": "study biology; a biology lesson; biology teacher。",
+    "commonMistake": "表示学习这门学科时说 study biology，不说 study a biology。",
+    "example": {
+      "english": "We learn about plants in biology.",
+      "chinese": "我们在生物课上学习植物知识。"
+    },
+    "application": {
+      "prompt": "In this subject, students learn about plants, animals and the human body. It is ___. A. biology B. history",
+      "solution": "A。解析：研究生物和生命的学科是 biology（生物学）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: biology",
+        "url": "https://dictionary.cambridge.org/dictionary/english/biology"
+      }
+    ]
+  },
+  {
+    "word": "IT",
+    "examTags": [
+      "词汇·学科名称与缩写",
+      "阅读·理解课程表信息"
+    ],
+    "grammar": "n. information technology（信息技术）的缩写；学科名称常写作大写 IT。",
+    "collocations": "an IT lesson; study IT; IT teacher。",
+    "commonMistake": "学科缩写 IT 要大写；小写 it 通常是代词“它”，词义不同。",
+    "example": {
+      "english": "We use computers in our IT lesson.",
+      "chinese": "我们在信息技术课上使用电脑。"
+    },
+    "application": {
+      "prompt": "The timetable uses ___ for the subject information technology. A. IT B. it",
+      "solution": "A。解析：information technology 的学科缩写写作大写 IT。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: IT",
+        "url": "https://dictionary.cambridge.org/dictionary/english/it"
+      }
+    ]
+  },
+  {
+    "word": "geography",
+    "examTags": [
+      "词汇·学科名称",
+      "阅读·理解地图与地理信息"
+    ],
+    "grammar": "n. 地理（学）；通常作不可数名词。表示学科时直接用 geography，不加 a/an。",
+    "collocations": "study geography; a geography lesson; geography teacher。",
+    "commonMistake": "geography 表示学科时通常不可数：We have geography today，不说 a geography。",
+    "example": {
+      "english": "In geography, we learn about maps and countries.",
+      "chinese": "地理课上我们学习地图和国家。"
+    },
+    "application": {
+      "prompt": "Students use maps to learn about countries and places in ___. A. geography B. music",
+      "solution": "A。解析：地图、国家和地方是 geography（地理）的学习内容。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: geography",
+        "url": "https://dictionary.cambridge.org/dictionary/english/geography"
+      }
+    ]
+  },
+  {
+    "word": "history",
+    "examTags": [
+      "词汇·学科名称",
+      "阅读·理解过去事件信息"
+    ],
+    "grammar": "n. 历史；学科名称通常作不可数名词。the past 指“过去”，history 也可指一段历史或个人经历。",
+    "collocations": "study history; a history lesson; in history。",
+    "commonMistake": "表示学习历史这门学科时通常说 study history，不说 study a history。",
+    "example": {
+      "english": "We read about old buildings in history.",
+      "chinese": "我们在历史课上阅读有关古建筑的内容。"
+    },
+    "application": {
+      "prompt": "In this subject, we learn what happened in the past. It is ___. A. history B. biology",
+      "solution": "A。解析：研究过去事件的学科是 history（历史）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: history",
+        "url": "https://dictionary.cambridge.org/dictionary/english/history"
+      }
+    ]
+  },
+  {
+    "word": "boring",
+    "examTags": [
+      "词汇·形容词词义辨析",
+      "阅读·判断人物感受与事物特点"
+    ],
+    "grammar": "adj. 令人厌烦的；描述引起无聊感的人或事。比较级 more boring，最高级 most boring。",
+    "collocations": "a boring lesson; a boring book; sound boring。",
+    "commonMistake": "boring 描述事物“令人无聊”；bored 描述人的感受“感到无聊”。",
+    "example": {
+      "english": "The long film is boring, so the children stop watching.",
+      "chinese": "这部电影很长又无聊，所以孩子们不再看了。"
+    },
+    "application": {
+      "prompt": "The lesson repeats the same exercise for an hour. It is ___. A. boring B. bored",
+      "solution": "A。解析：lesson 是让人感到无聊的事物，用 boring；人的感受用 bored。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: boring",
+        "url": "https://dictionary.cambridge.org/dictionary/english/boring"
+      }
+    ]
+  },
+  {
+    "word": "useful",
+    "examTags": [
+      "词汇·形容词与介词搭配",
+      "阅读·判断事物用途"
+    ],
+    "grammar": "adj. 有用的；有帮助的。比较级 more useful，最高级 most useful；常用 be useful for/to。",
+    "collocations": "a useful book; useful for learning; useful to students。",
+    "commonMistake": "useful 开头发音是辅音音素 /j/，说 a useful book，不说 an useful book。",
+    "example": {
+      "english": "A dictionary is useful for learning new words.",
+      "chinese": "词典对学习新单词很有用。"
+    },
+    "application": {
+      "prompt": "This map helps us find the way to the gym. It is ___. A. useful B. useless",
+      "solution": "A。解析：能帮忙找到路线说明地图是 useful（有用的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: useful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/useful"
+      }
+    ]
+  },
+  {
+    "word": "exciting",
+    "examTags": [
+      "词汇·形容词词义辨析",
+      "阅读·理解活动感受"
+    ],
+    "grammar": "adj. 令人兴奋的；描述引起兴奋感的人或事。比较级 more exciting，最高级 most exciting。",
+    "collocations": "an exciting game; an exciting trip; sound exciting。",
+    "commonMistake": "exciting 描述事物“令人兴奋”；excited 描述人的感受“感到兴奋”。",
+    "example": {
+      "english": "The school trip to the museum sounds exciting.",
+      "chinese": "去博物馆的学校旅行听起来很令人兴奋。"
+    },
+    "application": {
+      "prompt": "Everyone is looking forward to the school trip. They think it will be ___. A. exciting B. excited",
+      "solution": "A。解析：trip 是令人兴奋的活动，用 exciting；人的感受用 excited。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: exciting",
+        "url": "https://dictionary.cambridge.org/dictionary/english/exciting"
+      }
+    ]
+  },
+  {
+    "word": "past",
+    "examTags": [
+      "词汇·时间表达与多义词",
+      "阅读·定位过去时间信息"
+    ],
+    "grammar": "n. 过去；adj. 过去的；prep. 经过、晚于。常见表达 in the past（过去），walk past the school（走过学校）。",
+    "collocations": "in the past; past events; walk past the library。",
+    "commonMistake": "past 可作名词、形容词或介词；表示“过去”常说 in the past，不要与动词 pass 混淆。",
+    "example": {
+      "english": "In the past, students wrote on a blackboard.",
+      "chinese": "过去，学生们在黑板上写字。"
+    },
+    "application": {
+      "prompt": "Our grandparents tell us stories about the ___. A. past B. future",
+      "solution": "A。解析：祖父母讲述以前发生的故事，about the past 表示“关于过去”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: past",
+        "url": "https://dictionary.cambridge.org/dictionary/english/past"
+      }
+    ]
+  },
+  {
+    "word": "number",
+    "examTags": [
+      "词汇·名词搭配",
+      "听读·获取数字与联系方式"
+    ],
+    "grammar": "n. 数字；号码；数量。可数，复数 numbers。表示电话号码常说 phone number；the number of + 复数名词作主语时谓语通常用单数。",
+    "collocations": "phone number; room number; a large number of books。",
+    "commonMistake": "number 可表示“号码”或“数量”；a number of 表示“许多”，后接复数名词。",
+    "example": {
+      "english": "Please write your phone number on the form.",
+      "chinese": "请把你的电话号码写在表格上。"
+    },
+    "application": {
+      "prompt": "The form asks for the digits people can use to call you. Write your phone ___. A. number B. reason",
+      "solution": "A。解析：可用于拨打电话的号码是 phone number。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: number",
+        "url": "https://dictionary.cambridge.org/dictionary/english/number"
+      }
+    ]
+  },
+  {
+    "word": "reason",
+    "examTags": [
+      "词汇·名词搭配",
+      "阅读·理解原因与结果"
+    ],
+    "grammar": "n. 原因；理由。可数，复数 reasons；常用 the reason for sth. 或 the reason why ...。",
+    "collocations": "a good reason; the reason for a choice; for this reason。",
+    "commonMistake": "reason 是可数名词，单数前通常要有 a/the；常说 the reason for something。",
+    "example": {
+      "english": "One reason I like biology is that we learn about animals.",
+      "chinese": "我喜欢生物的一个原因是我们能学习动物知识。"
+    },
+    "application": {
+      "prompt": "Why do you like geography? Please give me one ___. A. reason B. number",
+      "solution": "A。解析：回答 why（为什么）时给出一个 reason（原因/理由）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reason",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reason"
+      }
+    ]
+  },
+  {
+    "word": "remember",
+    "examTags": [
+      "词汇·动词结构辨析",
+      "语言运用·提醒与记忆表达"
+    ],
+    "grammar": "v. 记得；记住。remember to do 表示记得去做；remember doing 表示记得做过。",
+    "collocations": "remember a name; remember to bring; remember doing sth.。",
+    "commonMistake": "remember to do 是“记得要做”；remember doing 是“记得做过”，两种结构意思不同。",
+    "example": {
+      "english": "Remember to bring your geography book tomorrow.",
+      "chinese": "记得明天带上你的地理书。"
+    },
+    "application": {
+      "prompt": "Please ___ to bring your history book to class tomorrow. A. remember B. remembers",
+      "solution": "A。解析：祈使句用动词原形；remember to bring 表示记得去带。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: remember",
+        "url": "https://dictionary.cambridge.org/dictionary/english/remember"
+      }
+    ]
+  },
+  {
+    "word": "as",
+    "examTags": [
+      "词汇·介词与连词用法",
+      "语法·比较结构与身份表达"
+    ],
+    "grammar": "prep./conj. 作为；像……一样；当……时等。常见结构 as a student（作为学生）、as ... as（和……一样）。",
+    "collocations": "as a subject; as a teacher; as ... as; as soon as。",
+    "commonMistake": "as ... as 中间用形容词或副词原级，如 as useful as；不要把第二个 as 漏掉。",
+    "example": {
+      "english": "I study French as an optional subject.",
+      "chinese": "我把法语作为一门选修课来学习。"
+    },
+    "application": {
+      "prompt": "My mother works ___ a biology teacher at our school. A. as B. because",
+      "solution": "A。解析：as + 职业表示“作为……”，as a biology teacher 意为“作为一名生物老师”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: as",
+        "url": "https://dictionary.cambridge.org/dictionary/english/as"
+      }
+    ]
+  },
+  {
+    "word": "AM",
+    "examTags": [
+      "词汇·时间缩写",
+      "听读·辨认上午时间"
+    ],
+    "grammar": "abbr. a.m. 的大写形式，表示午夜到中午之间的时间；常写在具体时间后，如 8 a.m. 或 8 AM。",
+    "collocations": "7 AM; 8:30 a.m.; from 9 AM to noon。",
+    "commonMistake": "AM 表示中午前；具体时刻写在 AM 前，如 9 AM。小写 am 也可能是 be 动词 am，要结合时间数字判断。",
+    "example": {
+      "english": "Our first class starts at 8 AM.",
+      "chinese": "我们的第一节课上午八点开始。"
+    },
+    "application": {
+      "prompt": "The school bus leaves at 7:15 in the morning. It leaves at 7:15 ___. A. AM B. PM",
+      "solution": "A。解析：早晨、中午之前的时间用 AM（或 a.m.）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Learner's Dictionary: a.m.",
+        "url": "https://dictionary.cambridge.org/dictionary/learner-english/a-m"
+      }
+    ]
+  },
+  {
+    "word": "PM",
+    "examTags": [
+      "词汇·时间缩写",
+      "听读·辨认下午与晚间时间"
+    ],
+    "grammar": "abbr. p.m. 的大写形式，表示中午到午夜之间的时间；常写在具体时间后，如 3 PM 或 8:30 p.m.。",
+    "collocations": "2 PM; 6:30 p.m.; from noon to 5 PM。",
+    "commonMistake": "PM 表示中午之后、午夜之前；12 PM 是中午，12 AM 是午夜。",
+    "example": {
+      "english": "The history club meets at 4 PM.",
+      "chinese": "历史社团下午四点开会。"
+    },
+    "application": {
+      "prompt": "The school concert begins at 7:00 in the evening. It begins at 7:00 ___. A. AM B. PM",
+      "solution": "B。解析：晚上七点在中午之后、午夜之前，用 PM（或 p.m.）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Learner's Dictionary: p.m.",
+        "url": "https://dictionary.cambridge.org/dictionary/learner-english/p-m"
+      }
+    ]
+  },
+  {
+    "word": "French",
+    "examTags": [
+      "词汇·语言与国籍名称",
+      "拼写·专有名词首字母大写"
+    ],
+    "grammar": "adj./n. 法国的；法语；法国人。表示语言时通常作不可数名词；语言和国籍名称首字母大写。",
+    "collocations": "speak French; French food; a French student。",
+    "commonMistake": "French 作语言或国籍形容词时首字母要大写；说“会说法语”用 speak French，不加 a。",
+    "example": {
+      "english": "We learn French on Tuesday afternoon.",
+      "chinese": "我们周二下午学法语。"
+    },
+    "application": {
+      "prompt": "Choose the correctly written language name: “I can speak ___.” A. French B. french",
+      "solution": "A。解析：语言名称 French 的首字母要大写。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: French",
+        "url": "https://dictionary.cambridge.org/dictionary/english/french"
+      }
+    ]
+  },
+  {
+    "word": "excellent",
+    "examTags": [
+      "词汇·形容词评价",
+      "语言运用·表达赞扬与评价"
+    ],
+    "grammar": "adj. 极好的；优秀的。可作定语或表语；以元音音素开头，前面的单数名词通常用 an。",
+    "collocations": "an excellent student; excellent work; be excellent at maths。",
+    "commonMistake": "excellent 前用 an：an excellent idea；不要因首字母是 e 以外的信息而漏掉冠词。",
+    "example": {
+      "english": "You did an excellent job on the geography project.",
+      "chinese": "你在地理项目中做得非常出色。"
+    },
+    "application": {
+      "prompt": "Mia gets the top mark on every test. She is ___ student. A. an excellent B. a excellent",
+      "solution": "A。解析：excellent 以元音音素开头，前面用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: excellent",
+        "url": "https://dictionary.cambridge.org/dictionary/english/excellent"
+      }
+    ]
+  },
+  {
+    "word": "instrument",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·音乐与兴趣"
+    ],
+    "grammar": "可数名词，表示乐器或工具；复数为 instruments。表示乐器时常用 musical instrument。",
+    "collocations": "a musical instrument；play an instrument；string instrument",
+    "commonMistake": "instrument 是乐器/工具；instrumental 是形容词，不能直接替代名词。",
+    "example": {
+      "english": "A piano is a musical instrument with black and white keys.",
+      "chinese": "钢琴是一种有黑白琴键的乐器。"
+    },
+    "application": {
+      "prompt": "A piano is an example of a musical ___.",
+      "solution": "instrument"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: instrument",
+        "url": "https://dictionary.cambridge.org/dictionary/english/instrument"
+      }
+    ]
+  },
+  {
+    "word": "singer",
+    "examTags": [
+      "词汇构词·名词后缀 -er",
+      "语法知识·可数名词"
+    ],
+    "grammar": "可数名词，表示歌手；由 sing 加 -er 构成，复数为 singers。sing 的变化是 sing—sang—sung。",
+    "collocations": "a pop singer；a famous singer；singer and songwriter",
+    "commonMistake": "singer 是“歌手”，sing 是“唱歌”；注意 sing 的过去式是 sang。",
+    "example": {
+      "english": "The young singer practises in the music room after school.",
+      "chinese": "这位年轻歌手放学后在音乐教室练习。"
+    },
+    "application": {
+      "prompt": "A person who sings songs for an audience is a ___.",
+      "solution": "singer"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: singer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/singer"
+      },
+      {
+        "label": "Cambridge Dictionary: sing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sing"
+      }
+    ]
+  },
+  {
+    "word": "future",
+    "examTags": [
+      "语法知识·名词与形容词",
+      "语言运用·计划与展望"
+    ],
+    "grammar": "可作名词，表示将来；也可作形容词，表示未来的。谈将来常用 in the future。",
+    "collocations": "in the future；future plans；future job",
+    "commonMistake": "通常说 in the future；表示将来的计划可说 future plans。",
+    "example": {
+      "english": "I want to learn more about music in the future.",
+      "chinese": "我将来想多了解音乐。"
+    },
+    "application": {
+      "prompt": "The time after the present is the ___.",
+      "solution": "future"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: future",
+        "url": "https://dictionary.cambridge.org/dictionary/english/future"
+      }
+    ]
+  },
+  {
+    "word": "term",
+    "examTags": [
+      "语法知识·可数名词",
+      "语言运用·校园时间安排"
+    ],
+    "grammar": "可数名词；在学校语境中表示学期，复数为 terms。",
+    "collocations": "this term；next term；the autumn term；the term starts/ends",
+    "commonMistake": "term 在学校语境中指学期；不要与表示某个学科术语的 term 混淆。",
+    "example": {
+      "english": "We have a new music teacher this term.",
+      "chinese": "这学期我们有一位新的音乐老师。"
+    },
+    "application": {
+      "prompt": "Our autumn ___ ends in January. (term / lesson)",
+      "solution": "term"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: term",
+        "url": "https://dictionary.cambridge.org/dictionary/english/term"
+      }
+    ]
+  },
+  {
+    "word": "problem",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·描述困难与解决办法"
+    ],
+    "grammar": "可数名词，表示问题或难题；复数为 problems。",
+    "collocations": "solve a problem；a maths problem；have a problem with",
+    "commonMistake": "表示一个问题时用 a problem；problem 是可数名词，不能直接用单数而不加限定词。",
+    "example": {
+      "english": "I ask my teacher when I have a problem with a maths question.",
+      "chinese": "数学题遇到问题时，我会向老师请教。"
+    },
+    "application": {
+      "prompt": "I cannot find the answer to this question. I have a ___.",
+      "solution": "problem"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: problem",
+        "url": "https://dictionary.cambridge.org/dictionary/english/problem"
+      }
+    ]
+  },
+  {
+    "word": "magic",
+    "examTags": [
+      "词汇辨析·名词与形容词",
+      "阅读能力·语境猜词"
+    ],
+    "grammar": "可作名词，表示魔法；也可作形容词修饰名词，如 magic show。表示“有魔力的”也常用 magical。",
+    "collocations": "do magic；a magic trick；a magic show",
+    "commonMistake": "magic 可作名词或定语形容词；magician 才表示“魔术师”。",
+    "example": {
+      "english": "The singer showed us a simple magic trick after the concert.",
+      "chinese": "演唱会后，这位歌手给我们表演了一个简单的魔术。"
+    },
+    "application": {
+      "prompt": "A show with surprising tricks may be called a ___ show.",
+      "solution": "magic"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: magic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/magic"
+      },
+      {
+        "label": "Cambridge Dictionary: magical",
+        "url": "https://dictionary.cambridge.org/dictionary/english/magical"
+      }
+    ]
+  },
+  {
+    "word": "life",
+    "examTags": [
+      "语法知识·不规则名词复数",
+      "语言运用·描述日常与校园"
+    ],
+    "grammar": "名词，可表示生命或生活；作可数名词时复数为 lives，变复数时 f 变为 v 再加 -es。",
+    "collocations": "school life；family life；daily life；a healthy life",
+    "commonMistake": "life 的复数是 lives，不是 lifes；注意 lives 也可作动词 live 的第三人称单数。",
+    "example": {
+      "english": "School life is busy, but I enjoy my music lessons.",
+      "chinese": "校园生活很忙碌，但我喜欢音乐课。"
+    },
+    "application": {
+      "prompt": "The plural form of the noun life is ___.",
+      "solution": "lives"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: life",
+        "url": "https://dictionary.cambridge.org/dictionary/english/life"
+      }
+    ]
+  },
+  {
+    "word": "scientist",
+    "examTags": [
+      "词汇构词·名词后缀",
+      "语法知识·可数名词"
+    ],
+    "grammar": "可数名词，表示科学家；由 science + -ist 构成，复数为 scientists。",
+    "collocations": "a scientist；a famous scientist；a team of scientists",
+    "commonMistake": "scientist 指科学家，science 指科学学科；表示“一位科学家”要用 a scientist。",
+    "example": {
+      "english": "The scientist visits our school to talk about space.",
+      "chinese": "这位科学家来我们学校讲太空。"
+    },
+    "application": {
+      "prompt": "A person who studies or works in science is a ___.",
+      "solution": "scientist"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: scientist",
+        "url": "https://dictionary.cambridge.org/dictionary/english/scientist"
+      },
+      {
+        "label": "Cambridge Dictionary: science",
+        "url": "https://dictionary.cambridge.org/dictionary/english/science"
+      }
+    ]
+  },
+  {
+    "word": "subject",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·谈论学科偏好"
+    ],
+    "grammar": "可数名词，在学校语境中表示学科；复数为 subjects。也可表示话题或主题。",
+    "collocations": "school subject；favourite subject；study a subject",
+    "commonMistake": "subject 表示学科时是可数名词；说“最喜欢的学科”可用 my favourite subject。",
+    "example": {
+      "english": "Music is my favourite subject this year.",
+      "chinese": "音乐是我今年最喜欢的学科。"
+    },
+    "application": {
+      "prompt": "History and PE are school ___. (subject)",
+      "solution": "subjects"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: subject",
+        "url": "https://dictionary.cambridge.org/dictionary/english/subject"
+      }
+    ]
+  },
+  {
+    "word": "learn",
+    "examTags": [
+      "语法知识·动词搭配",
+      "语言运用·学习方法"
+    ],
+    "grammar": "动词，表示学习或学会；可接名词、learn to do sth 或 learn about sth。过去式和过去分词可用 learned 或 learnt。",
+    "collocations": "learn English；learn to play；learn about science；learn from mistakes",
+    "commonMistake": "learn 表示获得知识或技能；teach 表示把知识或技能教给别人。",
+    "example": {
+      "english": "We learn about famous scientists in science class.",
+      "chinese": "我们在科学课上了解著名的科学家。"
+    },
+    "application": {
+      "prompt": "At school, we ___ new words and ideas every day. (learn)",
+      "solution": "learn"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: learn",
+        "url": "https://dictionary.cambridge.org/dictionary/english/learn"
+      }
+    ]
+  },
+  {
+    "word": "maths",
+    "examTags": [
+      "语法知识·学科名称与主谓一致",
+      "书写规范·英美拼写差异"
+    ],
+    "grammar": "名词，表示数学学科；英式英语常用 maths，美式英语常用 math；作学科名称时通常使用单数谓语。",
+    "collocations": "maths lesson；maths teacher；do maths；a maths problem",
+    "commonMistake": "英式拼法 maths 末尾有 s，但学科名通常按单数处理，如 Maths is interesting。",
+    "example": {
+      "english": "Maths is easier when I draw a picture.",
+      "chinese": "画图时，我觉得数学更容易。"
+    },
+    "application": {
+      "prompt": "The school subject about numbers and calculations is ___.",
+      "solution": "maths"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: maths",
+        "url": "https://dictionary.cambridge.org/dictionary/english/maths"
+      },
+      {
+        "label": "Cambridge Dictionary: mathematics",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mathematics"
+      }
+    ]
+  },
+  {
+    "word": "PE",
+    "examTags": [
+      "语言运用·学科缩写",
+      "书写规范·缩写大写"
+    ],
+    "grammar": "physical education 的缩写，表示体育课/体育；由两个大写字母组成，常见搭配是 PE lesson 或 PE class。",
+    "collocations": "have PE；a PE lesson；PE teacher",
+    "commonMistake": "PE 是缩写，两个字母都要大写；表示体育课可说 have PE。",
+    "example": {
+      "english": "We play basketball in PE on Thursday.",
+      "chinese": "我们周四体育课打篮球。"
+    },
+    "application": {
+      "prompt": "We run, jump, and play sports in ___ class. (PE / art)",
+      "solution": "PE"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: PE",
+        "url": "https://dictionary.cambridge.org/us/dictionary/english/pe"
+      },
+      {
+        "label": "Cambridge Dictionary: physical education",
+        "url": "https://dictionary.cambridge.org/dictionary/english/physical-education"
+      }
+    ]
+  },
+  {
+    "word": "hard",
+    "examTags": [
+      "语法知识·形容词与副词",
+      "词汇辨析·hard 与 hardly"
+    ],
+    "grammar": "可作形容词，表示困难的或坚硬的；也可作副词，表示努力地。harder、hardest 是常见比较级和最高级。",
+    "collocations": "a hard question；hard work；work hard；try hard",
+    "commonMistake": "hard 可表示“努力地”；hardly 意为“几乎不”，两者意思不同。",
+    "example": {
+      "english": "The last maths problem is hard, but I can try it.",
+      "chinese": "最后一道数学题很难，但我可以试试。"
+    },
+    "application": {
+      "prompt": "I need to practise more because this maths problem is ___. (hard / hardly)",
+      "solution": "hard"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hard"
+      },
+      {
+        "label": "Cambridge Grammar: hard",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/hard"
+      }
+    ]
+  },
+  {
+    "word": "difficult",
+    "examTags": [
+      "语法知识·形容词与不定式",
+      "阅读能力·理解难度描述"
+    ],
+    "grammar": "形容词，表示困难的；常用 be difficult for sb 或 be difficult to do sth；比较级通常用 more difficult。",
+    "collocations": "a difficult question；difficult for me；difficult to understand",
+    "commonMistake": "表示“对某人来说困难”常用 difficult for sb；比较级通常是 more difficult。",
+    "example": {
+      "english": "It is difficult to learn a new instrument without practice.",
+      "chinese": "不练习就很难学会一种新乐器。"
+    },
+    "application": {
+      "prompt": "This question is not easy to answer. It is ___. (difficult / difficulty)",
+      "solution": "difficult"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: difficult",
+        "url": "https://dictionary.cambridge.org/dictionary/english/difficult"
+      }
+    ]
+  },
+  {
+    "word": "sure",
+    "examTags": [
+      "语法知识·形容词搭配",
+      "交际表达·确认信息"
+    ],
+    "grammar": "形容词，表示确信的；常用 be sure (that)...、be sure of/about sth 和 make sure。",
+    "collocations": "Are you sure?；be sure of；make sure；be sure to do sth",
+    "commonMistake": "表示“确定……”可说 be sure that...；sure 是形容词，常与 be 连用。",
+    "example": {
+      "english": "Are you sure the music lesson is in Room 5?",
+      "chinese": "你确定音乐课在五号教室吗？"
+    },
+    "application": {
+      "prompt": "I checked the timetable twice, so I am ___ that PE starts at ten.",
+      "solution": "sure"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sure"
+      }
+    ]
+  },
+  {
+    "word": "easy",
+    "examTags": [
+      "语法知识·形容词与不定式",
+      "词汇辨析·形容词与副词"
+    ],
+    "grammar": "形容词，表示容易的；常用 be easy for sb 或 be easy to do；比较级 easier，副词为 easily。",
+    "collocations": "an easy question；easy to learn；easy for beginners",
+    "commonMistake": "easy 是形容词，如 The song is easy to learn；easily 是副词，用来修饰动词。",
+    "example": {
+      "english": "This song has only three notes, so it is easy to learn.",
+      "chinese": "这首歌只有三个音符，所以很容易学。"
+    },
+    "application": {
+      "prompt": "The instructions have one short step, so the task is ___ to finish. (easy / easily)",
+      "solution": "easy"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: easy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/easy"
+      }
+    ]
+  },
+  {
+    "word": "use",
+    "examTags": [
+      "词性辨析·动词与名词",
+      "语法·不定式与用途表达"
+    ],
+    "grammar": "use 可作动词“使用”或名词“用途、使用”；作动词时常用 use sth to do sth，也可用 be used for + 名词/动名词表示用途。",
+    "collocations": "use a computer; use sth to do sth; be used for; make use of",
+    "commonMistake": "表示用某物做某事常说 use sth to do sth；表示用途时也可说 be used for + 名词或动名词。",
+    "example": {
+      "english": "We use coloured paper to make a poster for our class.",
+      "chinese": "我们用彩纸为班级制作海报。"
+    },
+    "application": {
+      "prompt": "选词填空：We use a ruler ___ draw straight lines. A. to  B. at",
+      "solution": "A. to。use sth to do sth 表示“用某物做某事”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: use",
+        "url": "https://dictionary.cambridge.org/dictionary/english/use"
+      }
+    ]
+  },
+  {
+    "word": "give",
+    "examTags": [
+      "动词·不规则变化",
+      "语法·双宾语结构"
+    ],
+    "grammar": "give 是动词，过去式 gave，过去分词 given。常见结构有 give sb sth 和 give sth to sb，表示“给某人某物”。",
+    "collocations": "give sb a song; give sth to sb; give someone an idea; give a present",
+    "commonMistake": "give 的过去式是 gave、过去分词是 given；常见双宾语顺序是 give sb sth，或 give sth to sb。",
+    "example": {
+      "english": "Our music teacher gives us a new song to practise each week.",
+      "chinese": "我们的音乐老师每周给我们一首新歌练习。"
+    },
+    "application": {
+      "prompt": "选词填空：The teacher gave ___ a new song to practise. A. us  B. to us",
+      "solution": "A. us。句中采用 give sb sth 结构，直接宾语 a new song 放在后面。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: give",
+        "url": "https://dictionary.cambridge.org/dictionary/english/give"
+      }
+    ]
+  },
+  {
+    "word": "idea",
+    "examTags": [
+      "词法·可数名词",
+      "语言运用·提出建议"
+    ],
+    "grammar": "idea 是可数名词，表示“想法、主意”；复数为 ideas。常用 have/get an idea 或 an idea for sth。",
+    "collocations": "a good idea; have an idea; an idea for a song; an idea to do sth",
+    "commonMistake": "idea 是可数名词，单数前通常需要 a/an/the 等限定词；idea 以元音音素开头，通常说 an idea。",
+    "example": {
+      "english": "I have an idea for our school song.",
+      "chinese": "我有一个创作校歌的想法。"
+    },
+    "application": {
+      "prompt": "选词填空：“Let's write a song about our school.” “That's a great ___!” A. idea  B. afternoon",
+      "solution": "A. idea。对建议表示赞同时可说 That's a great idea!。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: idea",
+        "url": "https://dictionary.cambridge.org/dictionary/english/idea"
+      }
+    ]
+  },
+  {
+    "word": "listen",
+    "examTags": [
+      "语法·动词与介词搭配",
+      "听力·课堂指令理解"
+    ],
+    "grammar": "listen 是不及物动词，表示“听”；后接听的对象时通常用 listen to sb/sth。",
+    "collocations": "listen to music; listen to the teacher; listen carefully; listen for a song",
+    "commonMistake": "表示“听音乐/听老师讲”要说 listen to music/the teacher；listen 后接对象时不能漏掉 to。",
+    "example": {
+      "english": "We listen to a new song in music class.",
+      "chinese": "我们在音乐课上听一首新歌。"
+    },
+    "application": {
+      "prompt": "选词填空：Please listen ___ the teacher's instructions. A. to  B. at",
+      "solution": "A. to。listen to sb/sth 表示“听某人/某事”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: listen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/listen"
+      },
+      {
+        "label": "Cambridge Grammar: Listen, listen to, or hear?",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/word-choice-listen-listen-to-or-hear"
+      }
+    ]
+  },
+  {
+    "word": "draw",
+    "examTags": [
+      "动词·不规则变化",
+      "语境·美术课堂活动"
+    ],
+    "grammar": "draw 是动词，表示“画”；过去式 drew，过去分词 drawn。常用 draw a picture/map，表示画一幅图/地图。",
+    "collocations": "draw a picture; draw a map; draw a line; draw with a pencil",
+    "commonMistake": "draw 的过去式是 drew，过去分词是 drawn，不是 drawed；用铅笔画可说 draw with a pencil。",
+    "example": {
+      "english": "Lena draws a picture of the school garden after class.",
+      "chinese": "下课后莉娜画了一幅校园花园的图。"
+    },
+    "application": {
+      "prompt": "选词填空：Yesterday, Kate ___ a picture of our classroom. A. drew  B. draw",
+      "solution": "A. drew。Yesterday 表示过去，draw 的过去式是 drew。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: draw",
+        "url": "https://dictionary.cambridge.org/dictionary/english/draw"
+      }
+    ]
+  },
+  {
+    "word": "travel",
+    "examTags": [
+      "词汇·旅行场景",
+      "语法·情态动词后动词原形"
+    ],
+    "grammar": "travel 可作动词“旅行、出行”，也可作不可数名词“旅行”；过去式和过去分词通常为 travelled（英式）或 traveled（美式）。",
+    "collocations": "travel by bus/train; travel to a city; travel around the world; travel abroad",
+    "commonMistake": "表示乘坐交通工具出行可说 travel by train；travel 作“旅行”活动时通常不可数，不说 a travel。",
+    "example": {
+      "english": "My family likes to travel by train in the summer.",
+      "chinese": "我家人喜欢在夏天乘火车旅行。"
+    },
+    "application": {
+      "prompt": "选词填空：My family will ___ to Beijing by train during the holiday. A. travel  B. travels",
+      "solution": "A. travel。will 后接动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: travel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/travel"
+      }
+    ]
+  },
+  {
+    "word": "walk",
+    "examTags": [
+      "词汇·出行方式",
+      "词性辨析·动词与名词"
+    ],
+    "grammar": "walk 可作动词“步行”或名词“散步、步行”；过去式和过去分词均为 walked。常用 walk to school 和 go for a walk。",
+    "collocations": "walk to school; walk home; go for a walk; take a walk",
+    "commonMistake": "表示“步行去学校”说 walk to school；表示“步行回家”说 walk home，home 前通常不加 to。",
+    "example": {
+      "english": "We walk to the music room after lunch.",
+      "chinese": "午饭后我们步行去音乐教室。"
+    },
+    "application": {
+      "prompt": "选词填空：We ___ to school every day because we live nearby. A. walk  B. walks",
+      "solution": "A. walk。主语 We 是复数人称，谓语用 walk。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: walk",
+        "url": "https://dictionary.cambridge.org/dictionary/english/walk"
+      }
+    ]
+  },
+  {
+    "word": "afternoon",
+    "examTags": [
+      "语法·时间介词短语",
+      "听读·时间信息获取"
+    ],
+    "grammar": "afternoon 是可数名词，表示“下午”；常见表达为 in the afternoon、this afternoon、on Friday afternoon。",
+    "collocations": "in the afternoon; this afternoon; tomorrow afternoon; Friday afternoon",
+    "commonMistake": "泛指“在下午”常说 in the afternoon；this afternoon 或 tomorrow afternoon 前通常不加 in/the。",
+    "example": {
+      "english": "We have music class in the afternoon.",
+      "chinese": "我们下午有音乐课。"
+    },
+    "application": {
+      "prompt": "选词填空：We have art class ___ the afternoon. A. in  B. at",
+      "solution": "A. in。表示“在下午”用 in the afternoon。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: afternoon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/afternoon"
+      }
+    ]
+  },
+  {
+    "word": "then",
+    "examTags": [
+      "语法·时间顺序副词",
+      "阅读·步骤与先后关系"
+    ],
+    "grammar": "then 是副词，可表示“然后、接着”或“那时”。叙述步骤时常用 first..., then... 表示先后顺序。",
+    "collocations": "first ... then ...; and then; from then on; by then",
+    "commonMistake": "then 表示“然后/那时”；than 用于比较，如 taller than me，两词拼写和用法不同。",
+    "example": {
+      "english": "First we listen to the song, and then we sing it together.",
+      "chinese": "我们先听这首歌，然后一起唱。"
+    },
+    "application": {
+      "prompt": "选词填空：First, finish your homework; ___, you can listen to the song. A. then  B. before",
+      "solution": "A. then。句意是先完成作业，接着可以听歌，用 then 表示“然后”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: then",
+        "url": "https://dictionary.cambridge.org/dictionary/english/then"
+      }
+    ]
+  },
+  {
+    "word": "Miss",
+    "examTags": [
+      "语言运用·礼貌称呼",
+      "写作·称呼格式与大小写"
+    ],
+    "grammar": "Miss 可作女性称谓，放在姓名前，如 Miss Green；作为称谓时首字母大写。与 Mr、Ms 一样，后面接姓氏或全名。",
+    "collocations": "Miss Green; Miss Li; Dear Miss Brown; ask Miss Smith",
+    "commonMistake": "作为姓名前的称谓时写作 Miss + 姓氏并大写首字母；不要把 Miss 当作普通名词随意小写。",
+    "example": {
+      "english": "Miss Green teaches us music on Tuesday.",
+      "chinese": "格林老师星期二教我们音乐。"
+    },
+    "application": {
+      "prompt": "选词填空：Our female teacher's surname is Green. We call her ___. A. Miss Green  B. Mr Green",
+      "solution": "A. Miss Green。Miss 是女性称谓，Mr 是男性称谓。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Miss",
+        "url": "https://dictionary.cambridge.org/dictionary/english/miss"
+      }
+    ]
+  },
+  {
+    "word": "work",
+    "examTags": [
+      "词性辨析·动词与不可数名词",
+      "语法·动词搭配"
+    ],
+    "grammar": "work 可作动词“工作、学习、运转”，也可作名词“工作、功课”。表示工作或功课时通常为不可数名词；作动词时常用 work at/in/for。",
+    "collocations": "do work; a lot of work; work hard; work at a school; work for a company",
+    "commonMistake": "work 表示一般的工作或功课时通常不可数，不说 a work 或 works；表示一份具体职位常用 a job。",
+    "example": {
+      "english": "I have a lot of schoolwork to finish this afternoon.",
+      "chinese": "今天下午我有很多学校作业要完成。"
+    },
+    "application": {
+      "prompt": "选词填空：There is a lot of ___ to do before the school show. A. work  B. works",
+      "solution": "A. work。此处指要完成的工作，是不可数名词，不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: work",
+        "url": "https://dictionary.cambridge.org/dictionary/english/work"
+      },
+      {
+        "label": "Cambridge Grammar: Work (noun)",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/work"
+      }
+    ]
+  },
+  {
+    "word": "sometimes",
+    "examTags": [
+      "语法·频度副词位置",
+      "写作·描述日常习惯"
+    ],
+    "grammar": "sometimes 是频度副词，表示“有时”；可放在句首、句中或句末，常放在实义动词前、be 动词后。",
+    "collocations": "sometimes listen to music; sometimes after school; sometimes ... sometimes ...",
+    "commonMistake": "sometimes 表示“有时”；sometime 表示“某个时候”，不能混用。",
+    "example": {
+      "english": "I sometimes draw pictures after school.",
+      "chinese": "我有时放学后画画。"
+    },
+    "application": {
+      "prompt": "选词填空：I ___ draw after school, but not every day. A. sometimes  B. always",
+      "solution": "A. sometimes。not every day 表示并非每天，符合“有时”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sometimes",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sometimes"
+      }
+    ]
+  },
+  {
+    "word": "feel",
+    "examTags": [
+      "动词·不规则过去式",
+      "语法·系动词与形容词"
+    ],
+    "grammar": "feel 可表示“感觉、觉得、摸起来”；过去式和过去分词均为 felt。表示感受时可作系动词，后接形容词。",
+    "collocations": "feel happy; feel tired; feel well; feel like doing sth",
+    "commonMistake": "feel 作系动词后接形容词，如 feel tired，不用副词 tiredly；feel 的过去式是 felt。",
+    "example": {
+      "english": "I feel happy when we sing together.",
+      "chinese": "我们一起唱歌时我感到开心。"
+    },
+    "application": {
+      "prompt": "选词填空：After the long walk, I ___ tired. A. feel  B. feels",
+      "solution": "A. feel。主语 I 对应动词原形 feel。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: feel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/feel"
+      }
+    ]
+  },
+  {
+    "word": "busy",
+    "examTags": [
+      "词汇·形容词语境义",
+      "语法·形容词搭配与不定式"
+    ],
+    "grammar": "busy 是形容词，表示“忙碌的、繁忙的”；常用 be busy with sth、be busy doing sth，也可用 too busy to do sth。",
+    "collocations": "be busy with homework; be busy doing sth; a busy afternoon; too busy to do sth",
+    "commonMistake": "常说 be busy doing sth 或 be busy with sth；表示“太忙而不能做某事”用 too busy to do sth。",
+    "example": {
+      "english": "The students are busy practising the school song.",
+      "chinese": "学生们正忙着练习校歌。"
+    },
+    "application": {
+      "prompt": "选词填空：Everyone is preparing for the show, so the classroom is ___. A. busy  B. busily",
+      "solution": "A. busy。be 动词后用形容词 busy 作表语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: busy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/busy"
+      }
+    ]
+  },
+  {
+    "word": "study",
+    "examTags": [
+      "词性辨析·动词与名词",
+      "语法·动词时态与搭配"
+    ],
+    "grammar": "study 可作动词“学习、研究”或名词“学习、书房”；动词第三人称单数为 studies，过去式为 studied。常用 study a subject 和 study for a test。",
+    "collocations": "study English; study for a test; study hard; a quiet place to study",
+    "commonMistake": "study 以辅音字母 + y 结尾，第三人称单数变 y 为 i 加 -es（studies），过去式变 y 为 i 加 -ed（studied）。",
+    "example": {
+      "english": "I study English for thirty minutes after school.",
+      "chinese": "我放学后学英语三十分钟。"
+    },
+    "application": {
+      "prompt": "选词填空：I ___ English every afternoon for the test. A. study  B. studies",
+      "solution": "A. study。主语 I 对应动词原形 study。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: study",
+        "url": "https://dictionary.cambridge.org/dictionary/english/study"
+      }
+    ]
+  },
+  {
+    "word": "song",
+    "examTags": [
+      "词法·可数名词单复数",
+      "语境·音乐活动"
+    ],
+    "grammar": "song 是可数名词，表示“歌曲”；复数为 songs。song 也可在固定表达中表示鸟鸣或泛指歌唱。",
+    "collocations": "sing a song; listen to a song; a school song; a song about school",
+    "commonMistake": "表示一首歌曲时 song 是可数名词，单数前通常用 a/the/物主限定词；多首歌用 songs。",
+    "example": {
+      "english": "Our class sings a song about school at the show.",
+      "chinese": "演出时我们班唱了一首关于学校的歌。"
+    },
+    "application": {
+      "prompt": "选词填空：The music teacher teaches us a new ___ today. A. song  B. songs",
+      "solution": "A. song。a 后接可数名词单数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: song",
+        "url": "https://dictionary.cambridge.org/dictionary/english/song"
+      }
+    ]
+  },
+  {
+    "word": "out",
+    "examTags": [
+      "词汇·方位与状态语境",
+      "语法·副词与 out of 搭配"
+    ],
+    "grammar": "out 可作副词或介词，常表示“向外、在外面”；be out 可表示“不在家/不在某处”，表示从里面出来常用 go/come out of + 地点。",
+    "collocations": "go out; come out; be out; go out of the room; get out",
+    "commonMistake": "out 表示“不在家/不在某处”时可单独使用；out of 后面通常要接地点或其他名词，如 out of the room。",
+    "example": {
+      "english": "Let's go out for a walk after the music lesson.",
+      "chinese": "音乐课后我们出去散散步吧。"
+    },
+    "application": {
+      "prompt": "选词填空：I called Lily at home, but she isn't there; she's ___. A. out  B. out of",
+      "solution": "A. out。表示人不在家可用 be out；out of 后还需要接地点或名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: out",
+        "url": "https://dictionary.cambridge.org/dictionary/english/out"
+      },
+      {
+        "label": "Cambridge Grammar: Out or out of?",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/out-or-out-of."
+      }
+    ]
+  }
+]

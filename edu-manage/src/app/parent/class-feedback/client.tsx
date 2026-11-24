@@ -2,15 +2,19 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { Button, Tag, Typography } from 'antd'
-import { CameraOutlined, MessageOutlined } from '@ant-design/icons'
+import { CameraOutlined, MessageOutlined, RightOutlined } from '@ant-design/icons'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { formatFriendlyTime } from '@/lib/date/relative'
 import { toast } from 'sonner'
+import { useSWRConfig } from 'swr'
+import { isParentUnreadCountsCacheKey } from '@/lib/parent-unread-cache'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
 import { PullToRefresh } from '@/components/PullToRefresh'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { getTeacherAvatarUrl, DEFAULT_TEACHER_AVATAR } from '@/lib/teacher-avatars'
 import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
 import { groupByRelativeDate } from '@/lib/date/group-relative'
 
@@ -29,6 +33,12 @@ async function persistFeedbackReadState(feedbackId: string) {
 type HomeworkItem = string | { content?: string; title?: string }
 type FeedbackItem = {
   resolvedSubject?: string
+  consecutiveSessionLabel?: string | null
+  isSingleSession?: boolean
+  subjectSnapshot?: string | null
+  studentNameSnapshot?: string | null
+  displayStudentName?: string | null
+  sessionDate?: string | null
   id: string
   createdAt: string
   status: string
@@ -46,7 +56,7 @@ type FeedbackItem = {
   images: FeedbackImageVariant[]
   signedThumbnails?: Record<string, string>
   studentRating?: unknown
-  teacher?: { id: string; name: string; subjects?: string | null } | null
+  teacher?: { id: string; name: string; subjects?: string | null; avatar?: string | null; gender?: string | null } | null
   term?: { name: string; status: string } | null
   knowledgeDetail?: {
     edition?: string
@@ -72,23 +82,81 @@ type FeedbackItem = {
   } | null
 }
 
-const SUBJECT_STYLES: Record<string, { badgeClass: string; glyph: string; tagColor: string; tagBg: string }> = {
-  数学: { badgeClass: 'is-math', glyph: '数', tagColor: '#0E5E4E', tagBg: 'rgba(14,94,78,.12)' },
-  英语: { badgeClass: 'is-english', glyph: '英', tagColor: '#2B4E8C', tagBg: 'rgba(43,78,140,.12)' },
-  物理: { badgeClass: 'is-physics', glyph: '物', tagColor: '#A5823C', tagBg: 'rgba(165,130,60,.14)' },
-  化学: { badgeClass: 'is-chemistry', glyph: '化', tagColor: '#C96F3A', tagBg: 'rgba(201,111,58,.14)' },
-  语文: { badgeClass: 'is-chinese', glyph: '语', tagColor: '#B55445', tagBg: 'rgba(181,84,69,.12)' },
-  生物: { badgeClass: 'is-biology', glyph: '生', tagColor: '#2F6B4F', tagBg: 'rgba(47,107,79,.12)' },
+const SUBJECT_STYLES: Record<string, { glyph: string; tagColor: string; tagBg: string }> = {
+  数学: { glyph: '数', tagColor: '#0E5E4E', tagBg: 'rgba(14,94,78,.12)' },
+  英语: { glyph: '英', tagColor: '#2B4E8C', tagBg: 'rgba(43,78,140,.12)' },
+  物理: { glyph: '物', tagColor: '#8A6517', tagBg: 'rgba(138,101,23,.12)' },
+  化学: { glyph: '化', tagColor: '#C96F3A', tagBg: 'rgba(201,111,58,.12)' },
+  语文: { glyph: '语', tagColor: '#B55445', tagBg: 'rgba(181,84,69,.12)' },
+  生物: { glyph: '生', tagColor: '#2F6B4F', tagBg: 'rgba(47,107,79,.12)' },
+  历史: { glyph: '历', tagColor: '#6B4226', tagBg: 'rgba(107,66,38,.12)' },
+  地理: { glyph: '地', tagColor: '#3D6B5E', tagBg: 'rgba(61,107,94,.12)' },
+  政治: { glyph: '政', tagColor: '#A83B3B', tagBg: 'rgba(168,59,59,.12)' },
 }
 
-const DEFAULT_SUBJECT_STYLE = { badgeClass: 'is-default', glyph: '课', tagColor: '#0E5E4E', tagBg: 'rgba(14,94,78,.12)' }
+const DEFAULT_SUBJECT_STYLE = { glyph: '学', tagColor: '#0E5E4E', tagBg: 'rgba(14,94,78,.10)' }
 
 function subjectStyle(subject: string) {
   return SUBJECT_STYLES[subject] || DEFAULT_SUBJECT_STYLE
 }
 
-function feedbackSubject(feedback: FeedbackItem) {
-  return feedback.resolvedSubject || '课堂反馈'
+function inferSubjectFromText(text?: string | null): string {
+  if (!text) return ''
+  const match = text.match(/(数学|英语|物理|化学|语文|生物|历史|地理|政治|道德与法治)/)
+  return match ? match[1] : ''
+}
+
+function resolveFeedbackSubject(feedback: FeedbackItem): string {
+  const candidate = (feedback.resolvedSubject || feedback.subjectSnapshot || '').trim()
+  if (candidate && candidate !== '课堂反馈') return candidate
+
+  const lessonSubject = (feedback.classLesson?.subject || '').trim()
+  if (lessonSubject && lessonSubject !== '课堂反馈') return lessonSubject
+
+  const cardSubject = (feedback.knowledgeDetail?.subject || '').trim()
+  if (cardSubject && cardSubject !== '课堂反馈') return cardSubject
+
+  const fromCourse = inferSubjectFromText(feedback.classLesson?.group?.course?.name)
+  if (fromCourse) return fromCourse
+
+  const fromTeacher = inferSubjectFromText(feedback.teacher?.subjects)
+  if (fromTeacher) return fromTeacher
+
+  const fromLessonName = inferSubjectFromText(feedback.classLesson?.name)
+  if (fromLessonName) return fromLessonName
+
+  return ''
+}
+
+function formatTeacherDisplayName(teacherName?: string | null): string {
+  const name = teacherName?.trim() || '任课'
+  if (name.endsWith('老师') || name.endsWith('教练') || name.endsWith('助教')) {
+    return name
+  }
+  return `${name}老师`
+}
+
+function resolveFeedbackDisplayContent(feedback: FeedbackItem, unread: boolean): { summary: string; topic: string } {
+  const topic = (feedback.knowledgeDetail?.topic || feedback.knowledgePoints?.[0] || '').trim()
+  const rawSummary = (feedback.summary || '').trim()
+  if (rawSummary) {
+    return { summary: rawSummary, topic }
+  }
+  const lessonContent = (feedback.lessonContent || '').trim()
+  if (lessonContent) {
+    return { summary: lessonContent, topic }
+  }
+  const comment = (feedback.overallComment || '').trim()
+  if (comment) {
+    return { summary: comment, topic }
+  }
+  if (topic) {
+    return { summary: `本节课重点学习了【${topic}】，点击查看详细掌握情况与作业。`, topic }
+  }
+  return {
+    summary: unread ? '老师已发送本节课的学情记录，请点击查看。' : '老师已发布本节学情记录与课堂表现，点击查看详情。',
+    topic,
+  }
 }
 
 type LinkedChild = { id: string; name: string; grade: string | null; membershipLevel: string | null }
@@ -113,6 +181,7 @@ export function ClassFeedbackClient({
   const router = useRouter()
   const searchParams = useSearchParams()
   const isMobile = useIsMobile() ?? false
+  const { mutate: mutateSWR } = useSWRConfig()
   const [locallyReadIds, setLocallyReadIds] = useState<Set<string>>(() => new Set())
   const [recentCutoff] = useState(() => new Date(Date.now() - 7 * 86400000))
   const feedbackGroups = useMemo(
@@ -136,6 +205,9 @@ export function ClassFeedbackClient({
     setLocallyReadIds(current => new Set(current).add(feedback.id))
     try {
       await persistFeedbackReadState(feedback.id)
+      await mutateSWR(isParentUnreadCountsCacheKey).catch(() => {
+        toast.warning('反馈已标记为已读，但未读角标暂时无法同步')
+      })
     } catch (error) {
       setLocallyReadIds(current => {
         const next = new Set(current)
@@ -151,19 +223,23 @@ export function ClassFeedbackClient({
     if (highlightedFeedback) {
       if (!highlightedFeedback.parentReadAt && highlightedFeedback.status === 'PUBLISHED') {
         setLocallyReadIds(current => new Set(current).add(highlightedFeedback.id))
-        void persistFeedbackReadState(highlightedFeedback.id).catch((error: unknown) => {
-          setLocallyReadIds(current => {
-            const next = new Set(current)
-            next.delete(highlightedFeedback.id)
-            return next
+        void persistFeedbackReadState(highlightedFeedback.id)
+          .then(() => mutateSWR(isParentUnreadCountsCacheKey).catch(() => {
+            toast.warning('反馈已标记为已读，但未读角标暂时无法同步')
+          }))
+          .catch((error: unknown) => {
+            setLocallyReadIds(current => {
+              const next = new Set(current)
+              next.delete(highlightedFeedback.id)
+              return next
+            })
+            toast.error(error instanceof Error ? error.message : '标记已读失败，请检查网络后重试')
           })
-          toast.error(error instanceof Error ? error.message : '标记已读失败，请检查网络后重试')
-        })
       }
       const target = `/parent/class-feedback/${highlightedFeedback.id}${activeChildId ? `?childId=${encodeURIComponent(activeChildId)}` : ''}`
       router.replace(target)
     }
-  }, [highlightedFeedback])
+  }, [activeChildId, highlightedFeedback, mutateSWR, router])
 
   const openDetail = (f: FeedbackItem) => {
     void markAsRead(f)
@@ -204,32 +280,71 @@ export function ClassFeedbackClient({
         <div className="parent-feedback-groups">
           {feedbackGroups.map(group => <section key={group.key} className="parent-feedback-group">
             <div className="parent-record-divider">{group.label}</div>
-            <div className="parent-feedback-list">{group.items.map((f) => {
-              const subject = feedbackSubject(f)
-              const subjectMeta = subjectStyle(subject)
+            <div className="parent-feedback-list">{group.items.map((f, rowIndex) => {
+              const subject = resolveFeedbackSubject(f)
+              const subjectMeta = subject ? subjectStyle(subject) : null
               const unread = !f.parentReadAt && f.status === 'PUBLISHED' && !locallyReadIds.has(f.id)
-              // 权限过滤后直接展示老师写的课堂摘要（两三行），照片张数在右侧已有；全文留在详情页
-              const rawSummary = (f.summary || '').trim()
-              const summary = rawSummary || (unread ? '新课堂反馈，请点击查看' : '课堂反馈已发布，请点击查看')
+              const teacherDisplayName = formatTeacherDisplayName(f.teacher?.name)
+              const { summary, topic } = resolveFeedbackDisplayContent(f, unread)
               const courseLabel = f.classLesson?.group?.course?.name || ''
-              return <button type="button" key={f.id} className="parent-feedback-row" onClick={() => openDetail(f)}>
-                <span className={`pf-badge ${subjectMeta.badgeClass}`} aria-hidden="true">
-                  {subjectMeta.glyph}
-                  {unread && <span className="pf-badge-sub">!</span>}
-                </span>
+              const singleSessionLabel = f.isSingleSession
+                ? `单次课程${f.sessionDate ? ` · ${new Date(f.sessionDate).toLocaleDateString('zh-CN')}` : ''}`
+                : ''
+              return <button type="button" key={f.id} className="parent-feedback-row stagger-item" style={{ animationDelay: `${Math.min(rowIndex, 8) * 40}ms` }} onClick={() => openDetail(f)}>
+                <div className="parent-feedback-avatar-col">
+                  <div className="parent-feedback-avatar-wrapper">
+                    <CachedAvatarImage
+                      src={getTeacherAvatarUrl(f.teacher?.avatar, f.teacher?.gender, f.teacher?.name)}
+                      alt={teacherDisplayName}
+                      className="parent-feedback-avatar-img"
+                      style={{ width: 44, height: 44 }}
+                      fallbackSrc={DEFAULT_TEACHER_AVATAR}
+                    />
+                    {unread && <span className="parent-feedback-unread-badge" aria-label="未读" />}
+                  </div>
+                </div>
                 <span className="parent-feedback-body">
                   <span className="parent-feedback-heading">
-                    <strong>{f.teacher?.name || '老师'}</strong>
-                    <span className="parent-feedback-subject" style={{ color: subjectMeta.tagColor, background: subjectMeta.tagBg, borderColor: `${subjectMeta.tagColor}33` }}>{subject}</span>
-                    {f.term?.name && <span className="parent-feedback-term">{f.term.name.replace(/^牧哲学堂/, '').replace(/批次$/, '')}</span>}
-                    {unread && <span className="parent-feedback-unread" aria-label="未读" />}
+                    <span className="parent-feedback-heading-left">
+                      <strong>{teacherDisplayName}</strong>
+                      {subject && (
+                        <span className="parent-feedback-subject" style={{ color: subjectMeta?.tagColor, background: subjectMeta?.tagBg, borderColor: `${subjectMeta?.tagColor}33` }}>
+                          {subject}
+                        </span>
+                      )}
+                      {f.consecutiveSessionLabel ? (
+                        <span style={{
+                          padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700,
+                          background: 'rgba(232, 120, 74, 0.12)', color: '#C2572C', border: '1px solid rgba(232, 120, 74, 0.3)',
+                        }}>
+                          {f.consecutiveSessionLabel}
+                        </span>
+                      ) : (
+                        <span className="parent-feedback-type-badge">📖 课堂反馈</span>
+                      )}
+                    </span>
                     <time>{formatFriendlyTime(f.createdAt)}</time>
                   </span>
+                  {topic && (
+                    <span className="parent-feedback-topic-pill">
+                      <span className="topic-icon">🎯</span>
+                      <span className="topic-text">知识点：{topic}</span>
+                    </span>
+                  )}
                   <span className="parent-feedback-summary" title={summary}>{summary}</span>
-                  <span className="parent-feedback-extras">
-                    {courseLabel && <span>{courseLabel}</span>}
-                    {f.imageUrls?.length > 0 && <span><CameraOutlined /> {f.imageUrls.length}张课堂照片</span>}
-                    {f.parentReply && <span><MessageOutlined /> 已回复</span>}
+                  <span className="parent-feedback-footer">
+                    <span className="parent-feedback-extras">
+                      {f.displayStudentName && <span>学员：{f.displayStudentName}</span>}
+                      {courseLabel && <span>{courseLabel}</span>}
+                      {f.term?.name && <span>{f.term.name.replace(/^牧哲学堂/, '').replace(/批次$/, '')}</span>}
+                      {singleSessionLabel && <span>{singleSessionLabel}</span>}
+                      {f.imageUrls?.length > 0 && <span><CameraOutlined /> {f.imageUrls.length}张照片</span>}
+                      {f.parentReply && <span><MessageOutlined /> 已回复</span>}
+                    </span>
+                    <span className="parent-feedback-action-btn">
+                      <span>查看完整反馈</span>
+                      <RightOutlined style={{ fontSize: 9 }} />
+                    </span>
                   </span>
                 </span>
               </button>

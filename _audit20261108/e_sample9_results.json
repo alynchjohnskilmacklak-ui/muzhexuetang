@@ -1,0 +1,339 @@
+{
+  "queries": {
+    "Q3_enrollment_history": {
+      "sql": "SELECT s.name AS student, e.id, e.status::text, e.\"totalHours\", e.\"usedHours\", e.\"remainHours\",\n            e.\"enrolledAt\"::text, g.name AS group_name, g.\"intensiveMode\"::text\n     FROM \"Student\" s\n     JOIN \"Enrollment\" e ON e.\"studentId\"=s.id\n     LEFT JOIN \"ClassGroup\" g ON g.id=e.\"groupId\"\n     WHERE s.\"deletedAt\" IS NULL AND s.\"remainHours\" > 0.05\n       AND COALESCE((SELECT SUM(x.\"remainHours\") FROM \"Enrollment\" x WHERE x.\"studentId\"=s.id AND x.status='ACTIVE' AND x.\"deletedAt\" IS NULL),0)=0\n     ORDER BY s.name, e.\"enrolledAt\" LIMIT 30",
+      "rows": [
+        {
+          "student": "丁梓航",
+          "id": "cmrkernyo09etbbxt2l64nfjs",
+          "status": "ACTIVE",
+          "totalHours": 119,
+          "usedHours": 119,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-14 08:47:42.097",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "冯敬轩",
+          "id": "cmrc1svw303kynrop3rakgcnq",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:34.612",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "刘子旭",
+          "id": "cmt9zb6ol000414jxma2e2whd",
+          "status": "WITHDRAWN",
+          "totalHours": 86.8,
+          "usedHours": 0,
+          "remainHours": 86.8,
+          "enrolledAt": "2026-08-26 10:56:41.878",
+          "group_name": "1",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "刘静萱",
+          "id": "cmrc1sv9l03k9nrop4nktmk9e",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:33.802",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "史依菲",
+          "id": "cmrbt2tke00dknrop746lpspp",
+          "status": "WITHDRAWN",
+          "totalHours": 16,
+          "usedHours": 0,
+          "remainHours": 16,
+          "enrolledAt": "2026-07-08 08:18:21.614",
+          "group_name": "牧哲学堂初一（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "史琰",
+          "id": "cmrc1swdz03linropha80eqqk",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:35.256",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "吕湘锦",
+          "id": "cmrf80mrg00kfbcuopfqi1edl",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:52.253",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "张旭尧",
+          "id": "cmrc1svrp03ktnropo053yqtu",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:34.453",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "曹鑫榆",
+          "id": "cmrc1svel03kenropl5iy2lw4",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:33.981",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "李世渲",
+          "id": "cmrc1svmx03konropaydznsgh",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:34.281",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "李嘉浩",
+          "id": "cmrc0lhn902fenropvnd9sh55",
+          "status": "WITHDRAWN",
+          "totalHours": 134.4,
+          "usedHours": 8.4,
+          "remainHours": 126.00000000000001,
+          "enrolledAt": "2026-07-08 11:48:49.941",
+          "group_name": "牧哲学堂初二（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "李家钰",
+          "id": "cmrc0yhgk02n1nrop04pxaf7d",
+          "status": "WITHDRAWN",
+          "totalHours": 134.4,
+          "usedHours": 16.099999999999994,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 11:58:56.228",
+          "group_name": "牧哲学堂初三（三班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "李家钰",
+          "id": "cmrii485j008mbbxtg9xy90s1",
+          "status": "ACTIVE",
+          "totalHours": 117.6,
+          "usedHours": 117.6,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-13 00:45:54.631",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "李浩宇",
+          "id": "cmrc1vhq203m2nroporbhs3zh",
+          "status": "WITHDRAWN",
+          "totalHours": 134.4,
+          "usedHours": 16.799999999999994,
+          "remainHours": 117.59999999999998,
+          "enrolledAt": "2026-07-08 12:24:36.218",
+          "group_name": "牧哲学堂初三（二班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "李烨灿",
+          "id": "cmrf80ml800k5bcuosou75we9",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:52.028",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "杨子涵",
+          "id": "cmrf80n0h00kubcuopgcq5or4",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:52.577",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "王天一",
+          "id": "cmrc1swm903lsnroprzgr7uol",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:35.553",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "王梦涵",
+          "id": "cmrf80n8y00l4bcuokjic47ge",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:52.883",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "王睿阳",
+          "id": "cmrf80m0l00jbbcuoqauvjlzd",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:51.286",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "谷旭媛",
+          "id": "cmrf80n5z00kzbcuovna2y55v",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:52.775",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "谷沫轩",
+          "id": "cmrf80lxd00j6bcuovjn70cn6",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:51.17",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "赵浩淼",
+          "id": "cmrf80ni700ljbcuos3ktrazb",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:53.215",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "郝瀚琳",
+          "id": "cmrc1swi303lnnropcyyhhnfh",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:35.403",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "郝烁旭",
+          "id": "cmrf80muf00kkbcuoxc8mr3oc",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:52.359",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "郝诗雅",
+          "id": "cmrc1sw9l03ldnropf0oqpayc",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:35.097",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "陈洛汐",
+          "id": "cmrxf501v0bucpgw48rh7kbs0",
+          "status": "ACTIVE",
+          "totalHours": 78.4,
+          "usedHours": 78.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-23 11:19:04.579",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "陶金恒",
+          "id": "cmrf80m6100jgbcuogmi3hwpd",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:51.481",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "韩彤瑶",
+          "id": "cmrc1sw5a03l8nropfjq0peq3",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:34.943",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "韩紫若彤",
+          "id": "cmrf80mf200jvbcuokvv9311k",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.4,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-10 17:39:51.806",
+          "group_name": "牧哲学堂初升高衔接班",
+          "intensiveMode": "NORMAL"
+        },
+        {
+          "student": "韩锦路",
+          "id": "cmrc1sw0s03l3nroptgabk0pb",
+          "status": "ACTIVE",
+          "totalHours": 134.4,
+          "usedHours": 134.39999999999992,
+          "remainHours": 0,
+          "enrolledAt": "2026-07-08 12:22:34.78",
+          "group_name": "牧哲学堂初三（一班）",
+          "intensiveMode": "NORMAL"
+        }
+      ]
+    }
+  }
+}

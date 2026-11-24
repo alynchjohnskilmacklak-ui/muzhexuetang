@@ -183,6 +183,8 @@ export function AdaptiveSelect({ mobileSearch, ...props }: AdaptiveSelectProps) 
       showSearch={isMobile ? false : showSearch}
       searchValue={isMobile ? undefined : searchValue}
       onSearch={isMobile ? undefined : onSearch}
+      placement={isMobile ? 'bottomLeft' : props.placement}
+      listHeight={isMobile ? Math.min(props.listHeight ?? 240, 240) : props.listHeight}
       onChange={handleChange}
       popupRender={mobilePopupRender}
     >

@@ -58,17 +58,17 @@ export function setAdminTermScopeCookie(response: NextResponse, termId: string) 
   return response
 }
 
-export async function isClassGroupInActiveTerm(db: PrismaClient, groupId: string) {
-  const group = await db.classGroup.findUnique({
-    where: { id: groupId },
+export async function isClassGroupInActiveTerm(db: PrismaClient, groupId: string, division: string) {
+  const group = await db.classGroup.findFirst({
+    where: { id: groupId, division, term: { division } },
     select: { term: { select: { status: true } } },
   })
   return group?.term?.status === 'ACTIVE'
 }
 
-export async function isClassLessonInActiveTerm(db: PrismaClient, lessonId: string) {
-  const lesson = await db.classLesson.findUnique({
-    where: { id: lessonId },
+export async function isClassLessonInActiveTerm(db: PrismaClient, lessonId: string, division: string) {
+  const lesson = await db.classLesson.findFirst({
+    where: { id: lessonId, division, group: { division, term: { division } } },
     select: { group: { select: { term: { select: { status: true } } } } },
   })
   return lesson?.group.term?.status === 'ACTIVE'

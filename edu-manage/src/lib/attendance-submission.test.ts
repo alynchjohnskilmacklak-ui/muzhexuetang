@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { hasAttendingStudent, hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
+import {
+  hasAttendingStudent,
+  hasSubmittedLessonAttendance,
+  isCancelledOrPostponedLesson,
+  validateAttendanceSubmissionRecords,
+} from '@/lib/attendance-submission'
 
 describe('hasSubmittedLessonAttendance', () => {
   it('uses attendanceSubmittedAt as the canonical marker', () => {
@@ -51,5 +56,46 @@ describe('hasAttendingStudent', () => {
     expect(hasAttendingStudent([{ status: 'LEAVE' }, { status: 'ABSENT' }])).toBe(false)
     expect(hasAttendingStudent([{ status: 'MAKEUP' }, { status: 'invalid' }])).toBe(false)
     expect(hasAttendingStudent([])).toBe(false)
+  })
+})
+
+describe('attendance submission validation', () => {
+  const roster = new Set(['student-a', 'student-b'])
+
+  it('accepts unique, eligible students with valid attendance status', () => {
+    expect(validateAttendanceSubmissionRecords([
+      { studentId: 'student-a', status: 'PRESENT', actualMinutes: 35 },
+      { studentId: 'student-b', status: 'LEAVE' },
+    ], roster)).toEqual({
+      ok: true,
+      records: [
+        { studentId: 'student-a', status: 'PRESENT', actualMinutes: 35 },
+        { studentId: 'student-b', status: 'LEAVE', actualMinutes: null },
+      ],
+    })
+  })
+
+  it('rejects duplicate or out-of-roster records instead of partially saving', () => {
+    expect(validateAttendanceSubmissionRecords([
+      { studentId: 'student-a', status: 'PRESENT' },
+      { studentId: 'student-a', status: 'LEAVE' },
+    ], roster)).toMatchObject({ ok: false, reason: 'DUPLICATE_STUDENT' })
+    expect(validateAttendanceSubmissionRecords([
+      { studentId: 'student-a', status: 'PRESENT' },
+      { studentId: 'student-x', status: 'PRESENT' },
+    ], roster)).toMatchObject({ ok: false, reason: 'OUTSIDE_ROSTER' })
+    expect(validateAttendanceSubmissionRecords([
+      { studentId: 'student-a', status: 'PRESENT' },
+    ], roster)).toMatchObject({ ok: false, reason: 'MISSING_ROSTER_STUDENT' })
+  })
+
+  it('rejects malformed status/minutes and cancelled or postponed lessons', () => {
+    expect(validateAttendanceSubmissionRecords([{ studentId: 'student-a', status: 'UNKNOWN' }], roster))
+      .toMatchObject({ ok: false, reason: 'INVALID_STATUS' })
+    expect(validateAttendanceSubmissionRecords([{ studentId: 'student-a', status: 'PRESENT', actualMinutes: -15 }], roster))
+      .toMatchObject({ ok: false, reason: 'INVALID_MINUTES' })
+    expect(isCancelledOrPostponedLesson('CANCELLED')).toBe(true)
+    expect(isCancelledOrPostponedLesson('POSTPONED')).toBe(true)
+    expect(isCancelledOrPostponedLesson('SCHEDULED')).toBe(false)
   })
 })

@@ -1,13 +1,13 @@
 import type { PrismaClient } from '@prisma/client'
-import { parentLinkedStudentWhere } from '@/lib/business-visibility'
+import { parentStudentHistoryWhere } from '@/lib/business-visibility'
 import { groupParentStudentRecords, sortParentStudentsByCurrentTerm, currentTermLabel } from '@/lib/parent-student-selection'
 
 /** One visible child per identity, with all authorized historical record IDs. */
 export async function getParentChildren(prisma: PrismaClient, parentId: string) {
   const rows = await prisma.student.findMany({
-    where: parentLinkedStudentWhere(parentId),
+    where: parentStudentHistoryWhere(parentId),
     select: {
-      id: true, identityId: true, name: true, grade: true, gender: true, birthYear: true, updatedAt: true, membershipLevel: true,
+      id: true, identityId: true, name: true, grade: true, gender: true, birthYear: true, updatedAt: true, membershipLevel: true, status: true,
       termMemberships: {
         select: {
           grade: true, status: true, joinedAt: true,
@@ -17,9 +17,12 @@ export async function getParentChildren(prisma: PrismaClient, parentId: string) 
     },
     orderBy: { createdAt: 'asc' },
   })
-  const grouped = groupParentStudentRecords(rows)
+  // Keep inactive historical rows attached to an active identity, but don't
+  // surface an identity whose every record has been deactivated.
+  const visibleRows = rows.filter((student) => student.status !== 'INACTIVE')
+  const grouped = groupParentStudentRecords(visibleRows)
   return sortParentStudentsByCurrentTerm(grouped.map(({ student }) => student)).map((student) => {
-    const { recordIds } = grouped.find(({ student: item }) => item.id === student.id)!
+    const recordIds = rows.filter((record) => record.identityId === student.identityId).map((record) => record.id)
     return {
       id: student.id,
       name: student.name,

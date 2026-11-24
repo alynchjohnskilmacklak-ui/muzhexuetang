@@ -27,14 +27,17 @@ docker buildx build --progress=plain --load --builder mzt-release --target runne
 ```powershell
 python deploy-release.py                      # 构建 app(runner) 并部署
 python deploy-release.py --migrator           # 构建 migrator，备份数据库并执行双库迁移后更新 app
+python deploy-release.py --migration-bundle   # 复用服务器 migrator，仅上传 schema/迁移包并校验双库后更新 app
 python deploy-release.py --migrator-only      # 仅部署并运行 migrator；不重建 app
 python deploy-release.py --skip-build --tag <tag>   # 复用 release/ 已有 tar 只做部署
 python deploy-release.py --skip-build --skip-upload --migrator --tag <tag>  # 续跑已加载到服务器的同 tag 镜像
 python deploy-release.py --dry-run            # 只打印将执行的命令
 ```
 
-脚本自动完成：本地构建（逐步骤计时）→ `docker save` 到 `release/edu-manage-app-<tag>.tar`（含 `.sha256`）→ 上传服务器 → 服务器 `sha256sum` 校验 → `docker load` → 删除远端临时 tar（保留本地 release 包）→ 旧版打备份 tag `pre-<tag>-backup-app` → 切 `:latest` → 可选的数据库备份及双库迁移 → 重建 app → 最多等待 240 秒，严格检查容器 healthy、`/login` HTTP 200 和实际镜像 ID，并输出每阶段耗时。
+脚本自动完成：本地构建（逐步骤计时）→ `docker save` 到 `release/edu-manage-app-<tag>.tar`（含 `.sha256`）→ 上传服务器 → 服务器 `sha256sum` 校验 → `docker load` → 删除远端临时 tar → 旧版打备份 tag `pre-<tag>-backup-app` → 切 `:latest` → 可选的数据库备份及双库迁移 → 重建 app → 最多等待 240 秒，严格检查容器 healthy、`/login` HTTP 200 和实际镜像 ID。
+发布成功后，服务器仅保留当前运行镜像和一个 `pre-<tag>-backup-*` 回滚镜像，旧日期版本标签及未引用悬空镜像会清理；本地每种镜像只保留当前/最近一个发布包，镜像也只保留当前版。清理仅在健康检查成功后进行，失败部署会保留发布包和回滚镜像。Docker Buildx 构建缓存不清理，以便下次增量构建继续复用。
 `--migrator-only` 使用相同的本地构建、tar、SHA256 校验、远端 load 与数据库备份流程，只更新 migrator 镜像并执行双库迁移及 schema 对齐检查，不切换或重启 app。用于独立发布迁移工具或 schema 防漂移校验时，避免顺带部署 app 工作区改动。
+`--migration-bundle` 适用于服务器已有可用 migrator 镜像、但本地迁移文件更新的场景：只打包上传 `prisma/schema.prisma`、`prisma/migrations` 和 `scripts/migrate-all.sh`，由现有 migrator 容器只读挂载该文件包，先备份再执行双库迁移和 schema 对齐检查，随后只发布 app 镜像。这样不必为 SQL/schema 变更重新打包、上传完整 migrator 镜像。SSH key/agent 可用时，大型镜像优先走 OpenSSH SCP 流式上传；配置了密码时保留 SFTP 回退。
 普通 app-only 发布会先比较本地 `prisma/schema.prisma` 和 `prisma/migrations` 与生产 migrator 镜像中的指纹；不一致就拒绝切换 app，要求先用 `--migrator` 完成备份、迁移和数据库 schema 对齐检查。这样漏带 `--migrator` 时会在 app 上线前失败关闭。
 `--skip-upload` 仅用于上次发布已将该 tag 镜像加载到服务器的续跑场景；它要求同时指定 `--skip-build`，并在切换任何 tag 前逐个校验本地与服务器镜像 ID 完全一致。确认后会删除服务器上重复的临时 tar 副本释放空间，本地 release 包保留。
 
@@ -75,6 +78,7 @@ cd /opt/edu-manage-docker/source && docker compose -f compose.production.yaml up
 - Dockerfile 已挂 BuildKit 持久缓存（`/root/.npm` + `/app/.next/cache`）：无代码变化时全层 CACHED（约 1s）；仅改页面约 130s；冷构建约 372s。
 - **不要例行执行 `docker buildx prune`**——那会清掉 `.next/cache` 加速缓存。只留意磁盘占用即可（`docker buildx du` 查看）。
 - 构建镜像内容与部署回滚方式不受缓存挂载影响（cache mount 仅构建期使用）。
+- `docker image prune -f` 只清理没有标签、没有容器引用的悬空镜像；不清理 Buildx 构建缓存。
 
 ## 6. 发布脚本离线回归测试
 

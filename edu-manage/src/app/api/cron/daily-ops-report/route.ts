@@ -3,6 +3,7 @@ import type { PrismaClient } from '@prisma/client'
 import { getPrismaForDivision } from '@/lib/prisma'
 import { sendWxMessage } from '@/lib/wxpusher'
 import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
+import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,9 +53,8 @@ function formatDivision(label: string, stats: DailyStats) {
   return `${label}：${stats.totalLessons}节课，${stats.missingAttendance}节未考勤，${stats.publishedFeedbacks}条已发布反馈，${stats.lessonsWithoutFeedback}节未反馈`
 }
 
-export async function GET(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get('token')
-  if (token !== process.env.CRON_SECRET && token !== process.env.HEALTH_TOKEN) {
+export async function POST(req: NextRequest) {
+  if (!isAuthorizedCronRequest(req.headers.get('authorization'), process.env.CRON_SECRET)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

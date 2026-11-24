@@ -1,0 +1,1030 @@
+[
+  {
+    "word": "quarter",
+    "examTags": [
+      "词汇·时间表达",
+      "听读·获取钟点信息"
+    ],
+    "grammar": "n. 四分之一；一刻钟；可数，复数 quarters。时间表达中 a quarter past seven 是七点一刻，a quarter to eight 是差一刻八点。",
+    "collocations": "a quarter past seven; a quarter to eight; a quarter of an hour。",
+    "commonMistake": "quarter past + 小时表示过了该点一刻；quarter to + 小时表示差一刻到该点。",
+    "example": {
+      "english": "My first class starts at a quarter past eight.",
+      "chinese": "我的第一节课八点一刻开始。"
+    },
+    "application": {
+      "prompt": "The clock shows 7:15. It is a quarter ___ seven. A. past B. to",
+      "solution": "A。解析：7:15 是七点过一刻，用 a quarter past seven。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: quarter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/quarter"
+      }
+    ]
+  },
+  {
+    "word": "shower",
+    "examTags": [
+      "词汇·日常活动与名词",
+      "语言运用·描述作息"
+    ],
+    "grammar": "n. 淋浴；阵雨；v. 洗淋浴。可数名词，复数 showers；常用 take/have a shower。",
+    "collocations": "take a shower; have a quick shower; shower gel。",
+    "commonMistake": "表示“洗淋浴”常说 take a shower；shower 作名词时单数前通常需要 a。",
+    "example": {
+      "english": "I take a shower after my morning run.",
+      "chinese": "我晨跑后洗淋浴。"
+    },
+    "application": {
+      "prompt": "After football practice, Ben takes ___ before dinner. A. a shower B. homework",
+      "solution": "A。解析：运动后洗淋浴可以说 take a shower。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shower",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shower"
+      }
+    ]
+  },
+  {
+    "word": "brush",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·动词搭配与词形"
+    ],
+    "grammar": "v. 刷；刷净；n. 刷子。作动词时 brush—brushed—brushed—brushing；第三人称单数 brushes。",
+    "collocations": "brush your teeth; brush your hair; a toothbrush。",
+    "commonMistake": "brush one's teeth 中 teeth 是 tooth 的复数；he/she 作主语时 brush 要加 -es：brushes。",
+    "example": {
+      "english": "She brushes her teeth before breakfast.",
+      "chinese": "她早餐前刷牙。"
+    },
+    "application": {
+      "prompt": "I use a toothbrush to ___ my teeth every morning. A. brush B. brushes",
+      "solution": "A。解析：to 后接动词原形，使用 brush。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: brush",
+        "url": "https://dictionary.cambridge.org/dictionary/english/brush"
+      }
+    ]
+  },
+  {
+    "word": "tooth",
+    "examTags": [
+      "词汇·不规则名词复数",
+      "语法·身体部位表达"
+    ],
+    "grammar": "n. 牙齿；单数 tooth，复数 teeth，是不规则变化。常用 brush one's teeth。",
+    "collocations": "a front tooth; brush your teeth; toothache。",
+    "commonMistake": "tooth 的复数是 teeth，不是 tooths；说“刷牙”用 brush one's teeth。",
+    "example": {
+      "english": "The dentist says I should brush my teeth twice a day.",
+      "chinese": "牙医说我应该每天刷两次牙。"
+    },
+    "application": {
+      "prompt": "Brush your ___ after breakfast and before bed. A. tooth B. teeth",
+      "solution": "B。解析：通常刷多颗牙齿，tooth 的复数形式是 teeth。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tooth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tooth"
+      }
+    ]
+  },
+  {
+    "word": "duty",
+    "examTags": [
+      "词汇·名词搭配",
+      "阅读·理解责任与分工"
+    ],
+    "grammar": "n. 职责；责任；可数或不可数。复数 duties；由辅音字母 + y 结尾时，变 y 为 i 再加 -es。",
+    "collocations": "be on duty; do your duty; a sense of duty。",
+    "commonMistake": "duty 的复数是 duties，不是 dutys；on duty 表示“值班/当班”。",
+    "example": {
+      "english": "It is my duty to feed the dog every morning.",
+      "chinese": "每天早上喂狗是我的职责。"
+    },
+    "application": {
+      "prompt": "Mr Wu is helping students at the school gate today. He is on ___. A. duty B. shower",
+      "solution": "A。解析：on duty 表示“值班”，符合老师在校门口工作的情境。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: duty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/duty"
+      }
+    ]
+  },
+  {
+    "word": "usually",
+    "examTags": [
+      "词汇·频度副词位置",
+      "听读·理解日常习惯"
+    ],
+    "grammar": "adv. 通常；一般。频度副词常放在实义动词前、be 动词后。",
+    "collocations": "usually get up; usually at home; usually goes to bed early。",
+    "commonMistake": "usually 放在实义动词前，如 usually walk；放在 be 动词后，如 is usually busy。",
+    "example": {
+      "english": "I usually walk to school with my brother.",
+      "chinese": "我通常和哥哥一起步行上学。"
+    },
+    "application": {
+      "prompt": "I ___ get up at seven on school days. A. usually B. usual",
+      "solution": "A。解析：修饰动词 get up 要用副词 usually；usual 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: usually",
+        "url": "https://dictionary.cambridge.org/dictionary/english/usually"
+      }
+    ]
+  },
+  {
+    "word": "reporter",
+    "examTags": [
+      "词汇·职业与人物",
+      "阅读·根据职责识别职业"
+    ],
+    "grammar": "n. 记者；可数，复数 reporters。由 report + -er 构成，-er 常表示做某种工作的人。",
+    "collocations": "a news reporter; a TV reporter; a reporter for a newspaper。",
+    "commonMistake": "reporter 是“记者”，report 是“报道/报告”或“报道”这个动词；注意区分人和工作内容。",
+    "example": {
+      "english": "The reporter asks the coach about the game.",
+      "chinese": "记者向教练询问比赛的情况。"
+    },
+    "application": {
+      "prompt": "A person who asks questions and writes news for a newspaper is a ___. A. reporter B. restaurant",
+      "solution": "A。解析：采访并报道新闻的人是 reporter（记者）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reporter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reporter"
+      }
+    ]
+  },
+  {
+    "word": "around",
+    "examTags": [
+      "词汇·介词与副词语境义",
+      "听读·理解大致时间和方位"
+    ],
+    "grammar": "prep./adv. 大约；在周围；环绕。表示大约的时间或数量时可放在数字前，如 around seven。",
+    "collocations": "around seven o'clock; walk around the park; look around。",
+    "commonMistake": "around + 时间可表示“大约”；around the room 表示“在房间周围/环顾四周”，根据后面的词判断意思。",
+    "example": {
+      "english": "The school bus arrives around eight in the morning.",
+      "chinese": "校车早上大约八点到。"
+    },
+    "application": {
+      "prompt": "The bus comes at about 7:30, but the time may change a little. It comes ___ 7:30. A. around B. exactly",
+      "solution": "A。解析：about 7:30 表示“大约七点半”，可用 around 7:30。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: around",
+        "url": "https://dictionary.cambridge.org/dictionary/english/around"
+      }
+    ]
+  },
+  {
+    "word": "homework",
+    "examTags": [
+      "词汇·不可数名词",
+      "语言运用·描述学习安排"
+    ],
+    "grammar": "n. 家庭作业；通常作不可数名词，不加复数 -s；可说 a piece of homework。",
+    "collocations": "do homework; finish your homework; a lot of homework。",
+    "commonMistake": "homework 通常不可数，不说 a homework 或 homeworks；常用 do homework。",
+    "example": {
+      "english": "I finish my homework before dinner.",
+      "chinese": "我在晚饭前完成家庭作业。"
+    },
+    "application": {
+      "prompt": "How much ___ do you have tonight? A. homework B. homeworks",
+      "solution": "A。解析：homework 通常不可数，不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: homework",
+        "url": "https://dictionary.cambridge.org/dictionary/english/homework"
+      }
+    ]
+  },
+  {
+    "word": "saying",
+    "examTags": [
+      "词汇·名词与动词词形",
+      "阅读·理解谚语含义"
+    ],
+    "grammar": "n. 谚语；格言；可数，复数 sayings。由 say + -ing 构成；say 是动词“说”。",
+    "collocations": "an old saying; as the saying goes; a popular saying。",
+    "commonMistake": "saying 作名词常指一句谚语或格言；say 是动词，句子中要按主语和时态变形。",
+    "example": {
+      "english": "My grandfather often uses an old saying to teach me a lesson.",
+      "chinese": "爷爷常用一句老话来教我道理。"
+    },
+    "application": {
+      "prompt": "“早睡早起身体好”是一句常见的 ___. A. saying B. reporter",
+      "solution": "A。解析：简短表达生活道理的谚语或格言是 saying。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: saying",
+        "url": "https://dictionary.cambridge.org/dictionary/english/saying"
+      }
+    ]
+  },
+  {
+    "word": "rise",
+    "examTags": [
+      "词汇·不规则动词词形",
+      "阅读·理解日常作息与自然现象"
+    ],
+    "grammar": "v. 上升；起身；rise—rose—risen—rising。rise 通常不直接接宾语；表示“升起”可说 the sun rises。",
+    "collocations": "rise early; the sun rises; rise from a chair。",
+    "commonMistake": "rise 表示自己“升起/起身”，不直接带宾语；raise 表示“举起/提高”某物，后面要接宾语。",
+    "example": {
+      "english": "The sun rises before six in summer.",
+      "chinese": "夏天太阳六点前升起。"
+    },
+    "application": {
+      "prompt": "The sun ___ in the east every morning. A. rises B. raises",
+      "solution": "A。解析：太阳自己升起用不及物动词 rise；raise 后需要接宾语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rise"
+      }
+    ]
+  },
+  {
+    "word": "stay",
+    "examTags": [
+      "词汇·动词搭配与词义",
+      "语言运用·描述状态和去留"
+    ],
+    "grammar": "v. 停留；保持。stay—stayed—stayed—staying；可作系动词，后接形容词表示“保持某种状态”。",
+    "collocations": "stay at home; stay in bed; stay healthy; stay up late。",
+    "commonMistake": "stay 作“保持”时后可直接接形容词，如 stay healthy；不需要再加 be。",
+    "example": {
+      "english": "I stay at school until my club meeting ends.",
+      "chinese": "我待在学校，直到社团活动结束。"
+    },
+    "application": {
+      "prompt": "You have a fever, so please ___ at home today. A. stay B. stays",
+      "solution": "A。解析：please 引导祈使句，用动词原形 stay。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stay",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stay"
+      }
+    ]
+  },
+  {
+    "word": "routine",
+    "examTags": [
+      "词汇·名词与日常活动",
+      "写作·描述日常生活顺序"
+    ],
+    "grammar": "n. 常规；惯例；日常生活安排。可数，复数 routines；也可作形容词，表示“常规的”。",
+    "collocations": "daily routine; morning routine; follow a routine。",
+    "commonMistake": "routine 是名词“日常安排”，常说 my daily routine；不要与 reporter 等表示人的名词混淆。",
+    "example": {
+      "english": "My morning routine starts with breakfast.",
+      "chinese": "我的早晨日常安排从吃早餐开始。"
+    },
+    "application": {
+      "prompt": "The usual things you do each morning are your morning ___. A. routine B. homework",
+      "solution": "A。解析：每天通常会做的一系列事情是 routine（日常安排）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: routine",
+        "url": "https://dictionary.cambridge.org/dictionary/english/routine"
+      }
+    ]
+  },
+  {
+    "word": "restaurant",
+    "examTags": [
+      "词汇·生活场所与可数名词",
+      "听读·定位就餐地点"
+    ],
+    "grammar": "n. 餐馆；餐厅；可数，复数 restaurants。单数前通常有 a/the 或物主限定词。",
+    "collocations": "go to a restaurant; eat at a restaurant; a family restaurant。",
+    "commonMistake": "restaurant 是可数名词，单数前通常需要限定词；拼写时注意中间的 au。",
+    "example": {
+      "english": "We have dinner at a small restaurant near the station.",
+      "chinese": "我们在车站附近的一家小餐馆吃晚饭。"
+    },
+    "application": {
+      "prompt": "People go to this place to order and eat meals. It is a ___. A. restaurant B. routine",
+      "solution": "A。解析：点餐并用餐的场所是 restaurant（餐馆）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: restaurant",
+        "url": "https://dictionary.cambridge.org/dictionary/english/restaurant"
+      }
+    ]
+  },
+  {
+    "word": "housework",
+    "examTags": [
+      "语法知识·不可数名词",
+      "语言运用·家庭日常"
+    ],
+    "grammar": "不可数名词，指打扫和整理家务；通常不加 a，也没有常规复数形式。",
+    "collocations": "do housework；help with the housework；share the housework",
+    "commonMistake": "housework 泛指家务劳动时作不可数名词，通常不说 a housework 或 houseworks。",
+    "example": {
+      "english": "I help with the housework after I finish my homework.",
+      "chinese": "做完作业后，我会帮忙做家务。"
+    },
+    "application": {
+      "prompt": "On Saturday, I help my parents do ___ at home.",
+      "solution": "housework"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: housework",
+        "url": "https://dictionary.cambridge.org/dictionary/english/housework"
+      }
+    ]
+  },
+  {
+    "word": "while",
+    "examTags": [
+      "语法知识·时间连词",
+      "阅读能力·理解同时发生的动作"
+    ],
+    "grammar": "可作名词，表示一段时间、片刻，常用于 for a while；也可作连词，表示“在……期间/当……时”，连接两个分句。",
+    "collocations": "for a while；in a while；while I am doing...；while we wait",
+    "commonMistake": "while 作连词时后接含主语和谓语的分句；表示“一段时间”常说 for a while。during 后接名词短语。",
+    "example": {
+      "english": "We talk for a while after dinner.",
+      "chinese": "晚饭后我们聊了一会儿。"
+    },
+    "application": {
+      "prompt": "I read a book ___ my sister prepares dinner. (while / during)",
+      "solution": "while"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: while",
+        "url": "https://dictionary.cambridge.org/dictionary/english/while"
+      },
+      {
+        "label": "Cambridge Grammar: as, when or while",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/when-or-while"
+      }
+    ]
+  },
+  {
+    "word": "weekend",
+    "examTags": [
+      "语法知识·可数名词与时间介词",
+      "语言运用·时间安排"
+    ],
+    "grammar": "可数名词，表示周末；复数为 weekends。英式英语常说 at the weekend，美式英语常说 on the weekend；this weekend 前通常不加介词。",
+    "collocations": "this weekend；at the weekend；on the weekend；weekend plans",
+    "commonMistake": "at the weekend 和 on the weekend 分别常见于英式和美式英语；this weekend 通常不加 at/on。",
+    "example": {
+      "english": "We visit our grandparents every weekend.",
+      "chinese": "我们每个周末都去看望祖父母。"
+    },
+    "application": {
+      "prompt": "Saturday and Sunday together make up the ___.",
+      "solution": "weekend"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: weekend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/weekend"
+      }
+    ]
+  },
+  {
+    "word": "daily",
+    "examTags": [
+      "词汇辨析·形容词与副词",
+      "语言运用·日常习惯"
+    ],
+    "grammar": "形容词，表示每日的或日常的，通常放在名词前作定语。",
+    "collocations": "daily routine；daily exercise；daily life；daily activities",
+    "commonMistake": "daily 是一个词，可作形容词或副词；every day 是两个词，常作时间状语表示“每天”。",
+    "example": {
+      "english": "A short daily walk helps me feel ready for school.",
+      "chinese": "每天短暂散步能让我做好上学的准备。"
+    },
+    "application": {
+      "prompt": "I take a ___ walk before school each day. (daily)",
+      "solution": "daily"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: daily",
+        "url": "https://dictionary.cambridge.org/dictionary/english/daily"
+      }
+    ]
+  },
+  {
+    "word": "only",
+    "examTags": [
+      "语法知识·副词位置",
+      "阅读能力·理解范围限制"
+    ],
+    "grammar": "副词，表示“只有/仅仅”；常放在所限定的词或短语之前，位置不同可能改变强调重点。",
+    "collocations": "only one；only a few；only child；not only...but also...",
+    "commonMistake": "only 通常靠近它所限定的内容；only one book 表示“只有一本书”。",
+    "example": {
+      "english": "I have only one club meeting today.",
+      "chinese": "我今天只有一次社团活动。"
+    },
+    "application": {
+      "prompt": "There is ___ one clean shirt left, so I need to do the laundry. (only)",
+      "solution": "only"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: only",
+        "url": "https://dictionary.cambridge.org/dictionary/english/only"
+      }
+    ]
+  },
+  {
+    "word": "break",
+    "examTags": [
+      "语法知识·名词与不规则动词",
+      "语言运用·作息与休息"
+    ],
+    "grammar": "可作名词，表示休息或间断；也可作动词，表示打破或损坏，不规则变化为 break—broke—broken。",
+    "collocations": "have a break；take a short break；break a cup；break a window",
+    "commonMistake": "a break 可表示一次休息或间断；break 作“损坏”时过去式是 broke，过去分词是 broken。",
+    "example": {
+      "english": "We have a ten-minute break between lessons.",
+      "chinese": "两节课之间我们有十分钟的休息时间。"
+    },
+    "application": {
+      "prompt": "After two hours of study, I take a short ___.",
+      "solution": "break"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: break",
+        "url": "https://dictionary.cambridge.org/dictionary/english/break"
+      }
+    ]
+  },
+  {
+    "word": "finish",
+    "examTags": [
+      "语法知识·动词后接动词-ing",
+      "语言运用·任务与时间管理"
+    ],
+    "grammar": "动词，表示完成；后接名词或动词-ing形式，如 finish homework、finish eating。",
+    "collocations": "finish homework；finish doing sth；finish a task",
+    "commonMistake": "finish 后接另一动作时通常用动词-ing，如 finish reading；不说 finish to read。",
+    "example": {
+      "english": "I finish my homework before I play hockey.",
+      "chinese": "我做完作业后再打曲棍球。"
+    },
+    "application": {
+      "prompt": "I always ___ my homework before dinner. (finish)",
+      "solution": "finish"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: finish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/finish"
+      }
+    ]
+  },
+  {
+    "word": "hockey",
+    "examTags": [
+      "语法知识·运动名称",
+      "语言运用·体育活动"
+    ],
+    "grammar": "名词，表示曲棍球运动，通常作不可数名词；可指场地曲棍球或冰球。",
+    "collocations": "play hockey；a hockey stick；ice hockey；field hockey",
+    "commonMistake": "表示进行曲棍球运动通常说 play hockey，不在运动名称前加 a。",
+    "example": {
+      "english": "The students play hockey on the field after school.",
+      "chinese": "学生们放学后在球场上打曲棍球。"
+    },
+    "application": {
+      "prompt": "Players wear skates and use sticks to play ___ on ice. (hockey / tennis)",
+      "solution": "hockey"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hockey",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hockey"
+      }
+    ]
+  },
+  {
+    "word": "already",
+    "examTags": [
+      "语法知识·副词位置",
+      "阅读能力·理解动作完成时间"
+    ],
+    "grammar": "副词，表示“已经”；常用于肯定句，通常放在主要动词前、be 动词后或助动词与主要动词之间。",
+    "collocations": "already finished；have already done；be already ready",
+    "commonMistake": "already 常用于肯定句；在现在完成时中通常放在 have/has 与过去分词之间。",
+    "example": {
+      "english": "I have already packed my bag for tomorrow.",
+      "chinese": "我已经收拾好明天要用的书包了。"
+    },
+    "application": {
+      "prompt": "It is only seven, but Ben has ___ finished breakfast. (already / yet)",
+      "solution": "already"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: already",
+        "url": "https://dictionary.cambridge.org/dictionary/english/already"
+      }
+    ]
+  },
+  {
+    "word": "dark",
+    "examTags": [
+      "语法知识·形容词与比较级",
+      "语言运用·描述光线与时间"
+    ],
+    "grammar": "形容词，表示黑暗的或颜色深的；比较级 darker，最高级 darkest。",
+    "collocations": "get dark；in the dark；dark blue；a dark room",
+    "commonMistake": "dark 是形容词，如 The room is dark；描述天气变暗可说 It gets dark。",
+    "example": {
+      "english": "It gets dark early in winter, so I come home before six.",
+      "chinese": "冬天天黑得早，所以我六点前回家。"
+    },
+    "application": {
+      "prompt": "There is no light in the room, so it is ___. (dark / bright)",
+      "solution": "dark"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dark",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dark"
+      }
+    ]
+  },
+  {
+    "word": "outside",
+    "examTags": [
+      "语法知识·副词与介词",
+      "阅读能力·理解地点信息"
+    ],
+    "grammar": "可作副词表示在外面，也可作介词，后接地点名词表示在……外面；还可作形容词，如 outside door。",
+    "collocations": "go outside；play outside；outside the house；wait outside",
+    "commonMistake": "outside 作介词时后接地点，如 outside the house；单独作副词时可说 Let's go outside。",
+    "example": {
+      "english": "The children play outside while their mother cooks dinner.",
+      "chinese": "妈妈做晚饭时，孩子们在外面玩。"
+    },
+    "application": {
+      "prompt": "It is sunny. Let's play ___ instead of staying indoors.",
+      "solution": "outside"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: outside",
+        "url": "https://dictionary.cambridge.org/dictionary/english/outside"
+      }
+    ]
+  },
+  {
+    "word": "part",
+    "examTags": [
+      "语法知识·可数名词与介词搭配",
+      "阅读能力·理解组成关系"
+    ],
+    "grammar": "可数名词，表示部分或组成部分；常用 a part of，表示整体中的一部分。",
+    "collocations": "a part of the day；part of my routine；play a part in",
+    "commonMistake": "表示“……的一部分”通常用 a part of；part-time 是另一个含义的复合词。",
+    "example": {
+      "english": "Breakfast is an important part of my morning routine.",
+      "chinese": "早餐是我早晨日常安排中的重要部分。"
+    },
+    "application": {
+      "prompt": "A short walk is one ___ of my daily routine. (part)",
+      "solution": "part"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: part",
+        "url": "https://dictionary.cambridge.org/dictionary/english/part"
+      }
+    ]
+  },
+  {
+    "word": "everyday",
+    "examTags": [
+      "词汇辨析·合成形容词与时间短语",
+      "书写规范·易混拼写"
+    ],
+    "grammar": "形容词，表示日常的、普通的，通常放在名词前；every day 是两个词，作时间状语表示“每天”。",
+    "collocations": "everyday life；everyday clothes；everyday activities",
+    "commonMistake": "everyday 是形容词，如 everyday activities；表示“每天”要写 every day。",
+    "example": {
+      "english": "I wear comfortable clothes for everyday activities.",
+      "chinese": "日常活动时我穿舒适的衣服。"
+    },
+    "application": {
+      "prompt": "Choose the adjective meaning “ordinary”: my ___ clothes.",
+      "solution": "everyday"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: everyday",
+        "url": "https://dictionary.cambridge.org/dictionary/english/everyday"
+      },
+      {
+        "label": "Cambridge Grammar: every day or everyday",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/every"
+      }
+    ]
+  },
+  {
+    "word": "prepare",
+    "examTags": [
+      "语法知识·动词搭配",
+      "语言运用·计划与准备"
+    ],
+    "grammar": "动词，表示准备；可用 prepare for + 名词，prepare to do sth，或 prepare sth。规则变化为 prepared—prepared，进行时为 preparing。",
+    "collocations": "prepare for school；prepare to leave；prepare breakfast；prepare a bag",
+    "commonMistake": "表示为某事做准备说 prepare for sth；表示准备做某事说 prepare to do sth。",
+    "example": {
+      "english": "I prepare my sports clothes the night before PE.",
+      "chinese": "体育课前一晚，我会准备好运动服。"
+    },
+    "application": {
+      "prompt": "We need to ___ for the hockey game tonight. (prepare)",
+      "solution": "prepare"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: prepare",
+        "url": "https://dictionary.cambridge.org/dictionary/english/prepare"
+      }
+    ]
+  },
+  {
+    "word": "Finnish",
+    "examTags": [
+      "词汇·国家与国籍表达",
+      "语法·专有形容词大写"
+    ],
+    "grammar": "adj. 芬兰的；n. 芬兰语（通常不可数）。表示芬兰人通常说 a Finn 或 a Finnish person；国籍和语言名称首字母大写。",
+    "collocations": "a Finnish student；the Finnish language；Finnish food",
+    "commonMistake": "Finnish 可作形容词，也可指芬兰语；表示一个芬兰人通常说 a Finn 或 a Finnish person，不说 a Finnish。",
+    "example": {
+      "english": "A Finnish student joined our English class this term.",
+      "chinese": "这学期一位芬兰学生加入了我们的英语班。"
+    },
+    "application": {
+      "prompt": "A person or thing from Finland can be described as ___. (Finnish / Finland)",
+      "solution": "Finnish。解析：Finland 是国家名；Finnish 作形容词表示“芬兰的/芬兰人的/芬兰语的”，作名词指“芬兰语”；一个芬兰人说 a Finn 或 a Finnish person。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Finnish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/finnish"
+      }
+    ]
+  },
+  {
+    "word": "o’clock",
+    "examTags": [
+      "语法知识·时间表达",
+      "书写规范·撇号"
+    ],
+    "grammar": "adv. ……点钟。放在 1 至 12 的整点数字后表示时间；写作 o’clock，使用撇号。",
+    "collocations": "at six o’clock；three o’clock in the afternoon；what time is it?",
+    "commonMistake": "o’clock 表示整点，不用于 6:30 这类带分钟的时间；注意撇号位置。",
+    "example": {
+      "english": "Our first lesson begins at eight o’clock.",
+      "chinese": "我们的第一节课八点开始。"
+    },
+    "application": {
+      "prompt": "The clock shows exactly 9:00. It is nine ___. (o’clock / half)",
+      "solution": "o’clock。解析：9:00 是九点整，用 nine o’clock。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: o’clock",
+        "url": "https://dictionary.cambridge.org/dictionary/english/o-clock"
+      },
+      {
+        "label": "Cambridge Grammar: telling the time",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/telling-the-time"
+      }
+    ]
+  },
+  {
+    "word": "half",
+    "examTags": [
+      "词汇·时间与数量表达",
+      "语法知识·固定结构"
+    ],
+    "grammar": "n./det./pron. 一半；半个。常见结构有 half an hour（半小时）、half past six（六点半）和 half of the cake（一半蛋糕）。",
+    "collocations": "half an hour；half past seven；half of the class",
+    "commonMistake": "表示几点半常说 half past + 小时；half an hour 中 hour 前用 an。",
+    "example": {
+      "english": "The film starts in half an hour.",
+      "chinese": "电影半小时后开始。"
+    },
+    "application": {
+      "prompt": "The clock shows 7:30. It is half ___ seven. (past / to)",
+      "solution": "past。解析：英式时间表达中 7:30 是 half past seven。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: half",
+        "url": "https://dictionary.cambridge.org/dictionary/english/half"
+      }
+    ]
+  },
+  {
+    "word": "dress",
+    "examTags": [
+      "词汇·名词与动词辨析",
+      "语言运用·衣着表达"
+    ],
+    "grammar": "n. 连衣裙；衣服；v. 穿衣。作名词时是可数名词；作动词时规则变化为 dress—dressed—dressed。",
+    "collocations": "wear a dress；get dressed；dress in warm clothes",
+    "commonMistake": "表示“穿着某件衣服”常用 wear；get dressed 表示“穿好衣服”，不能说 get dress。",
+    "example": {
+      "english": "Ella wears a warm dress on cold school mornings.",
+      "chinese": "寒冷的上学早晨，埃拉会穿一条暖和的连衣裙。"
+    },
+    "application": {
+      "prompt": "Before school, Leo gets ___ and packs his bag. (dressed / dress)",
+      "solution": "dressed。解析：固定表达是 get dressed，表示“穿好衣服”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dress",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dress"
+      }
+    ]
+  },
+  {
+    "word": "breakfast",
+    "examTags": [
+      "词汇·一日三餐",
+      "语法知识·餐名的冠词用法"
+    ],
+    "grammar": "n. 早餐。谈论日常用餐时通常不加冠词；可说 have/eat breakfast 或 for breakfast。",
+    "collocations": "have breakfast；eat breakfast；for breakfast；breakfast time",
+    "commonMistake": "泛指日常早餐时通常说 have breakfast，不说 have a breakfast；特定的一顿早餐也可用冠词。",
+    "example": {
+      "english": "I have breakfast at seven before school.",
+      "chinese": "我上学前七点吃早餐。"
+    },
+    "application": {
+      "prompt": "I usually ___ breakfast before I leave for school. (have / has)",
+      "solution": "have。解析：主语 I 后用动词原形；固定表达为 have breakfast。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: breakfast",
+        "url": "https://dictionary.cambridge.org/dictionary/english/breakfast"
+      }
+    ]
+  },
+  {
+    "word": "before",
+    "examTags": [
+      "语法知识·介词与连词",
+      "语言运用·事件先后顺序"
+    ],
+    "grammar": "prep./conj./adv. 在……以前。后接名词或时间作介词，后接主谓完整的从句作连词，也可单独作副词。",
+    "collocations": "before class；before dinner；before you leave",
+    "commonMistake": "before 后接从句时，从句要有主语和谓语；表示将来时间时，before 从句中通常用一般现在时。",
+    "example": {
+      "english": "Please wash your hands before dinner.",
+      "chinese": "晚饭前请洗手。"
+    },
+    "application": {
+      "prompt": "Wash your hands ___ you eat. Do it first, not afterwards. (before / after)",
+      "solution": "before。解析：先洗手、后吃饭，所以用 before（在……以前）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: before",
+        "url": "https://dictionary.cambridge.org/dictionary/english/before"
+      }
+    ]
+  },
+  {
+    "word": "begin",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语法知识·动词不定式与动名词"
+    ],
+    "grammar": "v. 开始。过去式 began，过去分词 begun；begin 后可接 to do 或 doing，通常都表示开始做某事。",
+    "collocations": "begin a lesson；begin to read；begin doing homework",
+    "commonMistake": "begin 的过去式是 began，过去分词是 begun；begin doing 和 begin to do 通常都可用。",
+    "example": {
+      "english": "The lesson began at nine yesterday.",
+      "chinese": "昨天这节课九点开始。"
+    },
+    "application": {
+      "prompt": "The film ___ at six yesterday, so we arrived early. (began / begun)",
+      "solution": "began。解析：yesterday 表示过去，begin 的一般过去式是 began。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: begin",
+        "url": "https://dictionary.cambridge.org/dictionary/english/begin"
+      }
+    ]
+  },
+  {
+    "word": "dinner",
+    "examTags": [
+      "词汇·一日三餐",
+      "语法知识·名词可数性与搭配"
+    ],
+    "grammar": "n. 正餐；晚餐。表示日常用餐时常用 have dinner，不加冠词；正式宴会或特定一餐也可作可数名词。",
+    "collocations": "have dinner；cook dinner；after dinner；dinner time",
+    "commonMistake": "表示日常吃晚饭通常说 have dinner；不能把所有 dinner 都当作不可数名词，正式宴会可说 a dinner。",
+    "example": {
+      "english": "We have dinner together at six every evening.",
+      "chinese": "我们每天晚上六点一起吃晚饭。"
+    },
+    "application": {
+      "prompt": "We usually ___ dinner together at six. (have / has)",
+      "solution": "have。解析：主语 We 后用动词原形，日常用餐表达为 have dinner。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dinner",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dinner"
+      }
+    ]
+  },
+  {
+    "word": "early",
+    "examTags": [
+      "语法知识·形容词与副词",
+      "语言运用·时间顺序"
+    ],
+    "grammar": "adj./adv. 早的；早地。比较级 earlier，最高级 earliest；作形容词修饰名词，作副词修饰动词。",
+    "collocations": "get up early；arrive early；an early bus；early in the morning",
+    "commonMistake": "early 可作形容词或副词，比较级和最高级分别是 earlier、earliest；soon 表示“不久”，含义不同。",
+    "example": {
+      "english": "We got up early to catch the first bus.",
+      "chinese": "我们早起去赶第一班公交车。"
+    },
+    "application": {
+      "prompt": "The first lesson starts at 8:00, so we should arrive ___. (early / late)",
+      "solution": "early。解析：要赶上第一节课，应当提前到达。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: early",
+        "url": "https://dictionary.cambridge.org/dictionary/english/early"
+      },
+      {
+        "label": "Cambridge Grammar: early",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/early"
+      }
+    ]
+  },
+  {
+    "word": "ask",
+    "examTags": [
+      "语法知识·动词与介词搭配",
+      "交际表达·提问与请求"
+    ],
+    "grammar": "v. 问；请求。常用 ask sb. a question、ask sb. for sth.、ask sb. to do sth.；过去式和过去分词为 asked。",
+    "collocations": "ask a question；ask for help；ask sb. to do sth.",
+    "commonMistake": "请求某物用 ask for sth.；向某人提问用 ask sb. a question，不在 ask 与人之间加 to。",
+    "example": {
+      "english": "I asked the teacher for help with my homework.",
+      "chinese": "我向老师求助，解决作业上的问题。"
+    },
+    "application": {
+      "prompt": "If you need a pencil, ask ___ one. (for / about)",
+      "solution": "for。解析：想要别人给某物，用 ask for sth.。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ask",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ask"
+      },
+      {
+        "label": "Cambridge Grammar: ask and ask for",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/ask-and-ask-for"
+      }
+    ]
+  },
+  {
+    "word": "lunch",
+    "examTags": [
+      "词汇·一日三餐",
+      "语法知识·餐名的冠词用法"
+    ],
+    "grammar": "n. 午餐。表示日常用餐时通常不加冠词；可说 have/eat lunch、for lunch，也可构成 lunch box。",
+    "collocations": "have lunch；eat lunch；for lunch；lunch box",
+    "commonMistake": "泛指日常午餐时通常说 have lunch，不说 have a lunch；特定活动或宴请中的午餐可用冠词。",
+    "example": {
+      "english": "We have lunch at school at twelve.",
+      "chinese": "我们十二点在学校吃午饭。"
+    },
+    "application": {
+      "prompt": "At noon, the students have ___ in the dining hall. (lunch / breakfast)",
+      "solution": "lunch。解析：中午吃的是午餐。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lunch",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lunch"
+      }
+    ]
+  },
+  {
+    "word": "film",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·理解影视活动信息"
+    ],
+    "grammar": "n. 电影；影片。表示一部电影时是可数名词，可说 a film 或 two films；作动词时表示拍摄影片。",
+    "collocations": "watch a film；see a film；a film about animals",
+    "commonMistake": "表示“看一部电影”常说 watch/see a film；film 是可数名词，单数前通常需要 a/an/the 等限定词。",
+    "example": {
+      "english": "Our class watched a film about life on a farm.",
+      "chinese": "我们班看了一部关于农场生活的电影。"
+    },
+    "application": {
+      "prompt": "At the cinema, we watched a ___ with moving pictures and a story. (film / lesson)",
+      "solution": "film。解析：电影院放映的故事影片是 film（电影）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: film",
+        "url": "https://dictionary.cambridge.org/dictionary/english/film"
+      }
+    ]
+  },
+  {
+    "word": "lesson",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·理解课程表信息"
+    ],
+    "grammar": "n. 课；一节课；经验教训。表示课程时是可数名词，复数为 lessons；也可指从经历中得到的教训。",
+    "collocations": "an English lesson；have a lesson；learn a lesson",
+    "commonMistake": "表示“一节课”时 lesson 是可数名词，单数前需有限定词，如 an English lesson。",
+    "example": {
+      "english": "Our English lesson begins at nine o’clock.",
+      "chinese": "我们的英语课九点开始。"
+    },
+    "application": {
+      "prompt": "We have an English ___ from 9:00 to 9:40. (lesson / breakfast)",
+      "solution": "lesson。解析：9:00 到 9:40 的课程是一节英语课。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lesson",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lesson"
+      }
+    ]
+  },
+  {
+    "word": "ice",
+    "examTags": [
+      "语法知识·不可数名词",
+      "词汇·天气与状态变化"
+    ],
+    "grammar": "n. 冰。表示冰这种物质时通常作不可数名词；表达数量时可用 a piece/cube of ice。",
+    "collocations": "a piece of ice；an ice cube；ice cream",
+    "commonMistake": "泛指冰时 ice 通常不加 a 或复数 -s；数冰块时说 ice cubes，不说 two ices。",
+    "example": {
+      "english": "Put two ice cubes in the water, please.",
+      "chinese": "请在水里放两块冰。"
+    },
+    "application": {
+      "prompt": "When water freezes, it becomes ___. (ice / steam)",
+      "solution": "ice。解析：水冻结后变成冰。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ice",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ice"
+      }
+    ]
+  }
+]

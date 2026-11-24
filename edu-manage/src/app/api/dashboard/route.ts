@@ -9,10 +9,13 @@ import {
   visibleClassGroupWhere,
   visibleStudentWhere,
 } from '@/lib/business-visibility'
-import { summarizeParentMessageWorkflow } from '@/lib/parent-message-workflow'
+import { getParentMessageWorkflowState, summarizeParentMessageWorkflow } from '@/lib/parent-message-workflow'
 import { intensiveTeachingTypeLabel } from '@/lib/intensive-class'
 import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { dateRangeDays, getLocalDayRange, localDateKey } from '@/lib/date/local-day'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { presentDashboardUpcomingLesson, selectNextScheduledLessonDay, shouldShowWeekendNextLessons } from '@/lib/dashboard-upcoming-lessons'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,11 +28,7 @@ function addDays(date: Date, days: number) {
 }
 
 function roundHours(value: number) {
-  return Number(value.toFixed(1))
-}
-
-function hoursBetween(start: Date, end: Date) {
-  return Math.max(0, (end.getTime() - start.getTime()) / 3600000)
+  return Number(value.toFixed(2))
 }
 
 function formatTimeAgo(date: Date) {
@@ -70,6 +69,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url)
   const division = getRequestDivision(user, searchParams.get('division'))
   const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+  const selectedTermKind = selectedTerm
+    ? (await prisma.academicTerm.findUnique({ where: { id: selectedTerm.id }, select: { kind: true } }))?.kind
+    : null
   const scopedTermId = selectedTerm?.id || '__NO_SELECTED_TERM__'
   const termStudentWhere = { termMemberships: { some: { termId: scopedTermId } } }
   const termGroupWhere = { termId: scopedTermId }
@@ -81,7 +83,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const [
     totalStudents,
     lastMonthStudents,
-    monthlyClassLessons,
+    monthlyClassHours,
     todayClassLessons,
     activityLogs,
     activeGroups,
@@ -103,15 +105,35 @@ export const GET = apiHandler(async (req: NextRequest) => {
   ] = await Promise.all([
     prisma.student.count({ where: { ...scopedStudentWhere, status: 'ACTIVE' } }),
     prisma.student.count({ where: { ...scopedStudentWhere, status: 'ACTIVE', createdAt: { lt: monthStart } } }),
-    prisma.classLesson.findMany({
-      where: {
-        ...scopedLessonWhere,
-        lessonDate: { gte: monthStart, lt: monthEnd },
-        status: { notIn: ['CANCELLED', 'POSTPONED'] },
-        group: scopedGroupWhere,
-      },
-      select: { startTime: true, endTime: true, lessonDate: true, group: { select: { lessonMinutes: true } } },
-    }),
+    prisma.$queryRaw<Array<{ year: number; monthIndex: number; hours: number }>>`
+      SELECT
+        EXTRACT(YEAR FROM lesson."lessonDate")::int AS "year",
+        (EXTRACT(MONTH FROM lesson."lessonDate")::int - 1) AS "monthIndex",
+        COALESCE(SUM(
+          CASE
+            WHEN class_group."lessonMinutes" > 0
+              THEN class_group."lessonMinutes"::double precision / 60.0
+            ELSE GREATEST(
+              0.0,
+              EXTRACT(EPOCH FROM (lesson."endTime"::time - lesson."startTime"::time)) / 3600.0
+            )
+          END
+        ), 0)::double precision AS "hours"
+      FROM "ClassLesson" AS lesson
+      INNER JOIN "ClassGroup" AS class_group ON class_group."id" = lesson."groupId"
+      INNER JOIN "Course" AS course ON course."id" = class_group."courseId"
+      WHERE lesson."division" = ${division}
+        AND lesson."lessonDate" >= ${sixMonthsAgo}
+        AND lesson."lessonDate" < ${monthEnd}
+        AND lesson."status" NOT IN ('CANCELLED', 'POSTPONED')
+        AND class_group."termId" = ${scopedTermId}
+        AND class_group."division" = ${division}
+        AND class_group."status" <> 'ARCHIVED'
+        AND class_group."deletedAt" IS NULL
+        AND course."isActive" = TRUE
+        AND course."deletedAt" IS NULL
+      GROUP BY 1, 2
+    `,
     prisma.classLesson.findMany({
       where: {
         ...scopedLessonWhere,
@@ -126,10 +148,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
             course: true,
             room: true,
             teacher: { select: { name: true, gender: true, avatar: true } },
-            enrollments: { where: activeEnrollmentWhere, select: { id: true } },
+            enrollments: { where: activeEnrollmentWhere, select: { studentId: true, subjects: true } },
           },
         },
         attendances: { select: { studentId: true } },
+        lessonStudents: { select: { studentId: true } },
       },
       orderBy: { startTime: 'asc' },
     }),
@@ -197,6 +220,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where: { student: scopedStudentWhere },
       select: {
         status: true,
+        teacherId: true,
         replies: {
           select: {
             role: true,
@@ -290,11 +314,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }]
   })
 
-  const classLessonHours = monthlyClassLessons.reduce((sum, lesson) => {
-    if (lesson.group.lessonMinutes > 0) return sum + lesson.group.lessonMinutes / 60
-    return sum + hoursBetween(combineLessonDateTime(lesson.lessonDate, lesson.startTime), combineLessonDateTime(lesson.lessonDate, lesson.endTime))
-  }, 0)
-  const monthlyScheduledHours = roundHours(classLessonHours)
+  const classHoursByMonth = new Map(
+    monthlyClassHours.map((row) => [`${row.year}-${row.monthIndex}`, row.hours]),
+  )
+  const monthlyScheduledHours = roundHours(classHoursByMonth.get(`${now.getFullYear()}-${now.getMonth()}`) ?? 0)
   const monthlyDeductedHours = roundHours(monthlyDeducted._sum.hoursDeducted ?? 0)
 
   const teacherWorkloadMap = new Map<string, { name: string; hours: number; students: Set<string> }>()
@@ -311,6 +334,32 @@ export const GET = apiHandler(async (req: NextRequest) => {
     lesson.attendances.forEach((attendance) => target.students.add(attendance.studentId))
     teacherWorkloadMap.set(teacherId, target)
   }
+
+  // 统计班级在读带班学员（确保已排班学员的教师被准确计入带班名师）
+  const activeClassGroups = await prisma.classGroup.findMany({
+    where: {
+      ...scopedGroupWhere,
+      status: 'ACTIVE',
+      deletedAt: null,
+    },
+    select: {
+      teacherId: true,
+      enrollments: {
+        where: { status: 'ACTIVE', deletedAt: null, student: { status: 'ACTIVE', deletedAt: null } },
+        select: { studentId: true },
+      },
+    },
+  })
+  for (const group of activeClassGroups) {
+    if (!group.teacherId) continue
+    const target = teacherWorkloadMap.get(group.teacherId) ?? {
+      name: '',
+      hours: 0,
+      students: new Set<string>(),
+    }
+    group.enrollments.forEach((e) => target.students.add(e.studentId))
+    teacherWorkloadMap.set(group.teacherId, target)
+  }
   const teacherWorkload = [...teacherWorkloadMap.values()]
     .map((item) => ({ name: item.name, hours: roundHours(item.hours), students: item.students.size }))
     .sort((a, b) => b.hours - a.hours)
@@ -318,7 +367,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   // ── 今日教师考勤/反馈完成情况（按教师聚合，管理者一目了然） ──
   const todayLessonIds = todayClassLessons.map((lesson) => lesson.id)
-  const [todayFeedbackRows, studentCreatedAtRows, sixMonthClassLessons] = await Promise.all([
+  const [todayFeedbackRows, studentCreatedAtRows] = await Promise.all([
     todayLessonIds.length
       ? prisma.classroomFeedback.findMany({
           where: { classLessonId: { in: todayLessonIds } },
@@ -328,15 +377,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
     prisma.student.findMany({
       where: { ...scopedStudentWhere, status: 'ACTIVE' },
       select: { createdAt: true },
-    }),
-    prisma.classLesson.findMany({
-      where: {
-        ...scopedLessonWhere,
-        lessonDate: { gte: sixMonthsAgo, lt: monthEnd },
-        status: { notIn: ['CANCELLED', 'POSTPONED'] },
-        group: scopedGroupWhere,
-      },
-      select: { lessonDate: true, startTime: true, endTime: true, group: { select: { lessonMinutes: true } } },
     }),
   ])
 
@@ -369,6 +409,76 @@ export const GET = apiHandler(async (req: NextRequest) => {
     .map((item) => ({ ...item }))
     .sort((a, b) => (b.pendingAttendance + b.pendingFeedback) - (a.pendingAttendance + a.pendingFeedback) || b.todayLessons - a.todayLessons)
 
+  // ── 在读学员年级分布透视 ──
+  const rawGradeGroups = await prisma.student.groupBy({
+    by: ['grade'],
+    _count: { id: true },
+    where: { ...scopedStudentWhere, status: 'ACTIVE' },
+  })
+  const totalActiveStudents = rawGradeGroups.reduce((sum, g) => sum + g._count.id, 0)
+  const GRADE_ORDER = ['初一', '初二', '初三', '高一', '高二', '高三']
+  const studentGrades = rawGradeGroups
+    .map((g) => ({
+      grade: g.grade || '未分年级',
+      count: g._count.id,
+      percentage: totalActiveStudents > 0 ? Math.round((g._count.id / totalActiveStudents) * 100) : 0,
+    }))
+    .sort((a, b) => {
+      const idxA = GRADE_ORDER.indexOf(a.grade)
+      const idxB = GRADE_ORDER.indexOf(b.grade)
+      return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB)
+    })
+
+  // ── 校区执教教师实况（排除管理督导，聚焦一线授课名师带班与待办） ──
+  const allActiveTeachers = await prisma.teacher.findMany({
+    where: {
+      status: 'ACTIVE',
+      tierLevel: { not: 'MANAGER' },
+    },
+    select: {
+      id: true,
+      name: true,
+      gender: true,
+      avatar: true,
+      tierLevel: true,
+      subjects: true,
+    },
+  })
+  const teacherPendingRepliesMap = new Map<string, number>()
+  for (const msg of parentMessages) {
+    if (msg.teacherId) {
+      const state = getParentMessageWorkflowState(msg)
+      if (state.pendingTeacherReply) {
+        teacherPendingRepliesMap.set(msg.teacherId, (teacherPendingRepliesMap.get(msg.teacherId) || 0) + 1)
+      }
+    }
+  }
+  const teachersSummary = allActiveTeachers.map((t) => {
+    const comp = teacherComplianceMap.get(t.id)
+    const workload = teacherWorkloadMap.get(t.id)
+    const pendingReplies = teacherPendingRepliesMap.get(t.id) || 0
+    return {
+      teacherId: t.id,
+      name: t.name,
+      gender: t.gender,
+      avatar: t.avatar,
+      tierLevel: t.tierLevel,
+      subjects: t.subjects,
+      activeStudents: workload?.students.size || 0,
+      monthlyHours: roundHours(workload?.hours || 0),
+      todayLessons: comp?.todayLessons || 0,
+      pendingAttendance: comp?.pendingAttendance || 0,
+      pendingFeedback: comp?.pendingFeedback || 0,
+      pendingReplies,
+    }
+  }).sort((a, b) => {
+    const pendingA = a.pendingReplies + a.pendingAttendance + a.pendingFeedback
+    const pendingB = b.pendingReplies + b.pendingAttendance + b.pendingFeedback
+    if (pendingB !== pendingA) return pendingB - pendingA
+    if (b.todayLessons !== a.todayLessons) return b.todayLessons - a.todayLessons
+    return b.activeStudents - a.activeStudents
+  })
+
   // ── 近 6 个月学员增长 + 课时趋势（图表数据） ──
   const monthBuckets: Array<{ key: string; label: string }> = []
   for (let i = 5; i >= 0; i--) {
@@ -380,14 +490,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const key = `${row.createdAt.getFullYear()}-${row.createdAt.getMonth()}`
     newStudentsByMonth.set(key, (newStudentsByMonth.get(key) || 0) + 1)
   }
-  const classHoursByMonth = new Map<string, number>()
-  for (const lesson of sixMonthClassLessons) {
-    const key = `${lesson.lessonDate.getFullYear()}-${lesson.lessonDate.getMonth()}`
-    const hours = lesson.group.lessonMinutes > 0
-      ? lesson.group.lessonMinutes / 60
-      : hoursBetween(combineLessonDateTime(lesson.lessonDate, lesson.startTime), combineLessonDateTime(lesson.lessonDate, lesson.endTime))
-    classHoursByMonth.set(key, roundHours((classHoursByMonth.get(key) || 0) + hours))
-  }
   let studentAccumulator = 0
   const growthData = {
     months: monthBuckets.map((bucket) => bucket.label),
@@ -396,7 +498,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       studentAccumulator += newStudentsByMonth.get(bucket.key) || 0
       return studentAccumulator
     }),
-    classHours: monthBuckets.map((bucket) => classHoursByMonth.get(bucket.key) || 0),
+    classHours: monthBuckets.map((bucket) => roundHours(classHoursByMonth.get(bucket.key) || 0)),
   }
 
   const classLessonSchedules = todayClassLessons.map((lesson) => {
@@ -417,7 +519,15 @@ export const GET = apiHandler(async (req: NextRequest) => {
       teacher: lesson.teacher?.name ?? lesson.group.teacher.name,
       room: lesson.group.room?.name ?? '-',
       subject: lesson.subject ?? lesson.group.course.subject,
-      students: lesson.group.enrollments.length,
+      students: resolveSubjectLessonStudentIds(
+        lesson.lessonStudents.map((student) => student.studentId),
+        lesson.group.enrollments.map((enrollment) => ({
+          studentId: enrollment.studentId,
+          subjects: enrollment.subjects,
+        })),
+        lesson.subject ?? lesson.group.course.subject,
+        lesson.lessonDate,
+      ).length,
       statusLabel: getStatusLabel(start, end, attendanceSubmitted),
     }
   })
@@ -429,6 +539,59 @@ export const GET = apiHandler(async (req: NextRequest) => {
     return d.getHours() * 60 + d.getMinutes()
   }
   const schedules = classLessonSchedules.sort((a, b) => minuteOfDay(a) - minuteOfDay(b))
+  let weekendNextLessons: Array<{
+    id: string
+    groupId: string
+    groupName: string
+    subject: string
+    teacher: string
+    room: string
+    studentCount: number
+    date: string
+    startTime: string
+    endTime: string
+  }> = []
+  if (shouldShowWeekendNextLessons(
+    selectedTerm ? { status: selectedTerm.status, kind: selectedTermKind } : null,
+    schedules.length,
+  )) {
+    const todayKey = localDateKey(today)
+    const horizon = dateRangeDays(todayKey, 15).at(-1) || todayKey
+    const { start: upcomingStart } = getLocalDayRange(dateRangeDays(todayKey, 2)[1])
+    const { end: upcomingEnd } = getLocalDayRange(horizon)
+    const upcomingRows = await prisma.classLesson.findMany({
+      where: {
+        ...scopedLessonWhere,
+        deletedAt: null,
+        lessonDate: { gte: upcomingStart, lt: upcomingEnd },
+        status: 'SCHEDULED',
+        group: { ...scopedGroupWhere, deletedAt: null, status: { not: 'ARCHIVED' } },
+      },
+      include: {
+        teacher: { select: { id: true, name: true } },
+        group: {
+          include: {
+            course: { select: { subject: true } },
+            room: { select: { name: true } },
+            teacher: { select: { id: true, name: true } },
+            teacherAssignments: { select: { teacherId: true, subject: true, teacher: { select: { name: true } } } },
+            enrollments: { where: activeEnrollmentWhere, select: { studentId: true, subjects: true } },
+          },
+        },
+        lessonStudents: { select: { studentId: true } },
+      },
+      orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
+      take: 300,
+    })
+    if (upcomingRows.length) {
+      const nextDay = selectNextScheduledLessonDay(upcomingRows, todayKey)
+      if (nextDay.date) {
+        weekendNextLessons = nextDay.lessons.map((lesson) =>
+          presentDashboardUpcomingLesson(lesson, nextDay.date!),
+        )
+      }
+    }
+  }
   const todayLessonsCompleted = schedules.filter((item) => item.statusLabel === '已完成').length
   const todayLessonsPendingAttendance = schedules.filter((item) => item.statusLabel === '待考勤').length
   const unreadComments = unreadParentComments + unreadPerformanceComments
@@ -479,6 +642,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     growthData,
     schedules,
     teacherCompliance,
+    weekendNextLessons,
     operatingHighlights: [
       { label: '今日待考勤', value: todayLessonsPendingAttendance, tone: 'orange', href: '/attendance' },
       { label: '未推送试卷', value: unpublishedPapers, tone: 'blue', href: '/grades' },
@@ -486,6 +650,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ],
     workloads: teacherWorkload,
     intensiveAppointments,
+    studentGrades,
+    teachersSummary,
     logs: activityLogs.map((log) => ({
       id: log.id,
       user: log.user?.name ?? log.teacher?.name ?? '系统',

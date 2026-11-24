@@ -1,450 +1,144 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import Image from 'next/image'
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
+import { EnglishIntroWord } from './EnglishIntroWord'
+import styles from './SplashScreen.module.css'
 
-const FEATURES = [
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z"
-          fill="rgba(232,117,69,0.15)"
-          stroke="#E87545"
-          strokeWidth="1.4"
-        />
-        <path d="M6.5 10l2.5 2.5 4.5-4.5" stroke="#E87545" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-    iconBg: 'rgba(232,117,69,0.18)',
-    title: '985/211硕士师资',
-    desc: '全体老师均为985/211硕士，支持学信网实名核实资质',
-    badge: '资质可查',
-    badgeStyle: {
-      background: 'rgba(232,117,69,0.12)',
-      color: '#E87545',
-      border: '1px solid rgba(232,117,69,0.25)',
-    },
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <rect x="2" y="4" width="16" height="12" rx="2.5" stroke="#0d9e82" strokeWidth="1.4" fill="rgba(13,158,130,0.1)" />
-        <path d="M5 8h10M5 11h6" stroke="#0d9e82" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
-    iconBg: 'rgba(13,158,130,0.18)',
-    title: '自主研发管理系统',
-    desc: '三端全覆盖，数据透明，家长实时查看孩子上课状态',
-    badge: null,
-    badgeStyle: null,
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 2l1.9 4.78L17 7.64l-3.55 3.39.84 4.79L10 13.5l-4.29 2.32.84-4.79L3 7.64l5.1-.86L10 2z"
-          fill="rgba(150,120,255,0.15)"
-          stroke="#a080f0"
-          strokeWidth="1.4"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    iconBg: 'rgba(180,150,255,0.15)',
-    title: '新乐唯一志愿模拟',
-    desc: '专为新乐市学生定制，整合一分一档数据，完全免费',
-    badge: '✦ 新乐独家',
-    badgeStyle: {
-      background: 'rgba(160,128,240,0.15)',
-      color: '#a080f0',
-      border: '1px solid rgba(160,128,240,0.3)',
-    },
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M10 2v16M2 10h16" stroke="#f5a623" strokeWidth="1.6" strokeLinecap="round" />
-        <circle cx="10" cy="10" r="7" stroke="#f5a623" strokeWidth="1.4" fill="rgba(245,166,35,0.08)" />
-      </svg>
-    ),
-    iconBg: 'rgba(245,166,35,0.15)',
-    title: '全新乐最低价格',
-    desc: '透明定价，无二次收费，所有教辅教材费用全含',
-    badge: '无隐性消费',
-    badgeStyle: {
-      background: 'rgba(245,166,35,0.12)',
-      color: '#d48806',
-      border: '1px solid rgba(245,166,35,0.25)',
-    },
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z"
-          fill="rgba(232,117,69,0.15)"
-          stroke="#E87545"
-          strokeWidth="1.4"
-        />
-        <path d="M6.5 10l2.5 2.5 4.5-4.5" stroke="#E87545" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-    iconBg: 'rgba(232,117,69,0.18)',
-    title: '每班10人·至少3名老师全程陪伴',
-    desc: '没有学不会的学生，只有不会教的老师。从初一到中考，牧哲学堂只专注你的孩子',
-    badge: null,
-    badgeStyle: null,
-  },
-]
+const INTRO_RIBBON = 'M651 141 C677 126 690 144 675 160 C644 191 571 190 519 169 C473 151 425 129 393 104 C409 83 395 63 370 66'
+const HALO = 'M0 -49 C10 -56 21 -48 26 -41 C40 -42 48 -31 46 -20 C58 -11 56 3 49 12 C53 26 43 38 30 38 C22 51 8 54 -2 47 C-15 54 -28 48 -33 38 C-48 36 -54 24 -49 12 C-59 2 -56 -12 -47 -20 C-48 -34 -38 -43 -25 -41 C-19 -51 -8 -55 0 -49 Z'
 
-export type SplashVariant = 'compact' | 'full'
-
-export function SplashScreen({
-  onDone,
-  variant = 'compact',
-  duration = 1500,
-}: {
-  onDone: () => void
-  variant?: SplashVariant
-  duration?: number
-}) {
-  const [phase, setPhase] = useState<'logo' | 'features'>('logo')
-  const [shownFeatures, setShownFeatures] = useState<number[]>([])
+export function SplashScreen({ onDone, duration = 7000 }: { onDone: () => void; duration?: number }) {
+  const id = useId()
+  const gradientId = `${id}-ink`
+  const apertureId = `${id}-aperture`
   const [exiting, setExiting] = useState(false)
-  const [reducedMotion, setReducedMotion] = useState(false)
-  const showFeatures = variant === 'full' && phase === 'features'
+  const completed = useRef(false)
+  const skipTimer = useRef<number | null>(null)
+  const exitTimer = useRef<number | null>(null)
+  const doneTimer = useRef<number | null>(null)
+  const totalDuration = Number.isFinite(duration) ? Math.max(300, duration) : 7000
 
   useEffect(() => {
-    const totalDuration = Math.max(300, duration)
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    setReducedMotion(reduceMotion)
-    if (reduceMotion) {
-      if (variant === 'full') {
-        setPhase('features')
-        setShownFeatures(FEATURES.map((_, index) => index))
-      }
-      const doneTimer = window.setTimeout(onDone, Math.min(totalDuration, 2000))
-      return () => window.clearTimeout(doneTimer)
-    }
-
-    const featureTimer = variant === 'full'
-      ? window.setTimeout(() => setPhase('features'), Math.min(1600, Math.max(300, totalDuration * .4)))
-      : null
-    const exitDuration = variant === 'full' ? 600 : 250
-    const exitTimer = window.setTimeout(() => setExiting(true), Math.max(0, totalDuration - exitDuration))
-    const doneTimer = window.setTimeout(onDone, totalDuration)
+    completed.current = false
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const runDuration = reduced ? Math.min(900, totalDuration) : totalDuration
+    // 在动画结束前提前触发 exiting，确保孔径展开时遮罩的 pointer-events 立即变为 none，绝不阻挡底层点击
+    exitTimer.current = window.setTimeout(() => setExiting(true), Math.max(0, runDuration - (reduced ? 180 : 400)))
+    doneTimer.current = window.setTimeout(() => {
+      if (completed.current) return
+      completed.current = true
+      onDone()
+    }, runDuration)
     return () => {
-      if (featureTimer) window.clearTimeout(featureTimer)
-      window.clearTimeout(exitTimer)
-      window.clearTimeout(doneTimer)
+      if (exitTimer.current !== null) window.clearTimeout(exitTimer.current)
+      if (doneTimer.current !== null) window.clearTimeout(doneTimer.current)
+      if (skipTimer.current !== null) window.clearTimeout(skipTimer.current)
     }
-  }, [duration, onDone, variant])
+  }, [onDone, totalDuration])
 
-  useEffect(() => {
-    if (!showFeatures) return
-    const timers: number[] = []
-    FEATURES.slice(0, 4).forEach((_, i) => {
-      timers.push(window.setTimeout(() => setShownFeatures((prev) => [...prev, i]), i * 110 + 60))
-    })
-    timers.push(window.setTimeout(() => setShownFeatures((prev) => [...prev, 4]), 4 * 110 + 60 + 180))
-    // 定时动画异常时仍保证所有功能标签最终可见。
-    timers.push(window.setTimeout(() => setShownFeatures(FEATURES.map((_, index) => index)), 1200))
-    return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [showFeatures])
+  const handleSkip = () => {
+    if (completed.current || exiting) return
+    setExiting(true)
+    if (exitTimer.current !== null) window.clearTimeout(exitTimer.current)
+    if (doneTimer.current !== null) window.clearTimeout(doneTimer.current)
+    skipTimer.current = window.setTimeout(() => {
+      if (completed.current) return
+      completed.current = true
+      onDone()
+    }, 180)
+  }
 
   return (
-    <div className="splash-screen-root" style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: 9999,
-      background: 'linear-gradient(145deg,#fffaf6 0%,#fff2e8 38%,#ffe0c7 72%,#fff8f0 100%)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: showFeatures ? 'flex-start' : 'center',
-      opacity: exiting ? 0 : 1,
-      transition: reducedMotion ? 'none' : `opacity ${variant === 'full' ? 600 : 250}ms ease`,
-      overflow: showFeatures ? 'auto' : 'hidden',
-      padding: showFeatures ? '32px 0 28px' : '20px 0',
-    }}>
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        pointerEvents: 'none',
-        background: `
-          radial-gradient(ellipse at 28% 34%,rgba(232,117,69,0.22) 0%,transparent 58%),
-          radial-gradient(ellipse at 78% 70%,rgba(240,154,91,0.2) 0%,transparent 55%)
-        `,
-      }} />
-
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        height: 2,
-        width: '100%',
-        transformOrigin: 'left center',
-        background: 'linear-gradient(90deg,#E87545,#0d9e82)',
-        animation: reducedMotion ? 'none' : `splashProg ${Math.max(300, duration)}ms linear forwards`,
-        willChange: 'transform',
-      }} />
-
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 12,
-        transition: 'transform 0.75s cubic-bezier(0.4,0,0.2,1), margin 0.75s ease',
-        transform: 'scale(1)',
-        marginBottom: 12,
-        animation: reducedMotion ? 'none' : 'splashLogoIn 0.65s cubic-bezier(0.34,1.56,0.64,1) 0.08s both',
-      }} className={showFeatures ? 'splash-logo-block splash-logo-block-features' : 'splash-logo-block'}>
-        <div className="splash-logo-mark" style={{ position: 'relative', width: 'clamp(136px, 18vw, 168px)', height: 'clamp(136px, 18vw, 168px)', filter: 'drop-shadow(0 0 16px rgba(232,117,69,0.25))' }}>
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%,-50%)',
-            width: 280,
-            height: 280,
-            borderRadius: '50%',
-            border: '1px solid rgba(232,117,69,0.22)',
-            animation: reducedMotion ? 'none' : 'splashRing 2s ease 0.45s infinite',
-            pointerEvents: 'none',
-            willChange: 'transform, opacity',
-          }} />
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%,-50%)',
-            width: 280,
-            height: 280,
-            borderRadius: '50%',
-            border: '1px solid rgba(13,158,130,0.16)',
-            animation: reducedMotion ? 'none' : 'splashRing 2s ease 0.8s infinite',
-            pointerEvents: 'none',
-            willChange: 'transform, opacity',
-          }} />
-          <Image
-            src="/UI_picture/logo.png"
-            alt="牧哲学堂"
-            fill
-            sizes="(max-width: 767px) 136px, 168px"
-            style={{ objectFit: 'contain' }}
-            priority
-          />
-        </div>
-
-        <div style={{
-          fontSize: 46,
-          fontWeight: 800,
-          letterSpacing: 9,
-          background: 'linear-gradient(135deg,#6f2c12 20%,#E87545 55%,#F09A5B 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          animation: reducedMotion ? 'none' : `splashFadeUp 0.45s ease ${variant === 'compact' ? 0.25 : 0.9}s both`,
-          transition: 'opacity 0.3s, max-height 0.3s',
-        }} className="splash-brand-title">
-          牧哲学堂
-        </div>
-        <div style={{
-          width: 80,
-          height: 1,
-          background: 'linear-gradient(90deg,transparent,#E87545 40%,#0d9e82 60%,transparent)',
-          animation: reducedMotion ? 'none' : `splashLineIn 0.4s ease ${variant === 'compact' ? 0.4 : 1.3}s both`,
-          transition: 'opacity 0.3s, max-height 0.3s',
-        }} />
-        <div style={{
-          fontSize: 14,
-          color: 'rgba(111,44,18,0.58)',
-          letterSpacing: 8,
-          animation: reducedMotion ? 'none' : `splashFadeUp 0.4s ease ${variant === 'compact' ? 0.48 : 1.15}s both`,
-          transition: 'opacity 0.3s, max-height 0.3s',
-        }} className="splash-brand-en">
-          M O R E J O Y
-        </div>
-        <div style={{
-          fontSize: 14,
-          color: 'rgba(111,44,18,0.42)',
-          letterSpacing: 2,
-          animation: reducedMotion ? 'none' : `splashFadeUp 0.4s ease ${variant === 'compact' ? 0.62 : 1.6}s both`,
-          transition: 'opacity 0.3s, max-height 0.3s',
-        }} className="splash-brand-slogan">
-          在思想的原野上，放牧星辰
-        </div>
+    <div
+      className={`${styles.root}${exiting ? ` ${styles.exiting}` : ''}`}
+      style={{ '--intro-duration': `${totalDuration}ms` } as CSSProperties}
+      aria-label="Muzhe Joy，牧哲学堂正在开启"
+      data-testid="muzhe-intro"
+    >
+      <svg className={styles.curtain} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <mask id={apertureId} maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+            <rect width="100" height="100" fill="white" />
+            <g transform="translate(50 50)"><path className={styles.aperture} d={HALO} fill="black" /></g>
+          </mask>
+          <radialGradient id={`${id}-warm-wash`} cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(17 29) scale(57 70)">
+            <stop className={styles.orangeGlow} stopOpacity=".16" />
+            <stop offset="1" className={styles.orangeGlow} stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id={`${id}-teal-wash`} cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(87 67) scale(56 66)">
+            <stop className={styles.tealGlow} stopOpacity=".12" />
+            <stop offset="1" className={styles.tealGlow} stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id={`${id}-paper-light`}>
+            <stop className={styles.paperGlow} stopOpacity=".9" />
+            <stop offset="1" className={styles.paperGlow} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <g mask={`url(#${apertureId})`}>
+          <rect width="100" height="100" className={styles.backdrop} />
+          <rect width="100" height="100" fill={`url(#${id}-warm-wash)`} />
+          <rect width="100" height="100" fill={`url(#${id}-teal-wash)`} />
+          <ellipse cx="50" cy="48" rx="42" ry="45" fill={`url(#${id}-paper-light)`} />
+          <path className={styles.bookOrange} d="M-8 76 C16 76 37 93 50 111 C63 93 84 76 108 76" fill="none" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
+          <path className={styles.bookTeal} d="M-5 84 C20 82 39 98 50 115 C61 98 80 82 105 84" fill="none" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
+        </g>
+      </svg>
+      <button className={styles.skip} type="button" onClick={handleSkip} disabled={exiting} title="跳过动画，进入登录页" data-motion-ignore>
+        跳过动画
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="none" aria-hidden="true">
+          <path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      <h1 className={styles.stage} aria-label="Muzhe Joy">
+        <svg className={styles.artwork} viewBox="0 0 740 240" fill="none" aria-hidden="true">
+          <defs>
+            <linearGradient id={gradientId} x1="76" y1="120" x2="657" y2="120" gradientUnits="userSpaceOnUse">
+              <stop offset="0" className={styles.rose} />
+              <stop offset=".23" className={styles.peach} />
+              <stop offset=".39" className={styles.gold} />
+              <stop offset=".53" className={styles.mint} />
+              <stop offset=".67" className={styles.sky} />
+              <stop offset=".81" className={styles.lilac} />
+              <stop offset="1" className={styles.rose} />
+            </linearGradient>
+          </defs>
+          <EnglishIntroWord gradientId={gradientId} />
+          <g stroke={`url(#${gradientId})`} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round">
+            <path className={styles.ribbon} d={INTRO_RIBBON} pathLength="1" />
+          </g>
+        </svg>
+      </h1>
+      <div className={styles.emblem} aria-hidden="true">
+        <svg viewBox="-100 -100 200 200" fill="none">
+          <defs>
+            <linearGradient id={`${gradientId}-halo`} x1="-55" y1="0" x2="55" y2="0" gradientUnits="userSpaceOnUse">
+              <stop className={styles.gold} /><stop offset=".35" className={styles.mint} />
+              <stop offset=".65" className={styles.sky} /><stop offset="1" className={styles.lilac} />
+            </linearGradient>
+          </defs>
+          <g stroke={`url(#${gradientId}-halo)`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path className={styles.halo} d={HALO} pathLength="1" />
+            <path className={styles.echoOne} d={HALO} /><path className={styles.echoTwo} d={HALO} /><path className={styles.echoThree} d={HALO} />
+          </g>
+          {/* Vector trace of the supplied mark: cap, tassel and open book. */}
+          <g className={styles.logo} transform="translate(-50 -50) scale(.08)">
+            <g className={styles.logoOrange}>
+              <path d="M305 240H942Q948 240 948 246V267Q948 273 942 273H902Q889 273 889 285V430Q889 435 884 435H877Q872 435 872 430V285Q872 274 861 274H806Q793 274 793 286V339Q793 345 787 345H457Q451 345 451 339V279Q451 273 445 273H305Q300 273 300 268V245Q300 240 305 240Z" />
+              <path d="M456 372H789Q793 372 793 377V414C793 511 718 577 623 577S451 509 451 414V377Q451 372 456 372Z" />
+              <path d="M881 450C887 450 888 461 894 465L908 470Q916 473 910 480L904 488V503Q904 512 896 509L882 503 867 509Q859 512 859 503V488L852 480Q847 473 855 470L869 465C875 462 875 450 881 450Z" />
+              <path d="M112 500 621 637 1141 500 939 780Q936 785 930 788C809 831 706 890 620 965 534 887 430 832 306 788Q299 785 295 778Z" />
+            </g>
+            <g className={styles.logoTeal}>
+              <path d="M217 814C379 829 508 906 604 1019 481 942 359 890 214 889Z" />
+              <path d="M1019 814C857 829 728 906 632 1019 755 942 877 890 1022 889Z" />
+            </g>
+          </g>
+        </svg>
       </div>
-
-      {showFeatures && (
-        <div style={{
-          width: '100%',
-          maxWidth: 500,
-          padding: '0 16px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 10,
-          }}>
-            {FEATURES.slice(0, 4).map((f, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 8,
-                  padding: '11px 12px 10px',
-                  borderRadius: 16,
-                  background: 'rgba(255,255,255,0.88)',
-                  border: '1px solid rgba(232,117,69,0.12)',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                  willChange: 'transform, opacity',
-                  opacity: reducedMotion || shownFeatures.includes(i) ? 1 : 0,
-                  transform: reducedMotion || shownFeatures.includes(i)
-                    ? 'translateY(0) scale(1)'
-                    : 'translateY(16px) scale(0.96)',
-                  transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.2,0.64,1)',
-                }}
-              >
-                <div style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 11,
-                  flexShrink: 0,
-                  background: f.iconBg,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  {f.icon}
-                </div>
-
-                <div style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#3d2010',
-                  lineHeight: 1.35,
-                }}>
-                  {f.title}
-                </div>
-                <div style={{
-                  fontSize: 11,
-                  color: 'rgba(61,32,16,0.55)',
-                  lineHeight: 1.5,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }}>
-                  {f.desc}
-                </div>
-                {f.badge && (
-                  <div style={{
-                    display: 'inline-block',
-                    alignSelf: 'flex-start',
-                    fontSize: 10,
-                    padding: '2px 8px',
-                    borderRadius: 6,
-                    marginTop: 'auto',
-                    ...(f.badgeStyle as React.CSSProperties),
-                  }}>
-                    {f.badge}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 13,
-            padding: '11px 14px',
-            borderRadius: 16,
-            background: 'linear-gradient(135deg,rgba(255,255,255,0.9) 0%,rgba(255,242,232,0.88) 100%)',
-            border: '1px solid rgba(232,117,69,0.18)',
-            boxShadow: '0 2px 12px rgba(232,117,69,0.07)',
-            willChange: 'transform, opacity',
-            opacity: reducedMotion || shownFeatures.includes(4) ? 1 : 0,
-            transform: reducedMotion || shownFeatures.includes(4)
-              ? 'translateY(0) scale(1)'
-              : 'translateY(16px) scale(0.96)',
-            transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.2,0.64,1)',
-          }}>
-            <div style={{
-              width: 36,
-              height: 36,
-              borderRadius: 12,
-              flexShrink: 0,
-              background: 'rgba(232,117,69,0.14)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-                <circle cx="10" cy="10" r="3"
-                  fill="rgba(232,117,69,0.25)" stroke="#E87545" strokeWidth="1.4"/>
-                <path d="M10 1v3M10 16v3M1 10h3M16 10h3
-                         M3.22 3.22l2.12 2.12M14.66 14.66l2.12 2.12
-                         M3.22 16.78l2.12-2.12M14.66 5.34l2.12-2.12"
-                  stroke="#E87545" strokeWidth="1.4" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontSize: 14,
-                fontWeight: 700,
-                color: '#E87545',
-                marginBottom: 3,
-                lineHeight: 1.3,
-              }}>
-                每班10人 · 至少3名老师全程陪伴
-              </div>
-              <div style={{
-                fontSize: 12,
-                color: 'rgba(61,32,16,0.55)',
-                lineHeight: 1.5,
-              }}>
-                没有学不会的学生，只有不会教的老师
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes splashLogoIn {
-          from { opacity:0; transform:scale(0.3); }
-          to   { opacity:1; transform:scale(1); }
-        }
-        @keyframes splashFadeUp {
-          from { opacity:0; transform:translateY(10px); }
-          to   { opacity:1; transform:translateY(0); }
-        }
-        @keyframes splashLineIn {
-          from { opacity:0; transform:scaleX(0); }
-          to   { opacity:1; transform:scaleX(1); }
-        }
-        @keyframes splashRing {
-          0%   { transform: translate(-50%,-50%) scale(0.46); opacity:0.7; }
-          100% { transform: translate(-50%,-50%) scale(1);    opacity:0; }
-        }
-        @keyframes splashProg {
-          from { transform: scaleX(0); }
-          to   { transform: scaleX(1); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .splash-screen-root,
-          .splash-screen-root * {
-            animation: none !important;
-            transition: none !important;
-          }
-        }
-      `}</style>
+      <div className={styles.brandSignature} aria-hidden="true">
+        <span className={styles.schoolName}>牧哲学堂</span>
+        <span className={styles.schoolMotto}>不怕学浅，唯恐志短</span>
+      </div>
     </div>
   )
 }

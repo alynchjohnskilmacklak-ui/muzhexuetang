@@ -131,19 +131,27 @@ export const GET = apiHandler(async (request: NextRequest) => {
     select: { amount: true, paidAt: true },
     orderBy: { paidAt: 'asc' },
   })
-  const monthMap = new Map<string, { income: number; expense: number }>()
+  const monthMap = new Map<string, number>()
   for (const fee of monthlyFees) {
     if (!fee.paidAt) continue
-    const key = fee.paidAt.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' })
-    const existing = monthMap.get(key) || { income: 0, expense: 0 }
-    existing.income += fee.amount
-    monthMap.set(key, existing)
+    const key = `${fee.paidAt.getFullYear()}-${String(fee.paidAt.getMonth() + 1).padStart(2, '0')}`
+    monthMap.set(key, (monthMap.get(key) || 0) + fee.amount)
   }
-  const finance = [...monthMap.entries()].map(([month, val]) => ({
+  const monthlyExpenses = await prisma.operatingExpense.findMany({
+    where: { division, deletedAt: null, occurredAt: { gte: from, lt: to } },
+    select: { amount: true, occurredAt: true },
+  })
+  const expenseMap = new Map<string, number>()
+  for (const expense of monthlyExpenses) {
+    const key = expense.occurredAt.toISOString().slice(0, 7)
+    expenseMap.set(key, (expenseMap.get(key) || 0) + expense.amount)
+  }
+  const finance = [...new Set([...monthMap.keys(), ...expenseMap.keys()])].sort().map((month) => ({
     month,
-    income: Math.round(val.income),
-    expense: Math.round(val.expense),
-    profit: Math.round(val.income - val.expense),
+    income: Math.round(monthMap.get(month) || 0),
+    expense: expenseMap.has(month) ? Math.round((expenseMap.get(month) || 0) * 100) / 100 : null,
+    // Costs are manually recorded and may be incomplete, so do not calculate profit yet.
+    profit: null,
   }))
 
   // Monthly retention: students created each month vs still active

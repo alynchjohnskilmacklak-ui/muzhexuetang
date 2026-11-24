@@ -49,7 +49,7 @@ export function parseAiArticleResponse(
       throw new Error('生成内容混入其他学生标记，请重试')
     }
     if (!student.observation && /未记录|没有记录|暂无.*观察|没有.{0,8}观察记录|暂无.{0,8}观察|尚未.{0,6}观察|未提供.{0,4}观察|暂不展开|先不展开|不展开个人表现|个人表现方面.{0,6}描述/.test(sections[1])) {
-      throw new Error('AI 生成了“未记录/不展开”等回避性表述，请重试')
+      throw new Error('生成内容含“未记录/不展开”等回避性表述，请重试')
     }
     const normalizeStudentReference = (value: string) => value
       .replace(new RegExp(`${key}(?!\\d)(?:同学)?`, 'g'), `${student.name}同学`)

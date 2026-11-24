@@ -1,0 +1,35 @@
+=== FileAsset 整体外键填充率 ===
+[
+  {
+    "total": 5667,
+    "feedback_id": 0,
+    "post_id": 0,
+    "lesson_id": 0,
+    "owner_id": 0,
+    "student_id": 0,
+    "uploaded_by_id": 5667
+  }
+]
+=== 按 ownerType 的 studentId 填充 ===
+[
+  {
+    "ownerType": "feedback",
+    "n": 5618,
+    "student_id": 0
+  },
+  {
+    "ownerType": "admin_material",
+    "n": 30,
+    "student_id": 0
+  },
+  {
+    "ownerType": "teacher_upload",
+    "n": 17,
+    "student_id": 0
+  },
+  {
+    "ownerType": "meal_image",
+    "n": 2,
+    "student_id": 0
+  }
+]

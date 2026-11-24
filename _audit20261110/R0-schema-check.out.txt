@@ -1,0 +1,297 @@
+{
+  "migrationsTable": [
+    {
+      "n": 0
+    }
+  ],
+  "masteryCols": [
+    {
+      "column_name": "id"
+    },
+    {
+      "column_name": "studentId"
+    },
+    {
+      "column_name": "teacherId"
+    },
+    {
+      "column_name": "knowledgePoint"
+    },
+    {
+      "column_name": "level"
+    },
+    {
+      "column_name": "note"
+    },
+    {
+      "column_name": "createdAt"
+    },
+    {
+      "column_name": "termId"
+    }
+  ],
+  "masteryIdx": [
+    {
+      "indexname": "MasteryRecord_pkey"
+    },
+    {
+      "indexname": "MasteryRecord_termId_studentId_createdAt_idx"
+    }
+  ],
+  "masteryRows": [
+    {
+      "n": 0
+    }
+  ],
+  "weaknessRows": [
+    {
+      "n": 1
+    }
+  ],
+  "vocab": [
+    {
+      "progress": 32,
+      "sessions": 4,
+      "students": 1
+    }
+  ],
+  "notifCols": [
+    {
+      "column_name": "id"
+    },
+    {
+      "column_name": "userId"
+    },
+    {
+      "column_name": "title"
+    },
+    {
+      "column_name": "content"
+    },
+    {
+      "column_name": "type"
+    },
+    {
+      "column_name": "link"
+    },
+    {
+      "column_name": "relatedType"
+    },
+    {
+      "column_name": "relatedId"
+    },
+    {
+      "column_name": "href"
+    },
+    {
+      "column_name": "read"
+    },
+    {
+      "column_name": "readAt"
+    },
+    {
+      "column_name": "status"
+    },
+    {
+      "column_name": "studentId"
+    },
+    {
+      "column_name": "senderId"
+    },
+    {
+      "column_name": "pushStatus"
+    },
+    {
+      "column_name": "pushError"
+    },
+    {
+      "column_name": "attempts"
+    },
+    {
+      "column_name": "lastError"
+    },
+    {
+      "column_name": "sentAt"
+    },
+    {
+      "column_name": "createdAt"
+    },
+    {
+      "column_name": "deletedAt"
+    },
+    {
+      "column_name": "deletionBatchId"
+    },
+    {
+      "column_name": "qywxMsgId"
+    },
+    {
+      "column_name": "qywxExternalUserId"
+    },
+    {
+      "column_name": "qywxProcessingAt"
+    },
+    {
+      "column_name": "qywxSenderUserId"
+    }
+  ],
+  "notifTotal": [
+    {
+      "total": 10529
+    }
+  ],
+  "fileAssetFk": [
+    {
+      "n": 5667,
+      "fb": 0,
+      "st": 0
+    }
+  ],
+  "vocabSetCols": [
+    {
+      "column_name": "id"
+    },
+    {
+      "column_name": "studentId"
+    },
+    {
+      "column_name": "wordId"
+    },
+    {
+      "column_name": "status"
+    },
+    {
+      "column_name": "correctCount"
+    },
+    {
+      "column_name": "wrongCount"
+    },
+    {
+      "column_name": "lastResult"
+    },
+    {
+      "column_name": "lastAt"
+    },
+    {
+      "column_name": "updatedAt"
+    },
+    {
+      "column_name": "createdAt"
+    },
+    {
+      "column_name": "id"
+    },
+    {
+      "column_name": "studentId"
+    },
+    {
+      "column_name": "grade"
+    },
+    {
+      "column_name": "volume"
+    },
+    {
+      "column_name": "unit"
+    },
+    {
+      "column_name": "total"
+    },
+    {
+      "column_name": "correct"
+    },
+    {
+      "column_name": "wrongIds"
+    },
+    {
+      "column_name": "answers"
+    },
+    {
+      "column_name": "finishedAt"
+    },
+    {
+      "column_name": "createdAt"
+    },
+    {
+      "column_name": "id"
+    },
+    {
+      "column_name": "grade"
+    },
+    {
+      "column_name": "volume"
+    },
+    {
+      "column_name": "unit"
+    },
+    {
+      "column_name": "section"
+    },
+    {
+      "column_name": "headword"
+    },
+    {
+      "column_name": "normalizedHeadword"
+    },
+    {
+      "column_name": "phonetic"
+    },
+    {
+      "column_name": "pos"
+    },
+    {
+      "column_name": "note"
+    },
+    {
+      "column_name": "meanings"
+    },
+    {
+      "column_name": "phrase"
+    },
+    {
+      "column_name": "bookPage"
+    },
+    {
+      "column_name": "sourcePage"
+    },
+    {
+      "column_name": "createdAt"
+    },
+    {
+      "column_name": "updatedAt"
+    }
+  ],
+  "vocabTables": [
+    {
+      "table_name": "VocabWord"
+    },
+    {
+      "table_name": "VocabProgress"
+    },
+    {
+      "table_name": "VocabSession"
+    }
+  ],
+  "hourTx": [
+    {
+      "type": "ATTENDANCE_DEDUCT",
+      "n": 25355,
+      "sum": -17760.2000000084
+    },
+    {
+      "type": "ADMIN_ADJUSTMENT",
+      "n": 8,
+      "sum": 44.800000000000004
+    },
+    {
+      "type": "ATTENDANCE_REFUND",
+      "n": 1,
+      "sum": 0.7
+    }
+  ],
+  "leaveReq": [
+    {
+      "status": "approved",
+      "n": 2
+    }
+  ]
+}

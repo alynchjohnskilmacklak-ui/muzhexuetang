@@ -1,0 +1,1538 @@
+[
+  {
+    "word": "ancient",
+    "examTags": [
+      "词汇·形容词",
+      "阅读·历史与古迹"
+    ],
+    "grammar": "adj. 古代的；古老的。可作定语或表语；ancient times 指古代。",
+    "collocations": "ancient history; an ancient city; ancient times",
+    "commonMistake": "ancient 修饰名词时不变形；不要与 modern（现代的）混淆。",
+    "example": {
+      "english": "We visited an ancient town during the holiday.",
+      "chinese": "假期里我们参观了一座古镇。"
+    },
+    "application": {
+      "prompt": "The Great Wall has a long history. It is an ___ structure. A. ancient B. modern",
+      "solution": "A。解析：有悠久历史的建筑可称为 ancient（古老的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ancient",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ancient"
+      }
+    ]
+  },
+  {
+    "word": "camp",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·动词词形"
+    ],
+    "grammar": "n. 营地；度假营；v. 露营。作动词时 camp—camped—camped。",
+    "collocations": "a summer camp; go camping; camp in the mountains",
+    "commonMistake": "表示“去露营”常用 go camping；camp 的现在分词双写 p：camping。",
+    "example": {
+      "english": "Our class will camp by the lake this weekend.",
+      "chinese": "我们班这周末要在湖边露营。"
+    },
+    "application": {
+      "prompt": "They put up a tent and spent the night outdoors. They went ___. A. shopping B. camping",
+      "solution": "B。解析：搭帐篷在户外过夜是 go camping（去露营）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: camp",
+        "url": "https://dictionary.cambridge.org/dictionary/english/camp"
+      }
+    ]
+  },
+  {
+    "word": "landscape",
+    "examTags": [
+      "词汇·名词",
+      "阅读·景物描写"
+    ],
+    "grammar": "n. 风景；景色；（自然）地貌。可数名词，复数 landscapes。",
+    "collocations": "a beautiful landscape; mountain landscapes; landscape painting",
+    "commonMistake": "landscape 可指一片景色或地貌；scenery 通常作不可数名词表示风景。",
+    "example": {
+      "english": "The green landscape looked beautiful after the rain.",
+      "chinese": "雨后的绿色景色很美。"
+    },
+    "application": {
+      "prompt": "The photo shows fields, hills, and a river. It shows a lovely ___. A. landscape B. suitcase",
+      "solution": "A。解析：田野、山丘和河流构成一幅 landscape（景色）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: landscape",
+        "url": "https://dictionary.cambridge.org/dictionary/english/landscape"
+      }
+    ]
+  },
+  {
+    "word": "strange",
+    "examTags": [
+      "词汇·形容词",
+      "熟词多义·陌生与奇怪"
+    ],
+    "grammar": "adj. 奇怪的；陌生的。be strange to sb 表示“对某人来说陌生”。",
+    "collocations": "a strange sound; feel strange; be strange to me",
+    "commonMistake": "strange 可表示“奇怪”或“陌生”；表示“对某人陌生”常用 be strange to sb。",
+    "example": {
+      "english": "I heard a strange noise outside the window.",
+      "chinese": "我听到窗外有一个奇怪的声音。"
+    },
+    "application": {
+      "prompt": "I have never been to this city, so everything is ___ to me. A. ready B. strange",
+      "solution": "B。解析：句意为“我从没来过这座城市，所以一切对我都很陌生”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: strange",
+        "url": "https://dictionary.cambridge.org/dictionary/english/strange"
+      }
+    ]
+  },
+  {
+    "word": "vacation",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·介词搭配"
+    ],
+    "grammar": "n. 假期；度假。可数，常用 on vacation；美式英语常用 vacation，英式英语常用 holiday。",
+    "collocations": "during the vacation; go on vacation; a summer vacation",
+    "commonMistake": "表示“在度假”用 on vacation；说去某地度假可用 go on vacation to...。",
+    "example": {
+      "english": "My family is on vacation in the countryside.",
+      "chinese": "我家人在乡村度假。"
+    },
+    "application": {
+      "prompt": "The children have no school this week. Their family is ___ in Sanya. A. on vacation B. at work",
+      "solution": "A。解析：放假去三亚度假可说 be on vacation。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: vacation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/vacation"
+      }
+    ]
+  },
+  {
+    "word": "fantastic",
+    "examTags": [
+      "词汇·形容词",
+      "写作·表达评价"
+    ],
+    "grammar": "adj. 极好的；吸引人的；极大的。可作定语或表语；副词 fantastically。",
+    "collocations": "a fantastic view; sound fantastic; a fantastic idea",
+    "commonMistake": "fantastic 是形容词，作表语时与 be、sound、look 等连用。",
+    "example": {
+      "english": "We had a fantastic time at the science museum.",
+      "chinese": "我们在科学博物馆度过了非常愉快的时光。"
+    },
+    "application": {
+      "prompt": "The trip was wonderful. We had a ___ time. A. terrible B. fantastic",
+      "solution": "B。解析：fantastic 表示“极好的”，与 wonderful 意思相近。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fantastic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fantastic"
+      }
+    ]
+  },
+  {
+    "word": "town",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·地点与方位"
+    ],
+    "grammar": "n. 镇；城镇；（城镇的）商业区。可数，复数 towns；in town 常指在镇上。",
+    "collocations": "a small town; the town centre; go into town",
+    "commonMistake": "town 指城镇或镇中心区域；搭配 in town 通常不加冠词。",
+    "example": {
+      "english": "There is a quiet park near the town centre.",
+      "chinese": "镇中心附近有一个安静的公园。"
+    },
+    "application": {
+      "prompt": "She grew up in a small ___ near the sea. A. town B. cloud",
+      "solution": "A。解析：海边可以有一个 small town（小镇）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: town",
+        "url": "https://dictionary.cambridge.org/dictionary/english/town"
+      }
+    ]
+  },
+  {
+    "word": "breath",
+    "examTags": [
+      "词汇·名词与动词辨析",
+      "语法·固定搭配"
+    ],
+    "grammar": "n. 呼吸；一口气。可数；动词为 breathe，意为“呼吸”。",
+    "collocations": "take a deep breath; hold one's breath; out of breath",
+    "commonMistake": "breath 是名词，breathe 是动词；注意 breathe 末尾有不发音的 e。",
+    "example": {
+      "english": "She stopped for a moment to catch her breath.",
+      "chinese": "她停下来歇了一会儿，好喘口气。"
+    },
+    "application": {
+      "prompt": "After running up the stairs, Ben was out of ___. A. breathe B. breath",
+      "solution": "B。解析：out of breath 是固定搭配，意为“上气不接下气”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: breath",
+        "url": "https://dictionary.cambridge.org/dictionary/english/breath"
+      }
+    ]
+  },
+  {
+    "word": "take sb’s breath away",
+    "examTags": [
+      "词汇·动词短语",
+      "阅读·情绪与景物描写"
+    ],
+    "grammar": "phr. 使某人惊叹；令某人屏息。sb 所指的人用所有格形式；主语通常是景色、表演等。",
+    "collocations": "the view takes my breath away; take your breath away; breathtaking scenery",
+    "commonMistake": "短语中用 one's breath；主语是第三人称单数时 take 要加 -s。",
+    "example": {
+      "english": "The view from the mountain took our breath away.",
+      "chinese": "山上的景色令我们惊叹不已。"
+    },
+    "application": {
+      "prompt": "The sunset was so beautiful that it ___ away. A. took my breath B. took my ticket",
+      "solution": "A。解析：take one's breath away 表示“令某人惊叹”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: breath",
+        "url": "https://dictionary.cambridge.org/dictionary/english/breath"
+      }
+    ]
+  },
+  {
+    "word": "especially",
+    "examTags": [
+      "词汇·副词",
+      "语法·强调范围"
+    ],
+    "grammar": "adv. 尤其；特别。用于强调某人或某事；形容词是 especial，但常见对应形容词为 special。",
+    "collocations": "especially important; especially for children; like ... especially",
+    "commonMistake": "especially 用来突出强调，不能与 specially（专门地）在所有语境中互换。",
+    "example": {
+      "english": "I enjoy outdoor activities, especially hiking.",
+      "chinese": "我喜欢户外活动，尤其是徒步。"
+    },
+    "application": {
+      "prompt": "All the students enjoyed the trip, ___ the younger ones. A. slowly B. especially",
+      "solution": "B。解析：此处强调“尤其是年纪较小的学生”，用 especially。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: especially",
+        "url": "https://dictionary.cambridge.org/dictionary/english/especially"
+      }
+    ]
+  },
+  {
+    "word": "steamed chicken soup",
+    "examTags": [
+      "词汇·食物名称",
+      "阅读·地方饮食"
+    ],
+    "grammar": "n. 汽锅鸡（汤）。steamed 为过去分词作定语，说明食物的制作方式；chicken soup 为中心名词。",
+    "collocations": "a bowl of chicken soup; steamed chicken; serve chicken soup",
+    "commonMistake": "steamed 修饰后面的食物名称；表达一碗汤用 a bowl of，不用 a soup。",
+    "example": {
+      "english": "We tried steamed chicken soup at a local restaurant.",
+      "chinese": "我们在当地餐馆尝了汽锅鸡。"
+    },
+    "application": {
+      "prompt": "The menu says the chicken is cooked by steaming. Which dish is it? A. steamed chicken soup B. fried rice",
+      "solution": "A。解析：steamed chicken soup 指汽锅鸡；fried rice 是炒饭。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: soup",
+        "url": "https://dictionary.cambridge.org/dictionary/english/soup"
+      }
+    ]
+  },
+  {
+    "word": "anywhere",
+    "examTags": [
+      "词汇·复合不定代词",
+      "语法·否定句与疑问句"
+    ],
+    "grammar": "adv./pron. 在任何地方；随便哪个地方。常用于疑问句、否定句；肯定句常用 somewhere。",
+    "collocations": "go anywhere; not find it anywhere; anywhere else",
+    "commonMistake": "肯定陈述中表示“某个地方”通常用 somewhere；否定句中常用 anywhere。",
+    "example": {
+      "english": "We couldn't find a quiet place anywhere in the busy town.",
+      "chinese": "在这个繁忙的小镇上，我们哪儿也找不到安静的地方。"
+    },
+    "application": {
+      "prompt": "Did you go ___ interesting during the holiday? A. nowhere B. anywhere",
+      "solution": "B。解析：一般疑问句中表示“任何地方”通常用 anywhere。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: anywhere",
+        "url": "https://dictionary.cambridge.org/dictionary/english/anywhere"
+      }
+    ]
+  },
+  {
+    "word": "nothing",
+    "examTags": [
+      "词汇·不定代词",
+      "语法·主谓一致"
+    ],
+    "grammar": "pron. 没有事；没有任何东西。作主语时谓语用单数；nothing but 表示“只有”。",
+    "collocations": "nothing to eat; say nothing; nothing happened",
+    "commonMistake": "nothing 本身含否定意义，通常不再与 not 连用；作主语时用单数谓语。",
+    "example": {
+      "english": "Nothing was left in the picnic basket.",
+      "chinese": "野餐篮里什么也没剩下。"
+    },
+    "application": {
+      "prompt": "There ___ in the box except an old photo. A. is nothing B. are nothing",
+      "solution": "A。解析：nothing 作主语，谓语用单数 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nothing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nothing"
+      }
+    ]
+  },
+  {
+    "word": "guide",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·导游与指南"
+    ],
+    "grammar": "n. 导游；指南、手册；v. 给某人领路；指导。guide—guided—guided。",
+    "collocations": "a tour guide; a travel guide; guide sb around a place",
+    "commonMistake": "guide 可作人（导游）或资料（指南）；guide sb to/around... 表示带领某人。",
+    "example": {
+      "english": "Our guide showed us around the old palace.",
+      "chinese": "导游带我们参观了古老的宫殿。"
+    },
+    "application": {
+      "prompt": "A person who shows visitors around a city is a ___. A. scarf B. guide",
+      "solution": "B。解析：带游客参观的人是 guide（导游）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: guide",
+        "url": "https://dictionary.cambridge.org/dictionary/english/guide"
+      }
+    ]
+  },
+  {
+    "word": "scenery",
+    "examTags": [
+      "词汇·不可数名词",
+      "阅读·自然景色"
+    ],
+    "grammar": "n. 风景；景色，通常不可数。常用 beautiful scenery；指具体的一片景观可说 a scene。",
+    "collocations": "beautiful scenery; mountain scenery; enjoy the scenery",
+    "commonMistake": "scenery 通常不可数，不说 a scenery 或 sceneries；不要与 scene（场景）混淆。",
+    "example": {
+      "english": "We stopped to enjoy the scenery along the river.",
+      "chinese": "我们停下来欣赏河边的风景。"
+    },
+    "application": {
+      "prompt": "The mountains and lake make the area famous for its ___. A. scenery B. scissors",
+      "solution": "A。解析：scenery 表示自然风景，通常作不可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: scenery",
+        "url": "https://dictionary.cambridge.org/dictionary/english/scenery"
+      }
+    ]
+  },
+  {
+    "word": "silk",
+    "examTags": [
+      "词汇·材料与材质",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 丝绸；蚕丝，通常不可数。作定语修饰名词时常用 silk，如 a silk scarf。",
+    "collocations": "silk clothes; a silk scarf; a piece of silk",
+    "commonMistake": "表示材质时 silk 通常不可数；表达“一条丝巾”说 a silk scarf，而不是 a silk。",
+    "example": {
+      "english": "She bought a light silk scarf at the market.",
+      "chinese": "她在市场买了一条轻薄的丝绸围巾。"
+    },
+    "application": {
+      "prompt": "This soft scarf is made of ___. A. silks B. silk",
+      "solution": "B。解析：silk 表示丝绸材料时通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: silk",
+        "url": "https://dictionary.cambridge.org/dictionary/english/silk"
+      }
+    ]
+  },
+  {
+    "word": "scarf",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·复数拼写"
+    ],
+    "grammar": "n. 围巾；披巾。可数，复数常写 scarves，也可写 scarfs。",
+    "collocations": "wear a scarf; a wool scarf; tie a scarf around your neck",
+    "commonMistake": "scarf 的复数常用 scarves，注意 f 变 v 后加 -es；也可见 scarfs。",
+    "example": {
+      "english": "He wrapped a warm scarf around his neck.",
+      "chinese": "他把一条暖和的围巾围在脖子上。"
+    },
+    "application": {
+      "prompt": "There are two ___ on the shelf. A. scarves B. scarfses",
+      "solution": "A。解析：scarf 的常见复数形式是 scarves。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: scarf",
+        "url": "https://dictionary.cambridge.org/dictionary/english/scarf"
+      }
+    ]
+  },
+  {
+    "word": "ready",
+    "examTags": [
+      "词汇·形容词",
+      "语法·固定结构"
+    ],
+    "grammar": "adj. 准备好的；现成的；已做完的。教材词表还列 adv. 义“已做完；已完成”。常用 be ready for sth；be ready to do sth。",
+    "collocations": "get ready; be ready for the trip; be ready to leave",
+    "commonMistake": "be ready for 后接名词；be ready to 后接动词原形。",
+    "example": {
+      "english": "We are ready to leave for the station.",
+      "chinese": "我们准备好动身去车站了。"
+    },
+    "application": {
+      "prompt": "The bags are packed. We are ready ___ leave. A. for B. to",
+      "solution": "B。解析：ready to do sth 后接动词原形，故用 to leave。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ready",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ready"
+      }
+    ]
+  },
+  {
+    "word": "ready to do sth",
+    "examTags": [
+      "语法·形容词搭配",
+      "语言运用·意愿与准备"
+    ],
+    "grammar": "phr. 准备好做某事；愿意做某事。结构为 be ready to + 动词原形。",
+    "collocations": "be ready to go; be ready to help; get ready to start",
+    "commonMistake": "to 是不定式符号，后接动词原形；不要说 be ready doing。",
+    "example": {
+      "english": "The volunteers are ready to help the visitors.",
+      "chinese": "志愿者准备好帮助游客了。"
+    },
+    "application": {
+      "prompt": "Mia finished packing and is ready ___ the trip. A. to start B. starting",
+      "solution": "A。解析：be ready to do sth 后接动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ready",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ready"
+      }
+    ]
+  },
+  {
+    "word": "somewhere",
+    "examTags": [
+      "词汇·复合不定代词",
+      "语法·肯定句语境"
+    ],
+    "grammar": "adv./pron. 在某处；到某处。常用于肯定句；疑问和否定语境常用 anywhere。",
+    "collocations": "go somewhere quiet; live somewhere; somewhere else",
+    "commonMistake": "somewhere 修饰形容词时形容词放后面：somewhere quiet；不说 somewhere quietly。",
+    "example": {
+      "english": "Let's find somewhere quiet to have lunch.",
+      "chinese": "我们找个安静的地方吃午饭吧。"
+    },
+    "application": {
+      "prompt": "We need ___ warm to wait for the bus. A. anywhere B. somewhere",
+      "solution": "B。解析：肯定句提出建议时表示“某个地方”，用 somewhere。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: somewhere",
+        "url": "https://dictionary.cambridge.org/dictionary/english/somewhere"
+      }
+    ]
+  },
+  {
+    "word": "myself",
+    "examTags": [
+      "词汇·反身代词",
+      "语法·反身代词用法"
+    ],
+    "grammar": "pron. 我自己。可作宾语或同位语；固定表达 by myself 表示独自或亲自。",
+    "collocations": "by myself; enjoy myself; teach myself",
+    "commonMistake": "反身代词需与主语一致：I 对应 myself；独自做某事可说 by myself。",
+    "example": {
+      "english": "I planned the whole trip by myself.",
+      "chinese": "这次旅行是我自己计划的。"
+    },
+    "application": {
+      "prompt": "I made this postcard ___ for my friend. A. myself B. yourself",
+      "solution": "A。解析：主语是 I，对应的反身代词是 myself。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: myself",
+        "url": "https://dictionary.cambridge.org/dictionary/english/myself"
+      }
+    ]
+  },
+  {
+    "word": "nothing but",
+    "examTags": [
+      "词汇·固定短语",
+      "阅读·限定与强调"
+    ],
+    "grammar": "phr. 只有；只是。but 在此相当于 except，后接名词、代词或动词原形。",
+    "collocations": "nothing but water; do nothing but wait; nothing but a mistake",
+    "commonMistake": "nothing but 表示“只有”；do nothing but 后常接动词原形。",
+    "example": {
+      "english": "There was nothing but sand around the small house.",
+      "chinese": "小屋周围只有沙子。"
+    },
+    "application": {
+      "prompt": "He did ___ sit and wait for the bus. A. instead of B. nothing but",
+      "solution": "B。解析：do nothing but do 表示“只做……”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nothing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nothing"
+      }
+    ]
+  },
+  {
+    "word": "hotel",
+    "examTags": [
+      "词汇·可数名词",
+      "语言运用·住宿与旅行"
+    ],
+    "grammar": "n. 旅馆；酒店。可数，复数 hotels；常用 stay at/in a hotel。",
+    "collocations": "book a hotel; stay at a hotel; a hotel room",
+    "commonMistake": "表示住在旅馆可说 stay at a hotel；hotel 前有形容词时注意冠词，如 a comfortable hotel。",
+    "example": {
+      "english": "We stayed at a small hotel near the station.",
+      "chinese": "我们住在车站附近的一家小旅馆。"
+    },
+    "application": {
+      "prompt": "We booked a room and will stay ___ a hotel tonight. A. at B. on",
+      "solution": "A。解析：stay at a hotel 是“住在旅馆”的常用搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hotel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hotel"
+      }
+    ]
+  },
+  {
+    "word": "comfortable",
+    "examTags": [
+      "词汇·形容词派生",
+      "语法·形容词与副词"
+    ],
+    "grammar": "adj. 使人舒服的；舒适的。comfortably 是副词；名词 comfort。",
+    "collocations": "a comfortable bed; feel comfortable; comfortable clothes",
+    "commonMistake": "comfortable 描述令人舒服的事物或感受；修饰动词要用 comfortably。",
+    "example": {
+      "english": "These comfortable shoes are good for walking.",
+      "chinese": "这双舒适的鞋适合步行。"
+    },
+    "application": {
+      "prompt": "The sofa is soft, so we can sit ___. A. comfortable B. comfortably",
+      "solution": "B。解析：修饰动词 sit 用副词 comfortably。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: comfortable",
+        "url": "https://dictionary.cambridge.org/dictionary/english/comfortable"
+      }
+    ]
+  },
+  {
+    "word": "bored",
+    "examTags": [
+      "词汇·情绪形容词",
+      "语法·-ed与-ing形容词"
+    ],
+    "grammar": "adj. 感到厌倦的；烦闷的。常用 be bored with/by；boring 表示“令人厌倦的”。",
+    "collocations": "feel bored; be bored with sth; get bored",
+    "commonMistake": "人感到厌倦用 bored；使人厌倦的事物用 boring。",
+    "example": {
+      "english": "We were bored with waiting in the long line.",
+      "chinese": "排了很长的队，我们等得很烦。"
+    },
+    "application": {
+      "prompt": "The film lasted three hours and made us feel ___. A. bored B. boring",
+      "solution": "A。解析：描述人的感受用 bored；令人厌倦的电影才是 boring。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bored",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bored"
+      }
+    ]
+  },
+  {
+    "word": "sky",
+    "examTags": [
+      "词汇·名词",
+      "阅读·天气与景色"
+    ],
+    "grammar": "n. 天；天空。通常说 the sky；可数时指某种天空或一片天空，复数 skies。",
+    "collocations": "in the sky; a clear sky; look up at the sky",
+    "commonMistake": "通常说 the sky；描述天空颜色可说 the sky is blue。",
+    "example": {
+      "english": "Dark clouds covered the sky before the storm.",
+      "chinese": "暴风雨来临前，乌云遮住了天空。"
+    },
+    "application": {
+      "prompt": "The birds are flying high ___ the sky. A. at B. in",
+      "solution": "B。解析：表示在天空中飞用 in the sky。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sky",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sky"
+      }
+    ]
+  },
+  {
+    "word": "towards",
+    "examTags": [
+      "词汇·介词",
+      "拼写·英美变体"
+    ],
+    "grammar": "prep. 朝；向；接近。英式拼写 towards；美式英语也常见 toward。",
+    "collocations": "walk towards the door; move towards the light; towards the end",
+    "commonMistake": "towards 后接名词或代词；towards 与 toward 意思相同，拼写有地区差异。",
+    "example": {
+      "english": "The children ran towards their teacher.",
+      "chinese": "孩子们朝老师跑去。"
+    },
+    "application": {
+      "prompt": "The bus is moving ___ the city centre. A. towards B. during",
+      "solution": "A。解析：表示朝某方向移动用 towards。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: towards",
+        "url": "https://dictionary.cambridge.org/dictionary/english/towards"
+      }
+    ]
+  },
+  {
+    "word": "rainbow",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·自然现象"
+    ],
+    "grammar": "n. 虹；彩虹。可数，复数 rainbows；常用 a rainbow。",
+    "collocations": "a bright rainbow; see a rainbow; a rainbow in the sky",
+    "commonMistake": "rainbow 是可数名词，单数前通常加 a；复数直接加 -s。",
+    "example": {
+      "english": "A rainbow appeared after the rain.",
+      "chinese": "雨后出现了一道彩虹。"
+    },
+    "application": {
+      "prompt": "After the shower, we saw ___ over the hills. A. a thunder B. a rainbow",
+      "solution": "B。解析：雨后天空中可见彩虹，rainbow 是可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rainbow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rainbow"
+      }
+    ]
+  },
+  {
+    "word": "square",
+    "examTags": [
+      "词汇·名词与形容词",
+      "熟词多义·广场与正方形"
+    ],
+    "grammar": "n. 广场；正方形；adj. 正方形的；平方的。平方单位常用 square metres。",
+    "collocations": "a town square; a square table; square kilometres",
+    "commonMistake": "square 可作名词或形容词；表示面积单位时 square 放在单位前，如 square metres。",
+    "example": {
+      "english": "People were listening to music in the town square.",
+      "chinese": "人们在城镇广场上听音乐。"
+    },
+    "application": {
+      "prompt": "This shape has four equal sides and four right angles. It is a ___. A. square B. circle",
+      "solution": "A。解析：四条边相等且四个角都是直角，才是 square（正方形）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: square",
+        "url": "https://dictionary.cambridge.org/dictionary/english/square"
+      }
+    ]
+  },
+  {
+    "word": "during",
+    "examTags": [
+      "语法·时间介词",
+      "语法·during与for辨析"
+    ],
+    "grammar": "prep. 在……期间。后接名词或名词短语；表示持续时长用 for + 一段时间。",
+    "collocations": "during the holiday; during the meeting; during the summer",
+    "commonMistake": "during 后接某个时期或事件；for 后接持续时长，如 for two hours。",
+    "example": {
+      "english": "We took many photos during the trip.",
+      "chinese": "旅行期间我们拍了很多照片。"
+    },
+    "application": {
+      "prompt": "The museum is free ___ the school holiday. A. for B. during",
+      "solution": "B。解析：school holiday 是一段时期，前用 during；for 后通常接时长。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: during",
+        "url": "https://dictionary.cambridge.org/dictionary/english/during"
+      }
+    ]
+  },
+  {
+    "word": "victory",
+    "examTags": [
+      "词汇·名词",
+      "语法·名词搭配"
+    ],
+    "grammar": "n. 胜利；成功。可数，复数 victories；常用 a victory over sb/sth。",
+    "collocations": "win a victory; a victory over the team; celebrate victory",
+    "commonMistake": "victory 的复数为 victories，变 y 为 i 再加 -es；常说 win a victory。",
+    "example": {
+      "english": "The team celebrated its victory after the final game.",
+      "chinese": "决赛后，球队庆祝了胜利。"
+    },
+    "application": {
+      "prompt": "Our school team won ___ over the visitors. A. a victory B. a vacation",
+      "solution": "A。解析：win a victory 表示“取得胜利”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: victory",
+        "url": "https://dictionary.cambridge.org/dictionary/english/victory"
+      }
+    ]
+  },
+  {
+    "word": "Russian",
+    "examTags": [
+      "词汇·国籍与语言",
+      "拼写·专有形容词大写"
+    ],
+    "grammar": "adj./n. 俄罗斯的；俄罗斯人；俄语。表示语言或国籍的人时首字母大写；可数名词复数 Russians。",
+    "collocations": "Russian culture; speak Russian; a Russian artist",
+    "commonMistake": "Russian 首字母要大写；the Russian language 可说俄语，Russia 才是国家名。",
+    "example": {
+      "english": "Our guide spoke Russian with the visitors.",
+      "chinese": "我们的导游用俄语和游客交谈。"
+    },
+    "application": {
+      "prompt": "The language is ___, and the country is Russia. A. Russia B. Russian",
+      "solution": "B。解析：Russian 可表示俄语；Russia 是国家名。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Russian",
+        "url": "https://dictionary.cambridge.org/dictionary/english/russian"
+      }
+    ]
+  },
+  {
+    "word": "fight",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·不规则动词"
+    ],
+    "grammar": "n. 战斗；争斗；v. 打仗；打架；努力争取。过去式和过去分词 fought。",
+    "collocations": "fight for peace; fight against a disease; have a fight",
+    "commonMistake": "fight 的过去式是 fought，不是 fighted；表示与困难斗争可用 fight against。",
+    "example": {
+      "english": "They fought for peace during the war.",
+      "chinese": "战争期间，他们为和平而战。"
+    },
+    "application": {
+      "prompt": "Last night, the two teams ___ hard for the prize. A. fought B. fighted",
+      "solution": "A。解析：fight 的过去式是不规则形式 fought。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fight",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fight"
+      }
+    ]
+  },
+  {
+    "word": "against",
+    "examTags": [
+      "词汇·介词",
+      "熟词多义·反对与依靠"
+    ],
+    "grammar": "prep. 反对；与……相反；紧靠。后接名词、代词或动名词；against the wall 表示靠着墙。",
+    "collocations": "against the rules; lean against the wall; vote against the plan",
+    "commonMistake": "against 是介词，后接名词或动名词，不直接接动词原形。",
+    "example": {
+      "english": "The bicycle was leaning against the wall.",
+      "chinese": "自行车靠在墙边。"
+    },
+    "application": {
+      "prompt": "It is ___ the rules to take photos here. A. during B. against",
+      "solution": "B。解析：against the rules 表示“违反规定”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: against",
+        "url": "https://dictionary.cambridge.org/dictionary/english/against"
+      }
+    ]
+  },
+  {
+    "word": "fight against sb / sth",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·介词宾语"
+    ],
+    "grammar": "phr. 与某人/某事物作战；与……作斗争。against 为介词，后接名词、代词或动名词。",
+    "collocations": "fight against an enemy; fight against disease; fight against pollution",
+    "commonMistake": "against 后接名词或代词；主语是单数第三人称时 fight 加 -s。",
+    "example": {
+      "english": "People are working together to fight against pollution.",
+      "chinese": "人们正共同努力对抗污染。"
+    },
+    "application": {
+      "prompt": "The villagers joined together to ___ the forest fire. A. fight against B. look for",
+      "solution": "A。解析：与火灾作斗争可说 fight against the fire。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fight",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fight"
+      }
+    ]
+  },
+  {
+    "word": "artwork",
+    "examTags": [
+      "词汇·名词",
+      "阅读·艺术作品"
+    ],
+    "grammar": "n. 艺术作品；插图。表示一件具体作品时可数，复数 artworks；也可作集合性用法。",
+    "collocations": "a piece of artwork; original artwork; artwork for a book",
+    "commonMistake": "表示“一件艺术作品”可说 a piece of artwork；不要把 artwork 与 artist（艺术家）混淆。",
+    "example": {
+      "english": "The children displayed their artwork in the school hall.",
+      "chinese": "孩子们在学校礼堂展示了他们的艺术作品。"
+    },
+    "application": {
+      "prompt": "The students put their paintings on the wall as ___. A. luggage B. artwork",
+      "solution": "B。解析：绘画作品可统称为 artwork。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: artwork",
+        "url": "https://dictionary.cambridge.org/dictionary/english/artwork"
+      }
+    ]
+  },
+  {
+    "word": "thousands of",
+    "examTags": [
+      "语法·数词与数量表达",
+      "阅读·数据描述"
+    ],
+    "grammar": "phr. 数以千计的；成千上万的。后接可数名词复数，谓语通常用复数。",
+    "collocations": "thousands of people; thousands of years; thousands of stars",
+    "commonMistake": "thousands of 后接名词复数；具体数字前不加 -s 和 of，如 two thousand people。",
+    "example": {
+      "english": "Thousands of visitors come to the old town each year.",
+      "chinese": "每年有成千上万名游客来到这座古镇。"
+    },
+    "application": {
+      "prompt": "___ people visit the museum every month. A. Thousands of B. Thousand of",
+      "solution": "A。解析：泛指成千上万时用 thousands of。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thousand",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thousand"
+      }
+    ]
+  },
+  {
+    "word": "tear",
+    "examTags": [
+      "词汇·名词",
+      "熟词多义·tear读音与词义"
+    ],
+    "grammar": "n. 眼泪；泪水。可数，常用 a tear；tear 作“撕裂”时也可作动词，但读音不同。",
+    "collocations": "tears of joy; burst into tears; wipe away a tear",
+    "commonMistake": "本课 tear 指“眼泪”；同形动词 tear（撕）读音不同，注意依语境辨义。",
+    "example": {
+      "english": "A tear rolled down her cheek when she said goodbye.",
+      "chinese": "她道别时，一滴眼泪顺着脸颊滑落。"
+    },
+    "application": {
+      "prompt": "The sad film brought ___ to the boy's eyes. A. tickets B. tears",
+      "solution": "B。解析：bring tears to one's eyes 表示“使某人流泪”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tear"
+      }
+    ]
+  },
+  {
+    "word": "remind",
+    "examTags": [
+      "词汇·动词搭配",
+      "语法·remind结构"
+    ],
+    "grammar": "v. 提醒；使想起。常用 remind sb to do sth、remind sb of sth、remind sb that...。",
+    "collocations": "remind me to call; remind sb of a place; remind us that...",
+    "commonMistake": "“提醒某人做某事”用 remind sb to do，不说 remind sb do；of 后接名词或代词。",
+    "example": {
+      "english": "Please remind me to bring my passport tomorrow.",
+      "chinese": "请提醒我明天带护照。"
+    },
+    "application": {
+      "prompt": "The guide reminded us ___ quiet in the museum. A. to be B. being",
+      "solution": "A。解析：remind sb to do sth 后接不定式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: remind",
+        "url": "https://dictionary.cambridge.org/dictionary/english/remind"
+      }
+    ]
+  },
+  {
+    "word": "peace",
+    "examTags": [
+      "词汇·抽象名词",
+      "写作·和平主题"
+    ],
+    "grammar": "n. 和平；太平，通常不可数。peaceful 为形容词；常说 make/keep peace。",
+    "collocations": "world peace; live in peace; peace and quiet",
+    "commonMistake": "peace 表示抽象的“和平”时通常不可数；“和平的”用 peaceful。",
+    "example": {
+      "english": "The visitors learned about the country's history and its hopes for peace.",
+      "chinese": "游客了解了这个国家的历史以及人们对和平的希望。"
+    },
+    "application": {
+      "prompt": "People around the world hope to live in ___. A. peaceful B. peace",
+      "solution": "B。解析：介词 in 后用名词 peace；peaceful 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: peace",
+        "url": "https://dictionary.cambridge.org/dictionary/english/peace"
+      }
+    ]
+  },
+  {
+    "word": "easily",
+    "examTags": [
+      "词汇·副词派生",
+      "语法·形容词与副词"
+    ],
+    "grammar": "adv. 容易地；轻易地。形容词 easy 的副词形式，y 变 i 再加 -ly。",
+    "collocations": "easily understand; move easily; be easily found",
+    "commonMistake": "easy 的副词是 easily；修饰动词用副词，不用形容词 easy。",
+    "example": {
+      "english": "You can easily reach the station by metro.",
+      "chinese": "你可以很容易地乘地铁到达车站。"
+    },
+    "application": {
+      "prompt": "The map is clear, so visitors can find the palace ___. A. easily B. easy",
+      "solution": "A。解析：修饰动词 find 用副词 easily。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: easily",
+        "url": "https://dictionary.cambridge.org/dictionary/english/easily"
+      }
+    ]
+  },
+  {
+    "word": "forget",
+    "examTags": [
+      "词汇·不规则动词",
+      "语法·forget doing与to do"
+    ],
+    "grammar": "v. 忘记；遗忘。forget—forgot—forgotten；forget to do 表示忘记去做，forget doing 表示忘记做过。",
+    "collocations": "forget a name; forget to bring sth; forget doing sth",
+    "commonMistake": "forget to do 指事情还没做而忘了；forget doing 指忘了做过某事。",
+    "example": {
+      "english": "I forgot to pack my camera, so I couldn't take photos.",
+      "chinese": "我忘了带相机，所以没能拍照。"
+    },
+    "application": {
+      "prompt": "Please don't ___ to lock the door before you leave. A. remember B. forget",
+      "solution": "B。解析：提醒对方不要忘记去锁门，用 forget to do。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: forget",
+        "url": "https://dictionary.cambridge.org/dictionary/english/forget"
+      }
+    ]
+  },
+  {
+    "word": "noon",
+    "examTags": [
+      "词汇·时间名词",
+      "语法·介词搭配"
+    ],
+    "grammar": "n. 正午；中午。通常不可数；at noon 表示“在中午”。",
+    "collocations": "at noon; around noon; by noon",
+    "commonMistake": "表示“在正午”用 at noon，通常不加 the。",
+    "example": {
+      "english": "The museum closes for lunch at noon.",
+      "chinese": "博物馆中午闭馆用午餐。"
+    },
+    "application": {
+      "prompt": "The train leaves at ___. A. noon B. midnight",
+      "solution": "A。解析：noon 是中午，midnight 是午夜。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: noon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/noon"
+      }
+    ]
+  },
+  {
+    "word": "sick",
+    "examTags": [
+      "词汇·形容词多义",
+      "语法·be sick与feel sick"
+    ],
+    "grammar": "adj. 生病的；恶心的。be sick 常指生病；feel sick 常指感到恶心，也可指不适。",
+    "collocations": "a sick child; feel sick; be sick in bed",
+    "commonMistake": "sick 可表示“生病”或“恶心”；描述病人可说 a sick person，描述感受用 feel sick。",
+    "example": {
+      "english": "The long bus ride made me feel sick.",
+      "chinese": "长时间坐公交让我觉得恶心。"
+    },
+    "application": {
+      "prompt": "After the rough boat ride, Ella began to feel ___. A. safe B. sick",
+      "solution": "B。解析：乘船颠簸后感到恶心用 feel sick。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sick",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sick"
+      }
+    ]
+  },
+  {
+    "word": "metro",
+    "examTags": [
+      "词汇·交通名词",
+      "语言运用·出行方式"
+    ],
+    "grammar": "n. 地铁系统；地下铁道。可数；英式英语常说 underground/tube，美式英语常说 subway。",
+    "collocations": "take the metro; a metro station; travel by metro",
+    "commonMistake": "表示乘地铁可说 take the metro 或 travel by metro；by 后不加 the。",
+    "example": {
+      "english": "We took the metro to the city centre.",
+      "chinese": "我们乘地铁去了市中心。"
+    },
+    "application": {
+      "prompt": "The roads were busy, so we went downtown by ___. A. metro B. passport",
+      "solution": "A。解析：metro 是地铁，适合在城市中出行。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: metro",
+        "url": "https://dictionary.cambridge.org/dictionary/english/metro"
+      }
+    ]
+  },
+  {
+    "word": "station",
+    "examTags": [
+      "词汇·可数名词",
+      "熟词多义·车站与机构"
+    ],
+    "grammar": "n. 车站；站；局。可数，复数 stations；可指火车站、地铁站、电视台等。",
+    "collocations": "a train station; a metro station; at the station",
+    "commonMistake": "station 的具体意思由语境决定；表示在车站常用 at the station。",
+    "example": {
+      "english": "Let's meet at the metro station at six.",
+      "chinese": "我们六点在地铁站见面吧。"
+    },
+    "application": {
+      "prompt": "Passengers are waiting for the train at the ___. A. scarf B. station",
+      "solution": "B。解析：乘客等火车的地方是 station（车站）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: station",
+        "url": "https://dictionary.cambridge.org/dictionary/english/station"
+      }
+    ]
+  },
+  {
+    "word": "palace",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·历史建筑"
+    ],
+    "grammar": "n. 王宫；宫殿。可数，复数 palaces；具体宫殿名称中的 Palace 通常大写。",
+    "collocations": "a royal palace; visit a palace; the palace gates",
+    "commonMistake": "palace 是“宫殿”，不要与 place（地方）混淆拼写。",
+    "example": {
+      "english": "The old palace is open to visitors every day.",
+      "chinese": "这座古老的宫殿每天都对游客开放。"
+    },
+    "application": {
+      "prompt": "A king or queen may live in a ___. A. palace B. station",
+      "solution": "A。解析：王室居住的宫殿是 palace。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: palace",
+        "url": "https://dictionary.cambridge.org/dictionary/english/palace"
+      }
+    ]
+  },
+  {
+    "word": "accordion",
+    "examTags": [
+      "词汇·乐器名词",
+      "语言运用·音乐"
+    ],
+    "grammar": "n. 手风琴。可数，复数 accordions；乐器前通常用 play the。",
+    "collocations": "play the accordion; an accordion player; accordion music",
+    "commonMistake": "表示演奏乐器通常用 play the accordion；不要漏掉定冠词 the。",
+    "example": {
+      "english": "My grandfather can play the accordion very well.",
+      "chinese": "我爷爷手风琴拉得很好。"
+    },
+    "application": {
+      "prompt": "Lily learned to play ___ accordion last year. A. a B. the",
+      "solution": "B。解析：乐器名称前通常用定冠词 the。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: accordion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/accordion"
+      }
+    ]
+  },
+  {
+    "word": "get together",
+    "examTags": [
+      "词汇·动词短语",
+      "语言运用·聚会"
+    ],
+    "grammar": "phr. 聚会；相聚。可作不及物短语，后接 with sb 或 for an event 说明对象或目的。",
+    "collocations": "get together with friends; get together for dinner; get together at weekends",
+    "commonMistake": "表示和某人相聚用 get together with sb；不要误写成 get together to sb。",
+    "example": {
+      "english": "Our family gets together every New Year.",
+      "chinese": "我们一家人每年新年都会团聚。"
+    },
+    "application": {
+      "prompt": "The classmates plan to ___ after the exams. A. get together B. turn around",
+      "solution": "A。解析：考试后同学们计划聚会，用 get together。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: get together",
+        "url": "https://dictionary.cambridge.org/dictionary/english/get-together"
+      }
+    ]
+  },
+  {
+    "word": "in the sun",
+    "examTags": [
+      "词汇·介词短语",
+      "语法·固定表达"
+    ],
+    "grammar": "phr. 在阳光下；在太阳照射下。sun 前通常用 the；注意与 under the sun（世上）区分语境。",
+    "collocations": "sit in the sun; dry clothes in the sun; read in the sun",
+    "commonMistake": "固定说 in the sun；sun 前通常要加 the。",
+    "example": {
+      "english": "The children sat in the sun and ate their lunch.",
+      "chinese": "孩子们坐在阳光下吃午餐。"
+    },
+    "application": {
+      "prompt": "Don't leave the ice cream ___ too long; it will melt. A. at noon B. in the sun",
+      "solution": "B。解析：在阳光下冰淇淋容易融化，应用 in the sun。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sun",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sun"
+      }
+    ]
+  },
+  {
+    "word": "tower",
+    "examTags": [
+      "词汇·可数名词",
+      "熟词多义·建筑与高塔"
+    ],
+    "grammar": "n. 塔；塔楼。可数，复数 towers；作动词可表示高耸，但本课常用名词义。",
+    "collocations": "a tall tower; a clock tower; the top of the tower",
+    "commonMistake": "tower 是可数名词；单数前通常需要冠词 a/the。",
+    "example": {
+      "english": "We could see the tower from the hotel window.",
+      "chinese": "从旅馆窗户能看到那座塔。"
+    },
+    "application": {
+      "prompt": "The old clock is at the top of the stone ___. A. tower B. valley",
+      "solution": "A。解析：钟常安装在 clock tower（钟楼）上。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tower",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tower"
+      }
+    ]
+  },
+  {
+    "word": "might",
+    "examTags": [
+      "语法·情态动词",
+      "语法·可能性表达"
+    ],
+    "grammar": "modal v. 可能；可以。might 后接动词原形，常表示较不确定的可能；无人称变化。",
+    "collocations": "might be late; might rain; might help",
+    "commonMistake": "might 后直接接动词原形，不加 to，也不随主语变化。",
+    "example": {
+      "english": "It might rain this afternoon, so take an umbrella.",
+      "chinese": "今天下午可能会下雨，所以带把伞。"
+    },
+    "application": {
+      "prompt": "We ___ visit the museum if we have enough time. A. might to B. might",
+      "solution": "B。解析：情态动词 might 后接动词原形 visit。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: might",
+        "url": "https://dictionary.cambridge.org/dictionary/english/might"
+      }
+    ]
+  },
+  {
+    "word": "budget",
+    "examTags": [
+      "词汇·名词与动词",
+      "语言运用·旅行计划"
+    ],
+    "grammar": "n. 预算；v. 把……编入预算；精打细算。可数名词；动词过去式拼作 budgeted，不双写 t。",
+    "collocations": "a limited budget; stay within budget; budget for a trip",
+    "commonMistake": "budget 的过去式是 budgeted，只加 -ed，不双写 t；within budget 表示“控制在预算之内”。",
+    "example": {
+      "english": "We planned a two-day trip on a small budget.",
+      "chinese": "我们用有限的预算计划了一次两日游。"
+    },
+    "application": {
+      "prompt": "The family wants to spend less and stay ___ budget. A. within B. between",
+      "solution": "A。解析：stay within budget 表示“控制在预算之内”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: budget",
+        "url": "https://dictionary.cambridge.org/dictionary/english/budget"
+      }
+    ]
+  },
+  {
+    "word": "passport",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·旅行证件"
+    ],
+    "grammar": "n. 护照。可数，复数 passports；常用 passport number、show one's passport。",
+    "collocations": "a valid passport; renew a passport; show your passport",
+    "commonMistake": "passport 是可数名词；出境旅行时要注意其有效期，passport 前按语境用 a/the。",
+    "example": {
+      "english": "Please keep your passport in a safe place.",
+      "chinese": "请把护照放在安全的地方。"
+    },
+    "application": {
+      "prompt": "You need this official document to travel to another country. It is a ___. A. poster B. passport",
+      "solution": "B。解析：出国旅行的证件是 passport（护照）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: passport",
+        "url": "https://dictionary.cambridge.org/dictionary/english/passport"
+      }
+    ]
+  },
+  {
+    "word": "forgetful",
+    "examTags": [
+      "词汇·形容词派生",
+      "语法·词形辨析"
+    ],
+    "grammar": "adj. 健忘的；好忘事的。由 forget + -ful 构成；名词 forgetfulness。",
+    "collocations": "a forgetful person; become forgetful; be forgetful about names",
+    "commonMistake": "forgetful 描述“容易忘事的”；forgotten 是 forget 的过去分词，词性和用法不同。",
+    "example": {
+      "english": "My grandpa is a little forgetful about names.",
+      "chinese": "我爷爷有点容易忘记名字。"
+    },
+    "application": {
+      "prompt": "She often leaves her keys at home. She can be quite ___. A. forgetful B. careful",
+      "solution": "A。解析：经常忘带钥匙说明她有些健忘，用 forgetful。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: forgetful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/forgetful"
+      }
+    ]
+  },
+  {
+    "word": "faraway",
+    "examTags": [
+      "词汇·形容词",
+      "阅读·地点与距离"
+    ],
+    "grammar": "adj. 远方的；遥远的，通常作定语；far away 可作副词短语表示“在远处”。",
+    "collocations": "a faraway place; a faraway land; seem far away",
+    "commonMistake": "faraway 通常作形容词修饰名词；far away 常作表语或状语，注意分写。",
+    "example": {
+      "english": "She dreamed of visiting a faraway island.",
+      "chinese": "她梦想去一座遥远的岛屿。"
+    },
+    "application": {
+      "prompt": "The explorer wrote about a ___ country across the sea. A. nearby B. faraway",
+      "solution": "B。解析：across the sea 表明这个国家很远，应用 faraway。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: faraway",
+        "url": "https://dictionary.cambridge.org/dictionary/english/faraway"
+      }
+    ]
+  },
+  {
+    "word": "regular",
+    "examTags": [
+      "词汇·形容词多义",
+      "语法·副词派生"
+    ],
+    "grammar": "adj. 平常的；有规律的；定期的。副词 regularly；名词 regularity。",
+    "collocations": "a regular bus service; regular exercise; a regular customer",
+    "commonMistake": "regular 可指“定期的”或“普通的”；副词用 regularly，不是 regular。",
+    "example": {
+      "english": "Regular exercise can help you stay healthy.",
+      "chinese": "规律锻炼有助于保持健康。"
+    },
+    "application": {
+      "prompt": "The bus comes every 20 minutes on a ___ schedule. A. regular B. strange",
+      "solution": "A。解析：按固定时间运行的班次是 regular（有规律的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: regular",
+        "url": "https://dictionary.cambridge.org/dictionary/english/regular"
+      }
+    ]
+  },
+  {
+    "word": "countryside",
+    "examTags": [
+      "词汇·地点名词",
+      "语法·冠词搭配"
+    ],
+    "grammar": "n. 乡村；农村，通常作单数集合概念。常用 in the countryside。",
+    "collocations": "live in the countryside; the quiet countryside; countryside roads",
+    "commonMistake": "表示“在乡村”常用 in the countryside；不要漏掉定冠词 the。",
+    "example": {
+      "english": "My aunt lives in the countryside, far from the city.",
+      "chinese": "我姑姑住在乡村，离城市很远。"
+    },
+    "application": {
+      "prompt": "They moved from the city to live ___ the countryside. A. on B. in",
+      "solution": "B。解析：固定表达为 in the countryside。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: countryside",
+        "url": "https://dictionary.cambridge.org/dictionary/english/countryside"
+      }
+    ]
+  },
+  {
+    "word": "turn around",
+    "examTags": [
+      "词汇·动词短语",
+      "熟词多义·转身与改变方向"
+    ],
+    "grammar": "phr. 转身；转向；翻转。作不及物短语时无需宾语；宾语代词置于 turn 和 around 之间时多指“把……转过来”。",
+    "collocations": "turn around quickly; turn the car around; turn around and look",
+    "commonMistake": "turn around 可表示自己转身；若宾语是代词，放在中间：turn it around。",
+    "example": {
+      "english": "I heard my name and turned around.",
+      "chinese": "我听到有人叫我的名字，便转过身来。"
+    },
+    "application": {
+      "prompt": "When the guide called him, Ben ___ to see who it was. A. turned around B. looked for",
+      "solution": "A。解析：听见有人叫时转身看，用 turn around。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: turn",
+        "url": "https://dictionary.cambridge.org/dictionary/english/turn"
+      }
+    ]
+  },
+  {
+    "word": "surprised",
+    "examTags": [
+      "词汇·情绪形容词",
+      "语法·-ed与-ing形容词"
+    ],
+    "grammar": "adj. 感到惊奇的；惊讶的。常用 be surprised at/by sth、be surprised to do、be surprised that...。",
+    "collocations": "feel surprised; be surprised at the news; be surprised to see sb",
+    "commonMistake": "人感到惊讶用 surprised；令人惊讶的事物用 surprising。",
+    "example": {
+      "english": "We were surprised to see snow in April.",
+      "chinese": "四月见到雪，我们感到很惊讶。"
+    },
+    "application": {
+      "prompt": "The visitors were ___ by the sudden change in weather. A. surprising B. surprised",
+      "solution": "B。解析：visitors 是感到惊讶的人，用 surprised。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: surprised",
+        "url": "https://dictionary.cambridge.org/dictionary/english/surprised"
+      }
+    ]
+  },
+  {
+    "word": "deer",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·单复数同形"
+    ],
+    "grammar": "n. 鹿。单复数同形，one deer / several deer；动词随数量变化。",
+    "collocations": "a deer in the forest; a herd of deer; wild deer",
+    "commonMistake": "deer 的复数仍为 deer，不加 -s；根据数量判断谓语单复数。",
+    "example": {
+      "english": "We saw three deer near the trees.",
+      "chinese": "我们在树附近看到了三只鹿。"
+    },
+    "application": {
+      "prompt": "There ___ two deer in the field. A. are B. is",
+      "solution": "A。解析：two deer 表示复数，be 动词用 are。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: deer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/deer"
+      }
+    ]
+  },
+  {
+    "word": "probably",
+    "examTags": [
+      "词汇·副词",
+      "语法·情态判断"
+    ],
+    "grammar": "adv. 很可能；大概。常放在实义动词前、be 动词后或情态动词后。",
+    "collocations": "probably be late; will probably rain; most probably",
+    "commonMistake": "probably 修饰整句或动词，位置通常在 will 等情态动词之后、实义动词之前。",
+    "example": {
+      "english": "The metro will probably be faster than the bus today.",
+      "chinese": "今天地铁很可能比公交快。"
+    },
+    "application": {
+      "prompt": "It ___ take about an hour to reach the countryside. A. probably will to B. will probably",
+      "solution": "B。解析：probably 可放在情态动词 will 后，实义动词原形前。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: probably",
+        "url": "https://dictionary.cambridge.org/dictionary/english/probably"
+      }
+    ]
+  },
+  {
+    "word": "look for",
+    "examTags": [
+      "词汇·动词短语",
+      "熟词多义·寻找与找到"
+    ],
+    "grammar": "phr. 寻找，强调寻找的过程。look for 的结果不一定是找到；find 表示找到的结果。",
+    "collocations": "look for a hotel; look for your passport; look for information",
+    "commonMistake": "look for 表示“寻找”，find 表示“找到”；不要把两者混为一谈。",
+    "example": {
+      "english": "We looked for the metro entrance but couldn't find it.",
+      "chinese": "我们寻找地铁入口，但没有找到。"
+    },
+    "application": {
+      "prompt": "I can't see my key. I need to ___ it before we leave. A. look for B. look after",
+      "solution": "A。解析：还在寻找钥匙，用 look for；look after 是照顾。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: look",
+        "url": "https://dictionary.cambridge.org/dictionary/english/look"
+      }
+    ]
+  },
+  {
+    "word": "Nazi",
+    "examTags": [
+      "词汇·历史名词",
+      "拼写·专名与形容词"
+    ],
+    "grammar": "n. 纳粹党人；纳粹分子。复数 Nazis；作为历史专名及其派生形容词时首字母大写。",
+    "collocations": "Nazi Germany; Nazi leaders; the Nazi Party",
+    "commonMistake": "Nazi 首字母大写，复数为 Nazis；历史语境中注意其特定含义。",
+    "example": {
+      "english": "The museum has a section about Nazi Germany and World War II.",
+      "chinese": "博物馆设有关于纳粹德国和第二次世界大战的展区。"
+    },
+    "application": {
+      "prompt": "A person who belonged to the Nazi Party during World War II was a ___. A. tourist B. Nazi",
+      "solution": "B。解析：Nazi 可指纳粹党人或纳粹分子。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Nazi",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nazi"
+      }
+    ]
+  }
+]

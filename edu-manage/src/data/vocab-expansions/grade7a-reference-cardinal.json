@@ -1,0 +1,632 @@
+[
+  {
+    "word": "one",
+    "examTags": ["数字·基数词与拼写", "语法·单复数", "听读·数量信息"],
+    "grammar": "num. 一；基数词可放在名词前表示数量。one + 单数可数名词；也可单独作代词代替前文提到的单数名词。",
+    "collocations": "one book; one hundred; one of my friends。",
+    "commonMistake": "one 后接单数可数名词：one candle；“第一”是序数词 first。",
+    "example": {
+      "english": "One candle is still burning on the cake.",
+      "chinese": "蛋糕上还有一根蜡烛在燃烧。"
+    },
+    "application": {
+      "prompt": "Only one candle is left. There is ___ candle on the cake. A. one B. two",
+      "solution": "A。解析：only one 表示只有一根，后接单数名词 candle。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: one",
+        "url": "https://dictionary.cambridge.org/dictionary/english/one"
+      }
+    ]
+  },
+  {
+    "word": "two",
+    "examTags": ["数字·基数词与拼写", "语法·可数名词复数", "听读·数量信息"],
+    "grammar": "num. 二；two 后接可数名词复数。复合数词 21–99（整十除外）通常用连字符连接，如 twenty-two。",
+    "collocations": "two books; two years; two hundred。",
+    "commonMistake": "two、too、to 发音相同但词义和拼写不同；数字“二”写 two。",
+    "example": {
+      "english": "Two small gifts are on the table.",
+      "chinese": "桌上有两件小礼物。"
+    },
+    "application": {
+      "prompt": "A pair has ___ shoes. A. two B. twelve",
+      "solution": "A。解析：一双鞋有两只，数字“二”是 two。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: two",
+        "url": "https://dictionary.cambridge.org/dictionary/english/two"
+      }
+    ]
+  },
+  {
+    "word": "three",
+    "examTags": ["数字·拼写辨析", "听读·理解数量与序列"],
+    "grammar": "num. 三；three 后接可数名词复数。可用于年龄、时间、人数和物品数量。",
+    "collocations": "three days; three people; three hundred。",
+    "commonMistake": "three（3）与 tree（树）读音相同，但拼写和意思不同；注意 three 中有 h。",
+    "example": {
+      "english": "Three friends help Mia decorate the room.",
+      "chinese": "三个朋友帮 Mia 装饰房间。"
+    },
+    "application": {
+      "prompt": "A triangle has ___ sides. A. three B. four",
+      "solution": "A。解析：三角形有三条边，three 表示“三”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: three",
+        "url": "https://dictionary.cambridge.org/dictionary/english/three"
+      }
+    ]
+  },
+  {
+    "word": "four",
+    "examTags": ["数字·拼写辨析", "听读·理解数量信息"],
+    "grammar": "num. 四；four 后接可数名词复数。复合数词可写作 twenty-four、forty-four。",
+    "collocations": "four sides; four seasons; four hundred。",
+    "commonMistake": "four 表示数字“4”；for 是介词，读音相同但意思和用法不同。",
+    "example": {
+      "english": "The classroom has four large windows.",
+      "chinese": "教室里有四扇大窗户。"
+    },
+    "application": {
+      "prompt": "A square has ___ equal sides. A. four B. five",
+      "solution": "A。解析：正方形有四条相等的边，four 表示“四”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: four",
+        "url": "https://dictionary.cambridge.org/dictionary/english/four"
+      }
+    ]
+  },
+  {
+    "word": "five",
+    "examTags": ["数字·拼写与词形", "听读·数量信息"],
+    "grammar": "num. 五；five 后接可数名词复数。与 -teen 或 -ty 组成数词时拼写发生变化：fifteen、fifty。",
+    "collocations": "five minutes; five fingers; five hundred。",
+    "commonMistake": "five 的拼写以 -ve 结尾；15 是 fifteen，50 是 fifty，不写 fiveteen 或 fivety。",
+    "example": {
+      "english": "We need five minutes to finish the game.",
+      "chinese": "我们还需要五分钟完成比赛。"
+    },
+    "application": {
+      "prompt": "One hand has ___ fingers. A. five B. fifteen",
+      "solution": "A。解析：一只手有五根手指，fifteen 表示十五。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: five",
+        "url": "https://dictionary.cambridge.org/dictionary/english/five"
+      }
+    ]
+  },
+  {
+    "word": "six",
+    "examTags": ["数字·拼写辨析", "听读·数量与年龄信息"],
+    "grammar": "num. 六；six 后接可数名词复数。与整十组合的 60 拼作 sixty。",
+    "collocations": "six years old; six questions; six hundred。",
+    "commonMistake": "six（6）和 sixteen（16）不同；六十写 sixty，不写 sixety。",
+    "example": {
+      "english": "My little cousin is six years old.",
+      "chinese": "我的小表弟六岁。"
+    },
+    "application": {
+      "prompt": "A cube has ___ faces. A. six B. sixteen",
+      "solution": "A。解析：正方体有六个面，six 表示“六”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: six",
+        "url": "https://dictionary.cambridge.org/dictionary/english/six"
+      }
+    ]
+  },
+  {
+    "word": "seven",
+    "examTags": ["数字·拼写辨析", "听读·日期与数量信息"],
+    "grammar": "num. 七；seven 后接可数名词复数。表示 70 时写 seventy。",
+    "collocations": "seven days; seven o'clock; seven hundred。",
+    "commonMistake": "seven 表示 7，seventeen 表示 17，seventy 表示 70；注意 -teen 和 -ty。",
+    "example": {
+      "english": "Our English lesson begins at seven thirty.",
+      "chinese": "我们的英语课七点半开始。"
+    },
+    "application": {
+      "prompt": "There are ___ days in one week. A. seven B. eleven",
+      "solution": "A。解析：一周有七天，seven 表示“七”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: seven",
+        "url": "https://dictionary.cambridge.org/dictionary/english/seven"
+      }
+    ]
+  },
+  {
+    "word": "eight",
+    "examTags": ["数字·拼写辨析", "语法·冠词与数量表达"],
+    "grammar": "num. 八；eight 后接可数名词复数。读音以元音音素开头，单数名词前可用 an，如 an eight-year-old child。",
+    "collocations": "eight arms; eight o'clock; eight hundred。",
+    "commonMistake": "eight 的首字母是 e，读音以元音音素开头：an eight-year-old child；eight 与 ate 同音。",
+    "example": {
+      "english": "The science club has eight new members.",
+      "chinese": "科学社有八名新成员。"
+    },
+    "application": {
+      "prompt": "An octopus has ___ arms. A. eight B. eighteen",
+      "solution": "A。解析：章鱼有八条腕，eighteen 表示十八。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eight",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eight"
+      }
+    ]
+  },
+  {
+    "word": "nine",
+    "examTags": ["数字·拼写辨析", "听读·时间与数量信息"],
+    "grammar": "num. 九；nine 后接可数名词复数。与 -teen、-ty 组合时去掉末尾 e：nineteen、ninety。",
+    "collocations": "nine years old; nine thirty; nine hundred。",
+    "commonMistake": "nine 的复合数词拼写去掉末尾 e：nineteen、ninety；不要写 nineteeen 或 ninty。",
+    "example": {
+      "english": "The bus leaves at nine in the morning.",
+      "chinese": "公交车早上九点出发。"
+    },
+    "application": {
+      "prompt": "The number after eight is ___. A. nine B. nineteen",
+      "solution": "A。解析：八后面是九，nine 表示“九”；nineteen 是十九。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nine",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nine"
+      }
+    ]
+  },
+  {
+    "word": "ten",
+    "examTags": ["数字·基数词与拼写", "听读·时间与数量信息"],
+    "grammar": "num. 十；ten 后接可数名词复数。表示 10 的倍数时 tens 可指“几十”，如 tens of people。",
+    "collocations": "ten minutes; ten years; tens of students。",
+    "commonMistake": "ten 表示 10；tens of 表示“几十”，不要把 tens of 和具体数词 ten 混为一谈。",
+    "example": {
+      "english": "The quiz has ten questions about numbers.",
+      "chinese": "这份小测有十道关于数字的题。"
+    },
+    "application": {
+      "prompt": "A decade is a period of ___ years. A. ten B. twelve",
+      "solution": "A。解析：十年叫 a decade，ten 表示“十”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ten",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ten"
+      }
+    ]
+  },
+  {
+    "word": "eleven",
+    "examTags": ["数字·拼写与数量", "听读·人数信息"],
+    "grammar": "num. 十一；eleven 后接可数名词复数。11–19 的数词通常以 -teen 结尾，但 eleven 是不规则形式。",
+    "collocations": "eleven players; eleven years old; eleven hundred。",
+    "commonMistake": "eleven 是不规则拼写，不是 oneteen；注意它和 seven、twelve 等数词一样需要单独记忆。",
+    "example": {
+      "english": "Eleven students are waiting outside the hall.",
+      "chinese": "十一名学生正在大厅外等候。"
+    },
+    "application": {
+      "prompt": "A standard football team has ___ players on the field. A. eleven B. seven",
+      "solution": "A。解析：一支标准足球队上场十一人，eleven 表示“十一”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eleven",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eleven"
+      }
+    ]
+  },
+  {
+    "word": "twelve",
+    "examTags": ["数字·不规则拼写", "听读·月份与数量信息"],
+    "grammar": "num. 十二；twelve 后接可数名词复数。12–19 中只有 thirteen 到 nineteen 以 -teen 结尾，twelve 是不规则形式。",
+    "collocations": "twelve months; twelve o'clock; twelve eggs。",
+    "commonMistake": "twelve 的拼写以 -ve 结尾；不要按 twelf 的发音错误拼写。",
+    "example": {
+      "english": "A year has twelve months.",
+      "chinese": "一年有十二个月。"
+    },
+    "application": {
+      "prompt": "How many months are there in a year? There are ___. A. twelve B. twenty",
+      "solution": "A。解析：一年有十二个月，twelve 表示“十二”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: twelve",
+        "url": "https://dictionary.cambridge.org/dictionary/english/twelve"
+      }
+    ]
+  },
+  {
+    "word": "thirteen",
+    "examTags": ["数字·teen/ty 辨析", "听读·年龄与数量信息"],
+    "grammar": "num. 十三；thirteen 后接可数名词复数。13–19 通常以 -teen 结尾，表示“十几”。",
+    "collocations": "thirteen years old; thirteen students; thirteen hundred。",
+    "commonMistake": "thirteen（13）以 -teen 结尾；thirty（30）以 -ty 结尾，听力中注意词尾差别。",
+    "example": {
+      "english": "My cousin is thirteen and starts Grade 7 this year.",
+      "chinese": "我表弟十三岁，今年开始读七年级。"
+    },
+    "application": {
+      "prompt": "The number 13 is spelled ___. A. thirteen B. thirty",
+      "solution": "A。解析：13 是 thirteen；thirty 表示 30。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thirteen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thirteen"
+      }
+    ]
+  },
+  {
+    "word": "fourteen",
+    "examTags": ["数字·teen/ty 辨析", "听读·价格与数量信息"],
+    "grammar": "num. 十四；fourteen 后接可数名词复数。表示 40 的 forty 拼写不同，需注意区分。",
+    "collocations": "fourteen days; fourteen students; fourteen yuan。",
+    "commonMistake": "fourteen（14）以 -teen 结尾；forty（40）不写成 fourty。",
+    "example": {
+      "english": "Fourteen guests are coming to the birthday party.",
+      "chinese": "十四位客人要来参加生日聚会。"
+    },
+    "application": {
+      "prompt": "The number 14 is ___. A. fourteen B. forty",
+      "solution": "A。解析：14 是 fourteen；forty 表示 40。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fourteen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fourteen"
+      }
+    ]
+  },
+  {
+    "word": "fifteen",
+    "examTags": ["数字·拼写变化", "听读·年龄与数量信息"],
+    "grammar": "num. 十五；fifteen 后接可数名词复数。five 变为 fifteen 时拼写变化；50 写作 fifty。",
+    "collocations": "fifteen minutes; fifteen candles; fifteen hundred。",
+    "commonMistake": "15 写作 fifteen，不是 fiveteen；注意 five 中的 ve 在 fifteen 中变为 f。",
+    "example": {
+      "english": "The train ride takes fifteen minutes.",
+      "chinese": "乘火车需要十五分钟。"
+    },
+    "application": {
+      "prompt": "The number 15 is spelled ___. A. fifteen B. fifty",
+      "solution": "A。解析：15 是 fifteen；fifty 表示 50。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fifteen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fifteen"
+      }
+    ]
+  },
+  {
+    "word": "sixteen",
+    "examTags": ["数字·teen/ty 辨析", "听读·年龄信息"],
+    "grammar": "num. 十六；sixteen 后接可数名词复数。16 以 -teen 结尾，60 写作 sixty。",
+    "collocations": "sixteen years old; sixteen questions; sixteen hundred。",
+    "commonMistake": "sixteen 是 16，sixty 是 60；听辨时留意 -teen 和 -ty 的重音与词尾。",
+    "example": {
+      "english": "Sixteen students joined the cooking club.",
+      "chinese": "十六名学生加入了烹饪社。"
+    },
+    "application": {
+      "prompt": "Mia is 16 years old. She is ___. A. sixteen B. sixty",
+      "solution": "A。解析：16 岁是 sixteen years old；sixty 表示六十。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sixteen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sixteen"
+      }
+    ]
+  },
+  {
+    "word": "seventeen",
+    "examTags": ["数字·teen/ty 辨析", "听读·数量与年龄信息"],
+    "grammar": "num. 十七；seventeen 后接可数名词复数。17 以 -teen 结尾，70 写作 seventy。",
+    "collocations": "seventeen years old; seventeen pages; seventeen hundred。",
+    "commonMistake": "seventeen（17）和 seventy（70）只差词尾；听力中注意 -teen 与 -ty 的区别。",
+    "example": {
+      "english": "Seventeen students signed up for the art club.",
+      "chinese": "十七名学生报名参加了美术社。"
+    },
+    "application": {
+      "prompt": "The school bus has 17 seats filled. There are ___ students on it. A. seventeen B. seventy",
+      "solution": "A。解析：17 是 seventeen；seventy 表示 70。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: seventeen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/seventeen"
+      }
+    ]
+  },
+  {
+    "word": "eighteen",
+    "examTags": ["数字·teen/ty 辨析", "听读·年龄与数量信息"],
+    "grammar": "num. 十八；eighteen 后接可数名词复数。18 以 -teen 结尾，80 写作 eighty。",
+    "collocations": "eighteen candles; eighteen years old; eighteen hundred。",
+    "commonMistake": "18 写作 eighteen，不是 eightteen；80 写作 eighty，不是 eightty。",
+    "example": {
+      "english": "Eighteen people came to hear the school band.",
+      "chinese": "十八个人来听学校乐队演出。"
+    },
+    "application": {
+      "prompt": "A student is 18 years old. The student is ___. A. eighteen B. eighty",
+      "solution": "A。解析：18 是 eighteen；eighty 表示 80。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eighteen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eighteen"
+      }
+    ]
+  },
+  {
+    "word": "nineteen",
+    "examTags": ["数字·teen/ty 辨析", "听读·数量与年龄信息"],
+    "grammar": "num. 十九；nineteen 后接可数名词复数。19 以 -teen 结尾，90 写作 ninety。",
+    "collocations": "nineteen students; nineteen years old; nineteen hundred。",
+    "commonMistake": "nineteen（19）和 ninety（90）要区分；nine 变成十九时写 nineteen，去掉 nine 末尾 e 后加 teen。",
+    "example": {
+      "english": "Nineteen students are in the school photo.",
+      "chinese": "学校合影里有十九名学生。"
+    },
+    "application": {
+      "prompt": "The number 19 is spelled ___. A. nineteen B. ninety",
+      "solution": "A。解析：19 是 nineteen；ninety 表示 90。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nineteen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nineteen"
+      }
+    ]
+  },
+  {
+    "word": "twenty",
+    "examTags": ["数字·整十数拼写", "听读·时间和数量信息"],
+    "grammar": "num. 二十；20 后接可数名词复数。21–29 写作 twenty-one 至 twenty-nine，中间用连字符。",
+    "collocations": "twenty minutes; twenty students; twenty-one。",
+    "commonMistake": "20 写作 twenty，不是 twoty；21–29 的十位与个位之间通常加连字符。",
+    "example": {
+      "english": "We have twenty minutes to finish the poster.",
+      "chinese": "我们有二十分钟完成海报。"
+    },
+    "application": {
+      "prompt": "The number 20 is spelled ___. A. twenty B. twelve",
+      "solution": "A。解析：20 是 twenty；twelve 表示 12。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: twenty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/twenty"
+      }
+    ]
+  },
+  {
+    "word": "thirty",
+    "examTags": ["数字·整十数拼写", "听读·时间与价格辨析"],
+    "grammar": "num. 三十；thirty 后接可数名词复数。31–39 用 thirty-one 至 thirty-nine，十位和个位之间加连字符。",
+    "collocations": "thirty seconds; thirty days; thirty-five。",
+    "commonMistake": "30 写作 thirty，不是 threety；13 是 thirteen，30 是 thirty。",
+    "example": {
+      "english": "The class lasts thirty minutes.",
+      "chinese": "这节课持续三十分钟。"
+    },
+    "application": {
+      "prompt": "The number 30 is ___. A. thirty B. thirteen",
+      "solution": "A。解析：30 是 thirty；thirteen 表示 13。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thirty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thirty"
+      }
+    ]
+  },
+  {
+    "word": "forty",
+    "examTags": ["数字·拼写易错点", "听读·数量与价格信息"],
+    "grammar": "num. 四十；forty 后接可数名词复数。41–49 可写作 forty-one 至 forty-nine。",
+    "collocations": "forty years old; forty pages; forty-two。",
+    "commonMistake": "40 的正确拼写是 forty，去掉 four 中的 u；不要写成 fourty。",
+    "example": {
+      "english": "The school needs forty new chairs.",
+      "chinese": "学校需要四十把新椅子。"
+    },
+    "application": {
+      "prompt": "Which spelling means 40? A. forty B. fourty",
+      "solution": "A。解析：四十的正确拼写是 forty，没有字母 u。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: forty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/forty"
+      }
+    ]
+  },
+  {
+    "word": "fifty",
+    "examTags": ["数字·整十数拼写", "听读·价格与数量信息"],
+    "grammar": "num. 五十；fifty 后接可数名词复数。51–59 用 fifty-one 至 fifty-nine。",
+    "collocations": "fifty yuan; fifty students; fifty-five。",
+    "commonMistake": "50 写作 fifty，five 中的 ve 在 fifty 中变为 f；不要写 fivety。",
+    "example": {
+      "english": "The shop sells the cake for fifty yuan.",
+      "chinese": "这家商店以五十元出售这个蛋糕。"
+    },
+    "application": {
+      "prompt": "The price is 50 yuan. Write the number in words: ___. A. fifty B. fifteen",
+      "solution": "A。解析：50 是 fifty；fifteen 表示 15。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fifty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fifty"
+      }
+    ]
+  },
+  {
+    "word": "sixty",
+    "examTags": ["数字·整十数拼写", "听读·时间与数量信息"],
+    "grammar": "num. 六十；sixty 后接可数名词复数。61–69 用 sixty-one 至 sixty-nine。",
+    "collocations": "sixty seconds; sixty minutes; sixty-four。",
+    "commonMistake": "60 写作 sixty，不写 sixety；sixteen（16）和 sixty（60）听起来不同，留意词尾。",
+    "example": {
+      "english": "There are sixty seconds in one minute.",
+      "chinese": "一分钟有六十秒。"
+    },
+    "application": {
+      "prompt": "One minute has ___ seconds. A. sixty B. sixteen",
+      "solution": "A。解析：一分钟有六十秒，sixty 表示 60。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sixty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sixty"
+      }
+    ]
+  },
+  {
+    "word": "seventy",
+    "examTags": ["数字·整十数拼写", "听读·数量与年龄信息"],
+    "grammar": "num. 七十；seventy 后接可数名词复数。71–79 用 seventy-one 至 seventy-nine。",
+    "collocations": "seventy years old; seventy pages; seventy-two。",
+    "commonMistake": "70 写作 seventy；注意它与 seventeen（17）的 -ty/-teen 区别。",
+    "example": {
+      "english": "The old library has seventy seats.",
+      "chinese": "这座旧图书馆有七十个座位。"
+    },
+    "application": {
+      "prompt": "The number 70 is ___. A. seventy B. seventeen",
+      "solution": "A。解析：70 是 seventy；seventeen 表示 17。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: seventy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/seventy"
+      }
+    ]
+  },
+  {
+    "word": "eighty",
+    "examTags": ["数字·整十数拼写", "听读·数量与价格信息"],
+    "grammar": "num. 八十；eighty 后接可数名词复数。81–89 用 eighty-one 至 eighty-nine。",
+    "collocations": "eighty students; eighty yuan; eighty-five。",
+    "commonMistake": "80 写作 eighty，保留 eight 中的 t，再加 -y；不要写 eightty。",
+    "example": {
+      "english": "The class collected eighty books for the school library.",
+      "chinese": "全班为学校图书馆收集了八十本书。"
+    },
+    "application": {
+      "prompt": "The number 80 is spelled ___. A. eighty B. eighteen",
+      "solution": "A。解析：80 是 eighty；eighteen 表示 18。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eighty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eighty"
+      }
+    ]
+  },
+  {
+    "word": "ninety",
+    "examTags": ["数字·整十数拼写", "听读·数量与成绩信息"],
+    "grammar": "num. 九十；ninety 后接可数名词复数。91–99 用 ninety-one 至 ninety-nine。",
+    "collocations": "ninety points; ninety years old; ninety-nine。",
+    "commonMistake": "90 写作 ninety，nine 去掉末尾 e 后加 -ty；不要写 ninty。",
+    "example": {
+      "english": "Our team scored ninety points in the game.",
+      "chinese": "我们队在比赛中得了九十分。"
+    },
+    "application": {
+      "prompt": "The number 90 is ___. A. ninety B. nineteen",
+      "solution": "A。解析：90 是 ninety；nineteen 表示 19。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ninety",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ninety"
+      }
+    ]
+  },
+  {
+    "word": "hundred",
+    "examTags": ["数字·大数表达规则", "语法·数词与名词搭配", "听读·数量信息"],
+    "grammar": "num. 一百。具体数词 + hundred + 名词时，hundred 不加 -s，名词用复数；表示概数用 hundreds of + 复数名词。",
+    "collocations": "one hundred students; two hundred yuan; hundreds of books。",
+    "commonMistake": "准确数量说 two hundred people，不加 s 或 of；概数说 hundreds of people。",
+    "example": {
+      "english": "The hall can hold one hundred guests.",
+      "chinese": "大厅能容纳一百位客人。"
+    },
+    "application": {
+      "prompt": "The school invited exactly 100 guests: one ___ guests. A. hundred B. hundreds of",
+      "solution": "A。解析：具体数字 one 后用 hundred，不加 -s，也不接 of。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hundred",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hundred"
+      }
+    ]
+  },
+  {
+    "word": "thousand",
+    "examTags": ["数字·大数表达规则", "听读·人数与距离信息"],
+    "grammar": "num. 一千。具体数量用数字 + thousand + 复数名词；概数用 thousands of + 复数名词。",
+    "collocations": "one thousand metres; two thousand people; thousands of stars。",
+    "commonMistake": "准确数量说 three thousand books，不加 -s 或 of；表示成千上万说 thousands of books。",
+    "example": {
+      "english": "The town has about two thousand students.",
+      "chinese": "这个镇大约有两千名学生。"
+    },
+    "application": {
+      "prompt": "The museum counted exactly 2,000 visitors: two ___ visitors. A. thousand B. thousands of",
+      "solution": "A。解析：具体数字 two 后用 thousand 原形；不加 -s 或 of。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thousand",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thousand"
+      }
+    ]
+  },
+  {
+    "word": "million",
+    "examTags": ["数字·大数表达规则", "阅读·理解人口与数据"],
+    "grammar": "num. 一百万。具体数量用数字 + million + 复数名词；概数用 millions of + 复数名词。",
+    "collocations": "one million people; two million views; millions of stars。",
+    "commonMistake": "具体数量说 three million users，不说 three millions users；表示数百万用 millions of users。",
+    "example": {
+      "english": "The video received one million views in a week.",
+      "chinese": "这个视频一周内获得了一百万次观看。"
+    },
+    "application": {
+      "prompt": "The website has exactly 3,000,000 users: three ___ users. A. million B. millions of",
+      "solution": "A。解析：具体数字 three 后用 million 原形，不加 -s 或 of。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: million",
+        "url": "https://dictionary.cambridge.org/dictionary/english/million"
+      }
+    ]
+  }
+]

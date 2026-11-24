@@ -1,12 +1,12 @@
+import { localDateColumnValue, localDateKey } from './date/local-day'
+
 export type ReplaceableLesson = {
   id: string
   lessonDate: Date
 }
 
 function dayKey(date: Date) {
-  const value = new Date(date)
-  value.setHours(0, 0, 0, 0)
-  return value.getTime()
+  return localDateKey(date)
 }
 
 export function selectReplacementTeachingDay(
@@ -15,7 +15,7 @@ export function selectReplacementTeachingDay(
 ) {
   if (requiredLessonCount <= 0) return null
 
-  const lessonsByDay = new Map<number, ReplaceableLesson[]>()
+  const lessonsByDay = new Map<string, ReplaceableLesson[]>()
   for (const lesson of lessons) {
     const key = dayKey(lesson.lessonDate)
     const current = lessonsByDay.get(key) || []
@@ -25,13 +25,13 @@ export function selectReplacementTeachingDay(
 
   const matchingDays = [...lessonsByDay.entries()]
     .filter(([, dayLessons]) => dayLessons.length === requiredLessonCount)
-    .sort(([left], [right]) => right - left)
+    .sort(([left], [right]) => right.localeCompare(left))
 
   if (!matchingDays.length) return null
 
   const [date, dayLessons] = matchingDays[0]
   return {
-    date: new Date(date),
+    date: localDateColumnValue(date),
     lessonIds: dayLessons.map((lesson) => lesson.id),
   }
 }

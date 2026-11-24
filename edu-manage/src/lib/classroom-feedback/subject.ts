@@ -14,6 +14,7 @@ export function feedbackSubject(
   teacherId: string | null | undefined,
   feedbackGroup?: SubjectGroup | null,
   knowledgeCardSubject?: string | null,
+  subjectSnapshot?: string | null,
 ): string {
   const lessonSubject = lesson?.subject?.trim()
   if (lessonSubject) return lessonSubject
@@ -22,6 +23,8 @@ export function feedbackSubject(
   const cardSubject = knowledgeCardSubject?.trim() || ''
 
   const group = lesson?.group || feedbackGroup
+  const snapshotSubject = subjectSnapshot?.trim() || ''
+  if (!group && snapshotSubject) return snapshotSubject
   const assignedSubjects = [...new Set((group?.teacherAssignments || [])
     .filter((assignment) => assignment.teacherId === teacherId)
     .map((assignment) => assignment.subject?.trim())
@@ -29,5 +32,5 @@ export function feedbackSubject(
   if (assignedSubjects.length === 1) return assignedSubjects[0]
   if (assignedSubjects.length > 1) return cardSubject
   if (group?.teacherAssignments?.length) return cardSubject
-  return group?.course?.subject?.trim() || cardSubject
+  return group?.course?.subject?.trim() || cardSubject || snapshotSubject
 }

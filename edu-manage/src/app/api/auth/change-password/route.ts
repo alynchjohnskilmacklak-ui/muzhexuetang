@@ -11,7 +11,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const user = await requireAuthenticatedUser()
   const prisma = user.prisma
   const body = await req.json()
-  const oldPassword = typeof body.oldPassword === 'string' ? body.oldPassword.trim() : ''
+  const oldPassword = typeof body.oldPassword === 'string' ? body.oldPassword : ''
   const newPassword = typeof body.newPassword === 'string' ? body.newPassword : ''
 
   if (!oldPassword) return NextResponse.json({ error: '请输入当前密码' }, { status: 400 })

@@ -75,6 +75,7 @@ export default function AppointmentDetailPage() {
       ) : (
         <>
           <button
+            className="mobile-shell-back"
             onClick={() => router.push('/dashboard')}
             style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', color: '#A06E0B', fontSize: 13, cursor: 'pointer', marginBottom: 10, padding: 0 }}
           >

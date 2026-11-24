@@ -1,0 +1,200 @@
+{
+  "queries": {
+    "Q3_drift_students_tx": {
+      "sql": "SELECT s.name AS student, s.\"remainHours\" AS student_remain, s.\"totalHours\" AS student_total,\n            e.\"totalHours\" AS enr_total, e.\"usedHours\", e.\"remainHours\" AS enr_remain,\n            count(h.id)::int AS tx_count,\n            count(h.id) FILTER (WHERE h.type IN ('ATTENDANCE_DEDUCT','INTENSIVE_REVIEW_APPROVED','ATTENDANCE_ACCRUE'))::int AS hour_tx,\n            max(h.\"createdAt\")::text AS last_tx_at,\n            s.\"updatedAt\"::text AS student_updated_at\n     FROM \"Student\" s\n     JOIN \"Enrollment\" e ON e.\"studentId\"=s.id AND e.status='ACTIVE' AND e.\"deletedAt\" IS NULL\n     LEFT JOIN \"HourTransaction\" h ON h.\"studentId\"=s.id AND h.\"deletedAt\" IS NULL\n     WHERE s.\"deletedAt\" IS NULL AND s.\"remainHours\" > 0.05\n       AND COALESCE((SELECT SUM(x.\"remainHours\") FROM \"Enrollment\" x WHERE x.\"studentId\"=s.id AND x.status='ACTIVE' AND x.\"deletedAt\" IS NULL),0)=0\n     GROUP BY s.id, s.name, s.\"remainHours\", s.\"totalHours\", e.\"totalHours\", e.\"usedHours\", e.\"remainHours\", s.\"updatedAt\"\n     ORDER BY s.\"remainHours\" DESC LIMIT 15",
+      "rows": [
+        {
+          "student": "李**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.389",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "王**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 200,
+          "hour_tx": 200,
+          "last_tx_at": "2026-08-08 09:25:07.478",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "郝**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.45",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "默**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.472",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "韩**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.467",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "陶**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.461",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "杨**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.444",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "默**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.438",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "马**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.427",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "吕**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.396",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "马**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.421",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "王**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.415",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "赵**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.433",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "谷**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 208,
+          "hour_tx": 208,
+          "last_tx_at": "2026-08-08 09:25:07.403",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        },
+        {
+          "student": "谷**",
+          "student_remain": 134.4,
+          "student_total": 134.4,
+          "enr_total": 134.4,
+          "usedHours": 134.4,
+          "enr_remain": 0,
+          "tx_count": 192,
+          "hour_tx": 192,
+          "last_tx_at": "2026-08-08 09:25:07.381",
+          "student_updated_at": "2026-09-20 11:35:59.356"
+        }
+      ]
+    },
+    "Q3_drift_tx_summary": {
+      "sql": "SELECT count(*)::int AS drift_students,\n            count(*) FILTER (WHERE tx_count = 0)::int AS no_tx,\n            count(*) FILTER (WHERE tx_count > 0)::int AS has_tx,\n            count(*) FILTER (WHERE x.\"updatedAt\" < COALESCE(x.last_tx_at, x.\"updatedAt\"))::int AS snapshot_stale_after_tx\n     FROM (\n       SELECT s.id, s.\"remainHours\", s.\"updatedAt\",\n              count(h.id)::int AS tx_count, max(h.\"createdAt\") AS last_tx_at\n       FROM \"Student\" s\n       LEFT JOIN \"Enrollment\" e ON e.\"studentId\"=s.id AND e.status='ACTIVE' AND e.\"deletedAt\" IS NULL\n       LEFT JOIN \"HourTransaction\" h ON h.\"studentId\"=s.id AND h.\"deletedAt\" IS NULL\n       WHERE s.\"deletedAt\" IS NULL AND s.\"remainHours\" > 0.05\n         AND COALESCE((SELECT SUM(x.\"remainHours\") FROM \"Enrollment\" x WHERE x.\"studentId\"=s.id AND x.status='ACTIVE' AND x.\"deletedAt\" IS NULL),0)=0\n       GROUP BY s.id, s.\"remainHours\", s.\"updatedAt\"\n     ) x",
+      "rows": [
+        {
+          "drift_students": 37,
+          "no_tx": 3,
+          "has_tx": 34,
+          "snapshot_stale_after_tx": 0
+        }
+      ]
+    }
+  }
+}

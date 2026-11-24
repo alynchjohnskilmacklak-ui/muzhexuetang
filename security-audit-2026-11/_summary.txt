@@ -1,0 +1,164 @@
+##### FILE 01-auth-session.md (252 lines)
+HEAD: ## 摘要表
+编号 | 问题 | 类别 | 危害 | 工作量 | 优先级
+A-1 | JWT 中的角色（role/division/teacherId）登录时固化，会话刷新与服务端守卫均不回库复核 | ①已具备但不完善 | 管理员在 DB 被降级/解绑后，旧 JWT 在 30 天有效期内仍持原角色通过角色守卫 | 中(1-3天) | 近期
+A-2 | 登录失败按"账号不存在 / 密码错误 / 身份不符 / 已停用"返回不同 code 与不同中文文案，可枚举账号是否存在及停用状态 | ①已具备但不完善 | 未登录攻击者可慢速批量探测邮箱/手机号是否注册、账号是否被停用 | 小(<1天) | 近期
+A-3 | 教师/家长默认初始口令为姓名拼音，且跳过密码策略校验；User 模型无强制改密标记 | ①已具备但不完善 | 初始口令可由公开姓名预测、无数字、不满足 10 位策略，首登不强制更换，弱口令长期有效 | 中(1-3天) | 近期
+A-4 | proxy 对"停用/踢出"状态做 5 秒内存缓存；限流与踢事件在 Redis 不可用时静默降级为单机内存 | ①已具备但不完善 | 被停用/踢出后最长 5s 旧 JWT 仍通过；多实例下限流阈值被分摊、跨实例踢推送可能收不到 | 中(1-3天) | 近期
+A-5 | 家长激活令牌有效期 7 天；激活密码策略（8 位+字母数字）弱于主策略；激活端点无独立限流，GET 回显家长姓名/邮箱/学员 | ①已具备但不完善 | 链接泄露后利用窗口长；8 位激活口令可在线慢速爆破；有效令牌可探测到家长身份信息 | 小(<1天) | 近期
+A-6 | 会话 Cookie 未使用 `__Host-` 前缀；`secure` 属性由 `NEXTAUTH_URL` 前缀推导 | ①已具备但不完善 | 同域其他路径/子域存在 Cookie 混淆面；生产 URL 误配 http 时 Cookie 明文下发 | 小(<1天) | 长期
+A-7 | IP 维度完全依赖 `X-Real-IP` 单头取值，防伪造以"Nginx 覆写该头"为前提 | ①已具备但不完善 | 反代若未覆写，客户端可自造 `X-Real-IP` 绕过 IP 限流并污染登录审计 IP | 小(<1天) | 近期
+A-8 | `detect-role` / `check-role` / `login-status` 三个预检接口返回可区分的角色/存在性/锁定状态 | ①已具备但不完善 | 配合慢速限流枚举非管理员账号是否存在、角色归属、锁定状态 | 小(<1天) | 长期
+B-1 | `api-rate-limit.ts` 为已废弃空壳转发，全仓 0 处业务引用 | ②完全缺失（死代码） | 命名上像独立 API 限流模块，易被误判为"已在 API 层独立生效" | 小(<1天) | 长期
+B-2 | `createPublicTeacherPortraitToken` 签发函数 0 处调用，验签端点却在接收令牌 | ②完全缺失（死代码/链路缺口） | 签名头像链接的签发侧未接线：要么是遗留死代码，要么公开头像签名链路缺失，状态不明 | 小(<1天) | 近期
+B-3 | 无密码历史复用检查、无定期轮换策略；无设备会话列表与单设备主动下线能力 | ②完全缺失 | 弱口令可反复换用；设备遗失/离职只能全局踢出，无设备级审计与撤销 | 大(>3天) | 长期
+B-4 | 登录链路无验证码/人机校验，管理员账号无 2FA | ②完全缺失 | 共享 NAT 出口下可绕过账号维度阈值进行慢速爆破；无第二因子兜底 | 大(>3天) | 长期
+C-1 | 限流/会话事件的 Redis 驱动为 auto 降级模式；本地 `.env` 未配置 `REDIS_URL`，生产实际配置待核实 | ③架构运维层 | 若生产未配置 Redis，限流与跨实例踢事件退化为单机内存，多实例部署下防护被稀释 | 中(1-3天) | 近期
+C-2 | `SUPER_ADMIN_EMAILS` 未出现在 `.env.example`，本地 `.env` 亦无该键；生产注入情况待核实 | ③架构运维层 | 未注入时所有管理员都无法通过超管守卫（功能静默失效）；配置漂移风险 | 小(<1天) | 近期
+C-3 | `initSessionEvents()` 仅在测试中调用，应用启动未初始化 Redis 订阅；跨实例 SSE 订阅靠发布时懒建立 | ③架构运维层 | 多实例下未发布过踢事件的实例不会建立订阅，其他实例的前端可能收不到即时下线提示（DB 复核兜底，不构成直接绕过） | 小(<1天) | 近期
+C-4 | cron / health 接口令牌走 URL query 参数 | ③架构运维层 | 令牌可能进入 Nginx 访问日志、浏览器历史、CDN/代理日志 | 小(<1天) | 近期
+C-5 | `robots.ts` Disallow 列表枚举了全部内部后台路由名 | ③架构运维层 | 非认证漏洞（君子协定），但向侦察者暴露内部路径结构清单 | 小(<1天) | 长期
+
+HEAD: ## 待实测项
+编号 | 待验证假设 | 验证方法 | 风险 | 建议
+T-1 | 生产 Nginx 已覆写 `X-Real-IP`，剥离客户端自带值 | 核对 Nginx 配置 `proxy_set_header X-Real-IP $remote_addr;`；从外部发送伪造 `X-Real-IP` 头观察登录记录/限流 key | 若未覆写，IP 限流可被任意伪造 IP 绕过，审计 IP 失真 | 上线前在部署 SOP 固化该规则；应用层增加受信代理判断
+T-2 | 生产已配置 `REDIS_URL` 且 `RATE_LIMIT_DRIVER`/`SESSION_EVENT_DRIVER=redis`，Redis 连通稳定 | 核对生产环境变量与 Redis 实例连接；压测观察限流桶是否跨进程生效；断 Redis 验证是否按预期拒绝启动（显式 redis 模式） | 未配置则多实例限流/踢事件退化为单机内存 | 显式锁定 redis 驱动并接入健康检查
+T-3 | 生产 `AUTH_SECRET`/`NEXTAUTH_SECRET` 长度≥32 且一致，`assertProductionSecurityEnv` 启动校验真实生效 | 查看启动日志（无"生产环境安全配置检查失败"）；核对两变量值一致、长度达标（值略，不落盘） | Secret 过短/不一致会导致 JWT 可被伪造或会话随机掉线 | 沿用 env-security 校验；轮换旧 Secret 后全员重登
+T-4 | 生产已注入 `SUPER_ADMIN_EMAILS` 且名单正确 | 核对环境变量名单（值略）；用非名单管理员账号调用 `requireSuperAdmin` 接口验证被拒 | 未注入则超管功能静默失效；名单过宽则超管面扩大 | `.env.example` 补项；超管操作留审计日志
+T-5 | 多实例下踢出/停用传播时效：5s 缓存窗口 + Redis Pub/Sub 推送是否符合预期 | 双实例部署，A 实例登录后在 B 实例踢号，观察两实例下旧 JWT 被拒时间；断开 Redis 观察降级行为 | 窗口内旧会话仍可访问；跨实例推送延迟 | 写接口绕过缓存；启动初始化订阅；缩短缓存 TTL
+T-6 | 重置/激活/头像签名令牌在 Nginx 日志、WxPusher 消息、浏览器历史、OSS/CDN 缓存中的留存情况 | 抽查访问日志与推送消息内容；确认激活/重置链接未被 CDN 缓存；核对 `api-handler.ts` 脱敏覆盖未包裹路由 | 令牌经日志/缓存泄露后可被复用至过期 | 令牌短有效期；日志脱敏覆盖全路由；必要时服务端定期吊销未使用令牌
+T-7 | 9 条未包裹 `apiHandler` 的路由鉴权兜底是否完整（静态已逐个核对，待运行态复核） | 清单：`[...nextauth]`（框架处理器）、`cron/daily-ops-report`、`cron/retry-notifications`、`health`、`parent/students/[id]/learning-report`（`getCurrentUser`，route.ts:28）、`public/teacher-showcase`、`public/teacher-showcase/portrait`（验签）、`qywx/event`（签名）、`wxpusher/callback`（appToken） | 个别路由若自鉴权缺陷，会绕过全局限流与统一错误处理 | 运行态对每条路由做未登录/错误令牌访问回归测试
+T-8 | next-auth 5.0.0-beta.32（beta 版）是否存在已知认证相关缺陷 | 对照 next-auth 官方变更日志/安全公告，评估升级到稳定版或最新 beta 的成本 | beta 版本可能存在 Cookie/会话处理已知问题 | 纳入依赖升级清单，升级后回归登录/踢出/跨端会话
+
+##### FILE 02-authz-admin-teacher.md (603 lines)
+HEAD: ## 2. 摘要表
+编号 | 问题 | 类别 | 危害 | 工作量 | 优先级
+B-1 | 注销教师接口 DELETE 仅校验会话、无角色判断，教师/家长账号可注销任意教师并转移课程学员 | ② 完全缺失 | 高（破坏性写操作 + 业务数据转移） | 小 | 立刻
+B-2 | `teachers` 列表接口仅校验登录，无角色判断且未做字段裁剪，全量返回教师 phone/email/学历/合同结束日期 | ② 完全缺失 | 中（教师通讯录与隐私字段泄露） | 小 | 近期
+B-3 | `highlights` 列表仅校验登录，未按角色/归属收窄，可按 studentId/groupId 遍历全部学员亮点 | ② 完全缺失 | 中（跨学员隐私内容泄露） | 小 | 近期
+B-4 | `schedules/teacher-week` 教师周课次接口：teacherId 参数未校验是否本人，非 admin 可读任意教师周课次与学员名单 | ② 完全缺失 | 中（跨教师 IDOR） | 小 | 近期
+B-5 | `schedules/daily` 当日课次接口未按角色裁剪，家长/教师可读当天全部课次及 enrollment 学员 id 名单、教师名 | ② 完全缺失 | 中（跨角色名单泄露） | 小 | 近期
+B-6 | 试卷评论接口不校验归属：教师不核 paper.teacherId、家长不核 paper.studentId，可对任意试卷留言 | ① 已具备但不完善 | 低-中（越权留言 + 可遍历试卷） | 小 | 近期
+B-7 | 试卷反应（点赞/表情）接口无归属校验，任意登录用户可对任意试卷操作反应 | ① 已具备但不完善 | 低 | 小 | 长期
+B-8 | 学员徽章接口教师分支 where 未带教师/学生归属，可按 studentId 读任意学员徽章 | ① 已具备但不完善 | 低 | 小 | 近期
+B-9 | 教师端聚合报表（paper-stats / parent-engagement / volunteer-stats）允许教师读取本学部全库聚合，未按本人教师裁剪 | ① 已具备但不完善 | 低（聚合值，无 PII） | 中 | 长期
+B-10 | 单次课反馈学生检索 `toStudentOptions` 列出本学部全部学生（含家长姓名/电话尾号），未限定本人授课学生 | ① 已具备但不完善 | 低-中（跨学员档案预览） | 中 | 近期
+B-11 | 一组只读探测类接口（overview / check-conflict / 冲突批量 / teachers-stats / grade-counts / courses 目录）仅校验登录即可跨角色读取 | ① 已具备但不完善 | 低（聚合/目录信息） | 小 | 长期
+B-12 | 家长沟通通知已读/删除标记 `userId` 错写成操作者本人 id，条件永不命中（逻辑缺陷，非越权） | ① 已具备但不完善 | 低（功能失效） | 小 | 近期
+B-13 | `settings` GET 向所有登录角色返回系统配置全量行（组织信息、作息时段、权益文案） | ① 已具备但不完善 | 低 | 小 | 长期
+B-14 | `materials/oss-signature` GET 未校验会话即返回 OSS 是否启用（布尔） | ① 已具备但不完善 | 低（配置探测） | 小 | 长期
+B-15 | 大量路由裸用 `auth()` 或本地 `requireAdmin()`，会话吊销/停用校验完全依赖 proxy 兜底；proxy 读操作存在 fail-open 窗口 | ③ 架构运维层 | 中（兜底失效时会话吊销不生效） | 中 | 近期
+B-16 | `api-rate-limit.ts` 为 156 字节空壳，范围内写/导出接口未接入限流 | ③ 架构运维层 | 低-中（枚举/爬取无节流） | 中 | 长期
+B-17 | cron 接口 Bearer token 走 URL query string，且 archive/retry 同时接受 CRON_SECRET 与 HEALTH_TOKEN，易进访问日志 | ③ 架构运维层 | 低-中（凭据泄露面） | 小 | 长期
+B-18 | Prisma raw SQL 盘点：全部参数化模板绑定，未发现 Unsafe 拼接 SQL（合格项，归档备查） | ③ 架构运维层 | — | — | 长期
+
+HEAD: ## 6. 待实测项
+编号 | 待验证假设 | 验证方法 | 风险 | 建议
+T-1 | `/api/uploads/[filename]`、`/api/files/...` 是否落在 proxy matcher 内；matcher L202 排除了静态 `uploads` 段，需确认 API 路径未被一并绕过 | 在测试环境用已退出登录会话直接请求未授权 `/api/uploads/xxx`、`/api/files/view?path=xxx`，观察是否 401；核对 matcher 正则分段 | 若绕过，文件访问仅靠 handler 内 `assertCanAccessFileAsset` 兜底，停用/吊销会话校验缺失 | 用 `requireAuthenticatedUser` + access lib 双保险；matcher 显式包含 `/api/` 前缀
+T-2 | 双库模式下 division 隔离是否真正生效：低权账号能否通过查询参数跨学部读取 | 测试环境准备 JUNIOR/SENIOR 两个账号，交叉请求带 `division=SENIOR` 的学员/课次/费用接口，核对返回行数与库来源 | 跨学部数据泄露 | 复核 `getRequestDivision`（division.ts 已忽略外部 division 入参）与 `getPrismaForDivision` 调用点；跨库访问补显式断言
+T-3 | proxy 读操作 fail-open 窗口（L157-168，失败计数 <3）内，已停用/被踢下线会话是否仍可读取 API | 测试环境模拟 DB 不可用，停用账号后请求 GET 接口，观察是否放行 | 会话吊销延迟生效 | 关键读接口 handler 内复用 `getCurrentUser()` 查库校验；评估读操作改 fail-closed
+T-4 | 反馈导出图片 7 天 HMAC token 是否绑定学部/学员，能否跨对象访问 | 用 A 学员导出 token 改 `assetId` 访问 B 学员图片链接（`classroom-feedback/export-image-url.ts` 签名覆盖 assetId:division:expires） | 跨学员图片越权查看 | 实测确认 division 与 assetId 均入签；必要时缩短 TTL
+T-5 | `messages/[id]`、`messages/read-all`、`messages/unread-count` 的 `getAccessibleParentMessageWhere` 是否对 teacher/admin/parent 三类都正确收口 | 测试环境分别用家长/教师账号请求他人会话 id 与 read-all，核对 403 与返回范围 | 跨会话消息泄露 | 若存在空 where 兜底，补角色默认拒绝
+T-6 | 单次课反馈手动填写姓名路径（`single-session` manual）是否绕过学生归属与家长通知边界 | 教师端走手动学生姓名 + 非在册学生生成反馈，检查是否向不存在/他人家长推送通知 | 误推送、数据污染 | 手动路径禁止关联真实 studentId；通知前二次校验在册与归属
+T-7 | B-1 注销教师链路在无角色校验时，`transferTo` 目标教师是否校验同学部、同批次 | 代码走查 + 测试环境构造跨学部 transferTo，核对课程/学员转移结果 | 跨学部数据错乱 | 补目标教师学部/批次校验与事务内二次断言
+T-8 | 管理端本地 `requireAdmin()` 包装在 DB 异常时的返回行为（是否 fail-open 返回 null 后被当作 403，还是误放行） | 模拟 DB 异常调用各本地包装接口，核对状态码与放行情况 | 兜底失效时越权 | 包装函数复用 guards 查库逻辑，异常统一 503
+
+##### FILE 03-authz-parent-public.md (288 lines)
+HEAD: ## 摘要表
+编号 | 问题 | 类别 | 危害 | 工作量 | 优先级
+C-1 | wxpusher/callback 仅靠共享 appToken 比对即可把任意家长账号的推送通道绑到攻击者 UID，无 HMAC、无待绑定会话校验、无归属校验 | 回调鉴权缺失 / 越权写 | appToken 一旦泄露（日志、前端、第三方平台泄露），攻击者可劫持课堂反馈、平安回家通知推送，接收他人孩子的敏感通知 | 中 | 立刻
+C-2 | 家长端 10 个文件（12 个 handler）只校验登录、未显式校验 `role==='parent'`，归属防护完全依赖"非家长绑定为空→查不到数据"的兜底 | 角色门残缺 | 一旦数据模型允许员工账号挂学员绑定，或后续复用公共查询函数放宽谓词，兜底消失即变成跨角色越权读/写 | 小 | 近期
+C-3 | check-role / detect-role 未登录即可探测账号存在性与角色/学部；login-status 暴露锁定状态与失败次数；login-check 仅 `ok:true/false` 弱枚举 | 信息枚举 | 配合字典批量探测可绘出系统账号与角色清单，并获知目标账号锁定节奏，辅助定向爆破 | 小 | 近期
+C-4 | qywx/event 回调未校验 timestamp 偏移、未存 nonce 防重放 | 回调防重放残缺 | 现 handler 不改库，重放暂无实际动作；未来若在该端点落地事件状态变更，捕获报文即可重放触发 | 小 | 近期
+C-5 | health 探针 token 用 `!==` 比较（非常量时间），且未走 apiHandler、无全局限流 | 密码学/限流残缺 | 理论上可通过响应时序逐字节推断 token；高频探测可拿到 DB 延迟/uptime/内存等内部运行指标 | 小 | 近期
+C-6 | ai/chat 限流为进程内内存 Map，不进 Redis | 架构/限流 | 多实例部署各自计数、进程重启清零，登录用户可绕过分钟/日额度刷量消耗大模型 API 额度 | 中 | 近期
+C-7 | schools GET 向登录家长返回 `updatedBy`（管理员用户 id） | 内部字段外泄 | 家长可枚举维护人内部 id，为后续针对内部账号的攻击提供信息 | 小 | 近期
+C-8 | documents/[id]/download 未做路径规范化复核，缺 nosniff 响应头 | 文件下载残缺 | 当前 fileUrl 仅服务端写入，风险低；若未来允许前端传文件名，存在目录穿越读文件面；缺少 nosniff 浏览器可能按内容嗅探执行 | 小 | 长期
+C-9 | yifenyidang 等 handler 自身无会话校验，鉴权完全依赖 proxy 中间件白名单 | 架构/纵深防御 | 若 proxy matcher 调整、handler 被直连调用或被其他路由复用，未登录即可拉取全量一分一档数据 | 中 | 近期
+C-10 | 限流驱动 Redis 故障时 auto 模式降级内存桶，仅本地 console.warn、无 Sentry/告警上报与熔断 | 架构/运维 | 公开接口在 Redis 故障窗口内失去分布式限流，可被慢速/分布式刷量击穿成本 | 小 | 近期
+C-11 | public-assistant 仅有 5 次/IP/分钟限流，无每日总额度与黑名单 | 架构/成本 | 无 DB 检索，不构成数据外泄；但可持续调用大模型产生 API 费用（内存降级下更易绕过） | 小 | 近期
+C-12 | qywx/event、wxpusher/callback、health、public/teacher-showcase（含 portrait）、parent/learning-report 等 handler 未包裹 apiHandler | 架构/一致性 | 不享受统一 body 大小限制、IP 提取与全局限流，回调/公开端点缺少一致的防爆破基线 | 小 | 长期
+C-13 | `/volunteer/docs/` 静态目录在 proxy 白名单内公开，上传附件凭文件名可直下 | 架构/数据边界 | 若误传学员材料、内部文档，静态目录不做鉴权即可被遍历下载 | 小 | 近期
+C-14 | miniapp 为空壳，无小程序鉴权/token 体系 | 架构/待办 | 未来接入微信小程序时若沿用"前端传 openid 即信"的做法，将出现身份伪造；需在接入前定方案 | 中 | 长期（接入前必须完成）
+
+HEAD: ## 待实测项
+编号 | 待验证假设 | 验证方法 | 风险 | 建议
+T-1 | proxy 中间件在生产是否真的拦截所有非白名单 `/api/**` 未登录请求（yifenyidang、quota、documents 等 handler 自不含鉴权） | 测试环境不带 Cookie 直接 `curl GET /api/volunteer/yifenyidang`、`/api/volunteer/quota`、`/api/volunteer/documents`，确认返回 401；并临时注释 proxy 白名单复现 handler 直连 | 若中间件未生效，公开统计/资料接口被未登录拉取 | 按 C-9 在 handler 内补自包含鉴权后复测
+T-2 | 生产限流是否走 Redis（而非静默 memory 降级）；public-assistant / 登录探测接口的分钟与日额度是否生效 | 查 `RATE_LIMIT_DRIVER`/`REDIS_URL` 配置与 Redis `rate:*` 键；脚本同 IP 连续打 public-assistant 6 次看第 6 次是否 429；重启进程后内存桶是否清零 | 限流失效导致大模型费用被刷、账号被批量探测 | 确认 Redis 驱动生效；按 C-10 加降级告警
+T-3 | wxpusher/callback 在 token 已知条件下能否把攻击者 uid 绑到指定家长 id（静态推断可行，需用测试账号实测写库行为） | 测试环境用测试 appToken 构造 `{data:{uid:testUid, extra:测试家长id, appToken:testToken}}` POST，查该家长 `wxpusherUid` 是否被改写；再验证双库模式 junior/senior 是否同时被写 | 推送通道劫持、他人孩子通知外泄 | 落地 C-1 票据化绑定前，禁止在生产启用 WxPusher 回调；实测后复测
+T-4 | qywx/event 重放是否被服务端拒绝（当前预期：不被拒绝，但因 handler 不改库而无实际动作） | 抓一条合法回调报文，间隔 10 分钟重放 POST，观察是否仍回 200；检查库内是否有任何状态字段变化 | 未来事件落地后重放触发状态变更 | 按 C-4 加 timestamp 窗口 + nonce 去重后复测
+T-5 | `AUTH_SECRET`/`NEXTAUTH_SECRET` 长度 ≥32 且两者一致；`HEALTH_TOKEN`、`WXPUSHER_APP_TOKEN`、`QYWX_CALLBACK_TOKEN/AES_KEY` 已在生产环境注入且未写入仓库/日志 | 对照 `src/lib/env-security.ts:26-32` 基线核对环境变量；grep 仓库与日志历史是否出现真实密钥 | JWT 可伪造、回调可被伪造、探针可被猜解 | 不满足则轮换全部密钥；报告内不记录任何真实密钥值
+T-6 | `/volunteer/docs/`、`/people/`、`/volunteer/picture/` 等免鉴权静态目录下是否存在学员名单、内部反馈、合同、真人证件照等非公开文件 | 列目录与文件名清单，抽样核对文件内容；检查上传接口历史落盘记录与 `/people/` 图片是否为真人照片 | 静态目录未鉴权导致内部材料/真人头像外泄 | 按 C-13 清理并隔离，敏感材料改签名 URL
+T-7 | ai/chat 内存限流在多实例/重启下的绕过幅度 | 压测：多实例轮换请求观察分钟/日计数；重启后日计数是否清零 | 登录用户绕过额度刷大模型费用 | 按 C-6 迁入 Redis 后复测
+T-8 | teacher-showcase 分享令牌在 7 天过期后是否真的失效；篡改 teacherId/division 后 AES-GCM AuthTag 是否拒绝 | 测试环境生成令牌，过期后访问 portrait；篡改密文 1 字节再访问，确认返回 403 | 分享链接可越权访问其他教师头像 | 若可通过则检查 token 校验分支与 `AUTH_SECRET` 配置
+T-9 | 家长会话被改密/重置后，旧 JWT 是否在 session-ping/kick-events 链路被立即判 `kicked` | 登录后记录会话，另一处改密，再用旧 Cookie 调 `/api/auth/session-ping`，确认回 `kicked` 401 | 旧会话残留导致账号共享 | 若未失效，排查 `currentSessionToken` 同步与 JWT 刷新路径
+
+##### FILE 04-anti-crawl-enumeration.md (462 lines)
+HEAD: ## 摘要表
+编号 | 问题 | 类别 | 危害 | 工作量 | 优先级
+D-1 | 匿名接口 `/api/public/teacher-showcase` 无分页、无独立限流，一次请求镜像全量在职教师名册 | ①已具备但不完善 | 教师对外资料被整站批量爬取；公开 AI 问答与展示页成为数据出口 | 小(<1天) | 立刻
+D-2 | 4 个后台列表 `limit/pageSize` 未 clamp（teachers/notifications/leave-requests/settings/logs），`?limit=100000` 直达 `take`；teachers 另有全量 `findMany` 内存分页 | ①已具备但不完善 | 已登录的管理员/教师可单请求拖全量通知/请假/日志/教师数据；大 `take` 可造成 DB 与内存压力 | 小(<1天) | 近期
+D-3 | 登录与 4 个预检接口响应区分存在性/停用/锁定，限流仅按共享 IP，无被探测账号维度聚合 | ①已具备但不完善 | 慢速换 IP 逐条枚举注册手机号/邮箱及账号状态；字典首探不触发账号锁定 | 小(<1天) | 近期
+D-4 | 9 个路由未走 `apiHandler`；其中 teacher-showcase（匿名）、learning-report、cron、health、两个 webhook 未挂应用层限流 | ①已具备但不完善 | 限流覆盖存在结构性盲区；匿名接口与内部任务端点不受统一桶约束 | 小(<1天) | 近期
+D-5 | 兜底限流 200 rpm、GET 300 rpm 偏宽；公开 AI 助手 5 rpm/IP 但无日配额；Redis 降级内存；ai/chat 为进程内 Map | ①已具备但不完善 | 高频批量拉取与 AI 成本滥用；多实例/重启后限流状态失真 | 中(1-3天) | 近期
+D-6 | robots.ts 遗漏 9 个认证页前缀；`/services` 规则与静态 rewrite 意图不一致 | ①已具备但不完善 | 仅君子协定级别风险；向侦察者暴露路径结构的代价有限 | 小(<1天) | 长期
+D-7 | `/volunteer/docs/*` 静态目录匿名公开，上传文档按文件名直链可达，无签名/过期；public 内存量 xlsx/测试 PDF 残留 | ①已具备但不完善 | 文档链接泄露后永久可下载；测试残留混淆生产资产清单 | 小(<1天) | 近期
+D-8 | 全链路无验证码/滑块/turnstile/hCaptcha/极验，无 Bot 指纹与行为风控 | ②完全缺失 | 换 IP 慢速枚举、接口薅取、AI 成本滥用无人机校验兜底 | 大(>3天) | 长期
+D-9 | 无跨接口按"被探测账号/手机号/关键字"聚合的频率限制 | ②完全缺失 | 同一手机号可在 detect-role、login-check、check-role、login-status、登录、找回密码之间被分散探测，单接口阈值都不超限 | 中(1-3天) | 近期
+D-10 | 全量导出接口无冷却期与每日次数上限，仅受兜底 200 rpm 约束 | ②完全缺失 | 管理员账号（或被窃会话）可反复导出全量学员/费用表；审计日志有记录但无事前节流 | 小(<1天) | 近期
+D-11 | 公开数据接口无分页契约/ETag/分片返回，名册类资源一次响应整表 | ②完全缺失 | 降低爬取成本，整站镜像无需翻页 | 中(1-3天) | 长期
+D-12 | Nginx 无 `limit_req`、无 UA/Bot 黑名单、无 ACL；仓库未见 WAF 模块与规则 | ③架构运维层 | 应用层桶被绕过（直连回环/多 IP）后无第二道边缘防线 | 中(1-3天) | 近期
+D-13 | CDN 侧 Bot 管理/边缘限流/ACL 在代码与文档中无证据，线上配置待核实 | ③架构运维层 | 若 CDN 未配边缘规则，所有防爬压力都压在应用单机桶上 | 中(1-3天) | 近期
+D-14 | 限流驱动 auto 降级内存；ai/chat 桶为进程内 Map；多实例下阈值被分摊、重启清零 | ③架构运维层 | 分布式部署时限流阈值失真；重启后被封账号/IP 记录清空 | 中(1-3天) | 近期
+D-15 | IP 维度唯一信任 `X-Real-IP`，前提是上层 Nginx/CDN 覆写该头；CDN 回源透传情况待核实 | ③架构运维层 | 若回源未覆写，限流按错误 IP 分桶（误伤或失效），审计 IP 失真 | 小(<1天) | 近期
+D-16 | 未见异常 UA、高频 401、单 IP 大流量下载的日志审计与告警配置 | ③架构运维层 | 批量爬取/枚举行为无可观测信号，事后无法回溯定位 | 中(1-3天) | 长期
+
+HEAD: ## 待实测项
+编号 | 待验证假设 | 验证方法（低频、单点、可回滚） | 风险 | 建议
+T-1 | `/api/public/teacher-showcase` 实际返回条数与响应体积，以及在无限流情况下连续 3 次请求是否均 200 | 本机 `next dev` 启动后，仅用 `curl` 请求 3 次该接口，记录返回 JSON 的教师条数与字节数；不并发、不翻页 | 仅打本机 dev 库，无线上影响 | 确认量级后决定分页大小与缓存策略（D-1）
+T-2 | 4 个未 clamp 接口在 dev 库下 `?limit=1000` 是否被 Prisma 接受并返回超量数据 | 本机登录测试账号，逐个请求 `teachers/notifications/leave-requests/settings/logs?limit=1000`，观察返回条数；验证完即关 dev server | 仅本机 dev 库；不指向线上 | 验证 D-2 修复前的真实行为，作为回归基线
+T-3 | 阿里云 CDN 控制台是否已配 Bot 管理、边缘限流、UA 拦截、动态缓存规则 | 运维登录 CDN/DCDN 控制台导出规则清单，与本报告 4.6 对照；不触发任何线上探测 | 只读控制台操作 | 归档规则到 `docs\`；缺失项按 D-13 补齐
+T-4 | CDN 回源后 `X-Real-IP` 是否为真实访客 IP；应用拿到的 IP 是否与访问日志一致 | 在 dev/预发环境经 Nginx 发起请求，对比 `logDeviceFingerprint` 记录的 IP 与 Nginx `$remote_addr`；线上仅核对日志字段，不构造伪造头请求 | 低频单次；伪造头测试只在本机直连场景做 | 确认 D-15 信任链；必要时调整边缘头覆写
+T-5 | E-4 `login-status` 对存在/不存在账号的响应时延差是否可被计时区分 | 本机 dev 环境分别用存在与不存在的测试邮箱各请求 5 次，记录响应时间分布；不做批量字典 | 本机 dev；请求量极小 | 若存在显著时延差，按 D-3 第 3 条抹平
+T-6 | `forgot-password` 对存在/不存在账号的响应时延差，以及发信失败是否回显差异 | 本机 dev 关闭真实发信（使用 mock/无效 SMTP 配置），两类邮箱各请求 3 次计时；核对响应体完全一致 | 本机 dev；不向真实邮箱发信 | 确认文案统一之外是否还需恒定时延处理
+T-7 | 生产共享挂载目录内是否残留 `public/uploads/` 9 个历史上传文件与 3 个测试 PDF；`/volunteer/docs/` 线上文件清单 | 运维在服务器上列主机 `/srv/edu-manage/shared/public/uploads` 与 `/volunteer/docs` 目录（compose `:69, :73` 挂载）；不通过 URL 逐个访问线上文件 | 只读主机目录 | 按 D-7 清理残留；公开素材登记造册
+T-8 | 生产 Redis 是否在线、限流是否走 Redis 驱动；`ai/chat` 进程内桶重启后是否清空 | compose 已注入 `REDIS_URL`（`compose.production.yaml:59`），运维核对运行时 Redis 连通性与降级日志；在预发环境触发 429 后重启实例，观察主限流桶是否保留、`ai/chat` 日配额是否重置 | 配置只读核对 + 预发低频验证 | 按 D-14 将 AI 桶迁移 Redis，并对内存降级加告警
+T-9 | robots/sitemap 线上实际输出与静态分析是否一致（含 9 个遗漏前缀是否被搜索引擎收录） | 用 `curl https://域名/robots.txt`、`/sitemap.xml` 各取一次；搜索引擎收录情况通过站长工具后台查看，不做主动提交 | 单次只读 GET | 按 D-6 补齐 Disallow 清单
+
+##### FILE 05-data-exfiltration.md (380 lines)
+HEAD: ## 摘要表
+编号 | 问题 | 类别 | 危害 | 工作量 | 优先级
+E-1 | `settings/backup/create` 七表无 select/无 take 全标量回包 | ①已具备但不完善·导出通道 | 单个 admin 会话即可拖走两库学员/教师/缴费/报名/补课全字段（含电话、邮箱、备注），无行数上限约束 | 中 | 立刻
+E-2 | 导出通道无专用限流、无按用户/按日配额 | ①已具备但不完善·限流 | 被盗用的 admin/teacher 凭证可高频重复拉取报表/Excel/JSON，IP 桶 200/300 rpm 不按人聚合 | 中 | 近期
+E-3 | 18/20 导出下载路由无独立审计条目 | ①已具备但不完善·审计 | 批量导出发生时无行为留痕，事后无法定位是谁、何时、导了哪批数据 | 小 | 近期
+E-4 | paper-stats 教师未按本人课次裁剪；volunteer-stats 跨部不裁剪 | ①已具备但不完善·授权裁剪 | 教师可见整 division 薄弱点排行；跨学部计数互漏（数据面为聚合，无个人行） | 小 | 近期
+E-5 | finance notes 自由文本随表导出；考勤/学员/薪资导出无 take 上限 | ①已具备但不完善·字段裁剪/分页 | 备注夹带的 PII 被带走；大库下表全量回包，单次响应体积与内存压力不可控 | 小 | 近期
+E-6 | OSS 私有 bucket 开关代码未接线，put 返回未签名公网 URL | ①已具备但不完善·对象存储 | 若 bucket 为 public-read，泄露 key/URL 即可裸读对象；私有判定完全依赖控制台 | 中 | 近期
+E-7 | 本地 legacyUrl `/uploads/<key>` 静态旁路，proxy matcher 排除 uploads/volunteer | ①已具备但不完善·访问控制 | 本地 driver 下历史链接可能绕过 `/api/uploads` 鉴权直读静态文件；是否被 Nginx/CDN 直出待核 | 中 | 近期
+E-8 | Sentry 无 beforeSend/无 PII 显式关闭、replay 无 masking | ①已具备但不完善·遥测泄露 | 异常事件可能携带 cookie/body/DOM 文本上报第三方；100% 错误 replay 录制整页 DOM | 小 | 近期
+E-9 | 文档类上传无 magic bytes；志愿文档通道无文件头校验 | ①已具备但不完善·上传校验 | 伪装扩展名的文档/压缩包可入库；混淆下载场景下内容类型不可信 | 中 | 近期
+E-10 | 请求 body/cookie 未纳入脱敏；upload 错误消息内部外泄；识别上游细节回显 120 字符 | ①已具备但不完善·错误/日志 | 内部 SDK/路径/SQL 片段可能经错误响应或遥测外泄；body 内敏感字段未在日志层兜底 | 小 | 近期
+E-11 | 部分上传/下载响应缺 nosniff；CSP script-src unsafe-inline；无 COOP/COEP | ①已具备但不完善·响应头 | 浏览器 MIME 嗅探混淆；内联脚本面被放开；跨域隔离纵深缺失 | 小 | 长期
+E-12 | 志愿文档下载仅登录、无角色校验 | ②完全缺失·授权 | 家长账号可调 `/volunteer/documents/[id]/download` 读取站内所有志愿文档 | 小 | 立刻
+E-13 | `.gitignore` 未排除根 `*.sql/*.zip/_*`；54.7MB 生产 dump 跟踪状态未核 | ②完全缺失·仓库泄露 | 若被 git 跟踪，生产库快照/源码压缩包随仓库分发；协作/备份/CI 场景扩散面大 | 小 | 立刻
+E-14 | 反馈图片签名 secret 缺失时降级未签名裸链；7 天 TTL 偏长 | ②完全缺失·签名机制 | 配置缺失时 fail-open；档案分享链接一周内可重放 | 小 | 近期
+E-15 | 无上传内容恶意扫描/病毒检测（magic bytes 之外） | ②完全缺失·上传校验 | 含宏/恶意脚本的 Office、压缩包、伪装文档可入库并被其他角色下载 | 中 | 长期
+E-16 | Redis 内网无密码 | ②完全缺失·基础设施 | 内网任意可达容器/主机可读写限流计数、会话缓存；依赖"内网隔离"单道防线 | 小 | 近期
+E-17 | db/redis 未映射公网端口（正面），但 Redis 无密码 + 单实例内网假设 | ③架构运维·网络隔离 | 公网面收敛到位；风险集中在内网横向与单实例降级 | — | 近期
+E-18 | 本地 scratch 体量巨大（release 1494MB / tmp 642MB / backups 55MB）；data/ 未进 dockerignore | ③架构运维·构建上下文 | 构建上下文臃肿；若误把本地目录挂进静态根或打包流程，存在快照/中间产物扩散风险 | 中 | 长期
+E-19 | 生产备份以文档 cron 约定为准，仓库内无 cron 安装证据；应用 JSON 导出非 DB 备份 | ③架构运维·备份策略 | 若每日 pg dump cron 未落地，数据库故障恢复依赖单次手动 dump；离线异地备份仅文档提及 | 中 | 近期
+E-20 | OSS ACL / CDN 回源缓存 / Nginx 是否直出 uploads 均为线上配置，仓库无证据 | ③架构运维·CDN/对象存储 | 静态旁路、签名 URL 被 CDN 长缓存、同域存储型 XSS 等风险无法在代码层闭环 | 中 | 近期
+E-21 | 多组第三方凭证已配置（DB/next-auth/WxPusher/企微/AI Key/OSS AK），仓库无轮换台账与 AK 最小权限证据 | ③架构运维·密钥管理 | 凭证分散在两份 env 与服务器 `.env`；AK 权限范围、轮换记录不可见；泄露后无法快速定位禁用 | 中 | 近期
+
+HEAD: ## 待实测项
+编号 | 待验证假设 | 验证方法（低风险、单点、可回滚） | 风险 | 建议
+T-10 | 生产 `STORAGE_DRIVER` 实际值（本地 `.env.local` 长度 5 = local；生产 compose 未覆盖该变量） | 运维在服务器 `docker exec edu-manage-app printenv STORAGE_DRIVER` 只读查看；不发起对象读写 | 只读容器环境变量 | 确认走本地文件还是 OSS；决定 E-6/E-7 修复优先级
+T-11 | OSS bucket ACL 是 public-read 还是私有；对象能否用裸公网 URL 直读 | 运维在 OSS 控制台查看 bucket 读写权限与对象 ACL；挑 1 个已知测试对象核对，不遍历列表 | 只读控制台 | 若 public-read，按 E-6 转私有 + 签名 URL
+T-12 | `/uploads/<key>` 与 `/volunteer/docs/*` 在 Nginx/CDN 下是否绕过鉴权直连 | 本机 dev 启动后，用未登录会话直接 GET 一个已知本地测试文件路径，观察 200 静态直出还是 302/401；线上仅由运维核对 nginx `location` 与 CDN 回源规则，不构造批量请求 | 本机 dev 低频；线上只读配置 | 按 E-7/E-12 收敛静态旁路
+T-13 | 根目录 `*.sql / *.zip / _*` 是否被 git 跟踪 | 在装有 git 的环境执行 `git ls-files` 过滤 `\.(sql | zip | dump)$` 与 `^_`；不提交、不推送任何文件 | 只读索引查询 | 已跟踪则按 E-13 从索引移除并评估历史清理
+T-14 | CDN 是否缓存 API 响应、签名 URL、上传目录 | 运维在 CDN 控制台查看缓存键规则与命中日志；抽查响应 `Cache-Control`/`Age` 头，不主动刷缓存 | 只读配置 | 签名 URL/API 配 no-store；上传目录排除缓存
+T-15 | Sentry 项目实际是否收到 cookie/request body/replay DOM 文本 | 运维在 Sentry 后台查看最近错误事件的 request 上下文与 replay 样本；必要时在预发环境触发一次受控 500 观察上送内容 | 预发单次受控触发 | 按 E-8 补 beforeSend/masking 后复测
+T-16 | Redis 内网是否有其他容器/主机可连；6379 是否仅 internal 可达 | 运维核对 compose 网络与宿主机防火墙；从另一容器 `redis-cli ping` 验证连通性，不写入键 | 内网只读探测 | 补 requirepass（E-16）；收紧网络策略
+T-17 | 服务器上 `release/ tmp/ backups/ data/` 是否被其他服务或 Nginx 静态根覆盖；历史日志是否含 DB 连接串/请求体 | 运维 `docker exec`/`ls` 核对目录位置与权限；抽样 grep 服务器日志中的连接串/手机号模式，不导出日志到外部 | 只读容器与服务器文件系统 | 按 E-18 固化目录边界；清理残留日志
+T-18 | 生产模式 500 是否真的不返回 `err.message`/stack | 本机以 `NODE_ENV=production` 启动 dev/预发，触发一次受控异常（如临时断库），观察响应体仅含通用文案；验证后恢复配置 | 本机/预发单次；不指向线上 | 若回显内部消息，按 E-10 收紧 catch 分支
+T-19 | 材料/讲义静态目录（`public/services marketing business-assets`）线上文件清单是否含用户上传残留 | 运维在容器 `public/` 下列目录核对；不通过 URL 逐个访问 | 只读容器文件系统 | 清理 test-*.pdf 等测试残留；公开素材登记造册

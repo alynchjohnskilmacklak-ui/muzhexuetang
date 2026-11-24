@@ -8,6 +8,8 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { TeacherTrendCharts } from '@/components/teacher/TeacherTrendCharts'
 
+import { resolveTier, TIER_THEME, type TeacherTier } from '@/constants/teacher-tier'
+
 const { Text, Title } = Typography
 
 const fetcher = async (url: string) => {
@@ -52,6 +54,13 @@ interface SalaryPayload {
   totalLesson: number
   totalFeedback: number
   totalAdjustment: number
+  salaryConfig: {
+    groupRateJunior: number
+    groupRateSenior: number
+    oneOnOneRates: Record<string, number>
+    feedbackRateGroup: number
+    feedbackRateOneOne: number
+  }
   settled?: { amount: number; at: string; description?: string | null } | null
   transactions: SalaryTransaction[]
 }
@@ -62,6 +71,12 @@ export default function TeacherSalaryPage() {
   const [salaryBucket, setSalaryBucket] = useState<'ALL' | 'SMALL_CLASS' | 'INTENSIVE'>('ALL')
   const [mobilePage, setMobilePage] = useState(1)
   const MOBILE_PAGE_SIZE = 4
+
+  // 读取教师梯队主题
+  const { data: dashData } = useSWR('/api/teacher/dashboard', fetcher)
+  const currentTier: TeacherTier = resolveTier(dashData?.teacher?.tierLevel)
+  const theme = TIER_THEME[currentTier]
+
   const { data, error, isLoading, mutate } = useSWR<SalaryPayload>(`/api/teacher/salary?period=${period}`, fetcher, { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true })
   // 教学与收入趋势（到课率 + 近 6 月课时/课时费），口径与教师首页一致
   const { data: trendData } = useSWR<{ attendanceWeekTrend: Array<{ label: string; rate: number }>; salaryTrend: Array<{ label: string; hours: number; pay: number }> }>('/api/teacher/trends', fetcher)
@@ -151,36 +166,59 @@ export default function TeacherSalaryPage() {
   ]
 
   return (
-    <div>
-      <Title level={4} style={{ marginTop: 0 }}>我的薪资</Title>
-      {error && <Alert type="error" showIcon message="薪资数据加载失败" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 12 }} />}
+    <div className="teacher-salary-container">
+      {error && <Alert type="error" showIcon message="薪资数据加载失败" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 14, borderRadius: 10 }} />}
 
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
-        <Space wrap>
-          <Segmented options={PERIOD_OPTIONS} value={period} onChange={(value) => setPeriod(value as string)} />
-          <Segmented
-            value={salaryBucket}
-            onChange={(value) => setSalaryBucket(value as typeof salaryBucket)}
-            options={[
-              { label: '全部', value: 'ALL' },
-              { label: '小班课', value: 'SMALL_CLASS' },
-              { label: '一对一/二/三', value: 'INTENSIVE' },
-            ]}
-          />
-        </Space>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+          <Space wrap>
+            <Segmented options={PERIOD_OPTIONS} value={period} onChange={(value) => setPeriod(value as string)} />
+            <Segmented
+              value={salaryBucket}
+              onChange={(value) => setSalaryBucket(value as typeof salaryBucket)}
+              options={[
+                { label: '全部', value: 'ALL' },
+                { label: '小班课', value: 'SMALL_CLASS' },
+                { label: '一对一/二/三', value: 'INTENSIVE' },
+              ]}
+            />
+          </Space>
+          <span style={{ fontSize: 12, color: '#8c8070' }}>
+            数据每 30 秒自动刷新 · 考勤与反馈即时计提
+          </span>
+        </div>
 
-        <Card className="teacher-salary-today" styles={{ body: { padding: isMobile ? 18 : 22 } }}>
-          <Text style={{ color: 'var(--color-ink-subtle)', fontSize: 13 }}>今日产生（含已结算）</Text>
-          <div style={{ marginTop: 4, color: 'var(--color-ink)', fontSize: isMobile ? 30 : 34, lineHeight: 1.2, fontWeight: 760 }}>
+        {/* 今日产生收入高光微卡片 */}
+        <div
+          style={{
+            padding: isMobile ? '16px 18px' : '20px 24px',
+            borderRadius: 14,
+            background: `linear-gradient(135deg, ${theme.secondary}14 0%, #ffffff 70%)`,
+            border: `1.5px solid ${theme.primary}22`,
+            boxShadow: '0 4px 18px rgba(0,0,0,0.025)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ color: '#685d4d', fontSize: 13, fontWeight: 650 }}>
+              今日教学与奖励产生（含已结算）
+            </span>
+            <Tag style={{ background: `${theme.primary}12`, color: theme.primary, border: `1px solid ${theme.primary}25`, borderRadius: 6, fontWeight: 600 }}>
+              {theme.roleTag || theme.name}
+            </Tag>
+          </div>
+          <div style={{ marginTop: 6, color: '#1a1201', fontSize: isMobile ? 32 : 38, lineHeight: 1.15, fontWeight: 800 }}>
             ¥{todayIncome.toFixed(2)}
           </div>
-          <Text style={{ display: 'block', marginTop: 7, color: 'var(--color-ink-subtle)', fontSize: 12 }}>不随上方时间和课程类型筛选变化</Text>
-        </Card>
+          <span style={{ display: 'block', marginTop: 6, color: '#8c8070', fontSize: 12 }}>
+            实时汇总今日全部已上课时费、考勤及反馈奖励 · 不随上方周期与类型筛选变动
+          </span>
+        </div>
 
+        {/* 核心指标统计条 */}
         <div className="teacher-salary-summary-strip">
           {[
-             ['当前待结算余额', data?.total ?? 0],
-            ['小班课', data?.totalSmallClass ?? 0],
+            ['当前待结算余额', data?.total ?? 0],
+            ['小班课课时费', data?.totalSmallClass ?? 0],
             ['一对一/二/三', data?.totalIntensive ?? 0],
           ].map(([label, value]) => (
             <div key={String(label)}>
@@ -265,15 +303,6 @@ export default function TeacherSalaryPage() {
               locale={{ emptyText: '暂无薪资记录' }}
             />
           )}
-        </Card>
-
-        <Card title="薪资规则说明" bordered={false} style={{ borderRadius: 8 }}>
-          <Space direction="vertical" size={6}>
-            <Text type="secondary" style={{ fontSize: 12 }}>课时费：完成考勤提交后自动发放，每节课仅计一次。</Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>反馈奖励：发布课堂反馈后按学员人数发放，同一学生当天同课程类型只奖励一次。</Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>默认初中班课 22 元/小时，高中班课 26 元/小时；一对一按年级独立定价。</Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>默认班课反馈奖励 0.5 元/人，一对一反馈奖励 1 元/人。</Text>
-          </Space>
         </Card>
       </Space>
     </div>

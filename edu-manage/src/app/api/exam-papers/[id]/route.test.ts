@@ -14,6 +14,8 @@ describe('exam-paper detail parent visibility', () => {
   const findFirst = vi.fn()
   const findUnique = vi.fn()
   const updateMany = vi.fn()
+  const paperCommentUpdateMany = vi.fn()
+  const notificationUpdateMany = vi.fn()
   const paper = {
     id: 'paper-1',
     status: 'PUBLISHED',
@@ -21,15 +23,26 @@ describe('exam-paper detail parent visibility', () => {
     questions: [],
     reactions: [],
     comments: [],
+    isReadByParent: false,
+    readAt: null,
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.getCurrentUser.mockResolvedValue({ id: 'parent-1', role: 'parent', division: 'JUNIOR' })
-    mocks.getRequestPrisma.mockResolvedValue({ examPaper: { findFirst, findUnique, updateMany } })
     mocks.resolveTeacherForUser.mockResolvedValue({ id: 'teacher-1' })
-    findFirst.mockResolvedValue(paper)
+    findFirst.mockResolvedValue({ ...paper, student: { ...paper.student }, comments: [] })
     updateMany.mockResolvedValue({ count: 0 })
+    paperCommentUpdateMany.mockResolvedValue({ count: 0 })
+    notificationUpdateMany.mockResolvedValue({ count: 1 })
+    mocks.getRequestPrisma.mockResolvedValue({
+      examPaper: { findFirst, findUnique, updateMany },
+      paperComment: { updateMany: paperCommentUpdateMany },
+      $transaction: (callback: (tx: unknown) => unknown) => callback({
+        examPaper: { updateMany },
+        notification: { updateMany: notificationUpdateMany },
+      }),
+    })
   })
 
   it('queries only published papers linked through either parent binding', async () => {
@@ -43,6 +56,25 @@ describe('exam-paper detail parent visibility', () => {
       { parentId: 'parent-1' },
       { parentUserId: 'parent-1' },
     ])
+    expect(updateMany.mock.calls[0][0].data).toMatchObject({ isReadByParent: true })
+    expect(notificationUpdateMany.mock.calls[0][0].where).toMatchObject({
+      userId: 'parent-1',
+      read: false,
+      OR: [{ relatedId: 'paper-1', OR: expect.arrayContaining([{ relatedType: { in: ['EXAM_PAPER', 'PAPER_PUBLISHED'] } }]) }],
+    })
+    expect((await response.json()).isReadByParent).toBe(true)
+  })
+
+  it('repairs unread exam notifications when the paper itself was already read', async () => {
+    findFirst.mockResolvedValue({ ...paper, isReadByParent: true, readAt: new Date('2026-10-30T10:00:00Z') })
+
+    const response = await GET(new NextRequest('http://localhost/api/exam-papers/paper-1'), {
+      params: Promise.resolve({ id: 'paper-1' }),
+    })
+
+    expect(response.status).toBe(200)
+    expect(notificationUpdateMany).toHaveBeenCalledTimes(1)
+    expect((await response.json()).isReadByParent).toBe(true)
   })
 
   it('returns not found for drafts and papers belonging to another family', async () => {
@@ -64,6 +96,24 @@ describe('exam-paper detail parent visibility', () => {
 
     expect(response.status).toBe(404)
     expect(findFirst.mock.calls[0][0].where).toMatchObject({ id: 'paper-foreign', teacherId: 'teacher-1' })
+  })
+
+  it('marks parent comments as read when staff opens a paper detail', async () => {
+    mocks.getCurrentUser.mockResolvedValue({ id: 'teacher-user', email: 't@example.com', name: '教师', role: 'teacher', division: 'JUNIOR' })
+    findFirst.mockResolvedValue({ ...paper, comments: [{ id: 'comment-1', isRead: false, author: { role: 'parent' } }] })
+    paperCommentUpdateMany.mockResolvedValue({ count: 1 })
+
+    const response = await GET(new NextRequest('http://localhost/api/exam-papers/paper-1'), {
+      params: Promise.resolve({ id: 'paper-1' }),
+    })
+
+    expect(response.status).toBe(200)
+    expect(paperCommentUpdateMany.mock.calls[0][0].where).toMatchObject({
+      paperId: 'paper-1',
+      author: { role: 'parent' },
+      isRead: false,
+    })
+    expect((await response.json()).comments[0].isRead).toBe(true)
   })
 
   it('does not mark a parent-visible draft as read or expose its data', async () => {
@@ -102,5 +152,6 @@ describe('exam-paper detail parent visibility', () => {
     expect(response.status).toBe(200)
     expect(updateMany.mock.calls[0][0].where).toMatchObject({ id: 'paper-1', status: 'PUBLISHED' })
     expect(findFirst.mock.calls[0][0].where).toMatchObject({ id: 'paper-1', status: 'PUBLISHED' })
+    expect(notificationUpdateMany).toHaveBeenCalledTimes(1)
   })
 })

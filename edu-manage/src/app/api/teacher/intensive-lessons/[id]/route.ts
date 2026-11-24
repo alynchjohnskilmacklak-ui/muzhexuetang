@@ -5,6 +5,7 @@ import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
 import { checkScheduleConflict, type ConflictInfo } from '@/lib/schedule-conflict'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 import { recordCourseChangeEvent } from '@/lib/course-change-events'
+import { visibleStudentWhere } from '@/lib/business-visibility'
 import {
   calculatePlannedMinutes,
   canTeacherEditIntensiveLesson,
@@ -34,7 +35,7 @@ async function getOwnedLesson(id: string) {
       group: {
         include: {
           room: { select: { id: true, name: true } },
-          enrollments: { where: { status: 'ACTIVE' }, select: { studentId: true } },
+          enrollments: { where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere }, select: { studentId: true } },
         },
       },
       lessonStudents: { select: { studentId: true } },

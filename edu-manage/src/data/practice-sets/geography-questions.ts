@@ -3040,7 +3040,7 @@ export const geographyQuestions: GeographySection[] = [
         prompt: '读图1.13，人口密度较高的区域主要集中在（ ）。',
         options: ['西北内陆和青藏高原', '东部平原及沿海城市密集地区', '新疆盆地和内蒙古高原西部', '横断山区和青藏高原边缘'],
         answerIndex: 1,
-        imageUrl: '/images/practice/geo-8a1-2-fig1-13.png',
+        imageUrl: '/images/practice/geo-8a1-2-fig1-13.webp',
         explanation: '图中人口密度较高的颜色主要分布在黑河—腾冲线东南侧，集中于华北平原、长江中下游平原和沿海城市密集区；西部高原、盆地人口密度整体较低。',
         difficulty: 'EXAM',
         sourceRef: '人教版八年级上册地理第一章第二节图1.13《中国人口的分布》（教材第13页，PDF第18页）地图判读题改编；非中考真题。',
@@ -3232,7 +3232,7 @@ export const geographyQuestions: GeographySection[] = [
         answerIndex: 0,
         explanation: '根据图中位置，大兴安岭以东、长白山以西主要分布东北平原；华北平原位于太行山以东、燕山以南，塔里木盆地在新疆南部，青藏高原在我国西南部。',
         difficulty: 'EXAM',
-        imageUrl: '/images/practice/geo-textbook-8a-fig2-2-china-terrain.png',
+        imageUrl: '/images/practice/geo-textbook-8a-fig2-2-china-terrain.webp',
         sourceRef: '人教版八年级上册第二章第一节图2.2（书内第23页，电子课本PDF第28页）；依据地图位置改编，非中考真题。',
       },
       {
@@ -3657,7 +3657,7 @@ export const geographyQuestions: GeographySection[] = [
         answerIndex: 1,
         explanation: '中线工程从汉江丹江口水库引水，自流到北京、天津。',
         difficulty: 'EXAM',
-        imageUrl: '/images/practice/geo-textbook-8a-fig3-16-south-north-water.png',
+        imageUrl: '/images/practice/geo-textbook-8a-fig3-16-south-north-water.webp',
         sourceRef: '人教版八年级上册第三章第二节图3.16（书内第78页，电子课本PDF第83页）；据中线工程示意图改编，非中考真题。',
       },
       {

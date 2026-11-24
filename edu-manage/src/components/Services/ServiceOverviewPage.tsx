@@ -53,7 +53,13 @@ function ServiceThumbnail({ service }: { service: ServiceCatalogItem }) {
   </span>
 }
 
-export function ServiceOverviewPage({ basePath }: { basePath: string }) {
+export function ServiceOverviewPage({
+  basePath,
+  hideHeader = false,
+}: {
+  basePath: string
+  hideHeader?: boolean
+}) {
   const [query, setQuery] = useState('')
   const normalizedQuery = query.trim().toLocaleLowerCase('zh-CN')
 
@@ -73,15 +79,19 @@ export function ServiceOverviewPage({ basePath }: { basePath: string }) {
 
   const resultCount = groups.reduce((total, group) => total + group.services.length, 0)
 
-  return <main className="service-page-shell service-catalog">
-    <nav className="service-context-bar" aria-label="业务页面导航">
-      <span className="service-context-bar__current">业务总览</span>
-    </nav>
-    <header className="service-catalog-head">
-      <span className="service-eyebrow">牧哲学堂 · 服务中心</span>
-      <h1>全部业务</h1>
-      <p>按学习阶段与实际需求分类，选择一项服务查看完整介绍。</p>
-    </header>
+  return <main className={`service-page-shell service-catalog ${hideHeader ? 'service-catalog--embedded' : ''}`}>
+    {!hideHeader && (
+      <>
+        <nav className="service-context-bar" aria-label="业务页面导航">
+          <span className="service-context-bar__current">业务总览</span>
+        </nav>
+        <header className="service-catalog-head">
+          <span className="service-eyebrow">牧哲学堂 · 服务中心</span>
+          <h1>全部业务</h1>
+          <p>按学习阶段与实际需求分类，选择一项服务查看完整介绍。</p>
+        </header>
+      </>
+    )}
 
     <label className="service-search">
       <span className="service-search__mark" aria-hidden>⌕</span>

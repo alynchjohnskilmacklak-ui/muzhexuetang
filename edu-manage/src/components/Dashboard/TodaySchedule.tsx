@@ -35,7 +35,7 @@ export function TodayScheduleCard({ data }: { data: TodaySchedule[] }) {
   )), [data, room, status, teacher])
 
   return (
-    <Card bordered={false} style={{ borderRadius: 16, height: '100%' }} styles={{ body: { padding: isMobile ? 14 : 18 } }}>
+      <Card variant="borderless" style={{ borderRadius: 16, height: '100%' }} styles={{ body: { padding: isMobile ? 14 : 18 } }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: isMobile ? 'stretch' : 'center', flexDirection: isMobile ? 'column' : 'row', marginBottom: 14 }}>
         <Title level={5} style={{ margin: 0 }}>今日课表</Title>
         <div style={{ display: 'flex', gap: 8, flexDirection: isMobile ? 'column' : 'row' }}>

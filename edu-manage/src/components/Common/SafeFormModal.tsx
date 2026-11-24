@@ -43,7 +43,7 @@ export function SafeFormModal({
         {...dialogProps}
         confirmLoading={confirmLoading}
         onClose={requestClose}
-        maskClosable={!confirmLoading}
+        maskClosable={false}
         keyboard={!confirmLoading}
         closable={!confirmLoading}
       />

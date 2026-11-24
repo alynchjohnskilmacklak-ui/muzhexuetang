@@ -4,14 +4,13 @@ import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
 import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
+import { AUTO_DISABLED_PARENT_SESSION_TOKEN } from '@/lib/parent-account-validity'
 
 export const dynamic = 'force-dynamic'
 
 // A non-null token marks account deactivation performed by this student
 // lifecycle. Manual account deactivation clears currentSessionToken, so a
 // later student reactivation cannot silently undo an administrator decision.
-const AUTO_DISABLED_PARENT_SESSION_TOKEN = 'system-disabled-no-current-student'
-
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

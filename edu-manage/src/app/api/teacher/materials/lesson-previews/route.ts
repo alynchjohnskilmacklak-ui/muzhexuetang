@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { dateRangeDays, getLocalDayRange, localDateKey, todayLocal } from '@/lib/date/local-day'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
-import { resolveLessonStudentIds } from '@/lib/lesson-roster'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { visibleStudentWhere } from '@/lib/business-visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,7 +42,7 @@ export const GET = apiHandler(async () => {
           term: { select: { kind: true } },
           room: { select: { name: true } },
           course: { select: { grade: true, subject: true } },
-          enrollments: { where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } }, select: { id: true, studentId: true } },
+          enrollments: { where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere }, select: { id: true, studentId: true, subjects: true } },
         },
       },
       lessonPreviewMaterial: {
@@ -84,9 +85,10 @@ export const GET = apiHandler(async () => {
       subject: lesson.subject || lesson.group.course.subject,
       groupName: lesson.group.name,
       roomName: lesson.group.room?.name || '教室待定',
-      studentCount: resolveLessonStudentIds(
+      studentCount: resolveSubjectLessonStudentIds(
         lesson.lessonStudents.map((item) => item.studentId),
-        lesson.group.enrollments.map((enrollment) => enrollment.studentId),
+        lesson.group.enrollments,
+        lesson.subject || lesson.group.course.subject,
         lesson.lessonDate,
       ).length,
       material,

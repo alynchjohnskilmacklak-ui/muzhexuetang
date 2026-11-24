@@ -76,6 +76,14 @@ bash scripts/deploy-prebuilt-tar.sh /tmp/edu-manage-runtime-YYYYMMDD-HHMM.tar.gz
 部署成功后，安装包中的脚本会自动更新服务器稳定入口，后续不需要再单独上传脚本。
 部署成功时也会更新 `/opt/edu-manage/scripts/backup-db.sh`，保证每日数据库备份任务使用当前审核过的脚本。
 
+## Nginx 静态资源直出（仅版本化预构建部署）
+
+仓库提供 `deploy/nginx/edu-manage-prebuilt.conf`，用于本节的 `/opt/edu-manage/current` 版本化发布方式。它从当前版本直接提供 `/_next/static/` 和 `public/` 下的 `/images/`、`/teacher-portraits/`、`/about-images/`、`/videos/`、`/people/`、`/stickers/`，减少这些静态请求经过 Node.js 的开销。缓存时长与 `next.config.ts` 对应；Nginx gzip 只在 `/_next/static/` 的静态资源位置启用。
+
+这个站点文件是预构建部署的可选配置。**Docker/Compose 部署继续使用原来的 Nginx 配置**，不要把 `/opt/edu-manage/current` 路径套用到容器发布。未列出的路径继续由 Next.js 处理；特别是 `/uploads/`、`/api/`、`/services/`、`/marketing/`、`/business-assets/` 和 `/volunteer/docs/` 没有配置 Nginx 直出。静态文件不存在时也会回源到 Next.js。
+
+如要启用，请先在服务器上确认当前部署由 `scripts/deploy-prebuilt-tar.sh` 管理，并将该配置安装为活动站点配置。之后先执行 `sudo nginx -t`；只有检查通过后，运维人员再按既有变更流程重载 Nginx。不要在未确认部署模式时切换此配置。
+
 ## 服务器目录
 
 ```text

@@ -7,6 +7,7 @@ import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
 import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { localDateColumnValue, localDateKey, todayLocal } from '@/lib/date/local-day'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,13 +18,19 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const role = (session.user as { role?: string }).role
   const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
-  const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
+  const dateStr = searchParams.get('date') || todayLocal()
+  let dayStart: Date
+  try {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) throw new Error('invalid date')
+    dayStart = localDateColumnValue(dateStr)
+    if (localDateKey(dayStart) !== dateStr) throw new Error('invalid date')
+  } catch {
+    return NextResponse.json({ error: '日期格式无效' }, { status: 400 })
+  }
+  const dayEnd = new Date(dayStart.getTime() + 86400000)
   const teacherIdParam = searchParams.get('teacherId')
   const classType = searchParams.get('classType')
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
-
-  const dayStart = new Date(`${dateStr}T00:00:00`)
-  const dayEnd = new Date(`${dateStr}T23:59:59`)
 
   const where: Record<string, unknown> = {
     status: { notIn: ['CANCELLED', 'POSTPONED'] },
@@ -74,6 +81,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         include: { student: { select: { id: true, name: true } } },
       },
       attendances: {
+        where: { deletedAt: null },
         select: { id: true, studentId: true, status: true },
       },
     },
@@ -103,8 +111,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const allDone = students.length > 0 && students.every(
       (student) => lesson.attendances.some((a) => a.studentId === student.studentId)
     )
-    const startTime = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T${lesson.startTime}:00`)
-    const endTime = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T${lesson.endTime}:00`)
+    const lessonDateKey = lesson.lessonDate.toISOString().slice(0, 10)
+    const startTime = new Date(`${lessonDateKey}T${lesson.startTime}:00+08:00`)
+    const endTime = new Date(`${lessonDateKey}T${lesson.endTime}:00+08:00`)
     return {
       id: lesson.id,
       title: lesson.group.name || lesson.group.course?.name || '-',

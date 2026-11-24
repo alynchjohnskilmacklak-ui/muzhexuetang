@@ -1,0 +1,1466 @@
+[
+  {
+    "word": "position",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. & v. 位置；职位；安置",
+    "collocations": "a position in a company; take a position; position the chair near the window",
+    "commonMistake": "position 是名词“职位/位置”或动词“安置”；谈工作时可说 apply for a position，不能把它和 position oneself（使自己处于某位置）混为一谈。",
+    "example": {
+      "english": "Mina applied for a teaching position at the new school.",
+      "chinese": "米娜申请了这所新学校的教师职位。"
+    },
+    "application": {
+      "prompt": "After three interviews, Mina was offered a ___ at the school. A. possession B. position",
+      "solution": "B。解析：position 在招聘语境中指“职位”；possession 表示“财物/拥有”，不符合被录用的意思。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: position",
+        "url": "https://dictionary.cambridge.org/dictionary/english/position"
+      }
+    ]
+  },
+  {
+    "word": "sadness",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 悲伤；难过",
+    "collocations": "deep sadness; a feeling of sadness; overcome sadness",
+    "commonMistake": "sadness 是不可数名词，由 sad 加 -ness 构成；表达“感到悲伤”用 feel sad，不能说 feel sadness 作表语。",
+    "example": {
+      "english": "The song filled the room with a quiet sadness.",
+      "chinese": "这首歌让整个房间弥漫着淡淡的忧伤。"
+    },
+    "application": {
+      "prompt": "After the team lost the final, the players felt ___ but thanked their fans. A. sadly B. sad",
+      "solution": "B。解析：felt 后接形容词 sad 表示“感到难过”；sadly 是副词，不能直接作 feel 的表语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sadness",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sadness"
+      }
+    ]
+  },
+  {
+    "word": "run out (of sth)",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 用完；耗尽",
+    "collocations": "run out of milk; time is running out; run out of supplies",
+    "commonMistake": "物品作主语时用 run out；人用完某物时说 run out of sth。",
+    "example": {
+      "english": "We ran out of clean water before the rescue team arrived.",
+      "chinese": "救援队到达前，我们的干净饮用水就用完了。"
+    },
+    "application": {
+      "prompt": "The generator stopped because the camp had ___ fuel. A. run out of B. run out",
+      "solution": "A。解析：句中 fuel 是“用完”的宾语，因此用 run out of；run out 后不直接接宾语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: run",
+        "url": "https://dictionary.cambridge.org/dictionary/english/run"
+      }
+    ]
+  },
+  {
+    "word": "lecture",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 讲座；讲课",
+    "collocations": "give a lecture on history; attend a lecture; a lecture hall",
+    "commonMistake": "lecture 通常指较正式的讲授；“听讲座”说 attend/listen to a lecture，不说 hear a lecture 表示参加活动。",
+    "example": {
+      "english": "We attended a lecture about protecting sea turtles.",
+      "chinese": "我们听了一场关于保护海龟的讲座。"
+    },
+    "application": {
+      "prompt": "Dr Lee will ___ a lecture on online safety this Friday. A. give B. attend",
+      "solution": "A。解析：give a lecture 表示“作讲座”；attend a lecture 是听众参加讲座。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lecture",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lecture"
+      }
+    ]
+  },
+  {
+    "word": "react",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 作出反应；回应",
+    "collocations": "react to the news; react quickly; reaction to a change",
+    "commonMistake": "react 后常接介词 to；名词形式为 reaction。",
+    "example": {
+      "english": "The audience reacted warmly to the young pianist.",
+      "chinese": "观众热情地回应了这位年轻钢琴家的演奏。"
+    },
+    "application": {
+      "prompt": "How did the dog ___ when it heard the doorbell? A. react B. reaction",
+      "solution": "A。解析：did 后用动词原形 react；reaction 是名词，不能放在助动词 did 后作谓语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: react",
+        "url": "https://dictionary.cambridge.org/dictionary/english/react"
+      }
+    ]
+  },
+  {
+    "word": "mix up",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 混淆；弄乱",
+    "collocations": "mix up the dates; mix A up with B; get the names mixed up",
+    "commonMistake": "mix up A and B 表示把两者弄混；说“把 A 误认为 B”可用 mix A up with B。",
+    "example": {
+      "english": "I mixed up the two meeting times and arrived an hour early.",
+      "chinese": "我把两个会议时间弄混了，提前一小时到了。"
+    },
+    "application": {
+      "prompt": "I called my new classmate Tom because I ___ him ___ his brother. A. brought; with B. mixed; up with",
+      "solution": "B。解析：mix sb up with sb 表示“把某人和另一个人弄混”；本句误认了两兄弟。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mix",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mix"
+      }
+    ]
+  },
+  {
+    "word": "put sth to good use",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 有效利用某物",
+    "collocations": "put old boxes to good use; put your skills to good use; make good use of time",
+    "commonMistake": "固定结构是 put sth to good use；sth 放在 put 与 to good use 之间。",
+    "example": {
+      "english": "Our art teacher put the empty bottles to good use by making flower vases.",
+      "chinese": "美术老师把空瓶子有效利用起来，做成了花瓶。"
+    },
+    "application": {
+      "prompt": "The club ___ its spare room ___ good use as a reading corner. A. made; for B. put; to",
+      "solution": "B。解析：put sth to good use 是“有效利用某物”；空房间被改作阅读角，符合这一搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: use",
+        "url": "https://dictionary.cambridge.org/dictionary/english/use"
+      }
+    ]
+  },
+  {
+    "word": "brain",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 脑；智力",
+    "collocations": "the human brain; brain research; use your brain",
+    "commonMistake": "brain 可指大脑，也可借指智力；mind 多指思维或心智，不能把两词在所有语境中互换。",
+    "example": {
+      "english": "The human brain keeps working even while we sleep.",
+      "chinese": "即使在睡觉时，人脑也仍在工作。"
+    },
+    "application": {
+      "prompt": "The doctor used a scan to study the patient's ___. A. mind B. brain",
+      "solution": "B。解析：scan 检查的是身体器官 brain（大脑）；mind 指思维或心智，不是可扫描的器官。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: brain",
+        "url": "https://dictionary.cambridge.org/dictionary/english/brain"
+      }
+    ]
+  },
+  {
+    "word": "chain",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 链条；一连串",
+    "collocations": "a bicycle chain; a chain of events; a chain store",
+    "commonMistake": "chain 作“链条”时可数；a chain of 表示“一连串”，不要漏掉介词 of。",
+    "example": {
+      "english": "A broken chain kept the bicycle from moving.",
+      "chinese": "链条断了，导致这辆自行车无法行驶。"
+    },
+    "application": {
+      "prompt": "One mistake led to another in a ___ of events. A. row B. chain",
+      "solution": "B。解析：a chain of events 指“接连发生的一连串事件”；row 不表示这种因果连续性。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chain",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chain"
+      }
+    ]
+  },
+  {
+    "word": "stable",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 稳定的；稳固的",
+    "collocations": "a stable job; remain stable; stable conditions",
+    "commonMistake": "stable 是形容词，名词 stability 表示“稳定性”；不要把 stable 当作副词修饰动词。",
+    "example": {
+      "english": "The patient is now in a stable condition.",
+      "chinese": "病人的病情现在稳定。"
+    },
+    "application": {
+      "prompt": "The bridge stayed ___ during the strong wind. A. stability B. stable",
+      "solution": "B。解析：stay 后用形容词 stable 作表语；stability 是名词，意为“稳定性”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stable",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stable"
+      }
+    ]
+  },
+  {
+    "word": "retell",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 复述；重新讲述",
+    "collocations": "retell a story; retell the event in your own words; retelling task",
+    "commonMistake": "retell 是及物动词，后直接接故事或经历；不要说 retell about a story。",
+    "example": {
+      "english": "At the end of class, Leo retold the story in his own words.",
+      "chinese": "下课前，利奥用自己的话复述了这个故事。"
+    },
+    "application": {
+      "prompt": "Please ___ the main events without looking at the book. A. tell about B. retell",
+      "solution": "B。解析：retell the events 表示“复述事件”；retell 后直接接宾语，不需要 about。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: retell",
+        "url": "https://dictionary.cambridge.org/dictionary/english/retell"
+      }
+    ]
+  },
+  {
+    "word": "memorize",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 记住；记忆",
+    "collocations": "memorize a poem; memorize the spelling; memorize facts",
+    "commonMistake": "memorize 的名词是 memorization；英式拼法 memorise 也正确，写作中应保持拼写一致。",
+    "example": {
+      "english": "Nora memorized the poem before the speaking contest.",
+      "chinese": "诺拉在演讲比赛前背熟了这首诗。"
+    },
+    "application": {
+      "prompt": "To remember the new words, I ___ them in short groups. A. memory B. memorize",
+      "solution": "B。解析：句中需要谓语动词 memorize（记住）；memory 是名词，不能直接充当谓语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: memorize",
+        "url": "https://dictionary.cambridge.org/dictionary/english/memorize"
+      }
+    ]
+  },
+  {
+    "word": "tick",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 给……打钩；n. 对号",
+    "collocations": "tick the correct box; put a tick next to an answer; tick off a list",
+    "commonMistake": "表示“打钩”时 tick 是动词；表示勾号时是名词，前面可用 a。",
+    "example": {
+      "english": "Tick the box if you can come to the meeting.",
+      "chinese": "如果你能来开会，请在方框里打钩。"
+    },
+    "application": {
+      "prompt": "There was a small ___ beside every correct answer. A. ticked B. tick",
+      "solution": "B。解析：a 后需要名词 tick（勾号）；ticked 是动词过去式或过去分词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tick",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tick"
+      }
+    ]
+  },
+  {
+    "word": "grandson",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 孙子；外孙",
+    "collocations": "their grandson; a loving grandfather; grandsons and granddaughters",
+    "commonMistake": "grandson 指儿子或女儿的儿子；对应女性是 granddaughter，不能用 grandson 泛指孙辈。",
+    "example": {
+      "english": "My grandson visits me every Sunday afternoon.",
+      "chinese": "我的外孙每周日下午都来看我。"
+    },
+    "application": {
+      "prompt": "Mr Wu has one granddaughter and two ___. A. grandsons B. granddaughters",
+      "solution": "A。解析：题干已给出一名孙女，另外两名男性孙辈是 grandsons。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grandson",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grandson"
+      }
+    ]
+  },
+  {
+    "word": "go through",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 经历；仔细察看",
+    "collocations": "go through a difficult time; go through the notes; go through customs",
+    "commonMistake": "go through 可表示“经历”或“逐项检查”；不能把它误写成表示穿过空间的 go across。",
+    "example": {
+      "english": "We went through the old letters together and found a family photo.",
+      "chinese": "我们一起仔细翻看旧信，找到了一张家庭照片。"
+    },
+    "application": {
+      "prompt": "Before handing in the report, check every page and ___ it carefully. A. go across B. go through",
+      "solution": "B。解析：go through the report 表示“仔细检查报告”；go across 强调从一边走到另一边。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: go",
+        "url": "https://dictionary.cambridge.org/dictionary/english/go"
+      }
+    ]
+  },
+  {
+    "word": "happen to",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 发生于；碰巧",
+    "collocations": "What happened to your bag?; happen to meet sb; happen to sb",
+    "commonMistake": "询问某人或某物遭遇了什么用 What happened to ...?；happen to do sth 表示“碰巧做某事”。",
+    "example": {
+      "english": "I happened to meet my primary-school teacher at the station.",
+      "chinese": "我碰巧在车站遇见了小学老师。"
+    },
+    "application": {
+      "prompt": "We ___ meet the school band while we were buying tickets. A. happened to B. happened for",
+      "solution": "A。解析：happen to do 表示“碰巧做某事”；句中两人意外遇到校乐队，符合此结构。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: happen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/happen"
+      }
+    ]
+  },
+  {
+    "word": "keep (...) in mind",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 记住；牢记",
+    "collocations": "keep the rules in mind; keep in mind that ...; bear sth in mind",
+    "commonMistake": "keep sth in mind 中 sth 放在 keep 与 in mind 之间；后接完整从句时用 keep in mind that。",
+    "example": {
+      "english": "Keep the meeting time in mind so you do not arrive late.",
+      "chinese": "记住开会时间，这样你就不会迟到。"
+    },
+    "application": {
+      "prompt": "The sign says the pool closes at six, so please ___ that ___ mind. A. keep; in B. hold; on",
+      "solution": "A。解析：keep that in mind 表示“把这件事记在心里”；本句提醒大家记住泳池关闭时间。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mind",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mind"
+      }
+    ]
+  },
+  {
+    "word": "case",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 情况；事实；案件",
+    "collocations": "in this case; a difficult case; a case of mistaken identity",
+    "commonMistake": "case 作“情况”时常见于 in this case；in case 表示“以防”，两种结构意义不同。",
+    "example": {
+      "english": "In this case, taking the earlier train is the safer choice.",
+      "chinese": "在这种情况下，乘坐较早的一班火车更稳妥。"
+    },
+    "application": {
+      "prompt": "The road is closed, so ___ we should take the bridge instead. A. in the case B. in this case",
+      "solution": "B。解析：in this case 表示“在这种情况下”；句子根据道路封闭这一事实作出选择。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: case",
+        "url": "https://dictionary.cambridge.org/dictionary/english/case"
+      }
+    ]
+  },
+  {
+    "word": "in sb’s case",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 就某人的情况而言",
+    "collocations": "in my case; in her case; in the case of young children",
+    "commonMistake": "in sb’s case 中 sb 要换成所有格（my/his/her）；它讨论个人情况，不等于 in case（以防）。",
+    "example": {
+      "english": "In my case, a short walk helps me think clearly.",
+      "chinese": "就我而言，短暂散步有助于理清思路。"
+    },
+    "application": {
+      "prompt": "Lily learns best by drawing pictures. ___, making a diagram is a good study method. A. In her case B. In case",
+      "solution": "A。解析：In her case 表示“就她的情况而言”；第二句承接 Lily 的个人学习习惯。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: case",
+        "url": "https://dictionary.cambridge.org/dictionary/english/case"
+      }
+    ]
+  },
+  {
+    "word": "opera",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 歌剧；歌剧团",
+    "collocations": "an opera singer; go to the opera; a famous opera",
+    "commonMistake": "opera 指有音乐和舞台表演的歌剧；它不是普通的 play（话剧）。",
+    "example": {
+      "english": "My parents took me to the opera for my birthday.",
+      "chinese": "父母带我去看歌剧庆祝生日。"
+    },
+    "application": {
+      "prompt": "The story is told through singing and orchestral music, so it is an ___. A. opera B. exhibition",
+      "solution": "A。解析：歌唱与管弦乐共同讲述舞台故事，符合 opera（歌剧）的特点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: opera",
+        "url": "https://dictionary.cambridge.org/dictionary/english/opera"
+      }
+    ]
+  },
+  {
+    "word": "picnic",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 野餐",
+    "collocations": "have a picnic; go on a picnic; a picnic basket",
+    "commonMistake": "picnic 前常用 have/go on；表示正在野餐可说 have a picnic，动词 picnic 的现在分词要双写 c。",
+    "example": {
+      "english": "We had a picnic under the trees beside the lake.",
+      "chinese": "我们在湖边的树下野餐。"
+    },
+    "application": {
+      "prompt": "If the weather stays sunny, we can ___ by the river. A. make a picnic B. have a picnic",
+      "solution": "B。解析：英语中固定搭配是 have a picnic（野餐）；make a picnic 不自然。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: picnic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/picnic"
+      }
+    ]
+  },
+  {
+    "word": "pardon",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 原谅；请再说一遍；interj. 抱歉",
+    "collocations": "Pardon me?; pardon sb for doing sth; beg your pardon",
+    "commonMistake": "听不清时可礼貌地说 Pardon?；表示原谅某人用 pardon sb，不能把 pardon 和 excuse 的结构随意互换。",
+    "example": {
+      "english": "Pardon me, could you say the station name again?",
+      "chinese": "不好意思，您能再说一遍车站的名字吗？"
+    },
+    "application": {
+      "prompt": "“The next stop is Green Park.” “___? I couldn't hear you.” A. Pardon B. Forgive",
+      "solution": "A。解析：单独说 Pardon? 是礼貌地请对方重复；forgive 需要宾语，不能这样使用。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pardon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pardon"
+      }
+    ]
+  },
+  {
+    "word": "gunshot",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 枪声；枪击声",
+    "collocations": "hear a gunshot; the sound of a gunshot; gunshot wound",
+    "commonMistake": "gunshot 是可数名词，单数前可用 a；若强调枪声，可说 the sound of a gunshot。",
+    "example": {
+      "english": "The hikers heard a gunshot far away in the forest.",
+      "chinese": "徒步者听见森林深处传来一声枪响。"
+    },
+    "application": {
+      "prompt": "The police heard one loud ___ shortly after midnight. A. gunshot B. gunsound",
+      "solution": "A。解析：one loud 后接可数名词 gunshot，表示“一声枪响”；gunsound 不是规范词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: gunshot",
+        "url": "https://dictionary.cambridge.org/dictionary/english/gunshot"
+      }
+    ]
+  },
+  {
+    "word": "grown-up",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 成年的；n. 成年人",
+    "collocations": "a grown-up conversation; ask a grown-up for help; grown-up responsibilities",
+    "commonMistake": "grown-up 作名词时指成年人；不要将它与 grown（grow 的过去分词）当作完全相同的词性。",
+    "example": {
+      "english": "The children asked a grown-up to help them cross the busy road.",
+      "chinese": "孩子们请一位成年人帮他们穿过繁忙的马路。"
+    },
+    "application": {
+      "prompt": "When the children got lost, they asked a nearby ___ for help. A. grow B. grown-up",
+      "solution": "B。解析：ask a grown-up for help 是“向成年人求助”；grow 是动词，不能指人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grown-up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grown-up"
+      }
+    ]
+  },
+  {
+    "word": "recall",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 回忆起；回想起",
+    "collocations": "recall a memory; recall doing sth; recall that ...",
+    "commonMistake": "recall doing 表示“记得做过某事”；回忆过去经历时不用 recall to do。",
+    "example": {
+      "english": "I recall seeing that painting at the museum last year.",
+      "chinese": "我记得去年在博物馆见过那幅画。"
+    },
+    "application": {
+      "prompt": "Emma clearly ___ locking the door before she left. A. recalls B. recall",
+      "solution": "A。解析：主语 Emma 是第三人称单数，谓语用 recalls；recall locking 表示“记得锁过门”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: recall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/recall"
+      }
+    ]
+  },
+  {
+    "word": "grapevine",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 葡萄藤；葡萄树",
+    "collocations": "a grapevine in the garden; grapevine leaves; grow grapevines",
+    "commonMistake": "grapevine 可指结葡萄的藤；口语里 hear sth through the grapevine 是“听到传闻”，不要按字面理解成电话网络。",
+    "example": {
+      "english": "A grapevine covered the sunny wall of my uncle's garden.",
+      "chinese": "一株葡萄藤爬满了叔叔花园里向阳的墙面。"
+    },
+    "application": {
+      "prompt": "In autumn, the ___ in our garden is heavy with purple fruit. A. grapevine B. pine tree",
+      "solution": "A。解析：葡萄藤在秋天结紫色果实，句中应填 grapevine；pine tree 是松树。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grapevine",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grapevine"
+      }
+    ]
+  },
+  {
+    "word": "boost",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 促进；使增长；n. 提高；帮助",
+    "collocations": "boost confidence; boost sales; a boost to the local economy",
+    "commonMistake": "boost 作动词后直接接被提升的对象；作名词时常用 a boost to sth。",
+    "example": {
+      "english": "Daily practice gave her confidence a real boost.",
+      "chinese": "每天练习大大增强了她的信心。"
+    },
+    "application": {
+      "prompt": "The new sports program aims to ___ students' confidence. A. boost B. booster",
+      "solution": "A。解析：aims to 后接动词原形 boost，表示“增强信心”；booster 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: boost",
+        "url": "https://dictionary.cambridge.org/dictionary/english/boost"
+      }
+    ]
+  },
+  {
+    "word": "to start with",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 首先；一开始",
+    "collocations": "to start with, ...; start with an example; to begin with",
+    "commonMistake": "to start with 常用于列举理由或说明开端；句首作连接语时后面通常加逗号。",
+    "example": {
+      "english": "To start with, we need to decide who will bring the maps.",
+      "chinese": "首先，我们需要决定由谁带地图。"
+    },
+    "application": {
+      "prompt": "___, let's check the weather before planning the hike. A. At first place B. To start with",
+      "solution": "B。解析：To start with 用来引出首先要做的事；句子先检查天气再规划徒步。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: start",
+        "url": "https://dictionary.cambridge.org/dictionary/english/start"
+      }
+    ]
+  },
+  {
+    "word": "short-term",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 短期的",
+    "collocations": "a short-term plan; short-term memory; short-term effects",
+    "commonMistake": "short-term 作复合形容词时通常加连字符并放在名词前；不要写成 short time plan。",
+    "example": {
+      "english": "The school introduced a short-term course in first aid.",
+      "chinese": "学校开设了一门短期急救课程。"
+    },
+    "application": {
+      "prompt": "The shelter needs a ___ solution for tonight, then a permanent one. A. short-term B. shortly",
+      "solution": "A。解析：solution 前需要形容词 short-term（短期的）；shortly 是副词，不能修饰名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: short-term",
+        "url": "https://dictionary.cambridge.org/dictionary/english/short-term"
+      }
+    ]
+  },
+  {
+    "word": "long-term",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 长期的",
+    "collocations": "a long-term goal; long-term benefits; long-term planning",
+    "commonMistake": "long-term 表示持续较长时间，常作定语；名词形式可用 the long term。",
+    "example": {
+      "english": "Learning to read regularly has long-term benefits.",
+      "chinese": "坚持阅读能带来长期益处。"
+    },
+    "application": {
+      "prompt": "The team is planning for ___ success, not just one good season. A. longly B. long-term",
+      "solution": "B。解析：success 前需要 long-term 作形容词，表示“长期的”；longly 不是规范副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: long-term",
+        "url": "https://dictionary.cambridge.org/dictionary/english/long-term"
+      }
+    ]
+  },
+  {
+    "word": "technique",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 技巧；技术",
+    "collocations": "a useful technique; a technique for memorizing words; breathing technique",
+    "commonMistake": "technique 指做事的方法或技巧；technical 是形容词“技术的”，不能用来表示某一种技巧。",
+    "example": {
+      "english": "The coach taught us a breathing technique for staying calm.",
+      "chinese": "教练教了我们一种保持冷静的呼吸技巧。"
+    },
+    "application": {
+      "prompt": "The pianist practised a new ___ to play the fast passage clearly. A. technique B. technical",
+      "solution": "A。解析：a new 后接名词 technique，指演奏技巧；technical 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: technique",
+        "url": "https://dictionary.cambridge.org/dictionary/english/technique"
+      }
+    ]
+  },
+  {
+    "word": "passage",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 段落；通道；走廊",
+    "collocations": "a passage from a novel; read the passage; a narrow passage",
+    "commonMistake": "passage 可指文章的一段或狭窄通道；paragraph 专指文章段落，不能表示走廊。",
+    "example": {
+      "english": "We read a short passage about life in the Arctic.",
+      "chinese": "我们读了一段关于北极生活的短文。"
+    },
+    "application": {
+      "prompt": "The guide led us through a narrow stone ___ between the rooms. A. paragraph B. passage",
+      "solution": "B。解析：rooms 之间的狭窄石头通道是 passage；paragraph 是文章段落。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: passage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/passage"
+      }
+    ]
+  },
+  {
+    "word": "likely",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 很可能的；adv. 可能",
+    "collocations": "be likely to do; it is likely that ...; a likely reason",
+    "commonMistake": "作形容词时用 be likely to do 或 It is likely that...；likely 作副词时可放在 will 后。",
+    "example": {
+      "english": "It is likely to rain before the football match ends.",
+      "chinese": "足球比赛结束前很可能会下雨。"
+    },
+    "application": {
+      "prompt": "Dark clouds are gathering, so it will ___ rain soon. A. likely B. likelihood",
+      "solution": "A。解析：will 后可接副词 likely，表示“很可能”；likelihood 是名词，不能放在 will 后作谓语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: likely",
+        "url": "https://dictionary.cambridge.org/dictionary/english/likely"
+      }
+    ]
+  },
+  {
+    "word": "wear out",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 磨损；使疲惫",
+    "collocations": "wear out shoes; wear yourself out; be worn out after work",
+    "commonMistake": "wear out 的过去式是 wore out，过去分词是 worn out；表示“筋疲力尽”时常用 be worn out。",
+    "example": {
+      "english": "Walking in the rain wore out the soles of my old shoes.",
+      "chinese": "在雨中走路把我的旧鞋底磨坏了。"
+    },
+    "application": {
+      "prompt": "After a twelve-hour shift, the nurses were completely ___. A. wear out B. worn out",
+      "solution": "B。解析：be worn out 表示“筋疲力尽”；句中 were 后需要过去分词形容词 worn out。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wear"
+      }
+    ]
+  },
+  {
+    "word": "discuss",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 讨论；谈论；商量",
+    "collocations": "discuss a problem; discuss the plan with sb; discuss how to help",
+    "commonMistake": "discuss 是及物动词，后直接接话题；不要说 discuss about the problem。",
+    "example": {
+      "english": "We discussed how to make the school garden more welcoming.",
+      "chinese": "我们讨论了怎样让校园花园更宜人。"
+    },
+    "application": {
+      "prompt": "The class will ___ the best way to reduce food waste. A. discuss B. discuss about",
+      "solution": "A。解析：discuss the best way 是正确结构；discuss 后直接接讨论内容，不加 about。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: discuss",
+        "url": "https://dictionary.cambridge.org/dictionary/english/discuss"
+      }
+    ]
+  },
+  {
+    "word": "image",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 图像；形象；印象",
+    "collocations": "a digital image; an image of the city; public image",
+    "commonMistake": "image 可指照片、脑海中的形象或公众形象；表示具体照片时 picture 更日常，但二者不能在所有搭配中互换。",
+    "example": {
+      "english": "The website uses a clear image of the new library.",
+      "chinese": "这个网站使用了一张新图书馆的清晰图片。"
+    },
+    "application": {
+      "prompt": "The charity wants to improve its public ___ by sharing its work. A. imagine B. image",
+      "solution": "B。解析：public image 指“公众形象”；imagine 是动词，不能放在形容词 public 后。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: image",
+        "url": "https://dictionary.cambridge.org/dictionary/english/image"
+      }
+    ]
+  },
+  {
+    "word": "graph",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 图；图表",
+    "collocations": "a line graph; a graph of test scores; draw a graph",
+    "commonMistake": "graph 通常用线或坐标展示数据变化；paragraph 是文字段落，不能用来表示数据图表。",
+    "example": {
+      "english": "The graph shows how the river level changed during the storm.",
+      "chinese": "图表显示了暴风雨期间河流水位的变化。"
+    },
+    "application": {
+      "prompt": "A ___ makes it easy to compare the monthly temperatures. A. graph B. paragraph",
+      "solution": "A。解析：graph 能用图形呈现并比较温度数据；paragraph 是文字段落。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: graph",
+        "url": "https://dictionary.cambridge.org/dictionary/english/graph"
+      }
+    ]
+  },
+  {
+    "word": "organize",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 组织；安排",
+    "collocations": "organize a meeting; organize information; well-organized notes",
+    "commonMistake": "organize 的名词为 organization；英式拼法 organise 也正确，派生形容词 organized 常用连字符构成 well-organized。",
+    "example": {
+      "english": "Our class organized a book sale to raise money for the library.",
+      "chinese": "我们班组织了一场图书义卖，为图书馆筹款。"
+    },
+    "application": {
+      "prompt": "The volunteers will ___ the clean-up day next Saturday. A. organization B. organize",
+      "solution": "B。解析：will 后接动词原形 organize，表示“组织”；organization 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: organize",
+        "url": "https://dictionary.cambridge.org/dictionary/english/organize"
+      }
+    ]
+  },
+  {
+    "word": "view",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 景色；观点；v. 观看",
+    "collocations": "a view of the sea; in my view; view a video",
+    "commonMistake": "view 作名词可指景色或观点，作动词表示观看；表达个人看法可说 in my view，不说 according to my view。",
+    "example": {
+      "english": "From the hill, we enjoyed a wide view of the valley.",
+      "chinese": "从山上望去，我们欣赏到了山谷的开阔景色。"
+    },
+    "application": {
+      "prompt": "___, every student should have a chance to speak. A. In my view B. In my viewing",
+      "solution": "A。解析：In my view 是“在我看来”的固定表达；本句引出说话者对课堂机会的看法。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: view",
+        "url": "https://dictionary.cambridge.org/dictionary/english/view"
+      }
+    ]
+  },
+  {
+    "word": "effective",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 有效的",
+    "collocations": "an effective method; effective in reducing waste; work effectively",
+    "commonMistake": "effective 的名词是 effect，副词是 effectively；effective 强调产生预期效果，efficient 强调省时省力。",
+    "example": {
+      "english": "Wearing a helmet is an effective way to protect your head.",
+      "chinese": "戴头盔是保护头部的有效方法。"
+    },
+    "application": {
+      "prompt": "The school tried a more ___ way to remind students to save water. A. effect B. effective",
+      "solution": "B。解析：way 前需用形容词 effective，表示“有效的”；effect 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: effective",
+        "url": "https://dictionary.cambridge.org/dictionary/english/effective"
+      }
+    ]
+  },
+  {
+    "word": "engine",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 发动机；引擎",
+    "collocations": "a car engine; engine noise; start the engine",
+    "commonMistake": "engine 通常指机器或车辆的发动机；engineer 是工程师，不能因拼写相近而互换。",
+    "example": {
+      "english": "The mechanic checked the engine before the long drive.",
+      "chinese": "长途驾驶前，修理工检查了发动机。"
+    },
+    "application": {
+      "prompt": "The bus driver turned off the ___ before leaving the vehicle. A. engine B. engineer",
+      "solution": "A。解析：turn off 的宾语是 bus 的 engine（发动机）；engineer 指工程师。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: engine",
+        "url": "https://dictionary.cambridge.org/dictionary/english/engine"
+      }
+    ]
+  },
+  {
+    "word": "fuel",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 燃料；v. 给……提供燃料",
+    "collocations": "save fuel; fuel consumption; fuel a car with petrol",
+    "commonMistake": "fuel 作名词通常不可数；fuel 作动词时可接交通工具或某种情绪作宾语。",
+    "example": {
+      "english": "The research ship carries enough fuel for the journey.",
+      "chinese": "这艘科考船带了足够的燃料完成这趟航行。"
+    },
+    "application": {
+      "prompt": "To cut costs, the airline is trying to use less ___. A. fuel B. fuels",
+      "solution": "A。解析：fuel 作“燃料”通常为不可数名词；less 后用 fuel，不加复数 s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fuel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fuel"
+      }
+    ]
+  },
+  {
+    "word": "anxiety",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 焦虑；担心",
+    "collocations": "anxiety about exams; feel anxiety; reduce anxiety",
+    "commonMistake": "anxiety 是不可数名词，形容词是 anxious；说“对考试感到焦虑”可用 anxiety about exams。",
+    "example": {
+      "english": "Talking with her teacher helped ease her anxiety about the test.",
+      "chinese": "和老师谈过后，她对考试的焦虑减轻了。"
+    },
+    "application": {
+      "prompt": "Ben felt ___ about speaking in front of the whole school. A. anxiously B. anxiety",
+      "solution": "B。解析：felt 后可接名词 anxiety 表示感到焦虑；anxiously 是副词，需修饰动作。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: anxiety",
+        "url": "https://dictionary.cambridge.org/dictionary/english/anxiety"
+      }
+    ]
+  },
+  {
+    "word": "address",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 地址；v. 写地址；处理",
+    "collocations": "home address; address an envelope; address a problem",
+    "commonMistake": "address 作动词时可表示“处理问题”或“向……讲话”；给信封写地址也用 address，不能说 write an address on someone。",
+    "example": {
+      "english": "Please write your return address on the back of the envelope.",
+      "chinese": "请把回邮地址写在信封背面。"
+    },
+    "application": {
+      "prompt": "Before mailing the letter, remember to ___ the envelope clearly. A. address B. address to",
+      "solution": "A。解析：address the envelope 表示“在信封上写地址”；该用法后面不加 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: address",
+        "url": "https://dictionary.cambridge.org/dictionary/english/address"
+      }
+    ]
+  },
+  {
+    "word": "password",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 密码；口令",
+    "collocations": "enter a password; reset your password; a strong password",
+    "commonMistake": "password 是可数名词；网络操作常用 enter/type a password，密码本身不能“记住账户”。",
+    "example": {
+      "english": "I changed my password after receiving the security alert.",
+      "chinese": "收到安全提醒后，我更改了密码。"
+    },
+    "application": {
+      "prompt": "The website won't open your account until you enter the correct ___. A. password B. passport",
+      "solution": "A。解析：登录账户需要输入 password（密码）；passport 是旅行证件。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: password",
+        "url": "https://dictionary.cambridge.org/dictionary/english/password"
+      }
+    ]
+  },
+  {
+    "word": "account",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 账户；账目；叙述",
+    "collocations": "open a bank account; a user account; an account of the trip",
+    "commonMistake": "account 作“账户”时常与 open/use 搭配；on account of 表示“因为”，不可误写成 on the account of。",
+    "example": {
+      "english": "My brother opened a savings account at the local bank.",
+      "chinese": "我哥哥在当地银行开了一个储蓄账户。"
+    },
+    "application": {
+      "prompt": "You need a user ___ to save your settings on this website. A. count B. account",
+      "solution": "B。解析：user account 指网站用户账户；count 是“数数”，不表示登录账户。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: account",
+        "url": "https://dictionary.cambridge.org/dictionary/english/account"
+      }
+    ]
+  },
+  {
+    "word": "increase",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 增加；n. 增长",
+    "collocations": "increase by ten percent; increase the price; an increase in visitors",
+    "commonMistake": "increase by 后接增幅，increase to 后接达到的数值；名词前可用 an。",
+    "example": {
+      "english": "The number of visitors increased by twenty percent this year.",
+      "chinese": "今年的参观人数增加了百分之二十。"
+    },
+    "application": {
+      "prompt": "The water level rose from 2 metres to 3 metres, an ___ of 1 metre. A. increase B. increasing",
+      "solution": "A。解析：an 后接名词 increase，表示“增长”；句中数量从 2 米升到 3 米。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: increase",
+        "url": "https://dictionary.cambridge.org/dictionary/english/increase"
+      }
+    ]
+  },
+  {
+    "word": "blood",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 血；血液",
+    "collocations": "blood pressure; blood type; donate blood",
+    "commonMistake": "blood 作“血液”时通常不可数；表示流血的动作要用动词 bleed，不说 blood from a cut 作动词。",
+    "example": {
+      "english": "The nurse took a small sample of blood for the test.",
+      "chinese": "护士抽取了一小份血样进行检查。"
+    },
+    "application": {
+      "prompt": "The hospital is asking people to ___ blood this weekend. A. bloody B. donate",
+      "solution": "B。解析：donate blood 表示“献血”；bloody 是形容词，意为“血腥的/满是血的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: blood",
+        "url": "https://dictionary.cambridge.org/dictionary/english/blood"
+      }
+    ]
+  },
+  {
+    "word": "wound",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 伤口；v. 使受伤",
+    "collocations": "a deep wound; wound a soldier; treat a wound",
+    "commonMistake": "wound 表示“伤口/使受伤”时读 /wuːnd/；它也可能是 wind 的过去式，需按上下文判断含义。",
+    "example": {
+      "english": "The nurse cleaned the wound on his arm.",
+      "chinese": "护士清洗了他手臂上的伤口。"
+    },
+    "application": {
+      "prompt": "The first-aid team covered the ___ with a clean bandage. A. wound B. wounder",
+      "solution": "A。解析：bandage 包扎的是 wound（伤口）；wounder 不是表示伤口的词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wound",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wound"
+      }
+    ]
+  },
+  {
+    "word": "mall",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 购物商场",
+    "collocations": "a shopping mall; go to the mall; a mall entrance",
+    "commonMistake": "mall 指大型购物商场；shopping centre 是常见同义表达，不要与 market（市场）在所有场景中混用。",
+    "example": {
+      "english": "We met at the mall after school to buy a birthday gift.",
+      "chinese": "放学后我们在购物商场碰面，去买生日礼物。"
+    },
+    "application": {
+      "prompt": "The new ___ has a cinema, a food court and more than a hundred shops. A. market B. mall",
+      "solution": "B。解析：有电影院、美食广场和许多商店的大型购物场所是 mall（购物商场）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mall"
+      }
+    ]
+  },
+  {
+    "word": "notebook",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 笔记本；笔记本电脑",
+    "collocations": "write in a notebook; a notebook computer; keep a notebook",
+    "commonMistake": "notebook 可指纸质笔记本，也可指笔记本电脑；paper notebook 表示纸本时可避免歧义。",
+    "example": {
+      "english": "I keep a small notebook in my bag for new English words.",
+      "chinese": "我在包里放了一本小笔记本，记英语新词。"
+    },
+    "application": {
+      "prompt": "Please write the homework in your ___ so you won't forget it. A. notebook B. notebook computer",
+      "solution": "A。解析：写作业并记下来需要纸质 notebook；notebook computer 是笔记本电脑。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: notebook",
+        "url": "https://dictionary.cambridge.org/dictionary/english/notebook"
+      }
+    ]
+  },
+  {
+    "word": "squirrel",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 松鼠",
+    "collocations": "a red squirrel; a squirrel's tail; squirrels collect nuts",
+    "commonMistake": "squirrel 的复数是 squirrels；所有格写 squirrel's，不要遗漏复数或所有格标记。",
+    "example": {
+      "english": "A squirrel hid an acorn under the garden bench.",
+      "chinese": "一只松鼠把橡子藏在花园长椅下面。"
+    },
+    "application": {
+      "prompt": "We watched two ___ carry nuts up the tree. A. squirrel B. squirrels",
+      "solution": "B。解析：two 后接复数 squirrels；本句有两只松鼠。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: squirrel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/squirrel"
+      }
+    ]
+  },
+  {
+    "word": "nut",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 坚果；螺母",
+    "collocations": "a handful of nuts; nut allergy; tighten a nut",
+    "commonMistake": "nut 可指坚果，也可指螺母；坚果统称时常用复数 nuts，不能与 nutritious（有营养的）混为同一个词。",
+    "example": {
+      "english": "The recipe adds chopped nuts for extra crunch.",
+      "chinese": "这道食谱加入切碎的坚果来增加酥脆口感。"
+    },
+    "application": {
+      "prompt": "The mechanic tightened the metal ___ that held the wheel in place. A. nut B. nutrition",
+      "solution": "A。解析：固定车轮的金属螺母是 nut；nutrition 意为“营养”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nut",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nut"
+      }
+    ]
+  },
+  {
+    "word": "wild",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 野生的；自然生长的",
+    "collocations": "wild animals; grow wild; in the wild",
+    "commonMistake": "wild 修饰动物或植物；表示“在野外”说 in the wild，副词“疯狂地/猛烈地”是 wildly。",
+    "example": {
+      "english": "We saw wild elephants from a safe distance.",
+      "chinese": "我们在安全距离外看到了野生大象。"
+    },
+    "application": {
+      "prompt": "The researchers observed the birds living freely ___, not in cages. A. wildly B. in the wild",
+      "solution": "B。解析：in the wild 表示“在野外”；此处说明鸟类生活在自然环境中，而非笼中。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wild",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wild"
+      }
+    ]
+  },
+  {
+    "word": "dolphin",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 海豚",
+    "collocations": "a school of dolphins; dolphin show; protect dolphins",
+    "commonMistake": "dolphin 的复数是 dolphins；表示一群海豚可用 a pod 或 a school of dolphins。",
+    "example": {
+      "english": "A dolphin leaped out of the water beside the boat.",
+      "chinese": "一只海豚在船边跃出水面。"
+    },
+    "application": {
+      "prompt": "We saw a group of ___ swimming near the reef. A. dolphins B. dolphin",
+      "solution": "A。解析：a group of 后接可数名词复数 dolphins；这里指一群海豚。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dolphin",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dolphin"
+      }
+    ]
+  },
+  {
+    "word": "recognize",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 辨认出；认可",
+    "collocations": "recognize a face; recognize sb as; recognize the importance of sth",
+    "commonMistake": "recognize 的名词是 recognition；英式拼法 recognise 也正确，注意它不是 recognize 的过去式。",
+    "example": {
+      "english": "I recognized my old neighbour by her cheerful laugh.",
+      "chinese": "我凭着她爽朗的笑声认出了老邻居。"
+    },
+    "application": {
+      "prompt": "Although he wore a hat, I could still ___ him from his voice. A. recognition B. recognize",
+      "solution": "B。解析：could 后接动词原形 recognize，表示“辨认出”；recognition 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: recognize",
+        "url": "https://dictionary.cambridge.org/dictionary/english/recognize"
+      }
+    ]
+  },
+  {
+    "word": "outline",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 纲要；轮廓；v. 概述",
+    "collocations": "write an outline; outline the main points; an outline of the plan",
+    "commonMistake": "outline 作动词时后接要点或计划；作名词时常说 an outline of sth，不要把 outline 和 online 混淆。",
+    "example": {
+      "english": "The speaker outlined the three steps of the experiment.",
+      "chinese": "演讲者概述了实验的三个步骤。"
+    },
+    "application": {
+      "prompt": "Before writing the essay, Jia made an ___ of her main ideas. A. outline B. online",
+      "solution": "A。解析：an outline of ideas 是“要点提纲”；online 表示“在线”，不合语境。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: outline",
+        "url": "https://dictionary.cambridge.org/dictionary/english/outline"
+      }
+    ]
+  },
+  {
+    "word": "divide",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 分开；划分；除",
+    "collocations": "divide the class into groups; divide the cake equally; divide by five",
+    "commonMistake": "divide A into B 表示“把 A 分成 B”；数学除法用 divide A by B，介词不能互换。",
+    "example": {
+      "english": "The teacher divided the class into four reading groups.",
+      "chinese": "老师把全班分成了四个阅读小组。"
+    },
+    "application": {
+      "prompt": "If you ___ 24 ___ 6, the answer is 4. A. divide; into B. divide; by",
+      "solution": "B。解析：divide 24 by 6 表示“24 除以 6”；divide ... into 用于分组或划分部分。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: divide",
+        "url": "https://dictionary.cambridge.org/dictionary/english/divide"
+      }
+    ]
+  },
+  {
+    "word": "divide sth into",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 把某物分成（若干部分）",
+    "collocations": "divide a cake into slices; divide a book into chapters; be divided into teams",
+    "commonMistake": "结构为 divide sth into + 类别或部分；被动式是 sth be divided into...。",
+    "example": {
+      "english": "The museum is divided into five sections by historical period.",
+      "chinese": "这座博物馆按历史时期分成五个展区。"
+    },
+    "application": {
+      "prompt": "The coach ___ the players ___ two teams for the practice match. A. divided; into B. divided; by",
+      "solution": "A。解析：divide the players into two teams 表示“把球员分成两队”；by 不用于划分组别。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: divide",
+        "url": "https://dictionary.cambridge.org/dictionary/english/divide"
+      }
+    ]
+  },
+  {
+    "word": "fully",
+    "examTags": [
+      "词汇·副词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adv. 完全地；充分地",
+    "collocations": "fully understand; fully grown; fully aware of",
+    "commonMistake": "fully 是副词，修饰动词、形容词或过去分词；对应形容词是 full，不能说 full understand。",
+    "example": {
+      "english": "The instructions were fully explained before the activity began.",
+      "chinese": "活动开始前，说明已被充分讲解。"
+    },
+    "application": {
+      "prompt": "The child was not ___ ready to cross the busy street alone. A. full B. fully",
+      "solution": "B。解析：ready 前需要副词 fully 修饰，表示“完全准备好”；full 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fully",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fully"
+      }
+    ]
+  },
+  {
+    "word": "one-size-fits-all",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 通用的；一刀切的",
+    "collocations": "a one-size-fits-all solution; one-size-fits-all advice; avoid one-size-fits-all rules",
+    "commonMistake": "one-size-fits-all 是复合形容词，通常用连字符；它指不考虑个人差异、对所有人一概适用的方案。",
+    "example": {
+      "english": "A one-size-fits-all schedule may not work for students with different needs.",
+      "chinese": "一刀切的日程安排可能不适合需求各异的学生。"
+    },
+    "application": {
+      "prompt": "Because each learner progresses differently, the school rejected a ___ reading plan. A. one-size-fits-all B. one-size-fits",
+      "solution": "A。解析：one-size-fits-all 描述对所有学生相同的通用计划；one-size-fits 不是完整形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: one-size-fits-all",
+        "url": "https://dictionary.cambridge.org/dictionary/english/one-size-fits-all"
+      }
+    ]
+  }
+]

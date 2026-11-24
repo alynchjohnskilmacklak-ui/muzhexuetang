@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs'
  */
 export function chineseToPinyin(name: string): string {
   const result = pinyin(name, { style: pinyin.STYLE_NORMAL })
-  return result.flat().join('').toLowerCase()
+  return result.flat().join('').toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
 /**

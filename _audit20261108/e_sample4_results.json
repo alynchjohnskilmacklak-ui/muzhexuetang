@@ -1,0 +1,50 @@
+{
+  "queries": {
+    "Q1_missing_deduct_at_split": {
+      "sql": "SELECT g.\"intensiveMode\"::text, l.\"intensiveReviewStatus\"::text,\n            count(*)::int AS n,\n            count(*) FILTER (WHERE l.id LIKE 'local-demo-%')::int AS seed_lessons\n     FROM \"ClassLesson\" l LEFT JOIN \"ClassGroup\" g ON g.id=l.\"groupId\"\n     WHERE l.\"deletedAt\" IS NULL AND l.\"attendanceSubmittedAt\" IS NOT NULL AND l.\"hoursDeductedAt\" IS NULL\n     GROUP BY 1,2 ORDER BY n DESC",
+      "rows": [
+        {
+          "intensiveMode": "INTENSIVE",
+          "intensiveReviewStatus": "APPROVED",
+          "n": 179,
+          "seed_lessons": 0
+        },
+        {
+          "intensiveMode": "INTENSIVE",
+          "intensiveReviewStatus": "REJECTED",
+          "n": 4,
+          "seed_lessons": 0
+        },
+        {
+          "intensiveMode": "NORMAL",
+          "intensiveReviewStatus": "NOT_REQUIRED",
+          "n": 2,
+          "seed_lessons": 2
+        }
+      ]
+    },
+    "Q2_regular_nonseed_missing_deduct": {
+      "sql": "SELECT l.id, l.\"lessonDate\", l.status::text, g.\"intensiveMode\"::text,\n            count(a.id)::int AS att_rows,\n            count(*) FILTER (WHERE COALESCE(a.\"hoursDeducted\",0)>0)::int AS deducted_rows\n     FROM \"ClassLesson\" l\n     LEFT JOIN \"ClassGroup\" g ON g.id=l.\"groupId\"\n     LEFT JOIN \"Attendance\" a ON a.\"lessonId\"=l.id AND a.\"deletedAt\" IS NULL\n     WHERE l.\"deletedAt\" IS NULL AND l.\"attendanceSubmittedAt\" IS NOT NULL AND l.\"hoursDeductedAt\" IS NULL\n       AND COALESCE(g.\"intensiveMode\"::text,'') <> 'INTENSIVE' AND l.id NOT LIKE 'local-demo-%'\n     GROUP BY l.id, l.\"lessonDate\", l.status, g.\"intensiveMode\"::text\n     ORDER BY l.\"lessonDate\" DESC LIMIT 20",
+      "rows": []
+    },
+    "Q3_feedback_bonus_refs": {
+      "sql": "SELECT count(*)::int AS total,\n            count(*) FILTER (WHERE \"feedbackId\" IS NULL)::int AS feedback_null\n     FROM \"TeacherSalaryTransaction\"\n     WHERE \"deletedAt\" IS NULL AND type='FEEDBACK_BONUS' AND \"lessonId\" IS NULL",
+      "rows": [
+        {
+          "total": 4643,
+          "feedback_null": 0
+        }
+      ]
+    },
+    "Q4_lesson_pay_refs": {
+      "sql": "SELECT count(*)::int AS total,\n            count(*) FILTER (WHERE \"lessonId\" IS NULL)::int AS lesson_null,\n            count(*) FILTER (WHERE \"termId\" IS NULL)::int AS term_null\n     FROM \"TeacherSalaryTransaction\"\n     WHERE \"deletedAt\" IS NULL AND type='LESSON_PAY'",
+      "rows": [
+        {
+          "total": 2007,
+          "lesson_null": 0,
+          "term_null": 0
+        }
+      ]
+    }
+  }
+}

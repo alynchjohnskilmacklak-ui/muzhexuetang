@@ -1,0 +1,1490 @@
+[
+  {
+    "word": "pack",
+    "examTags": [
+      "词汇·动词与名词",
+      "语言运用·旅行准备"
+    ],
+    "grammar": "v. 打包；收拾；n. 一包；一群。作动词过去式 packed；pack one's bags 表示收拾行李。",
+    "collocations": "pack a suitcase; pack one's bags; a pack of cards",
+    "commonMistake": "pack 的过去式和过去分词加 -ed：packed；pack up 表示收拾好。",
+    "example": {
+      "english": "I packed my clothes for the weekend trip.",
+      "chinese": "我为周末旅行收拾了衣服。"
+    },
+    "application": {
+      "prompt": "We need to ___ our bags before leaving for the airport. A. pack B. borrow",
+      "solution": "A。解析：出发前把行李装好用 pack。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pack",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pack"
+      }
+    ]
+  },
+  {
+    "word": "pack up",
+    "examTags": [
+      "词汇·动词短语",
+      "语言运用·收拾整理"
+    ],
+    "grammar": "phr. 打包；收拾。可作及物或不及物短语；代词宾语放在 pack 与 up 之间。",
+    "collocations": "pack up the books; pack it up; pack up and leave",
+    "commonMistake": "宾语是代词时说 pack it up，不说 pack up it。",
+    "example": {
+      "english": "We packed up our things after the picnic.",
+      "chinese": "野餐后我们收拾好了东西。"
+    },
+    "application": {
+      "prompt": "The picnic is over. Let's ___ everything and go home. A. hang up B. pack up",
+      "solution": "B。解析：结束活动后收拾东西用 pack up。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pack",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pack"
+      }
+    ]
+  },
+  {
+    "word": "bathroom",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·居家空间"
+    ],
+    "grammar": "n. 浴室；洗手间。可数，复数 bathrooms；美式英语中常指带厕所的卫生间。",
+    "collocations": "use the bathroom; bathroom mirror; bathroom door",
+    "commonMistake": "bathroom 的含义因地区而异；指家中某一间时用 a/the bathroom。",
+    "example": {
+      "english": "The bathroom is next to the bedroom.",
+      "chinese": "浴室在卧室旁边。"
+    },
+    "application": {
+      "prompt": "You want to wash your hands. You go to the ___. A. bathroom B. balcony",
+      "solution": "A。解析：洗手间或浴室是 bathroom。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bathroom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bathroom"
+      }
+    ]
+  },
+  {
+    "word": "sort",
+    "examTags": [
+      "词汇·动词与名词",
+      "熟词多义·整理与种类"
+    ],
+    "grammar": "v. 把……分类；整理；n. 种类。常见结构 sort sth into groups；a sort of 表示“一种”。",
+    "collocations": "sort the clothes; sort things into groups; this sort of book",
+    "commonMistake": "sort 作动词时可用 sort sth by/into...；a sort of 后接名词单数。",
+    "example": {
+      "english": "We sorted the books into three groups.",
+      "chinese": "我们把书分成了三组。"
+    },
+    "application": {
+      "prompt": "Please ___ the postcards by country. A. invite B. sort",
+      "solution": "B。解析：按国家把明信片分类用 sort。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sort",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sort"
+      }
+    ]
+  },
+  {
+    "word": "bedroom",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·居家空间"
+    ],
+    "grammar": "n. 卧室。可数，复数 bedrooms；常用主谓结构说明方位和数量。",
+    "collocations": "a small bedroom; bedroom window; go to the bedroom",
+    "commonMistake": "bedroom 是可数名词；单数前需有冠词或限定词，如 my bedroom。",
+    "example": {
+      "english": "There are two bedrooms upstairs.",
+      "chinese": "楼上有两间卧室。"
+    },
+    "application": {
+      "prompt": "The room where people usually sleep is the ___. A. bedroom B. kitchen",
+      "solution": "A。解析：睡觉的房间是 bedroom（卧室）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bedroom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bedroom"
+      }
+    ]
+  },
+  {
+    "word": "balcony",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·房屋结构"
+    ],
+    "grammar": "n. 阳台。可数，复数 balconies；以辅音字母加 y 结尾，变复数时 y 变 i 加 -es。",
+    "collocations": "a small balcony; sit on the balcony; balcony door",
+    "commonMistake": "balcony 的复数是 balconies，不是 balconys。",
+    "example": {
+      "english": "They grow herbs on the sunny balcony.",
+      "chinese": "他们在阳光充足的阳台上种香草。"
+    },
+    "application": {
+      "prompt": "There are flowers on both ___. A. balconys B. balconies",
+      "solution": "B。解析：balcony 变复数时 y 变 i 加 -es。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: balcony",
+        "url": "https://dictionary.cambridge.org/dictionary/english/balcony"
+      }
+    ]
+  },
+  {
+    "word": "hang up",
+    "examTags": [
+      "词汇·动词短语多义",
+      "语法·宾语位置"
+    ],
+    "grammar": "phr. 挂起；挂断电话。作及物短语时宾语可放中间或后面，代词必须置于 hang 与 up 之间。",
+    "collocations": "hang up a coat; hang it up; hang up the phone",
+    "commonMistake": "指挂衣物时可说 hang the coat up / hang it up；挂断电话也可说 hang up。",
+    "example": {
+      "english": "Please hang up your coat by the door.",
+      "chinese": "请把外套挂在门边。"
+    },
+    "application": {
+      "prompt": "The phone is ringing. Please don't ___ yet. A. hang up B. sort out",
+      "solution": "A。解析：hang up 可表示挂断电话。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hang up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hang-up"
+      }
+    ]
+  },
+  {
+    "word": "invite",
+    "examTags": [
+      "词汇·动词派生",
+      "语法·invite结构"
+    ],
+    "grammar": "v. 邀请。invite sb to do sth / invite sb to a place；名词 invitation。",
+    "collocations": "invite a friend; invite sb to dinner; invite sb to join us",
+    "commonMistake": "invite 后接人，再接 to do 或 to + 名词；名词形式拼作 invitation。",
+    "example": {
+      "english": "They invited us to have dinner with them.",
+      "chinese": "他们邀请我们和他们共进晚餐。"
+    },
+    "application": {
+      "prompt": "My cousin invited me ___ her new apartment. A. visiting B. to visit",
+      "solution": "B。解析：invite sb to do sth 表示邀请某人做某事。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: invite",
+        "url": "https://dictionary.cambridge.org/dictionary/english/invite"
+      }
+    ]
+  },
+  {
+    "word": "living room",
+    "examTags": [
+      "词汇·复合名词",
+      "阅读·居家空间"
+    ],
+    "grammar": "n. 客厅；起居室。可数，复数 living rooms；living 作定语表示居住、起居用途。",
+    "collocations": "in the living room; living room sofa; a bright living room",
+    "commonMistake": "living room 是两个词；复数通常只在中心名词 room 上加 -s。",
+    "example": {
+      "english": "The whole family watched a film in the living room.",
+      "chinese": "全家人在客厅里看电影。"
+    },
+    "application": {
+      "prompt": "Guests are sitting on the sofa in the ___. A. living room B. bathroom",
+      "solution": "A。解析：会客和休息的房间是 living room。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: living room",
+        "url": "https://dictionary.cambridge.org/dictionary/english/living-room"
+      }
+    ]
+  },
+  {
+    "word": "arrival",
+    "examTags": [
+      "词汇·名词派生",
+      "语法·arrive介词搭配"
+    ],
+    "grammar": "n. 到达。常用 on/upon arrival（到达时）；arrive at a small place，arrive in a city/country。",
+    "collocations": "time of arrival; on arrival; arrival at the station",
+    "commonMistake": "arrival 是名词；动词 arrive 常与 at（小地点）或 in（较大地点）连用。",
+    "example": {
+      "english": "On arrival at the hotel, we left our bags in the room.",
+      "chinese": "到达旅馆后，我们把行李放在房间里。"
+    },
+    "application": {
+      "prompt": "___ at the station, call me and I'll meet you. A. On arrive B. On arrival",
+      "solution": "B。解析：介词 on 后用名词 arrival，on arrival 表示“到达时”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: arrival",
+        "url": "https://dictionary.cambridge.org/dictionary/english/arrival"
+      }
+    ]
+  },
+  {
+    "word": "yet",
+    "examTags": [
+      "语法·副词与连词",
+      "熟词多义·尚未与然而"
+    ],
+    "grammar": "adv.（用于疑问句、否定句）还；conj. 但是、然而。副词常置于句末。",
+    "collocations": "not yet; have you finished yet?; small yet useful",
+    "commonMistake": "yet 表示“还”时常用于疑问或否定句，通常放句末；表示“然而”时连接转折。",
+    "example": {
+      "english": "Have you packed your suitcase yet?",
+      "chinese": "你收拾好行李箱了吗？"
+    },
+    "application": {
+      "prompt": "I haven't received the invitation ___. A. yet B. already",
+      "solution": "A。解析：否定句表示“还没有”常用 yet。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yet",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yet"
+      }
+    ]
+  },
+  {
+    "word": "add",
+    "examTags": [
+      "词汇·动词与数学表达",
+      "语法·add搭配"
+    ],
+    "grammar": "v. 添加；加。add A to B 表示把 A 加到 B 中；add up 表示合计。",
+    "collocations": "add sugar to tea; add a name to the list; add up the numbers",
+    "commonMistake": "说“把 A 加到 B 里”用 add A to B；不要把 to 后的对象和被添加物次序颠倒。",
+    "example": {
+      "english": "Please add your name to the guest list.",
+      "chinese": "请把你的名字加到宾客名单里。"
+    },
+    "application": {
+      "prompt": "We need to ___ some water ___ the soup. A. add; with B. add; to",
+      "solution": "B。解析：固定结构 add A to B 表示“把 A 加入 B”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: add",
+        "url": "https://dictionary.cambridge.org/dictionary/english/add"
+      }
+    ]
+  },
+  {
+    "word": "add sth to sth",
+    "examTags": [
+      "语法·动词结构",
+      "语言运用·添加与补充"
+    ],
+    "grammar": "phr. 把某物加入/添加到另一物中。结构 add A to B；A 为新增内容，B 为接收对象。",
+    "collocations": "add salt to the soup; add a point to the list; add details to a report",
+    "commonMistake": "注意语序：先说加入的东西 A，再说加入到哪里 B：add A to B。",
+    "example": {
+      "english": "She added a little milk to her tea.",
+      "chinese": "她往茶里加了一点牛奶。"
+    },
+    "application": {
+      "prompt": "Please add the new address ___ your contact list. A. to B. with",
+      "solution": "A。解析：表达“把某物加入某物”用 add A to B。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: add",
+        "url": "https://dictionary.cambridge.org/dictionary/english/add"
+      }
+    ]
+  },
+  {
+    "word": "go shopping",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·go doing结构"
+    ],
+    "grammar": "phr. 去购物。go + doing 常用于休闲活动，如 go swimming；第三人称单数 goes shopping。",
+    "collocations": "go shopping for clothes; go shopping with friends; go shopping downtown",
+    "commonMistake": "表示“去购物”用 go shopping，不说 go to shopping；过去式 went shopping。",
+    "example": {
+      "english": "My sister goes shopping with her friends on Saturdays.",
+      "chinese": "我姐姐每周六和朋友去购物。"
+    },
+    "application": {
+      "prompt": "They went ___ for food before the guests arrived. A. to shopping B. shopping",
+      "solution": "B。解析：go shopping 是固定的 go + doing 结构。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shopping",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shopping"
+      }
+    ]
+  },
+  {
+    "word": "biscuit",
+    "examTags": [
+      "词汇·可数名词",
+      "拼写·英美用词差异"
+    ],
+    "grammar": "n. 饼干。可数，复数 biscuits；英式英语通常指甜或咸的小饼干，美式英语 biscuit 常指松软面包。",
+    "collocations": "a packet of biscuits; chocolate biscuits; have a biscuit",
+    "commonMistake": "biscuit 是可数名词；英美用法有所不同，结合教材语境理解为“饼干”。",
+    "example": {
+      "english": "We bought a packet of biscuits for the train ride.",
+      "chinese": "我们买了一包饼干，准备坐火车时吃。"
+    },
+    "application": {
+      "prompt": "Would you like a ___ with your tea? A. biscuit B. luggage",
+      "solution": "A。解析：biscuit 是可以配茶吃的饼干；luggage 不可数且意为行李。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: biscuit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/biscuit"
+      }
+    ]
+  },
+  {
+    "word": "borrow",
+    "examTags": [
+      "词汇·动词辨析",
+      "语法·borrow与lend"
+    ],
+    "grammar": "v. 借入。borrow sth from sb；过去式 borrowed。lend sb sth / lend sth to sb 表示借出。",
+    "collocations": "borrow a book from the library; borrow money from sb; borrow a pen",
+    "commonMistake": "borrow 表示“借入”，lend 表示“借出”；借物来源用 from。",
+    "example": {
+      "english": "I borrowed a travel guide from the library.",
+      "chinese": "我从图书馆借了一本旅行指南。"
+    },
+    "application": {
+      "prompt": "Could I ___ your umbrella? It's raining outside. A. lend B. borrow",
+      "solution": "B。解析：说话者要借入雨伞，用 borrow；lend 是借给别人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: borrow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/borrow"
+      }
+    ]
+  },
+  {
+    "word": "plan",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·plan后接不定式"
+    ],
+    "grammar": "n. 计划；方案；v. 打算；计划。plan—planned—planned；plan to do sth。",
+    "collocations": "make a plan; plan a trip; plan to visit a museum",
+    "commonMistake": "plan 作动词后接 to do；变过去式或现在分词时双写 n：planned/planning。",
+    "example": {
+      "english": "We plan to visit the old town tomorrow.",
+      "chinese": "我们计划明天参观古镇。"
+    },
+    "application": {
+      "prompt": "They ___ to stay with relatives during the holiday. A. plan B. planning",
+      "solution": "A。解析：一般现在时中主语 they 后用动词原形 plan。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: plan",
+        "url": "https://dictionary.cambridge.org/dictionary/english/plan"
+      }
+    ]
+  },
+  {
+    "word": "treasure",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·珍宝与珍视"
+    ],
+    "grammar": "n. 宝物；财富，常作不可数或集合概念；v. 珍视；珍爱。过去式 treasured。",
+    "collocations": "buried treasure; a treasure hunt; treasure the memory",
+    "commonMistake": "treasure 作名词可指宝藏；作动词表示珍爱，后接名词或代词。",
+    "example": {
+      "english": "She treasures the letters her grandmother sent her.",
+      "chinese": "她很珍视祖母寄给她的信。"
+    },
+    "application": {
+      "prompt": "This old map may lead us to buried ___. A. arrival B. treasure",
+      "solution": "B。解析：buried treasure 是“埋藏的宝藏”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: treasure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/treasure"
+      }
+    ]
+  },
+  {
+    "word": "hunt",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·搜寻与狩猎"
+    ],
+    "grammar": "v. 搜寻；狩猎；n. 搜寻；狩猎。常用 hunt for sth，过去式 hunted。",
+    "collocations": "hunt for a missing key; go hunting; a treasure hunt",
+    "commonMistake": "表示搜寻某物可说 hunt for sth；不要漏掉 for。",
+    "example": {
+      "english": "The children hunted for clues around the house.",
+      "chinese": "孩子们在房子周围寻找线索。"
+    },
+    "application": {
+      "prompt": "The police are ___ for the missing bag. A. hunting B. borrowing",
+      "solution": "A。解析：寻找失踪的包可说 hunt for the bag。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hunt",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hunt"
+      }
+    ]
+  },
+  {
+    "word": "treasure hunt",
+    "examTags": [
+      "词汇·复合名词",
+      "语言运用·游戏活动"
+    ],
+    "grammar": "n. 寻宝游戏。可数，复数 treasure hunts；常用 go on/do a treasure hunt。",
+    "collocations": "a school treasure hunt; go on a treasure hunt; clues for a treasure hunt",
+    "commonMistake": "treasure hunt 是名词短语；参加寻宝游戏可说 take part in a treasure hunt。",
+    "example": {
+      "english": "The children followed the clues during a treasure hunt.",
+      "chinese": "孩子们在寻宝游戏中跟着线索寻找宝藏。"
+    },
+    "application": {
+      "prompt": "Players follow clues to find a hidden prize. This game is a ___. A. movie B. treasure hunt",
+      "solution": "B。解析：根据线索找隐藏奖品是 treasure hunt（寻宝游戏）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: treasure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/treasure"
+      }
+    ]
+  },
+  {
+    "word": "lift",
+    "examTags": [
+      "词汇·名词与动词多义",
+      "熟词多义·电梯与举起"
+    ],
+    "grammar": "n. 电梯；搭便车；v. 举起；抬起。英式英语中 lift 常指电梯，美式英语常用 elevator。",
+    "collocations": "take the lift; give sb a lift; lift a box",
+    "commonMistake": "lift 的词义看语境：take the lift 是乘电梯，give sb a lift 是开车捎某人。",
+    "example": {
+      "english": "We took the lift to the eighth floor.",
+      "chinese": "我们乘电梯到了八楼。"
+    },
+    "application": {
+      "prompt": "My bag is heavy. Could you help me ___ it? A. lift B. invite",
+      "solution": "A。解析：help me 后用动词原形 lift，表示“帮我抬”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lift",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lift"
+      }
+    ]
+  },
+  {
+    "word": "give sb a lift",
+    "examTags": [
+      "词汇·动词短语",
+      "语言运用·出行与帮助"
+    ],
+    "grammar": "phr. 开车顺便送某人；让某人搭便车。结构 give sb a lift 或 give a lift to sb。",
+    "collocations": "give me a lift home; give a neighbour a lift; ask for a lift",
+    "commonMistake": "lift 在此是名词“搭便车”；也可说 give a lift to sb。",
+    "example": {
+      "english": "My uncle gave me a lift to the station.",
+      "chinese": "我叔叔开车顺便把我送到了车站。"
+    },
+    "application": {
+      "prompt": "The bus has stopped running, so Dad will ___ us home. A. take notes for B. give a lift to",
+      "solution": "B。解析：开车送某人一程可说 give sb a lift。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lift",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lift"
+      }
+    ]
+  },
+  {
+    "word": "until",
+    "examTags": [
+      "语法·时间介词与连词",
+      "语法·持续到某时"
+    ],
+    "grammar": "prep./conj. 到……时；直到……为止。作介词后接时间点或名词；作连词后接从句。",
+    "collocations": "until noon; wait until Friday; stay until the shop closes",
+    "commonMistake": "主句为肯定句时常表示动作持续到某时；not ... until 表示“直到……才”。",
+    "example": {
+      "english": "The shop stays open until nine tonight.",
+      "chinese": "这家商店今晚营业到九点。"
+    },
+    "application": {
+      "prompt": "We waited ___ the rain stopped. A. until B. during",
+      "solution": "A。解析：until 可引导时间状语从句，表示一直等到雨停。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: until",
+        "url": "https://dictionary.cambridge.org/dictionary/english/until"
+      }
+    ]
+  },
+  {
+    "word": "be careful with",
+    "examTags": [
+      "词汇·形容词短语",
+      "语法·careful介词搭配"
+    ],
+    "grammar": "phr. 小心；当心（处理某物）。with 后接需要小心对待的人或物；be careful to do sth 表示做事谨慎。",
+    "collocations": "be careful with glass; be careful with money; be careful with the scissors",
+    "commonMistake": "be careful with 后接名词；提醒做某事要小心可说 be careful to do。",
+    "example": {
+      "english": "Be careful with the hot soup.",
+      "chinese": "小心这碗热汤。"
+    },
+    "application": {
+      "prompt": "The vase is very old. Please ___ it. A. be familiar to B. be careful with",
+      "solution": "B。解析：提醒小心处理花瓶用 be careful with it。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: careful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/careful"
+      }
+    ]
+  },
+  {
+    "word": "movie",
+    "examTags": [
+      "词汇·可数名词",
+      "拼写·英美用词差异"
+    ],
+    "grammar": "n. 电影。可数，复数 movies；movie 常用于美式英语，英式英语常用 film。",
+    "collocations": "watch a movie; a movie ticket; a movie star",
+    "commonMistake": "movie 是可数名词，单数前用 a/the；“看电影”可说 watch/see a movie。",
+    "example": {
+      "english": "We watched a movie together after dinner.",
+      "chinese": "晚饭后我们一起看了一部电影。"
+    },
+    "application": {
+      "prompt": "Let's watch ___ at home tonight. A. a movie B. a luggage",
+      "solution": "A。解析：movie 是可数名词，可说 a movie。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: movie",
+        "url": "https://dictionary.cambridge.org/dictionary/english/movie"
+      }
+    ]
+  },
+  {
+    "word": "the movies",
+    "examTags": [
+      "词汇·固定表达",
+      "熟词多义·电影院与电影"
+    ],
+    "grammar": "phr. 去电影院；电影（行业）。go to the movies 表示去看电影，常用复数形式。",
+    "collocations": "go to the movies; a night at the movies; the movie industry; the film industry",
+    "commonMistake": "go to the movies 指去电影院看电影；movie 本身是“电影”，两者语义不同。",
+    "example": {
+      "english": "We went to the movies on Saturday evening.",
+      "chinese": "周六晚上我们去电影院看了电影。"
+    },
+    "application": {
+      "prompt": "They bought tickets and went ___ after dinner. A. to the luggage B. to the movies",
+      "solution": "B。解析：买票去看电影可说 go to the movies。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: movie",
+        "url": "https://dictionary.cambridge.org/dictionary/english/movie"
+      }
+    ]
+  },
+  {
+    "word": "dead",
+    "examTags": [
+      "词汇·形容词多义",
+      "熟词多义·死亡与停止运行"
+    ],
+    "grammar": "adj. 死的；不运行的；失效的。常用 be dead、a dead battery；名词 death，副词形容词派生 deadly。",
+    "collocations": "a dead battery; be dead; a dead phone",
+    "commonMistake": "dead 是形容词，不能直接作动词表示“死”；“死亡”名词为 death。",
+    "example": {
+      "english": "My phone is dead, so I need to charge it.",
+      "chinese": "我的手机没电了，所以需要充电。"
+    },
+    "application": {
+      "prompt": "The screen is black and the battery has no power. The phone is ___. A. dead B. alive",
+      "solution": "A。解析：dead 可表示设备停止工作或没电。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dead",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dead"
+      }
+    ]
+  },
+  {
+    "word": "note",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·笔记与便条"
+    ],
+    "grammar": "n. 笔记；便条；注意；v. 注意到；指出。常见 take a note of sth、make a note。",
+    "collocations": "write a note; leave a note; note the difference",
+    "commonMistake": "note 作“笔记”可数；take notes（做笔记）通常用复数。",
+    "example": {
+      "english": "I left a note on the kitchen table.",
+      "chinese": "我在厨房桌上留了一张便条。"
+    },
+    "application": {
+      "prompt": "The teacher asked us to ___ the new words in class. A. decorate B. note",
+      "solution": "B。解析：注意或记下新单词可用 note；也可说 take notes。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: note",
+        "url": "https://dictionary.cambridge.org/dictionary/english/note"
+      }
+    ]
+  },
+  {
+    "word": "take notes",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·可数名词复数"
+    ],
+    "grammar": "phr. 做笔记。notes 常用复数；take 为动词，过去式 took。",
+    "collocations": "take notes in class; take notes on a talk; take careful notes",
+    "commonMistake": "表示做笔记通常用 take notes；不要说 take a note 表示系统地记课堂笔记。",
+    "example": {
+      "english": "Students took notes during the museum talk.",
+      "chinese": "学生们在博物馆讲解期间做了笔记。"
+    },
+    "application": {
+      "prompt": "Please ___ while the guide explains the history. A. take notes B. make luggage",
+      "solution": "A。解析：听讲解并记录信息用 take notes。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: note",
+        "url": "https://dictionary.cambridge.org/dictionary/english/note"
+      }
+    ]
+  },
+  {
+    "word": "clean up",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·宾语位置"
+    ],
+    "grammar": "phr. 清理；打扫干净。可及物或不及物；代词宾语置于 clean 与 up 之间。",
+    "collocations": "clean up the kitchen; clean it up; clean up after dinner",
+    "commonMistake": "宾语是代词时用 clean it up，不说 clean up it。",
+    "example": {
+      "english": "We cleaned up the room before our guests arrived.",
+      "chinese": "客人到来前我们打扫了房间。"
+    },
+    "application": {
+      "prompt": "The floor is dirty. Let's ___ before the visitors arrive. A. clean up it B. clean it up",
+      "solution": "B。解析：短语动词接代词作宾语时，代词放中间。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: clean",
+        "url": "https://dictionary.cambridge.org/dictionary/english/clean"
+      }
+    ]
+  },
+  {
+    "word": "community",
+    "examTags": [
+      "词汇·名词",
+      "阅读·社区与群体"
+    ],
+    "grammar": "n. 社区；社团；群体。可数，复数 communities；y 变 i 加 -es。",
+    "collocations": "a local community; community centre; community members",
+    "commonMistake": "community 的复数为 communities；不要直接写 communitys。",
+    "example": {
+      "english": "The local community organized a clean-up day.",
+      "chinese": "当地社区组织了一次清洁日活动。"
+    },
+    "application": {
+      "prompt": "People living in the same area can form a ___. A. community B. balcony",
+      "solution": "A。解析：同一地区的人们组成一个 community（社区）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: community",
+        "url": "https://dictionary.cambridge.org/dictionary/english/community"
+      }
+    ]
+  },
+  {
+    "word": "rubbish",
+    "examTags": [
+      "词汇·不可数名词",
+      "熟词多义·垃圾与无意义的话"
+    ],
+    "grammar": "n. 垃圾；废话，通常不可数。英式英语常用 rubbish，美式英语常用 trash/garbage。",
+    "collocations": "a pile of rubbish; throw rubbish away; rubbish bin",
+    "commonMistake": "rubbish 通常不可数，不说 a rubbish；一件垃圾可说 a piece of rubbish。",
+    "example": {
+      "english": "Please put the rubbish in the bin after lunch.",
+      "chinese": "午饭后请把垃圾放进垃圾桶。"
+    },
+    "application": {
+      "prompt": "The park is clean because visitors don't leave ___ behind. A. rubbishes B. rubbish",
+      "solution": "B。解析：rubbish 通常作不可数名词，不加复数词尾。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rubbish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rubbish"
+      }
+    ]
+  },
+  {
+    "word": "almost",
+    "examTags": [
+      "词汇·程度副词",
+      "语法·副词位置"
+    ],
+    "grammar": "adv. 差不多；几乎。可修饰动词、数词或 all/every 等词；不直接修饰名词。",
+    "collocations": "almost finished; almost all the guests; almost two hours",
+    "commonMistake": "almost 不直接放在名词前；表示“几乎所有的学生”说 almost all the students。",
+    "example": {
+      "english": "We almost missed the last metro.",
+      "chinese": "我们差点错过末班地铁。"
+    },
+    "application": {
+      "prompt": "___ everyone arrived before the film started. A. Almost B. Most of",
+      "solution": "A。解析：almost 可直接修饰 everyone，表示“几乎每个人”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: almost",
+        "url": "https://dictionary.cambridge.org/dictionary/english/almost"
+      }
+    ]
+  },
+  {
+    "word": "journey",
+    "examTags": [
+      "词汇·名词与动词",
+      "阅读·旅行与过程"
+    ],
+    "grammar": "n. 旅行；行程；历程。可数；v. 旅行（较少用）。常指从一地到另一地的过程。",
+    "collocations": "a long journey; the journey home; make a journey",
+    "commonMistake": "journey 强调路程或旅行过程；trip 常指一次短期出行或游览。",
+    "example": {
+      "english": "The train journey from the city took two hours.",
+      "chinese": "从城里乘火车过去要两个小时。"
+    },
+    "application": {
+      "prompt": "The long train ___ was comfortable and relaxing. A. plate B. journey",
+      "solution": "B。解析：乘火车从一地到另一地的行程是 journey。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: journey",
+        "url": "https://dictionary.cambridge.org/dictionary/english/journey"
+      }
+    ]
+  },
+  {
+    "word": "pull",
+    "examTags": [
+      "词汇·动词与名词",
+      "熟词多义·拉与拖"
+    ],
+    "grammar": "v. 拉；拖；拽；n. 拉；拽。pull—pulled—pulled；与 push（推）相对。",
+    "collocations": "pull the door open; pull a suitcase; pull a chair closer",
+    "commonMistake": "pull 是“拉”，push 是“推”；规则变化加 -ed：pulled。",
+    "example": {
+      "english": "She pulled her suitcase across the station.",
+      "chinese": "她拖着行李箱穿过车站。"
+    },
+    "application": {
+      "prompt": "The door says “PULL,” so you should ___ it toward you. A. pull B. push",
+      "solution": "A。解析：PULL 表示“拉”，朝自己方向拉门。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pull",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pull"
+      }
+    ]
+  },
+  {
+    "word": "luggage",
+    "examTags": [
+      "词汇·不可数名词",
+      "阅读·旅行物品"
+    ],
+    "grammar": "n. 行李，通常不可数。可用 a piece of luggage 表示一件行李；英式英语常用 luggage，美式英语也常用 baggage。",
+    "collocations": "a piece of luggage; carry luggage; luggage rack",
+    "commonMistake": "luggage 不加 -s 表复数；说“很多行李”用 a lot of luggage。",
+    "example": {
+      "english": "We left our luggage at the hotel before exploring the town.",
+      "chinese": "我们把行李放在旅馆后去逛小镇。"
+    },
+    "application": {
+      "prompt": "There is too much ___ to fit in the small car. A. luggages B. luggage",
+      "solution": "B。解析：luggage 是不可数名词，不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: luggage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/luggage"
+      }
+    ]
+  },
+  {
+    "word": "ah",
+    "examTags": [
+      "词汇·感叹词",
+      "语言运用·表达惊讶与领悟"
+    ],
+    "grammar": "interj. 啊；哦，用于表达高兴、惊奇、领悟等。独立使用时常以逗号或感叹号与句子分开。",
+    "collocations": "Ah, I see.; Ah, that's wonderful!; Ah, now I remember.",
+    "commonMistake": "ah 是感叹词，语气依语境而变；句中通常用逗号隔开，句末可用感叹号。",
+    "example": {
+      "english": "Ah, now I understand how the game works.",
+      "chinese": "啊，现在我明白这个游戏怎么玩了。"
+    },
+    "application": {
+      "prompt": "You suddenly remember where you left your keys. You say, “___, they're in my bag!” A. Ah B. Yet",
+      "solution": "A。解析：Ah 可用于表示想起或领悟。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ah",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ah"
+      }
+    ]
+  },
+  {
+    "word": "share sth with sb",
+    "examTags": [
+      "语法·动词结构",
+      "语言运用·分享与交流"
+    ],
+    "grammar": "phr. 与某人分享某物。结构 share A with B；A 可为信息、食物、经历或观点。",
+    "collocations": "share a room with sb; share a photo with friends; share ideas with the class",
+    "commonMistake": "表示“和某人分享某物”用 share A with B；不要说 share sth to sb。",
+    "example": {
+      "english": "She shared her travel photos with her classmates.",
+      "chinese": "她和同学们分享了旅行照片。"
+    },
+    "application": {
+      "prompt": "I want to ___ my plan ___ my family. A. share; to B. share; with",
+      "solution": "B。解析：固定结构为 share A with B。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: share",
+        "url": "https://dictionary.cambridge.org/dictionary/english/share"
+      }
+    ]
+  },
+  {
+    "word": "mm",
+    "examTags": [
+      "词汇·感叹词",
+      "语言运用·回应与态度"
+    ],
+    "grammar": "interj. 嗯；唔，可表示喜欢、同意或思考。拼写和语气由上下文决定，正式写作中少用。",
+    "collocations": "Mm, that's good.; Mm, let me think.; Mm-hmm, I agree.",
+    "commonMistake": "mm 是非正式感叹词，常用于对话；理解语气需结合说话情境。",
+    "example": {
+      "english": "Mm, this biscuit tastes really good.",
+      "chinese": "嗯，这块饼干真好吃。"
+    },
+    "application": {
+      "prompt": "After tasting the cake, Leo smiles and says, “___, delicious!” A. Mm B. Until",
+      "solution": "A。解析：Mm 可用来表达喜欢食物的赞许语气。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mm"
+      }
+    ]
+  },
+  {
+    "word": "familiar",
+    "examTags": [
+      "词汇·形容词",
+      "语法·介词搭配"
+    ],
+    "grammar": "adj. 熟悉的；常见的。be familiar with sth 表示熟悉某事物；be familiar to sb 表示为某人所熟悉。",
+    "collocations": "be familiar with the area; a familiar face; sound familiar",
+    "commonMistake": "主语“熟悉”某物用 familiar with；某物“为某人所熟悉”用 familiar to。",
+    "example": {
+      "english": "Are you familiar with this part of town?",
+      "chinese": "你熟悉镇上的这片区域吗？"
+    },
+    "application": {
+      "prompt": "The guide knows every street here. She is familiar ___ the area. A. to B. with",
+      "solution": "B。解析：表示某人熟悉某地用 be familiar with。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: familiar",
+        "url": "https://dictionary.cambridge.org/dictionary/english/familiar"
+      }
+    ]
+  },
+  {
+    "word": "joke",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·固定结构"
+    ],
+    "grammar": "n. 笑话；玩笑；v. 开玩笑。可数，复数 jokes；常用 tell a joke、joke with sb。",
+    "collocations": "tell a joke; make a joke about sth; joke with a friend",
+    "commonMistake": "说“讲笑话”用 tell a joke；make fun of sb 有取笑之意，不等同于 joke with sb。",
+    "example": {
+      "english": "He told a funny joke at the party.",
+      "chinese": "他在聚会上讲了一个有趣的笑话。"
+    },
+    "application": {
+      "prompt": "The story made everyone laugh. It was a funny ___. A. joke B. journey",
+      "solution": "A。解析：让人发笑的小故事是 joke（笑话）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: joke",
+        "url": "https://dictionary.cambridge.org/dictionary/english/joke"
+      }
+    ]
+  },
+  {
+    "word": "several",
+    "examTags": [
+      "词汇·限定词与代词",
+      "语法·可数名词复数"
+    ],
+    "grammar": "det./pron. 几个；一些。修饰或代替可数名词复数；通常表示数量不多但超过两个。",
+    "collocations": "several days; several people; several of my friends",
+    "commonMistake": "several 后接可数名词复数；不能修饰不可数名词。",
+    "example": {
+      "english": "We visited several museums during the trip.",
+      "chinese": "旅行期间我们参观了几家博物馆。"
+    },
+    "application": {
+      "prompt": "She packed ___ books for the journey. A. much B. several",
+      "solution": "B。解析：books 是可数名词复数，可用 several 修饰。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: several",
+        "url": "https://dictionary.cambridge.org/dictionary/english/several"
+      }
+    ]
+  },
+  {
+    "word": "nod",
+    "examTags": [
+      "词汇·动词与名词",
+      "语法·动词词形变化"
+    ],
+    "grammar": "v. 点头；n. 点头。过去式、过去分词 nodded；现在分词 nodding，末尾辅音字母双写。",
+    "collocations": "nod your head; nod in agreement; give a nod",
+    "commonMistake": "nod 变过去式或现在分词时双写 d：nodded、nodding。",
+    "example": {
+      "english": "He nodded when he understood the directions.",
+      "chinese": "他听懂路线说明后点了点头。"
+    },
+    "application": {
+      "prompt": "She ___ her head to show that she agreed. A. nodded B. noded",
+      "solution": "A。解析：nod 的过去式要双写 d 再加 -ed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nod",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nod"
+      }
+    ]
+  },
+  {
+    "word": "writer",
+    "examTags": [
+      "词汇·职业名词派生",
+      "语法·动词与名词词形"
+    ],
+    "grammar": "n. 作者；作家。由 write + -er 构成；writer 指写书、文章等的人。",
+    "collocations": "a travel writer; a famous writer; a writer of children's books",
+    "commonMistake": "writer 是“作者/作家”；write 是动词“写”，注意词性变化。",
+    "example": {
+      "english": "The writer described the town in great detail.",
+      "chinese": "作者详细描写了这座小镇。"
+    },
+    "application": {
+      "prompt": "The person who wrote this travel guide is its ___. A. reader B. writer",
+      "solution": "B。解析：写作或编写指南的人是 writer。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: writer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/writer"
+      }
+    ]
+  },
+  {
+    "word": "text",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·文本与短信"
+    ],
+    "grammar": "n. 正文；文本；v. 用手机给某人发短信。过去式 texted；常用 text sb / text sb sth。",
+    "collocations": "the main text; a text message; text a friend",
+    "commonMistake": "text 作动词可直接接人：text me；发短信给某人不说 text to me。",
+    "example": {
+      "english": "I'll text you when we arrive at the hotel.",
+      "chinese": "我们到旅馆时会给你发短信。"
+    },
+    "application": {
+      "prompt": "The map is missing. Please ___ me the address. A. text B. cover",
+      "solution": "A。解析：text 可作动词，表示用手机给某人发信息。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: text",
+        "url": "https://dictionary.cambridge.org/dictionary/english/text"
+      }
+    ]
+  },
+  {
+    "word": "describe",
+    "examTags": [
+      "词汇·动词派生",
+      "语法·describe宾语"
+    ],
+    "grammar": "v. 描述；形容。后接人或事物作宾语，也可用 describe sth as...；名词 description。",
+    "collocations": "describe a place; describe the problem; describe sth as beautiful",
+    "commonMistake": "describe 后直接接描述对象，不说 describe about sth；名词形式为 description。",
+    "example": {
+      "english": "Can you describe the apartment to me?",
+      "chinese": "你能给我描述一下这套公寓吗？"
+    },
+    "application": {
+      "prompt": "Please ___ what the room looks like. A. borrow B. describe",
+      "solution": "B。解析：说明房间的样子用 describe（描述）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: describe",
+        "url": "https://dictionary.cambridge.org/dictionary/english/describe"
+      }
+    ]
+  },
+  {
+    "word": "wherever",
+    "examTags": [
+      "语法·地点状语从句",
+      "词汇·复合连接词"
+    ],
+    "grammar": "adv./conj. 无论去哪里；在任何地方。可引导地点状语从句，常表示地点不受限制。",
+    "collocations": "wherever you go; sit wherever you like; take it wherever you travel",
+    "commonMistake": "wherever 引导从句时，通常不用再加 there；主句表达结果或建议。",
+    "example": {
+      "english": "Wherever we travel, we try the local food.",
+      "chinese": "无论去哪里旅行，我们都会尝尝当地食物。"
+    },
+    "application": {
+      "prompt": "You can put your suitcase ___ you find space. A. wherever B. until",
+      "solution": "A。解析：wherever 表示“在任何有空间的地方”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wherever",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wherever"
+      }
+    ]
+  },
+  {
+    "word": "matter",
+    "examTags": [
+      "词汇·动词与名词",
+      "熟词多义·要紧与问题"
+    ],
+    "grammar": "v. 要紧；有关系；n. 事情；问题。常见 What matters is...；What's the matter?",
+    "collocations": "It doesn't matter; a serious matter; What's the matter?",
+    "commonMistake": "matter 作动词时意为“重要/要紧”；What's the matter? 是询问“怎么了”。",
+    "example": {
+      "english": "It doesn't matter if we arrive a little late.",
+      "chinese": "我们晚到一会儿也没关系。"
+    },
+    "application": {
+      "prompt": "“___?” “I can't find my invitation.” A. What time is it B. What's the matter",
+      "solution": "B。解析：询问对方怎么了用 What's the matter?"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: matter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/matter"
+      }
+    ]
+  },
+  {
+    "word": "no matter",
+    "examTags": [
+      "词汇·固定结构",
+      "语法·让步状语从句"
+    ],
+    "grammar": "phr. 不论；不要紧。no matter + 疑问词可引导让步状语从句，如 no matter where/what。",
+    "collocations": "no matter what; no matter where you go; no matter how hard",
+    "commonMistake": "no matter 后接疑问词和完整从句；不要漏掉从句中的主语或谓语。",
+    "example": {
+      "english": "No matter where we stay, we can take the metro.",
+      "chinese": "无论我们住在哪里，都可以乘地铁。"
+    },
+    "application": {
+      "prompt": "___ what happens, call me when you arrive. A. No matter B. Because",
+      "solution": "A。解析：no matter what 表示“无论发生什么”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: matter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/matter"
+      }
+    ]
+  },
+  {
+    "word": "perhaps",
+    "examTags": [
+      "词汇·副词",
+      "写作·表达不确定性"
+    ],
+    "grammar": "adv. 也许；可能。常置于句首或情态动词前后；语气比 certainly 不确定。",
+    "collocations": "perhaps later; perhaps we should wait; perhaps the best choice",
+    "commonMistake": "perhaps 是副词，不单独充当谓语；常与 may/might 所表达的可能性搭配。",
+    "example": {
+      "english": "Perhaps we can visit the market tomorrow.",
+      "chinese": "也许我们明天可以去逛市场。"
+    },
+    "application": {
+      "prompt": "___ we should ask the guide for directions. A. Nearly B. Perhaps",
+      "solution": "B。解析：提出不确定的建议可用 perhaps（也许）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: perhaps",
+        "url": "https://dictionary.cambridge.org/dictionary/english/perhaps"
+      }
+    ]
+  },
+  {
+    "word": "plate",
+    "examTags": [
+      "词汇·可数名词",
+      "熟词多义·盘子与金属板"
+    ],
+    "grammar": "n. 盘子；碟子；金属板。可数，复数 plates；a plate of food 表示一盘食物。",
+    "collocations": "a dinner plate; a plate of rice; wash the plates",
+    "commonMistake": "plate 是容器“盘子”；一盘某种食物用 a plate of + 食物。",
+    "example": {
+      "english": "He put a plate of biscuits on the table.",
+      "chinese": "他把一盘饼干放在桌上。"
+    },
+    "application": {
+      "prompt": "Please put the sandwiches on a clean ___. A. plate B. towel",
+      "solution": "A。解析：盛放三明治可用 plate（盘子）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: plate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/plate"
+      }
+    ]
+  },
+  {
+    "word": "freshly",
+    "examTags": [
+      "词汇·副词派生",
+      "语法·fresh与freshly"
+    ],
+    "grammar": "adv. 刚刚；新近。由 fresh + -ly 构成，常修饰过去分词或形容词。",
+    "collocations": "freshly made; freshly painted; freshly baked bread",
+    "commonMistake": "freshly 修饰“刚刚制作/烘焙”的动作结果；fresh 是形容词，不能直接修饰动词。",
+    "example": {
+      "english": "We ate freshly baked bread for breakfast.",
+      "chinese": "早餐我们吃了刚烤好的面包。"
+    },
+    "application": {
+      "prompt": "The ___ painted room still smells of paint. A. fresh B. freshly",
+      "solution": "B。解析：修饰过去分词 painted，用副词 freshly。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: freshly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/freshly"
+      }
+    ]
+  },
+  {
+    "word": "smell",
+    "examTags": [
+      "词汇·感官动词与名词",
+      "熟词多义·闻与气味"
+    ],
+    "grammar": "v. 闻到；闻起来；n. 气味。smell—smelled/smelt—smelled/smelt；感官动词可接形容词作表语。",
+    "collocations": "smell the flowers; smell sweet; a strange smell",
+    "commonMistake": "smell + 形容词表示“闻起来……”；不要误用副词修饰系动词 smell。",
+    "example": {
+      "english": "The soup smells wonderful, but it needs more salt.",
+      "chinese": "汤闻起来很香，不过还需要再加点盐。"
+    },
+    "application": {
+      "prompt": "The freshly baked biscuits ___ delicious. A. smell B. are smelling",
+      "solution": "A。解析：smell 表示感官状态时常用一般现在时，后接形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: smell",
+        "url": "https://dictionary.cambridge.org/dictionary/english/smell"
+      }
+    ]
+  },
+  {
+    "word": "joy",
+    "examTags": [
+      "词汇·名词派生",
+      "写作·表达情感"
+    ],
+    "grammar": "n. 喜悦；乐趣。通常不可数；joyful 为形容词；可说 bring sb joy、a joy to do sth。",
+    "collocations": "with joy; bring joy to sb; the joy of travel",
+    "commonMistake": "joy 通常不可数；“令人愉快的”用 joyful，joyous 也可作形容词。",
+    "example": {
+      "english": "The visit brought great joy to the children.",
+      "chinese": "这次参观给孩子们带来了许多快乐。"
+    },
+    "application": {
+      "prompt": "The good news filled her with ___. A. joyful B. joy",
+      "solution": "B。解析：介词 with 后用名词 joy；joyful 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: joy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/joy"
+      }
+    ]
+  },
+  {
+    "word": "apartment",
+    "examTags": [
+      "词汇·可数名词",
+      "拼写·英美用词差异"
+    ],
+    "grammar": "n. 公寓套房。可数；美式英语常用 apartment，英式英语常用 flat。",
+    "collocations": "rent an apartment; an apartment building; a two-bedroom apartment",
+    "commonMistake": "apartment 指一套公寓住房；不要与 department（部门）混淆拼写。",
+    "example": {
+      "english": "They rented an apartment near the university.",
+      "chinese": "他们在大学附近租了一套公寓。"
+    },
+    "application": {
+      "prompt": "The family lives in a two-bedroom ___. A. apartment B. community",
+      "solution": "A。解析：两卧室的住房可称为 a two-bedroom apartment。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: apartment",
+        "url": "https://dictionary.cambridge.org/dictionary/english/apartment"
+      }
+    ]
+  },
+  {
+    "word": "block",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·街区与阻挡"
+    ],
+    "grammar": "n. 大楼；街区；大块；v. 阻挡；堵塞。可数，复数 blocks；block A from doing sth。",
+    "collocations": "a block of flats; a block of ice; block the road",
+    "commonMistake": "block 可指街区、大楼或块状物；动词 block 后直接接被阻挡对象。",
+    "example": {
+      "english": "The new apartment block is three streets from the station.",
+      "chinese": "这栋新公寓楼离车站有三个街区。"
+    },
+    "application": {
+      "prompt": "A fallen tree may ___ the road after the storm. A. describe B. block",
+      "solution": "B。解析：树倒在路上会阻挡交通，可用动词 block。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: block",
+        "url": "https://dictionary.cambridge.org/dictionary/english/block"
+      }
+    ]
+  },
+  {
+    "word": "decorate",
+    "examTags": [
+      "词汇·动词派生",
+      "语法·decorate搭配"
+    ],
+    "grammar": "v. 装饰；装潢。decorate sth with sth；过去式 decorated；名词 decoration。",
+    "collocations": "decorate a room; decorate the tree with lights; decorate a cake",
+    "commonMistake": "表示“用某物装饰”用 decorate A with B；不要把 with 后的装饰物和被装饰对象次序颠倒。",
+    "example": {
+      "english": "They decorated the living room with paper flowers.",
+      "chinese": "他们用纸花装饰了客厅。"
+    },
+    "application": {
+      "prompt": "We decorated the poster ___ colourful pictures. A. with B. from",
+      "solution": "A。解析：decorate sth with sth 表示“用……装饰……”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: decorate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/decorate"
+      }
+    ]
+  },
+  {
+    "word": "cover",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·覆盖与包括"
+    ],
+    "grammar": "v. 遮盖；覆盖；包括；报道；n. 覆盖物；封面。cover A with B 表示用 B 覆盖 A。",
+    "collocations": "cover the table; cover a book; cover the cost",
+    "commonMistake": "cover A with B 是“用 B 覆盖 A”；be covered with 表示“被……覆盖”。",
+    "example": {
+      "english": "She covered the bowl with a clean plate.",
+      "chinese": "她用一个干净的盘子盖住了碗。"
+    },
+    "application": {
+      "prompt": "The guidebook ___ all the main sights in town. A. borrows B. covers",
+      "solution": "B。解析：cover 可表示“包括、涉及”，此处指指南涵盖所有主要景点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cover",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cover"
+      }
+    ]
+  },
+  {
+    "word": "poster",
+    "examTags": [
+      "词汇·可数名词",
+      "语言运用·海报与宣传"
+    ],
+    "grammar": "n. 海报；招贴。可数，复数 posters；通常张贴在墙面或公告板上。",
+    "collocations": "a travel poster; put up a poster; a poster for the film",
+    "commonMistake": "poster 是可数名词，单数前用 a/the；动词“张贴”常用 put up。",
+    "example": {
+      "english": "We made a poster for the school trip.",
+      "chinese": "我们为学校旅行做了一张海报。"
+    },
+    "application": {
+      "prompt": "The club put up a ___ to invite students to the event. A. poster B. luggage",
+      "solution": "A。解析：宣传活动常用 poster（海报）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: poster",
+        "url": "https://dictionary.cambridge.org/dictionary/english/poster"
+      }
+    ]
+  },
+  {
+    "word": "scissors",
+    "examTags": [
+      "词汇·复数名词",
+      "语法·量词与代词一致"
+    ],
+    "grammar": "n. 剪刀，通常以复数形式出现。a pair of scissors 表示一把剪刀，谓语通常与 pair 一致。",
+    "collocations": "a pair of scissors; sharp scissors; cut paper with scissors",
+    "commonMistake": "scissors 形式上是复数；“一把剪刀”说 a pair of scissors，不说 a scissor。",
+    "example": {
+      "english": "I need a pair of scissors to cut the paper.",
+      "chinese": "我需要一把剪刀来剪纸。"
+    },
+    "application": {
+      "prompt": "This pair of scissors ___ very sharp. A. are B. is",
+      "solution": "B。解析：中心词是单数 pair，谓语用 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: scissors",
+        "url": "https://dictionary.cambridge.org/dictionary/english/scissors"
+      }
+    ]
+  },
+  {
+    "word": "glue",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 胶水，通常不可数；v. 粘贴；胶合。过去式 glued；glue A to B 表示把 A 粘到 B 上。",
+    "collocations": "a bottle of glue; glue paper together; glue a label to a box",
+    "commonMistake": "表示胶水时 glue 通常不可数；“一瓶胶水”用 a bottle of glue。",
+    "example": {
+      "english": "Use a little glue to attach the picture to the card.",
+      "chinese": "用一点胶水把图片粘到卡片上。"
+    },
+    "application": {
+      "prompt": "We used ___ to stick the paper shapes together. A. glue B. glues",
+      "solution": "A。解析：表示材料“胶水”时 glue 通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: glue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/glue"
+      }
+    ]
+  },
+  {
+    "word": "paper-cut",
+    "examTags": [
+      "词汇·复合名词",
+      "阅读·传统手工艺"
+    ],
+    "grammar": "n. 剪纸。可数，复数 paper-cuts；作定语时 paper-cut 常修饰 art/design。",
+    "collocations": "Chinese paper-cut; paper-cut art; make a paper-cut",
+    "commonMistake": "paper-cut 作“剪纸作品”时可数；表示剪纸艺术可说 paper-cut art。",
+    "example": {
+      "english": "The museum displayed a beautiful paper-cut of a flower.",
+      "chinese": "博物馆展出了一幅漂亮的花朵剪纸。"
+    },
+    "application": {
+      "prompt": "This traditional picture is made by cutting paper with scissors. It is a ___. A. text B. paper-cut",
+      "solution": "B。解析：通过剪纸制成的传统图案是 paper-cut。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: paper",
+        "url": "https://dictionary.cambridge.org/dictionary/english/paper"
+      }
+    ]
+  }
+]

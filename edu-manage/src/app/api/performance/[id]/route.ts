@@ -5,6 +5,9 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { parentLinkedStudentWhere } from '@/lib/business-visibility'
+import { markLinkedContentNotificationsRead } from '@/lib/notification-read-state'
+import type { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,8 +17,26 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  if (!['admin', 'teacher', 'parent'].includes(user.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const teacher = user.role === 'teacher' ? await resolveTeacherForUser(user, prisma) : null
+  if (user.role === 'teacher' && !teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const where: Prisma.PerformancePostWhereInput = user.role === 'parent'
+    ? {
+        id,
+        deletedAt: null,
+        visibility: { in: ['PARENT_ONLY', 'CLASS_PUBLIC'] as const },
+        student: { is: parentLinkedStudentWhere(user.id) },
+      }
+    : user.role === 'teacher'
+      ? { id, deletedAt: null, teacherId: teacher!.id }
+      : { id, deletedAt: null }
+
   const post = await prisma.performancePost.findFirst({
-    where: { id, deletedAt: null },
+    where,
     include: {
       student: true,
       teacher: true,
@@ -26,15 +47,32 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
   })
   if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  // Ownership check
-  if (user.role === 'parent' && post.student.parentUserId !== user.id) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (user.role === 'parent') {
+    const readAt = new Date()
+    await prisma.$transaction(async (tx) => {
+      await tx.performancePost.updateMany({
+        where: { id, deletedAt: null, student: parentLinkedStudentWhere(user.id) },
+        data: { isReadByParent: true },
+      })
+      await markLinkedContentNotificationsRead(tx.notification, {
+        userId: user.id,
+        relatedId: id,
+        relatedTypes: ['PERFORMANCE_FEEDBACK', 'PERFORMANCE_UPDATE'],
+        legacyHrefContains: `feedbackId=${encodeURIComponent(id)}`,
+        readAt,
+      })
+    })
+    post.isReadByParent = true
   }
-  if (user.role === 'teacher') {
-    const teacher = await resolveTeacherForUser(user, prisma)
-    if (!teacher || teacher.id !== post.teacherId) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
-    }
+
+  if (user.role === 'admin' || user.role === 'teacher') {
+    await prisma.postComment.updateMany({
+      where: { postId: id, author: { role: 'parent' }, isRead: false },
+      data: { isRead: true },
+    })
+    post.comments = post.comments.map((comment) => comment.author.role === 'parent'
+      ? { ...comment, isRead: true }
+      : comment)
   }
 
   return NextResponse.json(post)

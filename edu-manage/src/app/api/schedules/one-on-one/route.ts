@@ -77,7 +77,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const result = await prisma.$transaction(async (tx) => {
       // 1. Find or create ONE_ON_ONE course
       let course = await tx.course.findFirst({
-        where: { subject, type: 'ONE_ON_ONE', isActive: true },
+        where: { subject, type: 'ONE_ON_ONE', division, isActive: true, deletedAt: null },
       })
       if (!course) {
         course = await tx.course.create({
@@ -86,6 +86,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             subject,
             type: 'ONE_ON_ONE',
             grade: student.grade || undefined,
+            division,
             lessonMinutes,
             color: '#534AB7',
             isActive: true,
@@ -102,7 +103,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           intensiveMode: 'INTENSIVE',
           teachingType: 'ONE_ON_ONE',
           termId: activeTerm.id,
-          enrollments: { some: { studentId, status: 'ACTIVE' } },
+          enrollments: { some: { studentId, status: 'ACTIVE', deletedAt: null } },
         },
       })
       if (!group) {
@@ -133,9 +134,23 @@ export const POST = apiHandler(async (req: NextRequest) => {
             totalHours: 0,
             remainHours: 0,
             status: 'ACTIVE',
+            subjects: [subject],
           },
         })
         await syncStudentHourSnapshot(tx, studentId)
+      } else {
+        const existingEnrollment = await tx.enrollment.findUnique({
+          where: { studentId_groupId: { studentId, groupId: group.id } },
+        })
+        if (!existingEnrollment || existingEnrollment.status !== 'ACTIVE' || existingEnrollment.deletedAt) {
+          throw new Error('一对一课程报名关系已失效，请刷新后重试')
+        }
+        if (!existingEnrollment.subjects.includes(subject)) {
+          await tx.enrollment.update({
+            where: { id: existingEnrollment.id },
+            data: { subjects: [...new Set([...existingEnrollment.subjects, subject])] },
+          })
+        }
       }
 
       // 3. Create ClassLesson

@@ -2,7 +2,7 @@
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useState } from 'react'
-import { Alert, DatePicker, Form, Input, Select, Tag, TimePicker, message } from 'antd'
+import { Alert, DatePicker, Form, Input, Radio, Tag, TimePicker, message } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
 import dayjs from 'dayjs'
 import useSWR from 'swr'
@@ -167,7 +167,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
 
       <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
         <Form.Item name="division" label="学部" rules={[{ required: true, message: '请选择学部' }]}>
-          <AdaptiveSelect options={[{ label: '初中部', value: 'JUNIOR' }, { label: '高中部', value: 'SENIOR' }]} />
+          <Radio.Group id="schedule-division" optionType="button" buttonStyle="solid" size="large" aria-label="学部" options={[{ label: '初中部', value: 'JUNIOR' }, { label: '高中部', value: 'SENIOR' }]} />
         </Form.Item>
 
         <Form.Item name="classType" label="班型" rules={[{ required: true, message: '请选择班型' }]}>
@@ -202,10 +202,17 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
             showSearch
             optionFilterProp="label"
             placeholder="选择教师"
-            options={teacherList.map((teacher: Record<string, unknown>) => ({
-              label: teacher.name as string,
-              value: teacher.id as string,
-            }))}
+            options={teacherList.map((teacher: Record<string, unknown>) => {
+              const teacherSub = typeof teacher.subjects === 'string'
+                ? teacher.subjects
+                : Array.isArray(teacher.subjects)
+                  ? teacher.subjects.join('/')
+                  : ''
+              return {
+                label: teacherSub ? `${teacher.name as string} (${teacherSub})` : (teacher.name as string),
+                value: teacher.id as string,
+              }
+            })}
           />
         </Form.Item>
 

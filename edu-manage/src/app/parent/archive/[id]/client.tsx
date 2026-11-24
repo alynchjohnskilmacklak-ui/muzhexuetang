@@ -1,8 +1,11 @@
 'use client'
 
-import { Card, Descriptions, Image, Tag, Typography, Button } from 'antd'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { useEffect, useState } from 'react'
+import { Alert, Card, Descriptions, Image, Tag, Typography, Button } from 'antd'
+import { ArrowLeftOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
+import { useSWRConfig } from 'swr'
+import { isParentUnreadCountsCacheKey } from '@/lib/parent-unread-cache'
 import { fmtFull } from '@/lib/format-date'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
@@ -14,6 +17,8 @@ const MASTERY_LABELS: Record<string, { text: string; color: string }> = {
   NEEDS_PRACTICE: { text: '需练习', color: 'red' },
 }
 type PaperDetail = {
+  id: string
+  isReadByParent?: boolean
   title: string
   subject?: string | null
   paperDate?: string | null
@@ -26,17 +31,51 @@ type PaperDetail = {
 
 export function PaperDetailClient({ paper }: { paper: PaperDetail }) {
   const router = useRouter()
+  const { mutate: mutateSWR } = useSWRConfig()
+  const [readRetry, setReadRetry] = useState(0)
+  const [readError, setReadError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (paper.isReadByParent) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const response = await fetch(`/api/exam-papers/${encodeURIComponent(paper.id)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isReadByParent: true }),
+        })
+        const data = await response.json().catch(() => null) as { error?: string } | null
+        if (!response.ok) throw new Error(data?.error || '试卷已打开，但已读状态同步失败')
+        await mutateSWR(isParentUnreadCountsCacheKey)
+        if (!cancelled) setReadError(null)
+      } catch (error) {
+        if (!cancelled) setReadError(error instanceof Error ? error.message : '试卷已打开，但已读状态同步失败')
+      }
+    })()
+    return () => { cancelled = true }
+  }, [paper.id, paper.isReadByParent, readRetry, mutateSWR])
 
   return (
     <div>
       <Button
         type="text"
+        className="mobile-shell-back"
         icon={<ArrowLeftOutlined />}
         onClick={() => router.push('/parent/archive')}
         style={{ marginBottom: 16, padding: 0, color: '#5a4e3a' }}
       >
         返回学习档案
       </Button>
+      {readError && (
+        <Alert
+          type="warning"
+          showIcon
+          message={readError}
+          action={<Button size="small" icon={<ReloadOutlined />} onClick={() => setReadRetry((value) => value + 1)}>重试</Button>}
+          style={{ marginBottom: 12, borderRadius: 10 }}
+        />
+      )}
 
       <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }}>
         <Title level={4} style={{ marginBottom: 16 }}>{paper.title}</Title>

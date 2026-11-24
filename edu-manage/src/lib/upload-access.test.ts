@@ -119,4 +119,24 @@ describe('stored upload visibility', () => {
     await expect(assertCanAccessStoredFileAsset(user, 'parent-material/worksheet.pdf'))
       .rejects.toThrow('无权访问该文件')
   })
+
+  it('allows the linked parent to read an admin practice-reply image while denying it to teachers', async () => {
+    const file = {
+      ownerType: 'admin_practice_reply',
+      visibility: 'PARENT_VISIBLE',
+      uploadedById: 'admin-user',
+      studentId: 'student-1',
+      lessonId: null,
+      postId: null,
+      feedbackId: 'feedback-1',
+    }
+    const parent = actor('parent', file).user
+    const teacher = actor('teacher', file).user
+
+    await assertCanAccessFileAsset(parent, file)
+    await assertCanAccessStoredFileAsset(parent, 'admin_practice_reply/photo.webp')
+    await expect(assertCanAccessFileAsset(teacher, file)).rejects.toThrow('无权访问该文件')
+    await expect(assertCanAccessStoredFileAsset(teacher, 'admin_practice_reply/photo.webp')).rejects.toThrow('无权访问该文件')
+    expect(assertCanAccessStudent).toHaveBeenCalledWith(parent, 'student-1')
+  })
 })

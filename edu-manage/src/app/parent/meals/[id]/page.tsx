@@ -82,7 +82,7 @@ export default async function MealDetailPage({ params }: { params: Promise<{ id:
           <div style={{ fontSize: 44 }}>🍽️</div>
           <div style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginTop: 14 }}>未找到该菜品</div>
           <div style={{ fontSize: 13, color: '#6B7280', marginTop: 6 }}>菜单可能已更新或被移除</div>
-          <Link href="/parent/meals" style={{
+          <Link href="/parent/meals" className="mobile-shell-back" style={{
             display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 18,
             borderRadius: 999, padding: '8px 18px', background: '#1E4D3A', color: '#fff',
             fontSize: 13, fontWeight: 600, textDecoration: 'none',

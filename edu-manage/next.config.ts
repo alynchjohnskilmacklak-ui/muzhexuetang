@@ -15,8 +15,9 @@ const securityHeaders = [
       `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.aliyuncs.com https://*.aliyuncs.com.cn https://wxpusher.zjiecode.com",
+      "media-src 'self' data: blob: https://dict.youdao.com https://*.youdao.com https://fanyi.baidu.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://api.moonshot.cn https://api.deepseek.com https://wxpusher.zjiecode.com https://*.aliyuncs.com https://*.aliyuncs.com.cn",
+      "connect-src 'self' https://dict.youdao.com https://*.youdao.com https://fanyi.baidu.com https://api.moonshot.cn https://api.deepseek.com https://wxpusher.zjiecode.com https://*.aliyuncs.com https://*.aliyuncs.com.cn",
       "frame-src 'self' https://phet.colorado.edu https://www.geogebra.org https://www.desmos.com https://www.falstad.com https://chemcollective.org",
       "frame-ancestors 'self'",
       "object-src 'none'",
@@ -31,6 +32,9 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // 开发模式下放行临时隧道（cloudflared trycloudflare）与本机回环域名访问 dev 资源（HMR/JS chunk），
+  // 否则跨源 dev 资源被 Next 默认拦截，页面 HTML 能出但客户端无法水合，会一直卡在启动页
+  allowedDevOrigins: ['*.trycloudflare.com', 'localhost', '127.0.0.1'],
   // 预构建发布模式：产出 .next/standalone 可独立运行目录（服务器免 npm install / build）
   output: 'standalone',
   distDir: process.env.NEXT_DIST_DIR || '.next',
@@ -40,10 +44,6 @@ const nextConfig: NextConfig = {
   // ali-oss 的传递依赖链包含 vm2 等服务端包，其内部相对导入 Turbopack 无法解析；
   // 标记为服务端外部包，运行时由 Node 原生 require，绕开打包器。
   serverExternalPackages: ['ali-oss', 'urllib', 'proxy-agent', 'pac-proxy-agent', 'pac-resolver', 'degenerator', 'vm2'],
-  typescript: {
-    // 题库文件太大，TypeScript栈溢出，暂时跳过build时的类型检查
-    ignoreBuildErrors: true,
-  },
   experimental: {
     // 构建并行 CPU 上限：避免高核数机器上 Next 多 worker 同时构建导致内存 OOM
     cpus: buildCpus,
@@ -92,15 +92,48 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/((?!_next/static|_next/image|favicon.ico|images|people|public|api).*)',
+        source: '/((?!$|_next/static|_next/image|favicon.ico|images|people|public|api|teacher-portraits|about-images|videos|stickers).*)',
         headers: [
           { key: 'Cache-Control', value: 'no-cache' },
+        ],
+      },
+      {
+        // The public landing pages are static and do not contain user data.
+        // A short browser cache avoids repeating the initial HTML request while
+        // keeping published copy and layouts fresh shortly after deployment.
+        source: '/',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=60' },
+        ],
+      },
+      {
+        source: '/home.html',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=60' },
         ],
       },
       {
         source: '/images/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/teacher-portraits/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800' },
+        ],
+      },
+      {
+        source: '/about-images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800' },
+        ],
+      },
+      {
+        source: '/videos/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800' },
         ],
       },
       {
@@ -115,6 +148,12 @@ const nextConfig: NextConfig = {
         source: '/people/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=86400' },
+        ],
+      },
+      {
+        source: '/stickers/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800' },
         ],
       },
       {

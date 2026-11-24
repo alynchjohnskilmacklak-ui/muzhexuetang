@@ -1,16 +1,22 @@
 'use client'
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import useSWR from 'swr'
 import {
   Button,
   Card,
+  Col,
+  Drawer,
+  Empty,
   Form,
   Input,
+  Pagination,
   Popconfirm,
-  Space,
-  Table,
+  Row,
+  Segmented,
+  Spin,
+  Statistic,
   Tabs,
   Tag,
   Typography,
@@ -20,6 +26,7 @@ import {
 import { BrandModal } from '@/components/Common/BrandModal'
 import { EditOutlined, HistoryOutlined, KeyOutlined, LinkOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons'
 import { isUserActive } from '@/lib/user-status'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
 import { formatLocaleDateTime } from '@/lib/format-date'
 
@@ -78,6 +85,56 @@ interface AccountsResponse {
 }
 
 type ModalMode = 'admin' | 'teacher' | 'parent' | 'edit' | 'phone' | 'reset' | 'bind'
+type AccountSelection =
+  | { role: 'admin'; record: UserAccount }
+  | { role: 'teacher'; record: TeacherAccount }
+  | { role: 'parent'; record: ParentAccount }
+
+const ACCOUNT_PAGE_SIZE = 8
+
+function AccountPersonCard({
+  name,
+  role,
+  status,
+  primary,
+  secondary,
+  onClick,
+}: {
+  name: string
+  role: string
+  status: string | null | undefined
+  primary: string
+  secondary: string
+  onClick: () => void
+}) {
+  const tone = status == null ? 'pending' : isUserActive(status) ? 'active' : 'disabled'
+  const statusLabel = status == null ? '未创建账号' : isUserActive(status) ? '正常' : '已停用'
+
+  return (
+    <button type="button" className="settings-account-person-card" onClick={onClick}>
+      <span className="settings-account-card-heading">
+        <span className="settings-account-card-avatar" aria-hidden="true">{Array.from(name.trim())[0] || '用'}</span>
+        <span className="settings-account-card-identity">
+          <span className="settings-account-card-name">{name || '未命名'}</span>
+          <span className="settings-account-card-role">{role}</span>
+        </span>
+        <span className={`settings-account-card-status is-${tone}`}>{statusLabel}</span>
+      </span>
+      <span className="settings-account-card-meta">
+        <span className="settings-account-card-meta-item">
+          <span className="settings-account-card-meta-label">主要账号</span>
+          <span className="settings-account-card-meta-value">{primary || '未登记'}</span>
+        </span>
+        <span className="settings-account-card-meta-item">
+          <span className="settings-account-card-meta-label">关联信息</span>
+          <span className="settings-account-card-meta-value">{secondary || '暂无'}</span>
+        </span>
+      </span>
+      <span className="settings-account-card-open">查看详情与操作 <span aria-hidden="true">→</span></span>
+    </button>
+  )
+}
+
 const fetcher = async (url: string) => {
   const res = await fetch(url)
   const data = await res.json().catch(() => ({}))
@@ -95,12 +152,17 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
   useEffect(() => { setActiveRole(initialRole) }, [initialRole])
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedAccount, setSelectedAccount] = useState<AccountSelection | null>(null)
   const [mode, setMode] = useState<ModalMode | null>(null)
   const [target, setTarget] = useState<UserAccount | TeacherAccount | ParentAccount | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [issuedCredential, setIssuedCredential] = useState<{ email: string; password: string } | null>(null)
   const [passwordHistoryTarget, setPasswordHistoryTarget] = useState<UserAccount | null>(null)
   const [form] = Form.useForm()
+  const isMobile = useIsMobile() ?? false
+
+  useEffect(() => { setCurrentPage(1) }, [activeRole, keyword, statusFilter])
 
   const studentsWithoutParent = data?.studentsWithoutParent || []
 
@@ -243,27 +305,6 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
     },
   }
 
-  const passwordSecurity = (_: unknown, record: UserAccount) => (
-    <Space direction="vertical" size={0}>
-      <Tag color={record.passwordSecurity.encrypted ? 'green' : 'red'}>
-        {record.passwordSecurity.encrypted ? '已加密' : '需处理'}
-      </Tag>
-      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-        {record.passwordSecurity.source}
-        {record.passwordSecurity.changedAt ? ` · ${formatLocaleDateTime(record.passwordSecurity.changedAt)}` : ''}
-      </Typography.Text>
-      <Button
-        type="link"
-        size="small"
-        icon={<HistoryOutlined />}
-        style={{ padding: 0, height: 'auto' }}
-        onClick={() => setPasswordHistoryTarget(record)}
-      >
-        查看修改记录
-      </Button>
-    </Space>
-  )
-
   const admins = filterUsers(data?.admins || [])
   const parents = filterUsers(data?.parents || [])
   const currentAdmin = (data?.admins || []).find((admin) => admin.id === currentUserId)
@@ -273,159 +314,304 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
     return (!keyword || text.includes(keyword.toLowerCase())) && (!statusFilter || teacher.account?.status === statusFilter)
   })
 
-  const userActions = (record: UserAccount) => (
-    <Space wrap>
-      <Button size="small" icon={<EditOutlined />} onClick={() => openModal('edit', record)}>编辑</Button>
-      <Button size="small" icon={<KeyOutlined />} onClick={() => openModal('reset', record)}>重置密码</Button>
-      {isUserActive(record.status) ? (
-        <Popconfirm title="确定停用该账号？" onConfirm={() => changeStatus(record.id, 'disabled')}>
-          <Button size="small" danger icon={<StopOutlined />} disabled={record.id === currentUserId}>停用</Button>
+  const userActions = (record: UserAccount, closeDetails = false) => {
+    const openAction = (nextMode: ModalMode) => {
+      if (closeDetails) setSelectedAccount(null)
+      openModal(nextMode, record)
+    }
+    const completeStatusChange = (status: 'active' | 'disabled') => {
+      if (closeDetails) setSelectedAccount(null)
+      return changeStatus(record.id, status)
+    }
+
+    return (
+      <div className="settings-account-detail-actions">
+        <Button icon={<EditOutlined />} onClick={() => openAction('edit')}>编辑资料</Button>
+        <Button icon={<KeyOutlined />} onClick={() => openAction('reset')}>重置密码</Button>
+        {isUserActive(record.status) ? (
+          <Popconfirm title="确定停用该账号？" onConfirm={() => completeStatusChange('disabled')}>
+            <Button danger icon={<StopOutlined />} disabled={record.id === currentUserId}>停用账号</Button>
+          </Popconfirm>
+        ) : (
+          <Button onClick={() => completeStatusChange('active')}>启用账号</Button>
+        )}
+        <Popconfirm
+          title="按现有规范仅停用账号，不删除业务数据。确定继续？"
+          onConfirm={() => {
+            if (closeDetails) setSelectedAccount(null)
+            return softDelete(record.id)
+          }}
+        >
+          <Button danger disabled={record.id === currentUserId}>删除/停用</Button>
         </Popconfirm>
+      </div>
+    )
+  }
+
+  const cardPageOffset = (currentPage - 1) * ACCOUNT_PAGE_SIZE
+  const adminCards: ReactNode[] = admins.slice(cardPageOffset, cardPageOffset + ACCOUNT_PAGE_SIZE).map((record) => (
+    <AccountPersonCard
+      key={record.id}
+      name={record.name}
+      role={record.isSuperAdmin ? '最高权益管理员' : '管理员账号'}
+      status={record.status}
+      primary={record.email}
+      secondary={record.phone ? `登录手机号 ${record.phone}` : '未绑定登录手机号'}
+      onClick={() => setSelectedAccount({ role: 'admin', record })}
+    />
+  ))
+  const teacherCards: ReactNode[] = teachers.slice(cardPageOffset, cardPageOffset + ACCOUNT_PAGE_SIZE).map((record) => (
+    <AccountPersonCard
+      key={record.id}
+      name={record.name}
+      role="教师账号"
+      status={record.account?.status}
+      primary={record.phone || '未登记手机号'}
+      secondary={record.account?.email || record.email || '尚未创建登录账号'}
+      onClick={() => setSelectedAccount({ role: 'teacher', record })}
+    />
+  ))
+  const parentCards: ReactNode[] = parents.slice(cardPageOffset, cardPageOffset + ACCOUNT_PAGE_SIZE).map((record) => (
+    <AccountPersonCard
+      key={record.id}
+      name={record.name}
+      role="家长账号"
+      status={record.status}
+      primary={record.email || record.phone || '未登记账号'}
+      secondary={record.students.length ? `已绑定 ${record.students.length} 位学员` : '尚未绑定学员'}
+      onClick={() => setSelectedAccount({ role: 'parent', record })}
+    />
+  ))
+
+  const renderAccountPanel = (cards: ReactNode[], total: number) => (
+    <div className="settings-account-card-panel">
+      <div className="settings-account-card-count">共 {total} 个账号 · 点击人员卡片查看详情和操作</div>
+      {isLoading ? <div className="settings-account-card-loading"><Spin /></div> : total ? (
+        <div className="settings-account-card-grid">{cards}</div>
       ) : (
-        <Button size="small" onClick={() => changeStatus(record.id, 'active')}>启用</Button>
+        <Empty description="没有符合条件的账号" />
       )}
-      <Popconfirm title="按现有规范仅停用账号，不删除业务数据。确定继续？" onConfirm={() => softDelete(record.id)}>
-        <Button size="small" danger disabled={record.id === currentUserId}>删除/停用</Button>
-      </Popconfirm>
-    </Space>
+      {!isLoading && total > ACCOUNT_PAGE_SIZE && (
+        <Pagination
+          current={currentPage}
+          pageSize={ACCOUNT_PAGE_SIZE}
+          total={total}
+          showSizeChanger={false}
+          onChange={setCurrentPage}
+          size={isMobile ? 'small' : 'default'}
+        />
+      )}
+    </div>
   )
 
-  const adminColumns = [
-    { title: '姓名', dataIndex: 'name', key: 'name', width: 140 },
-    { title: '邮箱', dataIndex: 'email', key: 'email', width: 220 },
-    { title: '登录手机号', dataIndex: 'phone', key: 'phone', width: 150, render: (value: string | null | undefined) => value || '-' },
-    { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
-    { title: '密码状态', key: 'passwordSecurity', width: 210, render: passwordSecurity },
-    { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: (value: string | null) => formatLocaleDateTime(value) },
-    {
-      title: '操作',
-      key: 'action',
-      width: 360,
-      render: (_: unknown, record: UserAccount) => {
-        if (record.id === currentUserId) {
-          return (
-            <Space wrap>
-              <Typography.Text type="secondary">当前账号</Typography.Text>
-              <Button size="small" icon={<EditOutlined />} onClick={() => openModal('phone', record)}>
-                {record.phone ? '修改登录手机号' : '绑定登录手机号'}
-              </Button>
-            </Space>
-          )
-        }
-        if (record.isSuperAdmin && !currentIsSuperAdmin) {
-          return <Typography.Text type="secondary">最高权益管理员</Typography.Text>
-        }
-        return userActions(record)
-      },
-    },
-  ]
-
-  const teacherColumns = [
-    { title: '教师', dataIndex: 'name', key: 'name', width: 120 },
-    { title: '手机号（登录）', dataIndex: 'phone', key: 'phone', width: 140 },
-    { title: '教师邮箱', dataIndex: 'email', key: 'email', width: 200, render: (value: string | null) => value || '-' },
-    { title: '登录账号', key: 'account', width: 240, render: (_: unknown, record: TeacherAccount) => record.account?.email || <Tag>未创建</Tag> },
-    { title: '状态', key: 'status', width: 100, render: (_: unknown, record: TeacherAccount) => record.account ? statusTag(record.account.status) : '-' },
-    { title: '密码状态', key: 'passwordSecurity', width: 210, render: (_: unknown, record: TeacherAccount) => record.account ? passwordSecurity(_, record.account) : '-' },
-    {
-      title: '操作',
-      key: 'action',
-      width: 380,
-      render: (_: unknown, record: TeacherAccount) => record.account ? userActions(record.account) : (
-        <Button size="small" type="primary" icon={<PlusOutlined />} onClick={() => openModal('teacher', record)}>
-          创建账号
-        </Button>
-      ),
-    },
-  ]
-
-  const parentColumns = [
-    { title: '家长', dataIndex: 'name', key: 'name', width: 120 },
-    { title: '账号', dataIndex: 'email', key: 'email', width: 220 },
-    { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
-    { title: '密码状态', key: 'passwordSecurity', width: 210, render: passwordSecurity },
-    {
-      title: '绑定学员',
-      key: 'students',
-      width: 260,
-      render: (_: unknown, record: ParentAccount) => (
-        <Space wrap>
-          {record.students.length ? record.students.map((student) => (
-            <Tag key={student.id} closable onClose={(event) => { event.preventDefault(); void unbindStudent(student.id) }}>
-              {student.name}{student.grade ? ` / ${student.grade}` : ''}
-            </Tag>
-          )) : <Typography.Text type="secondary">未绑定</Typography.Text>}
-        </Space>
-      ),
-    },
-    { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: (value: string | null) => formatLocaleDateTime(value) },
-    {
-      title: '操作',
-      key: 'action',
-      width: 430,
-      render: (_: unknown, record: ParentAccount) => (
-        <Space wrap>
-          <Button size="small" icon={<LinkOutlined />} onClick={() => openModal('bind', record)}>绑定学员</Button>
-          {userActions(record)}
-        </Space>
-      ),
-    },
-  ]
+  const selectedRecord = selectedAccount?.record
+  const detailAccount: UserAccount | null = selectedAccount
+    ? selectedAccount.role === 'teacher' ? selectedAccount.record.account : selectedAccount.record
+    : null
+  const detailName = selectedRecord?.name || ''
+  const detailRoleLabel = selectedAccount?.role === 'admin' ? '管理员账号'
+    : selectedAccount?.role === 'teacher' ? '教师账号' : selectedAccount?.role === 'parent' ? '家长账号' : ''
+  const detailStatus = selectedAccount?.role === 'teacher'
+    ? selectedAccount.record.account?.status
+    : selectedAccount?.record.status
+  const detailEmail = selectedAccount?.role === 'teacher'
+    ? selectedAccount.record.account?.email || selectedAccount.record.email || '未登记'
+    : selectedRecord && 'email' in selectedRecord ? selectedRecord.email || '未登记' : '未登记'
+  const detailPhone = selectedAccount?.role === 'teacher'
+    ? selectedAccount.record.phone || '未登记'
+    : selectedRecord && 'phone' in selectedRecord ? selectedRecord.phone || '未登记' : '未登记'
+  const openDetailModal = (nextMode: ModalMode, nextTarget: typeof target) => {
+    setSelectedAccount(null)
+    openModal(nextMode, nextTarget)
+  }
 
   const toolbar = (
-    <Space wrap style={{ width: '100%', justifyContent: 'space-between', marginBottom: 16 }}>
-      <Space wrap>
+    <div className="settings-account-toolbar">
+      <div className="settings-account-filters">
         <Input.Search
           placeholder="搜索姓名、账号、手机号"
           allowClear
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
-          style={{ width: 260 }}
+          className="settings-account-search"
         />
-        <AdaptiveSelect
-          placeholder="状态筛选"
-          allowClear
-          value={statusFilter}
-          onChange={setStatusFilter}
+        <Segmented
+          block={isMobile}
+          value={statusFilter || 'all'}
+          onChange={(value) => setStatusFilter(value === 'all' ? '' : String(value))}
           options={[
+            { label: '全部', value: 'all' },
             { label: '正常', value: 'active' },
             { label: '已停用', value: 'disabled' },
           ]}
-          style={{ width: 140 }}
+          className="settings-account-status"
         />
-      </Space>
-      <Space wrap>
+      </div>
+      <div className="settings-account-actions">
         {activeRole === 'admin' && <Button type="primary" icon={<PlusOutlined />} style={{ background: 'var(--color-primary)' }} onClick={() => openModal('admin')}>新增管理员</Button>}
         {activeRole === 'parent' && <Button type="primary" icon={<PlusOutlined />} style={{ background: 'var(--color-primary)' }} onClick={() => openModal('parent')}>新增家长账号</Button>}
-      </Space>
-    </Space>
+      </div>
+    </div>
   )
 
   return (
     <Card bordered={false} style={{ borderRadius: 10 }}>
       {error && <Alert type="error" showIcon message="账号与绑定数据加载失败" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 16 }} />}
+
+      <Row gutter={[10, 10]} style={{ marginBottom: 16 }}>
+        <Col xs={12} sm={6}>
+          <div style={{ padding: '10px 14px', borderRadius: 10, background: '#FAFAF8', border: '1px solid #EDE9E1' }}>
+            <div style={{ fontSize: isMobile ? 11 : 12, color: '#8C827A' }}>管理员</div>
+            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#17352F', marginTop: 2 }}>
+              {data?.admins.length ?? 0}<span style={{ fontSize: 12, fontWeight: 400, marginLeft: 2 }}>个</span>
+            </div>
+          </div>
+        </Col>
+        <Col xs={12} sm={6}>
+          <div style={{ padding: '10px 14px', borderRadius: 10, background: '#FAFAF8', border: '1px solid #EDE9E1' }}>
+            <div style={{ fontSize: isMobile ? 11 : 12, color: '#8C827A' }}>教师账号</div>
+            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#14574D', marginTop: 2 }}>
+              {data?.teachers.length ?? 0}<span style={{ fontSize: 12, fontWeight: 400, marginLeft: 2 }}>位</span>
+            </div>
+          </div>
+        </Col>
+        <Col xs={12} sm={6}>
+          <div style={{ padding: '10px 14px', borderRadius: 10, background: '#FAFAF8', border: '1px solid #EDE9E1' }}>
+            <div style={{ fontSize: isMobile ? 11 : 12, color: '#8C827A' }}>家长账号</div>
+            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#17352F', marginTop: 2 }}>
+              {data?.parents.length ?? 0}<span style={{ fontSize: 12, fontWeight: 400, marginLeft: 2 }}>个</span>
+            </div>
+          </div>
+        </Col>
+        <Col xs={12} sm={6}>
+          <div style={{ padding: '10px 14px', borderRadius: 10, background: studentsWithoutParent.length > 0 ? '#FFF7F0' : '#FAFAF8', border: `1px solid ${studentsWithoutParent.length > 0 ? '#F3D2BA' : '#EDE9E1'}` }}>
+            <div style={{ fontSize: isMobile ? 11 : 12, color: studentsWithoutParent.length > 0 ? '#C45724' : '#8C827A' }}>待绑定学员</div>
+            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, color: studentsWithoutParent.length > 0 ? '#E8784A' : '#8C827A', marginTop: 2 }}>
+              {studentsWithoutParent.length}<span style={{ fontSize: 12, fontWeight: 400, marginLeft: 2 }}>位</span>
+            </div>
+          </div>
+        </Col>
+      </Row>
+
       {toolbar}
       <Tabs
         activeKey={activeRole}
-        onChange={setActiveRole}
+        onChange={(role) => { setActiveRole(role); setCurrentPage(1) }}
         items={[
           {
             key: 'admin',
-            label: '管理员管理',
-            children: <Table columns={adminColumns} dataSource={admins} rowKey="id" loading={isLoading} pagination={{ pageSize: 10 }} scroll={{ x: 'max-content' }} />,
+            label: '管理员账号',
+            children: renderAccountPanel(adminCards, admins.length),
           },
           {
             key: 'teacher',
-            label: '教师管理',
-            children: <Table columns={teacherColumns} dataSource={teachers} rowKey="id" loading={isLoading} pagination={{ pageSize: 10 }} scroll={{ x: 1100 }} />,
+            label: '教师账号',
+            children: renderAccountPanel(teacherCards, teachers.length),
           },
           {
             key: 'parent',
-            label: '学员/家长管理',
-            children: <Table columns={parentColumns} dataSource={parents} rowKey="id" loading={isLoading} pagination={{ pageSize: 10 }} scroll={{ x: 1200 }} />,
+            label: '家长账号与绑定',
+            children: renderAccountPanel(parentCards, parents.length),
           },
         ]}
       />
+
+      <Drawer
+        title="人员账号详情"
+        open={Boolean(selectedAccount)}
+        onClose={() => setSelectedAccount(null)}
+        placement={isMobile ? 'bottom' : 'right'}
+        width={isMobile ? '100%' : 520}
+        height={isMobile ? '86vh' : undefined}
+        rootClassName="settings-account-detail-drawer"
+        styles={{ body: { padding: '18px 20px' }, header: { padding: '16px 20px' } }}
+        destroyOnHidden
+      >
+        {selectedAccount && (
+          <div className="settings-account-detail">
+            <div className="settings-account-detail-profile">
+              <span className="settings-account-card-avatar" aria-hidden="true">{Array.from(detailName.trim())[0] || '用'}</span>
+              <div className="settings-account-detail-identity">
+                <strong>{detailName || '未命名'}</strong>
+                <span>{detailRoleLabel}</span>
+              </div>
+              {detailStatus == null ? <Tag>未创建账号</Tag> : statusTag(detailStatus)}
+            </div>
+
+            <section className="settings-account-detail-section">
+              <h3>账号信息</h3>
+              <dl className="settings-account-detail-grid">
+                <div><dt>登录账号</dt><dd>{detailEmail}</dd></div>
+                <div><dt>手机号</dt><dd>{detailPhone}</dd></div>
+                {selectedAccount.role === 'teacher' && <div><dt>授课学科</dt><dd>{selectedAccount.record.subjects || '未登记'}</dd></div>}
+                {detailAccount && <div><dt>最近登录</dt><dd>{formatLocaleDateTime(detailAccount.lastLoginAt)}</dd></div>}
+                {selectedAccount.role !== 'teacher' && <div><dt>创建时间</dt><dd>{formatLocaleDateTime(selectedAccount.record.createdAt)}</dd></div>}
+              </dl>
+            </section>
+
+            {detailAccount && (
+              <section className="settings-account-detail-section">
+                <h3>密码与安全</h3>
+                <div className="settings-account-security-card">
+                  <Tag color={detailAccount.passwordSecurity.encrypted ? 'green' : 'red'}>
+                    {detailAccount.passwordSecurity.encrypted ? '密码已加密' : '需要处理'}
+                  </Tag>
+                  <Typography.Text type="secondary">
+                    {detailAccount.passwordSecurity.source}
+                    {detailAccount.passwordSecurity.changedAt ? ` · ${formatLocaleDateTime(detailAccount.passwordSecurity.changedAt)}` : ''}
+                  </Typography.Text>
+                  <Button
+                    type="link"
+                    icon={<HistoryOutlined />}
+                    onClick={() => { setSelectedAccount(null); setPasswordHistoryTarget(detailAccount) }}
+                  >
+                    查看密码修改记录
+                  </Button>
+                </div>
+              </section>
+            )}
+
+            {selectedAccount.role === 'parent' && (
+              <section className="settings-account-detail-section">
+                <div className="settings-account-section-heading">
+                  <h3>绑定学员</h3>
+                  <Button icon={<LinkOutlined />} onClick={() => openDetailModal('bind', selectedAccount.record)}>绑定学员</Button>
+                </div>
+                {selectedAccount.record.students.length ? (
+                  <div className="settings-account-students">
+                    {selectedAccount.record.students.map((student) => (
+                      <div className="settings-account-student" key={student.id}>
+                        <span>{student.name}{student.grade ? ` · ${student.grade}` : ''}</span>
+                        <Button type="link" danger onClick={() => { setSelectedAccount(null); void unbindStudent(student.id) }}>解绑</Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : <Typography.Text type="secondary">当前没有绑定学员</Typography.Text>}
+              </section>
+            )}
+
+            <section className="settings-account-detail-section">
+              <h3>账号操作</h3>
+              {selectedAccount.role === 'teacher' && !selectedAccount.record.account && (
+                <Button block type="primary" icon={<PlusOutlined />} onClick={() => openDetailModal('teacher', selectedAccount.record)}>
+                  创建教师登录账号
+                </Button>
+              )}
+              {selectedAccount.role === 'admin' && detailAccount?.id === currentUserId && (
+                <Button block icon={<EditOutlined />} onClick={() => openDetailModal('phone', detailAccount)}>
+                  {detailAccount.phone ? '修改登录手机号' : '绑定登录手机号'}
+                </Button>
+              )}
+              {selectedAccount.role === 'admin' && detailAccount?.id !== currentUserId && detailAccount?.isSuperAdmin && !currentIsSuperAdmin && (
+                <Typography.Text type="secondary">最高权益管理员，仅最高权益管理员可操作此账号。</Typography.Text>
+              )}
+              {detailAccount && !(selectedAccount.role === 'admin' && detailAccount.id === currentUserId)
+                && !(selectedAccount.role === 'admin' && detailAccount.isSuperAdmin && !currentIsSuperAdmin)
+                && userActions(detailAccount, true)}
+            </section>
+          </div>
+        )}
+      </Drawer>
 
       <BrandModal
         title={mode === 'admin' ? '新增管理员' : mode === 'teacher' ? '创建教师登录账号' : mode === 'parent' ? '新增家长账号' : mode === 'reset' ? '重置密码' : mode === 'bind' ? '绑定学员' : mode === 'phone' ? '设置登录手机号' : '编辑账号'}
@@ -443,8 +629,8 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
               <Form.Item name="email" label="登录邮箱" tooltip="留空时优先使用教师邮箱，没有教师邮箱则使用手机号生成 @tea.com 账号">
                 <Input placeholder={target.email || `${target.phone}@tea.com`} />
               </Form.Item>
-              <Form.Item name="password" label="初始密码" tooltip="留空时由系统生成独立强密码；只在创建成功后显示一次" rules={[optionalPasswordRule]}>
-                <Input.Password placeholder="留空自动生成强密码" autoComplete="new-password" />
+              <Form.Item name="password" label="初始密码" tooltip="留空时使用教师姓名拼音（小写、无空格）；填写自定义密码时需符合密码规则" rules={[optionalPasswordRule]}>
+                <Input.Password placeholder="留空使用教师姓名拼音" autoComplete="new-password" />
               </Form.Item>
             </>
           )}
@@ -499,8 +685,8 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
                   options={studentsWithoutParent.map((student) => ({ label: `${student.name}${student.grade ? ` / ${student.grade}` : ''}`, value: student.id }))}
                 />
               </Form.Item>
-              <Form.Item name="password" label="初始密码" tooltip="留空时由系统生成独立强密码；只在创建成功后显示一次" rules={[optionalPasswordRule]}>
-                <Input.Password placeholder="留空自动生成强密码" autoComplete="new-password" />
+              <Form.Item name="password" label="初始密码" tooltip="留空时使用首位绑定学员姓名拼音；未绑定学员时使用家长姓名拼音" rules={[optionalPasswordRule]}>
+                <Input.Password placeholder="留空使用学员姓名拼音" autoComplete="new-password" />
               </Form.Item>
             </>
           )}
@@ -573,19 +759,17 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
           message="系统只记录修改时间、方式和操作人，不保存或展示明文密码。"
           style={{ marginBottom: 16 }}
         />
-        <Table
-          size="small"
-          rowKey={(record) => `${record.changedAt}-${record.source}`}
-          pagination={false}
-          dataSource={passwordHistoryTarget?.passwordSecurity.history || []}
-          columns={[
-            { title: '时间', dataIndex: 'changedAt', render: (value: string | null) => formatLocaleDateTime(value), width: 190 },
-            { title: '方式', dataIndex: 'source', width: 150 },
-            { title: '操作人', dataIndex: 'operator' },
-          ]}
-          locale={{ emptyText: '暂无历史审计记录' }}
-          scroll={{ x: 480 }}
-        />
+        {passwordHistoryTarget?.passwordSecurity.history.length ? (
+          <div className="settings-password-history-list">
+            {passwordHistoryTarget.passwordSecurity.history.map((entry) => (
+              <article className="settings-password-history-item" key={`${entry.changedAt}-${entry.source}`}>
+                <strong>{formatLocaleDateTime(entry.changedAt)}</strong>
+                <span>方式：{entry.source || '未记录'}</span>
+                <span>操作人：{entry.operator || '未记录'}</span>
+              </article>
+            ))}
+          </div>
+        ) : <Empty description="暂无历史审计记录" />}
       </BrandModal>
     </Card>
   )

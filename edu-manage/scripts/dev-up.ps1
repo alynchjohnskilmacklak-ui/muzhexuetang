@@ -6,7 +6,7 @@ Set-Location $project
 
 function Test-DevEndpoint {
     try {
-        $response = Invoke-WebRequest -Uri 'http://127.0.0.1:3000/login' -UseBasicParsing -TimeoutSec 4
+        $response = Invoke-WebRequest -Uri 'http://localhost:3000/login' -UseBasicParsing -TimeoutSec 4
         return $response.StatusCode -lt 500
     } catch {
         $statusCode = 0
@@ -36,6 +36,20 @@ function Get-ProjectListener {
         return [pscustomobject]@{ ProcessId = [int]$listener.OwningProcess; Owned = $owned }
     }
     return $null
+}
+
+function Test-ProjectDockerDevContainer {
+    $savedPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $containers = @(& docker ps --filter 'name=^/edu-manage-local-dev$' --format '{{.Names}}' 2>$null)
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $savedPreference
+    }
+
+    if ($exitCode -ne 0 -or $containers -notcontains 'edu-manage-local-dev') { return $false }
+    return (Test-DevEndpoint)
 }
 
 function Test-DockerEngine {
@@ -96,6 +110,11 @@ function Invoke-LocalDatabaseCheck {
     return [pscustomobject]@{ ExitCode = $exitCode; Output = $safeOutput }
 }
 
+if (Test-ProjectDockerDevContainer) {
+    Write-Host '牧哲学堂 Docker 源码热更新服务已就绪：http://localhost:3000/login'
+    exit 0
+}
+
 $dbStatus = Invoke-LocalDatabaseCheck
 if ($dbStatus.ExitCode -ne 0) {
     $dbMessage = $dbStatus.Output -join [Environment]::NewLine
@@ -120,12 +139,17 @@ if ($dbStatus.ExitCode -ne 0) {
 }
 Write-Host '本地数据库连接正常。'
 
+$listener = Get-ProjectListener
 if (Test-DevEndpoint) {
-    Write-Host '牧哲学堂本地页面已就绪：http://127.0.0.1:3000/login'
-    exit 0
+    if ($listener -and $listener.Owned) {
+        Write-Host '牧哲学堂本地开发服务已就绪：http://localhost:3000/login'
+        exit 0
+    }
+
+    Write-Host 'localhost:3000 有响应，但不是当前项目可确认的 Next 开发服务。若由生产模式 Docker 容器占用，源码修改不会热更新。请先停止 edu-manage-local-app，再运行本启动器；数据库容器无需停止。'
+    exit 2
 }
 
-$listener = Get-ProjectListener
 if ($listener) {
     if (-not $listener.Owned) {
         Write-Host '端口 3000 被其他或无法确认归属的进程占用。为保护其他项目，没有结束该进程。'
@@ -150,7 +174,7 @@ for ($attempt = 0; $attempt -lt 45; $attempt++) {
     if (Test-DevEndpoint) {
         $stamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
         Add-Content -Path $watchLog -Value "$stamp 本地 dev 服务已启动并通过 /login 健康检查"
-        Write-Host '本地开发服务已就绪：http://127.0.0.1:3000/login'
+        Write-Host '本地开发服务已就绪：http://localhost:3000/login'
         exit 0
     }
 }

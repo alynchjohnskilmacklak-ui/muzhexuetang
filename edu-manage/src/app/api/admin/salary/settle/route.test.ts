@@ -22,6 +22,7 @@ describe('admin settlement to both portal balances (isolated mock ledger)', () =
       teacher: { findFirst: async ({ where }: { where: { id: string } }) => people.find(person => person.id === where.id), findMany: async () => people },
       classGroup: { findMany: async () => [] }, classroomFeedback: { groupBy: async () => [] },
       academicTerm: { findFirst: async () => ({ id: 'term1', name: '测试批次', status: 'ACTIVE' }) },
+      teacherSalaryConfig: { findUnique: async () => null },
       teacherSalaryTransaction: {
         findMany: async ({ where }: { where: { teacherId?: string; termId?: string; createdAt?: { gte?: Date; lte?: Date } } }) => rows.filter(row => (!where.teacherId || row.teacherId === where.teacherId) && (!where.termId || row.termId === where.termId) && (!where.createdAt?.gte || row.createdAt >= where.createdAt.gte) && (!where.createdAt?.lte || row.createdAt <= where.createdAt.lte)).map(row => ({ ...row })),
         updateMany: async ({ where, data }: { where: { id: { in: string[] } }; data: { settledAt: Date; settlementBatchId: string } }) => {

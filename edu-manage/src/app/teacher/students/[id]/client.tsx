@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, Divider, Empty, Image as AntImage, Input, List, Modal, Select, Tag, Typography, Upload } from 'antd'
+import { Button, Empty, Image as AntImage, Input, Radio, Tag, Typography } from 'antd'
 import {
   ArrowLeftOutlined, BookOutlined, EditOutlined, LineChartOutlined,
   PlusOutlined, RocketOutlined, SaveOutlined, SendOutlined, TrophyOutlined,
@@ -64,6 +64,12 @@ const MOOD_MAP: Record<string, { label: string; color: string }> = {
   BAD: { label: '较差', color: '#D4537E' },
 }
 
+const MASTERY_LEVEL_OPTIONS = [
+  { value: 'MASTERED', label: '已掌握' },
+  { value: 'NEEDS_REVIEW', label: '需复习' },
+  { value: 'NEEDS_PRACTICE', label: '薄弱' },
+]
+
 const ATT_STATUS: Record<string, { label: string; color: string; bg: string }> = {
   PRESENT: { label: '出勤', color: '#1D9E75', bg: 'rgba(29,158,117,.1)' },
   LEAVE: { label: '请假', color: '#C2572C', bg: 'rgba(245,166,35,.12)' },
@@ -113,7 +119,7 @@ export function TeacherStudentDetailClient({
       {/* 返回 + 标题 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 4px 12px' }}>
         <Button
-          type="text" icon={<ArrowLeftOutlined />} onClick={() => router.push('/teacher/students')}
+          type="text" className="mobile-shell-back" icon={<ArrowLeftOutlined />} onClick={() => router.push('/teacher/students')}
           style={{ color: '#123C35' }}
         />
         <Text strong style={{ fontSize: 17, color: '#123C35' }}>学员详情</Text>
@@ -427,7 +433,7 @@ function GrowthArchive({ studentId }: { studentId: string }) {
     setAiGenerating(true)
     try {
       const res = await requestJson<{ draft?: string }>('/api/teacher/ai-feedback', { method: 'POST', body: JSON.stringify({ studentId, keywords, kind: 'stage' }) })
-      if (res.draft) { setSummary(res.draft); toast.success('AI 草稿已生成，请核对后保存') } else toast.warning('AI 未返回内容，请稍后重试')
+      if (res.draft) { setSummary(res.draft); toast.success('草稿已生成，请核对后保存') } else toast.warning('未能返回内容，请稍后重试')
     } catch (e: unknown) { toast.error(e instanceof Error ? e.message : '生成失败') }
     finally { setAiGenerating(false) }
   }
@@ -492,8 +498,8 @@ function GrowthArchive({ studentId }: { studentId: string }) {
           <span style={{ fontWeight: 800, fontSize: 15, color: '#123C35' }}>阶段总结 · 家长寄语</span>
         </div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-          <Input size="small" placeholder="AI 关键词（如：进步、专注）" value={keywords} onChange={(e) => setKeywords(e.target.value)} style={{ flex: 1 }} />
-          <Button size="small" icon={<RocketOutlined />} loading={aiGenerating} onClick={doAiGenerate} style={{ background: 'linear-gradient(135deg,#1B4A3D,#0E5E4E)', color: '#fff', border: 'none' }}>AI 生成</Button>
+          <Input size="small" placeholder="参考关键词（如：进步、专注）" value={keywords} onChange={(e) => setKeywords(e.target.value)} style={{ flex: 1 }} />
+          <Button size="small" icon={<RocketOutlined />} loading={aiGenerating} onClick={doAiGenerate} style={{ background: 'linear-gradient(135deg,#1B4A3D,#0E5E4E)', color: '#fff', border: 'none' }}>依托数据库生成</Button>
         </div>
         <TextArea rows={4} placeholder="总结本阶段学习情况、进步与亮点…" value={summary} onChange={(e) => setSummary(e.target.value)} style={{ borderRadius: 10, fontSize: 13 }} />
         <div style={{ marginTop: 8 }}>
@@ -568,13 +574,20 @@ function GrowthArchive({ studentId }: { studentId: string }) {
           <span style={{ width: 8, height: 8, borderRadius: 999, background: '#1D9E75' }} />
           <span style={{ fontWeight: 800, fontSize: 15, color: '#123C35' }}>知识掌握度</span>
         </div>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-          <Input size="small" placeholder="知识点" value={kpInput} onChange={(e) => setKpInput(e.target.value)} style={{ flex: 1, minWidth: 100 }} />
-          <Select
-            size="small" value={kpLevel} onChange={setKpLevel} style={{ width: 90 }}
-            options={[{ value: 'MASTERED', label: '已掌握' }, { value: 'NEEDS_REVIEW', label: '需复习' }, { value: 'NEEDS_PRACTICE', label: '薄弱' }]}
-          />
-          <Button size="small" type="primary" icon={<PlusOutlined />} onClick={addMastery} style={{ background: '#1D9E75', borderColor: '#1D9E75' }}>记录</Button>
+        <div style={{ display: 'grid', gap: 8, marginBottom: 10 }}>
+          <Input size="small" aria-label="知识点" placeholder="知识点" value={kpInput} onChange={(e) => setKpInput(e.target.value)} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <Radio.Group
+              size="small"
+              value={kpLevel}
+              onChange={(event) => setKpLevel(event.target.value)}
+              optionType="button"
+              buttonStyle="solid"
+              aria-label="知识掌握度"
+              options={MASTERY_LEVEL_OPTIONS}
+            />
+            <Button size="small" type="primary" icon={<PlusOutlined />} onClick={addMastery} style={{ background: '#1D9E75', borderColor: '#1D9E75' }}>记录</Button>
+          </div>
         </div>
         {!mastery.length ? <div style={{ color: '#98A2B3', fontSize: 12, padding: '4px 0' }}>暂无掌握度记录</div> : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

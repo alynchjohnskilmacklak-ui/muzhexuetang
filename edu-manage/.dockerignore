@@ -1,4 +1,5 @@
 .git
+/.codex-*
 .codex-release-staging
 .tmp-buildx
 __pycache__
@@ -33,6 +34,8 @@ public/services
 public/marketing
 public/business-assets
 public/volunteer/docs
+# Keep the original high-resolution portrait sources locally; ship the WebP derivatives.
+public/teacher-portraits/*.png
 scripts/seed-local-demo.ts
 scripts/local-test-seed.ts
 scripts/tests

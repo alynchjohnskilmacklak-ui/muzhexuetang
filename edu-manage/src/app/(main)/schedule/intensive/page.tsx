@@ -10,16 +10,17 @@ import {
   Button,
   Card,
   Checkbox,
-  Empty,
   Input,
   InputNumber,
   message,
-  Select,
+  Radio,
   Spin,
   Tag,
   Typography,
 } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
+import { PageLayout } from '@/components/Layout/PageLayout'
+import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import {
   CalendarOutlined,
@@ -39,8 +40,6 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 const { Text } = Typography
 
 const INTENSIVE_COLOR = '#534AB7'
-const SLOT_HEIGHT = 92
-
 const HOURLY_SLOTS = HOURLY_PERIODS
   .filter((period) => period.start < '22:00' && !['12:00', '13:00'].includes(period.start))
   .map((period) => ({ ...period, label: `${period.start}–${period.end}` }))
@@ -166,6 +165,7 @@ type IntensiveAppointmentItem = {
 }
 
 export default function IntensiveSchedulePage() {
+  const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [createOpen, setCreateOpen] = useState(false)
@@ -526,8 +526,12 @@ export default function IntensiveSchedulePage() {
   }
 
   return (
-    <div>
-      {/* Hero：个性化排课驾驶舱（深墨绿鎏金 · 贵宾服务） */}
+    <PageLayout
+      title="个性化排课"
+      subtitle="突击全能班 · 1对1 / 1对2 / 1对3 约课 · 授课审核 · 课时与工资自动结算"
+    >
+      <div>
+        {/* Hero：个性化排课驾驶舱（深墨绿鎏金 · 贵宾服务） */}
       <div style={{
         borderRadius: 18, overflow: 'hidden', marginBottom: 16,
         border: '1px solid #C9A45C',
@@ -1117,7 +1121,7 @@ export default function IntensiveSchedulePage() {
                   }}
                   options={selectedHistoryGroup.students.map((student) => ({
                     value: student.id,
-                    label: `${student.name}（剩余${student.remainHours.toFixed(1)}小时）`,
+                    label: `${student.name}（剩余${student.remainHours.toFixed(2)}小时）`,
                   }))}
                   maxTagCount="responsive"
                   style={{ width: '100%' }}
@@ -1147,12 +1151,13 @@ export default function IntensiveSchedulePage() {
                       <div style={{ minWidth: 0 }}>
                         <Text strong>{student?.name || '学生'}</Text>
                         <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>
-                          当前剩余 {Number(student?.remainHours || 0).toFixed(1)} 小时 · 本次预计扣 {deductHours.toFixed(1)} 小时
+                          当前剩余 {Number(student?.remainHours || 0).toFixed(2)} 小时 · 本次预计扣 {deductHours.toFixed(2)} 小时
                         </Text>
                       </div>
-                      <AdaptiveSelect
+                      <Radio.Group
                         value={record.status}
-                        onChange={(status: HistoryStatus) => {
+                        onChange={(event) => {
+                          const status = event.target.value as HistoryStatus
                           setHistoryDraft((current) => ({
                             ...current,
                             records: current.records.map((item) => (
@@ -1161,15 +1166,13 @@ export default function IntensiveSchedulePage() {
                           }))
                           setHistoryConfirmed(false)
                         }}
-                        options={[
-                          { value: 'PRESENT', label: '正常出勤（扣课）' },
-                          { value: 'LEAVE', label: '学生请假（不扣课）' },
-                          { value: 'ABSENT', label: '缺勤（扣课）' },
-                          { value: 'MAKEUP', label: '补课标记（不扣课）' },
-                        ]}
-                        style={{ width: '100%' }}
-                        getPopupContainer={(trigger) => trigger.parentElement || document.body}
-                      />
+                        style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 4, width: '100%' }}
+                      >
+                        <Radio.Button value="PRESENT" style={{ textAlign: 'center' }}>正常出勤（扣课）</Radio.Button>
+                        <Radio.Button value="LEAVE" style={{ textAlign: 'center' }}>学生请假（不扣课）</Radio.Button>
+                        <Radio.Button value="ABSENT" style={{ textAlign: 'center' }}>缺勤（扣课）</Radio.Button>
+                        <Radio.Button value="MAKEUP" style={{ textAlign: 'center' }}>补课标记（不扣课）</Radio.Button>
+                      </Radio.Group>
                     </div>
                   )
                 })}
@@ -1272,18 +1275,23 @@ export default function IntensiveSchedulePage() {
           </div>
           <div>
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>班型 *</Text>
-            <AdaptiveSelect style={{ width: '100%' }} value={createData.teachingType}
-              onChange={(value) => setCreateData((current) => ({ ...current, teachingType: value, studentIds: [] }))}
+            <Radio.Group
+              value={createData.teachingType}
+              onChange={(event) => setCreateData((current) => ({ ...current, teachingType: event.target.value, studentIds: [] }))}
+              optionType="button"
+              buttonStyle="solid"
               options={[
                 { label: '一对一', value: 'ONE_ON_ONE' },
                 { label: '一对二', value: 'ONE_ON_TWO' },
                 { label: '一对三', value: 'ONE_ON_THREE' },
-              ]} />
+              ]}
+            />
           </div>
           <div>
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>老师 *</Text>
             <MobileSelect placeholder="选择老师" style={{ width: '100%' }}
               value={createData.teacherId || undefined} onChange={v => setCreateData(p => ({ ...p, teacherId: v }))}
+              searchable={teacherList.length > 10}
               options={teacherList.map((t: Record<string, unknown>) => ({ label: t.name as string, value: t.id as string }))} />
           </div>
           <div>
@@ -1294,6 +1302,8 @@ export default function IntensiveSchedulePage() {
                 if (value.length > limit) return message.warning(`最多选择${limit}名学员`)
                 setCreateData((current) => ({ ...current, studentIds: value }))
               }}
+              showSearch={studentList.length > 10}
+              filterOption={(input, option) => String(option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
               options={studentList.map((s: Record<string, unknown>) => ({ label: `${s.name}${s.grade ? ` (${s.grade})` : ''}`, value: s.id as string }))} />
           </div>
           <div>
@@ -1310,5 +1320,6 @@ export default function IntensiveSchedulePage() {
         </div>
       </BrandModal>
     </div>
+    </PageLayout>
   )
 }

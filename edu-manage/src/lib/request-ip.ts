@@ -13,5 +13,10 @@ function normalizeIp(value: string | null): string | null {
  * entry of X-Forwarded-For for rate limits or audit records.
  */
 export function getTrustedClientIp(headers: HeaderReader): string {
-  return normalizeIp(headers.get('x-real-ip')) || 'unknown'
+  const trustedIp = normalizeIp(headers.get('x-real-ip'))
+  if (trustedIp) return trustedIp
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('TRUSTED_CLIENT_IP_MISSING')
+  }
+  return 'unknown'
 }

@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic'
 
 export interface RecentAlert {
   key: string
+  notificationId?: string
   type: string
   label: string
   title: string
@@ -136,7 +137,7 @@ function safeHref(raw: string | null | undefined, role: Role, relatedType: strin
   if (/(STUDENT|学员)/.test(t)) return '/students'
   if (/(TEACHER|教师)/.test(t)) return '/teachers'
   if (/(LEAVE|请假)/.test(t)) return '/leave-requests'
-  return '/notifications'
+  return '/communications'
 }
 
 export const GET = apiHandler(async () => {
@@ -221,6 +222,7 @@ export const GET = apiHandler(async () => {
     for (const n of notifications) {
       alerts.push({
         key: `nt_${n.id}`,
+        notificationId: n.id,
         type: n.relatedType || 'NOTICE',
         label: NOTIFICATION_TYPE_LABEL[n.relatedType || ''] || '通知',
         title: n.title,
@@ -261,6 +263,7 @@ export const GET = apiHandler(async () => {
       if (!href) continue // 无可跳转目标的不展示
       alerts.push({
         key: `nt_${n.id}`,
+        notificationId: n.id,
         type: n.relatedType || 'NOTICE',
         label: NOTIFICATION_TYPE_LABEL[n.relatedType || ''] || '通知',
         title: n.title,

@@ -3,7 +3,7 @@ import { getPrismaForDivision } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ClassFeedbackClient } from './client'
-import { visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
+import { parentVisibleNotificationWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 import { PARENT_ACTIVE_CHILD_COOKIE } from '@/constants/membership'
 import { getParentChildren, resolveParentChildSelection } from '@/lib/parent-children'
 import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
@@ -13,6 +13,7 @@ import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-poi
 import { signedFeedbackImageUrls } from '@/lib/classroom-feedback/signed-images'
 import { resolveParentFeedbackReadAt } from '@/lib/classroom-feedback/read-state'
 import { LearningRecordSwitcher } from '@/components/Parent/LearningRecordSwitcher'
+import { annotateConsecutiveLessons } from '@/lib/classroom-feedback/feedback-session-grouping'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,18 +37,29 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
     requestedChildId,
     storedChildId,
   )
+  const parentFeedbackScopes = [
+    ...(scopedStudentIds.length ? [{ studentIds: { hasSome: scopedStudentIds } }] : []),
+    {
+      isSingleSession: true,
+      studentIds: { isEmpty: true },
+      parentReadReceipts: { some: { parentUserId: userId } },
+    },
+  ]
+  const parentFeedbackWhere = {
+    ...visibleClassroomFeedbackWhere,
+    teacher: visibleTeacherWhere,
+    OR: parentFeedbackScopes,
+  }
 
   // If feedbackId is provided, fetch the specific feedback for auto-open
-  const highlightedFeedback = feedbackId && scopedStudentIds.length > 0
+  const highlightedFeedback = feedbackId
     ? await prisma.classroomFeedback.findFirst({
       where: {
+        ...parentFeedbackWhere,
         id: feedbackId,
-        ...visibleClassroomFeedbackWhere,
-        studentIds: { hasSome: scopedStudentIds },
-        teacher: visibleTeacherWhere,
       },
       include: {
-        teacher: { select: { id: true, name: true, subjects: true } },
+        teacher: { select: { id: true, name: true, subjects: true, avatar: true, gender: true } },
         term: { select: { name: true, status: true } },
         parentMessages: {
           where: { parentId: userId },
@@ -64,13 +76,9 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
     : null
 
   const feedbackRows = await prisma.classroomFeedback.findMany({
-    where: {
-      ...visibleClassroomFeedbackWhere,
-      studentIds: { hasSome: scopedStudentIds },
-      teacher: visibleTeacherWhere,
-    },
+    where: parentFeedbackWhere,
     include: {
-      teacher: { select: { id: true, name: true, subjects: true } },
+      teacher: { select: { id: true, name: true, subjects: true, avatar: true, gender: true } },
       term: { select: { name: true, status: true } },
       parentMessages: {
         where: { parentId: userId },
@@ -88,7 +96,12 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
   const readStateFeedbackIds = [...new Set([...feedbacks, ...(highlightedFeedback ? [highlightedFeedback] : [])].map((feedback) => feedback.id))]
   const parentReadReceipts = readStateFeedbackIds.length
     ? await prisma.notification.findMany({
-        where: { userId, relatedType: 'CLASSROOM_FEEDBACK', relatedId: { in: readStateFeedbackIds } },
+        where: {
+          userId,
+          relatedType: 'CLASSROOM_FEEDBACK',
+          relatedId: { in: readStateFeedbackIds },
+          AND: [parentVisibleNotificationWhere(userId)],
+        },
         select: { relatedId: true, read: true, readAt: true, createdAt: true },
       })
     : []
@@ -108,14 +121,54 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
     select: { id: true, course: { select: { subject: true } }, teacherAssignments: { select: { teacherId: true, subject: true } } },
   }) : []
   const groupById = new Map(unlinkedGroups.map((group) => [group.id, group]))
-  const forParent = <T extends typeof feedbacks[number]>(feedback: T) => ({
-    ...redactFeedbackForParent(feedback, scopedStudentIds),
+
+  // 连堂大课聚类识别（同班级、同日期、同老师、同学科且严格最多2节小课）
+  const lessonGroupIds = [...new Set([...feedbacks, ...(highlightedFeedback ? [highlightedFeedback] : [])]
+    .map((f) => f.classLesson?.groupId)
+    .filter((id): id is string => Boolean(id)))]
+  const consecutiveLessonRows = lessonGroupIds.length
+    ? await prisma.classLesson.findMany({
+        where: { groupId: { in: lessonGroupIds }, deletedAt: null },
+        select: {
+          id: true,
+          groupId: true,
+          lessonDate: true,
+          startTime: true,
+          endTime: true,
+          teacherId: true,
+          subject: true,
+          group: { select: { course: { select: { subject: true } } } },
+        },
+      })
+    : []
+  const consecutiveMap = annotateConsecutiveLessons(consecutiveLessonRows.map((l) => ({
+    id: l.id,
+    groupId: l.groupId,
+    lessonDate: l.lessonDate?.toISOString().slice(0, 10),
+    startTime: l.startTime,
+    endTime: l.endTime,
+    teacherId: l.teacherId,
+    subject: l.subject || l.group?.course?.subject || null,
+  })))
+
+  const forParent = <T extends typeof feedbacks[number]>(feedback: T) => {
+    const manualDirectFeedback = feedback.isSingleSession && feedback.studentIds.length === 0
+    const consecutiveMeta = feedback.classLesson?.id ? consecutiveMap.get(feedback.classLesson.id) : null
+    const consecutiveSessionLabel = consecutiveMeta?.isConsecutive
+      ? `连堂大课 ${consecutiveMeta.totalInSession}课时 · ${consecutiveMeta.sessionSpan}`
+      : null
+    return {
+    ...redactFeedbackForParent(feedback, manualDirectFeedback ? ['__single_session_manual__'] : scopedStudentIds),
+    consecutiveSessionLabel,
     parentReadAt: resolveParentFeedbackReadAt(feedback.parentReadAt, readReceiptsByFeedback.get(feedback.id) || []),
+    displayStudentName: manualDirectFeedback ? feedback.studentNameSnapshot : null,
     resolvedSubject: feedbackSubject(feedback.classLesson, feedback.teacherId,
       feedback.feedbackGroupId ? groupById.get(feedback.feedbackGroupId) : null,
-      parseStoredKnowledgeCard(feedback.knowledgeCard)?.subject),
+      parseStoredKnowledgeCard(feedback.knowledgeCard)?.subject,
+      feedback.subjectSnapshot),
     knowledgeDetail: parseStoredKnowledgeCard(feedback.knowledgeCard),
-  })
+  }
+  }
   const parentFeedbacks = feedbacks.map(forParent)
     .sort((left, right) => {
       const leftCurrent = left.term?.status === 'ACTIVE' ? 0 : 1

@@ -196,6 +196,25 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
   const termId = term.id
 
+  if (normalizedAssignments.length > 0) {
+    const tIds = [...new Set(normalizedAssignments.map((a) => a.teacherId))]
+    const teacherRecords = await prisma.teacher.findMany({
+      where: { id: { in: tIds } },
+      select: { id: true, name: true, subjects: true },
+    })
+    const tMap = new Map(teacherRecords.map((t) => [t.id, t]))
+    for (const a of normalizedAssignments) {
+      if (!a.subject) continue
+      const t = tMap.get(a.teacherId)
+      const subs = (t?.subjects || '').split(/[,，、]/).map((s) => s.trim()).filter(Boolean)
+      if (subs.length > 0 && !subs.includes(a.subject)) {
+        return NextResponse.json({
+          error: `教师（${t?.name || '未知'}）档案中未登记任教【${a.subject}】（已登记：${subs.join('、')}），请核对任课安排`,
+        }, { status: 400 })
+      }
+    }
+  }
+
   const group = await prisma.$transaction(async (tx) => {
     const g = await tx.classGroup.create({
       data: {

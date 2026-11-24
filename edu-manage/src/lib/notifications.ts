@@ -24,6 +24,8 @@ export type NotificationInput = {
   senderId?: string | null
   /** 推送状态（'none' | 'pending' | 'sent' | 'failed'）；不传则由数据库默认 'none' */
   pushStatus?: string | null
+  /** 首次创建时的推送原因或队列状态说明。 */
+  pushError?: string | null
 }
 
 const MAX_TITLE = 120
@@ -48,6 +50,7 @@ function toData(input: NotificationInput): Prisma.NotificationUncheckedCreateInp
     studentId: input.studentId ?? null,
     senderId: input.senderId ?? null,
     pushStatus: input.pushStatus ?? undefined,
+    pushError: input.pushError ?? undefined,
     status: 'ACTIVE',
   }
 }

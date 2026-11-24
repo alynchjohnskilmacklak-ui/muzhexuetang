@@ -1,0 +1,213 @@
+
+=== Q3c 回执真实行数（COUNT(r.id)，剔除 LEFT JOIN 空行） ===
+[
+  {
+    "receipt_rows": 301,
+    "receipt_rows_read": 299,
+    "receipt_rows_unread": 2,
+    "feedbacks_with_receipt": 301,
+    "parents_with_receipt": 7,
+    "published": 5335
+  }
+]
+
+=== Q3d 回执多家长/重复情况 ===
+[
+  {
+    "per_feedback": 1,
+    "feedbacks": 301
+  }
+]
+
+=== Q2b 缺家长归属的反馈抽样 10 条 ===
+[
+  {
+    "id": "cmsk8jeud0p4wcatz1xdqat8p",
+    "teacherId": "cmr8un9cy000a93ei6jexlpq7",
+    "students": 1,
+    "createdAt": "2026-08-08T10:33:01.670Z"
+  },
+  {
+    "id": "cmsj2abx60ijjcatz5azcb20z",
+    "teacherId": "cmp8f1djy000bappd21jdet98",
+    "students": 1,
+    "createdAt": "2026-08-07T14:50:14.106Z"
+  },
+  {
+    "id": "cmsj0dl4u0ie3catz1b761vzp",
+    "teacherId": "cmp8f1djy000bappd21jdet98",
+    "students": 1,
+    "createdAt": "2026-08-07T13:56:46.782Z"
+  },
+  {
+    "id": "cmsirhf540gjbcatz7he9n2tt",
+    "teacherId": "cmr8un9cy000a93ei6jexlpq7",
+    "students": 1,
+    "createdAt": "2026-08-07T09:47:49.096Z"
+  },
+  {
+    "id": "cmsidwez80d4tcatze0v3072n",
+    "teacherId": "cmr8un9cy000a93ei6jexlpq7",
+    "students": 1,
+    "createdAt": "2026-08-07T03:27:34.100Z"
+  },
+  {
+    "id": "cmshk2tvw0alscatzv3dkwv8q",
+    "teacherId": "cmp8f1djy000bappd21jdet98",
+    "students": 1,
+    "createdAt": "2026-08-06T13:32:44.877Z"
+  },
+  {
+    "id": "cmshgjdf1096vcatzcb9on0t3",
+    "teacherId": "cmp8ecgtc000i2m5ehdt47ul4",
+    "students": 1,
+    "createdAt": "2026-08-06T11:53:38.222Z"
+  },
+  {
+    "id": "cmshan9gg07t6catz5rfoo9nh",
+    "teacherId": "cmr8un9cy000a93ei6jexlpq7",
+    "students": 1,
+    "createdAt": "2026-08-06T09:08:42.016Z"
+  },
+  {
+    "id": "cmsha183l07nacatz381ts10n",
+    "teacherId": "cmsfsdzse0fw2rx2r7fnwrhsg",
+    "students": 1,
+    "createdAt": "2026-08-06T08:51:33.826Z"
+  },
+  {
+    "id": "cmsg2ps9t0jyjrx2rnnl1gurz",
+    "teacherId": "cmp8f1djy000bappd21jdet98",
+    "students": 1,
+    "createdAt": "2026-08-05T12:38:56.609Z"
+  }
+]
+
+=== Q2c 缺家长归属的 2 名学员 ===
+[
+  {
+    "id": "cmr3dwby00027nvkffairt6eg",
+    "name": "默嘉诺",
+    "parentId": null,
+    "parentUserId": null,
+    "status": "ACTIVE",
+    "deletedAt": null
+  },
+  {
+    "id": "cmr3dnyrj000onvkfw9n98u3t",
+    "name": "周钰瑶",
+    "parentId": null,
+    "parentUserId": null,
+    "status": "ACTIVE",
+    "deletedAt": null
+  }
+]
+
+=== Q9b 通知指向缺失反馈的状态分布 ===
+[
+  {
+    "feedback_status": "NO_ROW",
+    "deleted": 0,
+    "n": 78
+  }
+]
+
+=== Q7c ClassroomPick 表复核（总行数 / 教师 / 课次） ===
+[
+  {
+    "total_picks": 0,
+    "students": 0,
+    "lessons": 0,
+    "teachers": 0,
+    "visible": 0
+  }
+]
+
+=== Q7d 近30天课堂互动相关记录：Attendance rollCall 粗查 ===
+[
+  {
+    "attendance_rows": 25204,
+    "roll_call_rows": 0,
+    "last30d": 15
+  }
+]
+
+=== Q5c 评价明细 1 条 ===
+[
+  {
+    "id": "cmw3fihv6000gorsx8pwuip1o",
+    "feedbackId": "cmvxk1qef004vyqk2lyngf59t",
+    "parentUserId": "cmpamjbfd0004cv8lwcxwxysf",
+    "satisfied": false,
+    "reason": "好！上课认真",
+    "reviewStatus": "PENDING",
+    "reviewedAt": null,
+    "feedback_status": "PUBLISHED"
+  }
+]
+
+=== Q12 反馈正文 imageUrls 与 FileAsset 字段一致性（抽样前5） ===
+[
+  {
+    "id": "cmsna8lcf0porcatzl2d86gvq",
+    "imageUrls": [
+      "feedback-1786369425132-9ajuh4.jpg",
+      "feedback-1786369425154-xyh5uw.jpg",
+      "feedback-1786369426114-5qwapi.jpg",
+      "feedback-1786369426552-8hfyv9.jpg"
+    ],
+    "owners": [
+      "feedback"
+    ]
+  },
+  {
+    "id": "cmsna6hzx0po8catzxezu060a",
+    "imageUrls": [
+      "feedback-1786369333391-5lxsgz.jpg",
+      "feedback-1786369333592-7fjvl8.jpg",
+      "feedback-1786369334087-nqbcqh.jpg"
+    ],
+    "owners": [
+      "feedback"
+    ]
+  },
+  {
+    "id": "cmsk8k7950p5ocatz70wc8pcp",
+    "imageUrls": [
+      "feedback-1786185207822-rmtfgi.jpg"
+    ],
+    "owners": [
+      "feedback"
+    ]
+  },
+  {
+    "id": "cmsk8jtbo0p58catzpy1ba6sj",
+    "imageUrls": [
+      "feedback-1786185190415-vvgehz.jpg"
+    ],
+    "owners": [
+      "feedback"
+    ]
+  },
+  {
+    "id": "cmsk8jeud0p4wcatz1xdqat8p",
+    "imageUrls": [
+      "feedback-1786185147596-89azr4.jpg"
+    ],
+    "owners": [
+      "feedback"
+    ]
+  }
+]
+
+=== Q13 家长留言 ParentMessage 与反馈归属 ===
+[
+  {
+    "messages": 39,
+    "feedbacks_with_msg": 17,
+    "orphan_msg": 22,
+    "msg_on_non_published": 0
+  }
+]
+
+DONE

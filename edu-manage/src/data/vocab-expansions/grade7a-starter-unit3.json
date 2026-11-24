@@ -1,0 +1,1186 @@
+[
+  {
+    "word": "fun",
+    "examTags": [
+      "词汇辨析·fun/funny",
+      "语法·名词可数性"
+    ],
+    "grammar": "n. 不可数，表示乐趣；adj. 非正式地表示有趣的、令人愉快的。作名词时常用于 have fun。",
+    "collocations": "have fun; a lot of fun; for fun; fun activities; a fun day。",
+    "commonMistake": "表示“好玩、有趣”通常用 fun；funny 多表示“好笑的”或“奇怪的”。",
+    "example": {
+      "english": "We have fun in the garden after lunch.",
+      "chinese": "午饭后我们在花园里玩得很开心。"
+    },
+    "application": {
+      "prompt": "We had ___ at the school fair. A. fun B. funny",
+      "solution": "A。解析：此处表示玩得开心，用不可数名词 fun；funny 表示好笑或奇怪。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: fun or funny",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/fun-or-funny"
+      },
+      {
+        "label": "Cambridge Dictionary: fun",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fun"
+      }
+    ]
+  },
+  {
+    "word": "yard",
+    "examTags": [
+      "词汇·语境判断词义",
+      "语言运用·地点表达"
+    ],
+    "grammar": "n. 可数名词，复数 yards；本单元指房屋旁或周围的院子。yard 也可表示长度单位“码”，需结合语境判断。",
+    "collocations": "in the yard; front/back yard; play in the yard; a small yard。",
+    "commonMistake": "yard 有“院子”和“码”两种常见词义，注意结合前后文判断。",
+    "example": {
+      "english": "The dog is playing in the yard.",
+      "chinese": "狗正在院子里玩。"
+    },
+    "application": {
+      "prompt": "There are flowers and a small tree ___ our yard. A. in B. from",
+      "solution": "A。解析：表示在院子里面用 in the yard。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yard"
+      }
+    ]
+  },
+  {
+    "word": "carrot",
+    "examTags": [
+      "词汇·名词单复数",
+      "语境理解·食物词汇"
+    ],
+    "grammar": "carrot 是可数名词，复数为 carrots；在 carrot soup 等复合名词中，carrot 作前置修饰语时通常用单数形式。",
+    "collocations": "a carrot; carrot sticks; carrot soup; grow carrots。",
+    "commonMistake": "表示胡萝卜本身时按可数名词使用：a carrot、two carrots；carrot soup 中单数形式 carrot 是复合名词的前置修饰语。",
+    "example": {
+      "english": "The rabbit is eating a carrot.",
+      "chinese": "兔子正在吃一根胡萝卜。"
+    },
+    "application": {
+      "prompt": "There are four ___ in this basket. A. carrot B. carrots",
+      "solution": "B。解析：four 后接可数名词复数 carrots。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: carrot",
+        "url": "https://dictionary.cambridge.org/dictionary/english/carrot"
+      }
+    ]
+  },
+  {
+    "word": "goose",
+    "examTags": [
+      "词汇·不规则名词复数",
+      "阅读·动物词汇"
+    ],
+    "grammar": "n. 可数名词，指鹅；复数是不规则形式 geese。",
+    "collocations": "a goose; two geese; a goose in the yard。",
+    "commonMistake": "goose 的复数是 geese，不是 gooses。",
+    "example": {
+      "english": "A goose is walking beside the pond.",
+      "chinese": "一只鹅正在池塘边走。"
+    },
+    "application": {
+      "prompt": "One goose, two ___. A. gooses B. geese",
+      "solution": "B。解析：goose 的不规则复数形式为 geese。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: goose",
+        "url": "https://dictionary.cambridge.org/dictionary/english/goose"
+      },
+      {
+        "label": "Cambridge Dictionary: geese",
+        "url": "https://dictionary.cambridge.org/dictionary/english/geese"
+      }
+    ]
+  },
+  {
+    "word": "count",
+    "examTags": [
+      "语法·动词词形",
+      "语言运用·数量表达"
+    ],
+    "grammar": "v. count—counted—counted，第三人称单数 counts，现在分词 counting；可表示依次数数或计算数量。",
+    "collocations": "count to ten; count the animals; count how many; count the books。",
+    "commonMistake": "can、may 等情态动词后接动词原形 count；主语为 he/she/it 时一般现在时用 counts。",
+    "example": {
+      "english": "Can you count the carrots in the basket?",
+      "chinese": "你能数一数篮子里的胡萝卜吗？"
+    },
+    "application": {
+      "prompt": "Our teacher asks us to ___ the plants in the yard. A. count B. counts",
+      "solution": "A。解析：to 后接动词原形 count。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: count",
+        "url": "https://dictionary.cambridge.org/dictionary/english/count"
+      }
+    ]
+  },
+  {
+    "word": "another",
+    "examTags": [
+      "词汇辨析·another/other",
+      "语法·限定词与代词"
+    ],
+    "grammar": "det./pron. 表示“另一个、再一个”；作限定词时 another + 单数可数名词，也可独立作代词。",
+    "collocations": "another book; another one; another day; one another。",
+    "commonMistake": "another 通常不直接修饰复数名词；说“其他的书”用 other books，说“再一本书”用 another book。",
+    "example": {
+      "english": "Please bring another chair from the kitchen.",
+      "chinese": "请从厨房再拿一把椅子来。"
+    },
+    "application": {
+      "prompt": "We need ___ plant for the yard. A. another B. else",
+      "solution": "A。解析：名词 plant 前表示“再一株”用 another；else 通常放在疑问词或不定代词后。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: another or other",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/word-choice-another-or-other"
+      },
+      {
+        "label": "Cambridge Dictionary: another",
+        "url": "https://dictionary.cambridge.org/dictionary/english/another"
+      }
+    ]
+  },
+  {
+    "word": "else",
+    "examTags": [
+      "语法·副词位置",
+      "阅读·补充信息"
+    ],
+    "grammar": "adv. 表示“其他的、另外的”；常放在 someone、anything、where、what 等词之后。",
+    "collocations": "someone else; anything else; what else; where else。",
+    "commonMistake": "else 通常后置，如 something else、who else；不要说 else something。",
+    "example": {
+      "english": "Is there anything else in the box?",
+      "chinese": "盒子里还有别的东西吗？"
+    },
+    "application": {
+      "prompt": "What ___ do we need for the garden? A. else B. other",
+      "solution": "A。解析：else 放在疑问词 what 后表示“还有什么”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: else",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/else"
+      },
+      {
+        "label": "Cambridge Dictionary: else",
+        "url": "https://dictionary.cambridge.org/dictionary/english/else"
+      }
+    ]
+  },
+  {
+    "word": "circle",
+    "examTags": [
+      "词法·动词/名词",
+      "阅读·识别题目指令"
+    ],
+    "grammar": "v. circle—circled—circled，表示用线圈出；n. 可数名词，复数 circles，表示圆圈。",
+    "collocations": "circle the answer/word; draw a circle; in a circle。",
+    "commonMistake": "作动词表示“圈出”时可直接接对象，如 circle the answer，不必加 around。",
+    "example": {
+      "english": "Circle the two rabbits in the picture.",
+      "chinese": "把图中的两只兔子圈出来。"
+    },
+    "application": {
+      "prompt": "Please ___ the carrot in the picture. A. circle B. circles",
+      "solution": "A。解析：祈使句用动词原形 circle。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: circle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/circle"
+      }
+    ]
+  },
+  {
+    "word": "cat",
+    "examTags": [
+      "词汇·可数名词",
+      "语言运用·宠物话题"
+    ],
+    "grammar": "cat 是可数名词，复数为 cats；常指家猫，也可泛指猫科动物中的猫。",
+    "collocations": "a pet cat; feed the cat; cat food; a cat and a dog。",
+    "commonMistake": "cat 作单数可数名词时，通常需有 a、the、my 等限定词。",
+    "example": {
+      "english": "The black cat is sitting by the plant.",
+      "chinese": "那只黑猫正坐在植物旁边。"
+    },
+    "application": {
+      "prompt": "I have ___ small cat at home. A. a B. an",
+      "solution": "A。解析：small 以辅音音素开头，单数可数名词短语前用 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cat"
+      }
+    ]
+  },
+  {
+    "word": "these",
+    "examTags": [
+      "语法·指示代词单复数",
+      "阅读·近指与指代"
+    ],
+    "grammar": "det./pron. this 的复数，指说话者附近的多个人或物；作限定词时 these + 复数名词，独立作主语时通常搭配 are。",
+    "collocations": "these books/plants; these are; one of these; look at these。",
+    "commonMistake": "these 指复数，后接复数名词或单独使用；单数对应 this。",
+    "example": {
+      "english": "These carrots are for the rabbits.",
+      "chinese": "这些胡萝卜是给兔子的。"
+    },
+    "application": {
+      "prompt": "___ are my new plants. A. These B. This",
+      "solution": "A。解析：plants 是复数，指示代词用 these；谓语 are 也与复数一致。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: this, that, these, those",
+        "url": "https://dictionary.cambridge.org/uk/grammar/british-grammar/this-that-these-those"
+      },
+      {
+        "label": "Cambridge Dictionary: these",
+        "url": "https://dictionary.cambridge.org/dictionary/english/these"
+      }
+    ]
+  },
+  {
+    "word": "plant",
+    "examTags": [
+      "词法·名词/动词",
+      "语法·动词词形"
+    ],
+    "grammar": "n. 可数名词，复数 plants，表示植物；v. plant—planted—planted，现在分词 planting，表示种植。",
+    "collocations": "a plant; tomato plant; plant seeds/trees/flowers; plant something in the garden。",
+    "commonMistake": "plant 作动词表示种植时直接接种子或植物，如 plant seeds；情态动词后用原形 plant。",
+    "example": {
+      "english": "We plant tomato seeds in the yard each spring.",
+      "chinese": "每年春天我们都在院子里种番茄种子。"
+    },
+    "application": {
+      "prompt": "We want to ___ tomatoes in the yard. A. plant B. plants",
+      "solution": "A。解析：want to 后接动词原形 plant。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: plant",
+        "url": "https://dictionary.cambridge.org/dictionary/english/plant"
+      }
+    ]
+  },
+  {
+    "word": "baby",
+    "examTags": [
+      "词汇·名词复数拼写",
+      "阅读·动物与成长"
+    ],
+    "grammar": "n. 可数名词，可指婴儿或动物幼崽；复数 babies。",
+    "collocations": "a baby rabbit; baby animals; a baby bird; have a baby。",
+    "commonMistake": "baby 的复数拼作 babies：辅音字母加 y 结尾，变 y 为 i 再加 -es。",
+    "example": {
+      "english": "The baby rabbit is hiding near its mother.",
+      "chinese": "小兔子正躲在妈妈附近。"
+    },
+    "application": {
+      "prompt": "A rabbit has two ___. (baby)",
+      "solution": "babies。解析：baby 以辅音字母加 y 结尾，复数变 y 为 i 再加 -es。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Essential Dictionary: baby",
+        "url": "https://dictionary.cambridge.org/dictionary/essential-british-english/baby"
+      },
+      {
+        "label": "Cambridge Grammar: forming the plural of nouns",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/nouns-forming-the-plural"
+      }
+    ]
+  },
+  {
+    "word": "chicken",
+    "examTags": [
+      "词汇辨析·同词不同义",
+      "语法·可数与不可数名词"
+    ],
+    "grammar": "n. 表示农场饲养的鸡时可数，复数 chickens；表示鸡肉时常作不可数名词。",
+    "collocations": "a chicken; two chickens; chicken for lunch; chicken soup。",
+    "commonMistake": "chicken 可指鸡也可指鸡肉；表示一只鸡时常用 a chicken，泛指食物时常用 chicken。",
+    "example": {
+      "english": "There are three chickens in the yard, and we have chicken for lunch.",
+      "chinese": "院子里有三只鸡，我们午饭吃鸡肉。"
+    },
+    "application": {
+      "prompt": "There are two ___ near the plant. A. chicken B. chickens",
+      "solution": "B。解析：two 后接可数名词复数；此处说两只鸡。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Learner's Dictionary: chicken",
+        "url": "https://dictionary.cambridge.org/us/dictionary/learner-english/chicken"
+      },
+      {
+        "label": "Cambridge Dictionary: chicken",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chicken"
+      }
+    ]
+  },
+  {
+    "word": "dog",
+    "examTags": [
+      "词汇·可数名词单复数",
+      "语言运用·宠物话题"
+    ],
+    "grammar": "n. 可数名词，复数 dogs；常指宠物狗，也可指用于看护或狩猎的狗。",
+    "collocations": "a pet dog; walk the dog; dog food; dogs bark。",
+    "commonMistake": "表示不止一只狗时用 dogs；普通单数 dog 前需有冠词或其他限定词。",
+    "example": {
+      "english": "Our dog follows the children around the yard.",
+      "chinese": "我们的狗跟着孩子们在院子里走来走去。"
+    },
+    "application": {
+      "prompt": "The two ___ are playing with a ball. A. dog B. dogs",
+      "solution": "B。解析：two 后接可数名词复数 dogs。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dog",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dog"
+      }
+    ]
+  },
+  {
+    "word": "rabbit",
+    "examTags": [
+      "词汇·可数名词单复数",
+      "阅读·动物与动作"
+    ],
+    "grammar": "n. 可数名词，复数 rabbits；也可指兔肉，此时可作不可数名词。",
+    "collocations": "a pet rabbit; two rabbits; feed a rabbit; a rabbit in the yard。",
+    "commonMistake": "rabbit 作单数可数名词时通常要有 a、the、my 等限定词。",
+    "example": {
+      "english": "The rabbit hops past the tomato plants.",
+      "chinese": "兔子跳过番茄植株旁边。"
+    },
+    "application": {
+      "prompt": "We can see three ___ in the yard. A. rabbit B. rabbits",
+      "solution": "B。解析：three 后接可数名词复数 rabbits。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rabbit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rabbit"
+      }
+    ]
+  },
+  {
+    "word": "tomato",
+    "examTags": [
+      "词汇·名词复数拼写",
+      "语境理解·食物与植物"
+    ],
+    "grammar": "tomato 是可数名词，复数为 tomatoes；在 tomato soup、tomato plant 等复合名词中，tomato 作前置修饰语时通常用单数形式。",
+    "collocations": "a tomato; two tomatoes; tomato soup; tomato plant。",
+    "commonMistake": "tomato 的复数是 tomatoes；部分以 o 结尾的名词复数需加 -es。",
+    "example": {
+      "english": "These tomatoes came from our garden.",
+      "chinese": "这些西红柿是我们从花园里摘的。"
+    },
+    "application": {
+      "prompt": "Please put the three ___ in the basket. A. tomato B. tomatoes",
+      "solution": "B。解析：three 后接名词复数；tomato 的复数拼作 tomatoes。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tomato",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tomato"
+      },
+      {
+        "label": "Cambridge Grammar: forming the plural of nouns",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/nouns-forming-the-plural"
+      }
+    ]
+  },
+  {
+    "word": "flower",
+    "examTags": [
+      "词法·名词单复数",
+      "语境·词汇运用"
+    ],
+    "grammar": "flower 是可数名词，单数前可用 a，复数为 flowers。",
+    "collocations": "a flower; pick a flower; a bunch of flowers; flower garden",
+    "commonMistake": "复数要在 flower 后加 -s；flower“花”和 flour“面粉”读音相同，拼写和意思不同。",
+    "example": {
+      "english": "We put a yellow flower by the window.",
+      "chinese": "我们在窗边放了一朵黄色的花。"
+    },
+    "application": {
+      "prompt": "选词填空：There is a ___ in the vase. A. flower  B. flowers",
+      "solution": "A. flower。a 后接可数名词单数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flower",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flower"
+      }
+    ]
+  },
+  {
+    "word": "apple",
+    "examTags": [
+      "词法·名词单复数",
+      "语法·冠词"
+    ],
+    "grammar": "apple 是可数名词，单数前用 an，复数为 apples。",
+    "collocations": "an apple; apple tree; apple juice; pick an apple",
+    "commonMistake": "apple 以元音音素开头，单数前用 an apple；复数 apples 前不加 a/an。",
+    "example": {
+      "english": "I picked an apple from the tree.",
+      "chinese": "我从树上摘了一个苹果。"
+    },
+    "application": {
+      "prompt": "选词填空：I eat ___ apple after lunch. A. an  B. a",
+      "solution": "A. an。apple 以元音音素开头，前面用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: apple",
+        "url": "https://dictionary.cambridge.org/dictionary/english/apple"
+      }
+    ]
+  },
+  {
+    "word": "tree",
+    "examTags": [
+      "词法·名词单复数",
+      "语法·介词搭配"
+    ],
+    "grammar": "tree 是可数名词，复数为 trees；常用 under/in a tree 表示在树下/树上。",
+    "collocations": "plant a tree; climb a tree; under a tree; an apple tree",
+    "commonMistake": "tree 的复数是 trees；表示树上长着或住着的东西常用 in the tree，表示落在树下常用 under the tree。",
+    "example": {
+      "english": "A small bird is in the tree.",
+      "chinese": "树上有一只小鸟。"
+    },
+    "application": {
+      "prompt": "There are two ___ by the lake. A. tree  B. trees",
+      "solution": "B. trees。two 后接可数名词复数，tree 的复数形式是 trees。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tree",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tree"
+      }
+    ]
+  },
+  {
+    "word": "this",
+    "examTags": [
+      "语法·指示代词",
+      "语法·主谓一致"
+    ],
+    "grammar": "this 可作指示代词独立指代离说话者较近的单数人或物；也可放在单数名词前作限定词。",
+    "collocations": "this is; this one; this apple; this tree",
+    "commonMistake": "this 指单数，be 动词通常用 is；指复数时用 these。",
+    "example": {
+      "english": "This is my apple.",
+      "chinese": "这是我的苹果。"
+    },
+    "application": {
+      "prompt": "你手里拿着一个苹果，说：___ is red. A. This  B. These",
+      "solution": "A. This。指近处的一个苹果用 this；these 用于近处的复数人或物。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: this",
+        "url": "https://dictionary.cambridge.org/dictionary/english/this"
+      },
+      {
+        "label": "Cambridge Grammar: This, that, these, those",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/determiners-this-that-or-these-those"
+      }
+    ]
+  },
+  {
+    "word": "those",
+    "examTags": [
+      "语法·指示代词",
+      "词法·单复数辨析"
+    ],
+    "grammar": "those 可作指示代词，独立指代离说话者较远的复数人或物；也可放在复数名词前作限定词。",
+    "collocations": "those are; those animals; those ducks; those trees over there",
+    "commonMistake": "those 用于远处的复数人或物；that 用于远处的单数人或物。",
+    "example": {
+      "english": "Those are my grandpa’s ducks.",
+      "chinese": "那些是我爷爷/外公的鸭子。"
+    },
+    "application": {
+      "prompt": "那边湖上的三只鸭子饿了。___ need some food. A. Those  B. That",
+      "solution": "A. Those。三只鸭子是远处的复数事物，用 those；that 用于远处的单数事物。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: those",
+        "url": "https://dictionary.cambridge.org/dictionary/english/those"
+      },
+      {
+        "label": "Cambridge Grammar: This, that, these, those",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/determiners-this-that-or-these-those"
+      }
+    ]
+  },
+  {
+    "word": "animal",
+    "examTags": [
+      "词法·名词单复数",
+      "语法·冠词"
+    ],
+    "grammar": "animal 是可数名词，复数为 animals；单数前用 an。",
+    "collocations": "a wild animal; a farm animal; love animals; many animals",
+    "commonMistake": "animal 虽以字母 a 开头，但选择 a/an 看发音；它以元音音素开头，所以说 an animal。",
+    "example": {
+      "english": "A horse is a large farm animal.",
+      "chinese": "马是一种大型农场动物。"
+    },
+    "application": {
+      "prompt": "选词填空：A cow is ___ animal. A. an  B. a",
+      "solution": "A. an。animal 以元音音素开头，单数前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: animal",
+        "url": "https://dictionary.cambridge.org/dictionary/english/animal"
+      }
+    ]
+  },
+  {
+    "word": "duck",
+    "examTags": [
+      "词法·名词单复数",
+      "话题语境·动物"
+    ],
+    "grammar": "duck 作“鸭子”时是可数名词，复数为 ducks。",
+    "collocations": "a duck; a duck pond; feed the ducks; a mother duck",
+    "commonMistake": "表示两只或多只鸭子时用 ducks；不要漏掉复数词尾 -s。",
+    "example": {
+      "english": "The yellow duck is swimming in the lake.",
+      "chinese": "那只黄色的鸭子正在湖里游泳。"
+    },
+    "application": {
+      "prompt": "选词填空：Look at the two ___. A. duck  B. ducks",
+      "solution": "B. ducks。two 后接可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: duck",
+        "url": "https://dictionary.cambridge.org/dictionary/english/duck"
+      }
+    ]
+  },
+  {
+    "word": "potato",
+    "examTags": [
+      "词法·名词单复数",
+      "词法·名词复数拼写"
+    ],
+    "grammar": "potato 作“土豆”时是可数名词，复数拼写为 potatoes。",
+    "collocations": "a potato; baked potatoes; mashed potato; potato salad",
+    "commonMistake": "potato 的复数通常写 potatoes，不是 potatos；注意把词尾 o 改为 oes。",
+    "example": {
+      "english": "We need two potatoes for dinner.",
+      "chinese": "晚饭我们需要两个土豆。"
+    },
+    "application": {
+      "prompt": "选词填空：There are three ___ in the bag. A. potato  B. potatoes",
+      "solution": "B. potatoes。three 后接复数；potato 的复数是 potatoes。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: potato",
+        "url": "https://dictionary.cambridge.org/dictionary/english/potato"
+      }
+    ]
+  },
+  {
+    "word": "many",
+    "examTags": [
+      "语法·数量表达",
+      "词法·可数名词"
+    ],
+    "grammar": "many 可作限定词修饰可数名词复数，也可作代词单独使用；常见问法是 How many + 复数名词。",
+    "collocations": "how many animals; many ducks; too many apples; so many cows",
+    "commonMistake": "many 修饰可数名词复数；much 常修饰不可数名词。回答数量时可单独用 many，如 There are many。",
+    "example": {
+      "english": "How many cows are on the farm? There are many.",
+      "chinese": "农场有多少头奶牛？有很多。"
+    },
+    "application": {
+      "prompt": "选词填空：How ___ animals are on the farm? A. many  B. much",
+      "solution": "A. many。animals 是可数名词复数，询问数量用 how many。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: many",
+        "url": "https://dictionary.cambridge.org/dictionary/english/many"
+      },
+      {
+        "label": "Cambridge Grammar: Many",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/many"
+      }
+    ]
+  },
+  {
+    "word": "grandpa",
+    "examTags": [
+      "话题语境·家庭",
+      "语言运用·称呼语"
+    ],
+    "grammar": "grandpa 是 grandfather 的非正式说法，是可数名词；用作直接称呼时常大写 Grandpa。",
+    "collocations": "my grandpa; visit Grandpa; Grandpa’s farm; Grandma and Grandpa",
+    "commonMistake": "my grandpa 中 grandpa 通常小写；直接称呼时首字母大写，如 Hello, Grandpa! 英语的 grandpa 不区分爷爷和外公。",
+    "example": {
+      "english": "My grandpa has a small farm.",
+      "chinese": "我爷爷/外公有一个小农场。"
+    },
+    "application": {
+      "prompt": "选出直接称呼时合适的写法：Good morning, ___! A. Grandpa  B. grandpa",
+      "solution": "A. Grandpa。直接称呼家人时称呼语首字母通常大写。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grandpa",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grandpa"
+      }
+    ]
+  },
+  {
+    "word": "farm",
+    "examTags": [
+      "词法·名词单复数",
+      "话题语境·农场"
+    ],
+    "grammar": "farm 作“农场”时是可数名词，单数前常用 a，复数为 farms；常用 on a farm 表示在农场。",
+    "collocations": "on a farm; farm animals; work on a farm; a dairy farm",
+    "commonMistake": "farm 是可数名词，单数前通常需要限定词，如 a farm 或 my farm；表示在农场常说 on a farm。",
+    "example": {
+      "english": "There are many animals on the farm.",
+      "chinese": "农场里有许多动物。"
+    },
+    "application": {
+      "prompt": "选出表示“农场”的词：We can see cows, ducks, and horses on the ___. A. farm  B. lake",
+      "solution": "A. farm。奶牛、鸭子和马生活在农场语境中。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: farm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/farm"
+      }
+    ]
+  },
+  {
+    "word": "cow",
+    "examTags": [
+      "词法·名词单复数",
+      "话题语境·动物"
+    ],
+    "grammar": "cow 是可数名词，指奶牛时单数前可用 a，复数为 cows。",
+    "collocations": "a cow; dairy cow; cow’s milk; feed the cows",
+    "commonMistake": "a cow 表示一头奶牛，复数 cows 表示多头；不要把复数写成 cow’s，后者通常表示“奶牛的”。",
+    "example": {
+      "english": "The cow is eating grass near the tree.",
+      "chinese": "奶牛正在树旁吃草。"
+    },
+    "application": {
+      "prompt": "选词填空：There are two ___ near the house. A. cow  B. cows",
+      "solution": "B. cows。two 后接可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cow"
+      }
+    ]
+  },
+  {
+    "word": "small",
+    "examTags": [
+      "词法·形容词用法",
+      "词法·形容词比较等级"
+    ],
+    "grammar": "small 是形容词，可放在名词前或 be 动词后；比较级 smaller，最高级 smallest。",
+    "collocations": "a small house; a small animal; smaller than; the smallest apple",
+    "commonMistake": "small 的比较级和最高级要双写 l 再加 -er/-est：smaller、smallest；than 前通常用比较级。",
+    "example": {
+      "english": "This is a small apple.",
+      "chinese": "这是一个小苹果。"
+    },
+    "application": {
+      "prompt": "选词填空：The duck is ___ than the cow. A. smaller  B. small",
+      "solution": "A. smaller。than 表示比较，small 要用比较级 smaller。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: small",
+        "url": "https://dictionary.cambridge.org/dictionary/english/small"
+      }
+    ]
+  },
+  {
+    "word": "lake",
+    "examTags": [
+      "词法·名词单复数",
+      "语法·介词搭配"
+    ],
+    "grammar": "lake 是可数名词，单数前可用 a，复数为 lakes；常见位置表达有 by the lake、on the lake。",
+    "collocations": "by the lake; on the lake; a lake; a small lake",
+    "commonMistake": "lake 是可数名词，单数前要有冠词或其他限定词，如 a lake、the lake。",
+    "example": {
+      "english": "Those ducks are swimming in the lake.",
+      "chinese": "那些鸭子正在湖里游泳。"
+    },
+    "application": {
+      "prompt": "选出合适的地点：The ducks are swimming in the ___. A. lake  B. house",
+      "solution": "A. lake。鸭子在湖里游泳，地点语境对应 lake。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lake",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lake"
+      }
+    ]
+  },
+  {
+    "word": "house",
+    "examTags": [
+      "词法·名词单复数",
+      "词汇辨析·house/home"
+    ],
+    "grammar": "house 是可数名词，指房屋建筑，单数前常用 a，复数为 houses。",
+    "collocations": "a small house; my house; in the house; a house by the lake",
+    "commonMistake": "house 侧重房屋建筑，home 侧重居住的家；表达“回家”用 go home，不说 go to home。",
+    "example": {
+      "english": "Grandpa’s house is next to the lake.",
+      "chinese": "爷爷/外公的房子在湖边。"
+    },
+    "application": {
+      "prompt": "选词填空：The family lives in a small ___. A. house  B. horse",
+      "solution": "A. house。家人居住的建筑是 house；horse 是“马”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: house",
+        "url": "https://dictionary.cambridge.org/dictionary/english/house"
+      },
+      {
+        "label": "Cambridge Grammar: House or home?",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/house-or-home"
+      }
+    ]
+  },
+  {
+    "word": "horse",
+    "examTags": [
+      "词法·名词单复数",
+      "词汇辨析·horse/house"
+    ],
+    "grammar": "horse 是可数名词，单数前可用 a，复数为 horses。",
+    "collocations": "a horse; ride a horse; a horse and cart; a brown horse",
+    "commonMistake": "horse 是“马”，house 是“房子”；注意拼写和词义不同。",
+    "example": {
+      "english": "The brown horse is behind the house.",
+      "chinese": "那匹棕色的马在房子后面。"
+    },
+    "application": {
+      "prompt": "选词填空：The farmer rides a ___. A. horse  B. house",
+      "solution": "A. horse。农夫骑的是马；house 表示房子。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: horse",
+        "url": "https://dictionary.cambridge.org/dictionary/english/horse"
+      }
+    ]
+  },
+  {
+    "word": "sheep",
+    "examTags": [
+      "词法·名词单复数",
+      "语境理解·动物数量"
+    ],
+    "grammar": "sheep 表示绵羊时，单数和复数同形：one sheep, three sheep。句中谓语根据实际数量确定。",
+    "collocations": "a sheep; three sheep; a flock of sheep; sheep on the farm",
+    "commonMistake": "sheep 的复数不加 -s；表示三只羊说 three sheep，不说 three sheeps。",
+    "example": {
+      "english": "There are five sheep behind the house.",
+      "chinese": "房子后面有五只绵羊。"
+    },
+    "application": {
+      "prompt": "There are two ___ on the farm. A. sheep  B. sheeps",
+      "solution": "A. sheep。sheep 的单复数同形，two 后仍用 sheep。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sheep",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sheep"
+      }
+    ]
+  },
+  {
+    "word": "big",
+    "examTags": [
+      "词法·形容词比较级",
+      "语境理解·大小描述"
+    ],
+    "grammar": "big 作形容词表示“大”；比较级 bigger，最高级 biggest。变比较级、最高级时通常双写词尾 g 再加 -er/-est。",
+    "collocations": "a big house; a big animal; big and small; get bigger",
+    "commonMistake": "big 的比较级和最高级要双写 g：bigger, biggest；不说 more big。",
+    "example": {
+      "english": "The brown horse is bigger than the white one.",
+      "chinese": "这匹棕色的马比那匹白色的马大。"
+    },
+    "application": {
+      "prompt": "This cow is ___ than that one. A. bigger  B. big",
+      "solution": "A. bigger。than 表示比较，big 要用比较级 bigger。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: big",
+        "url": "https://dictionary.cambridge.org/dictionary/english/big"
+      }
+    ]
+  },
+  {
+    "word": "look",
+    "examTags": [
+      "语言运用·动词搭配",
+      "语境理解·动作与状态"
+    ],
+    "grammar": "look 作“看”时常用 look at + 人或物；look 也可作连系动词，后接形容词描述看起来的状态，如 look happy。",
+    "collocations": "look at a picture; look for a book; look after an animal; look happy",
+    "commonMistake": "表示“看某物”时用 look at，不说 look the picture；look 后接形容词描述状态，不用副词替代。",
+    "example": {
+      "english": "Look at the sheep near the lake.",
+      "chinese": "看湖边的那些绵羊。"
+    },
+    "application": {
+      "prompt": "Please look ___ the picture of my farm. A. at  B. on",
+      "solution": "A. at。look at 表示“看……”；picture 前用 at 引出对象。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: look",
+        "url": "https://dictionary.cambridge.org/dictionary/english/look"
+      }
+    ]
+  },
+  {
+    "word": "uncle",
+    "examTags": [
+      "话题语境·家庭成员",
+      "词法·可数名词"
+    ],
+    "grammar": "uncle 是可数名词，复数为 uncles。英语 uncle 可泛指父母的男性兄弟，也可指父母的男性姻亲。",
+    "collocations": "my uncle; Uncle Wang; an uncle and an aunt; visit my uncle",
+    "commonMistake": "普通叙述中说 my uncle；直接称呼并接姓名时常写作 Uncle Wang，称呼语首字母大写。",
+    "example": {
+      "english": "My uncle has a small farm.",
+      "chinese": "我叔叔有一个小农场。"
+    },
+    "application": {
+      "prompt": "My father's brother is my ___. A. uncle  B. aunt",
+      "solution": "A. uncle。uncle 表示叔叔、伯伯或舅舅等男性亲属。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: uncle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/uncle"
+      }
+    ]
+  },
+  {
+    "word": "grass",
+    "examTags": [
+      "词法·不可数名词",
+      "语境理解·自然环境"
+    ],
+    "grammar": "grass 通常作不可数名词表示“草”，泛指时不加 a，通常也不变复数；表达一根草可说 a blade of grass。",
+    "collocations": "green grass; walk on the grass; cut the grass; a blade of grass",
+    "commonMistake": "表示草地上的草时通常说 grass，不说 a grass 或 grasses；grass 也可指草坪上的草。",
+    "example": {
+      "english": "The sheep are eating grass in the yard.",
+      "chinese": "绵羊正在院子里吃草。"
+    },
+    "application": {
+      "prompt": "The cow is eating ___. A. grass  B. a grass",
+      "solution": "A. grass。grass 在这里泛指草，是不可数名词，不用 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grass",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grass"
+      }
+    ]
+  },
+  {
+    "word": "kind",
+    "examTags": [
+      "词汇·一词多义与词性",
+      "语言运用·固定搭配"
+    ],
+    "grammar": "kind 作名词表示“种类”，常见结构为 a kind of + 名词；作形容词表示“体贴的、亲切的”，常用 be kind to sb。",
+    "collocations": "a kind of animal; different kinds of flowers; be kind to animals; a kind person",
+    "commonMistake": "表示“对某人/某物友好”说 be kind to；many kinds of 后接名词复数，如 many kinds of animals。",
+    "example": {
+      "english": "My grandpa is kind to all the animals on his farm.",
+      "chinese": "我爷爷对农场里的所有动物都很友善。"
+    },
+    "application": {
+      "prompt": "She is always kind ___ the little dog. A. to  B. at",
+      "solution": "A. to。固定搭配 be kind to sb/sth 表示“对……友好”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: kind",
+        "url": "https://dictionary.cambridge.org/dictionary/english/kind"
+      }
+    ]
+  },
+  {
+    "word": "he",
+    "examTags": [
+      "语法·人称代词主格",
+      "阅读·代词指代"
+    ],
+    "grammar": "he 是第三人称单数男性人称代词主格，常在句中作主语；动词一般现在时通常要用第三人称单数形式。",
+    "collocations": "he is; he has; he likes; he and his family",
+    "commonMistake": "he 作主语，动词或介词后的宾语用 him，表示“他的”用 his：He likes his farm. I visit him.",
+    "example": {
+      "english": "He looks after the animals every morning.",
+      "chinese": "他每天早上照看这些动物。"
+    },
+    "application": {
+      "prompt": "___ is my uncle. A. He  B. Him",
+      "solution": "A. He。空格处作句子主语，要用人称代词主格。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: personal pronouns",
+        "url": "https://dictionary.cambridge.org/uk/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc"
+      }
+    ]
+  },
+  {
+    "word": "pig",
+    "examTags": [
+      "词法·名词单复数",
+      "语境理解·农场动物"
+    ],
+    "grammar": "pig 是可数名词，复数为 pigs；表示一只猪用 a pig，表示多只猪用 pigs。",
+    "collocations": "a pig; two pigs; a pig farm; feed the pigs",
+    "commonMistake": "pig 的复数直接加 -s：pigs；数词 two 后用复数，不说 two pig。",
+    "example": {
+      "english": "The pig is in the yard with the dog.",
+      "chinese": "猪和狗在院子里。"
+    },
+    "application": {
+      "prompt": "I can see three ___ behind the house. A. pig  B. pigs",
+      "solution": "B. pigs。three 后接可数名词复数，pig 的复数加 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pig",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pig"
+      }
+    ]
+  },
+  {
+    "word": "there",
+    "examTags": [
+      "语法·there be 句型",
+      "词汇辨析·there/their/they're"
+    ],
+    "grammar": "there 可作地点副词表示“在那里”；there be 句型表示某处有某人或某物，be 动词根据后面的名词决定单复数。",
+    "collocations": "over there; there is a cow; there are two ducks; Is there…?",
+    "commonMistake": "there 表示地点；their 表示“他们的”；they're 是 they are 的缩写。There is 后接单数名词，there are 后接复数名词。",
+    "example": {
+      "english": "There are two ducks by the lake.",
+      "chinese": "湖边有两只鸭子。"
+    },
+    "application": {
+      "prompt": "There ___ a cow behind the house. A. is  B. are",
+      "solution": "A. is。there be 句型中，a cow 是单数，be 动词用 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: there",
+        "url": "https://dictionary.cambridge.org/dictionary/english/there"
+      }
+    ]
+  },
+  {
+    "word": "behind",
+    "examTags": [
+      "语法·方位介词",
+      "语境理解·空间关系"
+    ],
+    "grammar": "behind 可作介词表示“在……后面”，后接名词或代词；也可作副词表示“在后面”。",
+    "collocations": "behind the house; behind a tree; stand behind me; behind the door",
+    "commonMistake": "behind 后直接接地点或人，不加 of：behind the house，不说 behind of the house。",
+    "example": {
+      "english": "The cat is hiding behind the chair.",
+      "chinese": "猫藏在椅子后面。"
+    },
+    "application": {
+      "prompt": "The dog is in front of the house; the pig is ___ it. A. behind  B. under",
+      "solution": "A. behind。句意与 in front of（在前面）相对，猪在房子后面。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: behind",
+        "url": "https://dictionary.cambridge.org/dictionary/english/behind"
+      }
+    ]
+  },
+  {
+    "word": "home",
+    "examTags": [
+      "词汇辨析·home/house",
+      "语言运用·地点表达"
+    ],
+    "grammar": "home 作名词表示“家”；在 go, come, get 等移动动词后常作副词，表示回家或到家，前面不加 to。",
+    "collocations": "at home; go home; come home; get home; a happy home",
+    "commonMistake": "表示“回家”说 go home，不说 go to home；house 通常指建筑物，home 更强调居住和生活的地方。",
+    "example": {
+      "english": "My family and I are at home today.",
+      "chinese": "我和家人今天在家。"
+    },
+    "application": {
+      "prompt": "After school, I go ___. A. home  B. to home",
+      "solution": "A. home。home 在 go 后作地点副词时不加 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: home",
+        "url": "https://dictionary.cambridge.org/dictionary/english/home"
+      },
+      {
+        "label": "Cambridge Grammar: house or home",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/house-or-home"
+      }
+    ]
+  },
+  {
+    "word": "beautiful",
+    "examTags": [
+      "词法·形容词比较等级",
+      "词汇·派生词"
+    ],
+    "grammar": "beautiful 是形容词，常放在名词前作定语，也可放在 be 动词后作表语；比较级和最高级通常用 more/most beautiful。",
+    "collocations": "a beautiful flower; a beautiful house; look beautiful; more beautiful",
+    "commonMistake": "beautiful 的比较级和最高级通常说 more beautiful、most beautiful，不说 beautifuler、beautifulest；名词形式是 beauty。",
+    "example": {
+      "english": "There is a beautiful flower by the lake.",
+      "chinese": "湖边有一朵美丽的花。"
+    },
+    "application": {
+      "prompt": "The garden looks ___. A. beautiful  B. beauty",
+      "solution": "A. beautiful。look 在这里是连系动词，后接形容词说明花园的状态。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: beautiful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/beautiful"
+      }
+    ]
+  },
+  {
+    "word": "like",
+    "examTags": [
+      "词汇·一词多义与词性",
+      "语言运用·动词搭配"
+    ],
+    "grammar": "like 作动词表示“喜欢”，后接名词、动名词或 to do；主语为 he/she/it 时用 likes。like 也可作介词表示“像……一样”或举例。",
+    "collocations": "like animals; like doing sth; like to do sth; animals like cows and sheep",
+    "commonMistake": "一般现在时主语是 he/she/it 时用 likes；表示“像”时 like 是介词，后接名词短语，如 It looks like a horse.",
+    "example": {
+      "english": "I like the animals on my grandpa's farm.",
+      "chinese": "我喜欢爷爷农场里的动物。"
+    },
+    "application": {
+      "prompt": "My uncle ___ the horse. A. likes  B. like",
+      "solution": "A. likes。主语 my uncle 是第三人称单数，一般现在时谓语动词用 likes。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: like",
+        "url": "https://dictionary.cambridge.org/dictionary/english/like"
+      },
+      {
+        "label": "Cambridge Grammar: like",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/like"
+      }
+    ]
+  },
+  {
+    "word": "his",
+    "examTags": [
+      "语法·物主限定词与代词",
+      "阅读·代词指代"
+    ],
+    "grammar": "his 可作物主限定词，放在名词前表示“他的”；也可单独作名词性物主代词，表示“他的（东西）”。",
+    "collocations": "his house; his family; his animals; The book is his.",
+    "commonMistake": "his 前不加撇号，也不写成 his's；his 后接名词时表示“他的”，单独使用时可指“他的东西”。",
+    "example": {
+      "english": "The big house is his.",
+      "chinese": "那座大房子是他的。"
+    },
+    "application": {
+      "prompt": "Look at the boy. ___ name is Tom. A. His  B. He",
+      "solution": "A. His。空格后有名词 name，应使用物主限定词 his。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: personal pronouns",
+        "url": "https://dictionary.cambridge.org/uk/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc"
+      }
+    ]
+  },
+  {
+    "word": "at",
+    "examTags": [
+      "语法·介词与时间地点",
+      "语言运用·常见介词搭配"
+    ],
+    "grammar": "at 常用于较具体的地点或准确时刻，如 at the farm、at home、at seven o'clock；也常见于 look at 等搭配。",
+    "collocations": "at home; at school; at the farm; at 7:00; look at a picture",
+    "commonMistake": "表示准确钟点通常用 at；表示一天中的某段时间通常用 in（如 in the morning），表示具体某一天常用 on。",
+    "example": {
+      "english": "The horses are at the farm.",
+      "chinese": "这些马在农场里。"
+    },
+    "application": {
+      "prompt": "My uncle gets up ___ seven o'clock. A. at  B. in",
+      "solution": "A. at。具体钟点前通常用 at。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: at",
+        "url": "https://dictionary.cambridge.org/dictionary/english/at"
+      }
+    ]
+  }
+]

@@ -1,6 +1,8 @@
 import type { Prisma } from '@prisma/client'
 import { roundHours } from '@/lib/hours'
 
+const HOUR_BALANCE_FLOAT_EPSILON = 1e-7
+
 export type AttendanceDeduction = {
   deducted: number
   beforeHours: number
@@ -59,15 +61,24 @@ export async function deductEnrollmentHours(
       where: { id: enrollmentId },
       select: { remainHours: true },
     })
-    const available = roundHours(Number(current?.remainHours || 0))
+    const storedAvailable = Number(current?.remainHours || 0)
+    const available = roundHours(storedAvailable)
     const safeDeduct = roundHours(Math.min(requested, available))
     if (safeDeduct <= 0) return { deducted: 0, beforeHours: available, afterHours: available }
 
+    // PostgreSQL Float values can land a few ULPs below the rounded amount
+    // after repeated subtraction. When consuming the rounded balance, compare
+    // against the exact value just read and set the final balance to zero.
+    const consumesRoundedBalance = safeDeduct === available
+      && Math.abs(storedAvailable - safeDeduct) <= HOUR_BALANCE_FLOAT_EPSILON
+
     const claimed = await tx.enrollment.updateMany({
-      where: { id: enrollmentId, remainHours: { gte: safeDeduct } },
+      where: consumesRoundedBalance
+        ? { id: enrollmentId, remainHours: storedAvailable }
+        : { id: enrollmentId, remainHours: { gte: safeDeduct } },
       data: {
         usedHours: { increment: safeDeduct },
-        remainHours: { decrement: safeDeduct },
+        remainHours: consumesRoundedBalance ? 0 : { decrement: safeDeduct },
       },
     })
     if (claimed.count !== 1) continue

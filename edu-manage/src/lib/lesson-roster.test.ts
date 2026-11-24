@@ -22,6 +22,15 @@ describe('subject lesson roster', () => {
     )).toEqual([])
   })
 
+  it('does not fall back for a current Shanghai-day lesson when the server runs in UTC', () => {
+    expect(resolveLessonStudentIds(
+      [],
+      ['student-in-other-subject'],
+      new Date('2026-09-13T00:00:00+08:00'),
+      new Date('2026-09-13T12:00:00+08:00'),
+    )).toEqual([])
+  })
+
   it('falls back to the group roster only for historical legacy lessons', () => {
     expect(resolveLessonStudentIds(
       [],
@@ -52,6 +61,55 @@ describe('subject lesson roster', () => {
       new Date('2026-09-13T00:00:00+08:00'),
       now,
     )).toEqual(['math-student'])
+  })
+
+  it('uses the same active subject roster for upcoming previews and attendance', () => {
+    const groupEnrollments = [
+      { studentId: 'math-student', subjects: ['数学'] },
+      { studentId: 'english-student', subjects: ['英语'] },
+    ]
+    const nextLessonRoster = resolveSubjectLessonStudentIds(
+      ['math-student', 'english-student'],
+      groupEnrollments,
+      '数学',
+      new Date('2026-09-14T00:00:00+08:00'),
+      now,
+    )
+
+    expect(nextLessonRoster).toEqual(['math-student'])
+    expect(nextLessonRoster.length).toBe(1)
+  })
+
+  it('does not copy a current or future lesson from group enrollment when its roster snapshot is missing', () => {
+    const groupEnrollment = [
+      { studentId: 'math-student', subjects: ['数学'] },
+      { studentId: 'english-student', subjects: ['英语'] },
+    ]
+
+    expect(resolveSubjectLessonStudentIds(
+      [],
+      groupEnrollment,
+      '数学',
+      new Date('2026-09-13T00:00:00+08:00'),
+      now,
+    )).toEqual([])
+    expect(resolveSubjectLessonStudentIds(
+      [],
+      groupEnrollment,
+      '数学',
+      new Date('2026-09-14T00:00:00+08:00'),
+      now,
+    )).toEqual([])
+  })
+
+  it('preserves a saved historical roster after a student withdraws or changes subjects', () => {
+    expect(resolveSubjectLessonStudentIds(
+      ['former-math-student', 'current-math-student'],
+      [{ studentId: 'current-math-student', subjects: ['数学'] }],
+      '数学',
+      new Date('2026-09-12T00:00:00+08:00'),
+      now,
+    )).toEqual(['former-math-student', 'current-math-student'])
   })
 
   it('does not include another subject when falling back for a historical lesson', () => {

@@ -1,10 +1,11 @@
 'use client'
 
 import useSWR from 'swr'
-import { Alert, Button, Card, Table, Input, Space, Typography, Tag } from 'antd'
+import { Alert, Button, Card, Input, Space, Typography, Tag } from 'antd'
 import { fetchJson } from '@/lib/fetch-json'
 import { SearchOutlined } from '@ant-design/icons'
 import { useState } from 'react'
+import { HorizontalScrollTable } from '@/components/Layout/HorizontalScrollTable'
 
 const { Text } = Typography
 
@@ -40,7 +41,7 @@ export function LogsTab() {
           style={{ width: 240 }}
         />
       </Space>
-      <Table
+      <HorizontalScrollTable
         columns={columns}
         dataSource={data?.data || []}
         rowKey="id"

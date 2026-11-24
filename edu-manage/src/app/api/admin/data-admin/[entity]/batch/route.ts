@@ -11,6 +11,8 @@ import { DATA_ADMIN_BATCH_ENTITIES, mutateDataAdminRecord } from '@/lib/data-adm
 import { getDynamicModel } from '@/lib/data-admin/dynamic-model'
 import { getRequestDivision } from '@/lib/division'
 import { getDataAdminDivisionScope } from '@/lib/data-admin/division-scope'
+import { notificationReadData } from '@/lib/notification-read-state'
+import { markFeedbackReadFromNotifications } from '@/lib/classroom-feedback/notification-read-sync'
 
 const ALLOWED_ACTIONS = ['softDelete', 'restore', 'markRead'] as const
 type BatchAction = typeof ALLOWED_ACTIONS[number]
@@ -73,7 +75,28 @@ export const POST = apiHandler(async (req: NextRequest,
   if (action === 'markRead') {
     try {
       const count = await prisma.$transaction(async (tx) => {
-        const updated = await tx.notification.updateMany({ where: { id: { in: uniqueIds }, deletedAt: null, ...recordScope }, data: { read: true, readAt: new Date() } })
+        const where = { id: { in: uniqueIds }, deletedAt: null, ...recordScope }
+        const selectedNotifications = await tx.notification.findMany({
+          where,
+          select: {
+            userId: true,
+            type: true,
+            relatedType: true,
+            relatedId: true,
+            user: { select: { role: true } },
+          },
+        })
+        const updated = await tx.notification.updateMany({ where, data: notificationReadData() })
+        const feedbackNotificationsByParent = new Map<string, typeof selectedNotifications>()
+        for (const notification of selectedNotifications) {
+          if (notification.user.role !== 'parent') continue
+          const parentNotifications = feedbackNotificationsByParent.get(notification.userId) || []
+          parentNotifications.push(notification)
+          feedbackNotificationsByParent.set(notification.userId, parentNotifications)
+        }
+        for (const [parentUserId, notifications] of feedbackNotificationsByParent) {
+          await markFeedbackReadFromNotifications(tx, parentUserId, notifications)
+        }
         await tx.activityLog.create({ data: { userId: session.user.id, action: 'DATA_ADMIN_BATCH_MARK_READ', entityType: 'Notification', detail: '批量标记通知已读', metadata: { ids: uniqueIds, count: updated.count } } })
         return updated.count
       })

@@ -1,0 +1,609 @@
+{
+  "schemaVersion": "muzhe-poetry-recitation-v1",
+  "volume": {
+    "grade": 7,
+    "semester": 1,
+    "name": "七年级上册",
+    "edition": "统编版（人民教育出版社）"
+  },
+  "scopeNotice": "收录本册教材诗词与课外古诗词诵读。教材收录不自动等同于全国统一必背；由教师按教学和本地考试范围布置。",
+  "sourceBook": "最新【人教版】7年级语文课本•上册.pdf",
+  "reviewStatus": "待教师二次校对",
+  "items": [
+    {
+      "id": "g7-1-001",
+      "sequence": 1,
+      "title": "观沧海",
+      "author": "曹操",
+      "dynasty": "东汉末",
+      "textbookSection": "古代诗歌四首",
+      "contentType": "课内古诗",
+      "genre": "四言古诗",
+      "stanzas": [
+        [
+          "东临碣石，以观沧海。",
+          "水何澹澹，山岛竦峙。"
+        ],
+        [
+          "树木丛生，百草丰茂。",
+          "秋风萧瑟，洪波涌起。"
+        ],
+        [
+          "日月之行，若出其中；",
+          "星汉灿烂，若出其里。"
+        ],
+        [
+          "幸甚至哉，歌以咏志。"
+        ]
+      ],
+      "meaningSummary": "诗人登临碣石山观海，以开阔壮丽的海景寄托胸怀天下、建功立业的豪情。",
+      "keyNotes": [
+        {
+          "term": "澹澹",
+          "meaning": "水波荡漾的样子"
+        },
+        {
+          "term": "竦峙",
+          "meaning": "高高耸立"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          1,
+          2
+        ],
+        "pdfPages": [
+          10,
+          11
+        ],
+        "crosswalkTitle": "观沧海",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 22,
+        "printedPage": 15,
+        "otherTitleHits": [
+          24
+        ],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-002",
+      "sequence": 2,
+      "title": "次北固山下",
+      "author": "王湾",
+      "dynasty": "唐",
+      "textbookSection": "古代诗歌四首",
+      "contentType": "课内古诗",
+      "genre": "五言律诗",
+      "stanzas": [
+        [
+          "客路青山外，行舟绿水前。",
+          "潮平两岸阔，风正一帆悬。"
+        ],
+        [
+          "海日生残夜，江春入旧年。",
+          "乡书何处达，归雁洛阳边。"
+        ]
+      ],
+      "meaningSummary": "诗人行舟途中描绘江上早春景象，借归雁传书表达对故乡亲人的思念。",
+      "keyNotes": [
+        {
+          "term": "次",
+          "meaning": "停宿"
+        },
+        {
+          "term": "乡书",
+          "meaning": "家书"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          3,
+          4
+        ],
+        "pdfPages": [
+          12,
+          13
+        ],
+        "crosswalkTitle": "次北固山下",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 23,
+        "printedPage": 16,
+        "otherTitleHits": [
+          24
+        ],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-003",
+      "sequence": 3,
+      "title": "闻王昌龄左迁龙标遥有此寄",
+      "author": "李白",
+      "dynasty": "唐",
+      "textbookSection": "古代诗歌四首",
+      "contentType": "课内古诗",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "杨花落尽子规啼，闻道龙标过五溪。",
+          "我寄愁心与明月，随君直到夜郎西。"
+        ]
+      ],
+      "meaningSummary": "诗人借暮春景物和明月寄托对被贬友人的牵挂与慰问。",
+      "keyNotes": [
+        {
+          "term": "左迁",
+          "meaning": "贬官、降职"
+        },
+        {
+          "term": "子规",
+          "meaning": "杜鹃鸟"
+        },
+        {
+          "term": "五溪",
+          "meaning": "古代对今湘西、黔东一带溪流的合称"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          5,
+          6
+        ],
+        "pdfPages": [
+          14,
+          15
+        ],
+        "crosswalkTitle": "闻王昌龄左迁龙标遥有此寄",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 23,
+        "printedPage": 16,
+        "otherTitleHits": [
+          24
+        ],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-004",
+      "sequence": 4,
+      "title": "天净沙·秋思",
+      "author": "马致远",
+      "dynasty": "元",
+      "textbookSection": "古代诗歌四首",
+      "contentType": "课内古诗",
+      "genre": "散曲·小令",
+      "stanzas": [
+        [
+          "枯藤老树昏鸦，",
+          "小桥流水人家，",
+          "古道西风瘦马。",
+          "夕阳西下，",
+          "断肠人在天涯。"
+        ]
+      ],
+      "meaningSummary": "作者将多种秋日景物组合成萧瑟画面，写出漂泊游子的孤独和思乡之情。",
+      "keyNotes": [
+        {
+          "term": "天净沙",
+          "meaning": "曲牌名"
+        },
+        {
+          "term": "断肠",
+          "meaning": "形容悲伤到极点"
+        },
+        {
+          "term": "天涯",
+          "meaning": "远离家乡的地方"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          7,
+          8
+        ],
+        "pdfPages": [
+          16,
+          17
+        ],
+        "crosswalkTitle": "天净沙·秋思",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 24,
+        "printedPage": 17,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-005",
+      "sequence": 5,
+      "title": "峨眉山月歌",
+      "author": "李白",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（一）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "峨眉山月半轮秋，影入平羌江水流。",
+          "夜发清溪向三峡，思君不见下渝州。"
+        ]
+      ],
+      "meaningSummary": "诗人由峨眉山月写到夜行江上，展现行舟之快，也抒发离乡时对友人的思念。",
+      "keyNotes": [
+        {
+          "term": "平羌",
+          "meaning": "今青衣江"
+        },
+        {
+          "term": "发",
+          "meaning": "出发"
+        },
+        {
+          "term": "渝州",
+          "meaning": "今重庆一带"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "峨眉山月歌",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 82,
+        "printedPage": 75,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-006",
+      "sequence": 6,
+      "title": "江南逢李龟年",
+      "author": "杜甫",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（一）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "岐王宅里寻常见，崔九堂前几度闻。",
+          "正是江南好风景，落花时节又逢君。"
+        ]
+      ],
+      "meaningSummary": "诗人与旧日故人暮春重逢，借眼前景象追忆盛世，感叹个人遭际和时代变迁。",
+      "keyNotes": [
+        {
+          "term": "寻常",
+          "meaning": "经常"
+        },
+        {
+          "term": "落花时节",
+          "meaning": "暮春，也暗含衰落、飘零之感"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "江南逢李龟年",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 82,
+        "printedPage": 75,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-007",
+      "sequence": 7,
+      "title": "行军九日思长安故园",
+      "author": "岑参",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（一）",
+      "contentType": "课外古诗词诵读",
+      "genre": "五言绝句",
+      "stanzas": [
+        [
+          "强欲登高去，无人送酒来。",
+          "遥怜故园菊，应傍战场开。"
+        ]
+      ],
+      "meaningSummary": "诗人在战乱军旅中思念故乡，把惦念故园的情感寄托于想象中的菊花。",
+      "keyNotes": [
+        {
+          "term": "九日",
+          "meaning": "农历九月九日重阳节"
+        },
+        {
+          "term": "傍",
+          "meaning": "靠近"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "行军九日思长安故园",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 83,
+        "printedPage": 76,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-008",
+      "sequence": 8,
+      "title": "夜上受降城闻笛",
+      "author": "李益",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（一）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "回乐烽前沙似雪，受降城外月如霜。",
+          "不知何处吹芦管，一夜征人尽望乡。"
+        ]
+      ],
+      "meaningSummary": "边塞月夜中传来的笛声唤起戍边将士共同的思乡之情。",
+      "keyNotes": [
+        {
+          "term": "芦管",
+          "meaning": "芦笛"
+        },
+        {
+          "term": "征人",
+          "meaning": "出征或戍边的军人"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "夜上受降城闻笛",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 83,
+        "printedPage": 76,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-009",
+      "sequence": 9,
+      "title": "秋词（其一）",
+      "author": "刘禹锡",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（二）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "自古逢秋悲寂寥，我言秋日胜春朝。",
+          "晴空一鹤排云上，便引诗情到碧霄。"
+        ]
+      ],
+      "meaningSummary": "诗人一反悲秋传统，借晴空白鹤表达开朗昂扬、积极进取的情怀。",
+      "keyNotes": [
+        {
+          "term": "寂寥",
+          "meaning": "冷清萧条"
+        },
+        {
+          "term": "排",
+          "meaning": "推开"
+        },
+        {
+          "term": "碧霄",
+          "meaning": "蓝天"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "秋词（其一）",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 162,
+        "printedPage": 155,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-010",
+      "sequence": 10,
+      "title": "夜雨寄北",
+      "author": "李商隐",
+      "dynasty": "唐",
+      "textbookSection": "课外古诗词诵读（二）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "君问归期未有期，巴山夜雨涨秋池。",
+          "何当共剪西窗烛，却话巴山夜雨时。"
+        ]
+      ],
+      "meaningSummary": "诗人身在巴蜀盼望归期，想象日后与亲人共话今夜，以未来团聚映照眼前孤寂。",
+      "keyNotes": [
+        {
+          "term": "何当",
+          "meaning": "何时将要"
+        },
+        {
+          "term": "却话",
+          "meaning": "回头说、追述"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": true,
+        "printedPages": [
+          9,
+          10
+        ],
+        "pdfPages": [
+          18,
+          19
+        ],
+        "crosswalkTitle": "夜雨寄北",
+        "note": null
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 162,
+        "printedPage": 155,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-011",
+      "sequence": 11,
+      "title": "十一月四日风雨大作（其二）",
+      "author": "陆游",
+      "dynasty": "南宋",
+      "textbookSection": "课外古诗词诵读（二）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "僵卧孤村不自哀，尚思为国戍轮台。",
+          "夜阑卧听风吹雨，铁马冰河入梦来。"
+        ]
+      ],
+      "meaningSummary": "诗人虽年老卧病仍念念不忘报国，风雨之夜梦见铁骑征战。",
+      "keyNotes": [
+        {
+          "term": "僵卧",
+          "meaning": "躺卧不起，形容老病"
+        },
+        {
+          "term": "戍轮台",
+          "meaning": "守卫边关"
+        },
+        {
+          "term": "夜阑",
+          "meaning": "夜将尽"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "十一月四日风雨大作（其二）",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 163,
+        "printedPage": 156,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    },
+    {
+      "id": "g7-1-012",
+      "sequence": 12,
+      "title": "潼关",
+      "author": "谭嗣同",
+      "dynasty": "清",
+      "textbookSection": "课外古诗词诵读（二）",
+      "contentType": "课外古诗词诵读",
+      "genre": "七言绝句",
+      "stanzas": [
+        [
+          "终古高云簇此城，秋风吹散马蹄声。",
+          "河流大野犹嫌束，山入潼关不解平。"
+        ]
+      ],
+      "meaningSummary": "诗人写潼关山河的雄奇奔放，借山水表达冲决束缚、追求自由的少年意气。",
+      "keyNotes": [
+        {
+          "term": "终古",
+          "meaning": "久远"
+        },
+        {
+          "term": "簇",
+          "meaning": "簇拥"
+        },
+        {
+          "term": "束",
+          "meaning": "拘束"
+        }
+      ],
+      "assignmentPolicy": "教师或学校按范围布置",
+      "crosswalk53": {
+        "matchedTo53MainBook": false,
+        "printedPages": [],
+        "pdfPages": [],
+        "crosswalkTitle": "潼关",
+        "note": "主册未收录不等于教材不要求背诵。"
+      },
+      "textbookSource": {
+        "file": "01-语文/课本/七年级上册/最新【人教版】7年级语文课本•上册.pdf",
+        "pdfPageIndex": 163,
+        "printedPage": 156,
+        "otherTitleHits": [],
+        "locatorStatus": "text_layer_match"
+      },
+      "recordStatus": "pending_teacher_proofread"
+    }
+  ],
+  "sourceCrosswalk": "01-语文/古诗词/教材对应提取_人教版初中语文_20261113/教材篇目与53必背古诗文逐篇对照表.md"
+}

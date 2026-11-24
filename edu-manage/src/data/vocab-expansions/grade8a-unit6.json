@@ -1,0 +1,1370 @@
+[
+  {
+    "word": "yourself",
+    "examTags": [
+      "词汇·反身代词",
+      "语法·人称代词变化"
+    ],
+    "grammar": "pron. 你自己；您自己。主语和宾语指同一人时用反身代词；也可放在名词或代词后表示“亲自”。",
+    "collocations": "help yourself; introduce yourself; do it yourself",
+    "commonMistake": "yourself 指单数的“你自己”；复数“你们自己”是 yourselves。",
+    "example": {
+      "english": "Please introduce yourself to the new students.",
+      "chinese": "请向新同学介绍一下你自己。"
+    },
+    "application": {
+      "prompt": "You made the model alone. You made it by ___. A. yourself B. yourselves",
+      "solution": "A。解析：you 指一人时反身代词用 yourself。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yourself",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yourself"
+      }
+    ]
+  },
+  {
+    "word": "engineer",
+    "examTags": [
+      "词汇·职业与未来规划",
+      "语法·可数名词与冠词"
+    ],
+    "grammar": "n. 工程师；技师。可数名词，复数 engineers；单数前用 an，因为以元音音素开头。",
+    "collocations": "a civil engineer; a software engineer; work as an engineer",
+    "commonMistake": "engineer 前通常用 an：an engineer；复数加 -s。",
+    "example": {
+      "english": "My cousin hopes to become an engineer.",
+      "chinese": "我表姐希望成为一名工程师。"
+    },
+    "application": {
+      "prompt": "Leo designs bridges and roads. He wants to be ___ engineer. A. an B. a",
+      "solution": "A。解析：engineer 的首音为元音音素，前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: engineer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/engineer"
+      }
+    ]
+  },
+  {
+    "word": "fashion",
+    "examTags": [
+      "词汇·职业与生活方式",
+      "语法·名词搭配"
+    ],
+    "grammar": "n. 时尚；时装业。通常不可数；in fashion 表示流行，fashion 也可指服装行业。",
+    "collocations": "the fashion industry; in fashion; fashion design",
+    "commonMistake": "fashion 是名词；形容“时尚的”用 fashionable。表示“流行”可说 in fashion。",
+    "example": {
+      "english": "She is interested in fashion and hopes to design clothes.",
+      "chinese": "她对时尚感兴趣，希望将来设计服装。"
+    },
+    "application": {
+      "prompt": "Clothes and styles that are popular at a certain time are part of ___. A. literature B. fashion",
+      "solution": "B。解析：fashion 可指时尚或时装业。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fashion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fashion"
+      }
+    ]
+  },
+  {
+    "word": "designer",
+    "examTags": [
+      "词汇·职业与构词",
+      "语法·名词后缀"
+    ],
+    "grammar": "n. 设计师；可数名词，复数 designers。由 design 加表示“做某事的人”的后缀 -er 构成。",
+    "collocations": "a fashion designer; a graphic designer; work as a designer",
+    "commonMistake": "designer 指设计师，design 可作“设计”名词或动词；注意词尾 -er 表示从事该工作的人。",
+    "example": {
+      "english": "The designer created a simple sports uniform.",
+      "chinese": "这位设计师设计了一套简洁的运动服。"
+    },
+    "application": {
+      "prompt": "A person who plans how clothes or products look is a ___. A. musician B. designer",
+      "solution": "B。解析：负责设计的人是 designer。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: designer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/designer"
+      }
+    ]
+  },
+  {
+    "word": "director",
+    "examTags": [
+      "词汇·熟词多义与职业",
+      "构词·动词派生名词"
+    ],
+    "grammar": "n. 导演；主任；董事。可数名词，复数 directors；由 direct 加后缀 -or 构成。",
+    "collocations": "a film director; the school director; a company director",
+    "commonMistake": "director 可指不同机构中的负责人；要根据 film、school 或 company 等语境判断。",
+    "example": {
+      "english": "The film director explained the story to the actors.",
+      "chinese": "电影导演向演员讲解了故事。"
+    },
+    "application": {
+      "prompt": "The person who guides actors while making a film is the ___. A. director B. lawyer",
+      "solution": "A。解析：负责指导影片拍摄的人是 director（导演）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: director",
+        "url": "https://dictionary.cambridge.org/dictionary/english/director"
+      }
+    ]
+  },
+  {
+    "word": "musician",
+    "examTags": [
+      "词汇·职业与音乐",
+      "构词·名词后缀"
+    ],
+    "grammar": "n. 音乐家；乐师。可数名词，复数 musicians；由 music 加后缀 -ian 构成。",
+    "collocations": "a talented musician; a professional musician; play with musicians",
+    "commonMistake": "musician 指从事音乐的人；music 是“音乐”，musical 可作“音乐的”或“音乐剧”。",
+    "example": {
+      "english": "The young musician practices the piano every day.",
+      "chinese": "这位年轻的音乐家每天练习钢琴。"
+    },
+    "application": {
+      "prompt": "A person who writes or performs music is a ___. A. photographer B. musician",
+      "solution": "B。解析：音乐家、乐师是 musician。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: musician",
+        "url": "https://dictionary.cambridge.org/dictionary/english/musician"
+      }
+    ]
+  },
+  {
+    "word": "fireman",
+    "examTags": [
+      "词汇·职业与公共服务",
+      "语法·不规则复数"
+    ],
+    "grammar": "n. 消防队员。复数 firemen；现代英语中也常用 firefighter 作不特指性别的表达。",
+    "collocations": "a fireman at the station; firemen put out fires; a fireman's uniform",
+    "commonMistake": "fireman 的复数是 firemen，不是 firemans；firefighter 是常见的性别中性说法。",
+    "example": {
+      "english": "The fireman helped the family leave the building safely.",
+      "chinese": "消防队员帮助这家人安全离开了大楼。"
+    },
+    "application": {
+      "prompt": "A ___ is trained to put out fires and rescue people. A. fireman B. painter",
+      "solution": "A。解析：扑灭火灾并参与救援的职业是 fireman。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fireman",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fireman"
+      }
+    ]
+  },
+  {
+    "word": "AI",
+    "examTags": [
+      "词汇·科技与生活",
+      "缩写·首字母词"
+    ],
+    "grammar": "缩写，artificial intelligence（人工智能）。AI 作学科概念时常不可数；具体系统或应用可说 an AI system。",
+    "collocations": "AI technology; AI tools; artificial intelligence",
+    "commonMistake": "AI 是大写缩写；若前有不定冠词，按字母 A 的元音音素说 an AI tool。",
+    "example": {
+      "english": "AI can help people organize information more quickly.",
+      "chinese": "人工智能可以帮助人们更快地整理信息。"
+    },
+    "application": {
+      "prompt": "The abbreviation for artificial intelligence is ___. A. AL B. AI",
+      "solution": "B。解析：artificial intelligence 的常用缩写是 AI。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: AI",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ai"
+      }
+    ]
+  },
+  {
+    "word": "essay",
+    "examTags": [
+      "词汇·阅读与写作",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 小品文；文章；短文。可数名词，复数 essays；常围绕一个主题展开。",
+    "collocations": "write an essay; an essay about careers; a short essay",
+    "commonMistake": "essay 是可数名词，单数前通常用 an；不要与表示“尝试”的动词 try 混淆。",
+    "example": {
+      "english": "I wrote an essay about my future job.",
+      "chinese": "我写了一篇关于未来职业的短文。"
+    },
+    "application": {
+      "prompt": "For homework, we must write ___ about a person we admire. A. an athlete B. an essay",
+      "solution": "B。解析：write 后接写作作品 essay；essay 前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: essay",
+        "url": "https://dictionary.cambridge.org/dictionary/english/essay"
+      }
+    ]
+  },
+  {
+    "word": "classic",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与形容词"
+    ],
+    "grammar": "n. 经典作品；名著；adj. 最优秀的；经典的；古典的。作名词时可数，复数 classics。",
+    "collocations": "a classic novel; a classic example; a film classic",
+    "commonMistake": "classic 可作名词“经典作品”或形容词“经典的”；classical 常表示古典艺术、古典音乐等。",
+    "example": {
+      "english": "The novel is a classic that many students enjoy.",
+      "chinese": "这部小说是一部许多学生喜欢的经典作品。"
+    },
+    "application": {
+      "prompt": "A book that has remained popular for many years may be called a ___. A. classic B. mini-goal",
+      "solution": "A。解析：classic 可指经久受欢迎的经典作品。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: classic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/classic"
+      }
+    ]
+  },
+  {
+    "word": "keep on doing sth",
+    "examTags": [
+      "词汇·持续行为",
+      "语法·keep on 后接动名词"
+    ],
+    "grammar": "phr. 继续做；反复做。keep on 后接动名词；keep on doing 强调继续或重复某动作。",
+    "collocations": "keep on practicing; keep on trying; keep on working toward a goal",
+    "commonMistake": "keep on 后接 doing，不接 to do：keep on practicing；不要漏掉动名词的 -ing。",
+    "example": {
+      "english": "She kept on practicing until she could play the song well.",
+      "chinese": "她一直练习，直到能把这首歌弹好。"
+    },
+    "application": {
+      "prompt": "If you want to improve, ___ practicing every day. A. make sure B. keep on",
+      "solution": "B。解析：keep on 后接动名词 practicing，表示继续练习。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: keep",
+        "url": "https://dictionary.cambridge.org/dictionary/english/keep"
+      }
+    ]
+  },
+  {
+    "word": "make sure",
+    "examTags": [
+      "词汇·提醒与确认",
+      "语法·不定式和宾语从句"
+    ],
+    "grammar": "phr. 确保；查明。常用 make sure (that) + 从句，或 make sure to do sth。",
+    "collocations": "make sure you understand; make sure to bring a notebook; make sure of the time",
+    "commonMistake": "make sure 后可接 that 从句或 to do；接名词时用 make sure of sth。",
+    "example": {
+      "english": "Make sure you write your goal in a clear sentence.",
+      "chinese": "确保你用清楚的句子写下目标。"
+    },
+    "application": {
+      "prompt": "Before the interview, ___ to arrive on time. A. take up B. make sure",
+      "solution": "B。解析：make sure to do 表示“确保做某事”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sure"
+      }
+    ]
+  },
+  {
+    "word": "try one’s best",
+    "examTags": [
+      "词汇·努力与计划",
+      "语法·try 与不定式"
+    ],
+    "grammar": "phr. 尽最大努力。常用 try one's best to do sth；one's 随主语变化为 my/your/his/her/our/their。",
+    "collocations": "try your best; try one's best to learn; do one's best",
+    "commonMistake": "try one's best 后常接 to do：try her best to improve；one's 要与主语对应。",
+    "example": {
+      "english": "I will try my best to reach my reading goal.",
+      "chinese": "我会尽最大努力实现阅读目标。"
+    },
+    "application": {
+      "prompt": "He wants to improve, so he will try ___ best to practice. A. him B. his",
+      "solution": "B。解析：固定表达 try one's best 中用物主代词 his。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: try",
+        "url": "https://dictionary.cambridge.org/dictionary/english/try"
+      }
+    ]
+  },
+  {
+    "word": "literature",
+    "examTags": [
+      "词汇·阅读与文化",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 文学；文献。表示文学这一学科或艺术形式时通常不可数；指某领域的文献资料时也常作集合用法。",
+    "collocations": "English literature; world literature; read literature about nature",
+    "commonMistake": "literature 泛指文学时通常不可数，不说 a literature；“文学作品”可说 works of literature。",
+    "example": {
+      "english": "She enjoys reading literature from different countries.",
+      "chinese": "她喜欢阅读不同国家的文学作品。"
+    },
+    "application": {
+      "prompt": "Novels, poems, and plays are forms of ___. A. literature B. law",
+      "solution": "A。解析：小说、诗歌和戏剧都属于文学 literature。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: literature",
+        "url": "https://dictionary.cambridge.org/dictionary/english/literature"
+      }
+    ]
+  },
+  {
+    "word": "athlete",
+    "examTags": [
+      "词汇·职业与运动",
+      "语法·可数名词与冠词"
+    ],
+    "grammar": "n. 运动员；可数名词，复数 athletes。单数前用 an，因为以元音音素开头。",
+    "collocations": "a young athlete; a professional athlete; train as an athlete",
+    "commonMistake": "athlete 前用 an：an athlete；athletic 是形容词“擅长运动的、健壮的”。",
+    "example": {
+      "english": "The athlete trains every morning before school.",
+      "chinese": "这名运动员每天早晨上学前训练。"
+    },
+    "application": {
+      "prompt": "A person who competes in sports is an ___. A. essay B. athlete",
+      "solution": "B。解析：参加体育训练或比赛的运动员是 athlete。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: athlete",
+        "url": "https://dictionary.cambridge.org/dictionary/english/athlete"
+      }
+    ]
+  },
+  {
+    "word": "photographer",
+    "examTags": [
+      "词汇·职业与艺术",
+      "构词·名词后缀"
+    ],
+    "grammar": "n. 摄影师；拍照者。可数名词，复数 photographers；由 photograph 加后缀 -er 构成。",
+    "collocations": "a wedding photographer; a wildlife photographer; work as a photographer",
+    "commonMistake": "photographer 是人，photography 是摄影艺术或技术，photograph 是照片；注意词形区别。",
+    "example": {
+      "english": "The photographer took pictures of birds in the park.",
+      "chinese": "摄影师在公园里拍了鸟类的照片。"
+    },
+    "application": {
+      "prompt": "The person taking the pictures for the school magazine is a ___. A. photographer B. director",
+      "solution": "A。解析：拍摄照片的人是 photographer。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: photographer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/photographer"
+      }
+    ]
+  },
+  {
+    "word": "painter",
+    "examTags": [
+      "词汇·职业与艺术",
+      "构词·名词后缀"
+    ],
+    "grammar": "n. 画家；油漆匠。可数名词，复数 painters；具体意思依作品、画笔或墙面等语境判断。",
+    "collocations": "a famous painter; an oil painter; a house painter",
+    "commonMistake": "painter 可指创作绘画的人，也可指给房屋等刷漆的工人；paint 作名词是颜料或油漆。",
+    "example": {
+      "english": "The painter used bright colors in her picture.",
+      "chinese": "这位画家在画作中使用了鲜艳的颜色。"
+    },
+    "application": {
+      "prompt": "An artist who paints pictures is a ___. A. painter B. lawyer",
+      "solution": "A。解析：创作绘画的艺术家是 painter。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: painter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/painter"
+      }
+    ]
+  },
+  {
+    "word": "businessman",
+    "examTags": [
+      "词汇·职业与社会",
+      "语法·不规则复数"
+    ],
+    "grammar": "n. 商界人士；企业家。传统形式复数 businessmen；businessperson/businesspeople 是常见的性别中性说法。",
+    "collocations": "a successful businessman; a local businessman; businessmen and businesswomen",
+    "commonMistake": "businessman 的复数是 businessmen；businessperson 可用于不强调性别的表达。",
+    "example": {
+      "english": "The businessman started a small company after college.",
+      "chinese": "这位商界人士大学毕业后创办了一家小公司。"
+    },
+    "application": {
+      "prompt": "The two ___ discussed their plans for a new company. A. businessmen B. businessmans",
+      "solution": "A。解析：man 结尾的人物名词复数常变 men：businessmen。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: businessman",
+        "url": "https://dictionary.cambridge.org/dictionary/english/businessman"
+      }
+    ]
+  },
+  {
+    "word": "actress",
+    "examTags": [
+      "词汇·职业与表演",
+      "语法·人物名词"
+    ],
+    "grammar": "n. 女演员；可数名词，复数 actresses。actor 也常作不特指性别的职业称呼。",
+    "collocations": "a famous actress; a film actress; play an actress in a show",
+    "commonMistake": "actress 指女演员，actor 可泛指演员；复数 actresses 的拼写要加 -es。",
+    "example": {
+      "english": "The actress spoke about her first role in a film.",
+      "chinese": "这位女演员谈到了她在电影中的第一个角色。"
+    },
+    "application": {
+      "prompt": "The woman who performs a role in a play is an ___. A. actress B. athlete",
+      "solution": "A。解析：女演员是 actress。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: actress",
+        "url": "https://dictionary.cambridge.org/dictionary/english/actress"
+      }
+    ]
+  },
+  {
+    "word": "lawyer",
+    "examTags": [
+      "词汇·职业与法律",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 律师；可数名词，复数 lawyers。表示从事律师职业常用 work as a lawyer。",
+    "collocations": "a family lawyer; talk to a lawyer; work as a lawyer",
+    "commonMistake": "lawyer 是人，law 是法律；两者词性不同，不能把 lawyer 用来表示法律条文。",
+    "example": {
+      "english": "The lawyer explained the rules in simple words.",
+      "chinese": "律师用简单的话解释了规则。"
+    },
+    "application": {
+      "prompt": "A person trained to give legal advice is a ___. A. lawyer B. musician",
+      "solution": "A。解析：提供法律建议的专业人士是 lawyer。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lawyer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lawyer"
+      }
+    ]
+  },
+  {
+    "word": "law",
+    "examTags": [
+      "词汇·规则与社会",
+      "语法·不可数名词与可数用法"
+    ],
+    "grammar": "n. 法律；法规。泛指法律体系时通常不可数；具体一条法律可数，复数 laws。",
+    "collocations": "obey the law; break the law; a new law",
+    "commonMistake": "law 表示法律制度时常用 the law；表示具体一项法规时可说 a law。",
+    "example": {
+      "english": "Everyone must follow the law.",
+      "chinese": "每个人都必须遵守法律。"
+    },
+    "application": {
+      "prompt": "A lawyer helps people understand the ___. A. law B. director",
+      "solution": "A。解析：律师提供法律方面的帮助，law 是“法律”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: law",
+        "url": "https://dictionary.cambridge.org/dictionary/english/law"
+      }
+    ]
+  },
+  {
+    "word": "bath",
+    "examTags": [
+      "词汇·日常生活",
+      "语法·名词与固定搭配"
+    ],
+    "grammar": "n. 洗澡；浴缸。可数名词，复数 baths；常用 have/take a bath。",
+    "collocations": "have a bath; take a warm bath; a bath towel",
+    "commonMistake": "表示“洗澡”可说 have/take a bath；bath 是名词，动词“洗澡”用 bathe。",
+    "example": {
+      "english": "I usually take a bath before going to bed.",
+      "chinese": "我通常睡前洗澡。"
+    },
+    "application": {
+      "prompt": "After the long walk, she took ___ warm bath. A. an B. a",
+      "solution": "B。解析：bath 以辅音音素开头，单数前用 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bath",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bath"
+      }
+    ]
+  },
+  {
+    "word": "miss",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·动词搭配"
+    ],
+    "grammar": "v. 想念；错过；未赶上。miss—missed—missed；表示“想念”或“错过”时均可直接接名词或动名词。",
+    "collocations": "miss your family; miss the bus; miss doing something",
+    "commonMistake": "miss 后可接名词或 doing：miss the train / miss seeing you；不要说 miss to see。",
+    "example": {
+      "english": "I miss playing basketball with my old team.",
+      "chinese": "我想念和老队友一起打篮球的时光。"
+    },
+    "application": {
+      "prompt": "Hurry, or you may ___ the last bus home. A. miss B. fail to",
+      "solution": "A。解析：没赶上公交车用 miss the bus。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: miss",
+        "url": "https://dictionary.cambridge.org/dictionary/english/miss"
+      }
+    ]
+  },
+  {
+    "word": "be tired of",
+    "examTags": [
+      "词汇·感受与态度",
+      "语法·形容词短语与动名词"
+    ],
+    "grammar": "phr. 对……感到厌倦。be tired of 后接名词、代词或动名词；主语不同，be 动词随之变化。",
+    "collocations": "be tired of the same food; be tired of waiting; get tired of doing sth",
+    "commonMistake": "of 是介词，后接 doing：be tired of practicing；不要与 be tired（身体疲倦）混淆。",
+    "example": {
+      "english": "He is tired of eating the same lunch every day.",
+      "chinese": "他厌倦了每天吃同样的午餐。"
+    },
+    "application": {
+      "prompt": "Mia is ___ waiting for the bus and wants to walk. A. tired of B. able to",
+      "solution": "A。解析：be tired of doing 表示“厌倦做某事”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tired",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tired"
+      }
+    ]
+  },
+  {
+    "word": "able",
+    "examTags": [
+      "词汇·能力表达",
+      "语法·be able to"
+    ],
+    "grammar": "adj. 能够；有才能的。常用 be able to do sth；able 是形容词，不能单独作谓语。",
+    "collocations": "be able to swim; be able to solve a problem; an able student",
+    "commonMistake": "表达“能够做某事”用 be able to + 动词原形；不要漏掉 be，也不要在 to 后用 doing。",
+    "example": {
+      "english": "With practice, you will be able to play the song.",
+      "chinese": "经过练习，你就能弹奏这首歌了。"
+    },
+    "application": {
+      "prompt": "After training, she will ___ to run five kilometers. A. be able B. can able",
+      "solution": "A。解析：will 后用 be able to 表达将来的能力。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: able",
+        "url": "https://dictionary.cambridge.org/dictionary/english/able"
+      }
+    ]
+  },
+  {
+    "word": "stick",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·不规则动词"
+    ],
+    "grammar": "v. 粘贴；刺入；n. 枝条；棍。动词过去式和过去分词为 stuck；stick sth to/on sth 表示粘到某处。",
+    "collocations": "a walking stick; stick a note on the door; stick a pin into the board",
+    "commonMistake": "stick 作动词的过去式是 stuck，不是 sticked；要根据宾语区分“粘贴”和“刺入”。",
+    "example": {
+      "english": "She stuck a small note on the wall.",
+      "chinese": "她把一张小纸条贴在墙上。"
+    },
+    "application": {
+      "prompt": "Yesterday, I ___ the photo onto the board. A. stuck B. sticked",
+      "solution": "A。解析：stick 的过去式是不规则形式 stuck。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stick",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stick"
+      }
+    ]
+  },
+  {
+    "word": "stick to sth",
+    "examTags": [
+      "词汇·坚持与计划",
+      "语法·介词后接名词或动名词"
+    ],
+    "grammar": "phr. 坚持；遵守；粘在……上。表示坚持计划、规则或做法时用 stick to + 名词或 doing。",
+    "collocations": "stick to a plan; stick to your resolution; stick to practicing",
+    "commonMistake": "to 在 stick to 中是介词，后接名词或动名词：stick to the plan / exercising。",
+    "example": {
+      "english": "If you stick to your study plan, you can make steady progress.",
+      "chinese": "如果你坚持学习计划，就能稳步进步。"
+    },
+    "application": {
+      "prompt": "She wants to improve her health, so she will ___ her exercise plan. A. put out B. stick to",
+      "solution": "B。解析：坚持计划用 stick to a plan。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stick",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stick"
+      }
+    ]
+  },
+  {
+    "word": "resolution",
+    "examTags": [
+      "词汇·计划与目标",
+      "构词·动词派生名词"
+    ],
+    "grammar": "n. 决定；决议；可数名词，复数 resolutions。New Year's resolution 指新年计划或决心。",
+    "collocations": "make a resolution; keep a resolution; a New Year's resolution",
+    "commonMistake": "resolution 是名词；make a resolution 表示“下决心”，resolve 是动词“决定、解决”。",
+    "example": {
+      "english": "My New Year's resolution is to exercise more often.",
+      "chinese": "我的新年计划是更经常锻炼。"
+    },
+    "application": {
+      "prompt": "At the start of the year, Ben made a ___ to read more books. A. resolution B. relationship",
+      "solution": "A。解析：make a resolution 表示“下定决心、制定计划”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: resolution",
+        "url": "https://dictionary.cambridge.org/dictionary/english/resolution"
+      }
+    ]
+  },
+  {
+    "word": "have (...) to do with sb / sth",
+    "examTags": [
+      "词汇·相关关系表达",
+      "语法·固定结构"
+    ],
+    "grammar": "phr. 与某人/某事有关。常见形式 have something/anything/nothing to do with；something 可按语境替换。",
+    "collocations": "have a lot to do with; have nothing to do with; have something to do with health",
+    "commonMistake": "结构为 have + 名词 + to do with；表示“与……无关”用 have nothing to do with。",
+    "example": {
+      "english": "Her interest in photography has a lot to do with her father.",
+      "chinese": "她对摄影的兴趣与她父亲有很大关系。"
+    },
+    "application": {
+      "prompt": "This problem is related to your plan. It ___ your resolution. A. has something to do with B. takes up",
+      "solution": "A。解析：have something to do with 表示“与……有关”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: do",
+        "url": "https://dictionary.cambridge.org/dictionary/english/do"
+      }
+    ]
+  },
+  {
+    "word": "mini-goal",
+    "examTags": [
+      "词汇·目标管理",
+      "构词·复合名词"
+    ],
+    "grammar": "n. 小目标；可数名词，复数 mini-goals。mini- 表示“小型的、短期的”，常与名词连用。",
+    "collocations": "set a mini-goal; reach a mini-goal; break a big plan into mini-goals",
+    "commonMistake": "mini-goal 是可数名词，复数在 goal 后加 -s：mini-goals；保留连字符。",
+    "example": {
+      "english": "Reading one page a day is a useful mini-goal.",
+      "chinese": "每天读一页是一个有用的小目标。"
+    },
+    "application": {
+      "prompt": "To finish a long project, set one small ___ for each week. A. director B. mini-goal",
+      "solution": "B。解析：mini-goal 表示为完成大计划设定的小目标。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: goal",
+        "url": "https://dictionary.cambridge.org/dictionary/english/goal"
+      }
+    ]
+  },
+  {
+    "word": "achieve",
+    "examTags": [
+      "词汇·目标与成果",
+      "语法·动词搭配"
+    ],
+    "grammar": "v.（经过努力）达到；完成。规则变化 achieve—achieved—achieved；常接 goal、success、result 等名词。",
+    "collocations": "achieve a goal; achieve success; achieve better results",
+    "commonMistake": "achieve 强调通过努力达成目标；常说 achieve a goal/success，不用 achieve to do。",
+    "example": {
+      "english": "She worked hard to achieve her reading goal.",
+      "chinese": "她努力学习以实现阅读目标。"
+    },
+    "application": {
+      "prompt": "With practice and patience, you can ___ your goal. A. introduce B. achieve",
+      "solution": "B。解析：实现目标用 achieve a goal。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: achieve",
+        "url": "https://dictionary.cambridge.org/dictionary/english/achieve"
+      }
+    ]
+  },
+  {
+    "word": "physical",
+    "examTags": [
+      "词汇·形容词与健康",
+      "语法·词性辨析"
+    ],
+    "grammar": "adj. 身体的；物质的。常与 health、exercise、activity 等搭配；副词 physically。",
+    "collocations": "physical health; physical exercise; physical activity",
+    "commonMistake": "physical 表示身体的或物质的；指心理方面用 mental，不能把两者混为一谈。",
+    "example": {
+      "english": "Regular physical activity is good for your health.",
+      "chinese": "有规律的身体活动有益健康。"
+    },
+    "application": {
+      "prompt": "Walking and swimming are forms of ___ activity. A. confident B. physical",
+      "solution": "B。解析：锻炼身体的活动用 physical activity。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: physical",
+        "url": "https://dictionary.cambridge.org/dictionary/english/physical"
+      }
+    ]
+  },
+  {
+    "word": "health",
+    "examTags": [
+      "词汇·健康与生活",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 健康；通常不可数。常用 good/poor health、health care；healthy 是形容词。",
+    "collocations": "be in good health; health problems; health care",
+    "commonMistake": "health 是名词，通常不说 a health；描述健康的用 healthy，副词为 healthily。",
+    "example": {
+      "english": "Exercise and enough sleep are important for good health.",
+      "chinese": "锻炼和充足睡眠对健康很重要。"
+    },
+    "application": {
+      "prompt": "Eating well and exercising can improve your ___. A. healthily B. health",
+      "solution": "B。解析：your 后接名词 health；healthily 是副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: health",
+        "url": "https://dictionary.cambridge.org/dictionary/english/health"
+      }
+    ]
+  },
+  {
+    "word": "healthily",
+    "examTags": [
+      "词汇·副词派生",
+      "语法·副词修饰动词"
+    ],
+    "grammar": "adv. 健康地。由 healthy 变 y 为 i 再加 -ly 构成；修饰 eat、live 等动词。",
+    "collocations": "eat healthily; live healthily; choose food healthily",
+    "commonMistake": "healthily 是副词，修饰动词；形容词 healthy 修饰名词，如 healthy food。",
+    "example": {
+      "english": "She tries to eat healthily during the school week.",
+      "chinese": "上学期间她努力健康饮食。"
+    },
+    "application": {
+      "prompt": "Choose an adverb: The family eats ___ and exercises often. A. healthily B. healthy",
+      "solution": "A。解析：修饰动词 eats 应用副词 healthily。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: healthily",
+        "url": "https://dictionary.cambridge.org/dictionary/english/healthily"
+      }
+    ]
+  },
+  {
+    "word": "take up",
+    "examTags": [
+      "词汇·短语动词多义",
+      "语法·可分结构"
+    ],
+    "grammar": "phr. 开始学；开始从事；也可表示占据（时间、空间）。宾语为代词时常放在 take 与 up 之间。",
+    "collocations": "take up photography; take up a new hobby; take up too much time",
+    "commonMistake": "take up a hobby 表示开始培养爱好；take up time/space 表示占用时间/空间，须看宾语判断。",
+    "example": {
+      "english": "He took up photography after joining the school club.",
+      "chinese": "加入学校社团后，他开始学习摄影。"
+    },
+    "application": {
+      "prompt": "Mia wants to learn painting, so she will ___ as a hobby. A. take up it B. take it up",
+      "solution": "B。解析：take up 是可分短语动词，代词放在中间：take it up。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: take",
+        "url": "https://dictionary.cambridge.org/dictionary/english/take"
+      }
+    ]
+  },
+  {
+    "word": "photography",
+    "examTags": [
+      "词汇·艺术与爱好",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 摄影；照相术。通常不可数；photographer 指摄影师，photograph 指照片。",
+    "collocations": "learn photography; wildlife photography; a photography club",
+    "commonMistake": "photography 是摄影活动或艺术，通常不可数；表示一张照片用 a photograph/photo。",
+    "example": {
+      "english": "I joined a club to learn more about photography.",
+      "chinese": "我加入了一个社团，想多学一些摄影知识。"
+    },
+    "application": {
+      "prompt": "Taking and creating pictures as an art is called ___. A. photographer B. photography",
+      "solution": "B。解析：摄影技术或艺术是 photography；从事摄影的人是 photographer。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: photography",
+        "url": "https://dictionary.cambridge.org/dictionary/english/photography"
+      }
+    ]
+  },
+  {
+    "word": "self-improvement",
+    "examTags": [
+      "词汇·自我成长",
+      "构词·复合名词"
+    ],
+    "grammar": "n. 自我改进；自我提高。通常不可数，由 self-（自己）和 improvement（改进）构成。",
+    "collocations": "a book on self-improvement; a plan for self-improvement; focus on self-improvement",
+    "commonMistake": "self-improvement 作抽象名词通常不可数；拼写中保留连字符。",
+    "example": {
+      "english": "Setting a small goal can be part of self-improvement.",
+      "chinese": "设定一个小目标可以成为自我提升的一部分。"
+    },
+    "application": {
+      "prompt": "Learning from mistakes and building good habits support ___. A. final B. self-improvement",
+      "solution": "B。解析：不断学习和改进自己属于 self-improvement。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: improvement",
+        "url": "https://dictionary.cambridge.org/dictionary/english/improvement"
+      }
+    ]
+  },
+  {
+    "word": "confident",
+    "examTags": [
+      "词汇·情绪与态度",
+      "语法·形容词与介词"
+    ],
+    "grammar": "adj. 自信的；肯定的。常用 be confident about/of sth，或 be confident that + 从句；名词为 confidence。",
+    "collocations": "feel confident; be confident about the future; confident that you can succeed",
+    "commonMistake": "confident 是形容词，confidence 是名词；常用 be confident about/of，不用 confident for。",
+    "example": {
+      "english": "She feels confident about speaking in front of the class.",
+      "chinese": "她对在全班面前发言感到有信心。"
+    },
+    "application": {
+      "prompt": "After practicing her speech, Lina felt more ___. A. confidence B. confident",
+      "solution": "B。解析：felt 后作表语用形容词 confident；confidence 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: confident",
+        "url": "https://dictionary.cambridge.org/dictionary/english/confident"
+      }
+    ]
+  },
+  {
+    "word": "organized",
+    "examTags": [
+      "词汇·形容词与词形",
+      "拼写·英美变体"
+    ],
+    "grammar": "adj. 有条理的；有组织的。也可写作 organised；由 organize 的过去分词形式作形容词。",
+    "collocations": "an organized plan; stay organized; a well-organized desk",
+    "commonMistake": "organized 与 organised 是美式、英式拼写变体；同一篇文章中保持拼写一致。",
+    "example": {
+      "english": "A weekly list helps me stay organized.",
+      "chinese": "每周清单能帮助我保持有条理。"
+    },
+    "application": {
+      "prompt": "Her notes are neat and easy to find, so they are well ___. A. organized B. organizingly",
+      "solution": "A。解析：well 后用过去分词形容词 organized 描述“有条理的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: organize",
+        "url": "https://dictionary.cambridge.org/dictionary/english/organize"
+      }
+    ]
+  },
+  {
+    "word": "wisely",
+    "examTags": [
+      "词汇·副词派生",
+      "语法·不规则副词"
+    ],
+    "grammar": "adv. 聪明地；明智地。由 wise 变为 wisely；修饰 make a choice、use 等动词。",
+    "collocations": "choose wisely; use your time wisely; spend money wisely",
+    "commonMistake": "wise 的副词是 wisely，不是 wise；副词通常修饰动词或形容词。",
+    "example": {
+      "english": "Use your free time wisely to practice a new skill.",
+      "chinese": "明智地利用空闲时间练习一项新技能。"
+    },
+    "application": {
+      "prompt": "You should use your time ___ when preparing for an exam. A. wisely B. wise",
+      "solution": "A。解析：修饰动词 use 用副词 wisely。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wisely",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wisely"
+      }
+    ]
+  },
+  {
+    "word": "possible",
+    "examTags": [
+      "词汇·可能性表达",
+      "语法·句型结构"
+    ],
+    "grammar": "adj. 可能的；合理的。常用 It is possible to do sth 或 It is possible that...；副词 possibly。",
+    "collocations": "as soon as possible; if possible; make it possible to learn",
+    "commonMistake": "possible 常用于 It is possible to...；possible 不能直接作副词修饰动词，副词为 possibly。",
+    "example": {
+      "english": "It is possible to reach the goal one step at a time.",
+      "chinese": "一步一步来就有可能实现目标。"
+    },
+    "application": {
+      "prompt": "Please send me the information as soon as ___. A. possible B. possibility",
+      "solution": "A。解析：固定表达 as soon as possible 意为“尽可能快地”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: possible",
+        "url": "https://dictionary.cambridge.org/dictionary/english/possible"
+      }
+    ]
+  },
+  {
+    "word": "paragraph",
+    "examTags": [
+      "词汇·阅读与写作",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 段；段落。可数名词，复数 paragraphs；一段通常围绕一个主要意思展开。",
+    "collocations": "the first paragraph; write a paragraph about; a short paragraph",
+    "commonMistake": "paragraph 是可数名词；表示“一段”用 a paragraph，注意拼写中有 ph。",
+    "example": {
+      "english": "Write one paragraph about a goal you want to achieve.",
+      "chinese": "写一段话谈谈你想实现的一个目标。"
+    },
+    "application": {
+      "prompt": "A group of sentences about one main idea is a ___. A. paragraph B. confidence",
+      "solution": "A。解析：围绕一个中心意思组织的文字段落叫 paragraph。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: paragraph",
+        "url": "https://dictionary.cambridge.org/dictionary/english/paragraph"
+      }
+    ]
+  },
+  {
+    "word": "introduce",
+    "examTags": [
+      "词汇·介绍与引入",
+      "语法·动词搭配"
+    ],
+    "grammar": "v. 介绍；引见；引进。常用 introduce sb to sb、introduce oneself、introduce a new idea/product。",
+    "collocations": "introduce yourself; introduce a friend to the class; introduce a new rule",
+    "commonMistake": "把某人介绍给另一人用 introduce A to B；introduce 后不要误用 for。",
+    "example": {
+      "english": "Let me introduce my project to the group.",
+      "chinese": "让我向小组介绍一下我的项目。"
+    },
+    "application": {
+      "prompt": "At the meeting, she will ___ her new plan to the team. A. achieve B. introduce",
+      "solution": "B。解析：向别人介绍计划用 introduce sth to sb。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: introduce",
+        "url": "https://dictionary.cambridge.org/dictionary/english/introduce"
+      }
+    ]
+  },
+  {
+    "word": "meaning",
+    "examTags": [
+      "词汇·词义与表达",
+      "构词·动词派生名词"
+    ],
+    "grammar": "n. 意义；含义。可数名词，复数 meanings；常用 the meaning of a word/sentence。",
+    "collocations": "the meaning of a word; a clear meaning; find out the meaning",
+    "commonMistake": "meaning 是名词，mean 是动词；询问词义可说 What is the meaning of...? 或 What does ... mean?",
+    "example": {
+      "english": "The teacher explained the meaning of the new word.",
+      "chinese": "老师解释了这个新单词的含义。"
+    },
+    "application": {
+      "prompt": "Look up the ___ of this word in the dictionary. A. meaning B. meaningful",
+      "solution": "A。解析：the 后接名词 meaning；meaningful 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: meaning",
+        "url": "https://dictionary.cambridge.org/dictionary/english/meaning"
+      }
+    ]
+  },
+  {
+    "word": "fail",
+    "examTags": [
+      "词汇·结果与努力",
+      "语法·动词搭配"
+    ],
+    "grammar": "v. 未能做到；失败；不及格。fail—failed—failed；常用 fail to do sth 表示未能做成某事。",
+    "collocations": "fail an exam; fail to arrive; fail in an attempt",
+    "commonMistake": "fail to do sth 表示“未能做某事”，to 后接动词原形；fail an exam 表示考试不及格。",
+    "example": {
+      "english": "He failed to reach his goal the first time but kept trying.",
+      "chinese": "他第一次没能实现目标，但继续努力。"
+    },
+    "application": {
+      "prompt": "The bus was late, so we ___ to arrive on time. A. achieved B. failed",
+      "solution": "B。解析：未能按时到达用 fail to arrive；过去发生用 failed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fail",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fail"
+      }
+    ]
+  },
+  {
+    "word": "ahead",
+    "examTags": [
+      "词汇·时间与位置",
+      "语法·副词介词搭配"
+    ],
+    "grammar": "adv. 提前；在前面。常用 ahead of sb/sth；look ahead 表示展望未来。",
+    "collocations": "ahead of time; go ahead; plan ahead",
+    "commonMistake": "ahead 常与 of 连用：ahead of schedule；不要把 ahead 与表示“头部”的 head 混淆。",
+    "example": {
+      "english": "We finished the project two days ahead of time.",
+      "chinese": "我们提前两天完成了项目。"
+    },
+    "application": {
+      "prompt": "The team finished its work before the deadline, two days ___. A. ahead B. behind of",
+      "solution": "A。解析：提前可说 ahead of time；此处 ahead 与 two days 连用。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ahead",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ahead"
+      }
+    ]
+  },
+  {
+    "word": "put out",
+    "examTags": [
+      "词汇·短语动词多义",
+      "语法·可分结构与宾语位置"
+    ],
+    "grammar": "phr. 扑灭；把……摆好/拿出。是可分短语动词；代词宾语放在 put 和 out 之间。",
+    "collocations": "put out a fire; put the chairs out; put it out safely",
+    "commonMistake": "代词宾语需放中间：put it out；put out a fire 表示扑灭火，具体意义看宾语。",
+    "example": {
+      "english": "The firefighters put out the fire quickly.",
+      "chinese": "消防员很快扑灭了火。"
+    },
+    "application": {
+      "prompt": "The fire was small, and the crew managed to ___ it ___. A. put; on B. put; out",
+      "solution": "B。解析：扑灭火灾用 put out a fire。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: put",
+        "url": "https://dictionary.cambridge.org/dictionary/english/put"
+      }
+    ]
+  },
+  {
+    "word": "design",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与动词"
+    ],
+    "grammar": "v. 设计；计划；n. 设计；花纹。动词过去式 designed；常用 design sth for sb。",
+    "collocations": "design a website; a clothing design; a flower design",
+    "commonMistake": "design 作动词时是“设计”；作名词时可指设计方案或图案，需由冠词和句子位置判断。",
+    "example": {
+      "english": "She designed a poster for the school sports day.",
+      "chinese": "她为学校运动会设计了一张海报。"
+    },
+    "application": {
+      "prompt": "The students will ___ a logo for their club. A. design B. miss",
+      "solution": "A。解析：创作或规划一个标志用动词 design。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: design",
+        "url": "https://dictionary.cambridge.org/dictionary/english/design"
+      }
+    ]
+  },
+  {
+    "word": "bridge",
+    "examTags": [
+      "词汇·建筑与连接",
+      "语法·名词搭配"
+    ],
+    "grammar": "n. 桥；可数名词，复数 bridges。也可引申为连接两者的纽带。",
+    "collocations": "cross a bridge; a bridge over the river; build a bridge between groups",
+    "commonMistake": "表示跨越某处的桥常用 a bridge over/across the river；注意 bridge 的拼写和发音。",
+    "example": {
+      "english": "The new bridge connects the two villages.",
+      "chinese": "这座新桥连接着两个村庄。"
+    },
+    "application": {
+      "prompt": "People use a ___ to cross the river safely. A. paragraph B. bridge",
+      "solution": "B。解析：跨越河流的建筑物是 bridge。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bridge",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bridge"
+      }
+    ]
+  },
+  {
+    "word": "final",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·形容词与名词"
+    ],
+    "grammar": "adj. 最后的；最终的；n. 决赛；期末考试。final 作名词时可用 the final，具体含义看语境。",
+    "collocations": "the final answer; a final exam; reach the final",
+    "commonMistake": "final 可指最终阶段或决赛；finally 是副词“最后、终于”，不能直接替换形容词 final。",
+    "example": {
+      "english": "Our final project is due next Friday.",
+      "chinese": "我们的期末项目下周五到期。"
+    },
+    "application": {
+      "prompt": "After winning every match, the team reached the ___. A. confidence B. final",
+      "solution": "B。解析：比赛中的最后阶段或决赛叫 the final。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: final",
+        "url": "https://dictionary.cambridge.org/dictionary/english/final"
+      }
+    ]
+  },
+  {
+    "word": "confidence",
+    "examTags": [
+      "词汇·名词派生与情绪",
+      "语法·不可数名词与介词"
+    ],
+    "grammar": "n. 信心；信任。通常不可数；常用 confidence in sb/sth；形容词为 confident。",
+    "collocations": "have confidence in yourself; build confidence; speak with confidence",
+    "commonMistake": "confidence 是名词，confident 是形容词；表示对某人有信心用 confidence in。",
+    "example": {
+      "english": "Practice gave him confidence in his speaking skills.",
+      "chinese": "练习让他对自己的口语能力有了信心。"
+    },
+    "application": {
+      "prompt": "After several successful practices, she gained more ___. A. confidence B. confident",
+      "solution": "A。解析：more 后作名词用 confidence；confident 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: confidence",
+        "url": "https://dictionary.cambridge.org/dictionary/english/confidence"
+      }
+    ]
+  },
+  {
+    "word": "draw to a close",
+    "examTags": [
+      "词汇·结束与进程",
+      "语法·固定短语"
+    ],
+    "grammar": "phr. 即将结束；接近完成。常用 sth draw(s) to a close；过去式 draw 变为 drew。",
+    "collocations": "the meeting draws to a close; the year drew to a close; bring a discussion to a close",
+    "commonMistake": "draw to a close 表示某事逐渐结束；主语为单数时 draw 加 -s：The year draws...。",
+    "example": {
+      "english": "As the school year drew to a close, we reviewed our goals.",
+      "chinese": "随着学年接近尾声，我们回顾了自己的目标。"
+    },
+    "application": {
+      "prompt": "The meeting is almost over; it is ___ a ___. A. drawing; close B. taking; final",
+      "solution": "A。解析：draw to a close 表示“即将结束”，进行时为 drawing to a close。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: draw",
+        "url": "https://dictionary.cambridge.org/dictionary/english/draw"
+      }
+    ]
+  },
+  {
+    "word": "form",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与动词"
+    ],
+    "grammar": "v.（使）形成；组成；n. 类型；形式；表格。form a habit 表示养成习惯，fill in a form 表示填写表格。",
+    "collocations": "form a team; form a good habit; fill in a form",
+    "commonMistake": "form 可作“形成”动词，也可作“表格、形式”名词；动词形式过去式为 formed。",
+    "example": {
+      "english": "It takes time to form a healthy habit.",
+      "chinese": "养成一个健康的习惯需要时间。"
+    },
+    "application": {
+      "prompt": "Please write your name and address on this ___. A. bridge B. form",
+      "solution": "B。解析：填写个人信息用名词 form（表格）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: form",
+        "url": "https://dictionary.cambridge.org/dictionary/english/form"
+      }
+    ]
+  },
+  {
+    "word": "relationship",
+    "examTags": [
+      "词汇·人与人及事物联系",
+      "语法·名词与介词"
+    ],
+    "grammar": "n. 关系；联系。可数名词，复数 relationships；常用 relationship with sb 或 relationship between A and B。",
+    "collocations": "a close relationship; a relationship with a friend; the relationship between health and exercise",
+    "commonMistake": "两者之间的关系用 relationship between A and B；某人和某人的关系用 relationship with。",
+    "example": {
+      "english": "Exercise has a close relationship with good health.",
+      "chinese": "锻炼与良好的健康状况密切相关。"
+    },
+    "application": {
+      "prompt": "The ___ between sleep and learning is important. A. resolution B. relationship",
+      "solution": "B。解析：两种事物之间的联系用 relationship。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: relationship",
+        "url": "https://dictionary.cambridge.org/dictionary/english/relationship"
+      }
+    ]
+  },
+  {
+    "word": "push-up",
+    "examTags": [
+      "词汇·运动项目",
+      "语法·可数复合名词"
+    ],
+    "grammar": "n. 俯卧撑；可数名词，复数 push-ups。动词短语 do push-ups 表示做俯卧撑。",
+    "collocations": "do push-ups; ten push-ups; a set of push-ups",
+    "commonMistake": "表示多个俯卧撑用 push-ups；常用 do 作动词，不说 make push-ups。",
+    "example": {
+      "english": "He does ten push-ups before breakfast.",
+      "chinese": "他早餐前做十个俯卧撑。"
+    },
+    "application": {
+      "prompt": "For a simple strength exercise, she did five ___. A. push-up's B. push-ups",
+      "solution": "B。解析：push-up 的复数加 -s，表示多个俯卧撑。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: push-up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/push-up"
+      }
+    ]
+  },
+  {
+    "word": "energetic",
+    "examTags": [
+      "词汇·性格与状态",
+      "构词·名词派生形容词"
+    ],
+    "grammar": "adj. 精力充沛的；充满活力的。常作定语或表语；名词为 energy，副词为 energetically。",
+    "collocations": "an energetic student; feel energetic; an energetic performance",
+    "commonMistake": "energetic 是形容词；energy 是名词，energetically 是副词，注意词性和拼写。",
+    "example": {
+      "english": "A short walk makes me feel more energetic.",
+      "chinese": "短暂散步让我感觉更有活力。"
+    },
+    "application": {
+      "prompt": "After a good night's sleep, the children felt ___. A. energetic B. energy",
+      "solution": "A。解析：felt 后作表语用形容词 energetic；energy 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: energetic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/energetic"
+      }
+    ]
+  },
+  {
+    "word": "last but not least",
+    "examTags": [
+      "词汇·篇章表达",
+      "语用·列举与总结"
+    ],
+    "grammar": "phr. 最后但同等重要的。用于列举最后一点，提醒读者不要忽视其重要性，常置于句首并加逗号。",
+    "collocations": "Last but not least, ...; last but not least in importance; mention someone last but not least",
+    "commonMistake": "固定表达为 last but not least；least 前不加 the，通常后接逗号和最后一项内容。",
+    "example": {
+      "english": "Last but not least, remember to thank everyone who helped.",
+      "chinese": "最后但同样重要的是，别忘了感谢所有帮助过的人。"
+    },
+    "application": {
+      "prompt": "You have listed three reasons. To introduce one final important reason, say, “___, we should save time for rest.” A. One by one B. Last but not least",
+      "solution": "B。解析：last but not least 用于引出最后一项且强调其同样重要。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: least",
+        "url": "https://dictionary.cambridge.org/dictionary/english/least"
+      }
+    ]
+  }
+]

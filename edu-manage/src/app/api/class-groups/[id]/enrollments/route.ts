@@ -9,8 +9,9 @@ import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 import { normalizeEnrollmentSubjects, validateEnrollmentSubjects } from '@/lib/enrollment-subjects'
 import { createNotification } from '@/lib/notifications'
-import { chinaClock, isEditableSubjectRosterLesson } from '@/lib/enrollment-subject-change'
+import { chinaClock, isEditableSubjectRosterLesson, resolveLessonSubjectForEnrollment } from '@/lib/enrollment-subject-change'
 import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
+import { localDateColumnValue } from '@/lib/date/local-day'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,14 +26,28 @@ function trimmedMeanHours(hours: number[]) {
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  if (user.role !== 'admin' && user.role !== 'teacher') return NextResponse.json({ error: '无权限' }, { status: 403 })
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  const group = await prisma.classGroup.findFirst({
+    where: { id, term: { division: user.division }, ...visibleClassGroupWhere },
+    select: { id: true, teacherId: true, teacherAssignments: { select: { teacherId: true } } },
+  })
+  if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
+  if (user.role === 'teacher'
+    && (!user.teacherId
+      || (group.teacherId !== user.teacherId
+        && !group.teacherAssignments.some((assignment) => assignment.teacherId === user.teacherId)))) {
+    return NextResponse.json({ error: '无权查看此班级名单' }, { status: 403 })
+  }
   const enrollments = await prisma.enrollment.findMany({
-    where: { groupId: id, ...activeEnrollmentWhere },
+    where: { groupId: id, ...activeEnrollmentWhere, student: visibleStudentWhere },
     include: {
       student: {
-        select: { id: true, name: true, phone: true, grade: true, school: true, parentName: true, parentPhone: true },
+        select: user.role === 'admin'
+          ? { id: true, name: true, phone: true, grade: true, school: true, parentName: true, parentPhone: true }
+          : { id: true, name: true, grade: true, school: true },
       },
     },
     orderBy: { enrolledAt: 'asc' },
@@ -46,7 +61,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   const prisma = await getRequestPrisma()
 
   const { id } = await params
-  if (!await isClassGroupInActiveTerm(prisma, id)) {
+  if (!await isClassGroupInActiveTerm(prisma, id, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能调整学员名单' }, { status: 409 })
   }
   const body = await req.json()
@@ -64,7 +79,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     where: { id, ...visibleClassGroupWhere },
     include: {
       course: true,
-      teacherAssignments: { select: { subject: true } },
+      teacherAssignments: { select: { teacherId: true, subject: true } },
       teacher: { select: { name: true } },
       room: { select: { name: true } },
       classLessons: { orderBy: { lessonDate: 'asc' }, select: { id: true, lessonDate: true, startTime: true }, take: 1 },
@@ -87,6 +102,12 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   if (!validateEnrollmentSubjects(requestedSubjects, availableSubjects)) {
     return NextResponse.json({ error: '请至少选择一个该班级开设的学科' }, { status: 400 })
   }
+  const lessonMatchesRequestedSubject = (lesson: { subject: string | null; teacherId: string | null }) =>
+    requestedSubjects.includes(resolveLessonSubjectForEnrollment(lesson, {
+      teacherId: group.teacherId,
+      courseSubject: group.course.subject,
+      teacherAssignments: group.teacherAssignments,
+    }) || '')
 
   const student = await prisma.student.findFirst({
     where: { id: studentId, ...visibleStudentWhere },
@@ -120,17 +141,22 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
       where: {
         groupId: id,
         status: 'SCHEDULED',
-        subject: { in: requestedSubjects },
+        OR: [
+          { subject: { in: requestedSubjects } },
+          { subject: null },
+        ],
         deletedAt: null,
         attendanceSubmittedAt: null,
         hoursDeductedAt: null,
         lessonDate: { gte: new Date(`${day}T00:00:00.000Z`) },
       },
-      select: { lessonDate: true, startTime: true },
+      select: { lessonDate: true, startTime: true, subject: true, teacherId: true },
     })
-    const remainingLessonCount = remainingLessons.filter((lesson) => isEditableSubjectRosterLesson({
-      ...lesson, hasAttendance: false, hasFeedback: false,
-    }, now)).length
+    const remainingLessonCount = remainingLessons.filter((lesson) =>
+      lessonMatchesRequestedSubject(lesson) && isEditableSubjectRosterLesson({
+        ...lesson, hasAttendance: false, hasFeedback: false,
+      }, now),
+    ).length
     if (remainingLessonCount > 0) {
       hours = roundHours(remainingLessonCount * hoursPerLesson(group.lessonMinutes))
     } else {
@@ -185,15 +211,20 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         lessonDate: { gte: new Date(`${day}T00:00:00.000Z`) },
         status: 'SCHEDULED',
         deletedAt: null,
-        subject: { in: requestedSubjects },
+        OR: [
+          { subject: { in: requestedSubjects } },
+          { subject: null },
+        ],
         attendanceSubmittedAt: null,
         hoursDeductedAt: null,
       },
-      select: { id: true, lessonDate: true, startTime: true },
+      select: { id: true, lessonDate: true, startTime: true, subject: true, teacherId: true },
     })
-    const eligibleLessons = futureLessons.filter((lesson) => isEditableSubjectRosterLesson({
-      ...lesson, hasAttendance: false, hasFeedback: false,
-    }, now))
+    const eligibleLessons = futureLessons.filter((lesson) =>
+      lessonMatchesRequestedSubject(lesson) && isEditableSubjectRosterLesson({
+        ...lesson, hasAttendance: false, hasFeedback: false,
+      }, now),
+    )
     if (eligibleLessons.length) {
       await tx.classLessonStudent.createMany({
         data: eligibleLessons.map((lesson) => ({ lessonId: lesson.id, studentId })),
@@ -248,7 +279,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   const prisma = await getRequestPrisma()
 
   const { id } = await params
-  if (!await isClassGroupInActiveTerm(prisma, id)) {
+  if (!await isClassGroupInActiveTerm(prisma, id, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能调整学员名单' }, { status: 409 })
   }
   const { searchParams } = new URL(req.url)
@@ -268,12 +299,20 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
     })
 
     // 退班快照：仅移除当天及以后未考勤课次的学员名单；历史课次保留（属于教学档案）
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
+    const todayStart = localDateColumnValue(new Date())
     await tx.classLessonStudent.deleteMany({
       where: {
         studentId: enrollment.studentId,
-        lesson: { groupId: id, lessonDate: { gte: todayStart } },
+        lesson: {
+          groupId: id,
+          lessonDate: { gte: todayStart },
+          status: 'SCHEDULED',
+          deletedAt: null,
+          attendanceSubmittedAt: null,
+          hoursDeductedAt: null,
+          attendances: { none: {} },
+          classroomFeedbacks: { none: { deletedAt: null } },
+        },
       },
     })
 

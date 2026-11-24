@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
+import { requireSingleSessionActor } from '@/lib/classroom-feedback/single-session-actor'
 import { resolveTeacherFeedbackCreationScope } from '@/lib/classroom-feedback/access'
 import { splitStudentObservationFragments } from '@/lib/classroom-feedback/student-observation-matching'
 import { AIProviderError, callDeepSeek, callDoubao, callKimi } from '@/lib/ai/client'
@@ -10,6 +11,9 @@ import { resolveTextbookCatalogSelectionValues } from '@/lib/classroom-feedback/
 import { getSelectedTextbookKnowledgeReferences } from '@/lib/classroom-feedback/textbook-knowledge-references'
 import { normalizeTextbookGrade, textbookEdition } from '@/lib/classroom-feedback/textbook-editions'
 import { checkTeacherAiRateLimit } from '@/lib/teacher-ai-rate-limit'
+import { getTeacherFeedbackSubjects } from '@/lib/classroom-feedback/teacher-subjects'
+import { MANUAL_SINGLE_SESSION_STUDENT_ID, resolveStandaloneFeedbackStudents, resolveStandaloneFeedbackTeacher } from '@/lib/classroom-feedback/single-session-scope'
+import { getTeacherSupportTags } from '@/lib/classroom-feedback/personalized-learning'
 import {
   aiProviderLabel,
   anonymizeAndRedactContacts,
@@ -30,30 +34,80 @@ import {
 export const dynamic = 'force-dynamic'
 
 export const POST = apiHandler(async (req: NextRequest) => {
-  const { teacher, prisma } = await requireCurrentTeacher()
   const body = await req.json() as Record<string, unknown>
+  const isSingleSession = body.isSingleSession === true
+  const currentActor = isSingleSession ? null : await requireCurrentTeacher()
+  const standaloneActor = isSingleSession
+    ? await requireSingleSessionActor(typeof body.singleSessionTeacherId === 'string' ? body.singleSessionTeacherId : null)
+    : null
+  const teacher = standaloneActor?.selectedTeacher || currentActor?.teacher
+  const prisma = standaloneActor?.prisma || currentActor!.prisma
+  if (!teacher) return NextResponse.json({ error: '请选择本学部内的授课老师' }, { status: 403 })
   const ids = Array.isArray(body.studentIds) ? body.studentIds.filter((value): value is string => typeof value === 'string') : []
   const mode = body.mode === 'followup' ? 'followup' : 'generate'
   const classroomOnlyStudentIds = mode === 'generate' && Array.isArray(body.classroomOnlyStudentIds)
     ? new Set(body.classroomOnlyStudentIds.filter((value): value is string => typeof value === 'string'))
     : new Set<string>()
   if (ids.length < 1 || ids.length > 5 || new Set(ids).size !== ids.length) {
-    return NextResponse.json({ error: '请勾选 1 至 5 名学生后使用 AI 助手' }, { status: 400 })
+    return NextResponse.json({ error: '请勾选 1 至 5 名学生后整理反馈草稿' }, { status: 400 })
   }
   const userInput = typeof body.userInput === 'string' ? body.userInput.trim().slice(0, CHAT_USER_INPUT_MAX) : ''
+  const isManualSingleSession = isSingleSession && body.singleSessionManual === true
+  const singleSessionTeacherId = typeof body.singleSessionTeacherId === 'string' && body.singleSessionTeacherId.trim()
+    ? body.singleSessionTeacherId.trim()
+    : teacher.id
+  const manualStudentName = typeof body.singleSessionStudentName === 'string' ? body.singleSessionStudentName.trim().slice(0, 60) : ''
+  const manualStudentGrade = typeof body.singleSessionGrade === 'string' ? body.singleSessionGrade.trim() : ''
+  const subject = typeof body.subject === 'string' ? body.subject.trim().slice(0, 30) : ''
   if (userInput.replace(/\s/g, '').length < 2) {
     return NextResponse.json({ error: '请输入课堂要点或修改要求' }, { status: 400 })
   }
 
-  const scope = await resolveTeacherFeedbackCreationScope(prisma, {
-    teacherId: teacher.id,
-    classLessonId: typeof body.classLessonId === 'string' ? body.classLessonId : null,
-    feedbackGroupId: typeof body.groupId === 'string' ? body.groupId : null,
-    requestedStudentIds: ids,
-    requestedSubject: typeof body.subject === 'string' ? body.subject : null,
-  })
-  if (!scope.allowed || scope.students.length !== ids.length) {
-    return NextResponse.json({ error: '所选学生不属于当前教师的这节课或该学科，请重新选择' }, { status: 403 })
+  let scopeStudents: Array<{ id: string; name: string; parentId: string | null; parentUserId: string | null; grade?: string | null }>
+  if (isSingleSession) {
+    const hasClassLink = (typeof body.classLessonId === 'string' && Boolean(body.classLessonId.trim()))
+      || (typeof body.groupId === 'string' && Boolean(body.groupId.trim()))
+    if (hasClassLink) return NextResponse.json({ error: '单次课程反馈不能关联班级或课堂课次' }, { status: 400 })
+    const feedbackTeacher = await resolveStandaloneFeedbackTeacher(prisma, teacher, singleSessionTeacherId)
+    if (!feedbackTeacher) return NextResponse.json({ error: '所选授课老师不存在或不属于当前学部' }, { status: 403 })
+    const subjectAllowed = subject && (await getTeacherFeedbackSubjects(prisma, feedbackTeacher)).includes(subject)
+    if (!subjectAllowed) return NextResponse.json({ error: '当前教师没有该学科的单次反馈权限，请重新选择学科' }, { status: 403 })
+
+    if (isManualSingleSession) {
+      if (ids.length !== 1 || ids[0] !== MANUAL_SINGLE_SESSION_STUDENT_ID || manualStudentName.length < 2
+        || !['初一', '初二', '初三', '高一', '高二', '高三'].includes(manualStudentGrade)) {
+        return NextResponse.json({ error: '请重新确认手动学员姓名、年级和单次课程信息' }, { status: 400 })
+      }
+      scopeStudents = [{ id: ids[0], name: manualStudentName, parentId: null, parentUserId: null, grade: manualStudentGrade }]
+    } else {
+      const standaloneStudents = await resolveStandaloneFeedbackStudents(prisma, teacher, ids)
+      if (!standaloneStudents) return NextResponse.json({ error: '请选择本学部中已绑定家长账号的学员，或改用手动填写姓名' }, { status: 403 })
+      scopeStudents = standaloneStudents
+    }
+  } else {
+    const scope = await resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: teacher.id,
+      classLessonId: typeof body.classLessonId === 'string' ? body.classLessonId : null,
+      feedbackGroupId: typeof body.groupId === 'string' ? body.groupId : null,
+      requestedStudentIds: ids,
+      isSingleSession: false,
+      requireLesson: true,
+      requireAttendanceSubmitted: true,
+      requestedSubject: typeof body.subject === 'string' ? body.subject : null,
+    })
+    if (!scope.allowed || scope.students.length !== ids.length) {
+      if (scope.reason === 'lesson-required') {
+        return NextResponse.json({ error: '请先选择具体课次并完成考勤，再生成本节课反馈' }, { status: 409 })
+      }
+      if (scope.reason === 'attendance-required') {
+        return NextResponse.json({ error: '本节课考勤尚未提交，完成考勤后才能生成反馈' }, { status: 409 })
+      }
+      if (scope.reason === 'blocked') {
+        return NextResponse.json({ error: '该学员本节课已请假或未到校，不能生成课堂反馈' }, { status: 409 })
+      }
+      return NextResponse.json({ error: '所选学生不属于当前教师的这节课或该学科，请重新选择' }, { status: 403 })
+    }
+    scopeStudents = scope.students
   }
 
   const provider = resolveAIProvider()
@@ -67,18 +121,19 @@ export const POST = apiHandler(async (req: NextRequest) => {
     : {}
   const selected: ChatStudent[] = ids.map((id) => ({
     id,
-    name: scope.students.find((student) => student.id === id)?.name || '学生',
+    name: scopeStudents.find((student) => student.id === id)?.name || '学生',
     observation: typeof observations[id] === 'string' ? observations[id].trim().slice(0, 350) : '',
   }))
   // 把姓名对应的个人表现从共享课堂内容中拆出，避免反馈张冠李戴。
-  const { sharedLessonNote: mentionStrippedNote, observationFragments } = splitStudentObservationFragments(userInput, scope.students)
+  const { sharedLessonNote: mentionStrippedNote, observationFragments } = splitStudentObservationFragments(userInput, scopeStudents)
   for (const [studentId, rows] of observationFragments) {
     const target = selected.find((student) => student.id === studentId)
     if (target) target.observation = [target.observation, ...rows].filter(Boolean).join('；').slice(0, 350)
   }
-  const subject = typeof body.subject === 'string' ? body.subject.slice(0, 30) : ''
-  const gradeRows = await prisma.student.findMany({ where: { id: { in: ids } }, select: { id: true, grade: true } })
-  const grades = [...new Set(gradeRows.map((row) => normalizeTextbookGrade(row.grade)).filter(Boolean))]
+  const gradeRows = isSingleSession
+    ? scopeStudents
+    : await prisma.student.findMany({ where: { id: { in: ids } }, select: { id: true, grade: true } })
+  const grades = [...new Set(gradeRows.map((row) => normalizeTextbookGrade(row.grade || '')).filter(Boolean))]
   if (grades.length !== 1) {
     return NextResponse.json({ error: '请选择同一年级且已填写年级的学生，以便匹配教材版本' }, { status: 400 })
   }
@@ -131,6 +186,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         observation: anonymize(student.observation) || '教师未提供个人课堂观察，不能推断个人表现或掌握程度',
         mastery: mastery || undefined,
         tags: rawTagList,
+        teachingActions: getTeacherSupportTags(rawTagList),
       }
     }),
   }
@@ -162,12 +218,20 @@ export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const knowledgeCandidates = getRelevantKnowledgePointCandidates(subject, grade, knowledgeLessonNote, selectedTextbookChapters)
     const textbookKnowledgeReferences = getSelectedTextbookKnowledgeReferences(subject, grade, textbookSelections)
+    const rawTopicCorrection = body.topicCorrection && typeof body.topicCorrection === 'object'
+      ? body.topicCorrection as Record<string, unknown>
+      : null
+    const correctionLessonTopic = typeof rawTopicCorrection?.lessonTopic === 'string' ? rawTopicCorrection.lessonTopic.trim().slice(0, 80) : ''
+    const correctionPreviousTopic = typeof rawTopicCorrection?.previousTopic === 'string' ? rawTopicCorrection.previousTopic.trim().slice(0, 80) : ''
     const chatInput: ChatModelInput = {
       mode,
       subject,
       grade,
       edition,
       lessonNote: input.lessonNote,
+      topicCorrection: correctionLessonTopic && correctionPreviousTopic
+        ? { lessonTopic: correctionLessonTopic, previousTopic: correctionPreviousTopic }
+        : undefined,
       selectedTextbookChapters,
       textbookKnowledgeReferences,
       verifiedCard,
@@ -182,7 +246,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const aiLimit = await checkTeacherAiRateLimit(teacher.id)
     if (!aiLimit.allowed) {
       return NextResponse.json(
-        { error: 'AI 助手使用较频繁，请稍后再试；已输入内容仍会保留' },
+        { error: '学堂数据库整理服务较频繁，请稍后再试；已输入内容仍会保留' },
         { status: 429, headers: aiLimit.retryAfter ? { 'Retry-After': String(aiLimit.retryAfter) } : {} },
       )
     }
@@ -279,7 +343,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       try {
         ok.push(parseSingleArticle(articleRaws[index] || '', target.student, target.key))
       } catch (error) {
-        failed.push({ studentId: target.student.id, error: error instanceof Error ? error.message : 'AI 生成失败，请重试' })
+        failed.push({ studentId: target.student.id, error: error instanceof Error ? error.message : '反馈草稿生成失败，请重试' })
       }
     })
 

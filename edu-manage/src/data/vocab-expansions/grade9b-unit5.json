@@ -1,0 +1,422 @@
+[
+  {
+    "word": "graduation",
+    "examTags": ["词汇·名词派生", "写作·校园生活"],
+    "grammar": "n. 毕业；毕业典礼。常用 graduation ceremony；graduate from 表示“从……毕业”，graduate 是动词或“毕业生”。",
+    "collocations": "graduation ceremony; after graduation; graduate from high school",
+    "commonMistake": "graduation 是名词；表达“毕业后”用 after graduation，而“毕业于某校”用 graduate from，不能把 graduation 当作动词。",
+    "example": {"english": "After graduation, Mei plans to study engineering at university.", "chinese": "毕业后，梅计划在大学学习工程。"},
+    "application": {"prompt": "After finishing high school, Mei celebrated her ___. A. pronunciation B. graduation", "solution": "B。解析：完成高中学业并庆祝的是 graduation（毕业）；pronunciation 是发音。"},
+    "sources": [{"label": "Cambridge Dictionary: graduation", "url": "https://dictionary.cambridge.org/dictionary/english/graduation"}]
+  },
+  {
+    "word": "vote",
+    "examTags": ["词汇·名词与动词", "语法·介词搭配"],
+    "grammar": "v. 投票；n. 选票、投票。过去式和过去分词为 voted；vote for/against sb or sth 表示投票支持/反对。",
+    "collocations": "vote for a class leader; vote against the plan; cast a vote",
+    "commonMistake": "说“为某人投票”用 vote for；vote 后接人或方案时不要漏掉 for。",
+    "example": {"english": "Our class will vote for a student to lead the graduation project.", "chinese": "我们班将投票选出一名学生来负责毕业项目。"},
+    "application": {"prompt": "The class chose Mia to represent them. They voted ___ her. A. at B. for", "solution": "B。解析：投票支持某人用 vote for；句中 her 指被选出的代表。"},
+    "sources": [{"label": "Cambridge Dictionary: vote", "url": "https://dictionary.cambridge.org/dictionary/english/vote"}]
+  },
+  {
+    "word": "leader",
+    "examTags": ["词汇·名词派生", "写作·人物品质"],
+    "grammar": "n. 领导者；领袖。由动词 lead 加 -er 构成；lead 的过去式为 led，名词 leadership 表示领导力。",
+    "collocations": "a team leader; a natural leader; show leadership",
+    "commonMistake": "leader 指带领团队的人，lead 是“带领”这一动作；注意 lead 的过去式写作 led，不是 leaded。",
+    "example": {"english": "A good leader listens to every member of the team.", "chinese": "好的领导者会倾听团队每一位成员的意见。"},
+    "application": {"prompt": "She organizes the group and helps everyone work together, so she is a ___. A. listener B. leader", "solution": "B。解析：组织团队并带领大家合作的人是 leader（领导者）。"},
+    "sources": [{"label": "Cambridge Dictionary: leader", "url": "https://dictionary.cambridge.org/dictionary/english/leader"}]
+  },
+  {
+    "word": "presentation",
+    "examTags": ["词汇·名词派生", "语法·动词搭配"],
+    "grammar": "n. 介绍；展示；演讲。可数；常用 give/make a presentation；动词 present 表示介绍或展示。",
+    "collocations": "give a presentation; a short presentation on science; presentation skills",
+    "commonMistake": "presentation 是可数名词，表示一次展示时要用 a；常说 give a presentation，而不是 make a speech on every context。",
+    "example": {"english": "Lily gave a presentation about her plan for the future.", "chinese": "莉莉介绍了她的未来计划。"},
+    "application": {"prompt": "Each student will ___ a presentation about a career they like. A. make B. do", "solution": "A。解析：常用搭配是 make a presentation，意为作介绍或展示。"},
+    "sources": [{"label": "Cambridge Dictionary: presentation", "url": "https://dictionary.cambridge.org/dictionary/english/presentation"}]
+  },
+  {
+    "word": "lifelong",
+    "examTags": ["词汇·形容词", "写作·学习与成长"],
+    "grammar": "adj. 终身的；毕生的，通常放在名词前作定语。可构成 lifelong learning（终身学习）和 a lifelong friend（终生朋友）。",
+    "collocations": "lifelong learning; a lifelong dream; a lifelong friend",
+    "commonMistake": "lifelong 是形容词，表示持续一生；不要写成 life-long，也不要把它误当副词修饰动词。",
+    "example": {"english": "Reading can be a lifelong source of joy.", "chinese": "阅读可以成为一生的快乐源泉。"},
+    "application": {"prompt": "She has loved music since childhood and hopes to keep learning about it all her life. Music is her ___ interest. A. weekly B. lifelong", "solution": "B。解析：从童年持续一生的兴趣是 lifelong interest（终身的兴趣）。"},
+    "sources": [{"label": "Cambridge Dictionary: lifelong", "url": "https://dictionary.cambridge.org/dictionary/english/lifelong"}]
+  },
+  {
+    "word": "projector",
+    "examTags": ["词汇·名词派生", "阅读·课堂设备"],
+    "grammar": "n. 放映机；投影仪。可数名词，复数为 projectors；由 project（投射、展示）加 -or 构成。",
+    "collocations": "a digital projector; use a projector; project an image onto a screen",
+    "commonMistake": "projector 是设备，project 可作动词表示把图像投到屏幕上；不要将二者的词性混用。",
+    "example": {"english": "We used a projector to show our photos on the classroom screen.", "chinese": "我们用投影仪把照片放映在教室屏幕上。"},
+    "application": {"prompt": "The teacher connected the computer to a ___ to display the slides on the wall. A. printer B. projector", "solution": "B。解析：把幻灯片投到墙面上需要 projector（投影仪）。"},
+    "sources": [{"label": "Cambridge Dictionary: projector", "url": "https://dictionary.cambridge.org/dictionary/english/projector"}]
+  },
+  {
+    "word": "vocational",
+    "examTags": ["词汇·形容词派生", "阅读·教育与职业"],
+    "grammar": "adj. 职业的；职业技术的，常修饰 education、training 或 school。名词 vocation 指职业或使命感。",
+    "collocations": "vocational education; vocational training; vocational school",
+    "commonMistake": "vocational 是形容词，修饰教育或培训；表示“职业”这个名词时用 vocation，二者不能直接互换。",
+    "example": {"english": "The school offers vocational training in cooking and car repair.", "chinese": "这所学校提供烹饪和汽车维修方面的职业培训。"},
+    "application": {"prompt": "Students learn practical skills for a trade at a ___ school. A. vocal B. vocational", "solution": "B。解析：教授职业技能的学校是 vocational school（职业学校）；vocal 表示声音的。"},
+    "sources": [{"label": "Cambridge Dictionary: vocational", "url": "https://dictionary.cambridge.org/dictionary/english/vocational"}]
+  },
+  {
+    "word": "whatever",
+    "examTags": ["词汇·复合关系代词", "语法·让步与名词从句"],
+    "grammar": "pron. 无论什么；……的一切；det. 任何……。可引导名词性从句或让步状语从句，如 whatever you choose、whatever happens。",
+    "collocations": "whatever happens; do whatever you can; whatever the reason",
+    "commonMistake": "whatever 可表示“无论什么”，后面常接完整句子；它不等于 however（无论怎样），不要把两者混用。",
+    "example": {"english": "Whatever job she chooses, she will keep learning new skills.", "chinese": "无论她选择什么工作，她都会继续学习新技能。"},
+    "application": {"prompt": "___ happens on the journey, stay with the group and follow the guide. A. Whatever B. However", "solution": "A。解析：从句缺少“发生的事情”作主语，用 whatever；however 表示“无论怎样”。"},
+    "sources": [{"label": "Cambridge Dictionary: whatever", "url": "https://dictionary.cambridge.org/dictionary/english/whatever"}]
+  },
+  {
+    "word": "path",
+    "examTags": ["词汇·可数名词", "阅读·道路与人生选择"],
+    "grammar": "n. 小路；路线；道路。可数，复数为 paths；path to/towards sth 也可表示通往某目标的途径。",
+    "collocations": "a narrow path; a path through the forest; the path to success",
+    "commonMistake": "path 是可数名词，单数前通常要有 a/the；表示“成功之路”常用 the path to success。",
+    "example": {"english": "A clear study plan can put you on the path to success.", "chinese": "明确的学习计划能让你走上成功之路。"},
+    "application": {"prompt": "The sign points to a narrow ___ through the forest. A. path B. cloud", "solution": "A。解析：穿过森林的小路是 path；句中 narrow 修饰可数名词。"},
+    "sources": [{"label": "Cambridge Dictionary: path", "url": "https://dictionary.cambridge.org/dictionary/english/path"}]
+  },
+  {
+    "word": "mainly",
+    "examTags": ["词汇·副词派生", "语法·副词位置"],
+    "grammar": "adv. 主要地；大部分地。由形容词 main 加 -ly 构成；常放在实义动词前或 be 动词后。",
+    "collocations": "mainly because; mainly based on; mainly used for",
+    "commonMistake": "mainly 是副词，修饰动词、形容词或整句；main 是形容词，如 the main reason，不能在名词前误用 mainly。",
+    "example": {"english": "The course is mainly for students who want to learn design.", "chinese": "这门课程主要面向想学习设计的学生。"},
+    "application": {"prompt": "The club is ___ made up of students from Grade Nine. A. main B. mainly", "solution": "B。解析：空格处修饰 made up，需用副词 mainly（主要地）。"},
+    "sources": [{"label": "Cambridge Dictionary: mainly", "url": "https://dictionary.cambridge.org/dictionary/english/mainly"}]
+  },
+  {
+    "word": "silent",
+    "examTags": ["词汇·形容词", "语法·系表结构"],
+    "grammar": "adj. 沉默的；无声的。可作表语或定语；silence 是名词，silently 是副词。",
+    "collocations": "keep/remain silent; a silent room; silent about the problem",
+    "commonMistake": "keep silent 表示保持沉默；silence 是名词，不能说 keep silence 来表达常见的“保持安静”。",
+    "example": {"english": "The room became silent as the principal began to speak.", "chinese": "校长开始讲话时，房间里安静了下来。"},
+    "application": {"prompt": "When the announcement began, everyone stopped talking and stayed ___. A. silent B. silence", "solution": "A。解析：stay 是系动词，后接形容词 silent（沉默的、安静的）。"},
+    "sources": [{"label": "Cambridge Dictionary: silent", "url": "https://dictionary.cambridge.org/dictionary/english/silent"}]
+  },
+  {
+    "word": "pronounce",
+    "examTags": ["词汇·动词", "语法·词形派生"],
+    "grammar": "v. 发音；读（音）。pronunciation 是名词；pronounce a word correctly 表示把一个词读正确。",
+    "collocations": "pronounce a name; pronounce the word correctly; difficult to pronounce",
+    "commonMistake": "动词是 pronounce，名词是 pronunciation；名词中多出一个 i，并且重音位置也不同。",
+    "example": {"english": "Could you pronounce this new word slowly for me?", "chinese": "你能为我慢慢读一下这个新单词吗？"},
+    "application": {"prompt": "I know the meaning of her surname, but I don't know how to ___ it. A. pronunciation B. pronounce", "solution": "B。解析：how to 后接动词原形，句意是“不知道怎么读这个姓氏”，用 pronounce。"},
+    "sources": [{"label": "Cambridge Dictionary: pronounce", "url": "https://dictionary.cambridge.org/dictionary/english/pronounce"}]
+  },
+  {
+    "word": "abroad",
+    "examTags": ["词汇·地点副词", "语法·副词与介词辨析"],
+    "grammar": "adv. 在国外；到国外。常用 go/study/live abroad；abroad 前通常不加 to 或 in。",
+    "collocations": "study abroad; travel abroad; from abroad",
+    "commonMistake": "abroad 是地点副词，说“去国外”用 go abroad，不说 go to abroad；“在国外”也通常不说 in abroad。",
+    "example": {"english": "My cousin hopes to study abroad after she graduates.", "chinese": "我表姐希望毕业后出国留学。"},
+    "application": {"prompt": "Tom received a scholarship and plans to study ___ next year. A. abroad B. foreign", "solution": "A。解析：study 后用地点副词 abroad（在国外）；foreign 是形容词，需修饰名词。"},
+    "sources": [{"label": "Cambridge Dictionary: abroad", "url": "https://dictionary.cambridge.org/dictionary/english/abroad"}]
+  },
+  {
+    "word": "graduate",
+    "examTags": ["词汇·名词与动词", "语法·介词搭配"],
+    "grammar": "v. 毕业；n. 毕业生。作动词时常用 graduate from a school/university；第三人称单数 graduates，过去式 graduated。",
+    "collocations": "graduate from university; a recent graduate; graduate with a degree",
+    "commonMistake": "graduate from 表示“从某校毕业”；不要用 graduate a school 表示毕业于某校。",
+    "example": {"english": "He graduated from university last year and found a job in a hospital.", "chinese": "他去年大学毕业，并在一家医院找到工作。"},
+    "application": {"prompt": "After four years of study, Nina will ___ from university in June. A. graduation B. graduate", "solution": "B。解析：will 后接动词原形；graduate from 表示“从大学毕业”。"},
+    "sources": [{"label": "Cambridge Dictionary: graduate", "url": "https://dictionary.cambridge.org/dictionary/english/graduate"}]
+  },
+  {
+    "word": "continuous",
+    "examTags": ["词汇·形容词派生", "语法·形容词与副词"],
+    "grammar": "adj. 连续的；持续不断的，强调中间没有间断。副词为 continuously；名词 continuity 表示连续性。",
+    "collocations": "continuous rain; continuous improvement; continuous process",
+    "commonMistake": "continuous 强调没有中断；副词要写 continuously。不要把形容词 continuous 直接放在动词后作方式状语。",
+    "example": {"english": "The machine needs a continuous supply of clean water.", "chinese": "这台机器需要持续不断的清洁供水。"},
+    "application": {"prompt": "The river provides a ___ flow of water throughout the year. A. continuous B. occasional", "solution": "A。解析：全年不断的水流是 continuous flow；occasional 表示偶尔发生的。"},
+    "sources": [{"label": "Cambridge Dictionary: continuous", "url": "https://dictionary.cambridge.org/dictionary/english/continuous"}]
+  },
+  {
+    "word": "madam",
+    "examTags": ["词汇·称呼用语", "写作·正式交际"],
+    "grammar": "n. 女士；夫人。Madam 可用于正式称呼不知姓名的女性，信件开头常见 Dear Madam；普通对话中多用 Ms 加姓氏。",
+    "collocations": "Dear Madam; excuse me, madam; ladies and gentlemen",
+    "commonMistake": "Madam 用作正式称呼时常单独使用或放在信件称呼中；已知对方姓名时通常用 Ms + 姓氏。",
+    "example": {"english": "Dear Madam, I am writing to ask about the evening course.", "chinese": "尊敬的女士：我写信想咨询晚间课程的情况。"},
+    "application": {"prompt": "You are writing a formal letter to a woman whose name you do not know. Begin with “Dear ___”. A. Madam B. Misses", "solution": "A。解析：正式信件中不知女性姓名时可用 Dear Madam；Misses 不是这样的称呼。"},
+    "sources": [{"label": "Cambridge Dictionary: madam", "url": "https://dictionary.cambridge.org/dictionary/english/madam"}]
+  },
+  {
+    "word": "translate",
+    "examTags": ["词汇·动词", "语法·介词与词形"],
+    "grammar": "v. 翻译；把……译成……。常用 translate sth from A into B；名词 translation，译者为 translator。",
+    "collocations": "translate a poem; translate from Chinese into English; machine translation",
+    "commonMistake": "表达“把A译成B”用 translate A into B；into 后接译成的目标语言，不要与 from 的来源语言颠倒。",
+    "example": {"english": "The students translated the story from English into Chinese.", "chinese": "学生们把这个故事从英语翻译成了中文。"},
+    "application": {"prompt": "We need to translate this notice ___ English into French. A. into B. from", "solution": "B。解析：表示来源语言用 from，目标语言前用 into；句意为“从英语译成法语”。"},
+    "sources": [{"label": "Cambridge Dictionary: translate", "url": "https://dictionary.cambridge.org/dictionary/english/translate"}]
+  },
+  {
+    "word": "part-time",
+    "examTags": ["词汇·复合形容词", "写作·工作与学习"],
+    "grammar": "adj. 兼职的；部分时间的，常作定语修饰 job、work 或 student。作副词短语时也常写 work part time。",
+    "collocations": "a part-time job; part-time work; work part time",
+    "commonMistake": "名词前作定语时常写带连字符的 part-time job；用作副词时可写 work part time，注意词性和位置。",
+    "example": {"english": "She has a part-time job at a bookshop on weekends.", "chinese": "她周末在一家书店做兼职。"},
+    "application": {"prompt": "Because he is still at school, he works only a few hours a day in a ___. A. part-time job B. full-time job", "solution": "A。解析：每天只工作几个小时的工作是 part-time job（兼职工作）。"},
+    "sources": [{"label": "Cambridge Dictionary: part-time", "url": "https://dictionary.cambridge.org/dictionary/english/part-time"}]
+  },
+  {
+    "word": "full-time",
+    "examTags": ["词汇·复合形容词", "写作·工作与学习"],
+    "grammar": "adj. 全职的；全日制的，常修饰 job、work 或 student。作副词短语时常写 work full time。",
+    "collocations": "a full-time job; a full-time student; work full time",
+    "commonMistake": "full-time 作前置定语时通常加连字符；work full time 中 full time 作副词短语，不要把它写作 full-timely。",
+    "example": {"english": "After graduation, he hopes to find full-time work as a designer.", "chinese": "毕业后，他希望找到一份设计师全职工作。"},
+    "application": {"prompt": "She works from morning to evening five days a week, so she has a ___ position. A. part-time B. full-time", "solution": "B。解析：一周工作五天且从早到晚的岗位是 full-time（全职的）。"},
+    "sources": [{"label": "Cambridge Dictionary: full-time", "url": "https://dictionary.cambridge.org/dictionary/english/full-time"}]
+  },
+  {
+    "word": "senior",
+    "examTags": ["词汇·形容词", "语法·比较与介词搭配"],
+    "grammar": "adj. 年长的；级别较高的；高年级的。常用 senior student、senior manager；比较关系可说 senior to sb。",
+    "collocations": "a senior student; senior citizens; be senior to someone",
+    "commonMistake": "senior 表示“比某人年长/级别高”时用 senior to，不用 senior than；senior 本身不加 -er。",
+    "example": {"english": "As a senior student, Kai helps younger students prepare for exams.", "chinese": "作为一名高年级学生，凯帮助低年级学生备考。"},
+    "application": {"prompt": "Mr Green has worked here longer and holds a higher position. He is ___ to Mr Lee. A. senior B. more senior than", "solution": "A。解析：senior 表示级别更高时搭配 to，故用 senior to Mr Lee。"},
+    "sources": [{"label": "Cambridge Dictionary: senior", "url": "https://dictionary.cambridge.org/dictionary/english/senior"}]
+  },
+  {
+    "word": "technical",
+    "examTags": ["词汇·形容词派生", "阅读·技能与职业"],
+    "grammar": "adj. 技术的；技能的。常修饰 problem、skill、support；名词 technique 指技巧，technician 指技术人员。",
+    "collocations": "technical skills; technical support; a technical problem",
+    "commonMistake": "technical 是形容词，修饰名词；technically 是副词，表示“从技术角度看”，不能用 technically skills。",
+    "example": {"english": "The course teaches students the technical skills needed to repair computers.", "chinese": "这门课程教学生维修电脑所需的技术技能。"},
+    "application": {"prompt": "The machine stopped working, so we called the company for ___ support. A. technician B. technical", "solution": "B。解析：support 前需要形容词 technical（技术支持）；technician 是技术人员。"},
+    "sources": [{"label": "Cambridge Dictionary: technical", "url": "https://dictionary.cambridge.org/dictionary/english/technical"}]
+  },
+  {
+    "word": "grateful",
+    "examTags": ["词汇·形容词派生", "语法·介词搭配"],
+    "grammar": "adj. 感激的。常用 be grateful to sb for sth；也可接 to do 或 that 从句。名词为 gratitude。",
+    "collocations": "be grateful to someone; grateful for your help; deeply grateful",
+    "commonMistake": "感谢某人做了某事用 grateful to sb for sth；to 后接人，for 后接感谢的原因或帮助。",
+    "example": {"english": "I am grateful to my teacher for encouraging me to try again.", "chinese": "我很感激老师鼓励我再试一次。"},
+    "application": {"prompt": "We are grateful ___ our coach for staying late to help us. A. to B. for", "solution": "A。解析：感谢某人用 grateful to our coach；for 后面才接感谢的事情。"},
+    "sources": [{"label": "Cambridge Dictionary: grateful", "url": "https://dictionary.cambridge.org/dictionary/english/grateful"}]
+  },
+  {
+    "word": "encouragement",
+    "examTags": ["词汇·名词派生", "语法·动词不定式搭配"],
+    "grammar": "n. 鼓励；鼓舞。多作不可数名词；动词 encourage 常用 encourage sb to do sth，形容词为 encouraging。",
+    "collocations": "words of encouragement; give someone encouragement; encouragement to keep trying",
+    "commonMistake": "encouragement 通常不可数，不说 an encouragement 表示一次鼓励；“鼓励某人做某事”用 encourage sb to do。",
+    "example": {"english": "Her friends' encouragement helped her finish the difficult project.", "chinese": "朋友们的鼓励帮助她完成了这个困难的项目。"},
+    "application": {"prompt": "The teacher encouraged Ben ___ his idea at the meeting. A. sharing B. to share", "solution": "B。解析：固定结构是 encourage sb to do sth，句中 Ben 后接 to share。"},
+    "sources": [{"label": "Cambridge Dictionary: encouragement", "url": "https://dictionary.cambridge.org/dictionary/english/encouragement"}]
+  },
+  {
+    "word": "line of work",
+    "examTags": ["词汇·职业表达", "口语·询问职业"],
+    "grammar": "phr. 行业；职业领域。常用于 What line of work are you in?（你从事哪一行？）；line 在此表示领域或类型。",
+    "collocations": "in the same line of work; a different line of work; what line of work",
+    "commonMistake": "line of work 指职业领域，询问职业常说 What line of work are you in?；不要按字面理解为“工作中的一条线”。",
+    "example": {"english": "My aunt is in the same line of work as my mother; they are both nurses.", "chinese": "我姑姑和我妈妈从事同一行业；她们都是护士。"},
+    "application": {"prompt": "“What ___ are you in?” “I work in education.” A. line of work B. line of traffic", "solution": "A。解析：询问某人从事的行业用 What line of work are you in?，回答是教育行业。"},
+    "sources": [{"label": "Cambridge Dictionary: line", "url": "https://dictionary.cambridge.org/dictionary/english/line"}]
+  },
+  {
+    "word": "bear ... in mind",
+    "examTags": ["词汇·动词短语", "语法·that从句"],
+    "grammar": "phr. 记住；把……记在心中。可说 bear in mind that... 或 bear sth in mind；bear 的过去式为 bore，过去分词为 borne。",
+    "collocations": "bear in mind that; bear this advice in mind; keep in mind",
+    "commonMistake": "bear ... in mind 中间可放 this、the rule 等宾语；接完整句子时用 bear in mind that...，不要漏掉 that。",
+    "example": {"english": "Bear in mind that the library closes at six on Fridays.", "chinese": "记住，图书馆周五六点关门。"},
+    "application": {"prompt": "Please ___ in mind that the final page must include your name. A. bear B. carry", "solution": "A。解析：固定表达是 bear in mind that...，意为“记住……”。"},
+    "sources": [{"label": "Cambridge Dictionary: bear", "url": "https://dictionary.cambridge.org/dictionary/english/bear"}]
+  },
+  {
+    "word": "diligence",
+    "examTags": ["词汇·名词派生", "写作·学习品质"],
+    "grammar": "n. 勤勉；勤奋。通常不可数；形容词 diligent，副词 diligently。",
+    "collocations": "with diligence; diligence and patience; show diligence",
+    "commonMistake": "diligence 是名词，描述人的品质时可用 her diligence；形容词要用 diligent，如 a diligent student。",
+    "example": {"english": "With patience and diligence, he improved his English step by step.", "chinese": "凭着耐心和勤奋，他一步步提高了英语水平。"},
+    "application": {"prompt": "She checks every detail carefully and works hard each day. Her ___ impressed the teacher. A. diligent B. diligence", "solution": "B。解析：形容词性物主代词 her 后接名词 diligence（勤奋）。"},
+    "sources": [{"label": "Cambridge Dictionary: diligence", "url": "https://dictionary.cambridge.org/dictionary/english/diligence"}]
+  },
+  {
+    "word": "equally",
+    "examTags": ["词汇·副词派生", "语法·比较与分配"],
+    "grammar": "adv. 同样地；平等地。由 equal 加 -ly 构成；divide/share sth equally 表示平均分配。",
+    "collocations": "equally important; share equally; divide the work equally",
+    "commonMistake": "equally 是副词，修饰形容词或动作；名词前作定语时用 equal，如 equal chances，不用 equally chances。",
+    "example": {"english": "The students shared the work equally and finished before lunch.", "chinese": "学生们平均分担了工作，并在午饭前完成了。"},
+    "application": {"prompt": "The four teammates divided the tasks ___ so that no one had more work. A. equally B. equal", "solution": "A。解析：修饰动词 divided 用副词 equally，表示平均地分配。"},
+    "sources": [{"label": "Cambridge Dictionary: equally", "url": "https://dictionary.cambridge.org/dictionary/english/equally"}]
+  },
+  {
+    "word": "cherish",
+    "examTags": ["词汇·动词", "写作·情感表达"],
+    "grammar": "v. 珍视；珍爱；怀有（希望、回忆等）。第三人称单数 cherishes，过去式 cherished。",
+    "collocations": "cherish a memory; cherish the opportunity; cherish the hope",
+    "commonMistake": "cherish 后直接接珍视的人或事物，不用 cherish for；第三人称单数按以 sh 结尾的规则加 -es。",
+    "example": {"english": "I will always cherish the memories of our final year at school.", "chinese": "我会永远珍藏我们在校最后一年的回忆。"},
+    "application": {"prompt": "Although the trip ended years ago, we still ___ the happy memories. A. cherish B. refuse", "solution": "A。解析：仍然珍视快乐回忆用 cherish the memories。"},
+    "sources": [{"label": "Cambridge Dictionary: cherish", "url": "https://dictionary.cambridge.org/dictionary/english/cherish"}]
+  },
+  {
+    "word": "lemon",
+    "examTags": ["词汇·可数名词", "阅读·食物与味道"],
+    "grammar": "n. 柠檬。可数，复数为 lemons；表示柠檬汁常说 lemon juice，表示一片柠檬用 a slice of lemon。",
+    "collocations": "a slice of lemon; lemon juice; a sour lemon",
+    "commonMistake": "lemon 是可数名词，单数前要有冠词或限定词；lemon juice 中 lemon 作名词定语，juice 通常不可数。",
+    "example": {"english": "Add a slice of lemon to the tea to give it a fresh taste.", "chinese": "在茶里加一片柠檬，让味道更清新。"},
+    "application": {"prompt": "The tea tastes too sweet, so Dad adds a slice of ___. A. lemonade B. lemon", "solution": "B。解析：一片可切开的水果是 lemon（柠檬）；lemonade 指柠檬饮料。"},
+    "sources": [{"label": "Cambridge Dictionary: lemon", "url": "https://dictionary.cambridge.org/dictionary/english/lemon"}]
+  },
+  {
+    "word": "lemonade",
+    "examTags": ["词汇·饮料名词", "语法·不可数名词"],
+    "grammar": "n. 柠檬水；柠檬汽水。通常作不可数名词；表示一杯时可说 a glass of lemonade。",
+    "collocations": "a glass of lemonade; fresh lemonade; make lemonade",
+    "commonMistake": "lemonade 通常不可数，表示一杯要说 a glass of lemonade，不说 a lemonade water。",
+    "example": {"english": "We made fresh lemonade with lemons from the garden.", "chinese": "我们用园子里的柠檬做了新鲜柠檬水。"},
+    "application": {"prompt": "It is hot outside. Would you like a glass of ___? A. lemonade B. lemon", "solution": "A。解析：盛在杯中饮用的是 lemonade（柠檬水）；lemon 是柠檬这种水果。"},
+    "sources": [{"label": "Cambridge Dictionary: lemonade", "url": "https://dictionary.cambridge.org/dictionary/english/lemonade"}]
+  },
+  {
+    "word": "cheat",
+    "examTags": ["词汇·动词与名词", "语法·介词搭配"],
+    "grammar": "v. 欺骗；作弊；n. 骗子或作弊行为。常说 cheat in an exam/on a test；cheat sb 表示欺骗某人。",
+    "collocations": "cheat in an exam; cheat on a test; cheat someone out of money",
+    "commonMistake": "表示考试作弊可用 cheat in an exam 或 cheat on a test；cheat sb out of sth 表示骗走某人的东西。",
+    "example": {"english": "The student admitted that he had cheated on the test.", "chinese": "这名学生承认自己在考试中作弊了。"},
+    "application": {"prompt": "The teacher saw him looking at another student's paper during the exam. He was trying to ___. A. cheat B. graduate", "solution": "A。解析：考试时偷看他人答卷属于 cheat（作弊）。"},
+    "sources": [{"label": "Cambridge Dictionary: cheat", "url": "https://dictionary.cambridge.org/dictionary/english/cheat"}]
+  },
+  {
+    "word": "till",
+    "examTags": ["词汇·介词与连词", "语法·时间状语从句"],
+    "grammar": "prep. & conj. 直到……为止；在……以前。与 until 意思相同；作连词时后接完整从句。",
+    "collocations": "till tomorrow; wait till the bus arrives; from morning till night",
+    "commonMistake": "till 可作介词接时间点，也可作连词接完整句子；表示将来时的时间从句时通常用一般现在时。",
+    "example": {"english": "We waited till the rain stopped before walking home.", "chinese": "我们一直等到雨停才步行回家。"},
+    "application": {"prompt": "Stay here till your mother ___ to pick you up. A. will come B. comes", "solution": "B。解析：till 引导时间状语从句，指将来时从句用一般现在时 comes。"},
+    "sources": [{"label": "Cambridge Dictionary: till", "url": "https://dictionary.cambridge.org/dictionary/english/till"}]
+  },
+  {
+    "word": "inform",
+    "examTags": ["词汇·动词派生", "语法·宾语与介词搭配"],
+    "grammar": "v. 通知；告知。常用 inform sb of/about sth 或 inform sb that...；名词 information 通常不可数。",
+    "collocations": "inform someone of a change; inform the class that; keep someone informed",
+    "commonMistake": "inform sb of/about sth 表示把某事告知某人；information 不可数，不能说 an information。",
+    "example": {"english": "Please inform the office if your contact details change.", "chinese": "如果你的联系方式有变，请通知办公室。"},
+    "application": {"prompt": "The school will ___ parents of the new graduation date by email. A. inform B. information", "solution": "A。解析：will 后接动词原形；inform sb of sth 表示通知某人某事。"},
+    "sources": [{"label": "Cambridge Dictionary: inform", "url": "https://dictionary.cambridge.org/dictionary/english/inform"}]
+  },
+  {
+    "word": "vocation",
+    "examTags": ["词汇·名词", "语法·词形辨析"],
+    "grammar": "n. 职业；（尤指适合个人的）工作或使命。形容词 vocational 表示职业的；常与 career、calling 区分语境。",
+    "collocations": "choose a vocation; a vocation in teaching; vocational training",
+    "commonMistake": "vocation 指职业或使命感，vocational 是形容词；不要把 vocation 与 vacation（假期）混淆。",
+    "example": {"english": "Teaching became her vocation because she loved helping young people learn.", "chinese": "因为喜欢帮助年轻人学习，教书成了她的职业使命。"},
+    "application": {"prompt": "He wants a career helping sick people, so nursing may be the right ___. A. vacation B. vocation", "solution": "B。解析：适合个人的职业方向是 vocation；vacation 是假期。"},
+    "sources": [{"label": "Cambridge Dictionary: vocation", "url": "https://dictionary.cambridge.org/dictionary/english/vocation"}]
+  },
+  {
+    "word": "patience",
+    "examTags": ["词汇·名词派生", "语法·with与不定式搭配"],
+    "grammar": "n. 耐心；忍耐力。通常不可数；形容词 patient 常用于 be patient with sb，或 have the patience to do sth。",
+    "collocations": "have patience; be patient with children; the patience to listen",
+    "commonMistake": "patience 是名词，patient 是形容词或病人；说“对某人有耐心”用 be patient with sb。",
+    "example": {"english": "Learning to play the piano takes time and patience.", "chinese": "学习弹钢琴需要时间和耐心。"},
+    "application": {"prompt": "The teacher explained the rule again and again without getting angry. She was very ___ with us. A. patience B. patient", "solution": "B。解析：be 动词后作表语用形容词 patient；patience 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: patience", "url": "https://dictionary.cambridge.org/dictionary/english/patience"}]
+  },
+  {
+    "word": "honestly",
+    "examTags": ["词汇·副词派生", "语法·副词位置"],
+    "grammar": "adv. 诚实地；说真的。由 honest 加 -ly 构成；名词为 honesty。可修饰动词，也可用于句首表达坦率看法。",
+    "collocations": "answer honestly; speak honestly; honestly speaking",
+    "commonMistake": "honestly 是副词，修饰 answer、speak 等动词；描述人的品质要用 honest，如 an honest answer。",
+    "example": {"english": "Please answer honestly, even if you made a mistake.", "chinese": "即使你犯了错，也请如实回答。"},
+    "application": {"prompt": "The form asks you to describe your experience truthfully. Please answer ___. A. honestly B. honest", "solution": "A。解析：修饰动词 answer 要用副词 honestly，表示诚实地回答。"},
+    "sources": [{"label": "Cambridge Dictionary: honestly", "url": "https://dictionary.cambridge.org/dictionary/english/honestly"}]
+  },
+  {
+    "word": "fall behind",
+    "examTags": ["词汇·动词短语", "语法·动词变化与介词"],
+    "grammar": "phr. 落后；跟不上。过去式为 fell behind；常说 fall behind in a subject 或 fall behind schedule。",
+    "collocations": "fall behind in class; fall behind schedule; help someone catch up",
+    "commonMistake": "fall behind 的过去式为 fell behind；表达落后于进度可说 fall behind schedule 或 fall behind in class，不要误写 falled behind。",
+    "example": {"english": "If you miss too many lessons, you may fall behind in maths.", "chinese": "如果你缺课太多，数学可能会落下。"},
+    "application": {"prompt": "After missing two weeks of school, Leo had to work hard to ___ in science. A. fall behind B. catch up", "solution": "B。解析：努力追上进度用 catch up；fall behind 表示落后，语意相反。"},
+    "sources": [{"label": "Cambridge Dictionary: fall behind", "url": "https://dictionary.cambridge.org/dictionary/english/fall-behind"}]
+  },
+  {
+    "word": "achievable",
+    "examTags": ["词汇·形容词派生", "写作·目标与计划"],
+    "grammar": "adj. 可达到的；可实现的。由 achieve 加 -able 构成；名词 achievement，表示成就。",
+    "collocations": "an achievable goal; realistic and achievable; achievable target",
+    "commonMistake": "achievable 描述目标“能够实现”；achieved 是 achieve 的过去式或过去分词，表示“已经实现”，不要混用。",
+    "example": {"english": "Breaking a large task into small steps makes it more achievable.", "chinese": "把大任务分成小步骤会让它更容易完成。"},
+    "application": {"prompt": "A goal that you can reach with steady effort is ___. A. achievable B. impossible", "solution": "A。解析：通过持续努力能够达到的目标是 achievable（可实现的）。"},
+    "sources": [{"label": "Cambridge Dictionary: achievable", "url": "https://dictionary.cambridge.org/dictionary/english/achievable"}]
+  },
+  {
+    "word": "fellow",
+    "examTags": ["词汇·限定形容词", "语法·名词前修饰语"],
+    "grammar": "adj. 同伴的；同类的，常放在名词前，如 fellow student、fellow worker；也可作名词表示伙伴或同伴。",
+    "collocations": "a fellow student; fellow citizens; a fellow of the college",
+    "commonMistake": "作“同伴的”时 fellow 通常放在名词前，如 a fellow student；不要在 fellow 和该名词之间插入副词。",
+    "example": {"english": "A fellow student showed me where to find the science lab.", "chinese": "一位同学告诉我科学实验室在哪里。"},
+    "application": {"prompt": "Someone in the same class as you can be called a ___. A. fellow student B. foreign student", "solution": "A。解析：fellow student 指同伴或同班同学；foreign student 指外国学生。"},
+    "sources": [{"label": "Cambridge Dictionary: fellow", "url": "https://dictionary.cambridge.org/dictionary/english/fellow"}]
+  },
+  {
+    "word": "unforgettable",
+    "examTags": ["词汇·否定前缀与形容词", "写作·经历描述"],
+    "grammar": "adj. 难以忘怀的；令人难忘的。由 un- + forget + -able 构成；forgettable 表示容易被忘记的。",
+    "collocations": "an unforgettable experience; an unforgettable day; make a trip unforgettable",
+    "commonMistake": "unforgettable 表示“不会忘记的、令人难忘的”；forget 是动词，forgettable/unforgettable 是形容词。",
+    "example": {"english": "The school concert was an unforgettable experience for everyone.", "chinese": "这场校园音乐会是每个人都难以忘怀的一次经历。"},
+    "application": {"prompt": "We still talk about the trip years later because it was ___. A. forgetful B. unforgettable", "solution": "B。解析：多年后仍会谈起，说明这次旅行令人难忘，用 unforgettable。"},
+    "sources": [{"label": "Cambridge Dictionary: unforgettable", "url": "https://dictionary.cambridge.org/dictionary/english/unforgettable"}]
+  },
+  {
+    "word": "from the (bottom of one’s) heart",
+    "examTags": ["词汇·固定短语", "写作·真挚表达"],
+    "grammar": "phr. 由衷地；发自内心地。常用 from the bottom of one's heart；one's 按主语替换为 my、your、her 等所有格。",
+    "collocations": "thank someone from the bottom of my heart; speak from the heart; a heartfelt thank-you",
+    "commonMistake": "短语中 bottom 前要有 the，heart 前要用所有格，如 from the bottom of my heart；不能漏掉 of。",
+    "example": {"english": "I thank my parents from the bottom of my heart for their support.", "chinese": "我由衷感谢父母一直以来的支持。"},
+    "application": {"prompt": "“Thank you ___ for helping me through a difficult year,” she said. A. from the bottom of my heart B. by the end of my heart", "solution": "A。解析：from the bottom of my heart 表示“由衷地、发自内心地”；句中表达真诚感谢。"},
+    "sources": [{"label": "Cambridge Dictionary: heart", "url": "https://dictionary.cambridge.org/dictionary/english/heart"}]
+  },
+  {
+    "word": "worth doing sth",
+    "examTags": ["词汇·形容词与动名词", "语法·固定句型"],
+    "grammar": "phr. 值得做某事。常用 be worth doing；worth 后接名词或动名词，不定式通常不直接跟在 worth 后。",
+    "collocations": "be worth doing; be worth a visit; well worth the effort",
+    "commonMistake": "be worth 后接动名词形式表达“值得做”，如 worth reading；动名词主动形式常有被动含义，不说 be worth to read。",
+    "example": {"english": "This book is worth reading because it explains the topic clearly.", "chinese": "这本书值得一读，因为它把这个主题解释得很清楚。"},
+    "application": {"prompt": "The museum has a rare collection, so it is worth ___ this weekend. A. to visit B. visiting", "solution": "B。解析：固定句型 be worth doing，故用 visiting，表示博物馆值得参观。"},
+    "sources": [{"label": "Cambridge Dictionary: worth", "url": "https://dictionary.cambridge.org/dictionary/english/worth"}]
+  }
+]

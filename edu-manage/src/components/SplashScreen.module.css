@@ -1,0 +1,174 @@
+/* Reference-directed brand opening; all beats share the same clock. */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--color-ink);
+  transition: opacity 180ms ease-out;
+}
+.exiting { opacity: 0; pointer-events: none; }
+.curtain { position: absolute; inset: 0; width: 100%; height: 100%; }
+.backdrop { fill: var(--color-intro-canvas); }
+.orangeGlow { stop-color: var(--color-intro-logo-orange); }
+.tealGlow { stop-color: var(--color-intro-logo-teal); }
+.paperGlow { stop-color: var(--color-intro-paper); }
+.bookOrange { stroke: var(--color-intro-logo-orange); opacity: .18; }
+.bookTeal { stroke: var(--color-intro-logo-teal); opacity: .16; }
+.aperture { transform: scale(0); animation: open var(--intro-duration) cubic-bezier(.7, 0, .2, 1) both; }
+.skip {
+  position: absolute;
+  z-index: 3;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 132px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 2px solid var(--color-intro-peach);
+  border-radius: 999px;
+  background: var(--color-brand-orange);
+  color: var(--color-ink);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-ink) 10%, transparent);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms, border-color 150ms;
+}
+@media (hover: hover) {
+  .skip:hover { background: color-mix(in srgb, var(--color-brand-orange) 86%, var(--color-intro-paper)); }
+}
+.skip:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 4px; }
+.skip:active { background: color-mix(in srgb, var(--color-brand-orange) 88%, var(--color-intro-peach)); }
+.skip:disabled { opacity: .75; cursor: default; }
+.stage { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; pointer-events: none; }
+.artwork { width: min(76vw, 740px); height: auto; overflow: visible; }
+.characterStroke, .ribbon, .halo { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.characterStroke { animation: writeStroke var(--stroke-duration) linear var(--stroke-delay) both; }
+.glyphComplete { animation: completeGlyph 1ms step-end var(--glyph-done) both; }
+.englishMuzhe, .englishJoy { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.englishMuzhe { animation: writeEnglishMuzhe var(--intro-duration) linear both; }
+.englishJoy { animation: writeEnglishJoy var(--intro-duration) linear both; }
+.lettering { animation: letteringExit var(--intro-duration) ease-in-out both; }
+.ribbon { animation: ribbon var(--intro-duration) ease-in-out both; }
+.rose { stop-color: var(--color-intro-rose); }
+.peach { stop-color: var(--color-intro-peach); }
+.gold { stop-color: var(--color-intro-gold); }
+.mint { stop-color: var(--color-intro-mint); }
+.sky { stop-color: var(--color-intro-sky); }
+.lilac { stop-color: var(--color-intro-lilac); }
+.emblem {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(260px, 30vw, 320px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.emblem > svg { width: 100%; height: 100%; overflow: visible; }
+.brandSignature {
+  position: absolute;
+  top: calc(50% + clamp(88px, 9vw, 118px));
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  max-width: calc(100% - 32px);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: signature var(--intro-duration) ease-in-out both;
+}
+.schoolName { color: var(--color-ink); font-size: 20px; font-weight: 600; }
+.schoolMotto { color: var(--color-ink-muted); font-size: 12px; }
+.halo { animation: halo var(--intro-duration) linear both; }
+.logo { animation: logo var(--intro-duration) cubic-bezier(.16, 1, .3, 1) both; }
+.logoOrange { fill: var(--color-intro-logo-orange); }
+.logoTeal { fill: var(--color-intro-logo-teal); }
+.echoOne, .echoTwo, .echoThree { opacity: 0; transform-origin: 0 0; }
+.echoOne { animation: echoOne var(--intro-duration) cubic-bezier(.7, 0, .2, 1) both; }
+.echoTwo { animation: echoTwo var(--intro-duration) cubic-bezier(.7, 0, .2, 1) both; }
+.echoThree { animation: echoThree var(--intro-duration) cubic-bezier(.7, 0, .2, 1) both; }
+@keyframes writeStroke {
+  from { stroke-dashoffset: 1; opacity: 0; }
+  1% { opacity: 1; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes letteringExit {
+  0%, 64% { opacity: 1; clip-path: inset(0); }
+  73%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); }
+}
+@keyframes writeEnglishMuzhe {
+  0%, 4% { stroke-dashoffset: 1; opacity: 0; }
+  4.1% { opacity: 1; }
+  37%, 100% { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes writeEnglishJoy {
+  0%, 38% { stroke-dashoffset: 1; opacity: 0; }
+  38.1% { opacity: 1; }
+  52%, 100% { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes completeGlyph {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ribbon {
+  0%, 64% { stroke-dashoffset: 1; opacity: 0; }
+  65% { opacity: 1; }
+  74% { stroke-dashoffset: 0; opacity: 1; }
+  80%, 100% { stroke-dashoffset: -1; opacity: 0; }
+}
+@keyframes halo {
+  0%, 74% { stroke-dashoffset: 1; opacity: 1; transform: scale(.9) rotate(-18deg); }
+  82%, 90% { stroke-dashoffset: 0; opacity: 1; transform: scale(1) rotate(0); }
+  100% { stroke-dashoffset: 0; opacity: 0; transform: scale(22) rotate(0); }
+}
+@keyframes logo {
+  0%, 80% { opacity: 0; }
+  85%, 90% { opacity: 1; }
+  96%, 100% { opacity: 0; }
+}
+@keyframes echoOne {
+  0%, 88% { opacity: 0; transform: scale(1); }
+  91% { opacity: .3; }
+  100% { opacity: 0; transform: scale(30); }
+}
+@keyframes echoTwo {
+  0%, 87% { opacity: 0; transform: scale(1.2); }
+  90% { opacity: .18; }
+  100% { opacity: 0; transform: scale(38); }
+}
+@keyframes echoThree {
+  0%, 86% { opacity: 0; transform: scale(1.4); }
+  89% { opacity: .1; }
+  100% { opacity: 0; transform: scale(46); }
+}
+@keyframes open {
+  0%, 90% { transform: scale(0); }
+  100% { transform: scale(2.5); }
+}
+@keyframes signature {
+  0% { opacity: 0; }
+  12%, 88% { opacity: 1; }
+  96%, 100% { opacity: 0; }
+}
+@media (max-width: 600px) {
+  .artwork { width: 94vw; }
+  .emblem { width: 240px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .root { transition-duration: 180ms; }
+  .aperture, .characterStroke, .glyphComplete, .englishMuzhe, .englishJoy, .lettering, .ribbon, .halo, .logo,
+  .echoOne, .echoTwo, .echoThree, .skip, .brandSignature { animation: none; }
+  .artwork, .halo, .echoOne, .echoTwo, .echoThree { display: none; }
+  .logo { opacity: 1; }
+  .skip { opacity: 1; }
+}

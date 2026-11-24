@@ -2,7 +2,7 @@
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useState } from 'react'
-import { Alert, Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
+import { Alert, Modal, Form, Input, InputNumber, Radio, Steps, message, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
 import { UserOutlined, BookOutlined, IdcardOutlined, UploadOutlined } from '@ant-design/icons'
 import type { UploadProps } from 'antd'
 import dayjs from 'dayjs'
@@ -15,6 +15,34 @@ import { BrandModal } from '@/components/Common/BrandModal'
 
 const EDU_OPTIONS = ['本科', '硕士', '博士在读', '博士', '其他'].map(value => ({ label: value, value }))
 
+async function prepareTeacherAvatar(file: File): Promise<File> {
+  if (file.size < 250 * 1024 || typeof createImageBitmap !== 'function') return file
+  let bitmap: ImageBitmap | null = null
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+    const maxDimension = 960
+    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height))
+    const width = Math.max(1, Math.round(bitmap.width * scale))
+    const height = Math.max(1, Math.round(bitmap.height * scale))
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext('2d')
+    if (!context) return file
+    context.drawImage(bitmap, 0, 0, width, height)
+
+    const outputType = file.type === 'image/png' || file.type === 'image/webp' ? 'image/webp' : 'image/jpeg'
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, outputType, 0.86))
+    if (!blob || blob.type !== outputType || blob.size >= file.size * 0.95) return file
+    const extension = outputType === 'image/webp' ? '.webp' : '.jpg'
+    return new File([blob], file.name.replace(/\.[^.]+$/, '') + extension, { type: outputType, lastModified: file.lastModified })
+  } catch {
+    return file
+  } finally {
+    bitmap?.close()
+  }
+}
+
 export function TeacherForm({
   open, onClose, initialData, mode = 'create',
 }: { open: boolean; onClose: () => void; initialData?: Record<string, unknown> | null; mode?: 'create' | 'edit' }) {
@@ -23,6 +51,10 @@ export function TeacherForm({
   const [loading, setLoading] = useState(false)
   const [submitError, setSubmitError] = useState<{ message: string; field?: string } | null>(null)
   const [photoOptions, setPhotoOptions] = useState<{ label: string; value: string }[]>([])
+  const [photoOptionsLoaded, setPhotoOptionsLoaded] = useState(false)
+  const [photoOptionsLoading, setPhotoOptionsLoading] = useState(false)
+  const [photoOptionsError, setPhotoOptionsError] = useState('')
+  const [photoOptionsRetry, setPhotoOptionsRetry] = useState(0)
   const avatar = Form.useWatch('avatar', form)
   const gender = Form.useWatch('gender', form)
   const rotationKey = String(initialData?.id || form.getFieldValue('name') || '')
@@ -32,10 +64,6 @@ export function TeacherForm({
     if (!open) return
     setCurrent(0)
     setSubmitError(null)
-    fetch('/api/teacher-photos')
-      .then(res => res.json())
-      .then(data => setPhotoOptions(Array.isArray(data.photos) ? data.photos.map((item: { name: string; url: string }) => ({ label: item.name, value: item.url })) : []))
-      .catch(() => setPhotoOptions([]))
 
     if (initialData) {
       form.setFieldsValue({
@@ -50,6 +78,28 @@ export function TeacherForm({
       form.resetFields()
     }
   }, [open, initialData, form])
+
+  useEffect(() => {
+    if (!open || photoOptionsLoaded) return
+    const controller = new AbortController()
+    setPhotoOptionsLoading(true)
+    setPhotoOptionsError('')
+    void fetch('/api/teacher-photos', { signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json().catch(() => null) as { photos?: Array<{ name: string; url: string }>; error?: string } | null
+        if (!response.ok) throw new Error(data?.error || `请求失败（${response.status}）`)
+        if (!Array.isArray(data?.photos)) throw new Error('照片列表格式异常')
+        const options = data.photos.map((item) => ({ label: item.name, value: item.url }))
+        setPhotoOptions(options)
+        setPhotoOptionsLoaded(true)
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return
+        setPhotoOptionsError(error instanceof Error ? error.message : '照片列表加载失败')
+      })
+      .finally(() => { if (!controller.signal.aborted) setPhotoOptionsLoading(false) })
+    return () => controller.abort()
+  }, [open, photoOptionsLoaded, photoOptionsRetry])
 
   const stepFields: Record<number, string[]> = { 0: ['name', 'phone'], 1: [], 2: ['subjects'] }
 
@@ -107,7 +157,7 @@ export function TeacherForm({
           width: isMobile ? 'calc(100vw - 32px)' : 460,
           content: (
             <Space direction="vertical" size={12} style={{ width: '100%', marginTop: 12 }}>
-              <Alert type="warning" showIcon message="初始密码仅显示本次，关闭后无法再次查看" />
+              <Alert type="warning" showIcon message="初始密码为教师姓名拼音（小写、无空格）；首次登录后建议修改。" />
               <Input addonBefore="账号" value={payload.loginEmail} readOnly />
               <Input.Password addonBefore="密码" value={payload.initialPassword} readOnly visibilityToggle />
               <Button
@@ -138,7 +188,7 @@ export function TeacherForm({
     customRequest: async ({ file, onSuccess, onError }) => {
       try {
         const formData = new FormData()
-        formData.append('file', file as File)
+        formData.append('file', await prepareTeacherAvatar(file as File))
         formData.append('uploadType', 'avatar')
         const res = await fetch('/api/upload', { method: 'POST', body: formData })
         const payload = await res.json().catch(() => ({}))
@@ -218,12 +268,20 @@ export function TeacherForm({
                     <AdaptiveSelect
                       allowClear
                       showSearch
-                      placeholder="从 public/people 选择已有教师照片"
+                      placeholder={photoOptionsLoading ? '正在加载预设照片…' : '从预设照片中选择（也可直接上传）'}
                       value={avatar || undefined}
                       onChange={(value) => form.setFieldValue('avatar', value)}
                       options={photoOptions}
                       style={{ width: '100%' }}
                     />
+                    {photoOptionsError && (
+                      <Alert
+                        type="warning"
+                        showIcon
+                        message="预设照片暂未加载，可直接上传照片"
+                        action={<Button size="small" type="link" onClick={() => setPhotoOptionsRetry((value) => value + 1)}>重试</Button>}
+                      />
+                    )}
                     <Upload {...uploadProps}>
                       <Button icon={<UploadOutlined />}>上传新照片</Button>
                     </Upload>
@@ -232,10 +290,27 @@ export function TeacherForm({
               </Form.Item>
             </Col>
             <Col span={12}><Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}><Input placeholder="教师姓名" /></Form.Item></Col>
-            <Col span={12}><Form.Item name="gender" label="性别"><AdaptiveSelect options={[{ label: '男', value: '男' }, { label: '女', value: '女' }]} placeholder="选填" allowClear /></Form.Item></Col>
+            <Col span={12}>
+              <Form.Item
+                name="gender"
+                label="性别"
+                extra={gender
+                  ? <Button type="link" size="small" onClick={() => form.setFieldValue('gender', undefined)}>清除选择</Button>
+                  : '可不填'}
+              >
+                <Radio.Group
+                  id="teacher-gender"
+                  optionType="button"
+                  buttonStyle="solid"
+                  size="large"
+                  aria-label="性别"
+                  options={[{ label: '男', value: '男' }, { label: '女', value: '女' }]}
+                />
+              </Form.Item>
+            </Col>
             <Col span={12}><Form.Item name="phone" label="手机" rules={[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '请输入正确手机号' }]}><Input type="tel" inputMode="numeric" placeholder="必填" /></Form.Item></Col>
             <Col span={12}><Form.Item name="email" label="邮箱"><Input placeholder="选填" /></Form.Item></Col>
-            <Col span={12}><Form.Item name="employmentType" label="任职类型" initialValue="FULL_TIME"><AdaptiveSelect options={[{ label: '全职', value: 'FULL_TIME' }, { label: '兼职', value: 'PART_TIME' }]} /></Form.Item></Col>
+            <Col span={12}><Form.Item name="employmentType" label="任职类型" initialValue="FULL_TIME"><Radio.Group id="teacher-employment-type" optionType="button" buttonStyle="solid" size="large" aria-label="任职类型" options={[{ label: '全职', value: 'FULL_TIME' }, { label: '兼职', value: 'PART_TIME' }]} /></Form.Item></Col>
             <Col span={12}><Form.Item name="tierLevel" label="教师等级" initialValue="NEW"><AdaptiveSelect options={TIER_OPTIONS} /></Form.Item></Col>
             <Col span={12}><Form.Item name="joinedAt" label="入职日期"><DatePicker style={{ width: '100%' }} placeholder="选择日期" /></Form.Item></Col>
             <Col span={12}><Form.Item name="contractEnd" label="合同到期日"><DatePicker style={{ width: '100%' }} placeholder="选择日期" /></Form.Item></Col>

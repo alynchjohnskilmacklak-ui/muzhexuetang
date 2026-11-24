@@ -6,6 +6,7 @@ describe('admin term scoped SWR keys', () => {
     expect(isAdminTermScopedSWRKey('/api/dashboard?division=JUNIOR')).toBe(true)
     expect(isAdminTermScopedSWRKey('/api/students/grade-counts?division=JUNIOR')).toBe(true)
     expect(isAdminTermScopedSWRKey('/api/admin/salary?period=month')).toBe(true)
+    expect(isAdminTermScopedSWRKey('/api/admin/students/student-1/growth-archive?termId=term-current')).toBe(true)
     expect(isAdminTermScopedSWRKey('/api/study-hall?date=2026-08-11')).toBe(true)
   })
 

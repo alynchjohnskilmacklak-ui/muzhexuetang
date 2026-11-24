@@ -146,7 +146,14 @@ export async function prepareLessonPreviewMaterial(input: PublishLessonPreviewIn
     deletionBatchId: null,
   }
 
-  return { existingId: existing?.id || null, data, groupId: lesson.group.id, lessonDate: lesson.lessonDate }
+  return {
+    existingId: existing?.id || null,
+    data,
+    groupId: lesson.group.id,
+    lessonDate: lesson.lessonDate,
+    groupTeacherId: lesson.group.teacherId,
+    teacherAssignments: lesson.group.teacherAssignments,
+  }
 }
 
 export async function persistPreparedLessonPreviewMaterial(
@@ -173,11 +180,20 @@ export async function publishLessonPreviewMaterial(input: PublishLessonPreviewIn
         deletedAt: null,
         status: { notIn: ['CANCELLED', 'POSTPONED'] },
       },
-      select: { id: true },
+      select: { id: true, teacherId: true, subject: true },
     })
-    if (siblingLessons.length > 0) {
+    const matchingLessonIds = siblingLessons
+      .filter((sibling) => {
+        const subject = sibling.subject || prepared.data.subject
+        const subjectTeacherId = prepared.teacherAssignments.find((assignment) => assignment.subject === subject)?.teacherId
+        const assignedTeacherId = sibling.teacherId || subjectTeacherId || prepared.groupTeacherId
+        return subject === prepared.data.subject
+          && assignedTeacherId === prepared.data.teacherId
+      })
+      .map((sibling) => sibling.id)
+    if (matchingLessonIds.length > 0) {
       await tx.studyMaterial.createMany({
-        data: siblingLessons.map((sibling) => ({ ...prepared.data, classLessonId: sibling.id })),
+        data: matchingLessonIds.map((classLessonId) => ({ ...prepared.data, classLessonId })),
         skipDuplicates: true,
       })
     }

@@ -153,7 +153,7 @@ export function BenefitsClient({ content, studentName, membershipLevel }: { cont
         <div style={{ position: 'absolute', top: -50, right: -40, width: 170, height: 170, borderRadius: 999, background: 'radial-gradient(circle,rgba(201,164,92,.32),transparent 65%)' }} />
         <div style={{ position: 'absolute', bottom: -70, left: -40, width: 150, height: 150, borderRadius: 999, background: 'radial-gradient(circle,rgba(255,255,255,.08),transparent 65%)' }} />
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <Image src="/images/logo-small.png" alt="牧哲学堂" width={52} height={52} style={{ borderRadius: 14, objectFit: 'cover', flexShrink: 0 }} preview={false} />
+          <Image src="/images/logo-small-128.webp" alt="牧哲学堂" width={52} height={52} style={{ borderRadius: 14, objectFit: 'cover', flexShrink: 0 }} preview={false} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,.68)', letterSpacing: .5 }}>家长端 · 会员权益</div>
             <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: .3, marginTop: 2 }}>会员权益</div>
@@ -259,13 +259,7 @@ export function BenefitsClient({ content, studentName, membershipLevel }: { cont
             const meta = LEVEL_META[itemLevel]
             const isCurrent = itemLevel === level
             return (
-              <div key={itemLevel} style={{
-                borderRadius: 14, padding: '13px 14px',
-                background: isCurrent ? meta.bg : '#fff',
-                border: `1px solid ${isCurrent ? meta.border : '#EEE7E1'}`,
-                display: 'flex', alignItems: 'center', gap: 12,
-                boxShadow: isCurrent ? '0 4px 12px rgba(18,60,53,.08)' : 'none',
-              }}>
+              <div key={itemLevel} className="stagger-item" style={{ animationDelay: `${Math.min(index, 8) * 40}ms`, borderRadius: 14, padding: '13px 14px', background: isCurrent ? meta.bg : '#fff', border: `1px solid ${isCurrent ? meta.border : '#EEE7E1'}`, display: 'flex', alignItems: 'center', gap: 12, boxShadow: isCurrent ? '0 4px 12px rgba(18,60,53,.08)' : 'none' }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: 12, flexShrink: 0,
                   background: isCurrent ? `linear-gradient(135deg,${meta.accent},${meta.accent}CC)` : 'rgba(0,0,0,.04)',
@@ -334,7 +328,8 @@ export function BenefitsClient({ content, studentName, membershipLevel }: { cont
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8, marginTop: 8 }}>
                     {item.items.map((b, index) => (
-                      <div key={b.title} style={{
+                      <div key={b.title} className="stagger-item" style={{
+                        animationDelay: `${Math.min(index, 8) * 40}ms`,
                         display: 'flex', gap: 10, alignItems: 'flex-start',
                         padding: '10px 12px', borderRadius: 12,
                         background: index % 2 === 0 ? 'rgba(18,60,53,.035)' : 'rgba(232,120,74,.035)',
@@ -374,8 +369,8 @@ export function BenefitsClient({ content, studentName, membershipLevel }: { cont
           各等级教学标准一致，以下仅对增值服务进行说明。
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {COMPARISONS.map(([title, normal, vip, svip]) => (
-            <div key={title} style={{ borderRadius: 14, border: '1px solid #EEE7E1', background: '#fff', padding: '12px 14px', boxShadow: '0 2px 10px rgba(26,18,1,.04)' }}>
+          {COMPARISONS.map(([title, normal, vip, svip], compareIndex) => (
+            <div key={title} className="stagger-item" style={{ animationDelay: `${Math.min(compareIndex, 8) * 40}ms`, borderRadius: 14, border: '1px solid #EEE7E1', background: '#fff', padding: '12px 14px', boxShadow: '0 2px 10px rgba(26,18,1,.04)' }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#123C35', marginBottom: 8 }}>{title}</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

@@ -1,0 +1,552 @@
+[
+  {
+    "word": "rhythm",
+    "examTags": ["词汇·名词", "听力·音乐节奏"],
+    "grammar": "n. 节奏；韵律。可数，复数 rhythms；rhythm of... 表示……的节奏。",
+    "collocations": "keep the rhythm; a steady rhythm; the rhythm of a song",
+    "commonMistake": "rhythm 的拼写中元音字母少，注意中间是 y；表达歌曲节奏用 rhythm，不是歌词 lyric。",
+    "example": {"english": "The drummer kept a steady rhythm throughout the song.", "chinese": "整首歌中，鼓手都保持着稳定的节奏。"},
+    "application": {"prompt": "The drummer tapped evenly while the band played. He kept the ___ of the song. A. rhythm B. costume", "solution": "A。解析：鼓点稳定地配合音乐，指保持歌曲的 rhythm（节奏）。"},
+    "sources": [{"label": "Cambridge Dictionary: rhythm", "url": "https://dictionary.cambridge.org/dictionary/english/rhythm"}]
+  },
+  {
+    "word": "folk",
+    "examTags": ["词汇·形容词与名词", "阅读·音乐类型"],
+    "grammar": "adj. 民间的；n. 人们，常用 folks（口语）。folk music 指民间音乐。",
+    "collocations": "folk music; folk song; local folk",
+    "commonMistake": "folk 作“民间的”时放在名词前作定语；folk music 不等于 pop music（流行音乐）。",
+    "example": {"english": "The village band played a folk song at the festival.", "chinese": "村里的乐队在节日上演奏了一首民歌。"},
+    "application": {"prompt": "The song has been passed down in the village for generations. It is a ___ song. A. electronic B. folk", "solution": "B。解析：世代流传的村落歌曲属于 folk song（民歌）。"},
+    "sources": [{"label": "Cambridge Dictionary: folk", "url": "https://dictionary.cambridge.org/dictionary/english/folk"}]
+  },
+  {
+    "word": "classical",
+    "examTags": ["词汇·形容词", "阅读·音乐类型"],
+    "grammar": "adj. 古典音乐的；古典的。常修饰 music、composer、concert 等名词。",
+    "collocations": "classical music; a classical composer; a classical concert",
+    "commonMistake": "表示“古典音乐”说 classical music；classical 是形容词，名词是 classic（经典作品或典范）。",
+    "example": {"english": "My grandfather listens to classical music every morning.", "chinese": "我爷爷每天早上听古典音乐。"},
+    "application": {"prompt": "The orchestra performed a work by Mozart at the concert. The audience enjoyed ___ music. A. classical B. noisy", "solution": "A。解析：莫扎特的管弦乐作品属于 classical music（古典音乐）。"},
+    "sources": [{"label": "Cambridge Dictionary: classical", "url": "https://dictionary.cambridge.org/dictionary/english/classical"}]
+  },
+  {
+    "word": "pop",
+    "examTags": ["词汇·名词与动词", "阅读·音乐类型"],
+    "grammar": "n. 流行音乐；v.（突然）出现、发出砰声。pop music 中 pop 作名词修饰 music。",
+    "collocations": "pop music; a pop song; pop into one's head",
+    "commonMistake": "pop music 是固定表达；这里的 pop 不表示 popcorn，也不把 music 写成复数。",
+    "example": {"english": "Her new pop song became popular with teenagers.", "chinese": "她的新流行歌曲很受青少年欢迎。"},
+    "application": {"prompt": "The singer's catchy new song is on the charts this week. It is a ___ song. A. opera B. pop", "solution": "B。解析：上榜且旋律流行的新歌属于 pop song（流行歌曲）。"},
+    "sources": [{"label": "Cambridge Dictionary: pop", "url": "https://dictionary.cambridge.org/dictionary/english/pop"}]
+  },
+  {
+    "word": "jazz",
+    "examTags": ["词汇·不可数名词", "听力·音乐类型"],
+    "grammar": "n. 爵士乐，通常不可数；表示一种音乐时一般不加 a，也不加复数 -s。",
+    "collocations": "jazz music; a jazz band; a jazz club",
+    "commonMistake": "jazz 表示音乐类型时通常不可数，说 listen to jazz，不说 listen to a jazz。",
+    "example": {"english": "A jazz band played in the small club last night.", "chinese": "昨晚一支爵士乐队在这家小俱乐部演出。"},
+    "application": {"prompt": "The saxophone player improvised with the band at the club. They were playing ___. A. jazz B. poetry", "solution": "A。解析：萨克斯即兴演奏是爵士乐演出常见的特点，此处用不可数名词 jazz。"},
+    "sources": [{"label": "Cambridge Dictionary: jazz", "url": "https://dictionary.cambridge.org/dictionary/english/jazz"}]
+  },
+  {
+    "word": "rap",
+    "examTags": ["词汇·名词与动词", "听力·音乐类型"],
+    "grammar": "n. 说唱乐；v. 说唱。过去式和过去分词通常为 rapped，动词现在分词为 rapping。",
+    "collocations": "rap music; a rap song; rap about something",
+    "commonMistake": "rap 作动词变过去式要双写 p：rapped；不要误写成 raped。",
+    "example": {"english": "The young artist rapped about life in his city.", "chinese": "这位年轻艺人用说唱讲述了他所在城市的生活。"},
+    "application": {"prompt": "The performer spoke the rhyming lines over a strong beat. She was ___. A. painting B. rapping", "solution": "B。解析：伴着节拍押韵说词是 rap（说唱）；句中用现在进行时 rapping。"},
+    "sources": [{"label": "Cambridge Dictionary: rap", "url": "https://dictionary.cambridge.org/dictionary/english/rap"}]
+  },
+  {
+    "word": "traditional",
+    "examTags": ["词汇·形容词", "语法·词性派生"],
+    "grammar": "adj. 传统的；习俗的。名词 tradition；副词 traditionally。",
+    "collocations": "traditional music; traditional clothes; a traditional festival",
+    "commonMistake": "名词 tradition 变形容词要加 -al：traditional；不要把 traditional 拼成 traditionary。",
+    "example": {"english": "The dancers wore traditional clothes from the region.", "chinese": "舞者们穿着这个地区的传统服饰。"},
+    "application": {"prompt": "The dance has been performed at this festival for hundreds of years. It is a ___ dance. A. traditional B. temporary", "solution": "A。解析：延续数百年的舞蹈具有传统性，应填 traditional。"},
+    "sources": [{"label": "Cambridge Dictionary: traditional", "url": "https://dictionary.cambridge.org/dictionary/english/traditional"}]
+  },
+  {
+    "word": "dance to",
+    "examTags": ["词汇·动词短语", "语法·介词搭配"],
+    "grammar": "phr. 随着……跳舞。dance to 后接音乐、歌曲或节拍，to 是介词。",
+    "collocations": "dance to music; dance to a beat; dance to a song",
+    "commonMistake": "dance to 后接音乐名词；表示伴着音乐跳舞不能漏掉 to，也不说 dance with the music。",
+    "example": {"english": "The children danced to the music at the school party.", "chinese": "孩子们在学校派对上随着音乐跳舞。"},
+    "application": {"prompt": "When the band began its lively song, everyone moved in time with it. They began to ___. A. dance across music B. dance to the music", "solution": "B。解析：表示“随着音乐跳舞”用 dance to the music，to 后接音乐。"},
+    "sources": [{"label": "Cambridge Dictionary: dance", "url": "https://dictionary.cambridge.org/dictionary/english/dance"}]
+  },
+  {
+    "word": "sing along to",
+    "examTags": ["词汇·动词短语", "语法·副词与介词"],
+    "grammar": "phr. 随着……一起唱。sing along to 后接歌曲或音乐；along 是副词，to 是介词。",
+    "collocations": "sing along to a song; sing along to the radio; sing along with the singer",
+    "commonMistake": "sing along to a song 表示跟着歌曲唱；along 不能放在 to 后面组成 sing to along。",
+    "example": {"english": "We sang along to our favorite song on the bus.", "chinese": "我们在公交车上跟着最喜欢的歌一起唱。"},
+    "application": {"prompt": "Everyone knew the chorus, so they joined in while the recording played. They began to ___. A. sing along to it B. sing it along to", "solution": "A。解析：代词 it 放在短语后接的宾语位置，结构是 sing along to it，意为跟着它唱。"},
+    "sources": [{"label": "Cambridge Dictionary: sing along", "url": "https://dictionary.cambridge.org/dictionary/english/sing-along"}]
+  },
+  {
+    "word": "lyric",
+    "examTags": ["词汇·名词与形容词", "语法·单复数"],
+    "grammar": "n. 歌词（常用复数 lyrics）；adj. 抒情的。a lyric 是一行歌词或一首抒情诗。",
+    "collocations": "song lyrics; write the lyrics; a lyric poem",
+    "commonMistake": "一首歌的歌词通常说 lyrics（复数）；表示整段歌词时不说 a lyric，除非指其中一行。",
+    "example": {"english": "I looked up the lyrics before the karaoke party.", "chinese": "卡拉 OK 派对前，我查了这首歌的歌词。"},
+    "application": {"prompt": "I know the melody, but I cannot remember all the words of the song. I cannot remember the ___. A. rhythms B. lyrics", "solution": "B。解析：歌曲中的词句是 lyrics（歌词）；rhythm 指节奏。"},
+    "sources": [{"label": "Cambridge Dictionary: lyric", "url": "https://dictionary.cambridge.org/dictionary/english/lyric"}]
+  },
+  {
+    "word": "electric",
+    "examTags": ["词汇·形容词", "语法·词性辨析"],
+    "grammar": "adj. 电的；令人激动的。名词 electricity；副词 electrically。",
+    "collocations": "electric current; an electric guitar; an electric shock",
+    "commonMistake": "electric 作形容词修饰 guitar、car 等；表示“电”这一名词用 electricity，不能写 an electric。",
+    "example": {"english": "The electric lights came on as the room grew dark.", "chinese": "房间暗下来时，电灯亮了。"},
+    "application": {"prompt": "The guitar needs a cable and an amplifier to produce its sound. It is an ___ guitar. A. electricity B. electric", "solution": "B。解析：名词 guitar 前需要形容词 electric（电的）；electricity 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: electric", "url": "https://dictionary.cambridge.org/dictionary/english/electric"}]
+  },
+  {
+    "word": "electric guitar",
+    "examTags": ["词汇·乐器名称", "阅读·音乐表演"],
+    "grammar": "n. 电吉他。可数名词，复数 electric guitars；electric 作前置定语修饰 guitar。",
+    "collocations": "play an electric guitar; electric guitar solo; a guitar amplifier",
+    "commonMistake": "electric guitar 是一种乐器；有 amplifier（放大器）不代表乐器变成 keyboard，二者是不同乐器。",
+    "example": {"english": "Leo played an electric guitar solo at the concert.", "chinese": "利奥在音乐会上演奏了一段电吉他独奏。"},
+    "application": {"prompt": "The musician plugged the instrument into an amplifier before the show. Which instrument did he prepare? A. a flute B. an electric guitar", "solution": "B。解析：需要接入放大器演奏的吉他是 electric guitar（电吉他）。"},
+    "sources": [{"label": "Cambridge Dictionary: guitar", "url": "https://dictionary.cambridge.org/dictionary/english/guitar"}]
+  },
+  {
+    "word": "keyboard",
+    "examTags": ["词汇·名词", "阅读·乐器与设备"],
+    "grammar": "n. 电子琴；键盘。可数，复数 keyboards；computer keyboard 指电脑键盘。",
+    "collocations": "play the keyboard; a computer keyboard; keyboard player",
+    "commonMistake": "keyboard 可指乐器或电脑输入设备；在乐队里 play the keyboard 指弹奏键盘乐器，不是打字。",
+    "example": {"english": "Mina plays the keyboard in the school band.", "chinese": "米娜在学校乐队里弹电子琴。"},
+    "application": {"prompt": "At rehearsal, Mina used both hands to play the black and white keys of an electronic instrument. She played the ___. A. keyboard B. trumpet", "solution": "A。解析：用双手弹黑白琴键的电子乐器是 keyboard（电子琴）。"},
+    "sources": [{"label": "Cambridge Dictionary: keyboard", "url": "https://dictionary.cambridge.org/dictionary/english/keyboard"}]
+  },
+  {
+    "word": "trumpet",
+    "examTags": ["词汇·可数名词", "阅读·乐器名称"],
+    "grammar": "n. 小号；喇叭。可数，复数 trumpets；演奏者是 trumpet player。",
+    "collocations": "play the trumpet; a trumpet player; a trumpet solo",
+    "commonMistake": "表示演奏某种乐器，乐器前通常加 the：play the trumpet；不是 play trumpet。",
+    "example": {"english": "The trumpet sounded clearly above the other instruments.", "chinese": "小号的声音清晰地盖过了其他乐器。"},
+    "application": {"prompt": "The brass musician blew into the shiny instrument and played a high note. She played the ___. A. violin B. trumpet", "solution": "B。解析：用气吹奏的铜管乐器是 trumpet（小号），violin 是弦乐器。"},
+    "sources": [{"label": "Cambridge Dictionary: trumpet", "url": "https://dictionary.cambridge.org/dictionary/english/trumpet"}]
+  },
+  {
+    "word": "style",
+    "examTags": ["词汇·名词", "写作·描述方式"],
+    "grammar": "n. 风格；方式。可数，复数 styles；style of... 表示……的风格。",
+    "collocations": "a musical style; a personal style; in the style of",
+    "commonMistake": "style 表示某人或作品的风格；表示“方式”时常用 style of doing，不把 style 当作动作本身。",
+    "example": {"english": "The singer has a style that is easy to recognize.", "chinese": "这位歌手的风格很容易辨认。"},
+    "application": {"prompt": "The singer mixes folk sounds with modern beats, so her music has a unique ___. A. style B. volume", "solution": "A。解析：民间元素与现代节拍构成她独特的音乐 style（风格）。"},
+    "sources": [{"label": "Cambridge Dictionary: style", "url": "https://dictionary.cambridge.org/dictionary/english/style"}]
+  },
+  {
+    "word": "piece",
+    "examTags": ["词汇·可数名词", "语法·量词与搭配"],
+    "grammar": "n. 一件；一片；一首（乐曲）；一篇。可数，复数 pieces；a piece of music 指一首乐曲。",
+    "collocations": "a piece of music; a piece of advice; a piece of paper",
+    "commonMistake": "数一首乐曲可说 a piece of music；music 本身通常不可数，不说 a music。",
+    "example": {"english": "The pianist played a short piece by Chopin.", "chinese": "钢琴家演奏了一首肖邦的短曲。"},
+    "application": {"prompt": "The pianist chose one short composition for the opening. She played a ___ of music. A. song B. piece", "solution": "B。解析：a piece of music 表示“一首乐曲”，piece 是合适的表达；song 不与 of music 这样搭配。"},
+    "sources": [{"label": "Cambridge Dictionary: piece", "url": "https://dictionary.cambridge.org/dictionary/english/piece"}]
+  },
+  {
+    "word": "performance",
+    "examTags": ["词汇·名词", "语法·词性派生"],
+    "grammar": "n. 演出；表演；表现。动词 perform；表演者 performer；复数 performances。",
+    "collocations": "give a performance; a live performance; a musical performance",
+    "commonMistake": "performance 是名词，前面可用 a；动词“表演”用 perform，不能说 give a perform。",
+    "example": {"english": "The audience cheered after the band's performance.", "chinese": "乐队演出结束后，观众欢呼起来。"},
+    "application": {"prompt": "The band finished its live show, and the audience stood up to clap. The ___ was a great success. A. performer B. performance", "solution": "B。解析：句子需要指整场演出的名词 performance；performer 指表演者。"},
+    "sources": [{"label": "Cambridge Dictionary: performance", "url": "https://dictionary.cambridge.org/dictionary/english/performance"}]
+  },
+  {
+    "word": "golden",
+    "examTags": ["词汇·形容词", "语法·词性派生"],
+    "grammar": "adj. 金色的；珍贵的、极好的。名词 gold；golden hour 指日落前后光线柔和的时段。",
+    "collocations": "golden hair; a golden opportunity; golden sunlight",
+    "commonMistake": "gold 可作名词“金”或形容词“金质的”；golden 常描写金色光泽或珍贵事物，如 golden sunlight。",
+    "example": {"english": "The setting sun filled the room with golden light.", "chinese": "落日的余晖让房间洒满金色的光。"},
+    "application": {"prompt": "The last sunlight made the leaves look bright and warm. They shone in the ___ light. A. dark B. golden", "solution": "B。解析：明亮温暖的落日光线是 golden light（金色的光）；dark 与上下文相反。"},
+    "sources": [{"label": "Cambridge Dictionary: golden", "url": "https://dictionary.cambridge.org/dictionary/english/golden"}]
+  },
+  {
+    "word": "lover",
+    "examTags": ["词汇·名词", "语法·词性派生"],
+    "grammar": "n. 爱好者；情人。由 love 加 -r 构成，复数 lovers；music lover 指音乐爱好者。",
+    "collocations": "a music lover; a lover of art; nature lovers",
+    "commonMistake": "lover 可指某事物的爱好者，也可指恋人；说音乐爱好者用 music lover，语境决定具体含义。",
+    "example": {"english": "As a jazz lover, he visits the club every Friday.", "chinese": "作为爵士乐爱好者，他每周五都会去那家俱乐部。"},
+    "application": {"prompt": "Ella owns hundreds of records and never misses a concert. She is a real music ___. A. lover B. driver", "solution": "A。解析：收藏唱片、常去音乐会的人是 music lover（音乐爱好者）。"},
+    "sources": [{"label": "Cambridge Dictionary: lover", "url": "https://dictionary.cambridge.org/dictionary/english/lover"}]
+  },
+  {
+    "word": "romantic",
+    "examTags": ["词汇·形容词", "写作·感情色彩"],
+    "grammar": "adj. 浪漫的；爱情的。名词 romance；romantically 是副词。",
+    "collocations": "a romantic song; a romantic story; a romantic evening",
+    "commonMistake": "romantic 的名词形式是 romance；描述歌曲气氛用 romantic，不用 romance 作形容词。",
+    "example": {"english": "They chose a romantic song for their first dance.", "chinese": "他们为第一支舞选了一首浪漫的歌曲。"},
+    "application": {"prompt": "The film tells a love story and ends with a wedding. It is a ___ film. A. comic B. romantic", "solution": "B。解析：以爱情故事为主线的电影可称为 romantic film（爱情片）。"},
+    "sources": [{"label": "Cambridge Dictionary: romantic", "url": "https://dictionary.cambridge.org/dictionary/english/romantic"}]
+  },
+  {
+    "word": "performer",
+    "examTags": ["词汇·名词", "语法·动词派生"],
+    "grammar": "n. 演奏者；表演者。由 perform + -er 构成；复数 performers。",
+    "collocations": "a talented performer; a street performer; live performers",
+    "commonMistake": "performer 指表演的人，performance 指演出或表现；不要把“演出很精彩”写成 performer was exciting。",
+    "example": {"english": "Each performer introduced a song before singing it.", "chinese": "每位表演者都在演唱前介绍了一首歌。"},
+    "application": {"prompt": "The woman on stage played the flute and greeted the audience. She was the evening's main ___. A. performance B. performer", "solution": "B。解析：句中指台上的人，应用 performer（表演者）；performance 指表演本身。"},
+    "sources": [{"label": "Cambridge Dictionary: performer", "url": "https://dictionary.cambridge.org/dictionary/english/performer"}]
+  },
+  {
+    "word": "purple",
+    "examTags": ["词汇·形容词与名词", "语法·颜色词用法"],
+    "grammar": "adj. 紫色的；n. 紫色。作颜色形容词时通常不变形；a shade of purple 指一种紫色色调。",
+    "collocations": "a purple dress; turn purple; a deep purple",
+    "commonMistake": "purple 既可作形容词也可作名词；放在名词前修饰颜色时不加 -ly。",
+    "example": {"english": "She wore a purple scarf to match her coat.", "chinese": "她围了一条紫色围巾来搭配外套。"},
+    "application": {"prompt": "The flowers are not red or blue; their petals are violet in color. The petals are ___. A. purple B. wooden", "solution": "A。解析：violet（紫罗兰色）说明花瓣是 purple（紫色的）。"},
+    "sources": [{"label": "Cambridge Dictionary: purple", "url": "https://dictionary.cambridge.org/dictionary/english/purple"}]
+  },
+  {
+    "word": "gifted",
+    "examTags": ["词汇·形容词", "语法·词性派生"],
+    "grammar": "adj. 有天赋的。动词 gift；gifted 常用 be gifted at/with... 表示在某方面有天赋。",
+    "collocations": "a gifted musician; be gifted at drawing; a gifted child",
+    "commonMistake": "be gifted at 后接名词或动名词；不要把 gifted 当副词修饰动词。",
+    "example": {"english": "The gifted pianist learned the song by ear.", "chinese": "这位有天赋的钢琴家凭听觉学会了这首曲子。"},
+    "application": {"prompt": "At four, Nina could play difficult tunes without lessons. She is a ___ young pianist. A. gifted B. gift", "solution": "A。解析：名词 pianist 前需形容词 gifted，说明她很有音乐天赋；gift 是名词“礼物”。"},
+    "sources": [{"label": "Cambridge Dictionary: gifted", "url": "https://dictionary.cambridge.org/dictionary/english/gifted"}]
+  },
+  {
+    "word": "poet",
+    "examTags": ["词汇·名词", "语法·职业名称"],
+    "grammar": "n. 诗人。可数名词，复数 poets；poetry 是诗歌的总称，poem 是一首诗。",
+    "collocations": "a famous poet; a poet writes poems; a modern poet",
+    "commonMistake": "poet 指写诗的人，poem 指一首诗，poetry 指诗歌这一文学体裁；三者不可混用。",
+    "example": {"english": "The poet read her new poem to the class.", "chinese": "这位诗人把她的新诗读给全班听。"},
+    "application": {"prompt": "Mr. Lee writes verses about the sea and has published three collections. He is a ___. A. poem B. poet", "solution": "B。解析：创作诗歌的人是 poet（诗人）；poem 是作品。"},
+    "sources": [{"label": "Cambridge Dictionary: poet", "url": "https://dictionary.cambridge.org/dictionary/english/poet"}]
+  },
+  {
+    "word": "policewoman",
+    "examTags": ["词汇·职业名称", "语法·复数拼写"],
+    "grammar": "n. 女警察。可数，复数 policewomen；对应的男性形式是 policeman。",
+    "collocations": "a policewoman on duty; ask a policewoman for help; police officers",
+    "commonMistake": "policewoman 的复数是 policewomen，woman 变 women；不是 policewomans。",
+    "example": {"english": "A policewoman helped the lost child find his parents.", "chinese": "一位女警察帮助走失的孩子找到了父母。"},
+    "application": {"prompt": "At the station, two female officers greeted the visitors. The ___ were very helpful. A. policewomen B. policewomans", "solution": "A。解析：policewoman 的复数将 woman 变为 women，故填 policewomen。"},
+    "sources": [{"label": "Cambridge Dictionary: policewoman", "url": "https://dictionary.cambridge.org/dictionary/english/policewoman"}]
+  },
+  {
+    "word": "deaf",
+    "examTags": ["词汇·形容词", "语法·形容词搭配"],
+    "grammar": "adj. 聋的；听不见的。be deaf in one ear 表示一只耳朵听不见；名词 deafness。",
+    "collocations": "be deaf; deaf in one ear; a deaf student",
+    "commonMistake": "deaf 是形容词，常说 be deaf 或 be deaf in one ear；不要与 death（死亡）混淆。",
+    "example": {"english": "The school provides captions for deaf students.", "chinese": "学校为失聪的学生提供字幕。"},
+    "application": {"prompt": "Ben cannot hear sounds, so the film uses captions for him. Ben is ___. A. blind B. deaf", "solution": "B。解析：字幕帮助听不见声音的人理解电影，deaf 意为“聋的”。"},
+    "sources": [{"label": "Cambridge Dictionary: deaf", "url": "https://dictionary.cambridge.org/dictionary/english/deaf"}]
+  },
+  {
+    "word": "composer",
+    "examTags": ["词汇·名词", "语法·动词派生"],
+    "grammar": "n. 作曲家。由 compose + -er 构成；composition 可指作品或创作。",
+    "collocations": "a famous composer; a music composer; compose a symphony",
+    "commonMistake": "composer 是创作音乐的人；performer 是演奏或表演的人，同一人可能兼具两种身份。",
+    "example": {"english": "The composer wrote a new piece for the school orchestra.", "chinese": "作曲家为学校管弦乐团创作了一首新曲。"},
+    "application": {"prompt": "She created the melody and wrote all the notes before the orchestra rehearsed it. She was the ___. A. composer B. conductor", "solution": "A。解析：创作旋律和乐谱的人是 composer（作曲家）；conductor 是指挥。"},
+    "sources": [{"label": "Cambridge Dictionary: composer", "url": "https://dictionary.cambridge.org/dictionary/english/composer"}]
+  },
+  {
+    "word": "electronic",
+    "examTags": ["词汇·形容词", "语法·词性辨析"],
+    "grammar": "adj. 电子的；电子设备的。名词 electronics 指电子学或电子设备。",
+    "collocations": "electronic music; electronic equipment; an electronic device",
+    "commonMistake": "electronic 表示由电子设备或电路实现；electric 通常指由电力驱动，如 electric guitar。",
+    "example": {"english": "The museum displays old electronic equipment.", "chinese": "博物馆展出了旧式电子设备。"},
+    "application": {"prompt": "The song was made with computers and synthesizers rather than acoustic instruments. It is ___ music. A. electrical B. electronic", "solution": "B。解析：由电脑和合成器制作的音乐是 electronic music（电子音乐）；electrical 多表示与电力系统有关。"},
+    "sources": [{"label": "Cambridge Dictionary: electronic", "url": "https://dictionary.cambridge.org/dictionary/english/electronic"}]
+  },
+  {
+    "word": "download",
+    "examTags": ["词汇·动词与名词", "语法·动词词形"],
+    "grammar": "v. 下载；n. 下载的数据。downloaded 为过去式和过去分词，downloading 为现在分词。",
+    "collocations": "download a song; download an app; a free download",
+    "commonMistake": "从网络把文件保存到设备上是 download；注意其过去式直接加 -ed：downloaded，不用不规则变化。",
+    "example": {"english": "I downloaded the concert recording to my tablet.", "chinese": "我把音乐会录音下载到了平板电脑上。"},
+    "application": {"prompt": "The song is now saved on my phone, so I can listen without the internet. I ___ it last night. A. downloaded B. uploaded", "solution": "A。解析：把歌曲保存到手机供离线收听是 downloaded（下载）；uploaded 是上传。"},
+    "sources": [{"label": "Cambridge Dictionary: download", "url": "https://dictionary.cambridge.org/dictionary/english/download"}]
+  },
+  {
+    "word": "rating",
+    "examTags": ["词汇·名词", "语法·动词派生"],
+    "grammar": "n. 评分；等级。动词 rate；rating 可指某项评价分数或等级。",
+    "collocations": "a high rating; a five-star rating; give a film a rating",
+    "commonMistake": "rating 是评分结果，rate 是给出评分的动词；a five-star rating 中 star 作单数定语。",
+    "example": {"english": "The album received a high rating from music reviewers.", "chinese": "这张专辑获得了乐评人的高分评价。"},
+    "application": {"prompt": "The album received four stars out of five on the music website. It got a good ___. A. rhythm B. rating", "solution": "B。解析：四星是网站给出的 rating（评分），rhythm 指节奏。"},
+    "sources": [{"label": "Cambridge Dictionary: rating", "url": "https://dictionary.cambridge.org/dictionary/english/rating"}]
+  },
+  {
+    "word": "hats off (to sb)",
+    "examTags": ["词汇·习语", "写作·表达赞赏"],
+    "grammar": "idiom.（向某人）表示敬佩或感谢。常用 Hats off to + 人，通常放在句首作感叹。",
+    "collocations": "Hats off to you; hats off to someone for doing something",
+    "commonMistake": "hats off to 后接值得称赞的人；不要按字面理解为“把帽子摘下来”，也不要漏掉介词 to。",
+    "example": {"english": "Hats off to the volunteers who organized the concert.", "chinese": "向组织这场音乐会的志愿者们致敬。"},
+    "application": {"prompt": "The volunteers raised money for the music room in one week. ___ them for their hard work! A. Hats off to B. Hands down from", "solution": "A。解析：称赞并感谢志愿者的努力可说 Hats off to them，意为“向他们致敬”。"},
+    "sources": [{"label": "Cambridge Dictionary: hats off to someone", "url": "https://dictionary.cambridge.org/dictionary/english/hats-off-to"}]
+  },
+  {
+    "word": "genius",
+    "examTags": ["词汇·名词", "熟词多义·天才与天赋"],
+    "grammar": "n. 天才人物；天赋。可数名词指人，不可数用法可指非凡的才能；复数 geniuses。",
+    "collocations": "a musical genius; a stroke of genius; show genius",
+    "commonMistake": "genius 指人时是可数名词，前面通常要有 a/the；形容词形式是 ingenious，意为“巧妙的”。",
+    "example": {"english": "The young chess genius won every game in the contest.", "chinese": "这位年轻的国际象棋天才在比赛中赢下了每一盘棋。"},
+    "application": {"prompt": "At age six, Kai could solve the hardest puzzle in minutes. People called him a ___. A. genius B. guest", "solution": "A。解析：很有天赋并能迅速解题的人可称为 genius（天才）。"},
+    "sources": [{"label": "Cambridge Dictionary: genius", "url": "https://dictionary.cambridge.org/dictionary/english/genius"}]
+  },
+  {
+    "word": "pianist",
+    "examTags": ["词汇·职业名称", "语法·乐器名词派生"],
+    "grammar": "n. 钢琴家；钢琴演奏者。由 piano + -ist 构成，复数 pianists。",
+    "collocations": "a concert pianist; a talented pianist; play as a pianist",
+    "commonMistake": "pianist 指弹钢琴的人；piano 是乐器本身。注意拼写 pian-ist，不要误写成 pianest。",
+    "example": {"english": "The pianist practiced for two hours before the concert.", "chinese": "音乐会前，这位钢琴家练习了两个小时。"},
+    "application": {"prompt": "At the concert, the musician sat at the grand piano and played Chopin's work. She is a ___. A. pianist B. poet", "solution": "A。解析：在音乐会上演奏钢琴的人是 pianist（钢琴家）；poet 是诗人。"},
+    "sources": [{"label": "Cambridge Dictionary: pianist", "url": "https://dictionary.cambridge.org/dictionary/english/pianist"}]
+  },
+  {
+    "word": "outdo",
+    "examTags": ["词汇·动词", "语法·不规则动词"],
+    "grammar": "v. 胜过；做得比……好。过去式 outdid，过去分词 outdone；outdo oneself 表示超常发挥。",
+    "collocations": "outdo a rival; outdo oneself; try to outdo someone",
+    "commonMistake": "outdo 的过去式是 outdid，不能写 outdoed；完成时用 outdone，如 has outdone。",
+    "example": {"english": "The team outdid its own record at the final meet.", "chinese": "这支队伍在决赛中刷新了自己的纪录。"},
+    "application": {"prompt": "Mia scored 88 last time, but today she earned 94 points. She managed to ___ her previous result. A. repeat B. outdo", "solution": "B。解析：94 分超过原来的 88 分，表示 outdo（胜过）之前的成绩。"},
+    "sources": [{"label": "Cambridge Dictionary: outdo", "url": "https://dictionary.cambridge.org/dictionary/english/outdo"}]
+  },
+  {
+    "word": "widen",
+    "examTags": ["词汇·动词", "语法·形容词派生"],
+    "grammar": "v. 拓宽；扩大。由 wide + -en 构成；widened 为过去式，widening 为现在分词。",
+    "collocations": "widen a road; widen the gap; widen one's knowledge",
+    "commonMistake": "wide 变动词时去 e 再加 -en：widen；不是 wideen。",
+    "example": {"english": "The town plans to widen the road near the school.", "chinese": "镇上计划拓宽学校附近的道路。"},
+    "application": {"prompt": "The old path was too narrow for two cyclists to pass, so workers planned to ___. A. widen it B. lengthen it", "solution": "A。解析：问题是道路太窄，解决办法是 widen（拓宽）道路；lengthen 是加长。"},
+    "sources": [{"label": "Cambridge Dictionary: widen", "url": "https://dictionary.cambridge.org/dictionary/english/widen"}]
+  },
+  {
+    "word": "soul",
+    "examTags": ["词汇·名词", "阅读·音乐情感"],
+    "grammar": "n. 灵魂；真挚情感；人。可数，复数 souls；with soul 可形容演奏富有感情。",
+    "collocations": "a kind soul; soul music; put one's soul into something",
+    "commonMistake": "soul（灵魂、情感）与同音词 sole（鞋底、唯一的）拼写和含义不同。",
+    "example": {"english": "She put her whole soul into the final song.", "chinese": "她全心投入地演唱了最后一首歌。"},
+    "application": {"prompt": "His voice was technically perfect, but the audience loved its deep feeling. The song had ___. A. a schedule B. soul", "solution": "B。解析：观众喜欢歌曲中真挚的情感，说明它有 soul（感染力、真情）。"},
+    "sources": [{"label": "Cambridge Dictionary: soul", "url": "https://dictionary.cambridge.org/dictionary/english/soul"}]
+  },
+  {
+    "word": "look down on",
+    "examTags": ["词汇·动词短语", "语法·动词短语辨析"],
+    "grammar": "phr. 轻视；蔑视。look down on 后接被轻视的人或群体；宾语是代词时放在 on 后。",
+    "collocations": "look down on others; look down on someone for something; never look down on people",
+    "commonMistake": "look down on 表示“轻视”，不是从高处向下看；宾语代词要说 look down on them，不说 look them down on。",
+    "example": {"english": "A good leader never looks down on new team members.", "chinese": "优秀的领导者从不轻视新队员。"},
+    "application": {"prompt": "Although Sam is rich, he treats every worker with respect and never ___. A. looks down on them B. looks them down on", "solution": "A。解析：短语 look down on 意为“轻视”，代词 them 放在介词 on 后。"},
+    "sources": [{"label": "Cambridge Dictionary: look down on someone", "url": "https://dictionary.cambridge.org/dictionary/english/look-down-on"}]
+  },
+  {
+    "word": "Polish",
+    "examTags": ["词汇·形容词与名词", "语法·国籍与语言"],
+    "grammar": "adj. 波兰的；n. 波兰人、波兰语。首字母大写；Poland 是国家名，Pole 指波兰人。",
+    "collocations": "Polish music; a Polish composer; speak Polish",
+    "commonMistake": "表示波兰的或波兰语时 Polish 首字母大写；polish（小写）是动词“擦亮”。",
+    "example": {"english": "The museum held a concert of Polish music.", "chinese": "博物馆举办了一场波兰音乐会。"},
+    "application": {"prompt": "Chopin was born in Poland, and the program featured ___ composers. A. Polish B. polish", "solution": "A。解析：此处说明作曲家的国籍，国籍形容词 Polish 必须大写；小写 polish 是“擦亮”。"},
+    "sources": [{"label": "Cambridge Dictionary: Polish", "url": "https://dictionary.cambridge.org/dictionary/english/polish"}]
+  },
+  {
+    "word": "characteristic",
+    "examTags": ["词汇·名词与形容词", "语法·词性辨析"],
+    "grammar": "n. 特征；品质；adj. 典型的。复数 characteristics；常用 characteristic of...。",
+    "collocations": "a common characteristic; a characteristic feature; be characteristic of",
+    "commonMistake": "characteristic 可作名词或形容词；character 是“人物、性格”，不是 characteristic 的同义词替换。",
+    "example": {"english": "A strong beat is a characteristic feature of this style.", "chinese": "强劲的节拍是这种风格的典型特征。"},
+    "application": {"prompt": "The bright brass sound appears in nearly every song by the band. It is a ___ feature of their music. A. characteristic B. characteristicly", "solution": "A。解析：名词 feature 前需要形容词 characteristic（典型的）；characteristicly 不是正确拼法。"},
+    "sources": [{"label": "Cambridge Dictionary: characteristic", "url": "https://dictionary.cambridge.org/dictionary/english/characteristic"}]
+  },
+  {
+    "word": "proudly",
+    "examTags": ["词汇·副词", "语法·形容词派生"],
+    "grammar": "adv. 自豪地；壮观地。形容词 proud；副词由 proud + -ly 构成，比较级 more proudly。",
+    "collocations": "smile proudly; stand proudly; proudly display a prize",
+    "commonMistake": "proudly 修饰动词，说明动作怎样发生；be 后作表语要用 proud，如 be proud of。",
+    "example": {"english": "The children proudly showed their handmade instruments.", "chinese": "孩子们自豪地展示了自己制作的乐器。"},
+    "application": {"prompt": "After receiving the medal, Lena held it up with a big smile. She ___ showed it to her family. A. proud B. proudly", "solution": "B。解析：副词 proudly 修饰 showed，说明她“自豪地”展示奖牌；proud 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: proudly", "url": "https://dictionary.cambridge.org/dictionary/english/proudly"}]
+  },
+  {
+    "word": "funeral",
+    "examTags": ["词汇·可数名词", "阅读·人生仪式"],
+    "grammar": "n. 葬礼。可数，复数 funerals；常说 attend a funeral 或 hold a funeral。",
+    "collocations": "attend a funeral; a funeral service; funeral music",
+    "commonMistake": "attend a funeral 表示参加葬礼；表示悼念某人可说 at someone's funeral，不把 funeral 当动词。",
+    "example": {"english": "Many people attended the teacher's funeral.", "chinese": "许多人参加了这位老师的葬礼。"},
+    "application": {"prompt": "Friends gathered to say goodbye to Mr. Wu after his death. They attended his ___. A. festival B. funeral", "solution": "B。解析：亲友为逝者送别的仪式是 funeral（葬礼）。"},
+    "sources": [{"label": "Cambridge Dictionary: funeral", "url": "https://dictionary.cambridge.org/dictionary/english/funeral"}]
+  },
+  {
+    "word": "young and old",
+    "examTags": ["词汇·并列短语", "阅读·人群范围"],
+    "grammar": "phr. 老老少少；年轻人和老年人。常作名词性表达，young and old 前可加 people。",
+    "collocations": "people young and old; welcome young and old; for young and old",
+    "commonMistake": "young and old 概括不同年龄的人；young and the old 中 old 前加 the 会改变表达结构。",
+    "example": {"english": "The music festival attracted people young and old.", "chinese": "这场音乐节吸引了男女老少。"},
+    "application": {"prompt": "The community concert welcomed children, parents, and grandparents alike. It was open to ___. A. young and old B. young or older", "solution": "A。解析：表示不分年龄、老少皆可参加，用并列短语 young and old。"},
+    "sources": [{"label": "Cambridge Dictionary: old", "url": "https://dictionary.cambridge.org/dictionary/english/old"}]
+  },
+  {
+    "word": "profession",
+    "examTags": ["词汇·名词", "语法·词性派生"],
+    "grammar": "n. 职业；行业。可数，复数 professions；professional 可作名词“专业人士”或形容词“职业的”。",
+    "collocations": "choose a profession; the teaching profession; a medical profession",
+    "commonMistake": "profession 通常指需要专业训练的职业；professional 可作形容词，不能在名词前误用 profession。",
+    "example": {"english": "Music became her profession after years of training.", "chinese": "经过多年的训练，音乐成为了她的职业。"},
+    "application": {"prompt": "After finishing medical school, he chose medicine as his ___. A. professor B. profession", "solution": "B。解析：把医学作为自己的职业可说 choose medicine as a profession；professor 是教授。"},
+    "sources": [{"label": "Cambridge Dictionary: profession", "url": "https://dictionary.cambridge.org/dictionary/english/profession"}]
+  },
+  {
+    "word": "contribution",
+    "examTags": ["词汇·名词", "语法·动词派生"],
+    "grammar": "n. 贡献；捐款。动词 contribute；常用 make a contribution to...，to 是介词。",
+    "collocations": "make a contribution; a contribution to music; contribute money to a cause",
+    "commonMistake": "make a contribution to 后接名词或动名词；动词 contribute to 中的 to 也作介词，后接 -ing。",
+    "example": {"english": "Her research made an important contribution to music education.", "chinese": "她的研究为音乐教育作出了重要贡献。"},
+    "application": {"prompt": "Each student gave ten dollars to help buy instruments. They made a small ___ to the music fund. A. contribution B. conclusion", "solution": "A。解析：捐款帮助音乐基金是 make a contribution to（为……作贡献）。"},
+    "sources": [{"label": "Cambridge Dictionary: contribution", "url": "https://dictionary.cambridge.org/dictionary/english/contribution"}]
+  },
+  {
+    "word": "cartoon",
+    "examTags": ["词汇·可数名词", "阅读·影视类型"],
+    "grammar": "n. 动画片；漫画。可数，复数 cartoons；cartoon character 指卡通人物。",
+    "collocations": "watch a cartoon; a cartoon film; draw a cartoon",
+    "commonMistake": "cartoon 可指动画片或漫画；若强调真人出演的电影，不用 cartoon。",
+    "example": {"english": "The children watched a cartoon about a clever musician.", "chinese": "孩子们看了一部关于聪明音乐家的动画片。"},
+    "application": {"prompt": "The film showed drawn characters moving and talking, so the children laughed at the ___. A. concert B. cartoon", "solution": "B。解析：以绘制角色为主的动画短片是 cartoon（动画片）。"},
+    "sources": [{"label": "Cambridge Dictionary: cartoon", "url": "https://dictionary.cambridge.org/dictionary/english/cartoon"}]
+  },
+  {
+    "word": "fair",
+    "examTags": ["词汇·形容词与名词", "熟词多义·公平与集市"],
+    "grammar": "adj. 公平的；合理的；n. 露天游乐场；集市。fairly 是副词，fairness 是名词“公平”。",
+    "collocations": "a fair decision; a book fair; a fair share",
+    "commonMistake": "fair 可表示“公平的”或“集市”；fairly 通常作副词，不要用 fairly 作名词。",
+    "example": {"english": "The teacher gave each group a fair chance to perform.", "chinese": "老师给了每个小组公平的表演机会。"},
+    "application": {"prompt": "Both teams followed the same rules and had equal time on stage. The contest was ___. A. fair B. empty", "solution": "A。解析：双方规则和时间相同，比赛是 fair（公平的）。"},
+    "sources": [{"label": "Cambridge Dictionary: fair", "url": "https://dictionary.cambridge.org/dictionary/english/fair"}]
+  },
+  {
+    "word": "fair and square",
+    "examTags": ["词汇·习语", "阅读·比赛结果"],
+    "grammar": "idiom. 光明正大地；完全公平地。常作副词短语修饰 win、beat 等动词。",
+    "collocations": "win fair and square; beat a team fair and square",
+    "commonMistake": "fair and square 在该习语中表示“光明正大地”，不是分别形容公平和方正；常放在动词后。",
+    "example": {"english": "Our team won the final fair and square.", "chinese": "我们队光明正大地赢得了决赛。"},
+    "application": {"prompt": "The judges checked the scores, and no one broke a rule. Our team won ___. A. in a circle B. fair and square", "solution": "B。解析：比赛没有违规、胜利完全公平，表达“光明正大地赢”用 fair and square。"},
+    "sources": [{"label": "Cambridge Dictionary: fair and square", "url": "https://dictionary.cambridge.org/dictionary/english/fair-and-square"}]
+  },
+  {
+    "word": "tape",
+    "examTags": ["词汇·名词与动词", "阅读·录音媒介"],
+    "grammar": "n. 磁带；胶带；v. 用磁带录音或录像。可数，复数 tapes；tape recorder 指磁带录音机。",
+    "collocations": "a tape recording; a cassette tape; tape a concert",
+    "commonMistake": "tape 可表示磁带或胶带，需看上下文；磁带作录音媒介时不等于 tape recorder（录音机）。",
+    "example": {"english": "My father still keeps a tape of his first concert.", "chinese": "我父亲仍保存着他第一次音乐会的录音带。"},
+    "application": {"prompt": "The old recorder played a cassette from 1985. My mother kept the music on a ___. A. tape B. screen", "solution": "A。解析：录音机里的旧式盒带是 tape（磁带），screen 是屏幕。"},
+    "sources": [{"label": "Cambridge Dictionary: tape", "url": "https://dictionary.cambridge.org/dictionary/english/tape"}]
+  },
+  {
+    "word": "tap",
+    "examTags": ["词汇·动词与名词", "语法·动词变形"],
+    "grammar": "v. 轻敲；打节拍；n. 水龙头；轻敲声。过去式 tapped，现在分词 tapping，需双写 p。",
+    "collocations": "tap a finger; tap someone on the shoulder; turn on the tap",
+    "commonMistake": "tap 作动词变过去式或现在分词时双写 p：tapped、tapping；名词 tap 还可指水龙头。",
+    "example": {"english": "He tapped the table twice to get our attention.", "chinese": "他轻敲了两下桌子来引起我们的注意。"},
+    "application": {"prompt": "The conductor needed the violinist's attention without speaking. He gave her a gentle ___ on the shoulder. A. wave B. tap", "solution": "B。解析：轻敲一下可说 give someone a tap on the shoulder；tap 作名词表示轻敲。"},
+    "sources": [{"label": "Cambridge Dictionary: tap", "url": "https://dictionary.cambridge.org/dictionary/english/tap"}]
+  },
+  {
+    "word": "tap one’s feet",
+    "examTags": ["词汇·动词短语", "阅读·动作描写"],
+    "grammar": "phr. 用脚打节拍。tap one's feet to music；one's 随主语变化为 my、his、her 等。",
+    "collocations": "tap one's feet to a beat; tap your feet along to music",
+    "commonMistake": "短语中的 one's 要与主语对应：She taps her feet；描述持续动作时 tap 要按规则双写 p 加 -ing。",
+    "example": {"english": "He tapped his feet to the lively music.", "chinese": "他随着欢快的音乐用脚打拍子。"},
+    "application": {"prompt": "While the band played, Leo's shoes moved lightly against the floor in time with the beat. He ___ to the music. A. tapped his feet B. clapped his hands", "solution": "A。解析：鞋子随节拍轻点地面，说明 Leo tapped his feet（用脚打节拍）。"},
+    "sources": [{"label": "Cambridge Dictionary: tap", "url": "https://dictionary.cambridge.org/dictionary/english/tap"}]
+  },
+  {
+    "word": "champion",
+    "examTags": ["词汇·名词与动词", "语法·熟词多义"],
+    "grammar": "n. 冠军；v. 捍卫、支持。可数名词复数 champions；动词过去式 championed。",
+    "collocations": "a world champion; the defending champion; champion a cause",
+    "commonMistake": "champion 作动词表示“支持、捍卫”，后接观点或事业；表示比赛冠军时它是名词。",
+    "example": {"english": "The singer became a champion of music education.", "chinese": "这位歌手成了音乐教育的倡导者。"},
+    "application": {"prompt": "The singer spoke at meetings and supported free music lessons for children. She chose to ___ music education. A. champion B. compete", "solution": "A。解析：主动支持并为音乐教育发声可用 champion 作动词，意为“倡导、捍卫”。"},
+    "sources": [{"label": "Cambridge Dictionary: champion", "url": "https://dictionary.cambridge.org/dictionary/english/champion"}]
+  },
+  {
+    "word": "flowing",
+    "examTags": ["词汇·形容词", "阅读·音乐与动作描写"],
+    "grammar": "adj. 流畅的；流动的；宽松飘逸的。由 flow + -ing 构成，可修饰 melody、hair、dress 等。",
+    "collocations": "a flowing melody; flowing lines; a flowing dress",
+    "commonMistake": "flowing 描写连续顺畅或飘动的状态；表示“有流量的”不要把它与 flowing water 的字面义混淆。",
+    "example": {"english": "The pianist played the flowing melody without a pause.", "chinese": "钢琴家一气呵成地弹奏了这段流畅的旋律。"},
+    "application": {"prompt": "The violinist connected each note smoothly, with no sudden breaks. The melody sounded ___. A. broken B. flowing", "solution": "B。解析：音符衔接顺畅、没有中断，旋律听起来 flowing（流畅）。"},
+    "sources": [{"label": "Cambridge Dictionary: flowing", "url": "https://dictionary.cambridge.org/dictionary/english/flowing"}]
+  },
+  {
+    "word": "finger",
+    "examTags": ["词汇·可数名词", "阅读·身体部位"],
+    "grammar": "n. 手指。可数，复数 fingers；thumb（拇指）通常单独称呼，不属于四根手指的用法。",
+    "collocations": "point a finger; finger exercise; play with one's fingers",
+    "commonMistake": "finger 指手指，thumb 专指拇指；按键可说 press a key with one finger。",
+    "example": {"english": "The pianist hurt one finger during practice.", "chinese": "钢琴家练习时弄伤了一根手指。"},
+    "application": {"prompt": "The pianist pressed the key with her index ___. A. finger B. shoulder", "solution": "A。解析：index finger 是“食指”，句中钢琴家用手指按琴键。"},
+    "sources": [{"label": "Cambridge Dictionary: finger", "url": "https://dictionary.cambridge.org/dictionary/english/finger"}]
+  },
+  {
+    "word": "schoolmate",
+    "examTags": ["词汇·可数名词", "语法·复合名词"],
+    "grammar": "n. 同学；校友。可数，复数 schoolmates；可指同校学生，不一定同班。",
+    "collocations": "a former schoolmate; meet a schoolmate; schoolmates from primary school",
+    "commonMistake": "schoolmate 指同校同学；classmate 更明确指同班同学，不能仅凭同校就断定二人是 classmates。",
+    "example": {"english": "I met an old schoolmate at the music competition.", "chinese": "我在音乐比赛上遇到了一位老同学。"},
+    "application": {"prompt": "Lily and Ben went to the same school, though they were in different classes. Ben is Lily's ___. A. teammate B. schoolmate", "solution": "B。解析：两人同校但不同班，可称为 schoolmates；teammate 指队友。"},
+    "sources": [{"label": "Cambridge Dictionary: schoolmate", "url": "https://dictionary.cambridge.org/dictionary/english/schoolmate"}]
+  },
+  {
+    "word": "nowadays",
+    "examTags": ["词汇·时间副词", "写作·今昔对比"],
+    "grammar": "adv. 现在；目前。通常置于句首或句末，用于谈论当今情况；不用于表示某个具体时刻。",
+    "collocations": "nowadays many people; children nowadays; life nowadays",
+    "commonMistake": "nowadays 指“如今”这一时期；表示“现在这一刻”通常用 now，不说 at nowadays。",
+    "example": {"english": "Nowadays, many students learn music through online lessons.", "chinese": "如今，许多学生通过在线课程学习音乐。"},
+    "application": {"prompt": "In the past, people bought music on tapes. ___, many listeners use streaming apps. A. Nowadays B. Yesterday", "solution": "A。解析：句子对比过去和当今听音乐的方式，应使用 nowadays（如今）。"},
+    "sources": [{"label": "Cambridge Dictionary: nowadays", "url": "https://dictionary.cambridge.org/dictionary/english/nowadays"}]
+  }
+]

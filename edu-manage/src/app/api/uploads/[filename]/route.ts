@@ -7,6 +7,7 @@ import { AuthError, requireAuthenticatedUser } from '@/lib/auth/guards'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { canAccessFeedbackImage } from '@/lib/classroom-feedback/access'
 import { assertCanAccessStoredFileAsset } from '@/lib/upload-access'
+import { extractUploadStorageKey, normalizeUploadRequestPath } from '@/lib/upload-url'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,13 +38,6 @@ function uploadRoots() {
   ].filter(Boolean) as string[]
 }
 
-function safeRelativePath(raw: string) {
-  const decoded = decodeURIComponent(raw || '').replace(/\\/g, '/')
-  const normalized = path.posix.normalize(decoded).replace(/^\/+/, '')
-  if (!normalized || normalized === '.' || normalized.startsWith('../') || normalized.includes('/../')) return null
-  return normalized
-}
-
 async function findUploadedFile(relativePath: string) {
   for (const root of uploadRoots()) {
     const rootPath = path.resolve(root)
@@ -63,7 +57,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
   const user = await requireAuthenticatedUser()
 
   const { filename } = await params
-  const relativePath = safeRelativePath(filename)
+  const relativePath = normalizeUploadRequestPath(filename)
   if (!relativePath) {
     return NextResponse.json({ error: 'Invalid file' }, { status: 400 })
   }
@@ -92,6 +86,29 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  if (req.nextUrl.searchParams.get('variant') === 'thumbnail') {
+    const asset = await prisma.fileAsset.findFirst({
+      where: { storageKey: relativePath, deletedAt: null },
+      select: { thumbnailUrl: true, storageDriver: true },
+    })
+    const thumbnailKey = asset?.thumbnailUrl ? extractUploadStorageKey(asset.thumbnailUrl) : null
+    if (asset && thumbnailKey && thumbnailKey !== relativePath) {
+      try {
+        const body = await readStoredBuffer(thumbnailKey, asset.storageDriver)
+        return new NextResponse(new Uint8Array(body), {
+          headers: {
+            'Content-Type': 'image/webp',
+            'Cache-Control': 'private, max-age=300, must-revalidate',
+            Vary: 'Cookie',
+            'X-Content-Type-Options': 'nosniff',
+          },
+        })
+      } catch {
+        // A missing thumbnail falls back to the authorized original below.
+      }
+    }
+  }
+
   const filePath = await findUploadedFile(relativePath)
   if (!filePath) {
     if (!isOssEnabled()) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -103,6 +120,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
           'Content-Type': CONTENT_TYPES[ext] || 'application/octet-stream',
           'Cache-Control': 'private, max-age=60, must-revalidate',
           Vary: 'Cookie',
+          'X-Content-Type-Options': 'nosniff',
         },
       })
     } catch (error) {
@@ -124,6 +142,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
         ETag: etag,
         'Cache-Control': 'private, no-cache, must-revalidate',
         Vary: 'Cookie',
+        'X-Content-Type-Options': 'nosniff',
       },
     })
   }
@@ -136,6 +155,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
       'Cache-Control': 'private, no-cache, must-revalidate',
       Vary: 'Cookie',
       ETag: etag,
+      'X-Content-Type-Options': 'nosniff',
     },
   })
 })

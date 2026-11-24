@@ -39,15 +39,31 @@ describe('INTENSIVE lesson review', () => {
     })).toContain('没有实际出勤学员')
   })
 
-  it('tracks approved teaching hours even when prepaid balance starts at zero', () => {
+  it('accrues approved teaching hours for non-prepaid enrollments', () => {
     expect(calculateApprovedHourSettlement({
       status: 'PRESENT',
       actualMinutes: 90,
+      totalHours: 0,
       remainHours: 0,
     })).toEqual({
       requestedHours: 1.5,
       deductedHours: 0,
-      uncoveredHours: 1.5,
+      accruedHours: 1.5,
+      uncoveredHours: 0,
+    })
+  })
+
+  it('preserves minute precision for 40-minute intensive sessions', () => {
+    expect(calculateApprovedHourSettlement({
+      status: 'PRESENT',
+      actualMinutes: 40,
+      totalHours: 0,
+      remainHours: 0,
+    })).toEqual({
+      requestedHours: 0.66666667,
+      deductedHours: 0,
+      accruedHours: 0.66666667,
+      uncoveredHours: 0,
     })
   })
 
@@ -55,19 +71,23 @@ describe('INTENSIVE lesson review', () => {
     expect(calculateApprovedHourSettlement({
       status: 'PRESENT',
       actualMinutes: 90,
+      totalHours: 10,
       remainHours: 1,
     })).toEqual({
       requestedHours: 1.5,
       deductedHours: 1,
+      accruedHours: 0,
       uncoveredHours: 0.5,
     })
     expect(calculateApprovedHourSettlement({
       status: 'LEAVE',
       actualMinutes: 90,
+      totalHours: 10,
       remainHours: 20,
     })).toEqual({
       requestedHours: 0,
       deductedHours: 0,
+      accruedHours: 0,
       uncoveredHours: 0,
     })
   })

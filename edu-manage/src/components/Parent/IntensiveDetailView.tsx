@@ -105,6 +105,7 @@ export function IntensiveDetailView({
       {showBack && (
         <button
           type="button"
+          className="mobile-shell-back"
           onClick={() => router.back()}
           style={{ display: 'flex', alignItems: 'center', gap: 6, border: 'none', background: 'transparent', color: '#5a4e3a', fontSize: 13, padding: '6px 0', cursor: 'pointer', justifySelf: 'flex-start' }}
         >
@@ -142,11 +143,11 @@ export function IntensiveDetailView({
           <div>
             <div style={{ fontSize: 11, color: 'rgba(242,227,182,.85)' }}>剩余课时</div>
             <div style={{ fontSize: 30, fontWeight: 800, color: '#F2E3B6', lineHeight: 1.15 }}>
-              {remain.toFixed(1)}<span style={{ fontSize: 13, fontWeight: 500 }}> 小时</span>
+              {remain.toFixed(2)}<span style={{ fontSize: 13, fontWeight: 500 }}> 小时</span>
             </div>
           </div>
           <div style={{ textAlign: 'right', fontSize: 11, color: 'rgba(246,233,200,.75)', lineHeight: 1.7 }}>
-            <div>已用 {used.toFixed(1)}h / 总计 {total.toFixed(1)}h</div>
+            <div>已用 {used.toFixed(2)}h / 总计 {total.toFixed(2)}h</div>
             <div style={{ width: 130, height: 5, borderRadius: 999, background: 'rgba(201,164,92,.22)', marginTop: 5, overflow: 'hidden' }}>
               <div style={{ width: `${usedPct}%`, height: '100%', borderRadius: 999, background: 'linear-gradient(90deg,#C9A45C,#F2E3B6)' }} />
             </div>
@@ -206,10 +207,10 @@ export function IntensiveDetailView({
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 6, fontSize: 12, textAlign: 'center' }}>
           <span style={{ background: '#0E5E4E', borderRadius: 10, padding: '8px 2px', color: '#F2E3B6' }}>
-            剩余课时<br /><strong style={{ fontSize: 14, color: '#F6E9C8' }}>{remain.toFixed(1)}h</strong>
+            剩余课时<br /><strong style={{ fontSize: 14, color: '#F6E9C8' }}>{remain.toFixed(2)}h</strong>
           </span>
           <span style={{ background: '#F8F3E7', borderRadius: 10, padding: '8px 2px', color: '#123C35' }}>
-            已审核授课<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{summary.approvedHours.toFixed(1)}h</strong>
+            已审核授课<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{summary.approvedHours.toFixed(2)}h</strong>
           </span>
           <span style={{ background: '#F8F3E7', borderRadius: 10, padding: '8px 2px', color: '#123C35' }}>
             待审核授课<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{summary.pendingCount}节</strong>
@@ -238,7 +239,7 @@ export function IntensiveDetailView({
               const feedback = lesson.classroomFeedbacks?.[0]
               const attendance = lesson.attendances?.[0]
               const minutes = Number(attendance?.actualMinutes || lesson.actualMinutes || 0)
-              const hours = minutes > 0 ? (minutes / 60).toFixed(1) : ''
+              const hours = minutes > 0 ? (minutes / 60).toFixed(2) : ''
               const review = lesson.intensiveReviews?.[0]
               return (
                 <ParentCard key={lesson.id} style={{ padding: 13, borderLeft: `3px solid ${status.color}` }}>

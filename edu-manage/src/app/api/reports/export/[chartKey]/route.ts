@@ -133,9 +133,9 @@ export const GET = apiHandler(async (
         map.set(k, (map.get(k) || 0) + f.amount)
       }
       const rows = [...map.entries()].map(([month, income]) => [month, Math.round(income)])
-      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('财务', ['月份', '收入(元)'], rows))
-      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '财务')
-      return sendXlsx(wb, `财务收支分析-${new Date().toISOString().slice(0, 10)}`)
+      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('收费收入', ['月份', '已收费用(元)'], rows))
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '收费收入')
+      return sendXlsx(wb, `收费收入趋势-${new Date().toISOString().slice(0, 10)}`)
     }
     case 'attendance': {
       const [attData, mkData] = await Promise.all([

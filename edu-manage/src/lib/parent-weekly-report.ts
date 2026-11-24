@@ -1,9 +1,13 @@
-import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 type WeeklyLessonRow = {
   id: string
   subject: string | null
+  lessonDate: Date
+  teacherId?: string | null
   group: {
+    teacherId?: string | null
+    teacherAssignments?: Array<{ teacherId: string; subject: string | null }>
     course: { subject: string | null }
     enrollments: Array<{ studentId: string; subjects: string[] }>
   }
@@ -16,12 +20,10 @@ export function buildWeeklyLessonRosters(lessons: WeeklyLessonRow[], allowedStud
 
   for (const lesson of lessons) {
     const snapshotIds = lesson.lessonStudents.map((row) => row.studentId)
-    const subject = lesson.subject || lesson.group.course.subject
-    const rosterIds = snapshotIds.length
-      ? snapshotIds
-      : lesson.group.enrollments
-        .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, subject))
-        .map((enrollment) => enrollment.studentId)
+    const subject = lesson.subject
+      || lesson.group.teacherAssignments?.find((assignment) => assignment.teacherId === lesson.teacherId || assignment.teacherId === lesson.group.teacherId)?.subject
+      || lesson.group.course.subject
+    const rosterIds = resolveSubjectLessonStudentIds(snapshotIds, lesson.group.enrollments, subject, lesson.lessonDate)
 
     for (const studentId of new Set(rosterIds)) {
       if (!allowed.has(studentId)) continue

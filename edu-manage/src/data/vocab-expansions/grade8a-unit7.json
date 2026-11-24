@@ -1,0 +1,1538 @@
+[
+  {
+    "word": "prediction",
+    "examTags": [
+      "词汇·名词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 预测；预言。动词为 predict，常见词形 prediction(s)。",
+    "collocations": "make a prediction; a prediction about the future; predict that ...",
+    "commonMistake": "prediction 是名词，predict 是动词；不要说 make a predict。",
+    "example": {
+      "english": "Her prediction about future transport was quite positive.",
+      "chinese": "她对未来交通的预测相当乐观。"
+    },
+    "application": {
+      "prompt": "The report is a ___ about life in 2050. A. prediction B. passenger",
+      "solution": "A。解析：about life in 2050 的预测用名词 prediction。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: prediction",
+        "url": "https://dictionary.cambridge.org/dictionary/english/prediction"
+      }
+    ]
+  },
+  {
+    "word": "outer",
+    "examTags": [
+      "词汇·形容词辨析",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 外面的；外表的；位于外部的。可作定语，outermost 表示最外层的。",
+    "collocations": "the outer wall; the outer layer; outer space",
+    "commonMistake": "outer 表示“外部的”，不等于 other（其他的）；outer 通常不单独作表语。",
+    "example": {
+      "english": "The outer wall of the science centre is made of glass.",
+      "chinese": "科学中心的外墙是玻璃做的。"
+    },
+    "application": {
+      "prompt": "The layer farthest from the centre is the ___ layer. A. inner B. outer",
+      "solution": "B。解析：outer 与 farthest from the centre 对应，表示外面的。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: outer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/outer"
+      }
+    ]
+  },
+  {
+    "word": "outer space",
+    "examTags": [
+      "词汇·名词短语",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 太空；外层空间，通常作不可数名词。常用 in outer space。",
+    "collocations": "explore outer space; travel in outer space; outer space research",
+    "commonMistake": "outer space 通常不加 a；表示“在太空中”说 in outer space。",
+    "example": {
+      "english": "The new spacecraft may travel through outer space one day.",
+      "chinese": "新型航天器有一天可能会穿越外层空间。"
+    },
+    "application": {
+      "prompt": "Astronauts work ___ for months at a time. A. in outer space B. at the outer space",
+      "solution": "A。解析：表示“在太空中”用 in outer space，且 space 此处不加冠词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: outer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/outer"
+      }
+    ]
+  },
+  {
+    "word": "worse",
+    "examTags": [
+      "词汇·比较级与最高级",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj./adv. 更差的；更糟的，是 bad 和 badly 的比较级；最高级为 worst。",
+    "collocations": "get worse; feel worse; worse than before",
+    "commonMistake": "worse 是比较级，后常接 than；最高级用 worst，不要写 worsest。",
+    "example": {
+      "english": "The traffic is worse today than it was yesterday.",
+      "chinese": "今天的交通比昨天更糟。"
+    },
+    "application": {
+      "prompt": "The weather became ___ after the storm. A. worse B. worst",
+      "solution": "A。解析：这里没有最高级范围提示，表示情况变得更糟，用比较级 worse。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: worse",
+        "url": "https://dictionary.cambridge.org/dictionary/english/worse"
+      }
+    ]
+  },
+  {
+    "word": "take over",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "phr. 接替；接管；接收。可接名词作宾语，也可表示接管某职位或职责。",
+    "collocations": "take over a company; take over a job; take over responsibility for ...",
+    "commonMistake": "take over 的宾语可放在 over 后；代词通常放中间：take it over。",
+    "example": {
+      "english": "A new team will take over the project next month.",
+      "chinese": "一个新团队下个月将接手这个项目。"
+    },
+    "application": {
+      "prompt": "The old manager is leaving, so Mia will ___ the team. A. take over B. take after",
+      "solution": "A。解析：接替负责人、接管团队用 take over；take after 表示长得像或性格像。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: take",
+        "url": "https://dictionary.cambridge.org/dictionary/english/take"
+      }
+    ]
+  },
+  {
+    "word": "sci-fi",
+    "examTags": [
+      "词汇·缩写与词义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 科幻小说（或影片等）；science fiction 的非正式缩略形式，也可作名词前置修饰语。",
+    "collocations": "sci-fi film; sci-fi story; read sci-fi",
+    "commonMistake": "sci-fi 是 science fiction 的缩写，拼写常带连字符；不要误拼成 sci fi。",
+    "example": {
+      "english": "We watched a sci-fi film about robots and space travel.",
+      "chinese": "我们看了一部关于机器人和太空旅行的科幻电影。"
+    },
+    "application": {
+      "prompt": "A story about robots in the future is often a ___ story. A. sci-fi B. history",
+      "solution": "A。解析：机器人与未来题材的故事属于 sci-fi（科幻）作品。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sci-fi",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sci-fi"
+      }
+    ]
+  },
+  {
+    "word": "ticket",
+    "examTags": [
+      "词汇·名词与可数性",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 票；券，可数，复数 tickets。常用 ticket to/for。",
+    "collocations": "buy a ticket; a ticket to the concert; train ticket",
+    "commonMistake": "ticket 是可数名词，单数前通常要用 a/an；不要漏冠词。",
+    "example": {
+      "english": "I bought two tickets for Saturday's concert.",
+      "chinese": "我买了两张星期六音乐会的票。"
+    },
+    "application": {
+      "prompt": "You need a ___ to enter the concert hall. A. wallet B. ticket",
+      "solution": "B。解析：进入音乐厅需要票，用 ticket。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ticket",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ticket"
+      }
+    ]
+  },
+  {
+    "word": "positive",
+    "examTags": [
+      "词汇·形容词语境义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 乐观的；积极的；良好的。常用于 be positive about sth，也可修饰 effect/result。",
+    "collocations": "a positive attitude; positive about the future; a positive effect",
+    "commonMistake": "positive 可表示“积极的、乐观的”，也可表示“确信的”，如 be positive that...；需根据语境判断。",
+    "example": {
+      "english": "She stays positive about the future of clean transport.",
+      "chinese": "她对清洁交通的未来保持乐观。"
+    },
+    "application": {
+      "prompt": "Although the task is hard, Leo remains ___ and keeps trying. A. positive B. careless",
+      "solution": "A。解析：遇到困难仍坚持尝试，说明态度积极，用 positive。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: positive",
+        "url": "https://dictionary.cambridge.org/dictionary/english/positive"
+      }
+    ]
+  },
+  {
+    "word": "traffic",
+    "examTags": [
+      "词汇·不可数名词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 交通；运输，通常不可数；v. 进行非法交易（教材语境以交通为主）。",
+    "collocations": "heavy traffic; traffic lights; a traffic jam",
+    "commonMistake": "traffic 表示“交通”时通常不可数，不说 a traffic；“交通拥堵”可说 heavy traffic 或 a traffic jam。",
+    "example": {
+      "english": "There is heavy traffic near the station every morning.",
+      "chinese": "每天早晨车站附近交通都很拥堵。"
+    },
+    "application": {
+      "prompt": "There is ___ on the road after the concert. A. many traffics B. heavy traffic",
+      "solution": "B。解析：traffic 作“交通”讲通常不可数，用 heavy 修饰。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: traffic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/traffic"
+      }
+    ]
+  },
+  {
+    "word": "technology",
+    "examTags": [
+      "词汇·名词与可数性",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 科技；工艺，通常不可数；特定技术可用 technologies。",
+    "collocations": "modern technology; technology in education; use technology",
+    "commonMistake": "technology 通常不可数；指具体多种技术时才可用复数 technologies。",
+    "example": {
+      "english": "Modern technology helps people share information quickly.",
+      "chinese": "现代科技帮助人们快速分享信息。"
+    },
+    "application": {
+      "prompt": "___ has changed the way students learn. A. Technology B. A technology",
+      "solution": "A。解析：泛指科技时 technology 通常作不可数名词，不加 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: technology",
+        "url": "https://dictionary.cambridge.org/dictionary/english/technology"
+      }
+    ]
+  },
+  {
+    "word": "video",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 视频；录像系统；v. 录像，过去式/过去分词为 videoed 或 videotaped（常用表达）。",
+    "collocations": "watch a video; a video call; video an event",
+    "commonMistake": "video 作名词表示一个视频时是可数名词；作动词时用 video sth，不要把名词和动词用法混淆。",
+    "example": {
+      "english": "Our class made a short video about future schools.",
+      "chinese": "我们班制作了一段关于未来学校的短视频。"
+    },
+    "application": {
+      "prompt": "We watched a short ___ about smart cities in class. A. traffic B. video",
+      "solution": "B。解析：观看的一段影像是 video（视频）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: video",
+        "url": "https://dictionary.cambridge.org/dictionary/english/video"
+      }
+    ]
+  },
+  {
+    "word": "transport",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 交通运输系统；旅行方式；v. 运输、运送。英式英语中作名词表示公共交通时常为不可数。",
+    "collocations": "public transport; transport goods; a means of transport",
+    "commonMistake": "transport 可作名词或动词；说“运输某物”直接用 transport goods，不加 to。",
+    "example": {
+      "english": "Electric buses transport passengers across the city.",
+      "chinese": "电动公交车把乘客运送到城市各处。"
+    },
+    "application": {
+      "prompt": "Trucks ___ food to the shops every morning. A. predict B. transport",
+      "solution": "B。解析：卡车把食品运送到商店，用动词 transport。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: transport",
+        "url": "https://dictionary.cambridge.org/dictionary/english/transport"
+      }
+    ]
+  },
+  {
+    "word": "system",
+    "examTags": [
+      "词汇·名词与可数性",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 系统；制度；体系，可数，复数 systems。",
+    "collocations": "a transport system; a computer system; the school system",
+    "commonMistake": "system 是可数名词，单数通常要有冠词或限定词，如 a system。",
+    "example": {
+      "english": "The city is building a better transport system.",
+      "chinese": "这座城市正在建设更完善的交通系统。"
+    },
+    "application": {
+      "prompt": "A group of connected parts working together is a ___. A. system B. ticket",
+      "solution": "A。解析：由相互关联部分构成并共同运作的体系是 system。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: system",
+        "url": "https://dictionary.cambridge.org/dictionary/english/system"
+      }
+    ]
+  },
+  {
+    "word": "efficient",
+    "examTags": [
+      "词汇·形副转换",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 效率高的；有功效的。副词 efficiently，名词 efficiency。",
+    "collocations": "an efficient system; work efficiently; energy-efficient buses",
+    "commonMistake": "efficient 是形容词，修饰名词；副词形式为 efficiently，不能用 efficient 修饰动词。",
+    "example": {
+      "english": "The new train system is faster and more efficient.",
+      "chinese": "新的列车系统更快，效率也更高。"
+    },
+    "application": {
+      "prompt": "The new machine uses less energy and works more ___. A. efficient B. efficiently",
+      "solution": "B。解析：修饰动词 works 要用副词 efficiently。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: efficient",
+        "url": "https://dictionary.cambridge.org/dictionary/english/efficient"
+      }
+    ]
+  },
+  {
+    "word": "education",
+    "examTags": [
+      "词汇·名词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 教育，通常不可数；形容词为 educational。",
+    "collocations": "receive an education; the education system; education for all",
+    "commonMistake": "education 泛指教育时通常不可数；修饰名词的形容词是 educational。",
+    "example": {
+      "english": "Technology can support education in many different ways.",
+      "chinese": "科技可以通过许多不同的方式支持教育。"
+    },
+    "application": {
+      "prompt": "Every child should have access to good ___. A. educations B. education",
+      "solution": "B。解析：泛指教育时 education 通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: education",
+        "url": "https://dictionary.cambridge.org/dictionary/english/education"
+      }
+    ]
+  },
+  {
+    "word": "length",
+    "examTags": [
+      "词汇·名词与形容词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 长度；时长，可数。形容词 long；常用 the length of。",
+    "collocations": "the length of a film; a length of 2 metres; at length",
+    "commonMistake": "length 表示长度或时长；描述物体“有多长”也可用 be ... long，不要说 be ... length。",
+    "example": {
+      "english": "The length of the video is about ten minutes.",
+      "chinese": "这段视频的时长大约是十分钟。"
+    },
+    "application": {
+      "prompt": "The ___ of the lesson is 40 minutes. A. long B. length",
+      "solution": "B。解析：空格前有 the，需名词 length；long 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: length",
+        "url": "https://dictionary.cambridge.org/dictionary/english/length"
+      }
+    ]
+  },
+  {
+    "word": "topic",
+    "examTags": [
+      "词汇·名词辨析",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 话题；题目；标题，可数。",
+    "collocations": "a topic for discussion; talk about a topic; change the topic",
+    "commonMistake": "topic 是讨论内容；title 指作品的标题，不要把二者当作同义词。",
+    "example": {
+      "english": "Robots are an interesting topic for our class discussion.",
+      "chinese": "机器人是我们班级讨论的一个有趣话题。"
+    },
+    "application": {
+      "prompt": "The students chose robots as the ___ of their discussion. A. partner B. topic",
+      "solution": "B。解析：讨论的内容是 topic（话题）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: topic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/topic"
+      }
+    ]
+  },
+  {
+    "word": "partner",
+    "examTags": [
+      "词汇·名词与搭配",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 搭档；同伴；合伙人，可数。",
+    "collocations": "a learning partner; work with a partner; business partner",
+    "commonMistake": "partner 指一起合作的人；表示“两人一组”常说 work in pairs 或 work with a partner。",
+    "example": {
+      "english": "Please work with a partner to plan the future city.",
+      "chinese": "请和一位搭档一起规划未来城市。"
+    },
+    "application": {
+      "prompt": "The teacher asked each student to work with a ___. A. partner B. traffic",
+      "solution": "A。解析：两人合作时，另一人是 partner（搭档）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: partner",
+        "url": "https://dictionary.cambridge.org/dictionary/english/partner"
+      }
+    ]
+  },
+  {
+    "word": "shall",
+    "examTags": [
+      "语法·情态动词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "modal v. 将要；将会。现代英语中常用于 I/we shall，或 Shall we ...? 提建议、征求意见；多用 will 表将来。",
+    "collocations": "Shall we ...?; I shall return; We shall see",
+    "commonMistake": "shall 后接动词原形；提建议时用 Shall we + 动词原形，不加 to。",
+    "example": {
+      "english": "Shall we use clean energy in our model city?",
+      "chinese": "我们在城市模型中使用清洁能源好吗？"
+    },
+    "application": {
+      "prompt": "___ we start the presentation now? A. Are B. Shall",
+      "solution": "B。解析：用 Shall we ...? 礼貌地提出建议。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shall"
+      }
+    ]
+  },
+  {
+    "word": "pass",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "v. 及格；通过；经过；传递；n. 及格；通行证。过去式/过去分词 passed。",
+    "collocations": "pass an exam; pass a test; pass a message to sb",
+    "commonMistake": "pass 是动词时过去式加 -ed：passed；pass an exam 表示通过考试，pass sb sth 表示递给某人某物。",
+    "example": {
+      "english": "Mia passed the science test on her first try.",
+      "chinese": "米娅第一次就通过了科学测验。"
+    },
+    "application": {
+      "prompt": "Sam studied hard and ___ the final exam. A. passed B. past",
+      "solution": "A。解析：句中需要动词“通过”，用 pass 的过去式 passed；past 常作介词或形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pass",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pass"
+      }
+    ]
+  },
+  {
+    "word": "winner",
+    "examTags": [
+      "词汇·名词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 优胜者；获胜者；成功者，可数。动词为 win，过去式 won。",
+    "collocations": "the winner of a contest; prize winner; a clear winner",
+    "commonMistake": "winner 是“获胜者”名词；win 是动词，不要说 He is a win。",
+    "example": {
+      "english": "The winner of the school science contest was announced today.",
+      "chinese": "学校科学竞赛的获胜者今天公布了。"
+    },
+    "application": {
+      "prompt": "The person who wins the contest is the ___. A. researcher B. winner",
+      "solution": "B。解析：获胜的人叫 winner；win 是“获胜”这个动作。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: winner",
+        "url": "https://dictionary.cambridge.org/dictionary/english/winner"
+      }
+    ]
+  },
+  {
+    "word": "cure",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 治疗方法；疗法；v. 治愈、治好。",
+    "collocations": "a cure for a disease; cure a patient; cure sb of an illness",
+    "commonMistake": "cure 可作名词或动词；常说 a cure for ...，不要误用 cure of 代替名词结构。",
+    "example": {
+      "english": "Researchers are working to find a cure for the disease.",
+      "chinese": "研究人员正在努力寻找这种疾病的疗法。"
+    },
+    "application": {
+      "prompt": "Scientists hope to find ___ for the illness. A. a concert B. a cure",
+      "solution": "B。解析：治疗疾病的方法是 a cure for the illness。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cure"
+      }
+    ]
+  },
+  {
+    "word": "cancer",
+    "examTags": [
+      "词汇·不可数名词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 癌症，通常作不可数名词；具体类型可说 lung cancer 等。",
+    "collocations": "cancer research; a cancer patient; lung cancer",
+    "commonMistake": "表示疾病“癌症”时通常不加 a；可说 a cancer patient（癌症患者）。",
+    "example": {
+      "english": "The hospital supports cancer research and patient care.",
+      "chinese": "这家医院支持癌症研究和患者护理。"
+    },
+    "application": {
+      "prompt": "Doctors are studying ways to treat ___. A. cash B. cancer",
+      "solution": "B。解析：治疗与研究的疾病是 cancer。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cancer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cancer"
+      }
+    ]
+  },
+  {
+    "word": "concert",
+    "examTags": [
+      "词汇·名词与搭配",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 音乐会；演奏会，可数。",
+    "collocations": "go to a concert; give a concert; a concert hall",
+    "commonMistake": "表示去听音乐会常说 go to a concert；concert 是可数名词，单数前用 a。",
+    "example": {
+      "english": "Our school band will give a concert this Friday.",
+      "chinese": "我们学校乐队将在本周五举办一场音乐会。"
+    },
+    "application": {
+      "prompt": "The school band is playing live music at a ___. A. system B. concert",
+      "solution": "B。解析：现场演奏音乐的活动是 concert（音乐会）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: concert",
+        "url": "https://dictionary.cambridge.org/dictionary/english/concert"
+      }
+    ]
+  },
+  {
+    "word": "cash",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 现金；钱，通常不可数；v. 兑现支票等。",
+    "collocations": "pay in cash; cash payment; cash a cheque",
+    "commonMistake": "cash 作“现金”讲通常不可数，不说 a cash；“用现金支付”说 pay in cash。",
+    "example": {
+      "english": "You can pay for the ticket in cash or by card.",
+      "chinese": "你可以用现金或银行卡支付门票。"
+    },
+    "application": {
+      "prompt": "We paid for lunch ___ because the card machine was broken. A. in cash B. in wallet",
+      "solution": "A。解析：表示“用现金支付”用 in cash。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cash",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cash"
+      }
+    ]
+  },
+  {
+    "word": "wallet",
+    "examTags": [
+      "词汇·名词与可数性",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 钱包；皮夹，可数。",
+    "collocations": "a leather wallet; keep cash in a wallet; lose one's wallet",
+    "commonMistake": "wallet 是可数名词；英式英语中女性的小钱包常称 purse，注意语境与地区差别。",
+    "example": {
+      "english": "He put the ticket safely in his wallet.",
+      "chinese": "他把票妥善地放进了钱包里。"
+    },
+    "application": {
+      "prompt": "He keeps his money and cards in a ___. A. wallet B. disaster",
+      "solution": "A。解析：装钱和卡片的钱包是 wallet。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wallet",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wallet"
+      }
+    ]
+  },
+  {
+    "word": "guest",
+    "examTags": [
+      "词汇·名词辨析",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 客人；宾客，可数。",
+    "collocations": "welcome a guest; guest speaker; house guest",
+    "commonMistake": "guest 是受邀来的客人；host 是主人，二者身份相反。",
+    "example": {
+      "english": "The guest speaker talked about robotics and education.",
+      "chinese": "特邀演讲嘉宾谈了机器人学和教育。"
+    },
+    "application": {
+      "prompt": "The person invited to stay or attend an event is a ___. A. guest B. host",
+      "solution": "A。解析：被邀请来的人是 guest；接待客人的人是 host。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: guest",
+        "url": "https://dictionary.cambridge.org/dictionary/english/guest"
+      }
+    ]
+  },
+  {
+    "word": "chief",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 首席的；最重要的；n. 首领、负责人。",
+    "collocations": "chief reason; chief scientist; the chief of a team",
+    "commonMistake": "chief 可作形容词或名词；不要与 chef（厨师）混淆拼写和词义。",
+    "example": {
+      "english": "The chief scientist explained how the robot works.",
+      "chinese": "首席科学家解释了机器人如何工作。"
+    },
+    "application": {
+      "prompt": "The ___ scientist led the research team. A. chief B. cheap",
+      "solution": "A。解析：chief scientist 表示首席科学家；cheap 意为便宜的。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chief",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chief"
+      }
+    ]
+  },
+  {
+    "word": "researcher",
+    "examTags": [
+      "词汇·名词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 研究者；探索者，可数。动词 research；research 作“研究”通常不可数。",
+    "collocations": "a medical researcher; a team of researchers; conduct research",
+    "commonMistake": "researcher 指做研究的人；research 多作不可数名词，不说 a research 表示一项研究。",
+    "example": {
+      "english": "A researcher is testing a new way to save energy.",
+      "chinese": "一位研究人员正在测试一种新的节能方法。"
+    },
+    "application": {
+      "prompt": "The ___ collected information about the new transport system. A. winner B. researcher",
+      "solution": "B。解析：收集研究资料的人是 researcher。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: researcher",
+        "url": "https://dictionary.cambridge.org/dictionary/english/researcher"
+      }
+    ]
+  },
+  {
+    "word": "everywhere",
+    "examTags": [
+      "词汇·副词用法",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adv. 到处；所有地方；也可作代词性用法。",
+    "collocations": "look everywhere; everywhere else; be seen everywhere",
+    "commonMistake": "everywhere 本身已含“在各处”之意，通常不与 to 连用；不说 go to everywhere。",
+    "example": {
+      "english": "Smart devices are becoming common everywhere.",
+      "chinese": "智能设备正在各地变得普遍。"
+    },
+    "application": {
+      "prompt": "We looked ___ for the missing ticket. A. to everywhere B. everywhere",
+      "solution": "B。解析：everywhere 作副词时前面不加 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: everywhere",
+        "url": "https://dictionary.cambridge.org/dictionary/english/everywhere"
+      }
+    ]
+  },
+  {
+    "word": "robotics",
+    "examTags": [
+      "词汇·名词与学科名称",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 机器人学，学科名称，通常不可数。",
+    "collocations": "study robotics; robotics industry; robotics engineer",
+    "commonMistake": "robotics 是学科名，通常不可数；表示机器人本身用 robots，不要混用。",
+    "example": {
+      "english": "My sister wants to study robotics at university.",
+      "chinese": "我姐姐想在大学学习机器人学。"
+    },
+    "application": {
+      "prompt": "The science club will learn about the design of robots in its ___ class. A. robotics B. traffic",
+      "solution": "A。解析：研究机器人设计的学科是 robotics。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: robotics",
+        "url": "https://dictionary.cambridge.org/dictionary/english/robotics"
+      }
+    ]
+  },
+  {
+    "word": "industry",
+    "examTags": [
+      "词汇·名词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 行业；工业，可数；industrial 为形容词。",
+    "collocations": "the technology industry; heavy industry; industry standards",
+    "commonMistake": "industry 是名词；形容词“工业的”是 industrial，不要把两种词性混用。",
+    "example": {
+      "english": "Robotics is changing the transport industry.",
+      "chinese": "机器人技术正在改变交通运输行业。"
+    },
+    "application": {
+      "prompt": "Factories and businesses in a particular field form an ___. A. education B. industry",
+      "solution": "B。解析：同一领域的工厂和企业构成一个 industry（行业）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: industry",
+        "url": "https://dictionary.cambridge.org/dictionary/english/industry"
+      }
+    ]
+  },
+  {
+    "word": "service",
+    "examTags": [
+      "词汇·名词与可数性",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 服务；公共服务，可数或不可数，按具体服务种类可用复数 services。",
+    "collocations": "public services; customer service; provide a service",
+    "commonMistake": "service 可指服务行为或具体服务；服务项目可用复数 services，不要一概当作不可数。",
+    "example": {
+      "english": "The city provides a free bus service for older people.",
+      "chinese": "这座城市为老年人提供免费公交服务。"
+    },
+    "application": {
+      "prompt": "The city offers useful public ___ to its residents. A. services B. traffics",
+      "solution": "A。解析：公共服务项目常用复数 services；traffic 通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: service",
+        "url": "https://dictionary.cambridge.org/dictionary/english/service"
+      }
+    ]
+  },
+  {
+    "word": "disaster",
+    "examTags": [
+      "词汇·名词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 灾难；不幸，可数。形容词 disastrous。",
+    "collocations": "a natural disaster; disaster area; a major disaster",
+    "commonMistake": "disaster 是名词，形容词是 disastrous；不要把 disaster 当作形容词修饰名词。",
+    "example": {
+      "english": "The robot helped people after the natural disaster.",
+      "chinese": "自然灾害发生后，机器人帮助了人们。"
+    },
+    "application": {
+      "prompt": "An earthquake can be a serious natural ___. A. emergency exit B. disaster",
+      "solution": "B。解析：地震属于自然灾害 natural disaster。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: disaster",
+        "url": "https://dictionary.cambridge.org/dictionary/english/disaster"
+      }
+    ]
+  },
+  {
+    "word": "emergency",
+    "examTags": [
+      "词汇·名词与搭配",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 突发事件；紧急情况，可数。",
+    "collocations": "in an emergency; emergency services; emergency exit",
+    "commonMistake": "emergency 是可数名词，常说 in an emergency；不要漏掉 an。",
+    "example": {
+      "english": "In an emergency, call the local rescue service.",
+      "chinese": "遇到紧急情况，请拨打当地救援服务电话。"
+    },
+    "application": {
+      "prompt": "If there is a fire, use the ___ exit. A. emergency B. emotional",
+      "solution": "A。解析：紧急出口称 emergency exit。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: emergency",
+        "url": "https://dictionary.cambridge.org/dictionary/english/emergency"
+      }
+    ]
+  },
+  {
+    "word": "disappear",
+    "examTags": [
+      "词汇·动词词形",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "v. 消失；不见。过去式/过去分词 disappeared，名词 disappearance。",
+    "collocations": "disappear suddenly; disappear from sight; disappear into the distance",
+    "commonMistake": "disappear 是动词，过去式双写 p 再加 -ed：disappeared；不要漏写一个 p。",
+    "example": {
+      "english": "The small robot disappeared behind the door.",
+      "chinese": "小机器人消失在门后。"
+    },
+    "application": {
+      "prompt": "The lights went out, and the little robot ___ from sight. A. disappeared B. disappear",
+      "solution": "A。解析：叙述过去发生的事用 disappeared。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: disappear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/disappear"
+      }
+    ]
+  },
+  {
+    "word": "challenging",
+    "examTags": [
+      "词汇·形容词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 挑战性的；需要努力的。动词 challenge，名词 challenge。",
+    "collocations": "a challenging task; find sth challenging; challenging to do",
+    "commonMistake": "challenging 描述“具有挑战性”；challenged 常表示受到挑战或有某种障碍，不能随意替换。",
+    "example": {
+      "english": "Learning to build a robot can be challenging but fun.",
+      "chinese": "学习制作机器人可能很有挑战性，但也很有趣。"
+    },
+    "application": {
+      "prompt": "The problem is difficult and needs careful thought. It is ___. A. valuable B. challenging",
+      "solution": "B。解析：困难且需要努力的事是 challenging（有挑战性的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: challenging",
+        "url": "https://dictionary.cambridge.org/dictionary/english/challenging"
+      }
+    ]
+  },
+  {
+    "word": "pilot",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 飞行员；领航员，可数；也可作动词表示驾驶（飞行器）或试行。",
+    "collocations": "a test pilot; become a pilot; pilot a plane",
+    "commonMistake": "pilot 作职业名词时可数，单数前用 a；pilot a plane 中作动词，后直接接宾语。",
+    "example": {
+      "english": "The pilot landed the plane safely in bad weather.",
+      "chinese": "飞行员在恶劣天气中安全地降落了飞机。"
+    },
+    "application": {
+      "prompt": "The person who flies an aircraft is a ___. A. passenger B. pilot",
+      "solution": "B。解析：驾驶飞机的人是 pilot；passenger 是乘客。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pilot",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pilot"
+      }
+    ]
+  },
+  {
+    "word": "expert",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 专家；行家，可数；adj. 熟练的；内行的。常用 expert in/on。",
+    "collocations": "an expert in robotics; expert advice; be expert at doing sth",
+    "commonMistake": "expert 作名词时单数前要用 an；表示擅长某领域常用 expert in/on。",
+    "example": {
+      "english": "We asked an expert in robotics to answer our questions.",
+      "chinese": "我们请了一位机器人学专家回答问题。"
+    },
+    "application": {
+      "prompt": "Someone with special knowledge of robotics is an ___. A. expert B. guest",
+      "solution": "A。解析：在某领域有专业知识的人是 expert。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: expert",
+        "url": "https://dictionary.cambridge.org/dictionary/english/expert"
+      }
+    ]
+  },
+  {
+    "word": "replace",
+    "examTags": [
+      "词汇·动词结构",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "v. 代替；取代；替换。过去式/过去分词 replaced。常用 replace A with B。",
+    "collocations": "replace an old machine; replace A with B; replace a worker",
+    "commonMistake": "“用 B 替换 A”说 replace A with B；不要用 replace by 来表达主动结构。",
+    "example": {
+      "english": "The school replaced old lights with energy-saving ones.",
+      "chinese": "学校用节能灯替换了旧灯。"
+    },
+    "application": {
+      "prompt": "The new battery will ___ the one that no longer works. A. replace B. depend",
+      "solution": "A。解析：用新的电池替换坏电池用 replace。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: replace",
+        "url": "https://dictionary.cambridge.org/dictionary/english/replace"
+      }
+    ]
+  },
+  {
+    "word": "creativity",
+    "examTags": [
+      "词汇·名词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 创造力，通常不可数。形容词 creative；动词 create。",
+    "collocations": "show creativity; encourage creativity; creative thinking",
+    "commonMistake": "creativity 是不可数名词；表示“有创造力的”用 creative，不要说 creativity idea。",
+    "example": {
+      "english": "Robotics projects can encourage creativity in students.",
+      "chinese": "机器人项目可以培养学生的创造力。"
+    },
+    "application": {
+      "prompt": "Art and design activities help children develop ___. A. creative B. creativity",
+      "solution": "B。解析：空格作动词 develop 的宾语，需要名词 creativity。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: creativity",
+        "url": "https://dictionary.cambridge.org/dictionary/english/creativity"
+      }
+    ]
+  },
+  {
+    "word": "emotional",
+    "examTags": [
+      "词汇·形名转换",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 情感的；情绪的。名词 emotion；常见复合词 emotional intelligence。",
+    "collocations": "emotional support; emotional health; emotional intelligence",
+    "commonMistake": "emotional 是形容词，emotion 是名词；说“情绪”不要把 emotional 当名词。",
+    "example": {
+      "english": "Robots may help people, but they cannot replace emotional support from friends.",
+      "chinese": "机器人或许能帮助人们，但不能取代朋友给予的情感支持。"
+    },
+    "application": {
+      "prompt": "A person's ___ needs include feeling understood and supported. A. emotional B. emotion",
+      "solution": "A。解析：修饰名词 needs 用形容词 emotional。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: emotional",
+        "url": "https://dictionary.cambridge.org/dictionary/english/emotional"
+      }
+    ]
+  },
+  {
+    "word": "intelligence",
+    "examTags": [
+      "词汇·名形转换",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 智力；智慧，通常不可数；形容词 intelligent。",
+    "collocations": "artificial intelligence; emotional intelligence; intelligence test",
+    "commonMistake": "intelligence 是名词，intelligent 是形容词；修饰名词应用 intelligent。",
+    "example": {
+      "english": "Artificial intelligence is used in many smart devices.",
+      "chinese": "人工智能被用于许多智能设备中。"
+    },
+    "application": {
+      "prompt": "The ability to learn and understand is called ___. A. intelligence B. intelligent",
+      "solution": "A。解析：called 后需名词 intelligence；intelligent 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: intelligence",
+        "url": "https://dictionary.cambridge.org/dictionary/english/intelligence"
+      }
+    ]
+  },
+  {
+    "word": "emotional intelligence",
+    "examTags": [
+      "词汇·名词短语",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 情绪智力，指识别、理解和调节情绪的能力，通常不可数。",
+    "collocations": "emotional intelligence skills; develop emotional intelligence; emotional intelligence at work",
+    "commonMistake": "该词组以 intelligence 为中心词，通常不加 a；不要只把它理解成“感情上的智商分数”。",
+    "example": {
+      "english": "Good emotional intelligence helps people understand one another.",
+      "chinese": "良好的情绪智力有助于人们相互理解。"
+    },
+    "application": {
+      "prompt": "Understanding and managing feelings is part of ___. A. outer space B. emotional intelligence",
+      "solution": "B。解析：理解和调节情绪的能力称 emotional intelligence。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: emotional",
+        "url": "https://dictionary.cambridge.org/dictionary/english/emotional"
+      }
+    ]
+  },
+  {
+    "word": "mention",
+    "examTags": [
+      "词汇·动词结构",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "v. 提到；写到。过去式/过去分词 mentioned。常用 mention sth to sb 或 mention that 从句。",
+    "collocations": "mention a name; mention sth to a friend; mention that ...",
+    "commonMistake": "mention 后直接接宾语，不说 mention about sth；要表达“向某人提到”用 mention sth to sb。",
+    "example": {
+      "english": "The researcher mentioned a new idea in her report.",
+      "chinese": "研究人员在报告中提到一个新想法。"
+    },
+    "application": {
+      "prompt": "Please ___ the meeting time to the team. A. mention about B. mention",
+      "solution": "B。解析：mention 后直接接提及的内容，不加 about。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mention",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mention"
+      }
+    ]
+  },
+  {
+    "word": "refrigerator",
+    "examTags": [
+      "词汇·名词与同义词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 冰箱，可数；常简称 fridge。",
+    "collocations": "in the refrigerator; a refrigerator door; keep food in the fridge",
+    "commonMistake": "refrigerator 是可数名词，单数前通常用 a/the；fridge 是常见非正式简称。",
+    "example": {
+      "english": "Keep the vegetables in the refrigerator to keep them fresh.",
+      "chinese": "把蔬菜放在冰箱里保鲜。"
+    },
+    "application": {
+      "prompt": "Milk should be kept cold in the ___. A. wallet B. refrigerator",
+      "solution": "B。解析：用来冷藏牛奶的电器是 refrigerator（冰箱）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: refrigerator",
+        "url": "https://dictionary.cambridge.org/dictionary/english/refrigerator"
+      }
+    ]
+  },
+  {
+    "word": "low",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 低的；矮的；低水平的；adv. 向下、低；n. 低点。可用 low on 表示所剩不多。",
+    "collocations": "a low price; a low voice; low on food",
+    "commonMistake": "low 作形容词修饰名词，作副词修饰动作；注意 low 和 below（在……下面）意义不同。",
+    "example": {
+      "english": "The robot can fly low over the field.",
+      "chinese": "机器人可以在田野上方低空飞行。"
+    },
+    "application": {
+      "prompt": "The plane was flying close to the ground, at a ___ height. A. tall B. low",
+      "solution": "B。解析：接近地面的高度是 low（低的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: low",
+        "url": "https://dictionary.cambridge.org/dictionary/english/low"
+      }
+    ]
+  },
+  {
+    "word": "run low (on sth)",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "phr. （某物）即将用尽；快用完。常用 be running low on sth。",
+    "collocations": "run low on fuel; run low on food; be running low on time",
+    "commonMistake": "run low on 表示“所剩不多”；表示已经用完用 run out of，二者程度不同。",
+    "example": {
+      "english": "Our bus is running low on fuel, so we need to stop soon.",
+      "chinese": "我们的公交车燃料快用完了，所以需要尽快停下来。"
+    },
+    "application": {
+      "prompt": "We have only a little water left; we are ___ water. A. taking over B. running low on",
+      "solution": "B。解析：所剩不多、快用完用 run low on。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: run",
+        "url": "https://dictionary.cambridge.org/dictionary/english/run"
+      }
+    ]
+  },
+  {
+    "word": "accept",
+    "examTags": [
+      "词汇·形近词辨析",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "v. 接受；相信（某个说法）。过去式/过去分词 accepted。",
+    "collocations": "accept an invitation; accept an offer; accept that ...",
+    "commonMistake": "accept 表示“接受”，except 表示“除……之外”；二者拼写近似但词性和含义不同。",
+    "example": {
+      "english": "She accepted the invitation to visit the robotics lab.",
+      "chinese": "她接受了参观机器人实验室的邀请。"
+    },
+    "application": {
+      "prompt": "He said yes to the invitation and decided to ___ it. A. accept B. except",
+      "solution": "A。解析：表示同意并接受邀请用 accept。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: accept",
+        "url": "https://dictionary.cambridge.org/dictionary/english/accept"
+      }
+    ]
+  },
+  {
+    "word": "influence",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 影响；作用，可数或不可数；v. 影响、对……起作用。",
+    "collocations": "have an influence on; influence a decision; a positive influence",
+    "commonMistake": "influence 作动词时直接接宾语，不说 influence on sb；名词结构是 have an influence on。",
+    "example": {
+      "english": "Technology can influence the way people learn.",
+      "chinese": "科技能够影响人们学习的方式。"
+    },
+    "application": {
+      "prompt": "Online videos can ___ what young people buy. A. disappear B. influence",
+      "solution": "B。解析：表示对购买选择产生影响，用动词 influence。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: influence",
+        "url": "https://dictionary.cambridge.org/dictionary/english/influence"
+      }
+    ]
+  },
+  {
+    "word": "creative",
+    "examTags": [
+      "词汇·形名转换",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 有创造力的；创造性的。名词 creativity；副词 creatively。",
+    "collocations": "a creative idea; creative writing; be creative",
+    "commonMistake": "creative 是形容词，creativity 是名词；不要用名词直接修饰名词 idea。",
+    "example": {
+      "english": "The students found a creative way to reuse old computers.",
+      "chinese": "学生们想出了一个有创意的方法来再利用旧电脑。"
+    },
+    "application": {
+      "prompt": "The team designed an original and ___ solution. A. creative B. creativity",
+      "solution": "A。解析：修饰名词 solution 需要形容词 creative。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: creative",
+        "url": "https://dictionary.cambridge.org/dictionary/english/creative"
+      }
+    ]
+  },
+  {
+    "word": "impossible",
+    "examTags": [
+      "词汇·形名辨析",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 不可能的。由 possible 加否定前缀 im- 构成。",
+    "collocations": "it is impossible to do sth; impossible for sb; seem impossible",
+    "commonMistake": "常用 It is impossible to ...；impossible 拼写为 im-possible，不要漏写 m。",
+    "example": {
+      "english": "It is impossible to predict every change in technology.",
+      "chinese": "要预测科技领域的每一项变化是不可能的。"
+    },
+    "application": {
+      "prompt": "It is ___ to finish the task in one minute. A. possibility B. impossible",
+      "solution": "B。解析：be 动词后作表语需用形容词 impossible。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: impossible",
+        "url": "https://dictionary.cambridge.org/dictionary/english/impossible"
+      }
+    ]
+  },
+  {
+    "word": "quality",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 素质；质量；品质；adj. 优质的、高质量的（常作定语）。",
+    "collocations": "high quality; quality education; the quality of a product",
+    "commonMistake": "quality 作“品质、质量”时是名词；复数 qualities 常指人的特质。",
+    "example": {
+      "english": "The quality of the new school buses is very good.",
+      "chinese": "新校车的质量很好。"
+    },
+    "application": {
+      "prompt": "The ___ of the service improved after the changes. A. quality B. qualities",
+      "solution": "A。解析：此处指服务的整体质量，用单数 quality。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: quality",
+        "url": "https://dictionary.cambridge.org/dictionary/english/quality"
+      }
+    ]
+  },
+  {
+    "word": "develop",
+    "examTags": [
+      "词汇·动词与派生词",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "v. 增强；发展；开发。过去式/过去分词 developed；名词 development。",
+    "collocations": "develop skills; develop a system; develop into ...",
+    "commonMistake": "develop 表示“发展、培养、开发”，宾语后不加 to；develop into 表示发展成为。",
+    "example": {
+      "english": "Students can develop useful skills by working on projects.",
+      "chinese": "学生可以通过参与项目培养有用的技能。"
+    },
+    "application": {
+      "prompt": "The club helps students ___ their problem-solving skills. A. develop B. development",
+      "solution": "A。解析：help sb 后接动词原形，develop 是动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: develop",
+        "url": "https://dictionary.cambridge.org/dictionary/english/develop"
+      }
+    ]
+  },
+  {
+    "word": "German",
+    "examTags": [
+      "词汇·国名与语言",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 德语；德国人；adj. 德国的。表示德国人时复数为 Germans。",
+    "collocations": "speak German; a German student; German technology",
+    "commonMistake": "German 首字母须大写；Germany 是国家“德国”，German 是德国的、德国人或德语。",
+    "example": {
+      "english": "Our German guest spoke about technology in her country.",
+      "chinese": "我们的德国客人谈到了她所在国家的科技。"
+    },
+    "application": {
+      "prompt": "The language spoken in Germany is ___. A. Germany B. German",
+      "solution": "B。解析：German 可表示德语；Germany 是国家名称。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: german",
+        "url": "https://dictionary.cambridge.org/dictionary/english/german"
+      }
+    ]
+  },
+  {
+    "word": "valuable",
+    "examTags": [
+      "词汇·形名转换",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 很有用的；宝贵的；有价值的。名词 value；复数名词 valuables 指贵重物品。",
+    "collocations": "valuable information; valuable to sb; a valuable lesson",
+    "commonMistake": "valuable 是形容词；名词为 value，复数名词 valuables 表示贵重物品。",
+    "example": {
+      "english": "The students received valuable advice from the researcher.",
+      "chinese": "学生们从研究人员那里得到了宝贵的建议。"
+    },
+    "application": {
+      "prompt": "The advice helped me a lot. It was very ___. A. valuable B. value",
+      "solution": "A。解析：be 动词后用形容词 valuable 作表语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: valuable",
+        "url": "https://dictionary.cambridge.org/dictionary/english/valuable"
+      }
+    ]
+  },
+  {
+    "word": "public",
+    "examTags": [
+      "词汇·形容词与搭配",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 公共的；公众的；n. the public 指公众。",
+    "collocations": "public transport; public services; in public",
+    "commonMistake": "public 作形容词时直接修饰名词；表示“在公共场合”说 in public，不说 in the public。",
+    "example": {
+      "english": "The city plans to improve public transport.",
+      "chinese": "这座城市计划改善公共交通。"
+    },
+    "application": {
+      "prompt": "People can use buses and trains as ___ transport. A. public B. publicly",
+      "solution": "A。解析：修饰 transport 需要形容词 public。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: public",
+        "url": "https://dictionary.cambridge.org/dictionary/english/public"
+      }
+    ]
+  },
+  {
+    "word": "medical",
+    "examTags": [
+      "词汇·形名辨析",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "adj. 医学的；医疗的。名词 medicine。",
+    "collocations": "medical care; medical research; a medical student",
+    "commonMistake": "medical 是形容词，medicine 是名词；医疗服务用 medical care，不用 medicine care。",
+    "example": {
+      "english": "The hospital uses new technology to provide medical care.",
+      "chinese": "这家医院使用新技术提供医疗服务。"
+    },
+    "application": {
+      "prompt": "The doctor gave the patient ___ help. A. medical B. medicine",
+      "solution": "A。解析：修饰名词 help 应用形容词 medical。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: medical",
+        "url": "https://dictionary.cambridge.org/dictionary/english/medical"
+      }
+    ]
+  },
+  {
+    "word": "challenge",
+    "examTags": [
+      "词汇·熟词多义",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 挑战；质疑；v. 向某人挑战；对……表示怀疑。",
+    "collocations": "face a challenge; a challenge to sb; challenge an idea",
+    "commonMistake": "challenge 作动词可直接接人或观点作宾语；形容“有挑战性的”用 challenging。",
+    "example": {
+      "english": "Building a safe robot is a challenge for the team.",
+      "chinese": "制造一台安全的机器人对团队来说是一项挑战。"
+    },
+    "application": {
+      "prompt": "The students must ___ the old idea and find better evidence. A. challenging B. challenge",
+      "solution": "B。解析：must 后接动词原形，challenge 表示质疑。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: challenge",
+        "url": "https://dictionary.cambridge.org/dictionary/english/challenge"
+      }
+    ]
+  },
+  {
+    "word": "task",
+    "examTags": [
+      "词汇·名词与可数性",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "n. 任务；工作，可数。",
+    "collocations": "complete a task; a difficult task; a task for sb",
+    "commonMistake": "task 是可数名词；表示“任务”时不要与 work（通常不可数）混淆。",
+    "example": {
+      "english": "Our first task is to design a robot that can help people.",
+      "chinese": "我们的首要任务是设计一台能帮助人们的机器人。"
+    },
+    "application": {
+      "prompt": "The students finished their science ___ before lunch. A. workes B. task",
+      "solution": "B。解析：一项具体任务用可数名词 task。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: task",
+        "url": "https://dictionary.cambridge.org/dictionary/english/task"
+      }
+    ]
+  },
+  {
+    "word": "depend",
+    "examTags": [
+      "词汇·动词搭配",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "v. 取决于；依靠。常用 depend on/upon；第三人称单数 depends。",
+    "collocations": "depend on the weather; depend on sb; it depends",
+    "commonMistake": "depend 后常接 on/upon；回答 “It depends.” 表示“看情况”。",
+    "example": {
+      "english": "Whether we travel by bus will depend on the weather.",
+      "chinese": "我们是否乘公交出行将取决于天气。"
+    },
+    "application": {
+      "prompt": "Our choice may ___ on the cost and time. A. depend B. depend of",
+      "solution": "A。解析：depend 与 on 搭配，表示“取决于”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: depend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/depend"
+      }
+    ]
+  },
+  {
+    "word": "depend on / upon",
+    "examTags": [
+      "词汇·介词搭配",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "phr. 取决于；依靠。后接名词、代词或动名词。",
+    "collocations": "depend on a friend; depend on the result; depend on doing sth",
+    "commonMistake": "介词 on/upon 后接名词、代词或动名词；不能说 depend of。",
+    "example": {
+      "english": "Many future jobs may depend on new technology.",
+      "chinese": "未来的许多工作可能取决于新技术。"
+    },
+    "application": {
+      "prompt": "Success may ___ careful planning. A. depend of B. depend on",
+      "solution": "B。解析：固定搭配为 depend on，表示“取决于”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: depend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/depend"
+      }
+    ]
+  },
+  {
+    "word": "come over",
+    "examTags": [
+      "词汇·动词短语",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "phr. 来访；拜访。常用 come over to sb's home/place；过去式 came over。",
+    "collocations": "come over for dinner; come over to my house; have a friend come over",
+    "commonMistake": "come over 表示来访；过去叙事时 come 变为 came，不要写 comed over。",
+    "example": {
+      "english": "My cousin will come over to see our new robot.",
+      "chinese": "我表弟将来我家看看我们的新机器人。"
+    },
+    "application": {
+      "prompt": "Would you like to ___ this afternoon and see the project? A. come over B. take over",
+      "solution": "A。解析：邀请别人过来拜访用 come over。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: come",
+        "url": "https://dictionary.cambridge.org/dictionary/english/come"
+      }
+    ]
+  },
+  {
+    "word": "as long as",
+    "examTags": [
+      "词汇·条件状语从句",
+      "中考·语境辨义与搭配"
+    ],
+    "grammar": "conj. 只要；引导条件状语从句。",
+    "collocations": "as long as you like; as long as we work together; as long as possible",
+    "commonMistake": "as long as 表条件“只要”时后接完整从句；从句表将来时通常用一般现在时。",
+    "example": {
+      "english": "As long as we use energy carefully, we can help the environment.",
+      "chinese": "只要我们谨慎用能，就能帮助环境。"
+    },
+    "application": {
+      "prompt": "You can join the visit ___ you follow the safety rules. A. as long as B. even though",
+      "solution": "A。解析：句意为“只要遵守安全规定就可以参加”，用 as long as 引导条件从句。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: as",
+        "url": "https://dictionary.cambridge.org/dictionary/english/as"
+      }
+    ]
+  }
+]

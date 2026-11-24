@@ -4,6 +4,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { parseMealDetails, startOfLocalDay } from '@/lib/meals'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { TEACHER_MEAL_APPEND_NOTE } from '@/lib/meal-attendance-append'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +38,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
         eating: true,
         teacherId: true,
         teacherName: true,
+        notes: true,
       },
     }),
     prisma.teacher.findMany({
@@ -76,6 +78,9 @@ export const GET = apiHandler(async (request: NextRequest) => {
     totalCount: effectivePortions.length,
     singleCount: effectivePortions.filter((portion) => portion === 'single').length,
     doubleCount: effectivePortions.filter((portion) => portion === 'double').length,
+    lateAddedCount: new Set(attendanceMeals
+      .filter((record) => record.eating && record.notes?.includes(TEACHER_MEAL_APPEND_NOTE))
+      .map((record) => record.studentId)).size,
     reportedTeachers: [
       ...attendanceTeachers.values(),
       ...reports.filter((report) => !attendanceTeachers.has(report.teacherId)).map((report) => report.teacher),

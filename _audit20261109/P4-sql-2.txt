@@ -1,0 +1,166 @@
+{
+  "a_enrollmentByStudent": [
+    {
+      "studentswithactiveenr": 191,
+      "enrpositive": 114,
+      "enrzero": 77,
+      "snapshotpositive": 151,
+      "snapshotzero": 40
+    }
+  ],
+  "a_snapshotPositiveButEnrZero": [
+    {
+      "cnt": 37
+    }
+  ],
+  "b_papers": [
+    {
+      "papers": 15,
+      "publishedlive": 15,
+      "readbyparent": 0
+    }
+  ],
+  "b_paperQuestions": [
+    {
+      "cnt": 0
+    }
+  ],
+  "b_papersWithQuestions": [
+    {
+      "cnt": 0
+    }
+  ],
+  "c_readReceipts": [
+    {
+      "cnt": 301
+    }
+  ],
+  "c_evaluations": [
+    {
+      "cnt": 1,
+      "satisfied": 0,
+      "unsatisfied": 1,
+      "pending": 1
+    }
+  ],
+  "c_checkins": [
+    {
+      "cnt": 0,
+      "done": 0,
+      "needhelp": 0
+    }
+  ],
+  "c_postReactions": [
+    {
+      "cnt": 0
+    }
+  ],
+  "c_paperReactions": [
+    {
+      "cnt": 0
+    }
+  ],
+  "d_mismatchDetail": [
+    {
+      "ntype": "PARENT_MESSAGE",
+      "rtype": "PARENT_MESSAGE",
+      "cnt": 31,
+      "unread": 8
+    },
+    {
+      "ntype": "PARENT_MESSAGE_REMINDER",
+      "rtype": "PARENT_MESSAGE",
+      "cnt": 13,
+      "unread": 12
+    },
+    {
+      "ntype": "leave",
+      "rtype": "NULL",
+      "cnt": 8,
+      "unread": 8
+    },
+    {
+      "ntype": "FEEDBACK_REVIEW",
+      "rtype": "CLASSROOM_FEEDBACK_REVIEW",
+      "cnt": 4,
+      "unread": 4
+    }
+  ],
+  "d_mismatchReceiverRole": [
+    {
+      "role": "teacher",
+      "cnt": 46
+    },
+    {
+      "role": "admin",
+      "cnt": 10
+    }
+  ],
+  "e_unlinkedStudentNotifications": [
+    {
+      "students": 11,
+      "notifications": 56
+    }
+  ],
+  "f_masteryColumns": [
+    {
+      "column_name": "id",
+      "data_type": "text"
+    },
+    {
+      "column_name": "studentId",
+      "data_type": "text"
+    },
+    {
+      "column_name": "teacherId",
+      "data_type": "text"
+    },
+    {
+      "column_name": "knowledgePoint",
+      "data_type": "text"
+    },
+    {
+      "column_name": "level",
+      "data_type": "text"
+    },
+    {
+      "column_name": "note",
+      "data_type": "text"
+    },
+    {
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone"
+    }
+  ],
+  "g_postVisibility": [],
+  "h_childrenPerParent": [
+    {
+      "kids": 1,
+      "parents": 113
+    },
+    {
+      "kids": 2,
+      "parents": 30
+    },
+    {
+      "kids": 3,
+      "parents": 1
+    },
+    {
+      "kids": 4,
+      "parents": 1
+    }
+  ],
+  "i_teacherPhone": [
+    {
+      "status": "ACTIVE",
+      "cnt": 29,
+      "withphone": 29
+    },
+    {
+      "status": "RESIGNED",
+      "cnt": 4,
+      "withphone": 4
+    }
+  ]
+}

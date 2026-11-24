@@ -7,7 +7,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
-import { getLocalDayRange } from '@/lib/date/local-day'
+import { getLocalDayRange, localDateKey, todayLocal } from '@/lib/date/local-day'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 
 export const dynamic = 'force-dynamic'
@@ -20,7 +20,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const periods = normalizeSchedulePeriods(config?.schedulePeriods)
 
   const { searchParams } = new URL(req.url)
-  const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
+  const dateStr = searchParams.get('date') || todayLocal()
   const courseType = searchParams.get('courseType') || ''
   const division = getRequestDivision(user, searchParams.get('division'))
   const selectedTerm = user.role === 'admin'
@@ -32,6 +32,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   try {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) throw new Error('invalid date')
     const range = getLocalDayRange(dateStr)
+    if (localDateKey(range.start) !== dateStr) throw new Error('invalid date')
     dayStart = range.start
     dayEnd = range.end
   } catch {

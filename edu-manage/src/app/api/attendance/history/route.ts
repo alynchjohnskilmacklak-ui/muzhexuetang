@@ -50,7 +50,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     include: {
       group: { select: { id: true, name: true, course: { select: { subject: true } } } },
       attendances: {
-        where: { student: visibleStudentWhere },
+        where: { deletedAt: null, student: visibleStudentWhere },
         include: { student: { select: { id: true, name: true } } },
       },
     },

@@ -31,6 +31,7 @@ export function parentUnreadClassroomFeedbackWhere(
 ): Prisma.ClassroomFeedbackWhereInput {
   return {
     status: 'PUBLISHED',
+    deletedAt: null,
     studentIds: { hasSome: studentIds },
     OR: [
       { parentReadReceipts: { none: { parentUserId } } },

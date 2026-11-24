@@ -8,7 +8,13 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async () => {
   try {
     const { user, teacher, prisma } = await requireCurrentTeacher()
-    const dashboard = await getTeacherDashboardData(teacher.id, prisma, user.id)
+    const [dashboard, teacherMessageUnreadCount, notificationUnreadCount] = await Promise.all([
+      getTeacherDashboardData(teacher.id, prisma, user.id),
+      prisma.teacherMessage.count({ where: { teacherId: teacher.id, readAt: null } }),
+      // Parent-message notifications are represented by the conversation unread count in the layout.
+      // Exclude them here so the combined navigation badge does not double count the same work.
+      prisma.notification.count({ where: { userId: user.id, status: 'ACTIVE', deletedAt: null, read: false, type: { not: 'PARENT_MESSAGE' } } }),
+    ])
 
     return NextResponse.json({
       teacher: { id: teacher.id, name: teacher.name, gender: teacher.gender, avatar: teacher.avatar, subjects: teacher.subjects, tierLevel: teacher.tierLevel },
@@ -17,7 +23,7 @@ export const GET = apiHandler(async () => {
         unsubmitted: dashboard.pendingTasks.unsubmittedAttendance,
         unpublished: dashboard.pendingTasks.unpublishedPapers,
         unread: dashboard.pendingTasks.unreadParentComments,
-        unreadMessages: 0,
+        unreadMessages: teacherMessageUnreadCount + notificationUnreadCount,
       },
     }, {
       headers: { 'Cache-Control': 'private, no-store' },

@@ -456,7 +456,7 @@ const civics9bSets: SetSeed[] = [
       distractors: ['各国发展可以完全脱离国际合作', '对外投资说明中国只是在引进外国资金和技术', '绿色合作能让世界所有分歧立即消失'],
       explanation: '图组呈现中国新能源产品出口和企业开展海外合作，体现对外开放与绿色发展合作。材料不能说明中国只引进外资，也不能推出世界分歧会立即消失。',
       point: 1,
-      imageUrl: '/images/practice/politics-2024-q10-green-cooperation.png',
+      imageUrl: '/images/practice/politics-2024-q10-green-cooperation.webp',
       difficulty: 'EXAM',
       sourceRef: '2024年河北省中考道德与法治真题（原卷版）第10题图组（image4—image7）；据图组改编为时代潮流与绿色合作题，非原题复现。',
     },

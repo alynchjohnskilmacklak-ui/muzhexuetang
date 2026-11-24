@@ -3,7 +3,7 @@ import { calculateIntensiveDeductHours, shouldGenerateIntensiveLessonPay } from 
 import { calcLessonPay, getTeacherSalaryConfig, inferGrade } from '@/lib/teacher-salary'
 import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
-const roundHours = (value: number) => Number(value.toFixed(4))
+const roundHours = (value: number) => Number(value.toFixed(8))
 const roundMoney = (value: number) => Number(value.toFixed(2))
 
 export type IntensiveAdjustmentHours = {

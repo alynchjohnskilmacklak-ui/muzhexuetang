@@ -1,10 +1,10 @@
 'use client'
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import dayjs from 'dayjs'
-import { Alert, DatePicker, Input, Select, Space, Tag, message } from 'antd'
+import { Alert, Button, DatePicker, Input, Space, Tag, message } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
@@ -33,20 +33,74 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
   const [endTime, setEndTime] = useState('')
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
-  const { data: groups, error: groupsError } = useSWR(!initialGroupId ? `/api/class-groups?division=${division}` : null, fetcher)
-  const { data: group, error: groupError } = useSWR(groupId ? `/api/class-groups/${groupId}` : null, fetcher)
+  const [conflictWarning, setConflictWarning] = useState<string | null>(null)
+  const [checkingConflict, setCheckingConflict] = useState(false)
+  const { data: groups, error: groupsError, isLoading: groupsLoading, mutate: mutateGroups } = useSWR(!initialGroupId ? `/api/class-groups?division=${division}` : null, fetcher)
+  const { data: group, error: groupError, isLoading: groupLoading, mutate: mutateGroup } = useSWR(groupId ? `/api/class-groups/${groupId}` : null, fetcher)
 
   const assignments: Array<{ teacherId: string; subject: string; teacherName: string }> = Array.isArray(group?.teacherAssignments) && group.teacherAssignments.length
-    ? group.teacherAssignments.filter((item: { subject?: string | null }) => Boolean(item.subject)).map((item: { teacherId: string; subject: string; teacher?: { name?: string } }) => ({
+    ? group.teacherAssignments.filter((item: { subject?: string | null }) => Boolean(item.subject)).map((item: { teacherId: string; subject: string; teacher?: { name?: string; subjects?: string | string[] } }) => ({
         teacherId: item.teacherId, subject: item.subject, teacherName: item.teacher?.name || '任课教师',
       }))
-    : group?.teacherId && group?.course?.subject
-      ? [{ teacherId: group.teacherId, subject: group.course.subject, teacherName: group.teacher?.name || '任课教师' }]
+    : group?.teacherId
+      ? (() => {
+          const teacherSubs = (typeof group.teacher?.subjects === 'string'
+            ? group.teacher.subjects.split(/[,，、]/)
+            : Array.isArray(group.teacher?.subjects)
+              ? group.teacher.subjects
+              : []
+          ).map((s: string) => s.trim()).filter(Boolean)
+          const courseSub = group.course?.subject?.trim()
+          const resolvedSubject = teacherSubs.length === 1
+            ? teacherSubs[0]
+            : (courseSub && teacherSubs.includes(courseSub))
+              ? courseSub
+              : (teacherSubs[0] || courseSub || '综合')
+          return [{ teacherId: group.teacherId, subject: resolvedSubject, teacherName: group.teacher?.name || '任课教师' }]
+        })()
       : []
   const selectedAssignment = assignments.find((item) => `${item.teacherId}::${item.subject}` === assignmentKey)
   const studentCount = selectedAssignment && Array.isArray(group?.enrollments)
     ? group.enrollments.filter((enrollment: { subjects: string[] }) => enrollmentIncludesSubject(enrollment.subjects || [], selectedAssignment.subject)).length
     : 0
+
+  useEffect(() => {
+    if (!date || !startTime || !endTime || !selectedAssignment?.teacherId) {
+      setConflictWarning(null)
+      return
+    }
+    let cancelled = false
+    const check = async () => {
+      setCheckingConflict(true)
+      try {
+        const res = await fetch('/api/schedule/conflict-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date,
+            startTime,
+            endTime,
+            teacherId: selectedAssignment.teacherId,
+            roomId: group?.roomId || null,
+          }),
+        })
+        const data = await res.json()
+        if (cancelled) return
+        if (data.hasConflict && data.conflicts?.length) {
+          const desc = data.conflicts.map((c: { desc: string; groupName: string; time: string }) => `${c.desc}（${c.groupName} ${c.time}）`).join('；')
+          setConflictWarning(`排课冲突预警：${desc}`)
+        } else {
+          setConflictWarning(null)
+        }
+      } catch {
+        // network fallback
+      } finally {
+        if (!cancelled) setCheckingConflict(false)
+      }
+    }
+    const timer = setTimeout(check, 300)
+    return () => { cancelled = true; clearTimeout(timer) }
+  }, [date, startTime, endTime, selectedAssignment?.teacherId, group?.roomId])
 
   const save = async () => {
     if (!groupId || !selectedAssignment || !date || !startTime || !endTime) {
@@ -87,20 +141,39 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
       onCancel={onClose}
       onOk={save}
       confirmLoading={saving}
-      okText="确认加课"
+      okText={checkingConflict ? '冲突检测中…' : '确认加课'}
+      okButtonProps={{ disabled: Boolean(conflictWarning) || checkingConflict }}
       cancelText="取消"
       width={isMobile ? 'calc(100vw - 24px)' : 560}
       styles={{ body: { maxHeight: 'min(70vh, 620px)', overflowY: 'auto' } }}
     >
       <Space direction="vertical" size={14} style={{ width: '100%', maxWidth: '100%' }}>
-        <Alert type="info" showIcon message="任意日期单独加课" description="适用于国庆补课、临时加课等情况，不改变固定每周上课日，也不会替换其他课次。" />
-        {groupsError && <Alert type="error" showIcon message="班级列表加载失败，请重新打开。" />}
+        {conflictWarning ? (
+          <Alert
+            type="error"
+            showIcon
+            message="排课时段冲突拦截"
+            description={conflictWarning}
+            style={{ borderRadius: 10 }}
+          />
+        ) : (
+          <Alert type="info" showIcon message="任意日期单独加课" description="适用于国庆补课、临时加课等情况，不改变固定每周上课日，也不会替换其他课次。" />
+        )}
+        {groupsError && (
+          <Alert
+            type="error"
+            showIcon
+            message="班级列表加载失败"
+            description={groupsError.message}
+            action={<Button size="small" onClick={() => void mutateGroups()}>重试</Button>}
+          />
+        )}
         <div>
           <div style={{ marginBottom: 6 }}>班级</div>
           <AdaptiveSelect
             showSearch={!isMobile}
             optionFilterProp="label"
-            placeholder="选择已有班级"
+            placeholder={groupsLoading ? '正在加载班级…' : '选择已有班级'}
             value={groupId || undefined}
             disabled={Boolean(initialGroupId)}
             onChange={(value) => { setGroupId(value); setAssignmentKey(''); setStartTime(''); setEndTime('') }}
@@ -115,7 +188,16 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
             getPopupContainer={(trigger) => trigger.parentElement || document.body}
           />
         </div>
-        {groupError && <Alert type="error" showIcon message="班级详情加载失败，请重新选择。" />}
+        {groupError && (
+          <Alert
+            type="error"
+            showIcon
+            message="班级详情加载失败"
+            description={groupError.message}
+            action={<Button size="small" onClick={() => void mutateGroup()}>重试</Button>}
+          />
+        )}
+        {groupLoading && !groupError && <Alert type="info" showIcon message="正在加载班级详情…" />}
         {groupId && (
           <>
             <div>

@@ -1,0 +1,182 @@
+/* 学员 360 卡片现代工艺样式 */
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.08));
+  border-radius: 14px;
+  background: var(--color-surface-1, #ffffff);
+  padding: 14px 14px 12px;
+  min-height: 140px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 160ms ease, border-color 160ms ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(20, 87, 77, 0.08);
+  border-color: var(--color-primary, #14574d);
+}
+
+.vipStrip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #C9A45C, #E5C37A);
+}
+
+.svipStrip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #14574D, #C9A45C);
+}
+
+.headRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.identityCol {
+  min-width: 0;
+  flex: 1;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+}
+
+.studentName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.membershipTag {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  line-height: 1.3;
+}
+
+.metaSubtitle {
+  font-size: 12px;
+  color: var(--color-ink-subtle, #756a58);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 标签行 */
+.badgesRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+/* 课时概览条 */
+.hoursBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--color-surface-3, #f5f2ee);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 11.5px;
+}
+
+.remainHoursItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.remainHoursVal {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.remainHoursDanger {
+  color: #E03E2D;
+}
+
+.remainHoursNormal {
+  color: var(--color-primary, #14574d);
+}
+
+.taughtHoursItem {
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+/* 作业班条目 */
+.studyHallLine {
+  font-size: 11px;
+  color: var(--color-ink-subtle, #756a58);
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 底部操作坞 (Action Dock) */
+.actionDock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.06));
+}
+
+.primaryLinks {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quickLinkBtn {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-primary, #14574d);
+  background: var(--color-primary-bg, #EAF4F1);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(20, 87, 77, 0.15);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 140ms ease;
+}
+
+.quickLinkBtn:hover {
+  background: rgba(20, 87, 77, 0.12);
+}
+
+.quickLinkBtn:active {
+  transform: scale(0.96);
+}
+
+.iconActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}

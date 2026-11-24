@@ -1,0 +1,64 @@
+{
+  "vocabWordTotal": [
+    {
+      "n": 2973
+    }
+  ],
+  "vocabWordByGrade": [
+    {
+      "grade": "初一",
+      "n": 1090,
+      "vols": 2,
+      "units": 22
+    },
+    {
+      "grade": "初三",
+      "n": 731,
+      "vols": 2,
+      "units": 8
+    },
+    {
+      "grade": "初二",
+      "n": 1152,
+      "vols": 2,
+      "units": 8
+    }
+  ],
+  "vocabWordDup": {
+    "ERROR": " |  | Raw query failed. Code: `42703`. Message: `column \"normalizedheadword\" does not exist`"
+  },
+  "vocabPosNull": [
+    {
+      "n": 2973,
+      "empty_meanings": 0,
+      "no_phonetic": 2973
+    }
+  ],
+  "notifStudentIdNull": [
+    {
+      "total": 10529,
+      "null_student": 10424
+    }
+  ],
+  "notifRecent7d": [
+    {
+      "n": 9
+    }
+  ],
+  "hourRecent3d": [],
+  "masteryRecent": [
+    {
+      "n": 0
+    }
+  ],
+  "salaryRecent": [],
+  "enrollBalance": {
+    "ERROR": " |  | Raw query failed. Code: `22P02`. Message: `ERROR: invalid input value for enum \"EnrollStatus\": \"CANCELLED\"`"
+  },
+  "studentSnapshot": [
+    {
+      "n": 191,
+      "sum": 18104.499999999956
+    }
+  ]
+}

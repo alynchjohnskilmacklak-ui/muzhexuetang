@@ -23,6 +23,7 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
           id: true,
           teacherId: true,
           studentIds: true,
+          studentNameSnapshot: true,
           createdAt: true,
           summary: true,
           overallComment: true,

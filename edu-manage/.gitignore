@@ -78,3 +78,15 @@ tmp/
 # code review artifacts
 design-qa.md
 outputs/
+
+# test and compiler caches
+.tmp*
+.vitest-temp
+.agents
+
+# python cache
+__pycache__/
+*.pyc
+query-teachers*.cjs
+find_ai_text.js
+.codex*

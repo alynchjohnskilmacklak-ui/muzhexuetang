@@ -1,0 +1,402 @@
+[
+  {
+    "word": "lantern",
+    "examTags": ["词汇·可数名词", "语法·节日搭配"],
+    "grammar": "n. 灯笼；提灯。可数，复数 lanterns；节日语境常说 a paper lantern 或 hang lanterns。",
+    "collocations": "light a lantern; hang paper lanterns; a lantern festival",
+    "commonMistake": "lantern 指有灯光的灯笼或提灯；复数直接加 -s，别把 lantern 与 light（光）当成同义名词互换。",
+    "example": {"english": "We hung red lanterns outside the house for the festival.", "chinese": "节日期间，我们在房子外挂上了红灯笼。"},
+    "application": {"prompt": "Before the festival began, the family hung a red ___ by the door. A. lantern B. ladder", "solution": "A。解析：节日前挂在门边、用于装饰和照明的是 lantern（灯笼）。"},
+    "sources": [{"label": "Cambridge Dictionary: lantern", "url": "https://dictionary.cambridge.org/dictionary/english/lantern"}]
+  },
+  {
+    "word": "eve",
+    "examTags": ["词汇·时间名词", "语法·介词搭配"],
+    "grammar": "n. 前夜；前夕。常见结构为 the eve of + 节日或事件；Christmas Eve 是“平安夜”。",
+    "collocations": "on the eve of the holiday; Christmas Eve; the eve of a journey",
+    "commonMistake": "eve 常与 of 连用表示某事前夕；不要用 eve 代替 evening 表示普通的“晚上”。",
+    "example": {"english": "On the eve of the match, both teams checked their equipment.", "chinese": "比赛前夕，两支队伍都检查了装备。"},
+    "application": {"prompt": "The school held a celebration on the ___ of its 50th anniversary. A. morning B. eve", "solution": "B。解析：周年纪念日到来前举行的庆祝活动发生在其“前夕”，用 eve。"},
+    "sources": [{"label": "Cambridge Dictionary: eve", "url": "https://dictionary.cambridge.org/dictionary/english/eve"}]
+  },
+  {
+    "word": "tomb",
+    "examTags": ["词汇·可数名词", "阅读·历史遗迹"],
+    "grammar": "n. 坟墓；冢。可数，复数 tombs；常指埋葬重要人物或古代遗体的墓室。",
+    "collocations": "an ancient tomb; a royal tomb; visit a tomb",
+    "commonMistake": "tomb 指埋葬死者的墓；不要与 room 混淆拼写，也不要用 tomb 指普通房间。",
+    "example": {"english": "Archaeologists found a small tomb beneath the old temple.", "chinese": "考古学家在古老寺庙下方发现了一座小墓室。"},
+    "application": {"prompt": "The archaeologists found a stone ___ where an ancient king was buried. A. tomb B. tower", "solution": "A。解析：埋葬古代国王的石造墓室是 tomb。"},
+    "sources": [{"label": "Cambridge Dictionary: tomb", "url": "https://dictionary.cambridge.org/dictionary/english/tomb"}]
+  },
+  {
+    "word": "parade",
+    "examTags": ["词汇·名词与动词", "语言运用·节庆活动"],
+    "grammar": "n. 游行；阅兵；v. 列队游行。名词可数；常用 take part in a parade，动词过去式 paraded。",
+    "collocations": "a street parade; take part in a parade; parade through the town",
+    "commonMistake": "参加游行说 take part in a parade；parade 作动词时表示列队展示或行进，不等于单纯 walk。",
+    "example": {"english": "The dancers paraded through the streets in bright costumes.", "chinese": "舞者们穿着鲜艳的服装列队穿过街道。"},
+    "application": {"prompt": "Bands and dancers marched along the main street as part of the holiday ___. A. lecture B. parade", "solution": "B。解析：乐队和舞者沿街列队行进，构成节日游行 parade。"},
+    "sources": [{"label": "Cambridge Dictionary: parade", "url": "https://dictionary.cambridge.org/dictionary/english/parade"}]
+  },
+  {
+    "word": "ancestor",
+    "examTags": ["词汇·可数名词", "阅读·家族与传统"],
+    "grammar": "n. 祖先；祖宗。可数，复数 ancestors；指家族中较早一代的人，也可指某事物的早期形式。",
+    "collocations": "one's ancestors; an ancestor of the family; respect our ancestors",
+    "commonMistake": "ancestor 指祖先本人，通常不表示仍在世的长辈；说“祖先们”用 ancestors。",
+    "example": {"english": "The family visits the village where their ancestors lived.", "chinese": "这家人会去祖先曾经居住的村庄。"},
+    "application": {"prompt": "The old family tree shows that Mei's ___ came from this village generations ago. A. ancestors B. passengers", "solution": "A。解析：家谱中几代以前的家族成员是 ancestors（祖先）。"},
+    "sources": [{"label": "Cambridge Dictionary: ancestor", "url": "https://dictionary.cambridge.org/dictionary/english/ancestor"}]
+  },
+  {
+    "word": "costume",
+    "examTags": ["词汇·可数名词", "语言运用·服装与表演"],
+    "grammar": "n. 戏装；（特定场合穿的）服装。可数，复数 costumes；常指表演、化装或传统活动所穿的服饰。",
+    "collocations": "wear a costume; a traditional costume; a costume party",
+    "commonMistake": "costume 多指戏装、化装服或传统服饰；日常穿着一般说 clothes，而不是 a costume。",
+    "example": {"english": "Each dancer wore a costume from a different region.", "chinese": "每位舞者都穿着来自不同地区的服装。"},
+    "application": {"prompt": "For the school play, Leo put on a full ___ that made him look like a king. A. costume B. helmet", "solution": "A。解析：为舞台角色准备、让他扮成国王的一整套服装是 costume（戏装）。"},
+    "sources": [{"label": "Cambridge Dictionary: costume", "url": "https://dictionary.cambridge.org/dictionary/english/costume"}]
+  },
+  {
+    "word": "row",
+    "examTags": ["词汇·熟词多义", "语法·动词过去式"],
+    "grammar": "v. 划船；n. 一排、一列。作“划船”时读 /rəʊ/，过去式 rowed；作“一排”时常用 a row of + 复数名词。",
+    "collocations": "row a boat; row across the lake; a row of chairs",
+    "commonMistake": "row 可表示“划船”或“一排”；表达划船时过去式加 -ed 写 rowed，不是 rowd。",
+    "example": {"english": "They rowed across the lake before the wind grew stronger.", "chinese": "风变大之前，他们划船穿过了湖面。"},
+    "application": {"prompt": "Mia used the oars to ___ the small boat to the other side of the lake. A. row B. line", "solution": "A。解析：用桨让小船前进是 row a boat（划船）；line 作动词不表示划船。"},
+    "sources": [{"label": "Cambridge Dictionary: row", "url": "https://dictionary.cambridge.org/dictionary/english/row"}]
+  },
+  {
+    "word": "wash away",
+    "examTags": ["词汇·动词短语", "语法·短语动词"],
+    "grammar": "phr. 冲走；洗掉。主语常是水、雨或浪；可分短语动词，名词宾语可放中间或后面，代词必须放 wash 与 away 之间。",
+    "collocations": "wash away the soil; wash the dirt away; wash it away",
+    "commonMistake": "宾语是代词时要说 wash it away，不能说 wash away it；注意 wash away 表示冲掉，不只是用水清洗。",
+    "example": {"english": "Heavy rain washed away part of the path near the river.", "chinese": "大雨冲走了河边小路的一部分。"},
+    "application": {"prompt": "The flood carried the loose soil into the river and ___ before anyone could stop it. A. washed it away B. washed away it", "solution": "A。解析：wash away 表示“冲走”；代词宾语 it 要放在中间，结构是 washed it away。"},
+    "sources": [{"label": "Cambridge Dictionary: wash", "url": "https://dictionary.cambridge.org/dictionary/english/wash"}]
+  },
+  {
+    "word": "princess",
+    "examTags": ["词汇·可数名词", "拼写·名词派生"],
+    "grammar": "n. 公主。可数，复数 princesses；由 prince 加 -ess 构成，表示女性王室成员。",
+    "collocations": "a young princess; the princess of Wales; a fairy-tale princess",
+    "commonMistake": "princess 的复数在词尾加 -es：princesses；不要写成 princesss，也别与男性称谓 prince 混用。",
+    "example": {"english": "The princess thanked the visitors for coming to the palace.", "chinese": "公主感谢来访者来到宫殿。"},
+    "application": {"prompt": "In the story, the king's daughter is a ___. A. prince B. princess", "solution": "B。解析：国王的女儿是 princess（公主）；prince 指王子。"},
+    "sources": [{"label": "Cambridge Dictionary: princess", "url": "https://dictionary.cambridge.org/dictionary/english/princess"}]
+  },
+  {
+    "word": "pale",
+    "examTags": ["词汇·形容词", "熟词多义·颜色与脸色"],
+    "grammar": "adj. 苍白的；颜色浅的。可作定语或表语；常见比较级 paler、最高级 palest。",
+    "collocations": "look pale; a pale face; pale blue",
+    "commonMistake": "pale 描写颜色浅或脸色苍白；表示“苍白的脸”说 a pale face，不能用副词 palely 修饰名词。",
+    "example": {"english": "After the long illness, his face still looked pale.", "chinese": "久病之后，他的脸色看起来仍然苍白。"},
+    "application": {"prompt": "After hearing the frightening news, Nina's face turned ___. A. cheerful B. pale", "solution": "B。解析：听到吓人的消息后脸色变白，用 pale 描写脸色苍白。"},
+    "sources": [{"label": "Cambridge Dictionary: pale", "url": "https://dictionary.cambridge.org/dictionary/english/pale"}]
+  },
+  {
+    "word": "policeman",
+    "examTags": ["词汇·职业名词", "拼写·不规则复数"],
+    "grammar": "n. 男警察。可数；复数 policemen，policewoman 的复数为 policewomen；现代语境也常用 police officer 作不特指性别的称呼。",
+    "collocations": "a police officer; ask a policeman for help; policemen on duty",
+    "commonMistake": "policeman 的复数是 policemen，man 变 men；police 本身通常作集合名词，谓语用复数。",
+    "example": {"english": "Two policemen helped direct traffic after the parade.", "chinese": "游行结束后，两名男警察帮忙指挥交通。"},
+    "application": {"prompt": "Several ___ stood near the crossing to help the children cross safely. A. policemen B. policemans", "solution": "A。解析：policeman 的不规则复数是 policemen，句中 several 表示复数。"},
+    "sources": [{"label": "Cambridge Dictionary: policeman", "url": "https://dictionary.cambridge.org/dictionary/english/policeman"}]
+  },
+  {
+    "word": "shame",
+    "examTags": ["词汇·名词", "语法·固定句型"],
+    "grammar": "n. 羞愧；令人遗憾的事。常用 feel shame、be ashamed of；It's a shame that... 表示“……真遗憾”。",
+    "collocations": "feel shame; It's a shame that...; be ashamed of a mistake",
+    "commonMistake": "shame 是名词；表达“为……感到羞愧”常说 be ashamed of，而不是 be shame of。",
+    "example": {"english": "It's a shame that the museum is closed on Mondays.", "chinese": "博物馆周一闭馆，真遗憾。"},
+    "application": {"prompt": "We planned to see the final show, but it was cancelled. It's a ___ that we missed it. A. shameful B. shame", "solution": "B。解析：It's a shame that... 是“……真遗憾”的句型，冠词 a 后需要名词 shame。"},
+    "sources": [{"label": "Cambridge Dictionary: shame", "url": "https://dictionary.cambridge.org/dictionary/english/shame"}]
+  },
+  {
+    "word": "president",
+    "examTags": ["词汇·职业与职务名词", "语法·冠词与大小写"],
+    "grammar": "n. 总统；主席；董事长。可数；表示某组织的负责人常用 the president of...；职务名作普通称谓时通常小写。",
+    "collocations": "the company president; the president of the club; elect a president",
+    "commonMistake": "president 表示机构负责人时常用 the president of + 组织；不要把 president 与 present（礼物/出席的）混淆。",
+    "example": {"english": "The president of the club welcomed the new members.", "chinese": "俱乐部主席欢迎了新成员。"},
+    "application": {"prompt": "The ___ of the student council announced the election results to the school. A. presence B. president", "solution": "B。解析：宣布学生会选举结果的是学生会主席 president；presence 表示“在场”。"},
+    "sources": [{"label": "Cambridge Dictionary: president", "url": "https://dictionary.cambridge.org/dictionary/english/president"}]
+  },
+  {
+    "word": "go all out",
+    "examTags": ["词汇·动词短语", "写作·努力与态度"],
+    "grammar": "phr. 全力以赴；竭尽全力。go 随主语和时态变化，如 goes all out、went all out；all out 不变。",
+    "collocations": "go all out to win; go all out for the team; go all out in the competition",
+    "commonMistake": "固定顺序是 go all out；后接目的时可用 to + 动词原形，如 go all out to help。",
+    "example": {"english": "The whole class went all out to prepare for the school show.", "chinese": "全班竭尽全力为校园演出做准备。"},
+    "application": {"prompt": "The team practised every evening because they wanted to win. They ___ to prepare for the final. A. went out all B. went all out", "solution": "B。解析：went all out 表示“全力以赴”；短语中 all out 的顺序不能颠倒。"},
+    "sources": [{"label": "Cambridge Dictionary: go all out", "url": "https://dictionary.cambridge.org/us/dictionary/english/go-all-out"}]
+  },
+  {
+    "word": "regret",
+    "examTags": ["词汇·动词与名词", "语法·非谓语辨析"],
+    "grammar": "v. 后悔；遗憾；n. 懊悔。regret doing 表示后悔做过；regret to do 常用于遗憾地告知；过去式 regretted，双写 t。",
+    "collocations": "regret doing something; regret to say; have no regrets",
+    "commonMistake": "regret 后接 doing 表示对已做之事后悔；regret to tell you 表示现在遗憾地告知，含义不同。",
+    "example": {"english": "I regret staying up so late before the exam.", "chinese": "我后悔考试前熬夜到那么晚。"},
+    "application": {"prompt": "After missing the early bus, Kai ___ getting up so late. A. regretted B. regretted to", "solution": "A。解析：他后悔已经发生的“起晚了”这件事，用 regret doing，故为 regretted getting。"},
+    "sources": [{"label": "Cambridge Dictionary: regret", "url": "https://dictionary.cambridge.org/dictionary/english/regret"}]
+  },
+  {
+    "word": "sofa",
+    "examTags": ["词汇·可数名词", "语法·家具词汇"],
+    "grammar": "n. 长沙发。可数，复数 sofas；常用 sit on the sofa，表示坐在沙发上用介词 on。",
+    "collocations": "a comfortable sofa; sit on the sofa; a sofa bed",
+    "commonMistake": "sofa 是可数名词，单数前需有限定词；说坐在沙发上用 on the sofa，不用 in the sofa。",
+    "example": {"english": "Grandma sat on the sofa and told us a story.", "chinese": "奶奶坐在沙发上给我们讲了一个故事。"},
+    "application": {"prompt": "There is room for three people to sit ___ the sofa. A. at B. on", "solution": "B。解析：表示坐在沙发的表面上用 sit on the sofa。"},
+    "sources": [{"label": "Cambridge Dictionary: sofa", "url": "https://dictionary.cambridge.org/dictionary/english/sofa"}]
+  },
+  {
+    "word": "compound",
+    "examTags": ["词汇·名词与形容词", "词汇·构词法"],
+    "grammar": "adj. 复合的；n. 复合词、化合物、院落。compound word 指由两个或多个词素构成的复合词；作名词时可数。",
+    "collocations": "a compound word; a chemical compound; a school compound",
+    "commonMistake": "compound word 是“复合词”，compound 也能作名词表示化合物；不要与 complex（复杂的）完全等同。",
+    "example": {"english": "“Toothbrush” is a compound word made from “tooth” and “brush”.", "chinese": "“toothbrush”是由“tooth”和“brush”构成的复合词。"},
+    "application": {"prompt": "“Raincoat” joins “rain” and “coat” to form a ___. A. compound word B. question mark", "solution": "A。解析：两个词组合成一个新词，构成 compound word（复合词）。"},
+    "sources": [{"label": "Cambridge Dictionary: compound", "url": "https://dictionary.cambridge.org/dictionary/english/compound"}]
+  },
+  {
+    "word": "complex",
+    "examTags": ["词汇·形容词", "语法·比较级与近义辨析"],
+    "grammar": "adj. 复杂的；由多部分组成的。可作定语或表语；比较级 more complex，最高级 most complex。",
+    "collocations": "a complex problem; a complex system; become more complex",
+    "commonMistake": "complex 表示“复杂的”，通常用 more complex 构成比较级；不要误写成 complexer。",
+    "example": {"english": "The guide explained the complex map one step at a time.", "chinese": "导游一步一步地讲解这张复杂的地图。"},
+    "application": {"prompt": "As the project added more stages, its plan became ___ than before. A. most complex B. more complex", "solution": "B。解析：than before 提示要用比较级 more complex，而不是最高级 most complex。"},
+    "sources": [{"label": "Cambridge Dictionary: complex", "url": "https://dictionary.cambridge.org/dictionary/english/complex"}]
+  },
+  {
+    "word": "lunar",
+    "examTags": ["词汇·形容词派生", "阅读·天文与历法"],
+    "grammar": "adj. 月亮的；月球的。常作定语修饰 calendar、month、surface 等名词；名词形式为 moon。",
+    "collocations": "the lunar calendar; a lunar month; lunar exploration",
+    "commonMistake": "lunar 是形容词，常置于名词前；“月亮”本身用 moon，不能把 lunar 单独当名词使用。",
+    "example": {"english": "The date of the festival changes according to the lunar calendar.", "chinese": "这个节日的日期会根据农历变化。"},
+    "application": {"prompt": "The festival date follows the phases of the moon, so it is based on a ___ calendar. A. lunar B. local", "solution": "A。解析：依据月相制定的历法是 lunar calendar（阴历/农历）。"},
+    "sources": [{"label": "Cambridge Dictionary: lunar", "url": "https://dictionary.cambridge.org/dictionary/english/lunar"}]
+  },
+  {
+    "word": "reunite",
+    "examTags": ["词汇·动词派生", "写作·家庭与团聚"],
+    "grammar": "v. （使）再次团聚；（使）重逢。re- 表示“再次”；可用 reunite with sb 或 reunite sb with sb。",
+    "collocations": "reunite with one's family; reunite two friends; be reunited after years",
+    "commonMistake": "表示“与某人团聚”用 reunite with sb；不要遗漏介词 with，也别把 unite（联合）误当成“再次重逢”。",
+    "example": {"english": "The festival reunited relatives who had not seen one another for years.", "chinese": "这个节日让多年未见的亲人重新团聚。"},
+    "application": {"prompt": "After living in different countries for years, the sisters were happy to ___ with each other. A. separate B. reunite", "solution": "B。解析：多年分居后姐妹再次相见团聚，用 reunite with each other。"},
+    "sources": [{"label": "Cambridge Dictionary: reunite", "url": "https://dictionary.cambridge.org/dictionary/english/reunite"}]
+  },
+  {
+    "word": "mooncake",
+    "examTags": ["词汇·复合名词", "阅读·节日饮食"],
+    "grammar": "n. 月饼。可数，复数 mooncakes；由 moon + cake 构成，常与 Mid-Autumn Festival 搭配。",
+    "collocations": "eat mooncakes; a box of mooncakes; mooncakes with lotus-seed paste",
+    "commonMistake": "mooncake 通常写作一个词；表示一盒月饼说 a box of mooncakes，cake 不可数的用法不适用于这里的单块月饼。",
+    "example": {"english": "We shared mooncakes while watching the full moon.", "chinese": "我们一边赏满月，一边分享月饼。"},
+    "application": {"prompt": "At the Mid-Autumn Festival dinner, everyone shared a traditional ___. A. mooncake B. sandwich", "solution": "A。解析：中秋节聚餐时分享的传统食品是 mooncake（月饼）。"},
+    "sources": [{"label": "Cambridge Dictionary: mooncake", "url": "https://dictionary.cambridge.org/dictionary/english/mooncake"}]
+  },
+  {
+    "word": "steal",
+    "examTags": ["词汇·不规则动词", "语法·动词词形变化"],
+    "grammar": "v. 偷；窃取。steal—stole—stolen；常用 steal sth from sb/place，stolen 可作过去分词或形容词。",
+    "collocations": "steal a bike; steal money from a shop; a stolen bag",
+    "commonMistake": "steal 的过去式是 stole，过去分词是 stolen；不要误写为 stealed，也不要与 rob sb of sth 的结构混用。",
+    "example": {"english": "Someone stole my bicycle from outside the library.", "chinese": "有人从图书馆外偷走了我的自行车。"},
+    "application": {"prompt": "The police found the ___ painting hidden in a box. A. stole B. stolen", "solution": "B。解析：painting 前需要过去分词作定语，steal 的过去分词是 stolen，表示“被偷的”。"},
+    "sources": [{"label": "Cambridge Dictionary: steal", "url": "https://dictionary.cambridge.org/dictionary/english/steal"}]
+  },
+  {
+    "word": "bring together",
+    "examTags": ["词汇·动词短语", "写作·联系与合作"],
+    "grammar": "phr. 把……聚到一起；使……联合。bring 随时态变化为 brought；代词宾语放 bring 与 together 之间。",
+    "collocations": "bring people together; bring a team together; music brings us together",
+    "commonMistake": "代词宾语放在中间：bring them together；过去式是 brought together，不是 bringed together。",
+    "example": {"english": "The celebration brings neighbours together every year.", "chinese": "这场庆祝活动每年都让邻居们聚在一起。"},
+    "application": {"prompt": "The project helped students from different classes work as one team; it ___ them ___. A. brought / together B. brought together / them", "solution": "A。解析：代词 them 要置于短语中间；brought them together 表示“把他们聚到一起”。"},
+    "sources": [{"label": "Cambridge Dictionary: bring together", "url": "https://dictionary.cambridge.org/dictionary/english/bring-together"}]
+  },
+  {
+    "word": "couplet",
+    "examTags": ["词汇·可数名词", "阅读·诗歌与传统"],
+    "grammar": "n. 对联；（诗歌中的）对句。可数，复数 couplets；一副对联通常由上下两行构成。",
+    "collocations": "write a couplet; a pair of couplets; Spring Festival couplets",
+    "commonMistake": "couplet 指成对的诗行或对联，不是单独一行；词尾是 -let，拼写不要漏掉 t。",
+    "example": {"english": "My grandfather wrote a couplet for the front door.", "chinese": "爷爷为大门写了一副对联。"},
+    "application": {"prompt": "The two matching lines of poetry on the doorway form a ___. A. couplet B. paragraph", "solution": "A。解析：成对的诗行或门上的对联称为 couplet；paragraph 是段落。"},
+    "sources": [{"label": "Cambridge Dictionary: couplet", "url": "https://dictionary.cambridge.org/dictionary/english/couplet"}]
+  },
+  {
+    "word": "firework",
+    "examTags": ["词汇·可数名词", "语法·单复数辨析"],
+    "grammar": "n. 烟火；烟花。可数，复数 fireworks 常泛指烟花表演或烟火；a firework 可指一枚烟花。",
+    "collocations": "set off fireworks; a firework display; fireworks at midnight",
+    "commonMistake": "泛指烟花表演时通常用复数 fireworks；单独一枚可说 a firework，不能写成 a fireworks。",
+    "example": {"english": "The fireworks lit up the sky at midnight.", "chinese": "午夜时分，烟花照亮了天空。"},
+    "application": {"prompt": "There were many colourful ___ above the river during the celebration. A. firework B. fireworks", "solution": "B。解析：many 后接可数名词复数，句中应使用 fireworks。"},
+    "sources": [{"label": "Cambridge Dictionary: firework", "url": "https://dictionary.cambridge.org/dictionary/english/firework"}]
+  },
+  {
+    "word": "gather",
+    "examTags": ["词汇·动词", "语法·动词搭配与词形"],
+    "grammar": "v. 聚集；集合；收集。可作及物或不及物动词；gather around/round 表示围拢，过去式 gathered。",
+    "collocations": "gather around the table; gather information; gather together",
+    "commonMistake": "gather 可表示人群聚集，也可表示收集信息；表示“收集”后需有宾语，如 gather information。",
+    "example": {"english": "Families gathered around the table to share the holiday meal.", "chinese": "家人们围坐在桌旁分享节日餐食。"},
+    "application": {"prompt": "Before dinner, the children ___ around the table to hear their grandfather's story. A. gathered B. borrowed", "solution": "A。解析：孩子们围到桌边听故事，用 gather around；过去发生故用 gathered。"},
+    "sources": [{"label": "Cambridge Dictionary: gather", "url": "https://dictionary.cambridge.org/dictionary/english/gather"}]
+  },
+  {
+    "word": "count down",
+    "examTags": ["词汇·动词短语", "语言运用·时间表达"],
+    "grammar": "phr. 倒数；倒计时。count down to + 时间/事件表示倒数到某时；count 随主语变化，down 不变。",
+    "collocations": "count down to midnight; count down the final seconds; a countdown begins",
+    "commonMistake": "count down to midnight 中 to 是介词，后接名词；若后接事件名词也用 to，不要误写成 count down until。",
+    "example": {"english": "The crowd counted down to midnight together.", "chinese": "人群一起倒数到午夜。"},
+    "application": {"prompt": "Everyone began to ___ from ten as the clock approached twelve. A. count down B. count up", "solution": "A。解析：从十开始往下数到十二点是 count down（倒计时）。"},
+    "sources": [{"label": "Cambridge Dictionary: count down", "url": "https://dictionary.cambridge.org/dictionary/english/count-down"}]
+  },
+  {
+    "word": "midnight",
+    "examTags": ["词汇·时间名词", "语法·介词搭配"],
+    "grammar": "n. 午夜；子夜，通常不可数。表示在午夜用 at midnight；可说 midnight sun 等固定组合。",
+    "collocations": "at midnight; after midnight; the stroke of midnight",
+    "commonMistake": "表示“在午夜”用 at midnight，不加 the；不要与 noon（正午）混淆。",
+    "example": {"english": "The New Year began at midnight, and the bells rang across the town.", "chinese": "新年在午夜到来，钟声响彻全镇。"},
+    "application": {"prompt": "The last train leaves ___, so we must reach the station before twelve. A. in midnight B. at midnight", "solution": "B。解析：具体时刻 midnight 前用介词 at，固定说 at midnight。"},
+    "sources": [{"label": "Cambridge Dictionary: midnight", "url": "https://dictionary.cambridge.org/dictionary/english/midnight"}]
+  },
+  {
+    "word": "Scottish",
+    "examTags": ["词汇·国籍形容词", "拼写·专名派生词"],
+    "grammar": "adj. 苏格兰的；苏格兰人的；n. 苏格兰人（用法较少）。作形容词修饰人、文化或事物；首字母大写。",
+    "collocations": "Scottish music; a Scottish tradition; Scottish people",
+    "commonMistake": "Scottish 是首字母大写的国籍形容词；表示苏格兰时用 Scotland，表示苏格兰人也可用 Scots。",
+    "example": {"english": "The group performed Scottish music at the international festival.", "chinese": "这个团体在国际节上演奏了苏格兰音乐。"},
+    "application": {"prompt": "The dancers wore traditional clothes from Scotland and performed ___ folk music. A. Scottish B. Scotland", "solution": "A。解析：名词 folk music 前要用形容词 Scottish 修饰；Scotland 是国家名词。"},
+    "sources": [{"label": "Cambridge Dictionary: Scottish", "url": "https://dictionary.cambridge.org/dictionary/english/scottish"}]
+  },
+  {
+    "word": "set off",
+    "examTags": ["词汇·多义动词短语", "语法·短语动词结构"],
+    "grammar": "phr. 点燃（烟花、爆竹）；动身。set—set—set；及物用法可分开，代词宾语放中间，如 set them off。",
+    "collocations": "set off fireworks; set off for the station; set an alarm off",
+    "commonMistake": "set off 可指“点燃”或“出发”；set off for + 地点表示动身去某处，代词宾语要放在 set 与 off 之间。",
+    "example": {"english": "They set off a few fireworks after the family dinner.", "chinese": "家庭晚餐后，他们点燃了几枚烟花。"},
+    "application": {"prompt": "At midnight, several fireworks were ___ to celebrate the festival. A. set aside B. set off", "solution": "B。解析：烟花在午夜被点燃用 be set off；set aside 表示把某物搁置一旁。"},
+    "sources": [{"label": "Cambridge Dictionary: set off/out", "url": "https://dictionary.cambridge.org/dictionary/english/set-off-out"}]
+  },
+  {
+    "word": "Chinese lunar calendar",
+    "examTags": ["词汇·历法表达", "语法·形容词作定语"],
+    "grammar": "n. 中国农历。Chinese 和 lunar 均作前置修饰语，中心词是 calendar；通常在句中小写，专名标题除外。",
+    "collocations": "follow the Chinese lunar calendar; a date on the lunar calendar; lunar-calendar months",
+    "commonMistake": "calendar 是中心名词，lunar 表示“月亮的”并修饰 calendar；不要把 lunar 写成名词 moon 的替代词。",
+    "example": {"english": "The festival falls on the fifteenth day of the first month in the Chinese lunar calendar.", "chinese": "这个节日是中国农历正月十五。"},
+    "application": {"prompt": "The festival date follows the moon instead of the sun, so it is set by China's ___ calendar. A. solar B. lunar", "solution": "B。解析：根据月相而非太阳年确定日期，采用的是 lunar calendar（农历）。"},
+    "sources": [{"label": "Cambridge Dictionary: lunar", "url": "https://dictionary.cambridge.org/dictionary/english/lunar"}]
+  },
+  {
+    "word": "sweep out",
+    "examTags": ["词汇·动词短语", "语法·不规则动词"],
+    "grammar": "phr. 把（房间、灰尘等）扫干净；扫出去。sweep—swept—swept；表示彻底扫净某空间时常用 sweep out。",
+    "collocations": "sweep out the room; sweep the dust out; sweep out the ashes",
+    "commonMistake": "sweep 的过去式和过去分词都是 swept，不是 sweeped；表示扫某处可说 sweep out a room。",
+    "example": {"english": "We swept out the room before putting up the decorations.", "chinese": "挂上装饰物之前，我们把房间打扫干净了。"},
+    "application": {"prompt": "The room was dusty, so the children ___ it before the guests arrived. A. sweeped out B. swept out", "solution": "B。解析：sweep 的过去式为 swept；swept out the room 表示把房间扫干净。"},
+    "sources": [{"label": "Cambridge Dictionary: sweep", "url": "https://dictionary.cambridge.org/dictionary/english/sweep"}]
+  },
+  {
+    "word": "dust",
+    "examTags": ["词汇·名词与动词", "词形辨析·dusty"],
+    "grammar": "n. 灰尘；尘土（通常不可数）；v. 掸去灰尘。过去式 dusted；形容词 dusty 表示“布满灰尘的”。",
+    "collocations": "a cloud of dust; dust the shelves; dust off an old book",
+    "commonMistake": "dust 作名词表示灰尘时通常不可数；dust the table 是“给桌子掸灰”，而 dusty table 才是“积了灰的桌子”。",
+    "example": {"english": "She dusted the shelves before arranging the books.", "chinese": "她先掸去架子上的灰尘，再摆放书籍。"},
+    "application": {"prompt": "The books were covered with ___, so Mei cleaned the shelf with a cloth. A. dusty B. dust", "solution": "B。解析：covered with 后接名词，表示“覆盖着灰尘”用不可数名词 dust。"},
+    "sources": [{"label": "Cambridge Dictionary: dust", "url": "https://dictionary.cambridge.org/dictionary/english/dust"}]
+  },
+  {
+    "word": "breeze",
+    "examTags": ["词汇·可数名词", "写作·天气描写"],
+    "grammar": "n. 微风；轻风。可数，复数 breezes；常作 gentle/light/cool 的修饰对象。",
+    "collocations": "a gentle breeze; a cool sea breeze; the breeze blew",
+    "commonMistake": "breeze 指轻柔的风；较强的风通常用 wind，拼写 breeze 末尾是双 e。",
+    "example": {"english": "A cool breeze came through the open window.", "chinese": "一阵凉爽的微风从开着的窗户吹了进来。"},
+    "application": {"prompt": "The leaves moved gently, but the trees did not bend. A light ___ was blowing. A. breeze B. storm", "solution": "A。解析：只轻轻吹动树叶的风是 breeze（微风），storm 指暴风雨。"},
+    "sources": [{"label": "Cambridge Dictionary: breeze", "url": "https://dictionary.cambridge.org/dictionary/english/breeze"}]
+  },
+  {
+    "word": "throughout",
+    "examTags": ["词汇·介词与副词", "语法·时间和范围"],
+    "grammar": "prep. 遍及；自始至终；adv. 始终。作介词可接名词，如 throughout the year；不与 through 连写或拆开。",
+    "collocations": "throughout the country; throughout the night; throughout the year",
+    "commonMistake": "throughout 可表示空间上的“遍及”或时间上的“整个期间”；后接名词，不说 throughout of the country。",
+    "example": {"english": "The lantern festival is celebrated throughout the country.", "chinese": "全国各地都会庆祝这个灯笼节。"},
+    "application": {"prompt": "The custom is not limited to one city; people follow it ___ the country. A. among B. throughout", "solution": "B。解析：表示某种习俗遍及全国，用 throughout the country。"},
+    "sources": [{"label": "Cambridge Dictionary: throughout", "url": "https://dictionary.cambridge.org/dictionary/english/throughout"}]
+  },
+  {
+    "word": "fool",
+    "examTags": ["词汇·名词与动词", "词形辨析·foolish"],
+    "grammar": "n. 蠢人；傻瓜；v. 欺骗。作动词常用 fool sb into doing sth；形容词 foolish 表示“愚蠢的”。",
+    "collocations": "make a fool of oneself; fool someone into doing something; April Fool",
+    "commonMistake": "fool 作动词是“欺骗某人”，后接宾语；“愚蠢的”用 foolish，不能把 fool 当形容词修饰名词。",
+    "example": {"english": "The false message fooled several people into sharing their passwords.", "chinese": "这条虚假信息骗得几个人交出了自己的密码。"},
+    "application": {"prompt": "The fake notice ___ the visitors into thinking the museum was closed. A. fooled B. followed", "solution": "A。解析：fooled sb into doing 表示“骗某人做/相信某事”；此处是被骗得以为博物馆关闭。"},
+    "sources": [{"label": "Cambridge Dictionary: fool", "url": "https://dictionary.cambridge.org/dictionary/english/fool"}]
+  },
+  {
+    "word": "powder",
+    "examTags": ["词汇·名词", "语法·不可数名词"],
+    "grammar": "n. 粉末；细面。通常作不可数名词；说一份或一包粉末时可用 a spoonful/packet of powder。",
+    "collocations": "milk powder; face powder; a packet of powder",
+    "commonMistake": "powder 表示粉末时通常不可数；要数数量可说 two packets of powder，不说 two powders（除非指不同品种）。",
+    "example": {"english": "Add a little baking powder to the flour before mixing it.", "chinese": "搅拌面粉前加入少许泡打粉。"},
+    "application": {"prompt": "The recipe asks for a small amount of baking ___. A. powders B. powder", "solution": "B。解析：baking powder 表示泡打粉，作为物质名词通常不可数。"},
+    "sources": [{"label": "Cambridge Dictionary: powder", "url": "https://dictionary.cambridge.org/dictionary/english/powder"}]
+  },
+  {
+    "word": "background",
+    "examTags": ["词汇·复合名词", "语法·介词搭配"],
+    "grammar": "n. 背景；出身；背景资料。常用 in the background、background information；表示某人的出身可说 family background。",
+    "collocations": "family background; background information; in the background",
+    "commonMistake": "in the background 指在背景中；on the background 通常不用于这个意思。background 也可指个人经历，不只表示画面背景。",
+    "example": {"english": "Soft music played in the background while the guests talked.", "chinese": "客人交谈时，背景中播放着轻柔的音乐。"},
+    "application": {"prompt": "Soft music played ___ while the guests talked. A. in the background B. in the foreground", "solution": "A。解析：交谈时作为环境衬托的音乐在“背景中”，用 in the background。"},
+    "sources": [{"label": "Cambridge Dictionary: background", "url": "https://dictionary.cambridge.org/dictionary/english/background"}]
+  },
+  {
+    "word": "carnival",
+    "examTags": ["词汇·可数名词", "阅读·节庆与文化"],
+    "grammar": "n. 狂欢节；嘉年华。可数，复数 carnivals；常指有游行、音乐和庆祝活动的公共节庆。",
+    "collocations": "a street carnival; carnival parade; celebrate at a carnival",
+    "commonMistake": "carnival 指节庆活动或嘉年华，作为可数名词单数前要有冠词；别与 carnival 的活动误写成不可数 carnival。",
+    "example": {"english": "Colourful dancers filled the streets during the summer carnival.", "chinese": "夏季狂欢节期间，色彩鲜艳的舞者挤满了街道。"},
+    "application": {"prompt": "The city held a week-long ___ with music, dancing, and a street parade. A. carnival B. timetable", "solution": "A。解析：有音乐、舞蹈和街头游行的节庆活动是 carnival（狂欢节/嘉年华）。"},
+    "sources": [{"label": "Cambridge Dictionary: carnival", "url": "https://dictionary.cambridge.org/dictionary/english/carnival"}]
+  },
+  {
+    "word": "samba",
+    "examTags": ["词汇·舞蹈名词", "语言运用·音乐与文化"],
+    "grammar": "n. 桑巴舞；桑巴音乐。通常不可数指舞蹈或音乐类型；具体一支舞可说 a samba。",
+    "collocations": "dance the samba; samba music; a samba rhythm",
+    "commonMistake": "samba 指巴西桑巴舞或其音乐；谈这种舞蹈时常说 dance the samba，乐曲类型也可说 samba music。",
+    "example": {"english": "The dancers danced the samba to lively Brazilian music.", "chinese": "舞者们伴着欢快的巴西音乐跳起了桑巴舞。"},
+    "application": {"prompt": "At the Brazilian cultural show, the dancers moved to a lively ___ rhythm. A. waltz B. samba", "solution": "B。解析：巴西文化表演中伴随桑巴节奏跳舞，用 samba（桑巴）。"},
+    "sources": [{"label": "Cambridge Dictionary: samba", "url": "https://dictionary.cambridge.org/dictionary/english/samba"}]
+  }
+]

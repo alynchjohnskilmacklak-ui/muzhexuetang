@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import { resolveUserForTeacher } from '@/lib/teacher-account-binding'
 import { createNotification } from '@/lib/notifications'
+import { qywxEnabled } from '@/lib/qywx'
 
 type NotificationClient = Pick<Prisma.TransactionClient, 'notification' | 'user' | 'teacher'>
 
@@ -61,5 +62,6 @@ export async function notifyParentAboutMessageReply(
     href: '/parent/messages',
     relatedType: 'PARENT_MESSAGE',
     relatedId: params.messageId,
+    pushStatus: qywxEnabled() ? 'queued' : 'none',
   })
 }

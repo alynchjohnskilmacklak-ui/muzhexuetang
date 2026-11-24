@@ -1,17 +1,39 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import aiLogo from '@/assets/ai-logo.png'
 import { useSession } from 'next-auth/react'
-import { CloseOutlined } from '@ant-design/icons'
-import { AIChatPanel } from './AIChatPanel'
+import dynamic from 'next/dynamic'
+import Image from 'next/image'
+import useSWR from 'swr'
+import { ArrowLeftOutlined, CloseOutlined, MessageOutlined } from '@ant-design/icons'
+import styles from './AssistantBriefing.module.css'
+import {
+  AssistantBriefingPanel,
+  AssistantBriefingPreview,
+  AssistantMascotImage,
+  useAssistantBriefing,
+  useAssistantMascotAction,
+  type AssistantRole,
+} from './AssistantBriefing'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import type { AIRole } from '@/data/ai-prompts'
-import type { RecentAlert } from '@/app/api/ai/recent-alerts/route'
+import { MEMBERSHIP_THEME, resolveMembership } from '@/constants/membership'
+import { TIER_THEME, resolveTier } from '@/constants/teacher-tier'
+import { getAssistantPanelGeometry } from './assistant-panel-layout'
 
-const ROLE_QUESTIONS: Record<string, string[]> = {
+const AIChatPanel = dynamic(
+  () => import('./AIChatPanel').then((module) => module.AIChatPanel),
+  { loading: () => <div role="status" style={{ padding: 20, color: 'var(--color-ink-muted)' }}>正在打开 AI 助手…</div> },
+)
+
+async function fetchParentUnreadCounts([url]: readonly [string, string]): Promise<{ total?: unknown }> {
+  const response = await fetch(url, { cache: 'no-store' })
+  if (!response.ok) throw new Error('未读消息暂时无法读取')
+  return await response.json() as { total?: unknown }
+}
+
+export const ROLE_QUESTIONS: Record<string, string[]> = {
   admin: [
     '2025年石家庄中考一统线和二统线有什么区别',
     '新乐市高中分配生政策是怎么运作的',
@@ -36,69 +58,63 @@ const ROLE_QUESTIONS: Record<string, string[]> = {
   ],
 }
 
-function roleToAIRole(role: string | undefined): AIRole {
+export function roleToAIRole(role: string | undefined): AIRole {
   if (role === 'admin' || role === 'teacher') return role
   return 'parent'
 }
 
-function timeAgo(iso: string): string {
-  try {
-    const diff = Date.now() - new Date(iso).getTime()
-    const m = Math.floor(diff / 60000)
-    if (m < 1) return '刚刚'
-    if (m < 60) return `${m}分钟前`
-    const h = Math.floor(m / 60)
-    if (h < 24) return `${h}小时前`
-    const d = Math.floor(h / 24)
-    if (d < 7) return `${d}天前`
-    return new Date(iso).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })
-  } catch {
-    return ''
-  }
-}
-
-/** 快捷指令：打开 AI 助手即可一键直达常看页面（按角色区分） */
-const QUICK_LINKS: Record<string, { label: string; href: string }[]> = {
+/** 快捷指令：打开 AI 助手即可一键直达常看页面（按角色区分）；icon/sub 用于精细宫格，notify 入口带未读角标 */
+const QUICK_LINKS: Record<string, { label: string; sub: string; href: string; icon: string; notify?: boolean }[]> = {
   parent: [
-    { label: '课堂反馈', href: '/parent/class-feedback' },
-    { label: '家校沟通', href: '/parent/messages' },
-    { label: '缴费明细', href: '/parent/fees' },
-    { label: '每日练习', href: '/parent/practice' },
-    { label: '课程表', href: '/parent/schedule' },
-    { label: '通知中心', href: '/parent/notifications' },
+    { label: '课堂反馈', sub: '老师动态', href: '/parent/class-feedback', icon: '📝', notify: true },
+    { label: '家校沟通', sub: '留言回复', href: '/parent/messages', icon: '💬', notify: true },
+    { label: '缴费明细', sub: '课时余额', href: '/parent/fees', icon: '💰' },
+    { label: '每日练习', sub: '专项刷题', href: '/parent/practice', icon: '✏️' },
+    { label: '课程表', sub: '上课安排', href: '/parent/schedule', icon: '📅' },
+    { label: '通知中心', sub: '全部消息', href: '/parent/notifications', icon: '🔔', notify: true },
   ],
   teacher: [
-    { label: '今日课程', href: '/teacher/today-lessons' },
-    { label: '考勤打卡', href: '/teacher/attendance' },
-    { label: '我的反馈', href: '/teacher/feedback' },
-    { label: '家校消息', href: '/teacher/messages' },
-    { label: '课时工资', href: '/teacher/compensation' },
+    { label: '今日课程', sub: '上课安排', href: '/teacher/today-lessons', icon: '📚' },
+    { label: '考勤打卡', sub: '提交记录', href: '/teacher/attendance', icon: '✅' },
+    { label: '我的反馈', sub: '发布动态', href: '/teacher/feedback', icon: '📝' },
+    { label: '家校消息', sub: '家长留言', href: '/teacher/messages', icon: '💬', notify: true },
+    { label: '课时工资', sub: '薪资明细', href: '/teacher/compensation', icon: '💰' },
   ],
   admin: [
-    { label: '学员管理', href: '/students' },
-    { label: '教师管理', href: '/teachers' },
-    { label: '考勤审核', href: '/attendance' },
-    { label: '课堂反馈', href: '/classroom-feedback' },
-    { label: '缴费管理', href: '/fees' },
-    { label: '通知中心', href: '/notifications' },
+    { label: '学员管理', sub: '学员台账', href: '/students', icon: '👥' },
+    { label: '教师管理', sub: '教师档案', href: '/teachers', icon: '🧑‍🏫' },
+    { label: '考勤审核', sub: '今日待核', href: '/attendance', icon: '✅' },
+    { label: '课堂反馈', sub: '发布审核', href: '/classroom-feedback', icon: '📝' },
+    { label: '缴费管理', sub: '缴费记录', href: '/fees', icon: '💰' },
+    { label: '通知中心', sub: '全部消息', href: '/notifications', icon: '🔔', notify: true },
   ],
 }
 
-const ALERT_TYPE_COLOR: Record<string, string> = {
-  CLASSROOM_FEEDBACK: '#E8784A',
-  PERFORMANCE_FEEDBACK: '#E8784A',
-  PERFORMANCE_UPDATE: '#8B7BD8',
-  ATTENDANCE: '#4C9F70',
-  MESSAGE: '#5B8DEF',
-  PAPER_PUBLISHED: '#B8860B',
-  EXAM_PAPER: '#B8860B',
-  STUDY_HALL_HOMEWORK: '#C86B85',
-  COURSE_CHANGE_EVENT: '#6C8EAE',
-  SCHEDULE_CHANGE: '#6C8EAE',
-}
+const STORAGE_KEY = 'muzhe-ai-launcher-v2'
+const QUICK_HITS_KEY = 'muzhe-ai-quick-hits-v1' // 「最近在用」置顶计数
 
-const STORAGE_KEY = 'muzhe-ai-launcher-v1'
-const PEEK_SIZE = 44 // 贴边时露出的宽度
+/** 快捷提问：按角色定制，点击直接进入 AI 问答（真实数据已回答，问什么答什么） */
+const QUICK_QUESTIONS: Record<string, { q: string; icon: string }[]> = {
+  parent: [
+    { q: '帮我看看孩子的课堂反馈', icon: '📋' },
+    { q: '今天孩子有什么安排', icon: '🗓️' },
+    { q: '本周学习情况怎么样', icon: '📈' },
+    { q: '怎么续报课程', icon: '🎓' },
+  ],
+  teacher: [
+    { q: '今天有哪些课', icon: '📚' },
+    { q: '我的课时和薪资情况', icon: '💰' },
+    { q: '有哪些家长留言待回复', icon: '💬' },
+    { q: '怎么提交课堂反馈', icon: '✍️' },
+  ],
+  admin: [
+    { q: '今天运营数据怎么样', icon: '📊' },
+    { q: '有哪些待审核的考勤', icon: '✅' },
+    { q: '有哪些待处理的课堂反馈', icon: '📋' },
+    { q: '学员和教师的情况如何', icon: '🧑‍🎓' },
+  ],
+}
+const PEEK_SIZE = 56 // 靠边时保留小牧主体可见，同时让一部分自然缩进屏幕外
 const EDGE_GAP = 24 // 展开时距边缘的间距（桌面）
 const BADGE_MAX = 99
 const TOP_SAFE = 72 // 留出顶部导航栏和间距，避免遮挡账号入口
@@ -121,7 +137,8 @@ function defaultTop(): number {
   try {
     const isMobile = window.innerWidth < 768
     const bottomSafe = isMobile ? BOTTOM_SAFE_MOBILE : BOTTOM_SAFE_DESKTOP
-    return getVerticalBounds(window.innerHeight, 56, bottomSafe).maxTop
+    const ballSize = isMobile ? 72 : 88
+    return getVerticalBounds(window.innerHeight, ballSize, bottomSafe).maxTop
   } catch {
     return 400
   }
@@ -134,7 +151,7 @@ function loadPref(): LauncherPref {
       const parsed = JSON.parse(raw) as LauncherPref
       if ((parsed.side === 'left' || parsed.side === 'right') && Number.isFinite(parsed.top)) {
         const mobile = window.innerWidth < 768
-        const ballSize = mobile ? 52 : 56
+        const ballSize = mobile ? 72 : 88
         const bottomSafe = mobile ? BOTTOM_SAFE_MOBILE : BOTTOM_SAFE_DESKTOP
         const maxX = Math.max(4, window.innerWidth - ballSize - 4)
         const { minTop, maxTop } = getVerticalBounds(window.innerHeight, ballSize, bottomSafe)
@@ -156,29 +173,93 @@ function loadPref(): LauncherPref {
 }
 
 export function AIFloatingLauncher() {
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const isMobile = useIsMobile() ?? false
   const [open, setOpen] = useState(false)
+  /** 弹窗内双页：overview=今日概况 / chat=AI 问答（弹窗内切换，不跳路由） */
+  const [panelView, setPanelView] = useState<'overview' | 'chat'>('overview')
+  /** 第一页快捷提问 → 切第二页并自动发送 */
+  const [quickAsk, setQuickAsk] = useState<string | null>(null)
+  const [petPopped, setPetPopped] = useState(false)
   const [peeked, setPeeked] = useState(true)
   const [pref, setPref] = useState<LauncherPref>({ side: 'right', x: EDGE_GAP, top: 400 })
+  const [viewportWidth, setViewportWidth] = useState<number | null>(null)
   const [viewportHeight, setViewportHeight] = useState<number | null>(null)
-  const [unread, setUnread] = useState(0)
-  // 最近通知预览（未展开时也常驻展示，点击可跳转）
-  const [alerts, setAlerts] = useState<RecentAlert[]>([])
-  const [alertsDismissed, setAlertsDismissed] = useState(false)
+  const [briefingDismissed, setBriefingDismissed] = useState(false)
   const router = useRouter()
   // 拖拽状态：dragPos=拖动中球的绝对位置（left/top）；非 null 表示正在拖
   const [dragPos, setDragPos] = useState<{ left: number; top: number } | null>(null)
   const dragRef = useRef<{ startX: number; startY: number; moved: boolean } | null>(null)
   const suppressClickRef = useRef(false)
+  const petOpenTimerRef = useRef<number | null>(null)
   const role = (session?.user as { role?: string } | undefined)?.role ?? 'parent'
+  const unreadUserId = (session?.user as { id?: string } | undefined)?.id
+  const unreadKey = sessionStatus === 'authenticated' && role === 'parent' && unreadUserId
+    ? ['/api/parent/unread-counts', unreadUserId] as const
+    : null
+  const { data: unreadData, mutate: refreshUnread } = useSWR(unreadKey, fetchParentUnreadCounts, {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+  })
+  const unreadTotal = Number(unreadData?.total)
+  const unread = Number.isFinite(unreadTotal) && unreadTotal >= 0 ? Math.floor(unreadTotal) : 0
+  const assistantRole: AssistantRole = role === 'admin' ? 'admin' : role === 'teacher' ? 'teacher' : 'parent'
+  const userName = typeof session?.user?.name === 'string' ? session.user.name : ''
   const questions = ROLE_QUESTIONS[role] ?? ROLE_QUESTIONS.parent
   const aiRole = roleToAIRole(role)
   const quickLinks = QUICK_LINKS[role] ?? QUICK_LINKS.parent
+  // 「最近在用」置顶：记录各快捷入口点击次数，按次数降序稳定排序（同次保持原顺序）
+  const [quickHits, setQuickHits] = useState<Record<string, number>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(QUICK_HITS_KEY) ?? '{}') as Record<string, number>
+    } catch {
+      return {}
+    }
+  })
+  const sortedQuickLinks = useMemo(() => {
+    const list = quickLinks.slice()
+    list.sort((a, b) => (quickHits[b.href] ?? 0) - (quickHits[a.href] ?? 0))
+    return list
+  }, [quickLinks, quickHits])
+  const topQuickHref = sortedQuickLinks[0]?.href
+  const { data: briefingData, refresh: refreshBriefing } = useAssistantBriefing(assistantRole)
+  const { actionId: mascotActionId, cycleAction: cycleMascotAction } = useAssistantMascotAction(assistantRole, briefingData)
+  // 等级主题：家长按会员等级（普通绿/VIP橙/SVIP深墨绿+金）、教师按教师等级、管理固定深绿 —— 注入弹窗/简报/宫格
+  const levelTheme = useMemo(() => {
+    if (assistantRole === 'teacher') {
+      const tier = resolveTier(briefingData.teacherDashboard?.teacher?.tierLevel)
+      const theme = TIER_THEME[tier]
+      // ELITE keeps its dark green tier badge, but the assistant's content
+      // surfaces stay light so dark body text and controls remain readable.
+      return {
+        accent: tier === 'ELITE' ? 'var(--color-primary)' : theme.accent,
+        tint: tier === 'ELITE' ? 'var(--color-brand-gold-bg)' : theme.bg,
+        gold: theme.gold || 'var(--color-brand-gold)',
+      }
+    }
+    if (assistantRole === 'parent') {
+      const level = resolveMembership(briefingData.parentToday?.students?.[0]?.student?.membershipLevel)
+      const theme = MEMBERSHIP_THEME[level]
+      return { accent: theme.accent, tint: theme.bg, gold: theme.gold }
+    }
+    return { accent: 'var(--color-primary)', tint: 'var(--color-primary-bg)', gold: 'var(--color-brand-gold)' }
+  }, [assistantRole, briefingData])
+  // 快捷入口未读角标：从简报动态里按类型计数（反馈/留言/通知）
+  const feedbackAlertCount = briefingData.alerts.filter((a) => /FEEDBACK/.test((a.type || '').toUpperCase())).length
+  const messageAlertCount = briefingData.alerts.filter((a) => (a.type || '').toUpperCase() === 'MESSAGE').length
+  const noticeAlertCount = role === 'parent' ? unread : briefingData.alerts.length
+  const teacherMessageCount = briefingData.teacherMessageCount ?? 0
 
   const handleQuickLink = useCallback(
     (href: string) => {
       setOpen(false)
+      setQuickHits((current) => {
+        const next = { ...current, [href]: (current[href] ?? 0) + 1 }
+        try {
+          localStorage.setItem(QUICK_HITS_KEY, JSON.stringify(next))
+        } catch {}
+        return next
+      })
       router.push(href)
     },
     [router],
@@ -187,14 +268,18 @@ export function AIFloatingLauncher() {
   useEffect(() => {
     const loaded = loadPref()
     setPref(loaded)
-    setPeeked(!(loaded.expanded ?? false))
+    const mobile = window.innerWidth < 768
+    // Keep the closed mascot tucked on phones even when an older saved
+    // preference left it fully expanded over tappable page content.
+    setPeeked(mobile || !(loaded.expanded ?? false))
 
     const syncViewportBounds = () => {
       const mobile = window.innerWidth < 768
-      const size = mobile ? 52 : 56
+      const size = mobile ? 72 : 88
       const bottomSafe = mobile ? BOTTOM_SAFE_MOBILE : BOTTOM_SAFE_DESKTOP
       const maxX = Math.max(4, window.innerWidth - size - 4)
       const { minTop, maxTop } = getVerticalBounds(window.innerHeight, size, bottomSafe)
+      setViewportWidth(window.innerWidth)
       setViewportHeight(window.innerHeight)
       setPref((current) => ({
         ...current,
@@ -218,39 +303,10 @@ export function AIFloatingLauncher() {
     }
   }, [open])
 
-  // 家长端：拉取未读总数做角标（失败静默，不影响悬浮球）
-  const refreshUnread = useCallback(async () => {
-    if (role !== 'parent') return
-    try {
-      const res = await fetch('/api/parent/unread-counts', { cache: 'no-store' })
-      if (!res.ok) return
-      const data = await res.json()
-      const total = Number(data.total)
-      if (Number.isFinite(total) && total >= 0) setUnread(Math.floor(total))
-    } catch {}
-  }, [role])
-
-  useEffect(() => {
-    void refreshUnread()
-  }, [refreshUnread])
-
-  // ---- 最近通知预览：登录后拉取最近未读（反馈/留言/通知），常驻在球旁 ----
-  const refreshAlerts = useCallback(async () => {
-    try {
-      const res = await fetch('/api/ai/recent-alerts', { cache: 'no-store' })
-      if (!res.ok) return
-      const data = await res.json()
-      setAlerts(Array.isArray(data.alerts) ? data.alerts : [])
-    } catch {}
-  }, [])
-
-  useEffect(() => {
-    void refreshAlerts()
-  }, [refreshAlerts])
-
-  const ballSize = isMobile ? 52 : 56
-  const panelWidth = isMobile ? 'calc(100vw - 20px)' : 420
-  const panelHeight = isMobile ? 'min(78vh, 680px)' : 'min(640px, calc(100vh - 24px))'
+  const ballSize = isMobile ? 72 : 88
+  // 双端统一：水平垂直居中弹窗（电脑 480×640 / 手机 92vw×88dvh），同一套视觉规范
+  const panelWidth = isMobile ? 'min(92vw, 400px)' : 'min(480px, calc(100vw - 32px))'
+  const panelGeometry = getAssistantPanelGeometry(isMobile)
 
   const side = pref.side
 
@@ -263,17 +319,47 @@ export function AIFloatingLauncher() {
 
   const handleOpen = useCallback(() => {
     setOpen(true)
+    setPanelView('overview')
+    setQuickAsk(null)
     setPeeked(false)
     persist({ ...pref, expanded: true })
     void refreshUnread()
-  }, [pref, persist, refreshUnread])
+    void refreshBriefing()
+  }, [pref, persist, refreshUnread, refreshBriefing])
 
   const handleClose = useCallback(() => {
+    if (petOpenTimerRef.current !== null) {
+      window.clearTimeout(petOpenTimerRef.current)
+      petOpenTimerRef.current = null
+    }
     setOpen(false)
+    setPetPopped(false)
     setPeeked(true)
-    // 关闭后回到贴边收起态（仅侧边位置有效；上/下边吸附保持原位由 expanded 语义管理）
+    // 关闭后让小羊重新从屏幕边缘倾身探头。
     persist({ ...pref, expanded: false })
   }, [pref, persist])
+
+  const handlePetClick = useCallback(() => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false
+      return
+    }
+    if (open) {
+      handleClose()
+      return
+    }
+    setPeeked(false)
+    setPetPopped(true)
+    if (petOpenTimerRef.current !== null) window.clearTimeout(petOpenTimerRef.current)
+    petOpenTimerRef.current = window.setTimeout(() => {
+      petOpenTimerRef.current = null
+      handleOpen()
+    }, 220)
+  }, [handleClose, handleOpen, open])
+
+  useEffect(() => () => {
+    if (petOpenTimerRef.current !== null) window.clearTimeout(petOpenTimerRef.current)
+  }, [])
 
   // ---- 拖拽（桌面与移动端均支持，全屏自由拖拽：水平+垂直） ----
   const onPointerDown = useCallback(
@@ -337,13 +423,13 @@ export function AIFloatingLauncher() {
       top = pos.top // 垂直位置保留
       expanded = false
     } else if (nearest === 'top') {
-      // 上边：贴顶完整显示
+      // 上边：贴顶；手机端仍贴边收起，避免挡住页面控件。
       top = minTop
-      expanded = true
+      expanded = !isMobile
     } else {
-      // 下边：贴底完整显示
+      // 下边：贴底；手机端仍贴边收起，避免挡住页面控件。
       top = maxTop
-      expanded = true
+      expanded = !isMobile
     }
     setPeeked(!expanded)
     persist({ side: nextSide, x, top, expanded })
@@ -358,19 +444,31 @@ export function AIFloatingLauncher() {
     top: pref.top,
     width: ballSize,
     height: ballSize,
-    borderRadius: '50%',
+    zIndex: 1080,
+    overflow: 'visible',
+    pointerEvents: 'none',
+    transition: dragPos !== null ? 'none' : 'right .28s cubic-bezier(.2, 0, 0, 1), left .28s cubic-bezier(.2, 0, 0, 1), top .28s cubic-bezier(.2, 0, 0, 1)',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+  }
+  const petHitAreaStyle: React.CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    borderRadius: 0,
     border: 'none',
     padding: 0,
     cursor: 'pointer',
     touchAction: 'none',
-    background: '#fff',
-    boxShadow: '0 6px 22px rgba(26,18,1,.28), 0 0 0 1px rgba(232,117,69,.25)',
-    zIndex: 1080,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'visible',
-    transition: dragPos !== null ? 'none' : 'right .28s cubic-bezier(.2, 0, 0, 1), left .28s cubic-bezier(.2, 0, 0, 1), top .28s cubic-bezier(.2, 0, 0, 1)',
+    background: 'transparent',
+    boxShadow: 'none',
+    pointerEvents: 'auto',
+    // The tucked phone launcher sits in the page gutter; keep the inner 10px
+    // click-through so it cannot steal the trailing arrow on full-width cards.
+    clipPath: peeked && isMobile
+      ? side === 'right' ? 'inset(0 0 0 10px)' : 'inset(0 10px 0 0)'
+      : undefined,
     userSelect: 'none',
     WebkitUserSelect: 'none',
   }
@@ -386,27 +484,20 @@ export function AIFloatingLauncher() {
 
   const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    bottom: isMobile ? 10 : 24,
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
     width: panelWidth,
-    height: panelHeight,
-    maxWidth: 'calc(100vw - 20px)',
-    background: '#f7f4f0',
-    borderRadius: 16,
-    boxShadow: '0 16px 48px rgba(0,0,0,.25)',
+    height: panelGeometry.height,
+    maxWidth: '100vw',
+    maxHeight: panelGeometry.maxHeight,
+    background: '#FFFDF9',
+    borderRadius: 24,
+    boxShadow: '0 24px 64px rgba(14,59,46,.18)',
     zIndex: 1100,
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-  }
-  if (side === 'left') panelStyle.left = isMobile ? 10 : 24
-  else panelStyle.right = isMobile ? 10 : 24
-  if (!isMobile && !dragPos && viewportHeight !== null) {
-    // 桌面端：面板在悬浮球附近垂直展开（不遮挡球）
-    const actualPanelHeight = Math.min(640, Math.max(0, viewportHeight - 24))
-    const maxPanelTop = Math.max(12, viewportHeight - actualPanelHeight - 12)
-    const panelTop = Math.min(pref.top + ballSize + 10, maxPanelTop)
-    panelStyle.top = Math.max(12, panelTop)
-    delete panelStyle.bottom
   }
 
   const badge = unread > 0 ? (unread > BADGE_MAX ? `${BADGE_MAX}+` : String(unread)) : null
@@ -415,19 +506,38 @@ export function AIFloatingLauncher() {
   const alertStyle: React.CSSProperties = {
     position: 'fixed',
     zIndex: 1085,
-    width: 'min(320px, calc(100vw - 20px))',
+    width: isMobile ? 'min(280px, calc(100vw - 78px))' : 'min(320px, calc(100vw - 20px))',
   }
-  if (!isMobile && alerts.length > 0 && !alertsDismissed && !open) {
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 800
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 800
+  let previewAttachmentSide: 'left' | 'right' = 'right'
+  let previewAttachmentPosition: 'top' | 'bottom' = 'top'
+  if (!briefingDismissed && !open) {
+    // Fixed-position CSS uses the layout viewport (clientWidth), which can be
+    // narrower than innerWidth when a desktop scrollbar is present.
+    const cssViewportWidth = viewportWidth ?? 800
+    const vw = typeof document !== 'undefined'
+      ? document.documentElement.clientWidth || cssViewportWidth
+      : cssViewportWidth
+    const vh = viewportHeight ?? 800
     const tipBallLeft = dragPos ? dragPos.left : side === 'right' ? vw - (displayX as number) - ballSize : (displayX as number)
     const tipBallTop = dragPos ? dragPos.top : pref.top
-    if (tipBallLeft + ballSize / 2 < vw / 2) alertStyle.left = Math.max(10, tipBallLeft + ballSize + 8)
-    else alertStyle.right = Math.max(10, vw - tipBallLeft + 8)
-    if (tipBallTop + ballSize < vh / 2) alertStyle.top = tipBallTop + ballSize + 8
-    else alertStyle.bottom = vh - tipBallTop + 8
+    // Keep the briefing bubble beside the mascot instead of covering its visible body.
+    const bubbleGap = 0
+    if (tipBallLeft + ballSize / 2 < vw / 2) {
+      alertStyle.left = Math.max(10, tipBallLeft + ballSize + bubbleGap)
+      previewAttachmentSide = 'left'
+    } else {
+      alertStyle.right = Math.max(10, vw - tipBallLeft + bubbleGap)
+      previewAttachmentSide = 'right'
+    }
+    if (tipBallTop + ballSize < vh / 2) {
+      alertStyle.top = tipBallTop + ballSize + bubbleGap
+      previewAttachmentPosition = 'top'
+    } else {
+      alertStyle.bottom = vh - tipBallTop + bubbleGap
+      previewAttachmentPosition = 'bottom'
+    }
     // 面板不要超出屏幕（宽度 min(320, vw-20)，防止被裁掉）
-    const panelW = Math.min(320, vw - 20)
+    const panelW = Math.min(isMobile ? 280 : 320, cssViewportWidth - (isMobile ? 78 : 20))
     if (alertStyle.right !== undefined) {
       const panelLeft = vw - (alertStyle.right as number) - panelW
       if (panelLeft < 10) {
@@ -441,128 +551,172 @@ export function AIFloatingLauncher() {
         delete alertStyle.left
       }
     }
+    const panelLeft = typeof alertStyle.left === 'number'
+      ? alertStyle.left
+      : vw - (alertStyle.right as number) - panelW
+    previewAttachmentSide = panelLeft + panelW / 2 < tipBallLeft + ballSize / 2 ? 'right' : 'left'
+    previewAttachmentPosition = alertStyle.top !== undefined ? 'top' : 'bottom'
   }
 
-  const handleAlertClick = useCallback(
-    (a: RecentAlert) => {
-      setAlertsDismissed(true)
-      if (a.key.startsWith('nt_') && role === 'parent') {
-        void fetch('/api/parent/notifications/mark-read', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: a.key.slice(3) }),
-        }).catch(() => {})
-        void refreshUnread()
-      }
-      setOpen(false)
-      router.push(a.href)
-    },
-    [role, router, refreshUnread],
-  )
-
-  return (
+  // 今日概况区（简报 + 快捷宫格）：默认全量展开，无「展开详情」交互
+  const briefingHeader = (
     <>
-      {/* 桌面端显示最近通知预览；手机端使用导航和浮球未读标记，避免遮挡当前内容 */}
-      {!isMobile && alerts.length > 0 && !alertsDismissed && !open && (
+      <AssistantBriefingPanel
+        role={assistantRole}
+        userName={userName}
+        data={briefingData}
+        actionId={mascotActionId}
+        onCycleAction={cycleMascotAction}
+        onNavigate={handleQuickLink}
+        onRefresh={refreshBriefing}
+      />
+      <div style={{ padding: '4px 0 8px' }}>
         <div
-          role="status"
           style={{
-            ...alertStyle,
-            background: '#fff',
-            borderRadius: 16,
-            boxShadow: '0 10px 30px rgba(26,18,1,.22), 0 0 0 1px rgba(232,117,69,.18)',
-            overflow: 'hidden',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            gap: 6,
+            width: '100%',
+            minWidth: 0,
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '10px 12px 8px 14px',
-              background: '#fff',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1201' }}>最近通知</span>
-              <span
-                style={{
-                  minWidth: 18,
-                  height: 18,
-                  padding: '0 5px',
-                  borderRadius: 9,
-                  background: '#E8784A',
-                  color: '#fff',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  lineHeight: '18px',
-                  textAlign: 'center',
-                }}
-              >
-                {alerts.length > 9 ? '9+' : alerts.length}
-              </span>
-            </div>
-            <button
-              type="button"
-              aria-label="关闭通知预览"
-              onClick={() => setAlertsDismissed(true)}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                width: 26,
-                height: 26,
-                color: '#b0a28c',
-                fontSize: 14,
-                lineHeight: 1,
-              }}
-            >
-              ×
-            </button>
-          </div>
-          <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-            {alerts.map((a) => (
+          {sortedQuickLinks.map((q) => {
+            const badgeCount = q.notify
+              ? q.href.includes('messages')
+                ? (role === 'teacher' ? teacherMessageCount : messageAlertCount)
+                : q.href.includes('notifications')
+                  ? noticeAlertCount
+                  : feedbackAlertCount
+              : 0
+            return (
               <button
-                key={a.key}
+                key={q.href}
                 type="button"
-                onClick={() => handleAlertClick(a)}
+                onClick={() => handleQuickLink(q.href)}
+                aria-label={`${q.label}：${q.sub}${badgeCount > 0 ? `，${badgeCount} 条未读` : ''}`}
                 style={{
                   display: 'flex',
-                  gap: 10,
-                  width: '100%',
-                  textAlign: 'left',
+                  alignItems: 'center',
+                  gap: 8,
                   border: 'none',
-                  borderTop: '1px solid rgba(0,0,0,.05)',
-                  background: 'transparent',
-                  padding: '9px 14px',
+                  background: 'var(--assistant-tint, #F2F6F1)',
+                  borderRadius: 12,
+                  padding: '7px 9px',
+                  minHeight: 40,
+                  minWidth: 0,
+                  position: 'relative',
+                  textAlign: 'left',
                   cursor: 'pointer',
-                  alignItems: 'flex-start',
+                  transition: 'transform .12s cubic-bezier(.2, 0, 0, 1)',
                 }}
               >
                 <span
+                  aria-hidden="true"
                   style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: 'var(--assistant-tint, #FFFDF9)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 16,
                     flexShrink: 0,
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    marginTop: 5,
-                    background: ALERT_TYPE_COLOR[a.type] || '#E8784A',
                   }}
-                />
-                <span style={{ minWidth: 0, flex: 1 }}>
-                  <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1a1201', lineHeight: 1.4 }}>
-                    {a.title}
-                  </span>
-                  {a.snippet && (
-                    <span style={{ display: 'block', fontSize: 12, color: '#8a7c66', marginTop: 2, lineHeight: 1.4 }}>
-                      {a.snippet}
-                    </span>
-                  )}
+                >
+                  {q.icon}
                 </span>
-                <span style={{ flexShrink: 0, fontSize: 11, color: '#b0a28c', marginTop: 2 }}>{timeAgo(a.time)}</span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span
+                    style={{
+                      display: 'block',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--color-ink)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {q.label}
+                    {Object.keys(quickHits).length > 0 && q.href === topQuickHref && (
+                      <span
+                        style={{
+                          marginLeft: 5,
+                          fontSize: 9,
+                          color: 'var(--assistant-gold, #B4652E)',
+                          background: 'var(--assistant-tint, #FBF1E3)',
+                          padding: '1px 5px',
+                          borderRadius: 8,
+                          verticalAlign: 1,
+                        }}
+                      >
+                        最近在用
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    style={{
+                      display: 'block',
+                      fontSize: 10,
+                      color: 'var(--color-ink-subtle)',
+                      marginTop: 1,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {q.sub}
+                  </span>
+                </span>
+                {badgeCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      top: 5,
+                      right: 5,
+                      minWidth: 17,
+                      height: 17,
+                      padding: '0 4px',
+                      borderRadius: 9,
+                      background: 'var(--assistant-accent, #E8784A)',
+                      color: '#fff',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      lineHeight: '17px',
+                      textAlign: 'center',
+                      boxShadow: '0 0 0 2px #FFFDF9',
+                    }}
+                  >
+                    {badgeCount > 99 ? '99+' : badgeCount}
+                  </span>
+                )}
               </button>
-            ))}
-          </div>
+            )
+          })}
+        </div>
+      </div>
+    </>
+  )
+
+  return (
+    <div style={{ '--assistant-accent': levelTheme.accent, '--assistant-tint': levelTheme.tint, '--assistant-gold': levelTheme.gold } as React.CSSProperties}>
+      {/* 手机上的悬浮气泡会遮挡正在操作的页面；简报保留在点开小牧后的助手面板里。 */}
+      {viewportHeight !== null && viewportWidth !== null && viewportWidth > 1024 && viewportHeight > 600 && !isMobile && !open && !briefingDismissed && (
+        <div style={alertStyle}>
+          <AssistantBriefingPreview
+            role={assistantRole}
+            userName={userName}
+            data={briefingData}
+            actionId={mascotActionId}
+            attachmentSide={previewAttachmentSide}
+            attachmentPosition={previewAttachmentPosition}
+            onCycleAction={cycleMascotAction}
+            onOpen={handleOpen}
+            onNavigate={handleQuickLink}
+            onDismiss={() => setBriefingDismissed(true)}
+          />
         </div>
       )}
 
@@ -572,37 +726,60 @@ export function AIFloatingLauncher() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(26,18,1,.35)',
+            background: 'rgba(14,59,46,.42)',
             zIndex: 1090,
-            backdropFilter: 'blur(1px)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
           }}
         />
       )}
 
       {/* 弹窗面板 */}
       {open && (
-        <div style={panelStyle} onClick={(e) => e.stopPropagation()}>
+        <div style={panelStyle} className={styles.aiPanelEnter} onClick={(e) => e.stopPropagation()}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '10px 14px 10px 16px',
-              background: '#fff',
-              borderBottom: '1px solid rgba(0,0,0,.06)',
+              padding: '12px 14px 10px 16px',
+              background: 'linear-gradient(180deg, #FFFDF9, #FBF6EC)',
+              borderBottom: '1px solid rgba(14,59,46,.06)',
               flexShrink: 0,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Image
-                src={aiLogo}
-                alt=""
-                width={26}
-                height={26}
-                style={{ objectFit: 'cover', borderRadius: 6 }}
-              />
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#1a1201' }}>
-                小牧 AI 助手
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 36, height: 36, display: 'flex', overflow: 'hidden', borderRadius: 12 }}>
+                <AssistantMascotImage actionId={mascotActionId} size={36} crop />
+              </span>
+              <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-ink)', letterSpacing: .3 }}>
+                    小牧助手
+                  </span>
+                  <span
+                    aria-label="在线"
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: '50%',
+                      background: '#38B26A',
+                      boxShadow: '0 0 0 3px rgba(56,178,106,.18)',
+                      display: 'inline-block',
+                    }}
+                  />
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: 'var(--assistant-gold, #B4652E)',
+                    letterSpacing: .4,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  把每一个孩子当作自己孩子来教
+                </span>
               </span>
             </div>
             <button
@@ -613,12 +790,12 @@ export function AIFloatingLauncher() {
                 border: 'none',
                 background: 'transparent',
                 cursor: 'pointer',
-                width: 32,
-                height: 32,
+                width: 44,
+                height: 44,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#8a7c66',
+                color: 'var(--color-ink-subtle)',
                 fontSize: 14,
                 borderRadius: 8,
               }}
@@ -626,80 +803,315 @@ export function AIFloatingLauncher() {
               <CloseOutlined />
             </button>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              overflowX: 'auto',
-              padding: '8px 14px',
-              background: '#fff',
-              borderBottom: '1px solid rgba(0,0,0,.06)',
-              flexShrink: 0,
-              scrollbarWidth: 'none',
-            }}
-          >
-            {quickLinks.map((q) => (
-              <button
-                key={q.href}
-                type="button"
-                onClick={() => handleQuickLink(q.href)}
+          {panelView === 'overview' ? (
+            <>
+              {/* 第一页：今日概况（简报 + 快捷宫格 + 快捷提问 + 家校服务），全量展开 */}
+              <div
                 style={{
-                  flexShrink: 0,
-                  border: '1px solid rgba(232,117,69,.35)',
-                  background: '#FFF6F0',
-                  color: '#C85A2C',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  padding: '4px 10px',
-                  borderRadius: 999,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  overflowY: 'auto',
+                  overscrollBehavior: 'contain',
+                  background: '#FFFDF9',
+                  scrollbarWidth: 'thin',
                 }}
               >
-                {q.label}
-              </button>
-            ))}
-          </div>
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <AIChatPanel aiRole={aiRole} suggestedQuestions={questions} />
-          </div>
+                {briefingHeader}
+                <div style={{ padding: '14px 12px 4px', borderTop: '1px solid rgba(14,59,46,.07)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 750, color: 'var(--assistant-accent, var(--color-primary))' }}>你可以这样问小牧</span>
+                    <span style={{ fontSize: 10.5, color: 'var(--color-ink-subtle)' }}>点击直接进入 AI 问答</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    {(QUICK_QUESTIONS[assistantRole] ?? QUICK_QUESTIONS.parent).map((item) => (
+                      <button
+                        key={item.q}
+                        type="button"
+                        onClick={() => {
+                          setQuickAsk(item.q)
+                          setPanelView('chat')
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          border: '1px solid rgba(14,59,46,.14)',
+                          background: '#fff',
+                          color: 'var(--color-ink)',
+                          borderRadius: 12,
+                          minHeight: 38,
+                          padding: '0 10px',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          boxShadow: '0 1px 3px rgba(14,59,46,.06)',
+                          minWidth: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          justifyContent: 'flex-start',
+                        }}
+                      >
+                        <span style={{ fontSize: 13, flexShrink: 0 }}>{item.icon}</span>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.q}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ padding: '12px 12px 4px' }}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '38px minmax(0, 1fr)',
+                      alignItems: 'center',
+                      gap: '6px 10px',
+                      padding: '10px 12px',
+                      borderRadius: 14,
+                      background: 'var(--assistant-tint, var(--color-primary-bg))',
+                      border: '1px solid rgba(14,59,46,.08)',
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        gridRow: '1 / span 2',
+                        width: 38,
+                        height: 38,
+                        borderRadius: 12,
+                        background: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 17,
+                        boxShadow: '0 1px 3px rgba(14,59,46,.08)',
+                        flexShrink: 0,
+                      }}
+                    >
+                      📞
+                    </span>
+                    <span style={{ minWidth: 0 }}>
+                      <span style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: 'var(--color-ink)' }}>
+                        家校服务热线
+                      </span>
+                      <span style={{ display: 'block', fontSize: 10.5, color: 'var(--color-ink-muted)', marginTop: 2, lineHeight: 1.4 }}>
+                        周一至周日 08:00-21:00 · 课程、考勤、缴费问题随时联系
+                      </span>
+                    </span>
+                    <span style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 6, minWidth: 0 }}>
+                      {['15930114500', '18031264903'].map((phone) => (
+                        <a
+                          key={phone}
+                          href={`tel:${phone}`}
+                          aria-label={`拨打家校服务热线 ${phone}`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minWidth: 0,
+                            minHeight: 36,
+                            padding: '0 6px',
+                            background: 'var(--assistant-accent, var(--color-primary))',
+                            color: '#fff',
+                            borderRadius: 10,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            textDecoration: 'none',
+                            whiteSpace: 'nowrap',
+                            fontVariantNumeric: 'tabular-nums',
+                          }}
+                        >
+                          {phone}
+                        </a>
+                      ))}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ padding: '2px 12px 14px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setPanelView('chat')}
+                    aria-label="进入 AI 智能问答"
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      border: 'none',
+                      background: 'linear-gradient(135deg, var(--assistant-accent, #0E3B2E), var(--assistant-accent, #0E3B2E))',
+                      color: '#fff',
+                      borderRadius: 14,
+                      minHeight: 46,
+                      fontSize: 13.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 6px 16px rgba(14,59,46,.16)',
+                    }}
+                  >
+                    <MessageOutlined style={{ fontSize: 15 }} />
+                    和小牧聊聊
+                    <span style={{ fontSize: 11, opacity: .8, fontWeight: 500 }}>AI 智能问答 ›</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* 第二页：AI 问答（全屏聊天），消息列表滚动 + 输入框固定 */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 12px',
+                  background: '#fff',
+                  borderBottom: '1px solid rgba(0,0,0,.06)',
+                  flexShrink: 0,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setPanelView('overview')}
+                  aria-label="返回今日概况"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    border: 'none',
+                    background: 'var(--assistant-tint, #F2F6F1)',
+                    color: 'var(--assistant-accent, #0E3B2E)',
+                    borderRadius: 10,
+                    minHeight: 36,
+                    padding: '0 12px',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <ArrowLeftOutlined style={{ fontSize: 12 }} />
+                  今日概况
+                </button>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-ink)', marginLeft: 4 }}>
+                  和小牧聊聊
+                </span>
+              </div>
+              {/* 品牌理念横幅：办学信条 + 校训（等级主题色） */}
+              <div
+                style={{
+                  flexShrink: 0,
+                  margin: '10px 12px 0',
+                  padding: '9px 12px 10px',
+                  borderRadius: 14,
+                  background: 'linear-gradient(135deg, var(--assistant-accent, #0E3B2E), var(--assistant-accent, #0E3B2E))',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  color: '#fff',
+                  boxShadow: '0 4px 12px rgba(14,59,46,.14)',
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    right: -14,
+                    top: -18,
+                    width: 72,
+                    height: 72,
+                    borderRadius: '50%',
+                    background: 'var(--assistant-gold, #C9A45C)',
+                    opacity: .16,
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    right: 22,
+                    top: -30,
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    border: '1.5px solid var(--assistant-gold, #C9A45C)',
+                    opacity: .35,
+                  }}
+                />
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--assistant-gold, #C9A45C)', letterSpacing: 1 }}>
+                    牧哲学堂 · MOREJOY
+                  </span>
+                </span>
+                <span
+                  style={{
+                    display: 'block',
+                    marginTop: 3,
+                    fontSize: 13,
+                    fontWeight: 750,
+                    lineHeight: 1.45,
+                    textShadow: '0 1px 2px rgba(0,0,0,.18)',
+                  }}
+                >
+                  没有学不会的学生，只有不会教的老师
+                </span>
+                <span
+                  style={{
+                    display: 'block',
+                    marginTop: 2,
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,.78)',
+                    letterSpacing: .3,
+                  }}
+                >
+                  不侈学识，唯恐志短 · 河北新乐 · 2016 创办
+                </span>
+              </div>
+              <div style={{ flex: 1, minHeight: 0, background: '#f7f4f0', marginTop: 10 }}>
+                <AIChatPanel
+                  aiRole={aiRole}
+                  suggestedQuestions={questions}
+                  quickAsk={quickAsk}
+                  onQuickAskHandled={() => setQuickAsk(null)}
+                  onNavigate={handleQuickLink}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
 
-      {/* 悬浮球：可拖拽（桌面），贴边收起态露出一点，点击滑出；再点开弹窗 */}
-      <button
-        type="button"
-        aria-label="打开AI助手"
-        onClick={() => {
-          if (suppressClickRef.current) { suppressClickRef.current = false; return }
-          if (peeked) { setPeeked(false); handleOpen(); return }
-          setOpen((v) => !v)
-        }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
+      {/* 小牧宠物：可拖拽，点宠物打开助手，气泡主任务直接跳转 */}
+      <div
+        data-ai-floating-launcher
+        data-peek-side={side}
+        className={[
+          styles.petLauncher,
+          peeked && !open ? styles.petLauncherPeeking : '',
+          petPopped ? styles.petLauncherPopped : '',
+          dragPos !== null ? styles.petLauncherDragging : '',
+        ].filter(Boolean).join(' ')}
         style={ballStyle}
       >
-        <span
-          style={{
-            position: 'absolute',
-            inset: 0,
-            borderRadius: '50%',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#fff',
-            pointerEvents: 'none',
-          }}
-        >
+        <button
+          type="button"
+          aria-label={open ? '关闭小牧AI助手' : '点击小羊打开AI助手'}
+          aria-expanded={open}
+          className={styles.petLauncherHitArea}
+          onClick={handlePetClick}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          style={petHitAreaStyle}
+        />
+        <span className={styles.petLauncherArt} aria-hidden="true">
           <Image
-            src={aiLogo}
-            alt="AI助手"
-            width={ballSize}
-            height={ballSize}
-            style={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: '50%' }}
+            src="/images/assistant-mascot/companion-3d.webp"
+            alt=""
+            width={512}
+            height={497}
+            loading="eager"
+            unoptimized
+            draggable={false}
+            sizes={ballSize + 'px'}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
           />
         </span>
         {/* 未读角标（家长端） */}
@@ -727,39 +1139,7 @@ export function AIFloatingLauncher() {
             {badge}
           </span>
         )}
-        {peeked && (
-          <span
-            style={{
-              position: 'absolute',
-              top: '50%',
-              width: 10,
-              height: 10,
-              marginTop: -5,
-              borderRadius: '50%',
-              background: '#E8784A',
-              boxShadow: '0 0 0 2px #fff',
-              pointerEvents: 'none',
-              ...(side === 'right' ? { left: 3 } : { right: 3 }),
-            }}
-          />
-        )}
-        {peeked && (
-          <span
-            style={{
-              position: 'absolute',
-              top: '50%',
-              marginTop: -2,
-              fontSize: 10,
-              color: '#E8784A',
-              lineHeight: 1,
-              pointerEvents: 'none',
-              ...(side === 'right' ? { left: 16 } : { right: 16, transform: 'scaleX(-1)' }),
-            }}
-          >
-            ›
-          </span>
-        )}
-      </button>
-    </>
+      </div>
+    </div>
   )
 }

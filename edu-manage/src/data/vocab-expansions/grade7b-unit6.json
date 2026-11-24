@@ -1,0 +1,622 @@
+[
+  {
+    "word": "rain or shine",
+    "examTags": ["词汇·天气表达", "语法·固定短语"],
+    "grammar": "phr. 不论晴雨；无论如何。可用于表达活动会按计划进行。",
+    "collocations": "rain or shine; the game will go on, rain or shine",
+    "commonMistake": "这是固定表达，用 or 连接 rain 和 shine；不是描述天气的完整句子。",
+    "example": {"english": "We will visit the farm, rain or shine.", "chinese": "无论晴雨，我们都会去农场。"},
+    "application": {"prompt": "The school trip will happen in any weather. It will go on, ___. A. rain or shine B. hot or coldly", "solution": "A。解析：rain or shine 表示“不论是雨或是晴”。"},
+    "sources": [{"label": "Dictionary.com Unabridged: rain or shine", "url": "https://www.dictionary.com/browse/rain-or-shine"}]
+  },
+  {
+    "word": "affect",
+    "examTags": ["词汇·动词", "语法·主谓一致"],
+    "grammar": "v. 影响。及物动词，后接名词作宾语；主语为第三人称单数时用 affects。",
+    "collocations": "affect the weather; affect people's plans; be affected by",
+    "commonMistake": "affect 通常是动词“影响”；effect 通常是名词“影响、效果”。",
+    "example": {"english": "Heavy rain can affect the football game.", "chinese": "大雨可能会影响足球比赛。"},
+    "application": {"prompt": "Cold weather ___ the plants in the garden. A. affects B. effects", "solution": "A。解析：句中需要动词作谓语，affect 的第三人称单数是 affects。"},
+    "sources": [{"label": "Cambridge Dictionary: affect", "url": "https://dictionary.cambridge.org/dictionary/english/affect"}]
+  },
+  {
+    "word": "dry",
+    "examTags": ["词汇·形容词", "语法·形容词反义"],
+    "grammar": "adj. 干的；干旱的。可作定语或表语；比较级通常为 drier，最高级为 driest。",
+    "collocations": "dry clothes; dry weather; a dry season",
+    "commonMistake": "dry 表示“不湿”；wet 表示“湿的”。作动词时 dry 可表示“弄干”。",
+    "example": {"english": "The towels are dry now, so we can put them away.", "chinese": "毛巾现在干了，我们可以把它们收起来。"},
+    "application": {"prompt": "The rain has stopped, and the ground has no water on it. It is ___. A. dry B. wet", "solution": "A。解析：没有水、干燥的用 dry。"},
+    "sources": [{"label": "Cambridge Dictionary: dry", "url": "https://dictionary.cambridge.org/dictionary/english/dry"}]
+  },
+  {
+    "word": "lightning",
+    "examTags": ["词汇·天气名词", "语法·不可数名词"],
+    "grammar": "n. 闪电。通常作不可数名词；可说 a flash of lightning。",
+    "collocations": "a flash of lightning; lightning and thunder; lightning strike",
+    "commonMistake": "lightning 通常不可数，不说 a lightning；thunder 是雷声，lightning 是闪电。",
+    "example": {"english": "A flash of lightning lit up the dark sky.", "chinese": "一道闪电照亮了黑暗的天空。"},
+    "application": {"prompt": "We saw a bright flash of ___ before the thunder. A. lightning B. wind", "solution": "A。解析：闪电可表达为 a flash of lightning。"},
+    "sources": [{"label": "Cambridge Dictionary: lightning", "url": "https://dictionary.cambridge.org/dictionary/english/lightning"}]
+  },
+  {
+    "word": "stormy",
+    "examTags": ["词汇·天气形容词", "语法·形容词构词"],
+    "grammar": "adj. 有暴风雨（或暴风雪）的。常修饰 weather、night、day 等名词；由 storm + -y 构成。",
+    "collocations": "stormy weather; a stormy night; stormy skies",
+    "commonMistake": "stormy 是形容词；storm 是名词“暴风雨”，也可作动词。",
+    "example": {"english": "The stormy weather kept the boats in the harbour.", "chinese": "暴风雨天气让船只留在港口。"},
+    "application": {"prompt": "There is heavy rain and strong wind today. It is ___ weather. A. stormy B. sunny", "solution": "A。解析：有暴风雨的天气是 stormy weather。"},
+    "sources": [{"label": "Cambridge Dictionary: stormy", "url": "https://dictionary.cambridge.org/dictionary/english/stormy"}]
+  },
+  {
+    "word": "north",
+    "examTags": ["词汇·方位词", "语法·介词搭配"],
+    "grammar": "n. 北部；北方。常用 in the north、to the north of 表示方位；作专名地区的一部分时首字母可大写。",
+    "collocations": "in the north; north of the town; the North Pole",
+    "commonMistake": "表示在某地北部常说 in the north of；to the north of 表示在其北面（通常不在其范围内）。",
+    "example": {"english": "Our school is in the north of the town.", "chinese": "我们学校在镇子的北部。"},
+    "application": {"prompt": "The library is inside the northern part of town. It is ___ the north of town. A. in B. to", "solution": "A。解析：在某地区内部用 in the north of。"},
+    "sources": [{"label": "Cambridge Dictionary: north", "url": "https://dictionary.cambridge.org/dictionary/english/north"}]
+  },
+  {
+    "word": "west",
+    "examTags": ["词汇·方位词", "语法·介词搭配"],
+    "grammar": "n. 西部；西；西方。常用 in the west、to the west of 表示方位。",
+    "collocations": "in the west; west of the river; the west coast",
+    "commonMistake": "in the west of 表示在某地区西部；to the west of 表示在其西边。",
+    "example": {"english": "The sun sets in the west.", "chinese": "太阳从西边落下。"},
+    "application": {"prompt": "The town is inside the western part of the country. It is ___ the west of the country. A. in B. to", "solution": "A。解析：在国家范围内部用 in the west of。"},
+    "sources": [{"label": "Cambridge Dictionary: west", "url": "https://dictionary.cambridge.org/dictionary/english/west"}]
+  },
+  {
+    "word": "south",
+    "examTags": ["词汇·方位词", "语法·介词搭配"],
+    "grammar": "n. 南部；南；南方。常用 in the south、to the south of 表示方位。",
+    "collocations": "in the south; south of the city; the South Pole",
+    "commonMistake": "in the south of 表示在某地区南部；to the south of 表示在其南边。",
+    "example": {"english": "Many people travel south for the warmer weather.", "chinese": "许多人向南旅行，去享受更暖和的天气。"},
+    "application": {"prompt": "The village lies inside the southern part of the island. It is ___ the south of the island. A. in B. to", "solution": "A。解析：在岛内南部用 in the south of。"},
+    "sources": [{"label": "Cambridge Dictionary: south", "url": "https://dictionary.cambridge.org/dictionary/english/south"}]
+  },
+  {
+    "word": "east",
+    "examTags": ["词汇·方位词", "语法·介词搭配"],
+    "grammar": "n. 东部；东；东方。常用 in the east、to the east of 表示方位。",
+    "collocations": "in the east; east of the station; the east coast",
+    "commonMistake": "in the east of 表示在某地区东部；to the east of 表示在其东边。",
+    "example": {"english": "The weather is warmer in the east of the island.", "chinese": "岛的东部天气更暖和。"},
+    "application": {"prompt": "The beach is outside and east of the town. It is ___ the east of the town. A. to B. in", "solution": "A。解析：在城镇外部的东边用 to the east of。"},
+    "sources": [{"label": "Cambridge Dictionary: east", "url": "https://dictionary.cambridge.org/dictionary/english/east"}]
+  },
+  {
+    "word": "stay in",
+    "examTags": ["词汇·动词短语", "语法·短语动词"],
+    "grammar": "phr. 待在家里；没有外出。stay 后接 in 表示留在室内或家中。",
+    "collocations": "stay in tonight; stay in because of the rain; stay in and read",
+    "commonMistake": "stay in 表示不外出；stay at home 也可表示待在家，不能说 stay home in。",
+    "example": {"english": "It is snowing, so we will stay in tonight.", "chinese": "正在下雪，所以我们今晚待在家里。"},
+    "application": {"prompt": "It is raining hard, so let's ___ and play a board game. A. stay in B. go out", "solution": "A。解析：大雨时留在室内用 stay in。"},
+    "sources": [{"label": "Cambridge Dictionary: stay in", "url": "https://dictionary.cambridge.org/us/dictionary/english/stay-in?topic=keeping-and-staying-the-same"}]
+  },
+  {
+    "word": "lucky",
+    "examTags": ["词汇·形容词", "语法·形容词搭配"],
+    "grammar": "adj. 运气好的；带来好运的。可作定语或表语；常用 be lucky to do sth。",
+    "collocations": "be lucky; a lucky day; be lucky to win",
+    "commonMistake": "lucky 是形容词；副词“幸运地”是 luckily，名词“运气”是 luck。",
+    "example": {"english": "We were lucky to catch the last bus.", "chinese": "我们很幸运，赶上了末班车。"},
+    "application": {"prompt": "They won the game by one point. They were ___. A. lucky B. luckily", "solution": "A。解析：be 动词后作表语需要形容词 lucky。"},
+    "sources": [{"label": "Cambridge Dictionary: lucky", "url": "https://dictionary.cambridge.org/dictionary/english/lucky"}]
+  },
+  {
+    "word": "lucky you",
+    "examTags": ["词汇·日常表达", "语法·感叹表达"],
+    "grammar": "phr. 你真幸运。常用作独立回应；也可说 You're lucky。",
+    "collocations": "Lucky you!; You're lucky to ...; lucky for you",
+    "commonMistake": "lucky you 是对某人幸运经历的回应；不要误写为 luckily you。",
+    "example": {"english": "“I got a seat by the window.” “Lucky you!”", "chinese": "“我坐到了靠窗的位置。”“你真幸运！”"},
+    "application": {"prompt": "“I won two tickets to the match!” “___!” A. Lucky you B. Luck you", "solution": "A。解析：表示“你真幸运”用固定回应 Lucky you!"},
+    "sources": [{"label": "Cambridge Dictionary: lucky", "url": "https://dictionary.cambridge.org/dictionary/english/lucky"}]
+  },
+  {
+    "word": "sunbathe",
+    "examTags": ["词汇·动词", "语法·不及物动词"],
+    "grammar": "v. 沐日光浴；晒太阳。常作不及物动词；现在分词为 sunbathing。",
+    "collocations": "sunbathe on the beach; go sunbathing; sunbathe in the sun",
+    "commonMistake": "sunbathe 是动词；名词活动可说 sunbathing，通常不直接说 do sunbathe。",
+    "example": {"english": "They like to sunbathe on the beach in the morning.", "chinese": "他们喜欢早上在海滩晒太阳。"},
+    "application": {"prompt": "At the beach, Nora lies in the sun to get a tan. She likes to ___. A. sunbathe B. storm", "solution": "A。解析：晒日光浴用 sunbathe。"},
+    "sources": [{"label": "Cambridge Dictionary: sunbathe", "url": "https://dictionary.cambridge.org/dictionary/english/sunbathe"}]
+  },
+  {
+    "word": "some day",
+    "examTags": ["词汇·时间表达", "语法·一般将来时语境"],
+    "grammar": "phr. 有朝一日；将来某一天。表示不确定的未来时间，常与一般将来时连用。",
+    "collocations": "some day in the future; I hope to ... some day",
+    "commonMistake": "some day 指未来某一天；some days 表示“有些日子”，意思不同。",
+    "example": {"english": "I hope to see snow in the mountains some day.", "chinese": "我希望有朝一日能在山里看到雪。"},
+    "application": {"prompt": "“Will you climb that mountain?” “I hope to do it ___.” A. some day B. yesterday", "solution": "A。解析：some day 表示将来的某一天。"},
+    "sources": [{"label": "Cambridge Dictionary: someday (some day)", "url": "https://dictionary.cambridge.org/dictionary/english/someday"}]
+  },
+  {
+    "word": "temperature",
+    "examTags": ["词汇·天气名词", "语法·名词搭配"],
+    "grammar": "n. 温度。常用 high/low temperature；询问温度可说 What is the temperature?",
+    "collocations": "the temperature is 10°C; high temperature; room temperature",
+    "commonMistake": "询问天气温度用 What is the temperature?；问天气情况可用 What is the weather like?",
+    "example": {"english": "The temperature is below zero this morning.", "chinese": "今天早晨气温在零度以下。"},
+    "application": {"prompt": "The weather report says it is 5°C. The ___ is five degrees Celsius. A. temperature B. direction", "solution": "A。解析：摄氏度数值表示温度，用 temperature。"},
+    "sources": [{"label": "Cambridge Dictionary: temperature", "url": "https://dictionary.cambridge.org/dictionary/english/temperature"}]
+  },
+  {
+    "word": "snowman",
+    "examTags": ["词汇·复合名词", "语法·不规则复数"],
+    "grammar": "n. 雪人。复数为 snowmen；复合词中的 man 变为 men。",
+    "collocations": "make a snowman; build a snowman; a snowman's hat",
+    "commonMistake": "snowman 的复数是 snowmen，不是 snowmans。",
+    "example": {"english": "The children made a snowman after school.", "chinese": "孩子们放学后堆了一个雪人。"},
+    "application": {"prompt": "One snowman, two ___. A. snowmen B. snowmans", "solution": "A。解析：snowman 的不规则复数是 snowmen。"},
+    "sources": [{"label": "Cambridge Dictionary: snowman", "url": "https://dictionary.cambridge.org/dictionary/english/snowman"}]
+  },
+  {
+    "word": "heavily",
+    "examTags": ["词汇·方式副词", "语法·副词修饰动词"],
+    "grammar": "adv. 大量地；沉重地。修饰动词，描述雨雪或动作的程度；由 heavy 变 y 为 i 再加 -ly。",
+    "collocations": "rain heavily; snow heavily; breathe heavily",
+    "commonMistake": "rain heavily 中 heavily 修饰动词；heavy rain 中 heavy 是修饰 rain 的形容词。",
+    "example": {"english": "It rained heavily during the night.", "chinese": "夜里下了大雨。"},
+    "application": {"prompt": "The verb is raining. Choose the correct adverb: It is raining ___. A. heavily B. heavy", "solution": "A。解析：副词 heavily 修饰动词 raining。"},
+    "sources": [{"label": "Cambridge Dictionary: heavily", "url": "https://dictionary.cambridge.org/dictionary/english/heavily"}]
+  },
+  {
+    "word": "snowy",
+    "examTags": ["词汇·天气形容词", "语法·形容词构词"],
+    "grammar": "adj. 下雪的；雪白的。常修饰 day、weather、mountain 等名词；由 snow + -y 构成。",
+    "collocations": "a snowy day; snowy weather; snowy mountains",
+    "commonMistake": "snowy 是形容词；snow 可作名词“雪”或动词“下雪”。",
+    "example": {"english": "We stayed home on the snowy day.", "chinese": "下雪天我们待在家里。"},
+    "application": {"prompt": "A day with falling snow is a ___ day. A. snowy B. sunny", "solution": "A。解析：下雪的用 snowy。"},
+    "sources": [{"label": "Cambridge Dictionary: snowy", "url": "https://dictionary.cambridge.org/dictionary/english/snowy"}]
+  },
+  {
+    "word": "beach volleyball",
+    "examTags": ["词汇·运动名称", "语法·不可数名词"],
+    "grammar": "n. 沙滩排球。通常指运动项目时作不可数名词；前置 beach 说明比赛场地。",
+    "collocations": "play beach volleyball; a beach volleyball game; beach volleyball players",
+    "commonMistake": "表示运动项目常说 play beach volleyball，不在 volleyball 前加 a。",
+    "example": {"english": "We played beach volleyball before the rain started.", "chinese": "下雨前我们打了沙滩排球。"},
+    "application": {"prompt": "Which sentence names the sport correctly? A. They play beach volleyball. B. They play a beach volleyball.", "solution": "A。解析：指运动项目时 beach volleyball 通常不可数。"},
+    "sources": [{"label": "Cambridge Dictionary: beach volleyball", "url": "https://dictionary.cambridge.org/dictionary/english/beach-volleyball"}]
+  },
+  {
+    "word": "high",
+    "examTags": ["词汇·形容词与副词", "语法·high与tall辨析"],
+    "grammar": "adj. 高的；adv. 在高处/向高处。作形容词修饰名词，作副词修饰动作或位置；常用于山、温度、价格、飞行高度等。",
+    "collocations": "a high mountain; high temperature; fly high; high above the sea",
+    "commonMistake": "high 常说山、温度、价格或位置高；描述人的身高通常用 tall。",
+    "example": {"english": "The temperature is high in the afternoon.", "chinese": "下午气温很高。"},
+    "application": {"prompt": "The afternoon temperature is 30°C. It is very ___. A. high B. tall", "solution": "A。解析：表示气温高用 high；tall 不修饰 temperature。"},
+    "sources": [{"label": "Cambridge Dictionary: high", "url": "https://dictionary.cambridge.org/dictionary/english/high"}]
+  },
+  {
+    "word": "freezing",
+    "examTags": ["词汇·天气形容词", "语法·形容词作表语"],
+    "grammar": "adj. 极冷的；冰冻的。可作定语或表语；It's freezing 表示“天气冷极了”。",
+    "collocations": "freezing cold; freezing weather; freezing temperatures",
+    "commonMistake": "freezing 表示非常冷；frozen 常表示已经冻住的状态，如 frozen water。",
+    "example": {"english": "It was freezing, so we wore warm coats.", "chinese": "天气冷极了，所以我们穿上了暖和的外套。"},
+    "application": {"prompt": "An adjective for extremely cold weather is ___. A. freezing B. frozen", "solution": "A。解析：freezing 可形容天气冷极了；frozen 表示被冻住的状态。"},
+    "sources": [{"label": "Cambridge Dictionary: freezing", "url": "https://dictionary.cambridge.org/dictionary/english/freezing"}]
+  },
+  {
+    "word": "tourist",
+    "examTags": ["词汇·职业与身份名词", "语法·可数名词"],
+    "grammar": "n. 旅行者；观光客。可数名词，单数前通常要有限定词；复数为 tourists。",
+    "collocations": "a tourist; tourist information; a tourist attraction",
+    "commonMistake": "tourist 指旅行观光的人；tourism 是“旅游业”，tour 是“旅行、参观”。",
+    "example": {"english": "The tourist asked for a map of the town.", "chinese": "这位游客要了一张城镇地图。"},
+    "application": {"prompt": "One person visiting a place for fun is a ___. A. tourist B. temperature", "solution": "A。解析：tourist 是旅行观光的人。"},
+    "sources": [{"label": "Cambridge Dictionary: tourist", "url": "https://dictionary.cambridge.org/dictionary/english/tourist"}]
+  },
+  {
+    "word": "mount",
+    "examTags": ["词汇·地名用词", "语法·专有名词"],
+    "grammar": "n. （仅用于地名）山；山峰。常置于山名之前并大写，如 Mount Huangshan；可缩写为 Mt.。",
+    "collocations": "Mount Huangshan; Mount Everest; climb a mountain",
+    "commonMistake": "专名中 Mount + 山名一般不加 the；普通名词“山”用 mountain。",
+    "example": {"english": "Mount Huangshan is famous for its clouds and peaks.", "chinese": "黄山以云海和山峰闻名。"},
+    "application": {"prompt": "Choose the correct place name: A. Mount Huangshan B. the Mount Huangshan", "solution": "A。解析：Mount + 山名作专名时通常不加 the。"},
+    "sources": [{"label": "Cambridge Dictionary: mount", "url": "https://dictionary.cambridge.org/dictionary/english/mount"}]
+  },
+  {
+    "word": "cloud",
+    "examTags": ["词汇·天气名词", "语法·可数名词"],
+    "grammar": "n. 云；云彩。通常是可数名词，复数为 clouds；cloudy 是形容词“多云的”。",
+    "collocations": "a white cloud; dark clouds; a cloud in the sky",
+    "commonMistake": "cloud 是名词，cloudy 是形容词；描述天气说 It's cloudy。",
+    "example": {"english": "Dark clouds are moving across the sky.", "chinese": "乌云正在天空中移动。"},
+    "application": {"prompt": "There are many ___ in the sky before the storm. A. clouds B. cloudys", "solution": "A。解析：cloud 的复数是 clouds；cloudy 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: cloud", "url": "https://dictionary.cambridge.org/dictionary/english/cloud"}]
+  },
+  {
+    "word": "feel like",
+    "examTags": ["词汇·动词短语", "语法·like后接名词或动名词"],
+    "grammar": "phr. 感觉像；也可表示想要。表示“感觉像”后接名词；表示“想做”后接名词或动名词，不接 to do。",
+    "collocations": "feel like rain; feel like a dream; feel like walking",
+    "commonMistake": "feel like doing sth 表示“想做某事”；不能说 feel like to do sth。",
+    "example": {"english": "The cool wind feels like a soft touch.", "chinese": "凉爽的风感觉像轻柔的触碰。"},
+    "application": {"prompt": "I want to walk by the lake. I feel like ___ by the lake. A. walking B. to walk", "solution": "A。解析：feel like 后接名词或动名词，动词用 walking。"},
+    "sources": [{"label": "Cambridge Dictionary: feel like", "url": "https://dictionary.cambridge.org/dictionary/english/feel-like"}]
+  },
+  {
+    "word": "magical",
+    "examTags": ["词汇·形容词派生", "语法·词形转换"],
+    "grammar": "adj. 魔法的；神奇的。可修饰名词或作表语；由 magic + -al 构成。",
+    "collocations": "a magical place; a magical moment; seem magical",
+    "commonMistake": "magical 是形容词；magic 可作名词“魔法”或形容词“有魔力的”。",
+    "example": {"english": "The snowy forest looked magical at sunrise.", "chinese": "日出时的雪林看起来神奇极了。"},
+    "application": {"prompt": "We need an adjective to describe the view. The view is ___. A. magical B. magically", "solution": "A。解析：be 后作表语用形容词 magical。"},
+    "sources": [{"label": "Cambridge Dictionary: magical", "url": "https://dictionary.cambridge.org/dictionary/english/magical"}]
+  },
+  {
+    "word": "rock",
+    "examTags": ["词汇·自然名词", "语法·可数名词"],
+    "grammar": "n. 岩石。通常是可数名词；一块岩石可说 a rock，复数为 rocks。",
+    "collocations": "a large rock; rocks on the beach; rock formation",
+    "commonMistake": "rock 表示“岩石”时是可数名词；rock music 中 rock 指摇滚乐。",
+    "example": {"english": "A small crab hid under a rock.", "chinese": "一只小螃蟹躲在岩石下面。"},
+    "application": {"prompt": "One large ___ blocked the path. A. rock B. rocks", "solution": "A。解析：one 后接单数名词 rock。"},
+    "sources": [{"label": "Cambridge Dictionary: rock", "url": "https://dictionary.cambridge.org/dictionary/english/rock"}]
+  },
+  {
+    "word": "rest",
+    "examTags": ["词汇·名词多义", "语法·可数名词与固定搭配"],
+    "grammar": "n. 休息；剩余部分。表示休息时可说 have/take a rest；表示剩余部分常用 the rest of。",
+    "collocations": "take a rest; have a short rest; the rest of the day",
+    "commonMistake": "a rest 表示一次休息；the rest of 表示“其余的……”，后接名词。",
+    "example": {"english": "After the long walk, we took a rest by the lake.", "chinese": "长途步行后，我们在湖边休息了一会儿。"},
+    "application": {"prompt": "We walked for two hours. Let's ___ a rest. A. take B. do", "solution": "A。解析：固定搭配是 take a rest。"},
+    "sources": [{"label": "Cambridge Dictionary: rest area", "url": "https://dictionary.cambridge.org/us/dictionary/english/rest-area?topic=road-surfaces-and-features"}]
+  },
+  {
+    "word": "area",
+    "examTags": ["词汇·地点名词", "语法·可数名词"],
+    "grammar": "n. 场地；地区。可数名词，常用 an area of + 名词表示一片/一块区域。",
+    "collocations": "a large area; a play area; an area of forest",
+    "commonMistake": "area 是可数名词，单数通常要用 a/an 或其他限定词。",
+    "example": {"english": "The picnic area is beside the river.", "chinese": "野餐区在河边。"},
+    "application": {"prompt": "The children can play safely in ___ area near the visitor centre. A. an B. a", "solution": "A。解析：area 以元音音素开头，单数前用 an。"},
+    "sources": [{"label": "Cambridge Dictionary: area", "url": "https://dictionary.cambridge.org/dictionary/english/area"}]
+  },
+  {
+    "word": "rest area",
+    "examTags": ["词汇·复合名词", "语法·可数名词"],
+    "grammar": "n. 休息区。由 rest + area 构成，可数；复数为 rest areas。",
+    "collocations": "a roadside rest area; stop at a rest area; rest area facilities",
+    "commonMistake": "rest area 指供人休息的地点；a rest area 的中心词是可数名词 area。",
+    "example": {"english": "The driver stopped at a rest area to drink some water.", "chinese": "司机在休息区停下来喝了些水。"},
+    "application": {"prompt": "We stopped at ___ rest area beside the highway. A. a B. an", "solution": "A。解析：rest area 是名词短语，冠词后紧接 rest；rest 以辅音音素开头，所以用 a。"},
+    "sources": [{"label": "Cambridge Dictionary: rest", "url": "https://dictionary.cambridge.org/dictionary/english/rest"}]
+  },
+  {
+    "word": "make progress",
+    "examTags": ["词汇·动词搭配", "语法·不可数名词"],
+    "grammar": "phr. 取得进展。progress 通常不可数，前面不加 a，也通常不用复数。",
+    "collocations": "make progress; make progress in English; make great progress",
+    "commonMistake": "progress 通常不可数，说 make progress，不说 make a progress 或 make progresses。",
+    "example": {"english": "With daily practice, Leo made progress in swimming.", "chinese": "通过每天练习，利奥在游泳方面取得了进步。"},
+    "application": {"prompt": "After a week of practice, Kim has made ___ in reading. A. progress B. a progress", "solution": "A。解析：progress 通常不可数，不加 a。"},
+    "sources": [{"label": "Cambridge Dictionary: progress", "url": "https://dictionary.cambridge.org/dictionary/english/progress"}]
+  },
+  {
+    "word": "although",
+    "examTags": ["词汇·连词", "语法·让步状语从句"],
+    "grammar": "conj. 虽然；尽管。引导让步状语从句；从句可放句首或主句后。",
+    "collocations": "Although it is cold, ...; ... although it is raining",
+    "commonMistake": "although 和 but 通常不在同一个句子里同时使用；可用 Although ..., 主句。",
+    "example": {"english": "Although the wind was strong, the hikers continued slowly.", "chinese": "虽然风很大，徒步者还是慢慢继续前行。"},
+    "application": {"prompt": "___ it was raining, the players continued the match. A. Although B. Despite", "solution": "A。解析：后面是完整句子；although 接从句，despite 后接名词或动名词。"},
+    "sources": [{"label": "Cambridge Dictionary: although", "url": "https://dictionary.cambridge.org/dictionary/english/although"}]
+  },
+  {
+    "word": "still",
+    "examTags": ["词汇·频度副词", "语法·副词位置"],
+    "grammar": "adv. 还；仍然。常放在 be 动词后、实义动词前；用于否定句时常放在助动词后。",
+    "collocations": "still raining; still live here; still not ready",
+    "commonMistake": "still 表示情况持续；yet 常用于否定句或疑问句句末表示“还、尚”。",
+    "example": {"english": "It was late, but the hikers were still on the path.", "chinese": "天已经晚了，但徒步者仍在路上。"},
+    "application": {"prompt": "The rain has not stopped. It is ___ raining. A. still B. yet", "solution": "A。解析：still 常放在进行时前表示动作仍在持续。"},
+    "sources": [{"label": "Cambridge Dictionary: still", "url": "https://dictionary.cambridge.org/dictionary/english/still"}]
+  },
+  {
+    "word": "in high spirits",
+    "examTags": ["词汇·情绪表达", "语法·固定介词短语"],
+    "grammar": "phr. 情绪高涨；兴高采烈。常作表语，前面用 be；spirits 在此用复数。",
+    "collocations": "be in high spirits; arrive in high spirits; keep someone in high spirits",
+    "commonMistake": "固定表达用 in high spirits；不要把 spirits 写成单数 spirit。",
+    "example": {"english": "The team was in high spirits after the hike.", "chinese": "徒步结束后，队员们兴高采烈。"},
+    "application": {"prompt": "Everyone is smiling and celebrating. They are ___. A. in high spirits B. at high spirit", "solution": "A。解析：固定搭配是 in high spirits。"},
+    "sources": [{"label": "Cambridge Dictionary: in high spirits", "url": "https://dictionary.cambridge.org/dictionary/english/in-high-spirits"}]
+  },
+  {
+    "word": "experience",
+    "examTags": ["词汇·名词与动词", "语法·可数与不可数"],
+    "grammar": "n. & v. 经历；经验；经历。作名词表示一般经验时常不可数；表示一次具体经历时可数；作动词表示经历。",
+    "collocations": "have experience; a good experience; experience bad weather",
+    "commonMistake": "表示“经验”通常不可数；表示“一次经历”可说 an experience。",
+    "example": {"english": "Our guide has experience hiking in cold weather.", "chinese": "我们的向导有在寒冷天气徒步的经验。"},
+    "application": {"prompt": "Last week, the hikers ___ heavy rain in the mountains. A. experienced B. experience", "solution": "A。解析：last week 表示过去时间，experience 作动词用过去式 experienced。"},
+    "sources": [{"label": "Cambridge Dictionary: experience", "url": "https://dictionary.cambridge.org/dictionary/english/experience"}]
+  },
+  {
+    "word": "through",
+    "examTags": ["词汇·介词与副词", "语法·方位介词"],
+    "grammar": "prep. 穿过；凭借。表示从内部穿过某个空间或物体；也可表示通过某种方式。",
+    "collocations": "walk through the forest; look through a window; learn through practice",
+    "commonMistake": "through 强调从内部穿过；across 强调从一边到另一边，通常跨过表面或开阔区域。",
+    "example": {"english": "We walked through the forest to reach the lake.", "chinese": "我们穿过森林到达湖边。"},
+    "application": {"prompt": "The path goes inside the forest and comes out on the other side. We walk ___ the forest. A. through B. over", "solution": "A。解析：从森林内部穿过用 through；over 表示在上方或越过。"},
+    "sources": [{"label": "Cambridge Dictionary: through", "url": "https://dictionary.cambridge.org/dictionary/english/through"}]
+  },
+  {
+    "word": "glad",
+    "examTags": ["词汇·情感形容词", "语法·形容词搭配"],
+    "grammar": "adj. 高兴的。常用 be glad to do sth 或 be glad that + 从句。",
+    "collocations": "be glad to help; be glad that; glad to hear",
+    "commonMistake": "glad 后可接 to do 或 that 从句；“我很高兴见到你”说 I'm glad to see you。",
+    "example": {"english": "We are glad to see the sun after the storm.", "chinese": "暴风雨后看到太阳，我们很高兴。"},
+    "application": {"prompt": "I am happy to help you. I am ___ to help you. A. glad B. gladly", "solution": "A。解析：be 后作表语用形容词 glad。"},
+    "sources": [{"label": "Cambridge Dictionary: glad", "url": "https://dictionary.cambridge.org/dictionary/english/glad"}]
+  },
+  {
+    "word": "peak",
+    "examTags": ["词汇·地貌名词", "语法·可数名词"],
+    "grammar": "n. 山顶；顶点。可数名词，常指山峰或某事物达到的最高点。",
+    "collocations": "reach the peak; a mountain peak; at its peak",
+    "commonMistake": "peak 是可数名词，单数前通常需要 the、a 或其他限定词。",
+    "example": {"english": "The hikers reached the peak before noon.", "chinese": "徒步者中午前到达了山顶。"},
+    "application": {"prompt": "We had been talking about the mountain's highest point. After a long climb, they stood on ___ peak. A. the B. a", "solution": "A。解析：前文已指出特定的最高峰，用 the peak。"},
+    "sources": [{"label": "Cambridge Dictionary: peak", "url": "https://dictionary.cambridge.org/dictionary/english/peak"}]
+  },
+  {
+    "word": "grey",
+    "examTags": ["词汇·颜色形容词", "语法·英美拼写"],
+    "grammar": "adj. 灰色的。可作定语或表语；grey 是英式拼法，gray 是美式拼法。",
+    "collocations": "grey clouds; a grey coat; turn grey",
+    "commonMistake": "grey 和 gray 意思相同，分别常见于英式和美式拼写；写作时全文保持一种拼法。",
+    "example": {"english": "Grey clouds covered the mountain in the morning.", "chinese": "早晨灰云笼罩着山。"},
+    "application": {"prompt": "This textbook uses British spelling. Choose the word for 灰色的: A. grey B. gray", "solution": "A。解析：英式拼写为 grey；gray 是美式拼写。"},
+    "sources": [{"label": "Cambridge Dictionary: grey", "url": "https://dictionary.cambridge.org/dictionary/english/grey"}]
+  },
+  {
+    "word": "because of",
+    "examTags": ["词汇·原因表达", "语法·介词短语"],
+    "grammar": "phr. 因为。介词短语，后接名词、代词或动名词；because 后接完整句子。",
+    "collocations": "because of the rain; because of bad weather; because of being late",
+    "commonMistake": "because of + 名词/代词/动名词；because + 主语 + 谓语。",
+    "example": {"english": "The match was delayed because of the storm.", "chinese": "比赛因暴风雨而推迟。"},
+    "application": {"prompt": "The flight was late ___ the fog. A. because of B. because", "solution": "A。解析：the fog 是名词短语，前面用 because of。"},
+    "sources": [{"label": "Cambridge Grammar: because or because of", "url": "https://dictionary.cambridge.org/grammar/british-grammar/word-patterns-because-or-because-of"}]
+  },
+  {
+    "word": "fog",
+    "examTags": ["词汇·天气名词", "语法·不可数名词"],
+    "grammar": "n. 雾。通常作不可数名词；foggy 是形容词“有雾的”。",
+    "collocations": "thick fog; fog in the morning; foggy weather",
+    "commonMistake": "fog 是名词，foggy 是形容词；描述天气说 It is foggy。",
+    "example": {"english": "Thick fog covered the road early this morning.", "chinese": "今天清晨浓雾笼罩着道路。"},
+    "application": {"prompt": "The noun for the cloud near the ground is ___. A. fog B. foggy", "solution": "A。解析：fog 是名词；foggy 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: fog", "url": "https://dictionary.cambridge.org/dictionary/english/fog"}]
+  },
+  {
+    "word": "ground",
+    "examTags": ["词汇·地点名词", "语法·固定介词搭配"],
+    "grammar": "n. 地面。表示地面时常作不可数名词，常见搭配 on the ground、fall to the ground。",
+    "collocations": "on the ground; wet ground; fall to the ground",
+    "commonMistake": "表示“地面”时说 on the ground，不说 on ground；ground 还可指场地或理由。",
+    "example": {"english": "The wet leaves covered the ground.", "chinese": "湿树叶铺满了地面。"},
+    "application": {"prompt": "The keys fell ___ the ground. A. on B. at", "solution": "A。解析：表示落在地面上常用 on the ground。"},
+    "sources": [{"label": "Cambridge Dictionary: ground", "url": "https://dictionary.cambridge.org/dictionary/english/ground"}]
+  },
+  {
+    "word": "wet",
+    "examTags": ["词汇·形容词", "语法·比较级拼写"],
+    "grammar": "adj. 湿的。可作定语或表语；比较级和最高级通常双写 t 再加 -er、-est：wetter、wettest。",
+    "collocations": "get wet; wet clothes; wet weather",
+    "commonMistake": "wet 是形容词；说“被雨淋湿”可用 get wet；比较级写 wetter，双写 t。",
+    "example": {"english": "My shoes got wet in the rain.", "chinese": "我的鞋子被雨淋湿了。"},
+    "application": {"prompt": "After walking in the rain, Sam's jacket was ___. A. wet B. dry", "solution": "A。解析：雨淋后衣服是湿的，用 wet。"},
+    "sources": [{"label": "Cambridge Dictionary: wet", "url": "https://dictionary.cambridge.org/dictionary/english/wet"}]
+  },
+  {
+    "word": "tiring",
+    "examTags": ["词汇·形容词派生", "语法·-ing与-ed形容词"],
+    "grammar": "adj. 令人疲倦的；累人的。描述事情或活动给人的感受；人的感受用 tired。",
+    "collocations": "a tiring walk; a tiring day; very tiring",
+    "commonMistake": "tiring 描述令人疲倦的事情；tired 描述感到疲倦的人。",
+    "example": {"english": "The long walk was tiring, but the view was beautiful.", "chinese": "长途步行很累人，但景色很美。"},
+    "application": {"prompt": "After a five-hour hike, I feel ___. A. tired B. tiring", "solution": "A。解析：描述“我感到累”用 tired；tiring 描述使人累的事。"},
+    "sources": [{"label": "Cambridge Dictionary: tiring", "url": "https://dictionary.cambridge.org/dictionary/english/tiring"}]
+  },
+  {
+    "word": "seem",
+    "examTags": ["词汇·系动词", "语法·seem结构"],
+    "grammar": "v. 似乎；好像。常用 seem + 形容词、seem to do 或 seem like + 名词。",
+    "collocations": "seem happy; seem to be; seem like a good idea",
+    "commonMistake": "seem 作系动词时后接形容词，不用副词：The sky seems grey。",
+    "example": {"english": "The mountain seems quiet after the rain.", "chinese": "雨后的山似乎很安静。"},
+    "application": {"prompt": "The clouds ___ dark, so we should take our raincoats. A. seem B. seemly", "solution": "A。解析：系动词 seem 后接形容词 dark。"},
+    "sources": [{"label": "Cambridge Dictionary: seem", "url": "https://dictionary.cambridge.org/dictionary/english/seem"}]
+  },
+  {
+    "word": "sunlight",
+    "examTags": ["词汇·自然名词", "语法·不可数名词"],
+    "grammar": "n. 阳光；日光。通常作不可数名词；可说 a ray of sunlight。",
+    "collocations": "bright sunlight; direct sunlight; a ray of sunlight",
+    "commonMistake": "sunlight 通常不可数，不说 a sunlight；表示一束阳光可说 a ray of sunlight。",
+    "example": {"english": "The plants need sunlight and water to grow.", "chinese": "植物生长需要阳光和水。"},
+    "application": {"prompt": "The noun for light from the sun is ___. A. sunlight B. a sunlight", "solution": "A。解析：sunlight 通常不可数，不加 a。"},
+    "sources": [{"label": "Cambridge Dictionary: sunlight", "url": "https://dictionary.cambridge.org/dictionary/english/sunlight"}]
+  },
+  {
+    "word": "at the top",
+    "examTags": ["词汇·方位短语", "语法·介词与of短语"],
+    "grammar": "phr. 在顶部；在顶端。常用 at the top of + 名词，表示最高处或页面最上方。",
+    "collocations": "at the top of the mountain; at the top of the page; reach the top",
+    "commonMistake": "at the top of 表示处于顶部；on top of 通常强调在某物表面上或“此外”。",
+    "example": {"english": "A small flag stood at the top of the hill.", "chinese": "小山顶上立着一面小旗。"},
+    "application": {"prompt": "The title is in the highest part of the page. It is ___ the top of the page. A. at B. in", "solution": "A。解析：在页面顶端用 at the top of。"},
+    "sources": [{"label": "Cambridge Dictionary: top", "url": "https://dictionary.cambridge.org/dictionary/english/top"}]
+  },
+  {
+    "word": "thought",
+    "examTags": ["词汇·名词", "语法·可数名词"],
+    "grammar": "n. 想法。是可数名词；单数前通常有限定词，复数为 thoughts。",
+    "collocations": "a good thought; share your thoughts; have a thought",
+    "commonMistake": "thought 作名词意为“想法”；它也是 think 的过去式和过去分词，需根据句子位置判断词性。",
+    "example": {"english": "I had a thought about how to keep the trail clean.", "chinese": "我想到一个保持步道清洁的办法。"},
+    "application": {"prompt": "She shared an interesting ___ with the group. A. thought B. think", "solution": "A。解析：an 后接名词 thought；think 是动词。"},
+    "sources": [{"label": "Cambridge Dictionary: thought", "url": "https://dictionary.cambridge.org/dictionary/english/thought"}]
+  },
+  {
+    "word": "mountain",
+    "examTags": ["词汇·地貌名词", "语法·可数名词"],
+    "grammar": "n. 山；高山。可数名词，单数前通常需要限定词；复数为 mountains。",
+    "collocations": "a high mountain; a mountain range; climb a mountain",
+    "commonMistake": "mountain 是普通名词；专名中的 Mount + 山名大写且通常不加 the。",
+    "example": {"english": "Clouds covered the top of the mountain.", "chinese": "云层覆盖了山顶。"},
+    "application": {"prompt": "The hikers climbed ___ mountain near the village. A. a B. an", "solution": "A。解析：mountain 以辅音音素开头，单数前用 a。"},
+    "sources": [{"label": "Cambridge Dictionary: mountain", "url": "https://dictionary.cambridge.org/dictionary/english/mountain"}]
+  },
+  {
+    "word": "at the start",
+    "examTags": ["词汇·时间短语", "语法·介词搭配"],
+    "grammar": "phr. 开始；起初。常接 of + 名词说明某活动或时间段的起点。",
+    "collocations": "at the start of the trip; at the start of the day; from start to finish",
+    "commonMistake": "at the start of 指某事开始时；start 作动词时可表示“开始做”。",
+    "example": {"english": "At the start of the walk, the sky was clear.", "chinese": "徒步刚开始时，天空晴朗。"},
+    "application": {"prompt": "___ the start of the lesson, the teacher checked the weather chart. A. At B. In", "solution": "A。解析：固定时间表达为 at the start of。"},
+    "sources": [{"label": "Cambridge Dictionary: start", "url": "https://dictionary.cambridge.org/dictionary/english/start"}]
+  },
+  {
+    "word": "end",
+    "examTags": ["词汇·名词", "语法·可数名词与介词短语"],
+    "grammar": "n. 末尾；结束。可数名词，常见结构有 at the end of 和 in the end；也可作动词“结束”。",
+    "collocations": "the end of the road; at the end; in the end",
+    "commonMistake": "at the end of 指某段时间或事物的末尾；in the end 表示“最后、终于”。",
+    "example": {"english": "There is a bus stop at the end of this road.", "chinese": "这条路的尽头有一个公交站。"},
+    "application": {"prompt": "The final scene is ___ the end of the film. A. at B. in", "solution": "A。解析：电影的结尾位置用 at the end of。"},
+    "sources": [{"label": "Cambridge Dictionary: end", "url": "https://dictionary.cambridge.org/dictionary/english/end"}]
+  },
+  {
+    "word": "at the end",
+    "examTags": ["词汇·时间与位置短语", "语法·at与in辨析"],
+    "grammar": "phr. 在末尾；最后。常接 of + 具体时间、道路、故事等，表示终点位置或时间。",
+    "collocations": "at the end of the day; at the end of the road; at the end of the story",
+    "commonMistake": "at the end of 是“在……末尾”；in the end 是“最后、终于”，不是具体位置。",
+    "example": {"english": "At the end of the trail, we saw a small lake.", "chinese": "在步道的尽头，我们看到一个小湖。"},
+    "application": {"prompt": "The last page is ___ the end of the book. A. at B. in", "solution": "A。解析：表示书的最后位置用 at the end of。"},
+    "sources": [{"label": "Cambridge Dictionary: end (at the end)", "url": "https://dictionary.cambridge.org/dictionary/english/end"}]
+  },
+  {
+    "word": "storm",
+    "examTags": ["词汇·天气名词", "语法·可数名词"],
+    "grammar": "n. 暴风雨；暴风雪。通常作可数名词；也可作动词表示“猛冲”。",
+    "collocations": "a heavy storm; a snowstorm; after the storm",
+    "commonMistake": "storm 是名词，stormy 是形容词；a storm 可数，stormy weather 中 weather 不可数。",
+    "example": {"english": "The storm damaged several trees in the park.", "chinese": "暴风雨损坏了公园里的几棵树。"},
+    "application": {"prompt": "The weather report warns that ___ storm may arrive tonight. A. a B. an", "solution": "A。解析：storm 是辅音音素开头的可数名词单数，用 a。"},
+    "sources": [{"label": "Cambridge Dictionary: storm", "url": "https://dictionary.cambridge.org/dictionary/english/storm"}]
+  },
+  {
+    "word": "pour",
+    "examTags": ["词汇·动词", "语法·动词搭配"],
+    "grammar": "v. 倾倒；倒出。常用 pour A into B；描述大雨时可说 rain pours down。",
+    "collocations": "pour water into a cup; pour out tea; rain pours down",
+    "commonMistake": "倒液体进容器用 pour ... into ...；雨下得很大可用 It is pouring。",
+    "example": {"english": "Please pour the warm tea into this cup.", "chinese": "请把热茶倒进这个杯子里。"},
+    "application": {"prompt": "The glass is empty. Please ___ some water into it. A. pour B. freeze", "solution": "A。解析：把水倒进杯子用 pour ... into ...。"},
+    "sources": [{"label": "Cambridge Dictionary: pour", "url": "https://dictionary.cambridge.org/dictionary/english/pour"}]
+  },
+  {
+    "word": "wind",
+    "examTags": ["词汇·天气名词", "语法·不可数名词"],
+    "grammar": "n. 风。表示空气流动时通常不可数；可用 strong、cold 等形容词修饰。",
+    "collocations": "strong wind; cold wind; the wind is blowing",
+    "commonMistake": "表示天气中的风，wind 通常不可数；windy 是形容词“有风的”。",
+    "example": {"english": "A cold wind blew across the field.", "chinese": "一阵冷风吹过田野。"},
+    "application": {"prompt": "The noun for moving air is ___. A. wind B. windy", "solution": "A。解析：wind 是名词；windy 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: wind", "url": "https://dictionary.cambridge.org/dictionary/english/wind"}]
+  },
+  {
+    "word": "shout",
+    "examTags": ["词汇·动词与名词", "语法·介词搭配"],
+    "grammar": "v. & n. 喊叫；呼唤。作动词可说 shout to sb（让对方听见）或 shout at sb（常带生气语气）。",
+    "collocations": "shout for help; shout to a friend; give a shout",
+    "commonMistake": "shout to someone 通常为让对方听见；shout at someone 常表示冲某人大声喊。",
+    "example": {"english": "She shouted to her friend across the windy field.", "chinese": "她隔着风大的田野向朋友喊话。"},
+    "application": {"prompt": "You want your friend far away to hear you. You shout ___ your friend. A. to B. at", "solution": "A。解析：为了让远处的人听见，用 shout to。"},
+    "sources": [{"label": "Cambridge Dictionary: shout", "url": "https://dictionary.cambridge.org/dictionary/english/shout"}]
+  },
+  {
+    "word": "run after",
+    "examTags": ["词汇·动词短语", "语法·短语动词"],
+    "grammar": "phr. 追逐；追赶。run after 后接被追赶的人或物；after 后的宾语不能移到 run 和 after 之间。",
+    "collocations": "run after a bus; run after a ball; run after someone",
+    "commonMistake": "run after 表示追赶；不能说 run a bus after。",
+    "example": {"english": "The boy ran after his hat in the strong wind.", "chinese": "男孩在大风中追赶自己的帽子。"},
+    "application": {"prompt": "The dog chased the ball across the park. It ran ___ the ball. A. after B. for", "solution": "A。解析：追赶某物用 run after。"},
+    "sources": [{"label": "Cambridge Dictionary: run after", "url": "https://dictionary.cambridge.org/dictionary/english/run-after"}]
+  },
+  {
+    "word": "Anna",
+    "examTags": ["词汇·人名", "语法·专有名词大写"],
+    "grammar": "n. 安娜（人名）。人名是专有名词，首字母大写；所属关系可写 Anna's。",
+    "collocations": "Anna's family; meet Anna; ask Anna a question",
+    "commonMistake": "英文人名首字母大写；句中写作 Anna，不写 anna。",
+    "example": {"english": "Anna checked the weather before the walk.", "chinese": "安娜在徒步前查看了天气。"},
+    "application": {"prompt": "Choose the correctly written name: A. Anna B. anna", "solution": "A。解析：人名 Anna 是专有名词，首字母大写。"},
+    "sources": [{"label": "Behind the Name: Anna", "url": "https://www.behindthename.com/name/anna"}]
+  },
+  {
+    "word": "John",
+    "examTags": ["词汇·人名", "语法·专有名词大写"],
+    "grammar": "n. 约翰（人名）。人名是专有名词，首字母大写；所属关系可写 John's。",
+    "collocations": "John's family; meet John; ask John for help",
+    "commonMistake": "英文人名首字母大写；句中写作 John，不写 john。",
+    "example": {"english": "John stayed in because the storm was strong.", "chinese": "因为暴风雨很大，约翰待在家里。"},
+    "application": {"prompt": "Choose the correctly written name: A. John B. john", "solution": "A。解析：人名 John 是专有名词，首字母大写。"},
+    "sources": [{"label": "Behind the Name: John", "url": "https://www.behindthename.com/name/john"}]
+  },
+  {
+    "word": "Stockholm",
+    "examTags": ["词汇·城市名称", "语法·专有名词大写"],
+    "grammar": "n. 斯德哥尔摩（瑞典首都）。城市名首字母大写；表示“在斯德哥尔摩”用 in Stockholm。",
+    "collocations": "in Stockholm; travel to Stockholm; Stockholm, Sweden",
+    "commonMistake": "Stockholm 是城市专名，首字母大写；不要在城市名前随意加 the。",
+    "example": {"english": "Stockholm is the capital of Sweden.", "chinese": "斯德哥尔摩是瑞典的首都。"},
+    "application": {"prompt": "Choose the correctly capitalized city name: A. Stockholm B. stockholm", "solution": "A。解析：城市专名 Stockholm 首字母大写。"},
+    "sources": [{"label": "Encyclopaedia Britannica: Stockholm", "url": "https://www.britannica.com/place/Stockholm"}]
+  },
+  {
+    "word": "Mount Huangshan",
+    "examTags": ["词汇·地理名称", "语法·专有名词与冠词"],
+    "grammar": "n. 黄山。专有地名，Mount 和 Huangshan 首字母大写；Mount + 山名通常不加 the。",
+    "collocations": "visit Mount Huangshan; climb Mount Huangshan; the peaks of Mount Huangshan",
+    "commonMistake": "专名中通常说 Mount Huangshan，不说 the Mount Huangshan；普通“山”用 mountain。",
+    "example": {"english": "Mount Huangshan is known for its cloudy peaks.", "chinese": "黄山以云雾缭绕的山峰闻名。"},
+    "application": {"prompt": "Choose the correct place name: A. Mount Huangshan B. the Mount Huangshan", "solution": "A。解析：Mount + 山名作专有名称时通常不加 the。"},
+    "sources": [{"label": "Huangshan Municipal Government: Mt. Huangshan", "url": "https://www.huangshan.gov.cn/English/Huangshanscenicplaces/TouristDestinations/8277043.html"}]
+  },
+  {
+    "word": "Bright Peak",
+    "examTags": ["词汇·地理名称", "语法·专有名词大写"],
+    "grammar": "n. 光明顶（黄山山峰名）。地名首字母大写；英文官方介绍中也称 Bright Summit。",
+    "collocations": "Bright Peak on Mount Huangshan; reach Bright Peak; view from Bright Peak",
+    "commonMistake": "Bright Peak 是地名，两个词首字母都大写；不要写成 bright peak。",
+    "example": {"english": "The hikers watched the sunrise from Bright Peak.", "chinese": "徒步者在光明顶观看日出。"},
+    "application": {"prompt": "Choose the correctly written peak name: A. Bright Peak B. bright peak", "solution": "A。解析：地名中 Bright 和 Peak 都首字母大写。"},
+    "sources": [{"label": "Huangshan Municipal Government: Mt. Huangshan (Bright Summit)", "url": "https://www.huangshan.gov.cn/English/Huangshanscenicplaces/TouristDestinations/8277043.html"}]
+  }
+]

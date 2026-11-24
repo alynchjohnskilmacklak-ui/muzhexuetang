@@ -1,0 +1,619 @@
+/* 教师端普通课作业 - 牧哲精品交互样式 */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+/* 教师等级特权与作业心智横幅 */
+.tierBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid rgba(20, 87, 77, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  flex-wrap: wrap;
+}
+
+.tierBannerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tierBadge {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2.5px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tierTagline {
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+.tierPrivilegeHint {
+  font-size: 11.5px;
+  color: var(--color-primary, #14574d);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  background: #eaf4f1;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* 统计罗盘指标卡 */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.statCard {
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.statCardAllDone {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+  border-color: #86efac !important;
+  box-shadow: 0 2px 8px rgba(22, 101, 52, 0.08) !important;
+}
+
+.statCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+.statTipIcon {
+  font-size: 12px;
+  color: #a8a29e;
+  cursor: help;
+  transition: color 0.15s;
+}
+
+.statTipIcon:hover {
+  color: var(--color-primary, #14574d);
+}
+
+.statValueWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: tabular-nums, sans-serif;
+  color: var(--color-ink, #1a1201);
+  line-height: 1.2;
+}
+
+.statUnit {
+  font-size: 12px;
+  color: #78716c;
+  font-weight: 500;
+}
+
+.statValueOrange {
+  color: #d97706;
+}
+
+.statValueSuccess {
+  color: #15803d;
+}
+
+.allDoneBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #15803d;
+  background: #ffffff;
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  border: 1px solid #86efac;
+  margin-left: 4px;
+}
+
+/* 核心布置作业卡片 */
+.composerCard {
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.composerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.composerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.composerBadge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-primary, #14574d);
+  background: #eaf4f1;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* 快捷作业类型模板推荐条 */
+.templateSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.templateLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-ink-muted, #5a4e3a);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.templateChipsRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.templateChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.templateChip:hover {
+  background: #eaf4f1;
+  border-color: #14574d;
+  color: #14574d;
+}
+
+.templateChipActive {
+  background: #eaf4f1 !important;
+  border-color: #14574d !important;
+  color: #14574d !important;
+  box-shadow: 0 1px 4px rgba(20, 87, 77, 0.15);
+}
+
+/* 表单输入组 */
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.classSelectExtra {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #15803d;
+  background: #f0fdf4;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #bbf7d0;
+}
+
+/* 快捷截止日期胶囊 */
+.quickDateRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.quickDateBtn {
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quickDateBtn:hover {
+  border-color: var(--color-primary, #14574d);
+  color: var(--color-primary, #14574d);
+  background: #eaf4f1;
+}
+
+/* 提交主按钮 */
+.publishBtn {
+  height: 42px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #14574d 0%, #0d3e37 100%) !important;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.25) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* 作业列表展示区域 */
+.assignmentListSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 单个作业卡片 */
+.assignmentCard {
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.assignmentCardAllReviewed {
+  border-color: rgba(22, 101, 52, 0.25);
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.cardTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cardTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  line-height: 1.4;
+}
+
+/* 一体化温润通栏信息条 */
+.unifiedMetaBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 5px 10px;
+  background: #f8fafc;
+  border: 1px solid rgba(20, 87, 77, 0.08);
+  border-radius: 8px;
+  font-size: 11.5px;
+  color: #475569;
+}
+
+.groupPill {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.metaDivider {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.instructionsBox {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #44403c;
+  background: #fafaf9;
+  border-left: 3px solid #14574d;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+}
+
+/* 进度与批改追踪条 */
+.progressTrackCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.progressLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+}
+
+/* 学员提交卡片网格 */
+.submissionsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.submissionItemCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.15s ease;
+}
+
+.submissionItemCardReviewed {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.subHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.studentMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.studentName {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.submitTime {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.submissionContent {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #334155;
+  background: #f8fafc;
+  padding: 8px 10px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+}
+
+/* 提交的照片缩略图 */
+.attachmentPhotoGrid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.photoThumb {
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  position: relative;
+  cursor: pointer;
+}
+
+/* 极速批改台区域 */
+.reviewDock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fafaf9;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e7e5e4;
+}
+
+.quickScoreRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.quickScoreBtn {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid #d6d3d1;
+  background: #ffffff;
+  color: #57534e;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quickScoreBtn:hover {
+  background: #f5f5f4;
+  border-color: #a8a29e;
+}
+
+.quickCommentRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.quickCommentChip {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px dashed #d6d3d1;
+  color: #44403c;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quickCommentChip:hover {
+  background: #eaf4f1;
+  border-color: #14574d;
+  color: #14574d;
+}
+
+.reviewActionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.saveReviewBtn {
+  background: #14574d !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+}
+
+.reviewedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* 未提交学员名单 */
+.unsubmittedRow {
+  font-size: 11.5px;
+  color: #94a3b8;
+  padding: 6px 10px;
+  background: #fafaf9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .statCard {
+    padding: 8px 10px;
+  }
+  .statValue {
+    font-size: 18px;
+  }
+  .composerCard {
+    padding: 14px 12px;
+  }
+  .assignmentCard {
+    padding: 12px;
+  }
+  .reviewActionRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

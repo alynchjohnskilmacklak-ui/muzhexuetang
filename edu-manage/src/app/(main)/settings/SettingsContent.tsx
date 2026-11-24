@@ -46,9 +46,9 @@ function SettingsTabs({ currentUserId }: { currentUserId: string }) {
   const activeGroup = groups.find((group) => group.children.some((child) => child.key === active))
   const select = (key: string) => router.push('/settings?tab=' + key, { scroll: false })
   return (
-    <div className="settings-brand-root" style={{ width: '100%', maxWidth: '100%', display: 'grid', gap: 16 }}>
+    <div className="settings-brand-root" style={{ width: '100%', maxWidth: '100%', minWidth: 0, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 16 }}>
       {/* 品牌引导条 */}
-      <div style={{
+      <div className="settings-intro-banner" style={{
         display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
         borderRadius: 14, background: 'linear-gradient(135deg, rgba(201,164,92,.12), rgba(242,227,182,.18))',
         border: '1px solid rgba(201,164,92,.35)', fontSize: 12.5, color: '#6B5424', lineHeight: 1.7,
@@ -57,6 +57,12 @@ function SettingsTabs({ currentUserId }: { currentUserId: string }) {
         <span>设置分为<strong>基础、账号、消息权益和审计</strong>四组；切换栏目会保留已打开表单，刷新或离开页面前请保存。维护与回收站位于<strong>数据管理</strong>。</span>
       </div>
       <style>{`
+        .settings-brand-root .ant-card,
+        .settings-brand-root .ant-card-body,
+        .settings-brand-root .ant-tabs,
+        .settings-brand-root .ant-tabs-content-holder,
+        .settings-brand-root .ant-tabs-content,
+        .settings-brand-root .ant-tabs-tabpane { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
         .settings-brand-root .ant-menu-inline { border-inline-end: none !important; border-radius: 14px; overflow: hidden; }
         .settings-brand-root .ant-menu-item { margin-inline: 6px !important; width: calc(100% - 12px) !important; border-radius: 10px !important; }
         .settings-brand-root .ant-menu-item-selected { background: rgba(14,94,78,.1) !important; color: #0E5E4E !important; font-weight: 700; }
@@ -67,6 +73,14 @@ function SettingsTabs({ currentUserId }: { currentUserId: string }) {
         .settings-brand-root .ant-alert-info .ant-alert-message { color: #6B5424 !important; }
         .settings-brand-root .ant-card { border-radius: 14px !important; border-color: #EDE9E1 !important; }
         .settings-brand-root .ant-btn { border-radius: 999px !important; }
+        .settings-intro-banner { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow-wrap: anywhere; }
+        .settings-intro-banner > span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+        .settings-intro-banner > .anticon { flex: 0 0 auto; }
+        .settings-brand-root .ant-tabs-nav { min-width: 0; max-width: 100%; }
+        @media (max-width: 600px) {
+          .settings-intro-banner { padding: 10px 12px !important; }
+          .settings-brand-root .ant-tabs-nav-wrap { min-width: 0; overflow-x: auto; }
+        }
       `}</style>
       <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 16 }}>
         {mobile ? (

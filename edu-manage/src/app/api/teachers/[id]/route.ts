@@ -128,7 +128,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     students: effective.students,
     classGroups: effective.groups,
     term: selectedTerm,
-    termTaughtHours: Number(termTaughtHours.toFixed(1)),
+    termTaughtHours: Number(termTaughtHours.toFixed(2)),
     _count: {
       ...teacher._count,
       students: effective.students.length,

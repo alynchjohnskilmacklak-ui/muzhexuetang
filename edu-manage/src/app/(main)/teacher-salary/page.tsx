@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import {
   Alert,
@@ -16,6 +17,7 @@ import {
   Segmented,
   Select,
   Space,
+  Spin,
   Statistic,
   Table,
   Tabs,
@@ -23,7 +25,17 @@ import {
   Typography,
 } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
-import { CheckCircleOutlined, DeleteOutlined, DollarOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons'
+import { PageLayout } from '@/components/Layout/PageLayout'
+import {
+  AuditOutlined,
+  CalendarOutlined,
+  CheckCircleOutlined,
+  DeleteOutlined,
+  DollarOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  TeamOutlined,
+} from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { submitSalarySettlement, SalarySubmissionError } from '@/lib/salary-settlement-client'
 import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
@@ -100,24 +112,34 @@ function SalaryAdjustmentModal({ teacherId, teacherName, open, onClose, onSaved 
 }) {
   const [form] = Form.useForm()
   const [saving, setSaving] = useState(false)
+  const requestKeyRef = useRef<{ fingerprint: string; key: string } | null>(null)
 
   const handleSubmit = async () => {
     const values = await form.validateFields()
+    const payload = {
+      teacherId,
+      amount: values.amount,
+      description: values.description.trim(),
+      salaryBucket: values.salaryBucket,
+    }
+    const fingerprint = JSON.stringify(payload)
+    if (requestKeyRef.current?.fingerprint !== fingerprint) {
+      requestKeyRef.current = { fingerprint, key: globalThis.crypto.randomUUID() }
+    }
     setSaving(true)
     try {
       const response = await fetch('/api/admin/salary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          teacherId,
-          amount: values.amount,
-          description: values.description.trim(),
-          salaryBucket: values.salaryBucket,
-        }),
+        body: JSON.stringify({ ...payload, idempotencyKey: requestKeyRef.current.key }),
       })
       const data = await response.json()
-      if (!response.ok) throw new Error(data.error || '调整失败')
+      if (!response.ok) {
+        if (response.status >= 400 && response.status < 500) requestKeyRef.current = null
+        throw new Error(data.error || '调整失败')
+      }
       message.success('工资调整已记录')
+      requestKeyRef.current = null
       form.resetFields()
       onSaved()
       onClose()
@@ -262,10 +284,13 @@ function SalaryConfigDrawer({ teacherId, teacherName, open, onClose, onSaved }: 
   )
 }
 
-export default function TeacherSalaryAdminPage() {
+function TeacherSalaryAdminInner() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialTeacherId = searchParams.get('teacherId') || ''
   const isMobile = useIsMobile() ?? false
   const [period, setPeriod] = useState('month')
-  const [filterTeacher, setFilterTeacher] = useState('')
+  const [filterTeacher, setFilterTeacher] = useState(initialTeacherId)
   const [salaryBucket, setSalaryBucket] = useState<'ALL' | 'SMALL_CLASS' | 'INTENSIVE'>('ALL')
   const [configDrawer, setConfigDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
   const [adjustmentModal, setAdjustmentModal] = useState({ open: false, teacherId: '', teacherName: '' })
@@ -500,9 +525,12 @@ export default function TeacherSalaryAdminPage() {
   }
 
   return (
-    <div>
-      <Title level={4} style={{ marginTop: 0 }}>教师薪资管理</Title>
-      {error && <Alert type="error" showIcon message="薪资加载失败，请勿根据当前空白数据结算" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 12 }} />}
+    <PageLayout
+      title="教师薪资管理"
+      subtitle="教师课时费核算 · 教学反馈与晚托津贴 · 薪资结算登记与流水导出"
+    >
+      <div>
+        {error && <Alert type="error" showIcon message="薪资加载失败，请勿根据当前空白数据结算" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 12 }} />}
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
         <Card size="small" bordered={false} style={{ borderRadius: 14 }}>
           <Space wrap>
@@ -613,5 +641,14 @@ export default function TeacherSalaryAdminPage() {
         <Text>确定删除“{pendingDelete?.description || '手动调整'}”这条流水吗？删除后工资合计会同步变化。</Text>
       </BrandModal>
     </div>
+    </PageLayout>
+  )
+}
+
+export default function TeacherSalaryAdminPage() {
+  return (
+    <Suspense fallback={<PageLayout title="教师薪资管理" subtitle="正在加载薪资数据..."><div style={{ textAlign: 'center', padding: 60 }}><Spin size="large" /></div></PageLayout>}>
+      <TeacherSalaryAdminInner />
+    </Suspense>
   )
 }

@@ -1,0 +1,202 @@
+{
+  "queries": {
+    "Q1c_lesson_rows": {
+      "sql": "SELECT a.id, a.status::text, a.\"enrollmentId\" IS NOT NULL AS has_enr,\n            e.\"totalHours\", e.\"usedHours\", e.\"remainHours\",\n            a.\"hoursDeducted\", a.\"actualMinutes\",\n            (SELECT h.type FROM \"HourTransaction\" h WHERE h.\"studentId\"=a.\"studentId\" AND h.\"lessonId\"=a.\"lessonId\" AND h.\"deletedAt\" IS NULL LIMIT 1) AS tx_type,\n            (SELECT h.amount FROM \"HourTransaction\" h WHERE h.\"studentId\"=a.\"studentId\" AND h.\"lessonId\"=a.\"lessonId\" AND h.\"deletedAt\" IS NULL LIMIT 1) AS tx_amount,\n            (SELECT h.\"afterHours\" FROM \"HourTransaction\" h WHERE h.\"studentId\"=a.\"studentId\" AND h.\"lessonId\"=a.\"lessonId\" AND h.\"deletedAt\" IS NULL LIMIT 1) AS tx_after\n     FROM \"Attendance\" a\n     LEFT JOIN \"Enrollment\" e ON e.id=a.\"enrollmentId\"\n     WHERE a.\"deletedAt\" IS NULL AND a.\"lessonId\"='cmrbpyx8d001snropqfo4r0ls'\n     ORDER BY a.\"hoursDeducted\" DESC NULLS LAST",
+      "rows": [
+        {
+          "id": "cmreawh3s00ptevdtt9mex3mm",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh4b00pxevdt5mofaqkt",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh4o00q1evdtazhbm4jm",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh5100q5evdtwu4mlfc3",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh5c00q9evdtwoj0jnhv",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh5o00qdevdtmdtnhlw8",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh6100qhevdtqz4rdn7k",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh6b00qlevdt0zv8rux7",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh6m00qpevdtxix0hfoj",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh6w00qtevdtgln5vniu",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh7600qxevdtvtdiillz",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh7r00r5evdthw1dsncn",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmreawh7h00r1evdtb9drmx6n",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 133.00000000000028,
+          "remainHours": 1.399999999999656,
+          "hoursDeducted": 0.7,
+          "actualMinutes": null,
+          "tx_type": "ATTENDANCE_DEDUCT",
+          "tx_amount": -0.7,
+          "tx_after": 127.4
+        },
+        {
+          "id": "cmrej3keu021qevdtu7tjp5qa",
+          "status": "PRESENT",
+          "has_enr": true,
+          "totalHours": 134.4,
+          "usedHours": 125.30000000000035,
+          "remainHours": 9.099999999999742,
+          "hoursDeducted": 0,
+          "actualMinutes": null,
+          "tx_type": null,
+          "tx_amount": null,
+          "tx_after": null
+        }
+      ]
+    },
+    "Q1c_lesson_tx_types": {
+      "sql": "SELECT h.type, count(*)::int AS n, min(h.amount)::float AS min_amt, max(h.amount)::float AS max_amt\n     FROM \"HourTransaction\" h\n     WHERE h.\"lessonId\"='cmrbpyx8d001snropqfo4r0ls' AND h.\"deletedAt\" IS NULL\n     GROUP BY h.type",
+      "rows": [
+        {
+          "type": "ATTENDANCE_DEDUCT",
+          "n": 13,
+          "min_amt": -0.7,
+          "max_amt": -0.7
+        }
+      ]
+    }
+  }
+}

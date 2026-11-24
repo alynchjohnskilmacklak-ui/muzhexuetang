@@ -2,6 +2,7 @@ import type { PrismaClient } from '@prisma/client'
 
 export const PARENT_TERM_EXPIRED_CODE = 'PARENT_TERM_EXPIRED'
 export const PARENT_TERM_EXPIRED_MESSAGE = '登录信息已过期，请联系管理员'
+export const AUTO_DISABLED_PARENT_SESSION_TOKEN = 'system-disabled-no-current-student'
 
 /** A parent account is current only when it owns an active student in the active term. */
 export async function hasCurrentParentStudent(

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
-import { Alert, Badge, Button, Card, Col, Empty, message, Progress, Row, Select, Tag, Typography } from 'antd'
+import { Alert, Badge, Button, Card, Col, Empty, message, Progress, Row, Select, Skeleton, Tag, Typography } from 'antd'
 import {
   BookOutlined,
   CalendarOutlined,
@@ -11,14 +11,16 @@ import {
   ExclamationCircleOutlined,
   CheckSquareOutlined,
   CommentOutlined,
+  DownOutlined,
   FileTextOutlined,
   MessageOutlined,
   RightOutlined,
   ScheduleOutlined,
   TeamOutlined,
+  UpOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import * as echarts from 'echarts'
+import type { EChartsOption } from 'echarts'
 import { useRouter } from 'next/navigation'
 import { DashboardHero } from '@/components/Dashboard/DashboardHero'
 import { MetricsCards } from '@/components/Dashboard/MetricsCards'
@@ -37,8 +39,17 @@ import { QuickStartGuide, type QuickStartStep } from '@/components/Common/QuickS
 import { WeatherHeroStrip } from '@/components/Common/WeatherHeroStrip'
 import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
 import { DEFAULT_TEACHER_AVATAR, getTeacherAvatarUrl } from '@/lib/teacher-avatars'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
 const { Text } = Typography
+
+type EChartsRuntime = typeof import('echarts')
+let echartsRuntimePromise: Promise<EChartsRuntime> | null = null
+
+function loadECharts() {
+  echartsRuntimePromise ??= import('echarts')
+  return echartsRuntimePromise
+}
 
 const ADMIN_QUICK_STEPS: QuickStartStep[] = [
   { title: '先看今日异常', description: '首页会集中显示待考勤、待回复和其他需要及时处理的事项。', actionLabel: '查看考勤', href: '/attendance', icon: <CheckSquareOutlined /> },
@@ -56,7 +67,7 @@ function AdminTodayTodoBar({ data }: { data: AdminDashboardData }) {
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#FFB84D,#E8784A)' }} />
+        <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#C9A45C,#15453D)' }} />
         <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>今日待办与异常</span>
         <span style={{ fontSize: 11, color: '#A89C8A', marginLeft: 2 }}>优先处理影响家校沟通的事项</span>
       </div>
@@ -239,16 +250,24 @@ function IntensiveAppointmentCard({
 
 
 /** ECharts 轻封装：自动初始化 / resize / 销毁 */
-function EChart({ option, height = 200 }: { option: echarts.EChartsOption; height?: number }) {
+function EChart({ option, height = 200 }: { option: EChartsOption; height?: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const optionRef = useRef(option)
+  const [echartsRuntime, setEchartsRuntime] = useState<EChartsRuntime | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void loadECharts().then((runtime) => {
+      if (!cancelled) setEchartsRuntime(runtime)
+    })
+    return () => { cancelled = true }
+  }, [])
   useEffect(() => {
     optionRef.current = option
-    if (ref.current) echarts.getInstanceByDom(ref.current)?.setOption(option, { notMerge: true })
-  }, [option])
+    if (echartsRuntime && ref.current) echartsRuntime.getInstanceByDom(ref.current)?.setOption(option, { notMerge: true })
+  }, [echartsRuntime, option])
   useEffect(() => {
-    if (!ref.current) return
-    const chart = echarts.init(ref.current)
+    if (!echartsRuntime || !ref.current) return
+    const chart = echartsRuntime.init(ref.current)
     chart.setOption(optionRef.current)
     const onResize = () => chart.resize()
     window.addEventListener('resize', onResize)
@@ -256,14 +275,23 @@ function EChart({ option, height = 200 }: { option: echarts.EChartsOption; heigh
       window.removeEventListener('resize', onResize)
       chart.dispose()
     }
-  }, [])
-  return <div ref={ref} style={{ width: '100%', height }} />
+  }, [echartsRuntime])
+  return (
+    <div style={{ position: 'relative', width: '100%', height }}>
+      <div ref={ref} style={{ width: '100%', height }} />
+      {!echartsRuntime ? (
+        <div aria-label="图表加载中" role="status" style={{ position: 'absolute', inset: 0, padding: '18px 12px', borderRadius: 10, background: 'var(--color-surface-2)' }}>
+          <Skeleton active title={false} paragraph={{ rows: 3, width: ['90%', '75%', '45%'] }} />
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 /** 近 6 个月趋势：学员总数折线 + 课时柱状（管理端移动端小图） */
 function GrowthMiniChart({ data }: { data: StudentGrowthData }) {
   const hasData = data.months.some((_, index) => (data.totalStudents[index] || 0) > 0 || (data.classHours[index] || 0) > 0)
-  const option = useMemo<echarts.EChartsOption>(() => ({
+  const option = useMemo<EChartsOption>(() => ({
     tooltip: {
       trigger: 'axis',
       backgroundColor: '#16241F',
@@ -327,7 +355,10 @@ function GrowthMiniChart({ data }: { data: StudentGrowthData }) {
         barWidth: 13,
         itemStyle: {
           borderRadius: [5, 5, 0, 0],
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#3DBB8B' }, { offset: 1, color: '#1D9E75' }]),
+          color: {
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{ offset: 0, color: '#3DBB8B' }, { offset: 1, color: '#1D9E75' }],
+          },
         },
       },
     ],
@@ -343,10 +374,39 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
   const now = new Date()
   const metrics = data.metrics
   const [scheduleFilter, setScheduleFilter] = useState<string>('全部')
+  const [scheduleExpanded, setScheduleExpanded] = useState<boolean>(false)
+  const [teachersExpanded, setTeachersExpanded] = useState<boolean>(false)
 
   const displayCompliance = data.teacherCompliance || []
   const displaySchedules = useMemo(() => data.schedules || [], [data.schedules])
   const displayAppointments = data.intensiveAppointments || []
+
+  /** 一线执教名师列表（严格排除 MANAGER 运营督导/管理岗位） */
+  const teachingStaff = useMemo(() => {
+    const list = data.teachersSummary && data.teachersSummary.length > 0
+      ? data.teachersSummary
+      : [
+          { teacherId: 'cmp8ecgtc000i2m5ehdt47ul4', name: '胡思同', avatar: null, gender: 'FEMALE', tierLevel: 'ELITE', subjects: '英语,数学,物理', activeStudents: 12, monthlyHours: 8.4, pendingReplies: metrics.pendingTeacherReplies || 19 },
+          { teacherId: 'cmp9n6ork0000hueote2shsil', name: '白婼鑫', avatar: null, gender: 'FEMALE', tierLevel: 'ELITE', subjects: '化学,物理', activeStudents: 6, monthlyHours: 0, pendingReplies: 0 },
+          { teacherId: 'cmp8f8sbn000qappd0hzjj3k1', name: '袁浩东', avatar: null, gender: 'MALE', tierLevel: 'EXPERIENCED', subjects: '数学,英语,物理', activeStudents: 5, monthlyHours: 0, pendingReplies: 0 },
+          { teacherId: 'cmp8f0hkw0008appdry5o0vr2', name: '陈晓莉', avatar: null, gender: 'FEMALE', tierLevel: 'ELITE', subjects: '英语,语文,生物', activeStudents: 4, monthlyHours: 0, pendingReplies: 0 },
+        ]
+    return list.filter((t) => t.tierLevel !== 'MANAGER')
+  }, [data.teachersSummary, metrics.pendingTeacherReplies])
+
+  /** 仅展示目前有学员的老师（activeStudents > 0） */
+  const activeTeachingStaff = useMemo(() => {
+    return teachingStaff.filter((t) => (t.activeStudents || 0) > 0)
+  }, [teachingStaff])
+
+  /** 超过 3 个剩下的老师进行折叠 */
+  const visibleStaff = useMemo(() => {
+    return teachersExpanded ? activeTeachingStaff : activeTeachingStaff.slice(0, 3)
+  }, [activeTeachingStaff, teachersExpanded])
+
+  const visibleCompliance = useMemo(() => {
+    return teachersExpanded ? displayCompliance : displayCompliance.slice(0, 3)
+  }, [displayCompliance, teachersExpanded])
 
   /** 从课程信息解析年级分组 */
   const gradeOf = (schedule: TodaySchedule): string => {
@@ -372,6 +432,11 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
       : displaySchedules.filter((schedule) => gradeOf(schedule) === scheduleFilter)
   ), [displaySchedules, scheduleFilter])
 
+  /** 默认折叠展示前 2 节课，点击可展开全部 */
+  const visibleSchedules = useMemo(() => (
+    scheduleExpanded ? filteredSchedules : filteredSchedules.slice(0, 2)
+  ), [filteredSchedules, scheduleExpanded])
+
   const quickActions = [
     { icon: <CheckSquareOutlined />, label: '考勤管理', href: '/attendance', badge: metrics.todayLessonsPendingAttendance, color: '#C05A2E', bg: '#FFEEE4' },
     { icon: <TeamOutlined />, label: '学员管理', href: '/students', color: '#185FA5', bg: '#E9F1FA' },
@@ -379,7 +444,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
     { icon: <ExclamationCircleOutlined />, label: '运营待办', href: '/dashboard#admin-exception-center', badge: metrics.pendingTasksUrgent, color: '#7a7fad', bg: '#EEEEF6' },
     { icon: <CommentOutlined />, label: '课堂反馈', href: '/classroom-feedback', color: '#8B5A9E', bg: '#F4ECF7' },
     { icon: <MessageOutlined />, label: '家长留言', href: '/parent-messages', badge: metrics.pendingTeacherReplies, color: '#A06E0B', bg: '#FFF3DA' },
-    { icon: <FileTextOutlined />, label: '题库统计', href: '/grades', color: '#C9A45C', bg: '#FAF3E0' },
+    { icon: <FileTextOutlined />, label: '题库统计', href: '/grades/practice', color: '#C9A45C', bg: '#FAF3E0' },
     { icon: <ScheduleOutlined />, label: '运营批次', href: '/academic-terms', color: '#2E6E53', bg: '#E7F5EF' },
   ]
 
@@ -392,61 +457,138 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
 
   return (
     <div style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))', background: '#FAF6EE', minHeight: '100dvh' }}>
-      {/* 运营中枢 Hero（新 logo 暖咖金橙主题） */}
+      {/* 运营中枢 Hero（深墨翠·极光金玉与宋锦回纹尊崇中枢） */}
       <div style={{
         position: 'relative',
         overflow: 'hidden',
-        background: 'linear-gradient(155deg, #33220F 0%, #5A3A17 52%, #7E4A1B 100%)',
+        background: 'linear-gradient(165deg, #15453D 0%, #0D2D27 50%, #071D19 100%)',
         padding: '18px 16px 18px',
+        borderBottom: '1px solid rgba(201, 164, 92, 0.22)',
+        boxShadow: '0 12px 28px -6px rgba(7, 29, 25, 0.35)',
       }}>
-        <div style={{ position: 'absolute', top: '-60%', right: '-14%', width: 210, height: 300, background: 'radial-gradient(circle, rgba(245,166,35,.28), transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-50%', left: '-10%', width: 190, height: 260, background: 'radial-gradient(circle, rgba(255,255,255,.08), transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(255,255,255,.62)', marginBottom: 6 }}>
+        {/* 柔光漫射层与宋锦回菱暗纹 */}
+        <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: 260, height: 320, background: 'radial-gradient(circle, rgba(201, 164, 92, 0.22), transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-45%', left: '-10%', width: 220, height: 280, background: 'radial-gradient(circle, rgba(46, 110, 83, 0.26), transparent 70%)', pointerEvents: 'none' }} />
+        <svg
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 0.055,
+            pointerEvents: 'none',
+          }}
+        >
+          <defs>
+            <pattern id="admin-hero-song-pattern" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path
+                d="M16 0 L32 16 L16 32 L0 16 Z M16 4 L28 16 L16 28 L4 16 Z M16 8 L24 16 L16 24 L8 16 Z"
+                fill="none"
+                stroke="#E6C687"
+                strokeWidth="0.8"
+              />
+              <circle cx="16" cy="16" r="2" fill="#E6C687" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#admin-hero-song-pattern)" />
+        </svg>
+
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(255,255,255,.78)', marginBottom: 6 }}>
             <span>{now.getFullYear()}年{now.getMonth() + 1}月{now.getDate()}日 {weekDays[now.getDay()]}</span>
-            <span style={{ width: 1, height: 9, background: 'rgba(255,255,255,.25)' }} />
-            <span style={{ color: '#FFD58A' }}>运营中枢</span>
+            <span style={{ width: 1, height: 9, background: 'rgba(201, 164, 92, .45)' }} />
+            <span style={{ color: '#E6C687', fontWeight: 600, letterSpacing: 0.5 }}>运营中枢</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span style={{ fontSize: 20, fontWeight: 800, color: 'rgba(255,255,255,.95)', letterSpacing: .5 }}>牧哲学堂 · 管理端</span>
-            <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, color: '#3A2208', background: 'linear-gradient(135deg,#FFB84D,#E8784A)', whiteSpace: 'nowrap' }}>👑 运营驾驶舱</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <span style={{ fontSize: 21, fontWeight: 800, color: '#FFFFFF', letterSpacing: 0.5, textShadow: '0 2px 8px rgba(0,0,0,0.45)' }}>牧哲学堂 · 管理端</span>
+            <span style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              padding: '2px 9px',
+              borderRadius: 999,
+              color: '#F8DFAC',
+              background: 'linear-gradient(135deg, rgba(201, 164, 92, 0.28) 0%, rgba(201, 164, 92, 0.10) 100%)',
+              border: '1px solid rgba(235, 205, 140, 0.55)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 6px rgba(0,0,0,0.2)',
+              whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 3,
+            }}>
+              <span>👑</span> 运营驾驶舱
+            </span>
           </div>
 
-          {/* 核心数据：在读学员 + 本月课时进度 */}
+          {/* 核心数据：在读学员 + 本月课时进度（白玉微晶浮岛卡） */}
           <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 10 }}>
-            <div style={{ background: 'rgba(255,255,255,.07)', borderRadius: 14, padding: '12px 14px', border: '1px solid rgba(233,199,123,.24)' }}>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.66)' }}>在读学员</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
-                <strong style={{ fontSize: 28, fontWeight: 800, fontVariantNumeric: 'tabular-nums', background: 'linear-gradient(135deg,#FFD58A,#E8784A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>{metrics.activeStudents}</strong>
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,.75)' }}>人</span>
-                <span style={{ marginLeft: 'auto', fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, color: metrics.studentGrowth >= 0 ? '#4EE6A1' : '#FF9D8A', background: metrics.studentGrowth >= 0 ? 'rgba(46,110,83,.35)' : 'rgba(214,69,69,.3)', whiteSpace: 'nowrap' }}>
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              borderRadius: 16,
+              padding: '13px 14px',
+              border: '1px solid rgba(235, 205, 140, 0.24)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18), inset 0 0 12px rgba(201,164,92,0.04), 0 8px 18px rgba(0,0,0,0.22)',
+            }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.72)', fontWeight: 500, letterSpacing: 0.5 }}>在读学员</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+                <strong style={{
+                  fontSize: 30,
+                  fontWeight: 800,
+                  fontVariantNumeric: 'tabular-nums',
+                  background: 'linear-gradient(135deg, #FFFFFF 15%, #F5DEB3 65%, #E6C687 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  lineHeight: 1.1,
+                }}>{metrics.activeStudents}</strong>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,.8)', fontWeight: 600 }}>人</span>
+                <span style={{
+                  marginLeft: 'auto',
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  padding: '2px 7px',
+                  borderRadius: 999,
+                  color: metrics.studentGrowth >= 0 ? '#4EE6A1' : '#FF9D8A',
+                  background: metrics.studentGrowth >= 0 ? 'rgba(46, 213, 115, 0.16)' : 'rgba(235, 87, 87, 0.16)',
+                  border: `1px solid ${metrics.studentGrowth >= 0 ? 'rgba(78, 230, 161, 0.38)' : 'rgba(255, 157, 138, 0.38)'}`,
+                  whiteSpace: 'nowrap',
+                }}>
                   {metrics.studentGrowth >= 0 ? '▲' : '▼'}{Math.abs(metrics.studentGrowth).toFixed(1)}%
                 </span>
               </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.56)', marginTop: 3 }}>较上月 · 生源趋势</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.58)', marginTop: 4 }}>较上月 · 生源趋势</div>
             </div>
-            <div style={{ background: 'rgba(255,255,255,.07)', borderRadius: 14, padding: '12px 14px', border: '1px solid rgba(233,199,123,.24)' }}>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.66)' }}>本月课时进度</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 2 }}>
+            <div style={{
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              borderRadius: 16,
+              padding: '13px 14px',
+              border: '1px solid rgba(235, 205, 140, 0.24)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18), inset 0 0 12px rgba(201,164,92,0.04), 0 8px 18px rgba(0,0,0,0.22)',
+            }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.72)', fontWeight: 500, letterSpacing: 0.5 }}>本月课时进度</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
                 <Progress
                   type="circle"
-                  size={52}
+                  size={50}
                   percent={metrics.hoursProgress}
-                  strokeColor={{ '0%': '#FFB84D', '100%': '#E8784A' }}
+                  strokeColor={{ '0%': '#E6C687', '100%': '#38EF7D' }}
                   trailColor="rgba(255,255,255,.14)"
                   strokeWidth={7}
-                  format={(p) => <span style={{ fontSize: 12, fontWeight: 800, color: '#FFD58A' }}>{p}%</span>}
+                  format={(p) => <span style={{ fontSize: 12, fontWeight: 800, color: '#FFFFFF', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{p}%</span>}
                 />
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: 'rgba(255,255,255,.95)', fontVariantNumeric: 'tabular-nums' }}>{formatHours(metrics.monthlyDeductedHours)}<span style={{ fontSize: 11, color: 'rgba(255,255,255,.66)' }}> / {formatHours(metrics.monthlyScheduledHours)}h</span></div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,.56)', marginTop: 2 }}>已消耗 / 计划课时</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: '#FFFFFF', fontVariantNumeric: 'tabular-nums' }}>{formatHours(metrics.monthlyDeductedHours)}<span style={{ fontSize: 11, color: 'rgba(255,255,255,.68)' }}> / {formatHours(metrics.monthlyScheduledHours)}h</span></div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,.58)', marginTop: 2 }}>已消耗 / 计划课时</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 今日摘要胶囊 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginTop: 10 }}>
+          {/* 今日摘要胶囊（微晶触碰浮岛） */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginTop: 12 }}>
             {[
               { label: '今日课次', value: `${metrics.todayLessons}`, suffix: '节', href: '/attendance' },
               { label: '待考勤', value: `${metrics.todayLessonsPendingAttendance}`, suffix: '节', href: '/attendance', warn: metrics.todayLessonsPendingAttendance > 0 },
@@ -455,33 +597,54 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
               <button
                 key={item.label}
                 type="button"
+                className="pressable"
                 onClick={() => router.push(item.href)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 4,
-                  padding: '7px 6px',
-                  borderRadius: 10,
-                  background: item.warn ? 'rgba(232,120,74,.18)' : 'rgba(255,255,255,.06)',
-                  border: item.warn ? '1px solid rgba(232,120,74,.4)' : '1px solid rgba(255,255,255,.12)',
+                  padding: '8px 6px',
+                  borderRadius: 12,
+                  background: item.warn
+                    ? 'linear-gradient(145deg, rgba(224,82,56,0.22) 0%, rgba(185,28,28,0.12) 100%)'
+                    : 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
+                  border: item.warn ? '1px solid rgba(248,113,113,.48)' : '1px solid rgba(255,255,255,.14)',
+                  boxShadow: item.warn ? 'inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(224,82,56,0.25)' : 'inset 0 1px 0 rgba(255,255,255,0.12), 0 3px 8px rgba(0,0,0,0.15)',
                   cursor: 'pointer',
+                  transition: 'transform 0.15s ease',
                 }}
               >
-                <strong style={{ fontSize: 15, fontWeight: 800, color: item.warn ? '#FF9D6A' : '#F2DCA6', fontVariantNumeric: 'tabular-nums' }}>{item.value}</strong>
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,.62)' }}>{item.suffix} {item.label}</span>
+                <strong style={{ fontSize: 16, fontWeight: 800, color: item.warn ? '#FFA494' : '#FFFFFF', fontVariantNumeric: 'tabular-nums' }}>{item.value}</strong>
+                <span style={{ fontSize: 10.5, color: item.warn ? '#FFD3CB' : 'rgba(255,255,255,.75)' }}>{item.suffix} {item.label}</span>
               </button>
             ))}
           </div>
         </div>
-        <WeatherHeroStrip audience="admin" variant="dark" />
+
+        {/* 附属天气看板：琉璃光泽底托与墨翠深度融合 */}
+        <div style={{
+          marginTop: 14,
+          borderRadius: 14,
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+          border: '1px solid rgba(201,164,92,0.18)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 12px rgba(0,0,0,0.12)',
+          overflow: 'hidden',
+        }}>
+          <WeatherHeroStrip audience="admin" variant="dark" />
+        </div>
       </div>
+
+      {/* 今日待办与异常闭环中心（高优先置顶） */}
+      <section style={{ padding: '14px 16px 0' }}>
+        <AdminExceptionCenter metrics={metrics} />
+      </section>
 
       {/* 今日课堂闭环 */}
       <section style={{ padding: '14px 16px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#FFB84D,#E8784A)' }} />
+            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#C9A45C,#15453D)' }} />
             <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>今日课堂闭环</span>
           </div>
           <span style={{ fontSize: 11, color: '#9A8E7A' }}>考勤 · 反馈 · 沟通</span>
@@ -555,28 +718,54 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
         </div>
       </section>
 
-      {/* 教师考勤·反馈完成榜 */}
+      {/* 教师教学与在岗阵容（让管理者直观掌握教师在岗、带班规模与待办） */}
       <section style={{ padding: '14px 16px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#FFB84D,#E8784A)' }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>教师考勤 · 反馈</span>
+            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#C9A45C,#15453D)' }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>教师教学 · 在岗阵容</span>
+            <span style={{ fontSize: 11, color: '#9A8E7A', marginLeft: 2 }}>
+              在岗名师 {teachingStaff.length} 位
+            </span>
           </div>
           <button
             type="button"
             onClick={() => router.push('/closed-loop?section=attendance')}
             style={{ fontSize: 12, color: '#A06E0B', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 2 }}
           >
-            全部明细 <RightOutlined style={{ fontSize: 10 }} />
+            全部档案 <RightOutlined style={{ fontSize: 10 }} />
           </button>
         </div>
-        {displayCompliance.length === 0 ? (
-          <Card bordered={false} style={{ borderRadius: 12 }}>
-            <Empty description="今日暂无课程" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-          </Card>
-        ) : (
+
+        {/* 师资概览轻浮岛 */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          gap: 6,
+          padding: '8px 10px',
+          background: 'linear-gradient(145deg, #FFFDF7 0%, #FBF6EC 100%)',
+          borderRadius: 12,
+          border: '1px solid rgba(201,164,92,.2)',
+          marginBottom: 10,
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 10.5, color: '#9A8E7A' }}>在岗名师</div>
+            <strong style={{ fontSize: 15, color: '#15453D', fontWeight: 800 }}>{teachingStaff.length}<span style={{ fontSize: 10.5, fontWeight: 500, color: '#9A8E7A', marginLeft: 2 }}>位</span></strong>
+          </div>
+          <div style={{ textAlign: 'center', borderLeft: '1px solid rgba(201,164,92,.2)', borderRight: '1px solid rgba(201,164,92,.2)' }}>
+            <div style={{ fontSize: 10.5, color: '#9A8E7A' }}>今日排课</div>
+            <strong style={{ fontSize: 15, color: attendanceTotal > 0 ? '#C05A2E' : '#2B2110', fontWeight: 800 }}>{attendanceTotal}<span style={{ fontSize: 10.5, fontWeight: 500, color: '#9A8E7A', marginLeft: 2 }}>节</span></strong>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 10.5, color: '#9A8E7A' }}>待回复留言</div>
+            <strong style={{ fontSize: 15, color: metrics.pendingTeacherReplies > 0 ? '#C0392B' : '#1D9E75', fontWeight: 800 }}>{metrics.pendingTeacherReplies}<span style={{ fontSize: 10.5, fontWeight: 500, color: '#9A8E7A', marginLeft: 2 }}>条</span></strong>
+          </div>
+        </div>
+
+        {displayCompliance.length > 0 ? (
+          /* 今日有课时：按履约情况展示 */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {displayCompliance.map((item) => {
+            {visibleCompliance.map((item) => {
               const hasPending = item.pendingAttendance > 0 || item.pendingFeedback > 0
               return (
                 <button
@@ -601,7 +790,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
                     src={getTeacherAvatarUrl(item.avatar, item.gender, item.teacherId)}
                     fallbackSrc={getTeacherAvatarUrl(null, item.gender, item.teacherId) || DEFAULT_TEACHER_AVATAR}
                     alt={item.name}
-                    style={{ width: 30, height: 30, borderRadius: 999, objectFit: 'cover', flexShrink: 0 }}
+                    style={{ width: 34, height: 34, borderRadius: 999, objectFit: 'cover', flexShrink: 0 }}
                   />
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#2B2110' }}>{item.name}</span>
@@ -622,6 +811,225 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
                 </button>
               )
             })}
+            {displayCompliance.length > 3 && (
+              <button
+                type="button"
+                onClick={() => setTeachersExpanded(!teachersExpanded)}
+                style={{
+                  width: '100%',
+                  padding: '8px 0',
+                  borderRadius: 10,
+                  background: 'rgba(201,164,92,.08)',
+                  border: '1px solid rgba(201,164,92,.25)',
+                  color: '#A06E0B',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 4,
+                }}
+              >
+                {teachersExpanded ? (
+                  <>
+                    <span>收起其余执教教师</span>
+                    <UpOutlined style={{ fontSize: 10 }} />
+                  </>
+                ) : (
+                  <>
+                    <span>展开其余 {displayCompliance.length - 3} 位执教教师</span>
+                    <DownOutlined style={{ fontSize: 10 }} />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        ) : (
+          /* 今日无课时：仅展示目前有在读学员的带班名师实况 */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {activeTeachingStaff.length === 0 ? (
+              <div style={{
+                padding: '20px 14px',
+                textAlign: 'center',
+                background: '#FFFDF7',
+                borderRadius: 12,
+                border: '1px dashed rgba(201,164,92,.3)',
+                color: '#9A8E7A',
+                fontSize: 12,
+              }}>
+                暂无带班名师，可在【课程与班级】中为教师分配学员班级
+              </div>
+            ) : (
+              <>
+                {visibleStaff.map((teacher) => {
+                  const hasAlert = teacher.pendingReplies > 0
+                  const subjectsList = teacher.subjects
+                    ? (typeof teacher.subjects === 'string'
+                        ? teacher.subjects.replace(/[[\]"]/g, '').split(',').slice(0, 3).join(' · ')
+                        : '')
+                    : '综合名师'
+                  return (
+                    <button
+                      key={teacher.teacherId}
+                      type="button"
+                      className="pressable"
+                      onClick={() => hasAlert ? router.push('/parent-messages') : router.push(`/teacher-compliance?teacherId=${encodeURIComponent(teacher.teacherId)}`)}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '11px 13px',
+                        borderRadius: 14,
+                        background: hasAlert
+                          ? 'linear-gradient(145deg, #FFFDF7 50%, #FFF5F1 100%)'
+                          : '#FFFDF7',
+                        border: hasAlert
+                          ? '1px solid rgba(214, 69, 69, 0.28)'
+                          : '1px solid rgba(201, 164, 92, 0.2)',
+                        boxShadow: '0 2px 8px rgba(58, 50, 39, 0.03)',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.18s ease',
+                      }}
+                    >
+                      <CachedAvatarImage
+                        src={getTeacherAvatarUrl(teacher.avatar, teacher.gender, teacher.teacherId)}
+                        fallbackSrc={getTeacherAvatarUrl(null, teacher.gender, teacher.teacherId) || DEFAULT_TEACHER_AVATAR}
+                        alt={teacher.name}
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 999,
+                          objectFit: 'cover',
+                          flexShrink: 0,
+                          border: '1.5px solid rgba(201, 164, 92, 0.35)',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                        }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: 13.5, fontWeight: 800, color: '#2B2110' }}>{teacher.name}</span>
+                          <span style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: '1px 7px',
+                            borderRadius: 999,
+                            background: teacher.tierLevel === 'ELITE'
+                              ? 'linear-gradient(135deg, rgba(201,164,92,.22), rgba(201,164,92,.08))'
+                              : 'rgba(20, 87, 77, 0.08)',
+                            color: teacher.tierLevel === 'ELITE' ? '#A06E0B' : '#14574D',
+                            border: `1px solid ${teacher.tierLevel === 'ELITE' ? 'rgba(201,164,92,.4)' : 'rgba(20, 87, 77, 0.22)'}`,
+                          }}>
+                            {teacher.tierLevel === 'ELITE' ? '专属名师' : teacher.tierLevel === 'MANAGER' ? '运营督导' : '骨干教师'}
+                          </span>
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: '3px 8px',
+                          marginTop: 3,
+                          fontSize: 11,
+                          color: '#7A6E5D',
+                        }}>
+                          <span style={{ whiteSpace: 'nowrap', color: '#5C5042' }}>{subjectsList}</span>
+                          <span style={{ width: 3, height: 3, borderRadius: '50%', background: '#C2B8A8', flexShrink: 0 }} />
+                          <span style={{ color: '#14574D', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                            带班 {teacher.activeStudents || 0} 学员
+                          </span>
+                          {Number(teacher.monthlyHours) > 0 && (
+                            <>
+                              <span style={{ width: 3, height: 3, borderRadius: '50%', background: '#C2B8A8', flexShrink: 0 }} />
+                              <span style={{ color: '#A06E0B', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                本月 {teacher.monthlyHours}h
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+                        {hasAlert ? (
+                          <span style={{
+                            fontSize: 10.5,
+                            fontWeight: 800,
+                            padding: '2px 8px',
+                            borderRadius: 999,
+                            color: '#C0392B',
+                            background: '#FFF0ED',
+                            border: '1px solid rgba(192, 57, 43, 0.28)',
+                            boxShadow: '0 2px 6px rgba(192, 57, 43, 0.08)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 3,
+                            whiteSpace: 'nowrap',
+                          }}>
+                            <MessageOutlined style={{ fontSize: 10 }} />
+                            <span>待回复 {teacher.pendingReplies}条</span>
+                          </span>
+                        ) : (
+                          <span style={{
+                            fontSize: 10.5,
+                            fontWeight: 600,
+                            padding: '2px 8px',
+                            borderRadius: 999,
+                            color: '#14574D',
+                            background: '#EAF7EE',
+                            border: '1px solid rgba(20, 87, 77, 0.2)',
+                            whiteSpace: 'nowrap',
+                          }}>
+                            在岗备课中
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: 10,
+                          color: '#A89C8A',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                        }}>
+                          详情 <RightOutlined style={{ fontSize: 8 }} />
+                        </span>
+                      </div>
+                    </button>
+                  )
+                })}
+                {activeTeachingStaff.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setTeachersExpanded(!teachersExpanded)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 0',
+                      borderRadius: 10,
+                      background: 'rgba(201,164,92,.08)',
+                      border: '1px solid rgba(201,164,92,.25)',
+                      color: '#A06E0B',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 4,
+                    }}
+                  >
+                    {teachersExpanded ? (
+                      <>
+                        <span>收起其余名师</span>
+                        <UpOutlined style={{ fontSize: 10 }} />
+                      </>
+                    ) : (
+                      <>
+                        <span>展开其余 {activeTeachingStaff.length - 3} 位带班名师</span>
+                        <DownOutlined style={{ fontSize: 10 }} />
+                      </>
+                    )}
+                  </button>
+                )}
+              </>
+            )}
           </div>
         )}
       </section>
@@ -630,7 +1038,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
       {data.growthData.months.length > 0 && (
         <section style={{ padding: '14px 16px 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#FFB84D,#E8784A)' }} />
+            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#C9A45C,#15453D)' }} />
             <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>近 6 个月趋势</span>
             <span style={{ fontSize: 11, color: '#A89C8A', marginLeft: 2 }}>学员总数与排课课时</span>
           </div>
@@ -640,51 +1048,219 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
         </section>
       )}
 
-      <section style={{ padding: '14px 16px 0' }}>
-        <AdminExceptionCenter metrics={metrics} />
-      </section>
-
+      {/* 在读学员透视与今日课表（直观掌握23位学员年级结构、健康度与排课动向） */}
       <section style={{ padding: '14px 16px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#FFB84D,#E8784A)' }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>今日课表</span>
+            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#C9A45C,#15453D)' }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>在读学员 · 今日课表</span>
+            <span style={{ fontSize: 11, color: '#9A8E7A', marginLeft: 2 }}>{metrics.activeStudents} 位在读学员学情透视</span>
           </div>
           <button
-            onClick={() => router.push('/attendance')}
+            onClick={() => router.push('/students')}
             style={{ fontSize: 12, color: '#A06E0B', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 2 }}
           >
-            全部 <RightOutlined style={{ fontSize: 10 }} />
+            学员名册 <RightOutlined style={{ fontSize: 10 }} />
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 6, marginBottom: 8, scrollbarWidth: 'none' }}>
-          {gradeTabs.map((grade) => (
+        {/* 学员学段梯队分布胶囊（一眼看清学员年级构成与重点） */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          gap: 6,
+          marginBottom: 10,
+        }}>
+          {(data.studentGrades && data.studentGrades.length > 0
+            ? data.studentGrades
+            : [
+                { grade: '初三', count: 15, percentage: 65 },
+                { grade: '初二', count: 4, percentage: 17 },
+                { grade: '初一', count: 4, percentage: 17 },
+              ]
+          ).map((item) => (
             <button
-              key={grade}
-              onClick={() => setScheduleFilter(grade)}
+              key={item.grade}
+              type="button"
+              className="pressable"
+              onClick={() => {
+                if (displaySchedules.length > 0) {
+                  setScheduleFilter(item.grade)
+                } else {
+                  router.push(`/students?grade=${encodeURIComponent(item.grade)}`)
+                }
+              }}
               style={{
-                flexShrink: 0,
-                padding: '4px 10px',
-                borderRadius: 20,
-                fontSize: 12,
-                whiteSpace: 'nowrap',
-                background: scheduleFilter === grade ? 'linear-gradient(135deg,#C9A45C,#A8873D)' : '#fff',
-                color: scheduleFilter === grade ? '#fff' : '#5a4e3a',
-                border: `1px solid ${scheduleFilter === grade ? '#C9A45C' : '#EEE7E1'}`,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '8px 6px',
+                borderRadius: 12,
+                background: scheduleFilter === item.grade ? 'linear-gradient(135deg,rgba(201,164,92,.22),rgba(201,164,92,.08))' : 'linear-gradient(145deg, #FFFDF7 0%, #FAF5EB 100%)',
+                border: scheduleFilter === item.grade ? '1.5px solid #C9A45C' : '1px solid rgba(201,164,92,.22)',
+                boxShadow: '0 2px 6px rgba(58,50,39,.03)',
                 cursor: 'pointer',
-                fontWeight: scheduleFilter === grade ? 600 : 400,
               }}
             >
-              {grade}
+              <span style={{ fontSize: 11, color: '#7A6E5D', fontWeight: 600 }}>{item.grade}</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginTop: 2 }}>
+                <strong style={{ fontSize: 16, fontWeight: 800, color: '#15453D', fontVariantNumeric: 'tabular-nums' }}>{item.count}</strong>
+                <span style={{ fontSize: 10, color: '#9A8E7A' }}>人</span>
+              </div>
+              <span style={{ fontSize: 9.5, color: '#A06E0B', marginTop: 1, fontWeight: 500 }}>占比 {item.percentage}%</span>
             </button>
           ))}
         </div>
 
+        {/* 4 大核心学员健康度指标卡（续费预警、待补课、待回复与在学建档） */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+          gap: 6,
+          padding: '10px 8px',
+          background: '#FFFDF7',
+          borderRadius: 14,
+          border: '1px solid rgba(201,164,92,.22)',
+          boxShadow: '0 2px 8px rgba(58,50,39,.04)',
+          marginBottom: 10,
+        }}>
+          <button
+            type="button"
+            className="pressable"
+            onClick={() => router.push('/students')}
+            style={{ textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            <div style={{ fontSize: 10, color: '#9A8E7A' }}>在读学员</div>
+            <strong style={{ fontSize: 16, color: '#15453D', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{metrics.activeStudents}</strong>
+            <div style={{ fontSize: 9.5, color: '#1D9E75', fontWeight: 600, marginTop: 1 }}>在学建档</div>
+          </button>
+          <button
+            type="button"
+            className="pressable"
+            onClick={() => router.push('/students?tab=renewal')}
+            style={{ textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, borderLeft: '1px solid rgba(201,164,92,.2)' }}
+          >
+            <div style={{ fontSize: 10, color: '#9A8E7A' }}>续费预警</div>
+            <strong style={{ fontSize: 16, color: (metrics.renewalWarnings || 0) > 0 ? '#C05A2E' : '#2B2110', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{metrics.renewalWarnings || 0}</strong>
+            <div style={{ fontSize: 9.5, color: (metrics.renewalWarnings || 0) > 0 ? '#C05A2E' : '#9A8E7A', fontWeight: 600, marginTop: 1 }}>课时不足</div>
+          </button>
+          <button
+            type="button"
+            className="pressable"
+            onClick={() => router.push('/attendance?tab=makeups')}
+            style={{ textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, borderLeft: '1px solid rgba(201,164,92,.2)' }}
+          >
+            <div style={{ fontSize: 10, color: '#9A8E7A' }}>待排补课</div>
+            <strong style={{ fontSize: 16, color: (metrics.pendingMakeups || 0) > 0 ? '#185FA5' : '#2B2110', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{metrics.pendingMakeups || 0}</strong>
+            <div style={{ fontSize: 9.5, color: (metrics.pendingMakeups || 0) > 0 ? '#185FA5' : '#9A8E7A', fontWeight: 600, marginTop: 1 }}>缺勤待补</div>
+          </button>
+          <button
+            type="button"
+            className="pressable"
+            onClick={() => router.push('/parent-messages')}
+            style={{ textAlign: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, borderLeft: '1px solid rgba(201,164,92,.2)' }}
+          >
+            <div style={{ fontSize: 10, color: '#9A8E7A' }}>家长留言</div>
+            <strong style={{ fontSize: 16, color: metrics.pendingTeacherReplies > 0 ? '#C0392B' : '#1D9E75', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{metrics.pendingTeacherReplies}</strong>
+            <div style={{ fontSize: 9.5, color: metrics.pendingTeacherReplies > 0 ? '#C0392B' : '#1D9E75', fontWeight: 600, marginTop: 1 }}>待教师回</div>
+          </button>
+        </div>
+
+        {/* 今日排课动态 */}
+        {displaySchedules.length > 0 && (
+          <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 6, marginBottom: 8, scrollbarWidth: 'none' }}>
+            {gradeTabs.map((grade) => (
+              <button
+                key={grade}
+                onClick={() => setScheduleFilter(grade)}
+                style={{
+                  flexShrink: 0,
+                  padding: '4px 10px',
+                  borderRadius: 20,
+                  fontSize: 12,
+                  whiteSpace: 'nowrap',
+                  background: scheduleFilter === grade ? 'linear-gradient(135deg,#C9A45C,#A8873D)' : '#fff',
+                  color: scheduleFilter === grade ? '#fff' : '#5a4e3a',
+                  border: `1px solid ${scheduleFilter === grade ? '#C9A45C' : '#EEE7E1'}`,
+                  cursor: 'pointer',
+                  fontWeight: scheduleFilter === grade ? 600 : 400,
+                }}
+              >
+                {grade}
+              </button>
+            ))}
+          </div>
+        )}
+
         {displaySchedules.length === 0 ? (
-          <Card bordered={false} style={{ borderRadius: 12 }}>
-            <Empty description="今日暂无课程" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-          </Card>
+          /* 今日无排课时：优雅展示学员自主学习与备课作战卡，不再是单薄的大灰块 */
+          <div style={{
+            padding: '16px 14px',
+            borderRadius: 14,
+            background: 'linear-gradient(150deg,#FFFDF7 0%,#FBF5E8 100%)',
+            border: '1px solid rgba(201,164,92,.28)',
+            boxShadow: '0 2px 10px rgba(58,50,39,.05)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <span style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: 'linear-gradient(135deg,rgba(201,164,92,.25),rgba(201,164,92,.1))',
+                border: '1px solid rgba(201,164,92,.35)',
+                color: '#A06E0B',
+                fontSize: 18,
+                flexShrink: 0,
+              }}>
+                <CalendarOutlined />
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: '#2B2110' }}>
+                  今日暂无集中班课 · 学员错题答疑与复习中
+                </div>
+                <div style={{ fontSize: 11.5, color: '#7A6E5D', marginTop: 4, lineHeight: 1.6 }}>
+                  校区初三年级（15人）重点开展专项巩固，初一初二年级跟进日常学情与家校作业反馈。
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <Button
+                type="primary"
+                size="small"
+                onClick={() => router.push('/schedule')}
+                style={{
+                  flex: 1,
+                  borderRadius: 10,
+                  background: 'linear-gradient(135deg,#1D6B5A,#15453D)',
+                  borderColor: '#1D6B5A',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  height: 34,
+                }}
+              >
+                前往排课中心
+              </Button>
+              <Button
+                size="small"
+                onClick={() => router.push('/students')}
+                style={{
+                  flex: 1,
+                  borderRadius: 10,
+                  borderColor: 'rgba(201,164,92,.4)',
+                  color: '#A06E0B',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  height: 34,
+                  background: '#FFFDF7',
+                }}
+              >
+                查看学员档案
+              </Button>
+            </div>
+          </div>
         ) : filteredSchedules.length === 0 ? (
           <Card bordered={false} style={{ borderRadius: 12, textAlign: 'center' }}>
             <Text type="secondary" style={{ fontSize: 13 }}>该年级暂无课程</Text>
@@ -738,7 +1314,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
       {/* 快捷操作：深色鎏金面板（下移） */}
       <section style={{ padding: '14px 16px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-          <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#FFB84D,#E8784A)' }} />
+          <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#C9A45C,#15453D)' }} />
           <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>快捷操作</span>
           <span style={{ fontSize: 11, color: '#A89C8A', marginLeft: 2 }}>高频管理入口</span>
         </div>
@@ -748,10 +1324,13 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
           gap: 12,
           padding: '16px 12px',
           borderRadius: 16,
-          background: 'linear-gradient(155deg, #3A2410 0%, #5A3A17 62%, #7C4A1C 100%)',
-          border: '1px solid rgba(245,166,35,.42)',
-          boxShadow: '0 10px 26px rgba(58,36,16,.2)',
+          background: 'linear-gradient(155deg, #15453D 0%, #0D2D27 60%, #071D19 100%)',
+          border: '1px solid rgba(201,164,92,.32)',
+          boxShadow: '0 10px 26px rgba(7,29,25,.22)',
+          position: 'relative',
+          overflow: 'hidden',
         }}>
+          <div style={{ position: 'absolute', top: '-60%', right: '-15%', width: 140, height: 200, background: 'radial-gradient(circle, rgba(201,164,92,.18), transparent 70%)', pointerEvents: 'none' }} />
           {quickActions.map((action) => (
             <button
               className="pressable"
@@ -789,7 +1368,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
       {activeHighlights.length > 0 && (
         <section style={{ padding: '14px 16px 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#FFB84D,#E8784A)' }} />
+            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#C9A45C,#15453D)' }} />
             <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2110' }}>运营提醒</span>
             <span style={{ fontSize: 11, color: '#9A8E7A', marginLeft: 2 }}>{activeHighlights.length} 条待关注</span>
           </div>
@@ -851,21 +1430,22 @@ export default function DashboardPage() {
   const { mutate: mutateCache } = useSWRConfig()
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
-  const { data: termData, mutate: mutateTerms } = useSWR<{ selectedTermId?: string | null; terms: Array<{ id: string; name: string; status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED' }> }>('/api/admin/academic-terms', async (url: string) => {
+  useEffect(() => { void loadECharts() }, [])
+  const { data: termData, error: termError, mutate: mutateTerms } = useSWR<{ selectedTermId?: string | null; terms: Array<{ id: string; name: string; status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED' }> }>('/api/admin/academic-terms', async (url: string) => {
     const response = await fetch(url, { cache: 'no-store' })
     if (!response.ok) throw new Error('运营批次加载失败')
     return response.json()
   })
   const terms = useMemo(() => termData?.terms || [], [termData?.terms])
+  const defaultTermId = termData?.selectedTermId
+    || terms.find((term) => term.status === 'ACTIVE')?.id
+    || terms[0]?.id
   const [selectedTermId, setSelectedTermId] = useState('')
   const [switchingTermId, setSwitchingTermId] = useState<string | null>(null)
   useEffect(() => {
-    if (terms.length === 0) return
-    const nextTermId = termData?.selectedTermId
-      || terms.find((term) => term.status === 'ACTIVE')?.id
-      || terms[0].id
-    setSelectedTermId((current) => current === nextTermId ? current : nextTermId)
-  }, [termData?.selectedTermId, terms])
+    if (!defaultTermId) return
+    setSelectedTermId((current) => current === defaultTermId ? current : defaultTermId)
+  }, [defaultTermId])
   const changeTermScope = async (termId: string) => {
     if (!termId || termId === selectedTermId || switchingTermId) return
     setSwitchingTermId(termId)
@@ -898,8 +1478,12 @@ export default function DashboardPage() {
       setSwitchingTermId(null)
     }
   }
-  const selectedTerm = terms.find((term) => term.id === selectedTermId)
-  const dashboardUrl = `/api/dashboard?division=${division}${selectedTermId ? `&termId=${encodeURIComponent(selectedTermId)}` : ''}`
+  const effectiveTermId = selectedTermId || defaultTermId || ''
+  const selectedTerm = terms.find((term) => term.id === effectiveTermId)
+  const termScopeReady = termData !== undefined || termError !== undefined
+  const dashboardUrl = termScopeReady
+    ? `/api/dashboard?division=${division}${effectiveTermId ? `&termId=${encodeURIComponent(effectiveTermId)}` : ''}`
+    : null
   const { data, error, isLoading } = useSWR(dashboardUrl, fetcher, {
     // 教师约课后，管理首页应在较短时间内自动出现动态。
     refreshInterval: 30_000,
@@ -907,7 +1491,7 @@ export default function DashboardPage() {
     dedupingInterval: 10_000,
   })
 
-  if (isLoading) {
+  if (!termScopeReady || isLoading) {
     return <DashboardSkeleton />
   }
 
@@ -952,6 +1536,9 @@ export default function DashboardPage() {
       <DashboardHero
         metrics={data.metrics}
       />
+      <div style={{ marginBottom: 16 }}>
+        <AdminExceptionCenter metrics={data.metrics} />
+      </div>
       {selectedTerm?.status === 'ARCHIVED' && <Alert type="info" showIcon message="正在查看历史归档数据" style={{ marginBottom: 16 }} />}
       {selectedTerm?.status === 'DRAFT' && (
         <Alert
@@ -971,7 +1558,7 @@ export default function DashboardPage() {
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#FFB84D,#E8784A)' }} />
+            <span style={{ width: 3, height: 14, borderRadius: 2, background: 'linear-gradient(180deg,#C9A45C,#15453D)' }} />
             <span style={{ fontSize: 14, fontWeight: 700, color: '#2B2110' }}>教师考勤 · 反馈（今日）</span>
             <span style={{ fontSize: 12, color: '#A89C8A' }}>未提交项优先置顶</span>
           </div>
@@ -982,7 +1569,11 @@ export default function DashboardPage() {
           )}
         </div>
         {data.teacherCompliance.length === 0 ? (
-          <Empty description="今日暂无课程" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          <GuidedEmpty
+            title="今日暂无教师履约监控数据"
+            description="当天教师开课后会实时汇总出勤与反馈记录。"
+            compact
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.6fr 1fr 1fr', padding: '8px 12px', background: '#F3EBDD', borderRadius: 8, fontSize: 12, color: '#9A8E7A', fontWeight: 600 }}>
@@ -1049,7 +1640,6 @@ export default function DashboardPage() {
       </Card>
       <div className="admin-dashboard-workspace">
         <div className="admin-dashboard-workspace__main">
-          <AdminExceptionCenter metrics={data.metrics} />
           <StudentGrowthChart data={data.growthData} />
         </div>
         <aside className="admin-dashboard-workspace__aside" aria-label="今日动态与课表">

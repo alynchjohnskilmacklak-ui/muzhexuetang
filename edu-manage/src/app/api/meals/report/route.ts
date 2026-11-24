@@ -5,6 +5,7 @@ import { mealCounts, parseMealDetails, startOfLocalDay } from '@/lib/meals'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { TEACHER_MEAL_APPEND_NOTE } from '@/lib/meal-attendance-append'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,6 +73,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
         studentName: record.student.name,
         portion: 'single' as const,
         groupName: record.groupName || '未标注班级',
+        appended: Boolean(record.notes?.includes(TEACHER_MEAL_APPEND_NOTE)),
       }))
     const submittedAt = records.reduce(
       (latest, record) => record.updatedAt > latest ? record.updatedAt : latest,
@@ -86,7 +88,9 @@ export const GET = apiHandler(async (request: NextRequest) => {
       riceSingle: details.length,
       riceDouble: 0,
       noodleCount: 0,
-      notes: '首节课考勤同步上报',
+      notes: records.some((record) => record.notes?.includes(TEACHER_MEAL_APPEND_NOTE))
+        ? '包含后续课次追加就餐'
+        : '首节课考勤同步上报',
       details,
       division,
       menuId: null,

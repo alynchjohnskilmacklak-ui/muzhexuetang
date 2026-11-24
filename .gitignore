@@ -32,3 +32,14 @@ edu-manage/*.zip
 
 # unrelated template repo
 awesome/
+
+# logs
+*.log
+deploy-*.log
+
+# python cache
+__pycache__/
+*.pyc
+
+# scratch
+_context_mode_review/

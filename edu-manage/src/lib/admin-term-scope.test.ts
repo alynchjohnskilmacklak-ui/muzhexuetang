@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { PrismaClient } from '@prisma/client'
 import type { NextRequest } from 'next/server'
-import { resolveAdminTermScope } from './admin-term-scope'
+import { isClassGroupInActiveTerm, isClassLessonInActiveTerm, resolveAdminTermScope } from './admin-term-scope'
 
 function request(url: string, cookieTermId?: string) {
   return {
@@ -24,6 +24,25 @@ const term = (id: string, status: 'ACTIVE' | 'ARCHIVED' = 'ACTIVE') => ({
 })
 
 describe('admin term scope', () => {
+  it('requires the current division when checking an active class group or lesson', async () => {
+    const classGroupFindFirst = vi.fn().mockResolvedValue({ term: { status: 'ACTIVE' } })
+    const classLessonFindFirst = vi.fn().mockResolvedValue({ group: { term: { status: 'ACTIVE' } } })
+    const db = {
+      classGroup: { findFirst: classGroupFindFirst },
+      classLesson: { findFirst: classLessonFindFirst },
+    } as unknown as PrismaClient
+
+    await expect(isClassGroupInActiveTerm(db, 'group-a', 'SENIOR')).resolves.toBe(true)
+    expect(classGroupFindFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'group-a', division: 'SENIOR', term: { division: 'SENIOR' } },
+    }))
+
+    await expect(isClassLessonInActiveTerm(db, 'lesson-a', 'JUNIOR')).resolves.toBe(true)
+    expect(classLessonFindFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'lesson-a', division: 'JUNIOR', group: { division: 'JUNIOR', term: { division: 'JUNIOR' } } },
+    }))
+  })
+
   it('uses the explicit query term before the persisted cookie', async () => {
     const findFirst = vi.fn().mockResolvedValue(term('query-term', 'ARCHIVED'))
     const db = { academicTerm: { findFirst } } as unknown as PrismaClient

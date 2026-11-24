@@ -1,0 +1,1287 @@
+/* 家长端初中古诗文背诵样式 - 牧哲宋韵宣纸美学与现代高工 */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 4px 60px 4px;
+}
+
+/* 顶部宣纸印章横幅 */
+.headerCard {
+  background: linear-gradient(135deg, #FAF7F2 0%, #F5EFEB 100%);
+  border: 1px solid rgba(138, 101, 23, 0.22);
+  border-radius: 18px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(138, 101, 23, 0.05);
+}
+
+.headerSeal {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  width: 46px;
+  height: 46px;
+  border: 2px solid #991b1b;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transform: rotate(8deg);
+  opacity: 0.85;
+  background: rgba(254, 242, 242, 0.7);
+  letter-spacing: 1px;
+  font-family: "Songti SC", "SimSun", serif;
+  user-select: none;
+}
+
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.headerTitle {
+  font-size: 19px;
+  font-weight: 800;
+  color: #451a03;
+  letter-spacing: -0.01em;
+}
+
+.headerTag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #854d0e;
+  background: #fef08a;
+  padding: 1.5px 7px;
+  border-radius: 5px;
+}
+
+.headerDesc {
+  font-size: 12px;
+  color: #78716c;
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+/* 年级一级大切换：七年级 (初一) · 八年级 (初二) · 九年级 (初三) */
+.gradeNav {
+  display: flex;
+  background: #F5EFEB;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 4px;
+}
+
+.gradeBtn {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #57534e;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gradeBtnActive {
+  background: #ffffff;
+  color: #14574d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* 分册选择书架卡片列表 (完全对齐英语特训书架风格) */
+.bookList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bookCard {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(20, 87, 77, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.bookCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(20, 87, 77, 0.08);
+}
+
+.bookCardSelected {
+  background: linear-gradient(135deg, #ffffff 0%, #f3f9f6 100%) !important;
+  border: 1.5px solid #14574d !important;
+  box-shadow: 0 6px 18px rgba(20, 87, 77, 0.12) !important;
+}
+
+.bookInfoWrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+}
+
+/* 立体语文课本封面 (对齐英语书架真实质感) */
+.bookCover {
+  position: relative;
+  width: 56px;
+  height: 78px;
+  min-width: 56px;
+  max-width: 56px;
+  border-radius: 4px 8px 8px 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  background: #f1ede6;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+}
+
+/* 书脊折痕光影 */
+.bookCover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(0, 0, 0, 0.08) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bookCoverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bookCornerBadge {
+  position: absolute;
+  right: 3px;
+  bottom: 4px;
+  background: #14574d;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  line-height: 1.1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  z-index: 3;
+  letter-spacing: 0.5px;
+}
+
+.bookTextCol {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5px;
+}
+
+.bookTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bookTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #17352f;
+  margin: 0;
+}
+
+.bookTag {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #eef7f4;
+  color: #14574d;
+}
+
+.currentStudyBadge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1.5px 6px;
+  border-radius: 4px;
+  background: #14574d;
+  color: #ffffff;
+}
+
+.bookSubtitle {
+  font-size: 11.5px;
+  color: #78716c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookMeta {
+  font-size: 11.5px;
+  color: #57534e;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.bookMeta strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: #17352f;
+}
+
+.donePill {
+  font-size: 10.5px;
+  color: #166534;
+  background: #dcfce7;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* 行动胶囊按钮 */
+.actionBtnPrimary {
+  background: #14574d;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(20, 87, 77, 0.28);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.actionBtnPrimary:hover {
+  background: #0d3e37;
+}
+
+.actionBtnSecondary {
+  background: #f0f5f2;
+  color: #14574d;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   单册篇目目录流 (二级视图)
+   ========================================================= */
+.volumeHeaderDock {
+  background: linear-gradient(135deg, #14574d 0%, #0d3e37 100%);
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 14px rgba(20, 87, 77, 0.25);
+}
+
+.volumeSummaryLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.volumeBadgePill {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 1.5px 6px;
+  border-radius: 4px;
+  width: fit-content;
+  font-weight: 600;
+}
+
+.volumeHeaderTitle {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.volumeSummaryRight {
+  text-align: right;
+}
+
+.volumeBigCount {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: tabular-nums, sans-serif;
+  line-height: 1;
+}
+
+.volumeCountSub {
+  font-size: 10.5px;
+  opacity: 0.85;
+}
+
+/* 篇目单卡 */
+.poemList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.poemCard {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.poemCard:hover {
+  border-color: #14574d;
+  box-shadow: 0 3px 10px rgba(20, 87, 77, 0.08);
+}
+
+.poemCardDone {
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%) !important;
+  border-color: #86efac !important;
+}
+
+.poemHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.poemTitleWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.poemTitleText {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1c1917;
+}
+
+.poemAuthorText {
+  font-size: 11.5px;
+  color: #78716c;
+}
+
+.tagDone {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #bbf7d0;
+}
+
+.tagReview {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #fde68a;
+}
+
+.tagTodo {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.poemQuoteBox {
+  font-size: 13px;
+  font-family: "Songti SC", "SimSun", serif;
+  color: #292524;
+  background: #fafaf9;
+  border-left: 3px solid #14574d;
+  padding: 6px 10px;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.metaTagDock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 10.5px;
+}
+
+.pillFocus {
+  background: #f5f5f4;
+  color: #57534e;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.pillTrap {
+  background: #fff1f2;
+  color: #be123c;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   单篇沉浸研习台 (三级伴背)
+   ========================================================= */
+.workbenchCard {
+  background: #fffdf9;
+  border: 1px solid #eae3d2;
+  border-radius: 18px;
+  padding: 18px 16px;
+  box-shadow: 0 4px 14px rgba(138, 101, 23, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wbHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px dashed #e7e5e4;
+  padding-bottom: 10px;
+}
+
+.wbTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: #17352f;
+  font-family: "Songti SC", "SimSun", serif;
+}
+
+.wbAuthor {
+  font-size: 12px;
+  color: #78716c;
+}
+
+.ladderNav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: #f5efeb;
+  padding: 3px;
+  border-radius: 10px;
+  gap: 3px;
+}
+
+.ladderTab {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 0;
+  border-radius: 7px;
+  color: #78716c;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: all 0.15s;
+}
+
+.ladderTabActive {
+  background: #14574d !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.25);
+}
+
+.scrollPaper {
+  background: #faf7f2;
+  border: 1px solid #eae3d2;
+  border-radius: 14px;
+  padding: 18px 12px;
+  text-align: center;
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 16.5px;
+  line-height: 2.3;
+  color: #1c1917;
+  letter-spacing: 0.5px;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.maskWord {
+  display: inline-block;
+  min-width: 26px;
+  height: 26px;
+  vertical-align: middle;
+  margin: 0 3px;
+  background: #e7decf;
+  border-bottom: 2px dashed #8a6517;
+  border-radius: 4px;
+  line-height: 24px;
+  font-size: 11px;
+  color: #8a6517;
+  font-family: sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.maskWordRevealed {
+  background: #fef08a !important;
+  color: #b45309 !important;
+  border-bottom: none !important;
+  font-weight: 900 !important;
+  font-size: 16.5px !important;
+  font-family: "Songti SC", serif !important;
+}
+
+.blindModeBox {
+  padding: 30px 10px;
+  color: #78716c;
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.blindEyeIcon {
+  font-size: 32px;
+  color: #8a6517;
+  margin-bottom: 8px;
+}
+
+.actionDeck {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btnParentStamp {
+  background: linear-gradient(135deg, #14574d 0%, #0d3e37 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 3px 10px rgba(20, 87, 77, 0.25);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btnParentStamp:hover {
+  opacity: 0.95;
+}
+
+.btnQuizEnter {
+  background: #ffffff;
+  color: #14574d;
+  border: 1px solid rgba(20, 87, 77, 0.3);
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+/* 中考情境默写练习浮层/卡片 */
+.quizCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quizPrompt {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #334155;
+  font-weight: 600;
+}
+
+.quizInputRow {
+  display: flex;
+  gap: 8px;
+}
+
+.stampCelebration {
+  text-align: center;
+  padding: 24px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.bigSeal {
+  width: 72px;
+  height: 72px;
+  border: 3px solid #991b1b;
+  border-radius: 12px;
+  color: #991b1b;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transform: rotate(6deg);
+  background: #fef2f2;
+  letter-spacing: 2px;
+  font-family: "Songti SC", serif;
+  box-shadow: 0 4px 12px rgba(153, 27, 27, 0.15);
+}
+
+/* =========================================================
+   中考语境默写特训卷专项组件样式
+   ========================================================= */
+
+.contextBanner {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  border-radius: 16px;
+  padding: 13px 16px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 6px 18px rgba(30, 58, 138, 0.18);
+  margin-bottom: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.contextBanner:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(30, 58, 138, 0.25);
+}
+
+.contextBannerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contextBadgeIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.contextBannerTitle {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.contextBannerSubtitle {
+  font-size: 11px;
+  color: #bfdbfe;
+  line-height: 1.35;
+}
+
+.contextBannerBtn {
+  background: #ffffff;
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 语境特训答题实操卡片 */
+.quizCardMain {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+.quizIndexBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.quizQuestionPrompt {
+  font-size: 14px;
+  line-height: 1.75;
+  color: #1e293b;
+  font-weight: 600;
+  background: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+}
+
+.quizInputSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quizInputGuide {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quizResultPanel {
+  padding: 14px;
+  border-radius: 12px;
+  animation: fadeIn 0.25s ease;
+}
+
+.quizResultCorrect {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+}
+
+.quizResultWrong {
+  background: #fef2f2;
+  border: 1.5px solid #fca5a5;
+}
+
+.quizAnswerCompare {
+  margin-top: 8px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.standardAnswerText {
+  color: #15803d;
+  font-weight: 800;
+  font-family: "Songti SC", "SimSun", serif;
+  font-size: 15px;
+}
+
+.trapWarningBox {
+  background: #fffbeb;
+  border: 1px solid #fef08a;
+  border-radius: 8px;
+  padding: 9px 12px;
+  margin-top: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.trapWarningIcon {
+  color: #d97706;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 1px;
+}
+
+/* 篇目分类过滤胶囊条 */
+.filterTabRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 6px 0;
+  scrollbar-width: none;
+}
+
+.filterTabRow::-webkit-scrollbar {
+  display: none;
+}
+
+.filterTab {
+  all: unset;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 4px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.filterTab:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.filterTabActive {
+  background: #14574d !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.2);
+}
+
+.pageBadge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.tag53 {
+  font-size: 10px;
+  font-weight: 800;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid #fde68a;
+}
+
+.keyNotesSection {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keyNotesTitle {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.keyNotesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyNoteItem {
+  font-size: 11.5px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 8px;
+  color: #334155;
+}
+
+.keyNoteItem strong {
+  color: #0f172a;
+  margin-right: 4px;
+}
+
+/* 真实中考年份省市与题型考点印章 */
+.examSourceBadge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 1.5px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.2;
+}
+
+.examCategoryBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 1.5px 8px;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+
+
+
+/* =========================================================
+   多维研学主导航（文白对译/点字成诗/飞花对句/梯级伴背/情境剧场）
+   ========================================================= */
+.studyModeNav {
+  display: flex;
+  background: #f1ebd8;
+  padding: 4px;
+  border-radius: 12px;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.studyModeNav::-webkit-scrollbar {
+  display: none;
+}
+
+.studyModeTab {
+  all: unset;
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #78716c;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.studyModeTabActive {
+  background: #14574d !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(20, 87, 77, 0.25);
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   文白对照与课下生词精读卡片
+   ========================================================= */
+.vernacularCardList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sentencePairCard {
+  background: #ffffff;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.sentencePairCard:hover {
+  border-color: #14574d;
+  box-shadow: 0 4px 12px rgba(20, 87, 77, 0.08);
+}
+
+.sentenceOrigRow {
+  font-family: "Songti SC", "SimSun", serif;
+  font-size: 16.5px;
+  font-weight: 800;
+  color: #1c1917;
+  letter-spacing: 0.5px;
+  line-height: 1.6;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.sentenceTransRow {
+  font-size: 13px;
+  color: #0369a1;
+  background: #f0f9ff;
+  border-left: 3px solid #38bdf8;
+  padding: 6px 10px;
+  border-radius: 0 6px 6px 0;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+.sentenceNotesRow {
+  font-size: 11.5px;
+  color: #78716c;
+  margin-top: 6px;
+  line-height: 1.5;
+  background: #fafaf9;
+  padding: 5px 8px;
+  border-radius: 6px;
+}
+
+/* =========================================================
+   点字成诗闯关游戏区
+   ========================================================= */
+.gameBoardCard {
+  background: linear-gradient(180deg, #fbf7ee 0%, #f6f0df 100%);
+  border: 2px solid #e6dcc6;
+  border-radius: 16px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 6px 20px rgba(120, 95, 30, 0.08);
+}
+
+.gameTargetGuide {
+  font-size: 12px;
+  color: #854d0e;
+  background: #fef9c3;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.targetSlotsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  min-height: 48px;
+  padding: 8px;
+  background: #ffffff;
+  border: 2px dashed #d6c7a1;
+  border-radius: 12px;
+  width: 100%;
+}
+
+.slotCell {
+  width: 38px;
+  height: 42px;
+  background: #faf7f2;
+  border: 1.5px solid #d1c5a5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Songti SC", "SimSun", serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #14574d;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.slotCellFilled {
+  background: #14574d;
+  color: #ffffff;
+  border-color: #0f3d36;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.3);
+}
+
+.bubblePoolRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.charBubbleBtn {
+  all: unset;
+  width: 42px;
+  height: 44px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-bottom: 3.5px solid #94a3b8;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Songti SC", "SimSun", serif;
+  font-size: 19px;
+  font-weight: 800;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.charBubbleBtn:hover {
+  transform: translateY(-2px);
+  border-bottom-width: 5px;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+
+.charBubbleBtn:active {
+  transform: translateY(2px);
+  border-bottom-width: 1.5px;
+}
+
+.charBubbleUsed {
+  opacity: 0.25;
+  pointer-events: none;
+  background: #e2e8f0;
+}
+
+/* =========================================================
+   飞花令名句对接挑战
+   ========================================================= */
+.coupletCard {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.coupletPromptBox {
+  background: #f8fafc;
+  border-left: 4px solid #14574d;
+  padding: 12px 14px;
+  border-radius: 0 10px 10px 0;
+  font-family: "Songti SC", serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.coupletOptionGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.coupletOptionBtn {
+  all: unset;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-family: "Songti SC", serif;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.coupletOptionBtn:hover {
+  border-color: #14574d;
+  background: #f0fdf4;
+}
+
+.coupletOptionCorrect {
+  background: #dcfce7 !important;
+  border-color: #22c55e !important;
+  color: #15803d !important;
+  font-weight: 800;
+}
+
+.coupletOptionWrong {
+  background: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #b91c1c !important;
+}
+
+/* =========================================================
+   深度赏析与全篇白话大意
+   ========================================================= */
+.appreciationBox {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.appreciationSectionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appreciationLabel {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.appreciationContent {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.7;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}

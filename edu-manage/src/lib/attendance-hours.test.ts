@@ -3,13 +3,15 @@ import { calculateAttendanceDeductHours, shouldCreateMakeupRequest } from './att
 import { calculateAttendanceRate, clampDeductHours } from './attendance-stats'
 
 describe('attendance hour deduction', () => {
-  it('deducts full lesson hours for small class present or leave', () => {
-    expect(calculateAttendanceDeductHours({ status: 'PRESENT', courseType: 'GROUP', lessonMinutes: 40 })).toBe(0.7)
-    expect(calculateAttendanceDeductHours({ status: 'LEAVE', courseType: 'GROUP', lessonMinutes: 90 })).toBe(1.5)
+  it('uses minute-accurate hour conversion for class duration', () => {
+    expect(calculateAttendanceDeductHours({ status: 'PRESENT', courseType: 'GROUP', lessonMinutes: 40 })).toBe(0.66666667)
+    expect(calculateAttendanceDeductHours({ status: 'PRESENT', courseType: 'GROUP', lessonMinutes: 60 })).toBe(1)
+    expect(calculateAttendanceDeductHours({ status: 'PRESENT', courseType: 'GROUP', lessonMinutes: 45 })).toBe(0.75)
+    expect(calculateAttendanceDeductHours({ status: 'LEAVE', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'MONTHLY' })).toBe(1.5)
   })
 
   it('deducts actual one-on-one minutes when provided', () => {
-    expect(calculateAttendanceDeductHours({ status: 'PRESENT', courseType: 'ONE_ON_ONE', lessonMinutes: 60, actualMinutes: 45 })).toBe(0.8)
+    expect(calculateAttendanceDeductHours({ status: 'PRESENT', courseType: 'ONE_ON_ONE', lessonMinutes: 60, actualMinutes: 45 })).toBe(0.75)
   })
 
   it('does not deduct makeup status and clamps negative remain hours', () => {
@@ -24,9 +26,11 @@ describe('attendance hour deduction', () => {
     expect(calculateAttendanceDeductHours({ status: 'ABSENT', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'MONTHLY' })).toBe(1.5)
     // 周末课（PER_HOUR）：没来不扣课时
     expect(calculateAttendanceDeductHours({ status: 'ABSENT', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'PER_HOUR' })).toBe(0)
-    // 周末课出勤/请假仍正常扣
+    // 周末课出勤扣除，获批请假退回
     expect(calculateAttendanceDeductHours({ status: 'PRESENT', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'PER_HOUR' })).toBe(1.5)
-    expect(calculateAttendanceDeductHours({ status: 'LEAVE', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'PER_HOUR' })).toBe(1.5)
+    expect(calculateAttendanceDeductHours({ status: 'LEAVE', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'PER_HOUR' })).toBe(0)
+    expect(calculateAttendanceDeductHours({ status: 'LEAVE', courseType: 'GROUP', lessonMinutes: 90, intensiveMode: 'INTENSIVE', billingMode: 'MONTHLY' })).toBe(1.5)
+    expect(calculateAttendanceDeductHours({ status: 'LEAVE', courseType: 'GROUP', lessonMinutes: 90, intensiveMode: 'INTENSIVE', billingMode: 'PER_HOUR' })).toBe(0)
   })
 })
 

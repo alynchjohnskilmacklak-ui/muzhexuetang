@@ -25,6 +25,7 @@ export const GET = apiHandler(async (
     const searchParams = request.nextUrl.searchParams
     const archive = await getFeedbackArchive(actor.prisma, actor, {
       studentId,
+      includeLinkedRecords: searchParams.get('includeLinkedRecords') !== '0',
       page: Number(searchParams.get('page') || 1),
       pageSize: Number(searchParams.get('pageSize') || 20),
       subject: searchParams.get('subject') || undefined,

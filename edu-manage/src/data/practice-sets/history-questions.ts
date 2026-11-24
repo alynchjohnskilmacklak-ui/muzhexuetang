@@ -2155,7 +2155,7 @@ export const historyQuestions = [
       { id: '', knowledgePointId: 'gelunbu', prompt: '哥伦布始终认为他到达的是？', options: ['印度', '中国', '日本', '非洲'], answerIndex: 0, explanation: '他以为到了印度，称当地人为印第安人。', difficulty: 'EXAM' },
       { id: '', knowledgePointId: 'mai zhelun', prompt: '麦哲伦环球航行证明了？', options: ['地圆学说', '地球是宇宙中心', '大陆漂移', '海洋相通'], answerIndex: 0, explanation: '证明地圆学说正确。', difficulty: 'EXAM' },
       { id: '', knowledgePointId: 'yingxiang', prompt: '新航路开辟后，欧洲的主要商路和贸易中心转移到？', options: ['大西洋沿岸', '地中海沿岸', '波罗的海沿岸', '黑海沿岸'], answerIndex: 0, explanation: '从地中海转移到大西洋沿岸。', difficulty: 'EXAM' },
-      { id: 'history-9a-5-14-q11', knowledgePointId: 'mai zhelun', prompt: '图示为麦哲伦船队的环球航行路线。该船队于1522年完成环球航行，2022年是其完成环球航行多少周年？', options: ['500周年', '503周年', '530周年', '535周年'], answerIndex: 0, imageUrl: '/images/practice/history-2022-q7-magellan-route.png', explanation: '麦哲伦船队于1522年完成环球航行，2022－1522＝500，因此2022年是完成环球航行500周年。', difficulty: 'EXAM', sourceRef: '2022年河北省中考历史真题（原卷版）第7题环球航行路线图；据真题改编，官方答案为500周年（A）。' },
+      { id: 'history-9a-5-14-q11', knowledgePointId: 'mai zhelun', prompt: '图示为麦哲伦船队的环球航行路线。该船队于1522年完成环球航行，2022年是其完成环球航行多少周年？', options: ['500周年', '503周年', '530周年', '535周年'], answerIndex: 0, imageUrl: '/images/practice/history-2022-q7-magellan-route.webp', explanation: '麦哲伦船队于1522年完成环球航行，2022－1522＝500，因此2022年是完成环球航行500周年。', difficulty: 'EXAM', sourceRef: '2022年河北省中考历史真题（原卷版）第7题环球航行路线图；据真题改编，官方答案为500周年（A）。' },
     ],
   },
   {
@@ -2804,7 +2804,7 @@ export const historyQuestions = [
       { id: '', knowledgePointId: 'jie shu', prompt: '阅读时间卡：1945年5月，德国无条件投降；8月15日，日本宣布接受《波茨坦公告》；9月2日，日本代表在“密苏里号”上签署投降书；9月9日，中国战区举行受降仪式。材料中标志第二次世界大战结束的是哪一事件？', options: ['德国无条件投降', '日本宣布接受《波茨坦公告》', '日本正式签署投降书', '中国战区举行受降仪式'], answerIndex: 2, explanation: '德国投降标志欧洲战事结束。日本在8月15日宣布接受《波茨坦公告》，但正式签署投降书是在9月2日，这一事件标志第二次世界大战结束；9月9日是中国战区受降仪式。', difficulty: 'EXAM', sourceRef: '依据人教版九年级下册第四单元第15课《第二次世界大战》的战争结束时间线编制原创材料题；日期为教材所述史实，非中考真题。' },
       { id: '', knowledgePointId: 'xing zhi', prompt: '材料：《联合国家宣言》签署国表示，各国政府保证运用全部军事或经济资源对抗与之交战的法西斯国家，并承诺不单独同敌国停战或媾和。结合二战中中国、苏联、英国、美国等国家共同对抗法西斯侵略的史实，可以判断第二次世界大战的性质是？', options: ['世界人民反法西斯战争', '争夺殖民地和霸权的帝国主义战争', '只有被侵略国家参加的民族解放战争', '由个别国家之间冲突构成的局部战争'], answerIndex: 0, explanation: '材料体现反法西斯国家联合行动。中国、苏联、英国、美国等不同社会制度和地区的国家共同反对德、意、日法西斯侵略，战争具有全球性，其性质是世界人民反法西斯战争。', difficulty: 'EXAM', sourceRef: '材料依据《联合国家宣言》核心内容改写，结合人教版九年级下册第四单元第15课《第二次世界大战》；原创材料题，非中考真题。' },
       { id: '', knowledgePointId: 'yingxiang', prompt: '阅读战后变化摘记：美苏成为具有强大影响力的国家，西欧各国普遍衰落；亚洲、非洲和拉丁美洲民族解放运动不断发展；联合国成立。依据材料和所学，最合理的认识是？', options: ['二战改变了国际力量对比，并推动民族解放运动发展', '联合国成立意味着美苏之间的对立随之消失', '欧洲国家战后仍独占世界政治经济中心', '殖民地国家的独立主要由原宗主国主动完成'], answerIndex: 0, explanation: '材料呈现美苏影响力上升、西欧衰落以及亚非拉民族解放运动发展，说明二战深刻改变了国际力量对比，并推动殖民体系瓦解。联合国成立并未消除大国矛盾，欧洲传统列强也不再独占国际中心地位；民族解放运动主要由殖民地人民长期斗争推动。', difficulty: 'EXAM', sourceRef: '依据人教版九年级下册第四单元第15课《第二次世界大战》及第五单元战后世界变化内容编制原创材料题；概括材料非史料原文，非中考真题。' },
-      { id: 'history-9b-4-15-q11', knowledgePointId: 'ya er ta', prompt: '下图所示军事行动发生于1945年8月，苏联红军出兵中国东北，对日本关东军发起进攻。这一军事行动的直接依据是（　）。', options: ['华盛顿会议的决定', '《联合国家宣言》', '雅尔塔会议的决定', '《华沙条约》'], answerIndex: 2, imageUrl: '/images/practice/history-2023-q11-soviet-offensive-map.png', explanation: '1945年2月雅尔塔会议上，苏联承诺在欧洲战争结束后参加对日作战。1945年8月苏军按约出兵中国东北，图示行动的直接依据是雅尔塔会议的决定。', difficulty: 'EXAM', sourceRef: '2023年河北省中考历史真题（原卷版/解析版）第11题苏军出兵东北示意图；据真题改编，官方答案C。' },
+      { id: 'history-9b-4-15-q11', knowledgePointId: 'ya er ta', prompt: '下图所示军事行动发生于1945年8月，苏联红军出兵中国东北，对日本关东军发起进攻。这一军事行动的直接依据是（　）。', options: ['华盛顿会议的决定', '《联合国家宣言》', '雅尔塔会议的决定', '《华沙条约》'], answerIndex: 2, imageUrl: '/images/practice/history-2023-q11-soviet-offensive-map.webp', explanation: '1945年2月雅尔塔会议上，苏联承诺在欧洲战争结束后参加对日作战。1945年8月苏军按约出兵中国东北，图示行动的直接依据是雅尔塔会议的决定。', difficulty: 'EXAM', sourceRef: '2023年河北省中考历史真题（原卷版/解析版）第11题苏军出兵东北示意图；据真题改编，官方答案C。' },
     ],
   },
   {
@@ -3140,7 +3140,7 @@ export const historyQuestions = [
         prompt: '观察下图年画中的题材和题词，判断它最符合下列哪个历史阶段（ ）。',
         options: ['北伐战争时期', '局部抗战时期', '全民族抗战时期', '人民解放战争时期'],
         answerIndex: 2,
-        imageUrl: '/images/practice/history-2022-q4-anti-japanese-new-year-print.png',
+        imageUrl: '/images/practice/history-2022-q4-anti-japanese-new-year-print.webp',
         explanation: '年画强调军民合作共同抗战，反映抗日民族统一战线推动下全民族抗战的历史阶段；北伐战争、局部抗战和人民解放战争的主题均不符合图中文字。',
         difficulty: 'EXAM',
         sourceRef: '2022年河北省中考历史真题（解析版）第4题年画；图中文字据官方解析转录并附于图下，按真题改编，官方答案C。',

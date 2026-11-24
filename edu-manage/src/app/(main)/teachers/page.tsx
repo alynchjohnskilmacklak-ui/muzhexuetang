@@ -1,17 +1,21 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Row, Col, Input, Select, Button, Space, Empty, Spin, Card, Pagination, Form, message } from 'antd'
-import { PlusOutlined, SearchOutlined, TeamOutlined, TrophyOutlined, ClockCircleOutlined, CalendarOutlined, CrownOutlined, IdcardOutlined } from '@ant-design/icons'
+import { useState, useEffect, useCallback, type ComponentProps } from 'react'
+import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { Alert, Input, Select, Segmented, Button, Empty, Spin, Card, Pagination, Form, message } from 'antd'
+import { AuditOutlined, CalendarOutlined, DollarOutlined, HolderOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { useRouter } from 'next/navigation'
 import { BrandModal } from '@/components/Common/BrandModal'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { TeacherCard } from './_components/TeacherCard'
 import { TeacherForm } from './_components/TeacherForm'
 import { DeleteConfirmModal } from './_components/DeleteConfirmModal'
-import { useIsMobile } from '@/hooks/useIsMobile'
 import { ALL_SUBJECTS } from '@/constants/subjects'
 
-const PAGE_SIZE = 24
+const PAGE_SIZE = 100
+const TEACHER_ORDER_KEY = 'muzhe-teacher-order-v1'
 
 type Teacher = {
   id: string; name: string; phone: string; employmentType: string; status: string
@@ -27,10 +31,54 @@ type TermScope = {
   status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED'
 }
 
+function readTeacherOrder() {
+  try {
+    const value = localStorage.getItem(TEACHER_ORDER_KEY)
+    const parsed = value ? JSON.parse(value) : []
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function SortableTeacherCard({ teacher, ...props }: ComponentProps<typeof TeacherCard>) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: teacher.id })
+  const dragHandle = (
+    <button
+      ref={setActivatorNodeRef}
+      type="button"
+      className="teacher-directory-drag-handle"
+      aria-label={`按住拖动${teacher.name}调整顺序`}
+      title="按住拖动调整顺序"
+      onClick={(event) => event.stopPropagation()}
+      {...attributes}
+      {...listeners}
+    >
+      <HolderOutlined aria-hidden="true" />
+    </button>
+  )
+
+  return (
+    <div
+      ref={setNodeRef}
+      className="teacher-directory-sortable-item"
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 2 : undefined,
+        position: 'relative',
+      }}
+    >
+      <TeacherCard teacher={teacher} {...props} dragHandle={dragHandle} />
+    </div>
+  )
+}
+
 export default function TeachersPage() {
-  const isMobile = useIsMobile() ?? false
+  const router = useRouter()
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState<string | undefined>()
   const [filterSubject, setFilterSubject] = useState<string | undefined>()
@@ -39,7 +87,6 @@ export default function TeachersPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editData, setEditData] = useState<Record<string, unknown> | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
-  const [stats, setStats] = useState({ total: 0, fullTime: 0, partTime: 0, avgRating: 0 })
   const [term, setTerm] = useState<TermScope | null>(null)
   const [messageTarget, setMessageTarget] = useState<{ teacher: Record<string, unknown>; type: 'remind' | 'praise' } | null>(null)
   const [messageTitle, setMessageTitle] = useState('')
@@ -49,6 +96,7 @@ export default function TeachersPage() {
 
   const fetchTeachers = useCallback(async () => {
     setLoading(true)
+    setLoadError('')
     const params = new URLSearchParams()
     if (filterType) params.set('type', filterType)
     if (search) params.set('q', search)
@@ -56,19 +104,21 @@ export default function TeachersPage() {
     params.set('page', String(page))
     params.set('limit', String(PAGE_SIZE))
     try {
-      const [tRes, sRes] = await Promise.all([
-        fetch(`/api/teachers?${params}`).then(r => { if (!r.ok) throw new Error('教师列表加载失败'); return r.json() }),
-        fetch('/api/teachers/stats').then(r => { if (!r.ok) throw new Error('教师统计加载失败'); return r.json() }),
-      ])
+      const tRes = await fetch(`/api/teachers?${params}`).then(r => { if (!r.ok) throw new Error('教师列表加载失败'); return r.json() })
       if (tRes.total > 0 && page > Math.ceil(tRes.total / PAGE_SIZE)) {
         setPage(Math.ceil(tRes.total / PAGE_SIZE))
         return
       }
-      setTeachers(tRes.teachers || [])
+      const savedOrder = readTeacherOrder()
+      const savedRank = new Map<string, number>(savedOrder.map((id, index) => [id, index]))
+      const loadedTeachers = [...(tRes.teachers || [])] as Teacher[]
+      loadedTeachers.sort((a, b) => (savedRank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (savedRank.get(b.id) ?? Number.MAX_SAFE_INTEGER))
+      setTeachers(loadedTeachers)
       setTotal(tRes.total || 0)
       setTerm(tRes.term || null)
-      setStats(sRes)
-    } catch { message.error('教师档案加载失败，请重试') } finally { setLoading(false) }
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : '教师档案加载失败，请检查网络后重试。')
+    } finally { setLoading(false) }
   }, [search, filterType, filterSubject, page])
 
   const fetchMessages = useCallback(async () => {
@@ -88,109 +138,107 @@ export default function TeachersPage() {
 
   useEffect(() => { fetchTeachers() }, [fetchTeachers])
 
-  const actions = !isMobile ? (
-    <Space>
-      <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }}
-        style={{ background: 'linear-gradient(135deg,#0E5E4E,#0B4B40)', borderColor: '#0E5E4E', boxShadow: '0 3px 10px rgba(14,94,78,.25)' }}>添加教师</Button>
-    </Space>
-  ) : null
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
-  const statCards = [
-    { key: 'total', title: '在职教师档案', value: String(stats.total), icon: <IdcardOutlined />, color: '#C9A45C', main: true },
-    { key: 'type', title: '全职 / 兼职', value: `${stats.fullTime} / ${stats.partTime}`, icon: <ClockCircleOutlined />, color: '#0E5E4E', main: false },
-    { key: 'rating', title: '平均满意度', value: String(stats.avgRating), icon: <TrophyOutlined />, color: '#B98A2F', main: false },
-    { key: 'todo', title: '待排课', value: '0', icon: <CalendarOutlined />, color: '#185FA5', main: false },
-  ]
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return
+    const oldIndex = teachers.findIndex((teacher) => teacher.id === active.id)
+    const newIndex = teachers.findIndex((teacher) => teacher.id === over.id)
+    if (oldIndex < 0 || newIndex < 0) return
+
+    const reordered = arrayMove(teachers, oldIndex, newIndex)
+    setTeachers(reordered)
+
+    try {
+      const savedOrder = readTeacherOrder()
+      const visibleIds = new Set(teachers.map((teacher) => teacher.id))
+      const firstVisible = savedOrder.findIndex((id) => visibleIds.has(id))
+      const hiddenBefore = firstVisible < 0 ? [] : savedOrder.slice(0, firstVisible).filter((id) => !visibleIds.has(id))
+      const hiddenAfter = (firstVisible < 0 ? savedOrder : savedOrder.slice(firstVisible)).filter((id) => !visibleIds.has(id))
+      const nextOrder = [...hiddenBefore, ...reordered.map((teacher) => teacher.id), ...hiddenAfter]
+      localStorage.setItem(TEACHER_ORDER_KEY, JSON.stringify(nextOrder))
+      message.success('教师顺序已保存到当前浏览器')
+    } catch {
+      message.warning('顺序已调整，但当前浏览器无法保存')
+    }
+  }
 
   return (
-    <PageLayout title="教师管理" subtitle="管理教师档案、排课与考核" actions={actions}>
-      {/* 品牌概览 Hero 区 */}
-      <div style={{
-        borderRadius: 18, padding: isMobile ? 18 : 24, marginBottom: 16,
-        background: 'linear-gradient(135deg,#123C35 0%,#0E5E4E 55%,#0B4B40 100%)',
-        boxShadow: '0 6px 22px rgba(14,94,78,.22)',
-        color: '#F7F3E8', position: 'relative', overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', right: -30, top: -40, fontSize: 160, opacity: .07, transform: 'rotate(-12deg)' }}><TeamOutlined /></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <CrownOutlined style={{ color: '#C9A45C', fontSize: 15 }} />
-          <span style={{ fontSize: isMobile ? 12 : 13, letterSpacing: 2, color: 'rgba(242,227,182,.9)' }}>牧哲学堂 · 师资团队</span>
-        </div>
-        <div style={{ fontSize: isMobile ? 26 : 34, fontWeight: 800, lineHeight: 1.2 }}>
-          {stats.total} 位教师 <span style={{ fontSize: isMobile ? 15 : 18, fontWeight: 500, color: 'rgba(247,243,232,.75)' }}>在岗护航每一节课</span>
-        </div>
-        <div style={{ marginTop: 8, fontSize: isMobile ? 12 : 13, color: 'rgba(247,243,232,.72)', lineHeight: 1.6 }}>
-          教师档案为全局资料，不会因换期开班而重复创建；卡片中的学员数、课次与授课数据跟随当前运营批次。
-        </div>
-        {term && (
-          <span style={{ display: 'inline-block', marginTop: 10, padding: '4px 12px', borderRadius: 999, background: 'rgba(201,164,92,.16)', border: '1px solid rgba(201,164,92,.35)', color: '#F2E3B6', fontSize: 11.5, fontWeight: 600 }}>
-            当前数据范围：{term.name}
-          </span>
-        )}
-      </div>
+    <PageLayout
+      title="教师档案"
+      subtitle="师资资质 · 任教科目 · 带教课时 · 沟通操作与行为日志"
+    >
+      {loadError && (
+        <Alert
+          type="error"
+          showIcon
+          message="教师档案暂时无法加载"
+          description={loadError}
+          action={<Button size="small" onClick={fetchTeachers}>重试</Button>}
+          style={{ marginBottom: 16, borderRadius: 10 }}
+        />
+      )}
 
-      {/* 品牌统计卡 */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(4, minmax(0,1fr))', gap: 10, marginBottom: 20 }}>
-        {statCards.map(item => item.main ? (
-          <div key={item.key} style={{
-            gridColumn: isMobile ? 'span 2' : undefined,
-            borderRadius: 16, padding: '16px 18px',
-            background: 'linear-gradient(135deg,#FAF8F4,#F3EEE3)', border: '1px solid #E7DFCE',
-            boxShadow: '0 2px 10px rgba(23,47,41,.06)',
-            display: 'flex', alignItems: 'center', gap: 14,
-          }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#C9A45C,#B98A2F)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, boxShadow: '0 3px 10px rgba(185,138,47,.3)' }}>{item.icon}</div>
-            <div>
-              <div style={{ fontSize: 11.5, color: '#8A6B2F', fontWeight: 600, marginBottom: 2 }}>{item.title}</div>
-              <div style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: '#0B4B40', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{item.value}</div>
-            </div>
-          </div>
-        ) : (
-          <div key={item.key} style={{ borderRadius: 16, padding: '14px 16px', background: '#fff', border: '1px solid #EDE9E1', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
-              <span style={{ width: 26, height: 26, borderRadius: 8, background: item.color + '14', color: item.color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>{item.icon}</span>
-              <span style={{ fontSize: 11, color: '#667085', fontWeight: 600 }}>{item.title}</span>
-            </div>
-            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: '#17352F', fontVariantNumeric: 'tabular-nums' }}>{item.value}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
-        <Input placeholder="搜索姓名、手机、科目…" prefix={<SearchOutlined style={{ color: '#98A2B3' }} />}
-          value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} style={{ width: isMobile ? '100%' : 260, borderRadius: 999 }} allowClear />
-        <Select placeholder="全部类型" value={filterType} onChange={value => { setFilterType(value); setPage(1) }} allowClear style={{ width: isMobile ? '100%' : 120 }}
-          options={[{ label: '全职', value: 'FULL_TIME' }, { label: '兼职', value: 'PART_TIME' }, { label: '离职', value: 'RESIGNED' }]} />
-        <Select placeholder="按科目筛选" value={filterSubject} onChange={value => { setFilterSubject(value); setPage(1) }} allowClear style={{ width: isMobile ? '100%' : 120 }}
+      <section className="teacher-directory-shell">
+        <div className="teacher-directory-toolbar">
+          <div className="teacher-directory-search-filters">
+            <Input placeholder="搜索姓名、手机或科目" prefix={<SearchOutlined />}
+              value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} allowClear />
+            <Segmented
+              aria-label="按任职类型筛选"
+              size="large"
+              value={filterType || 'ALL'}
+              onChange={value => { setFilterType(value === 'ALL' ? undefined : String(value)); setPage(1) }}
+              options={[
+                { label: '全部', value: 'ALL' },
+                { label: '全职', value: 'FULL_TIME' },
+                { label: '兼职', value: 'PART_TIME' },
+                { label: '离职', value: 'RESIGNED' },
+              ]}
+            />
+            <Select placeholder="全部科目" value={filterSubject} onChange={value => { setFilterSubject(value); setPage(1) }} allowClear
           options={ALL_SUBJECTS.map(subject => ({ label: subject, value: subject }))} />
-      </div>
+          </div>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }}>添加教师</Button>
+        </div>
+        <div className="teacher-directory-summary">
+          <span>共 {total} 位教师</span>
+          {term && <span>数据范围：{term.name}</span>}
+          <span className="teacher-directory-sort-note">按住卡片右上角拖动排序，顺序保存在本浏览器</span>
+        </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>
-      ) : teachers.length === 0 ? (
-        <Card bordered style={{ borderRadius: 12, textAlign: 'center', padding: 60 }}>
+        <div className="teacher-directory-loading"><Spin size="large" /></div>
+      ) : loadError ? null : teachers.length === 0 ? (
+        <Card bordered className="teacher-directory-empty">
           <Empty description={search || filterType || filterSubject ? '没有符合筛选条件的教师' : '暂无教师数据'}>
             {!search && !filterType && !filterSubject &&
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>添加第一位教师</Button>}
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }}>添加第一位教师</Button>}
           </Empty>
         </Card>
       ) : (
         <>
-          <Row gutter={[16, 16]}>
-            {teachers.map(t => (
-              <Col key={t.id} xs={24} lg={12}>
-                <TeacherCard teacher={t}
-                  onEdit={(d) => { setEditData(d); setFormOpen(true) }}
-                  onDelete={(d) => setDeleteTarget({ id: d.id as string, name: d.name as string })}
-                  onMessage={(teacher, type) => { setMessageTarget({ teacher, type }); setMessageTitle(''); setMessageContent('') }}
-                  unreadCount={unreadMap[t.id] || 0} />
-              </Col>
-            ))}
-          </Row>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={teachers.map((teacher) => teacher.id)} strategy={rectSortingStrategy}>
+              <div className="teacher-directory-grid">
+                {teachers.map((teacher) => (
+                  <SortableTeacherCard key={teacher.id} teacher={teacher}
+                    onEdit={(record) => { setEditData(record); setFormOpen(true) }}
+                    onDelete={(record) => setDeleteTarget({ id: record.id as string, name: record.name as string })}
+                    onMessage={(targetTeacher, type) => { setMessageTarget({ teacher: targetTeacher, type }); setMessageTitle(''); setMessageContent('') }}
+                    unreadCount={unreadMap[teacher.id] || 0} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
           {total > PAGE_SIZE && <Pagination current={page} pageSize={PAGE_SIZE} total={total} showSizeChanger={false}
-            onChange={setPage} style={{ marginTop: 20, textAlign: isMobile ? 'center' : 'right' }} />}
+            onChange={setPage} className="teacher-directory-pagination" />}
         </>
       )}
+      </section>
 
       <TeacherForm open={formOpen} onClose={() => { setFormOpen(false); setEditData(null); fetchTeachers() }} initialData={editData} mode={editData ? 'edit' : 'create'} />
       <DeleteConfirmModal open={!!deleteTarget} teacherId={deleteTarget?.id || null} teacherName={deleteTarget?.name || ''} onClose={() => setDeleteTarget(null)} onDeleted={fetchTeachers} />

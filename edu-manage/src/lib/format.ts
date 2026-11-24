@@ -1,4 +1,4 @@
-export function formatHours(value: number | string | null | undefined, digits = 1): string {
+export function formatHours(value: number | string | null | undefined, digits = 2): string {
   const n = Number(value ?? 0)
   if (!Number.isFinite(n)) return '0'
 
@@ -11,7 +11,7 @@ export function formatHours(value: number | string | null | undefined, digits = 
 export function formatHourPair(
   used: number | string | null | undefined,
   total: number | string | null | undefined,
-  digits = 1
+  digits = 2
 ): string {
   return `${formatHours(used, digits)}/${formatHours(total, digits)}`
 }

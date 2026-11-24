@@ -1,0 +1,953 @@
+/* ==========================================================================
+   Teacher Classroom Questioning & Interaction Statistics
+   Oriental Academy (牧哲学堂) - High Craft Theme
+   ========================================================================== */
+
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 4px 0 48px;
+}
+
+/* --------------------------------------------------------------------------
+   1. 顶部控制栏与筛选胶囊 (Toolbar & Date Pills)
+   -------------------------------------------------------------------------- */
+.filterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: linear-gradient(175deg, #fffdf9 0%, #faf6ee 100%);
+  border: 1px solid rgba(201, 164, 92, 0.26);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(58, 50, 39, 0.03);
+}
+
+.filterGroupLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.datePillsGroup {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background: rgba(20, 87, 77, 0.07);
+  border: 1px solid rgba(20, 87, 77, 0.12);
+  border-radius: 999px;
+  gap: 2px;
+}
+
+.datePill {
+  border: none;
+  background: transparent;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a4e3a;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.datePill:hover:not(.datePillActive) {
+  color: #14574d;
+  background: rgba(20, 87, 77, 0.05);
+}
+
+.datePillActive {
+  background: linear-gradient(135deg, #186358 0%, #10483f 100%);
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.25);
+  font-weight: 700;
+}
+
+.filterGroupRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   2. 全局 KPI 宏观罗盘 4 宫格 (精简紧凑版)
+   -------------------------------------------------------------------------- */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.kpiCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px;
+  background: linear-gradient(175deg, #fffdfa 0%, #faf6ee 100%);
+  border: 1px solid rgba(201, 164, 92, 0.28);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(58, 50, 39, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.kpiCard:hover {
+  transform: translateY(-1px);
+  border-color: rgba(20, 87, 77, 0.35);
+  box-shadow: 0 4px 12px rgba(20, 87, 77, 0.06);
+}
+
+.kpiHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.kpiTitle {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #756a58;
+}
+
+.kpiIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.kpiIconGreen {
+  background: rgba(20, 87, 77, 0.08);
+  color: #14574d;
+}
+
+.kpiIconGold {
+  background: rgba(201, 164, 92, 0.15);
+  color: #8a6517;
+}
+
+.kpiIconOrange {
+  background: rgba(194, 87, 44, 0.12);
+  color: #c2572c;
+}
+
+.kpiIconBlue {
+  background: rgba(29, 90, 156, 0.12);
+  color: #1d5a9c;
+}
+
+.kpiValueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.kpiValue {
+  font-size: 20px;
+  font-weight: 850;
+  color: #14574d;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.kpiUnit {
+  font-size: 11px;
+  font-weight: 600;
+  color: #756a58;
+}
+
+.kpiSub {
+  font-size: 10.5px;
+  color: #756a58;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kpiSub strong {
+  color: #1a1201;
+}
+
+/* --------------------------------------------------------------------------
+   3. 教师排课分类切换胶囊栏 (有课教师 vs 暂无排课)
+   -------------------------------------------------------------------------- */
+.teacherClassFilterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 4px 2px 2px;
+}
+
+.classToggleGroup {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background: rgba(20, 87, 77, 0.07);
+  border: 1px solid rgba(20, 87, 77, 0.14);
+  border-radius: 999px;
+  gap: 3px;
+}
+
+.classToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  padding: 4px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a4e3a;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.classToggleBtn:hover:not(.classToggleBtnActive) {
+  color: #14574d;
+  background: rgba(20, 87, 77, 0.05);
+}
+
+.classToggleBtnActive {
+  background: linear-gradient(135deg, #186358 0%, #10483f 100%);
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.22);
+  font-weight: 700;
+}
+
+.classCountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.08);
+  color: inherit;
+}
+
+.classToggleBtnActive .classCountBadge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.classFilterHint {
+  font-size: 11.5px;
+  color: #8a7d6b;
+}
+
+/* --------------------------------------------------------------------------
+   4. 教师列表与精简卡片 (Teacher Cards & Accordion)
+   -------------------------------------------------------------------------- */
+.teacherList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.teacherCard {
+  position: relative;
+  background: linear-gradient(175deg, #fffdfa 0%, #faf6ee 100%);
+  border: 1px solid rgba(201, 164, 92, 0.26);
+  border-radius: 13px;
+  box-shadow: 0 1px 6px rgba(58, 50, 39, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+}
+
+.teacherCard:hover {
+  border-color: rgba(20, 87, 77, 0.35);
+  box-shadow: 0 3px 12px rgba(20, 87, 77, 0.05);
+}
+
+.teacherCardExpanded {
+  border-color: rgba(20, 87, 77, 0.4);
+  box-shadow: 0 5px 16px rgba(20, 87, 77, 0.07);
+}
+
+/* 卡片主栏 (折叠态 - 精简紧凑行) */
+.cardSummaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  min-height: 50px;
+}
+
+.teacherProfile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.avatarWrapper {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teacherAvatar {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 1.5px solid rgba(201, 164, 92, 0.45) !important;
+  flex-shrink: 0 !important;
+  display: block;
+}
+
+.teacherInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.teacherNameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.teacherName {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: #1a1201;
+  line-height: 1.2;
+}
+
+.subjectTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  background: rgba(20, 87, 77, 0.08);
+  color: #14574d;
+  border: 1px solid rgba(20, 87, 77, 0.18);
+  white-space: nowrap;
+}
+
+.tierTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(201, 164, 92, 0.15);
+  color: #8a6517;
+  border: 1px solid rgba(201, 164, 92, 0.32);
+  white-space: nowrap;
+}
+
+.statusBadgeHasClass {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(20, 87, 77, 0.09);
+  color: #14574d;
+  border: 1px solid rgba(20, 87, 77, 0.2);
+  white-space: nowrap;
+}
+
+.statusBadgeIdle {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(140, 130, 115, 0.1);
+  color: #756a58;
+  border: 1px solid rgba(140, 130, 115, 0.22);
+  white-space: nowrap;
+}
+
+/* 中间紧凑指标胶囊条 */
+.metricsCluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 3px 12px;
+  background: rgba(20, 87, 77, 0.04);
+  border: 1px solid rgba(20, 87, 77, 0.1);
+  border-radius: 999px;
+  flex-wrap: wrap;
+}
+
+.metricItem {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.metricItemLabel {
+  font-size: 11px;
+  color: #756a58;
+  font-weight: 500;
+}
+
+.metricItemValue {
+  font-size: 14px;
+  font-weight: 800;
+  color: #14574d;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.metricItemUnit {
+  font-size: 10px;
+  font-weight: 600;
+  color: #756a58;
+}
+
+.metricDivider {
+  width: 1px;
+  height: 11px;
+  background: rgba(201, 164, 92, 0.35);
+  flex-shrink: 0;
+}
+
+/* 右侧常问学员轻量预览与展开按钮 */
+.actionSide {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.topStudentsPills {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.topStudentPrefix {
+  font-size: 10.5px;
+  color: #8a7d6b;
+  font-weight: 500;
+}
+
+.topStudentChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fbf7ee 0%, #f7efdc 100%);
+  border: 1px solid rgba(201, 164, 92, 0.3);
+  font-size: 10.5px;
+  color: #634b17;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.topStudentCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #14574d;
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+.expandToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf8 0%, #f5efe3 100%);
+  border: 1px solid rgba(20, 87, 77, 0.22);
+  color: #14574d;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+
+.expandToggleBtn:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #ece2d2 100%);
+  border-color: #14574d;
+}
+
+.expandArrow {
+  font-size: 10px;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.expandArrowRotated {
+  transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   4. 展开区域 (Details Section: Dual Tabs)
+   -------------------------------------------------------------------------- */
+.expandedContainer {
+  padding: 16px 18px 20px;
+  border-top: 1px solid rgba(201, 164, 92, 0.18);
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.expandedTabNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.subTabsPills {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background: rgba(20, 87, 77, 0.07);
+  border: 1px solid rgba(20, 87, 77, 0.12);
+  border-radius: 999px;
+  gap: 2px;
+}
+
+.subTabBtn {
+  border: none;
+  background: transparent;
+  padding: 4px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a4e3a;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.subTabBtn:hover:not(.subTabBtnActive) {
+  color: #14574d;
+  background: rgba(20, 87, 77, 0.05);
+}
+
+.subTabBtnActive {
+  background: linear-gradient(135deg, #186358 0%, #10483f 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   5. 学员提问频次排行榜表格 (Student Ranking Table)
+   -------------------------------------------------------------------------- */
+.rankingTableWrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 164, 92, 0.24);
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(58, 50, 39, 0.02);
+}
+
+.rankingTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  text-align: left;
+}
+
+.rankingTable th {
+  padding: 10px 14px;
+  background: #faf7f0;
+  border-bottom: 1px solid rgba(201, 164, 92, 0.2);
+  color: #756a58;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.rankingTable td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(201, 164, 92, 0.12);
+  color: #1a1201;
+  vertical-align: middle;
+}
+
+.rankingTable tr:last-child td {
+  border-bottom: none;
+}
+
+.rankingTable tr:hover td {
+  background: #fdfbf7;
+}
+
+.rankBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #756a58;
+  background: rgba(20, 87, 77, 0.06);
+}
+
+.rankBadgeTop1 {
+  background: linear-gradient(135deg, #ffd700 0%, #f5b041 100%);
+  color: #5c3c00;
+}
+
+.rankBadgeTop2 {
+  background: linear-gradient(135deg, #e0e0e0 0%, #b0bec5 100%);
+  color: #37474f;
+}
+
+.rankBadgeTop3 {
+  background: linear-gradient(135deg, #f0b27a 0%, #d35400 100%);
+  color: #ffffff;
+}
+
+.studentCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.studentName {
+  font-weight: 700;
+  color: #1a1201;
+}
+
+.gradeChip {
+  display: inline-flex;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(20, 87, 77, 0.07);
+  color: #14574d;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.pickCountBarWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.pickCountPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #186358 0%, #10483f 100%);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.pickProgressBar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(20, 87, 77, 0.08);
+  overflow: hidden;
+}
+
+.pickProgressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #26a69a 0%, #14574d 100%);
+  transition: width 0.3s ease;
+}
+
+.resultBreakdownRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.resultTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tagCorrect {
+  background: #edf6f1;
+  color: #2e7d5b;
+  border: 1px solid #cfe7db;
+}
+
+.tagPartial {
+  background: #fdf7ec;
+  color: #b7791f;
+  border: 1px solid #e6d3ac;
+}
+
+.tagNeedsWork {
+  background: #fdf3f0;
+  color: #c0392b;
+  border: 1px solid #e8c4bb;
+}
+
+.tagNoAnswer {
+  background: #f5f5f5;
+  color: #756a58;
+  border: 1px solid #e0e0e0;
+}
+
+/* --------------------------------------------------------------------------
+   6. 提问流水明细记录 (Detailed Logs Feed)
+   -------------------------------------------------------------------------- */
+.logsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  background: linear-gradient(155deg, #fffdf8 0%, #faf6ef 100%);
+  border: 1px solid rgba(201, 164, 92, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(58, 50, 39, 0.02);
+  transition: all 0.15s ease;
+}
+
+.logItem:hover {
+  background: #ffffff;
+  border-color: rgba(20, 87, 77, 0.3);
+  box-shadow: 0 3px 10px rgba(20, 87, 77, 0.05);
+}
+
+.logLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.logHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.logLessonInfo {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #756a58;
+}
+
+.logSourceTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sourceRandom {
+  background: rgba(20, 87, 77, 0.08);
+  color: #14574d;
+  border: 1px solid rgba(20, 87, 77, 0.16);
+}
+
+.sourceManual {
+  background: rgba(201, 164, 92, 0.12);
+  color: #8a6517;
+  border: 1px solid rgba(201, 164, 92, 0.25);
+}
+
+.logStudentName {
+  font-size: 13.5px;
+  font-weight: 750;
+  color: #1a1201;
+}
+
+.logQuestionLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a4e3a;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.logCommentText {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #5a4e3a;
+  margin-top: 2px;
+}
+
+.logRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.logTimeText {
+  font-size: 11px;
+  color: #8a7d6b;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   7. 响应式适配 (Responsive)
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .cardSummaryRow {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .teacherProfile {
+    flex: 1 1 auto;
+    min-width: 140px;
+  }
+
+  .metricsCluster {
+    padding: 2px 8px;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .actionSide {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .kpiCard {
+    padding: 8px 10px;
+  }
+
+  .kpiValue {
+    font-size: 17px;
+  }
+
+  .kpiSub {
+    font-size: 10px;
+  }
+
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .teacherClassFilterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .classToggleGroup {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .classToggleBtn {
+    flex: 1;
+    justify-content: center;
+    padding: 4px 6px;
+    font-size: 11.5px;
+  }
+
+  .metricsCluster {
+    width: 100%;
+    justify-content: space-around;
+    order: 3;
+    margin-top: 4px;
+    padding: 3px 6px;
+  }
+
+  .actionSide {
+    order: 2;
+  }
+}

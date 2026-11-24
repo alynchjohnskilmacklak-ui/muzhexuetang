@@ -129,8 +129,8 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
         phone: student.phone,
         status: student.status,
         courseNames,
-        taughtHours: Number(taughtHours.toFixed(1)),
-        remainHours: Number(remainHours.toFixed(1)),
+        taughtHours: Number(taughtHours.toFixed(2)),
+        remainHours: Number(remainHours.toFixed(2)),
         attendanceRate,
       }}
       feedbacks={feedbacks.map((f) => ({

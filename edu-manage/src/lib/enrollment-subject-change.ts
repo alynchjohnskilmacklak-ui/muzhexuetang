@@ -8,6 +8,21 @@ export function chinaClock(now: Date) {
   return { day: `${value('year')}-${value('month')}-${value('day')}`, time: `${value('hour')}:${value('minute')}` }
 }
 
+export function resolveLessonSubjectForEnrollment(
+  lesson: { subject: string | null; teacherId: string | null },
+  group: {
+    teacherId: string | null
+    courseSubject: string | null
+    teacherAssignments: Array<{ teacherId: string; subject: string | null }>
+  },
+) {
+  return lesson.subject
+    || group.teacherAssignments.find((assignment) => assignment.teacherId === lesson.teacherId)?.subject
+    || group.teacherAssignments.find((assignment) => assignment.teacherId === group.teacherId)?.subject
+    || (group.teacherAssignments.length === 1 ? group.teacherAssignments[0].subject : null)
+    || group.courseSubject
+}
+
 /** 允许修改今天（含已过开课时间）及未来、且没有该生考勤/反馈记录的课次名单；历史课次名单保持不变。 */
 export function isEditableSubjectRosterLesson(
   lesson: { lessonDate: Date; startTime: string; hasAttendance: boolean; hasFeedback: boolean },

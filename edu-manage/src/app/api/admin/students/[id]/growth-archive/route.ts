@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { requireAdminUser, AuthError } from '@/lib/auth/guards'
 import { getStudentGrowthArchive, StudentGrowthAccessError } from '@/lib/student-growth/archive'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +21,19 @@ export const GET = apiHandler(async (
     const actor = await requireAdminUser()
     const { id } = await params
     const searchParams = request.nextUrl.searchParams
+    const includeAllHistory = searchParams.get('scope') === 'all'
+    const requestedTermId = searchParams.get('termId')?.trim() || null
+    const selectedTerm = includeAllHistory
+      ? null
+      : await resolveAdminTermScope(actor.prisma, actor.division, request)
+    if (!includeAllHistory && requestedTermId && !selectedTerm) {
+      return NextResponse.json({ error: '所选批次不存在或不属于当前学部' }, { status: 404 })
+    }
+    if (!includeAllHistory && !selectedTerm) {
+      return NextResponse.json({ error: '当前没有可查看的运营批次' }, { status: 409 })
+    }
     const archive = await getStudentGrowthArchive(actor.prisma, actor, id, {
+      ...(selectedTerm ? { termId: selectedTerm.id } : {}),
       startDate: parseDate(searchParams.get('startDate')),
       endDate: parseDate(searchParams.get('endDate'), true),
     })

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
@@ -10,9 +11,52 @@ export const dynamic = 'force-dynamic'
 
 async function requireAdmin() {
   const session = await auth()
-  const user = session?.user as { id?: string; role?: string; name?: string | null } | undefined
+  const user = session?.user as { id?: string; role?: string; name?: string | null; division?: string } | undefined
   if (!user?.id || user.role !== 'admin') return null
-  return { id: user.id, role: user.role, name: user.name || null }
+  return {
+    id: user.id,
+    role: user.role,
+    name: user.name || null,
+    division: user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR',
+  }
+}
+
+function divisionStudentWhere(division: string): Prisma.StudentWhereInput {
+  return {
+    ...visibleStudentWhere,
+    division,
+    enrollments: {
+      some: {
+        ...activeEnrollmentWhere,
+        group: { ...visibleClassGroupWhere, division },
+      },
+    },
+  }
+}
+
+function divisionPostWhere(division: string): Prisma.PerformancePostWhereInput {
+  return {
+    deletedAt: null,
+    teacher: { status: { not: 'RESIGNED' } },
+    student: divisionStudentWhere(division),
+    OR: [
+      { classLessonId: null },
+      { classLesson: { division, group: { ...visibleClassGroupWhere, division } } },
+    ],
+  }
+}
+
+function divisionPaperWhere(division: string): Prisma.ExamPaperWhereInput {
+  return {
+    status: 'PUBLISHED',
+    deletedAt: null,
+    teacher: { status: { not: 'RESIGNED' } },
+    student: divisionStudentWhere(division),
+    OR: [
+      { classLessonId: null },
+      { classLesson: { division, group: { ...visibleClassGroupWhere, division } } },
+    ],
+  }
 }
 
 function roleLabel(role?: string | null) {
@@ -29,11 +73,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const { searchParams } = req.nextUrl
   const source = searchParams.get('source') || 'all'
+  const notificationId = (searchParams.get('notificationId') || '').trim()
   const unreadOnly = searchParams.get('unread') === '1'
   const q = (searchParams.get('q') || '').trim()
   const limit = Math.min(100, Math.max(10, Number(searchParams.get('limit') || 50)))
 
-  const postComments = source === 'paper'
+  const postComments = notificationId || source === 'paper' || source === 'feedback'
     ? []
     : await prisma.postComment.findMany({
         where: {
@@ -45,15 +90,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
               { post: { teacher: { name: { contains: q } } } },
             ],
           } : {}),
-          post: {
-            deletedAt: null,
-            teacher: { status: { not: 'RESIGNED' } },
-            student: { ...visibleStudentWhere, enrollments: { some: activeEnrollmentWhere } },
-            OR: [
-              { classLessonId: null },
-              { classLesson: { group: visibleClassGroupWhere } },
-            ],
-          },
+          post: divisionPostWhere(user.division),
         },
         include: {
           author: { select: { id: true, name: true, role: true } },
@@ -70,7 +107,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         take: limit,
       })
 
-  const paperComments = source === 'post'
+  const paperComments = notificationId || source === 'post' || source === 'feedback'
     ? []
     : await prisma.paperComment.findMany({
         where: {
@@ -83,15 +120,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
               { paper: { teacher: { name: { contains: q } } } },
             ],
           } : {}),
-          paper: {
-            status: 'PUBLISHED',
-            teacher: { status: { not: 'RESIGNED' } },
-            student: { ...visibleStudentWhere, enrollments: { some: activeEnrollmentWhere } },
-            OR: [
-              { classLessonId: null },
-              { classLesson: { group: visibleClassGroupWhere } },
-            ],
-          },
+          paper: divisionPaperWhere(user.division),
         },
         include: {
           author: { select: { id: true, name: true, role: true } },
@@ -113,7 +142,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ? []
     : await prisma.notification.findMany({
         where: {
+          ...(notificationId ? { id: notificationId } : {}),
+          user: { division: user.division },
+          AND: [{ OR: [{ studentId: null }, { student: { division: user.division } }] }],
           status: 'ACTIVE',
+          deletedAt: null,
           ...(source === 'feedback' ? { relatedType: 'CLASSROOM_FEEDBACK' } : {}),
           ...(unreadOnly ? { read: false } : {}),
           ...(q ? {
@@ -124,7 +157,17 @@ export const GET = apiHandler(async (req: NextRequest) => {
             ],
           } : {}),
         },
-        include: {
+        select: {
+          id: true,
+          userId: true,
+          title: true,
+          content: true,
+          relatedType: true,
+          relatedId: true,
+          href: true,
+          link: true,
+          read: true,
+          createdAt: true,
           user: { select: { id: true, name: true, role: true } },
           sender: { select: { id: true, name: true, role: true } },
           student: { select: { id: true, name: true, parentName: true, parentPhone: true } },
@@ -138,7 +181,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     .map((item) => item.relatedId as string))]
   const feedbackTeachers = feedbackIds.length
     ? await prisma.classroomFeedback.findMany({
-        where: { id: { in: feedbackIds } },
+        where: { id: { in: feedbackIds }, classLesson: { division: user.division } },
         select: { id: true, teacher: { select: { id: true, name: true } } },
       })
     : []
@@ -186,6 +229,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         label: roleLabel(notification.sender?.role || 'admin'),
       },
       parentUserId: notification.userId,
+      isCurrentUserRecipient: notification.userId === user.id,
       parent: notification.user,
       student: notification.student,
       teacher: notification.relatedId ? feedbackTeacherMap.get(notification.relatedId) || null : null,
@@ -194,7 +238,33 @@ export const GET = apiHandler(async (req: NextRequest) => {
     })),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, limit)
 
-  const unreadCount = items.filter((item) => item.author.role === 'parent' && !item.isRead).length
+  const [unreadPostCount, unreadPaperCount, unreadNotificationCount] = await Promise.all([
+    source === 'paper' || source === 'feedback' ? Promise.resolve(0) : prisma.postComment.count({
+      where: {
+        isRead: false,
+        author: { role: 'parent' },
+        post: divisionPostWhere(user.division),
+      },
+    }),
+    source === 'post' || source === 'feedback' ? Promise.resolve(0) : prisma.paperComment.count({
+      where: {
+        isRead: false,
+        author: { role: 'parent' },
+        paper: divisionPaperWhere(user.division),
+      },
+    }),
+    source === 'post' || source === 'paper' ? Promise.resolve(0) : prisma.notification.count({
+      where: {
+        user: { division: user.division },
+        AND: [{ OR: [{ studentId: null }, { student: { division: user.division } }] }],
+        status: 'ACTIVE',
+        deletedAt: null,
+        read: false,
+        ...(source === 'feedback' ? { relatedType: 'CLASSROOM_FEEDBACK' } : {}),
+      },
+    }),
+  ])
+  const unreadCount = unreadPostCount + unreadPaperCount + unreadNotificationCount
   return NextResponse.json({ items, unreadCount })
 })
 
@@ -210,8 +280,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!targetId || !content) return NextResponse.json({ error: '请填写回复内容' }, { status: 400 })
 
   if (type === 'notification') {
-    const target = await prisma.notification.findUnique({
-      where: { id: targetId },
+    const target = await prisma.notification.findFirst({
+      where: {
+        id: targetId,
+        status: 'ACTIVE',
+        deletedAt: null,
+        user: { role: 'parent', division: user.division },
+        OR: [{ studentId: null }, { student: { division: user.division, ...visibleStudentWhere } }],
+      },
       select: { userId: true, studentId: true, title: true },
     })
     if (!target) return NextResponse.json({ error: '通知不存在' }, { status: 404 })
@@ -231,7 +307,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   if (type === 'paper') {
-    const paper = await prisma.examPaper.findFirst({ where: { id: targetId, status: { not: 'DELETED' } }, select: { id: true } })
+    const paper = await prisma.examPaper.findFirst({
+      where: { id: targetId, status: 'PUBLISHED', deletedAt: null, student: divisionStudentWhere(user.division), OR: [
+        { classLessonId: null },
+        { classLesson: { division: user.division, group: { ...visibleClassGroupWhere, division: user.division } } },
+      ] },
+      select: { id: true },
+    })
     if (!paper) return NextResponse.json({ error: '学习档案不存在' }, { status: 404 })
     const comment = await prisma.paperComment.create({
       data: { paperId: targetId, authorId: user.id, content, isRead: true },
@@ -242,7 +324,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json(comment, { status: 201 })
   }
 
-  const post = await prisma.performancePost.findFirst({ where: { id: targetId, deletedAt: null }, select: { id: true } })
+  const post = await prisma.performancePost.findFirst({ where: { id: targetId, ...divisionPostWhere(user.division) }, select: { id: true } })
   if (!post) return NextResponse.json({ error: '表现反馈不存在' }, { status: 404 })
   const comment = await prisma.postComment.create({
     data: { postId: targetId, authorId: user.id, content, isRead: true },
@@ -260,16 +342,51 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
 
   const prisma = await getRequestPrisma()
   const body = await req.json()
+  const rawItems: unknown[] = Array.isArray(body.items) ? body.items : []
+  const readItems = Array.from(new Map(rawItems.flatMap((item) => {
+    if (!item || typeof item !== 'object') return []
+    const candidate = item as { id?: unknown; type?: unknown }
+    if (typeof candidate.id !== 'string' || !candidate.id.trim()) return []
+    if (candidate.type !== 'post' && candidate.type !== 'paper' && candidate.type !== 'notification') return []
+    const normalized = { id: candidate.id.trim(), type: candidate.type }
+    return [[`${normalized.type}:${normalized.id}`, normalized] as const]
+  })).values()).slice(0, 100)
+
+  if (readItems.length) {
+    const updatedCount = await prisma.$transaction(async (tx) => {
+      let count = 0
+      for (const item of readItems) {
+        const result = item.type === 'paper'
+          ? await tx.paperComment.updateMany({
+              where: { id: item.id, author: { role: 'parent' }, isRead: false, paper: divisionPaperWhere(user.division) },
+              data: { isRead: true },
+            })
+          : item.type === 'notification'
+            ? await tx.notification.updateMany({
+              where: { id: item.id, userId: user.id, user: { division: user.division }, status: 'ACTIVE', read: false },
+                data: { read: true, readAt: new Date() },
+              })
+            : await tx.postComment.updateMany({
+              where: { id: item.id, author: { role: 'parent' }, isRead: false, post: divisionPostWhere(user.division) },
+              data: { isRead: true },
+            })
+        count += result.count
+      }
+      return count
+    })
+    return NextResponse.json({ success: true, updatedCount })
+  }
+
   const type = body.type === 'paper' ? 'paper' : body.type === 'notification' ? 'notification' : 'post'
   const id = typeof body.id === 'string' ? body.id : ''
   if (!id) return NextResponse.json({ error: '缺少留言ID' }, { status: 400 })
 
   if (type === 'notification') {
-    await prisma.notification.update({ where: { id }, data: { read: true, readAt: new Date() } })
+    await prisma.notification.updateMany({ where: { id, userId: user.id, user: { division: user.division }, status: 'ACTIVE', read: false }, data: { read: true, readAt: new Date() } })
   } else if (type === 'paper') {
-    await prisma.paperComment.update({ where: { id }, data: { isRead: true } })
+    await prisma.paperComment.updateMany({ where: { id, author: { role: 'parent' }, isRead: false, paper: divisionPaperWhere(user.division) }, data: { isRead: true } })
   } else {
-    await prisma.postComment.update({ where: { id }, data: { isRead: true } })
+    await prisma.postComment.updateMany({ where: { id, author: { role: 'parent' }, isRead: false, post: divisionPostWhere(user.division) }, data: { isRead: true } })
   }
   return NextResponse.json({ success: true })
 })
@@ -283,17 +400,16 @@ export const DELETE = apiHandler(async (req: NextRequest) => {
   const { searchParams } = req.nextUrl
   const type = searchParams.get('type') === 'paper' ? 'paper' : searchParams.get('type') === 'notification' ? 'notification' : 'post'
   const id = searchParams.get('id') || ''
-  const targetId = searchParams.get('targetId') || ''
-  if (!id && !targetId) return NextResponse.json({ error: '缺少留言ID' }, { status: 400 })
+  if (!id) return NextResponse.json({ error: '缺少留言ID' }, { status: 400 })
 
   if (type === 'notification') {
-    await prisma.notification.updateMany({ where: targetId ? { id: targetId } : { id }, data: { status: 'DELETED' } })
+    await prisma.notification.updateMany({ where: { id, userId: user.id, user: { division: user.division }, status: 'ACTIVE' }, data: { status: 'DELETED' } })
     revalidatePath('/parent/notifications')
   } else if (type === 'paper') {
-    await prisma.paperComment.deleteMany({ where: targetId ? { paperId: targetId } : { id } })
+    await prisma.paperComment.deleteMany({ where: { id, author: { role: 'parent' }, paper: divisionPaperWhere(user.division) } })
     revalidatePath('/parent/grades')
   } else {
-    await prisma.postComment.deleteMany({ where: targetId ? { postId: targetId } : { id } })
+    await prisma.postComment.deleteMany({ where: { id, author: { role: 'parent' }, post: divisionPostWhere(user.division) } })
     revalidatePath('/parent/performance')
   }
   return NextResponse.json({ success: true })

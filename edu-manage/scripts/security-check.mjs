@@ -17,8 +17,12 @@ function isTracked(relativePath) {
   try {
     execFileSync('git', ['ls-files', '--error-unmatch', relativePath], { cwd: root, stdio: 'ignore' })
     return true
-  } catch {
-    return false
+  } catch (error) {
+    // `git ls-files --error-unmatch` returns 1 for a valid, untracked path.
+    // Other failures mean the index could not be checked and must not be
+    // reported as proof that a sensitive file is untracked.
+    if (error && typeof error === 'object' && 'status' in error && error.status === 1) return false
+    return null
   }
 }
 
@@ -49,8 +53,18 @@ assertCheck('teacher uninitialized account is rejected', /账号未初始化，�
 assertCheck('password verification requires bcrypt hash', /startsWith\(['"]\$2/.test(loginAccounts) && !/storedPassword\s*===\s*plainPassword/.test(loginAccounts))
 
 const uploads = read('src/app/api/uploads/[filename]/route.ts')
+const uploadPaths = read('src/lib/upload-url.ts')
+const uploadPathTests = read('src/lib/upload-url.test.ts')
 assertCheck('uploads require auth', /requireAuthenticatedUser\(\)/.test(uploads))
-assertCheck('uploads keep traversal safety', /safeRelativePath/.test(uploads) && /path\.resolve/.test(uploads) && /startsWith\(rootPath/.test(uploads))
+assertCheck(
+  'uploads keep traversal safety',
+  /normalizeUploadRequestPath/.test(uploads)
+    && /normalizeUploadRequestPath\(filename\)/.test(uploads)
+    && /path\.resolve/.test(uploads)
+    && /startsWith\(rootPath \+ path\.sep\)/.test(uploads)
+    && /segment === '\.\.'/.test(uploadPaths),
+)
+assertCheck('upload path tests cover traversal rejection', /normalizeUploadRequestPath/.test(uploadPathTests) && /rejects traversal/.test(uploadPathTests))
 assertCheck('uploads are private cached', /private/.test(uploads) && /ETag/.test(uploads) && !/public,\s*max-age=\d+,\s*immutable/.test(uploads))
 
 const uploadCreate = read('src/app/api/upload/route.ts')
@@ -91,8 +105,10 @@ assertCheck('sensitive exports are audited and private cached',
 
 // Local development may legitimately contain these files; the security
 // boundary is that they must never be committed or included in release tarballs.
-assertCheck('root .env is not tracked', !isTracked('.env'))
-assertCheck('local sqlite dev.db is not tracked', !isTracked('prisma/dev.db'))
+const rootEnvTracked = isTracked('.env')
+const localDbTracked = isTracked('prisma/dev.db')
+assertCheck('root .env is not tracked', rootEnvTracked === false, rootEnvTracked === null ? 'Git index unavailable; tracking status not verified' : '')
+assertCheck('local sqlite dev.db is not tracked', localDbTracked === false, localDbTracked === null ? 'Git index unavailable; tracking status not verified' : '')
 
 const failed = checks.filter((check) => !check.pass)
 for (const check of checks) {

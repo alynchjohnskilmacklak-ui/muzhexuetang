@@ -4,13 +4,14 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { assertTeacherOwnsStudent, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
-import { parentActiveStudentWhere, parentVisiblePerformancePostWhere } from '@/lib/business-visibility'
+import { parentActiveStudentWhere, parentStudentHistoryWhere, parentVisiblePerformancePostWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
 import { resolveLearningRecordTermId } from '@/lib/learning-record-term'
 import { createNotification } from '@/lib/notifications'
+import { findParentChild, getParentChildren } from '@/lib/parent-children'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,14 +51,27 @@ export const GET = apiHandler(async (req: NextRequest) => {
   }
 
   if (user.role === 'parent') {
-    const children = await prisma.student.findMany({
-      where: parentActiveStudentWhere(user.id),
-      select: { id: true },
-    })
-    const childIds = children.map((student) => student.id)
-    if (!childIds.length) return NextResponse.json({ posts: [], total: 0, page, limit })
-    if (studentId && !childIds.includes(studentId)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    Object.assign(where, parentVisiblePerformancePostWhere(user.id), { studentId: studentId || { in: childIds } })
+    Object.assign(where, parentVisiblePerformancePostWhere(user.id))
+    if (studentId) {
+      const children = await getParentChildren(prisma, user.id)
+      const selectedChild = findParentChild(children, studentId)
+      if (!selectedChild) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      const childIds = selectedChild.recordIds
+      // Linked term rows may no longer have an active enrollment, but remain
+      // visible to their bound parent inside this selected child's archive.
+      Object.assign(where, {
+        studentId: { in: childIds },
+        student: { id: { in: childIds }, ...parentStudentHistoryWhere(user.id) },
+      })
+    } else {
+      const children = await prisma.student.findMany({
+        where: parentActiveStudentWhere(user.id),
+        select: { id: true },
+      })
+      const childIds = children.map((student) => student.id)
+      if (!childIds.length) return NextResponse.json({ posts: [], total: 0, page, limit })
+      where.studentId = { in: childIds }
+    }
   }
 
   if (user.role === 'admin') {
@@ -184,6 +198,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
       await createNotification(prisma, {
         userId: parentUserId,
         type: 'PERFORMANCE_UPDATE',
+        relatedType: 'PERFORMANCE_UPDATE',
+        relatedId: post.id,
+        studentId: student.id,
         href: `/parent/archive?feedbackId=${post.id}`,
         title: `${student.name}有新的课堂表现`,
         content: content.slice(0, 60),

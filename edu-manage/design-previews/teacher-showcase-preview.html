@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf8f5">
+  <title>教师团队 · 牧哲学堂</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --color-primary: #14574d;
+      --color-primary-hover: #10483f;
+      --color-primary-bg: #eaf4f1;
+      --color-gold: #8a6517;
+      --color-gold-bg: #f8f1de;
+      --color-orange: #e8784a;
+      --color-ink: #1a1201;
+      --color-ink-muted: #5a4e3a;
+      --color-ink-subtle: #756a58;
+      --color-canvas: #faf8f5;
+      --color-surface: #fff;
+      --color-surface-soft: #f5f2ee;
+      --color-border: rgba(0, 0, 0, .06);
+      --shadow-soft: 0 18px 52px rgba(26, 18, 1, .075);
+      --radius-control: 10px;
+      --radius-card: 16px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--color-canvas);
+      color: var(--color-ink);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid var(--color-orange); outline-offset: 3px; }
+
+    .topbar {
+      height: 64px;
+      border-bottom: 1px solid var(--color-border);
+      background: rgba(255, 255, 255, .78);
+    }
+    .topbar-inner, .page { width: min(1240px, calc(100% - 48px)); margin-inline: auto; }
+    .topbar-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 11px; color: var(--color-ink); font-weight: 750; }
+    .brand-mark {
+      display: grid; place-items: center; width: 34px; height: 34px;
+      border-radius: 11px; background: var(--color-primary); color: #fff; font-size: 17px;
+    }
+    .brand-sub { padding-left: 11px; border-left: 1px solid rgba(26, 18, 1, .12); color: var(--color-ink-subtle); font-size: 13px; font-weight: 500; }
+    .team-total { color: var(--color-ink-muted); font-size: 13px; }
+    .team-total strong { color: var(--color-primary); font-size: 16px; }
+
+    .page { padding-top: 46px; padding-bottom: 56px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 25px; }
+    .intro-copy { max-width: 690px; }
+    .eyebrow { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; color: var(--color-primary); font-size: 13px; font-weight: 750; }
+    .eyebrow::before { content: ""; width: 22px; height: 2px; border-radius: 2px; background: var(--color-orange); }
+    h1 { margin: 0; font-size: clamp(30px, 4vw, 46px); font-weight: 760; letter-spacing: -.04em; line-height: 1.16; }
+    .intro p { max-width: 610px; margin: 12px 0 0; color: var(--color-ink-muted); font-size: 15px; line-height: 1.75; }
+    .intro-count { flex: none; padding: 14px 18px; border: 1px solid rgba(138, 101, 23, .2); border-radius: 14px; background: var(--color-gold-bg); color: var(--color-ink-muted); }
+    .intro-count strong { margin-right: 7px; color: var(--color-gold); font-size: 23px; line-height: 1; }
+
+    .profile-card {
+      display: grid;
+      grid-template-columns: minmax(310px, .82fr) minmax(0, 1.18fr);
+      min-height: 650px;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      border-radius: 22px;
+      background: var(--color-surface);
+      box-shadow: var(--shadow-soft);
+    }
+    .portrait-stage {
+      position: relative;
+      display: flex;
+      min-height: 650px;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      padding: 28px;
+      background: var(--color-primary-bg);
+      isolation: isolate;
+      perspective: 1200px;
+    }
+    .portrait-stage::before, .portrait-stage::after {
+      position: absolute; z-index: -1; content: ""; border: 1px solid rgba(20, 87, 77, .11); border-radius: 50%;
+    }
+    .portrait-stage::before { width: 430px; height: 430px; top: 80px; left: 50%; transform: translateX(-50%); }
+    .portrait-stage::after { width: 520px; height: 520px; top: 34px; left: 50%; transform: translateX(-50%); border-color: rgba(20, 87, 77, .06); }
+    .portrait-topline { display: flex; align-items: center; justify-content: space-between; color: var(--color-primary); font-size: 12px; font-weight: 700; }
+    .portrait-topline span:last-child { color: var(--color-ink-subtle); font-variant-numeric: tabular-nums; }
+    .portrait-wrap { position: absolute; inset: 68px 0 74px; display: flex; align-items: center; justify-content: center; transform-style: preserve-3d; }
+    .portrait-card {
+      position: relative;
+      width: min(78%, 380px);
+      height: 100%;
+      max-height: 495px;
+      overflow: visible;
+      border: 1px solid rgba(26, 18, 1, .1);
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 24px 45px rgba(20, 43, 38, .18), 0 7px 16px rgba(26, 18, 1, .08);
+      transform: rotateY(-9deg) rotateX(2deg) translateZ(22px);
+      transform-style: preserve-3d;
+      transition: transform .25s ease, box-shadow .25s ease;
+      will-change: transform;
+    }
+    .portrait-card::before {
+      position: absolute; z-index: 2; inset: 9px; content: ""; pointer-events: none;
+      border: 1px solid rgba(255, 255, 255, .8); border-radius: 13px; transform: translateZ(18px);
+    }
+    .portrait-card::after {
+      position: absolute; z-index: -1; inset: 12px -13px -13px 12px; content: "";
+      border: 1px solid rgba(20, 87, 77, .16); border-radius: 22px; background: #e1eee9;
+      transform: translateZ(-18px);
+    }
+    .portrait-card.is-turning-next { transform: rotateY(18deg) rotateX(1deg) translateZ(4px) scale(.97); }
+    .portrait-card.is-turning-previous { transform: rotateY(-23deg) rotateX(1deg) translateZ(4px) scale(.97); }
+    .portrait-card img { display: block; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; object-position: center 28%; transform: translateZ(2px); backface-visibility: hidden; }
+    .portrait-controls { position: absolute; z-index: 4; inset: 50% 14px auto; display: flex; justify-content: space-between; transform: translateY(-50%); pointer-events: none; }
+    .portrait-button { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid rgba(20, 87, 77, .18); border-radius: 50%; background: rgba(255, 255, 255, .9); color: var(--color-primary); font-size: 20px; cursor: pointer; pointer-events: auto; box-shadow: 0 5px 12px rgba(26, 18, 1, .08); transition: background .16s, color .16s, transform .16s; }
+    .portrait-button:hover { transform: scale(1.06); background: var(--color-primary); color: #fff; }
+    .portrait-caption { position: absolute; left: 25px; bottom: 24px; padding: 7px 10px; border: 1px solid rgba(20, 87, 77, .13); border-radius: 999px; background: rgba(255, 255, 255, .82); color: var(--color-primary); font-size: 11px; font-weight: 650; }
+    .portrait-watermark { position: absolute; right: 22px; bottom: 19px; color: rgba(20, 87, 77, .14); font-size: 15px; font-weight: 800; }
+
+    .profile-content { display: flex; min-width: 0; flex-direction: column; padding: 40px 44px 28px; }
+    .profile-overline { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--color-ink-subtle); font-size: 12px; }
+    .tier-badge { padding: 5px 10px; border: 1px solid rgba(20, 87, 77, .16); border-radius: 999px; background: var(--color-primary-bg); color: var(--color-primary); font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .name-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 17px; }
+    h2 { margin: 0; font-size: clamp(34px, 4vw, 48px); font-weight: 760; letter-spacing: -.045em; line-height: 1.08; }
+    .credentials { margin: 10px 0 0; color: var(--color-ink-muted); font-size: 15px; }
+    .subject-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .subject-chip { padding: 6px 11px; border-radius: 999px; background: var(--color-surface-soft); color: var(--color-primary); font-size: 12px; font-weight: 700; }
+    .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+    .fact { padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 12px; background: #fdfcf9; }
+    .fact-label { display: block; margin-bottom: 5px; color: var(--color-ink-subtle); font-size: 11px; }
+    .fact-value { color: var(--color-ink); font-size: 14px; font-weight: 700; }
+
+    .bio-heading { display: flex; align-items: center; gap: 9px; margin: 25px 0 10px; font-size: 15px; font-weight: 750; }
+    .bio-heading::before { content: ""; width: 3px; height: 16px; border-radius: 3px; background: var(--color-orange); }
+    .bio-copy { min-height: 0; color: var(--color-ink-muted); font-size: 13px; line-height: 1.85; }
+    .bio-copy p { margin: 0 0 10px; }
+    .bio-copy p:last-child { margin-bottom: 0; }
+    .quote { margin: 17px 0 0; padding: 13px 15px; border-radius: 12px; background: var(--color-gold-bg); color: #624b1f; font-size: 13px; font-weight: 650; line-height: 1.65; }
+    .quote::before { content: "课堂方法"; display: block; margin-bottom: 4px; color: var(--color-gold); font-size: 10px; font-weight: 800; }
+
+    .profile-navigation { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: auto; padding-top: 22px; }
+    .nav-status { display: flex; align-items: baseline; gap: 7px; color: var(--color-ink-subtle); font-size: 12px; }
+    .nav-status strong { color: var(--color-ink); font-size: 18px; font-variant-numeric: tabular-nums; }
+    .nav-controls { display: flex; gap: 8px; }
+    .nav-button { display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid rgba(20, 87, 77, .2); border-radius: 50%; background: var(--color-surface); color: var(--color-primary); font-size: 20px; cursor: pointer; transition: background .16s, color .16s, transform .16s; }
+    .nav-button:hover { transform: translateY(-1px); background: var(--color-primary); color: #fff; }
+    .nav-button:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+
+    .roster { display: flex; align-items: center; gap: 8px; margin-top: 17px; overflow-x: auto; padding: 2px 1px 5px; scrollbar-width: thin; }
+    .roster-label { flex: none; margin-right: 3px; color: var(--color-ink-subtle); font-size: 12px; }
+    .roster-button { flex: none; padding: 8px 13px; border: 1px solid rgba(26, 18, 1, .1); border-radius: 999px; background: var(--color-surface); color: var(--color-ink-muted); font-size: 12px; cursor: pointer; transition: background .16s, border-color .16s, color .16s; }
+    .roster-button[aria-current="true"] { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
+    .preview-note { margin: 13px 0 0; color: var(--color-ink-subtle); font-size: 11px; line-height: 1.6; }
+
+    @media (max-width: 900px) {
+      .page { padding-top: 32px; }
+      .profile-card { grid-template-columns: minmax(260px, .75fr) minmax(0, 1.25fr); }
+      .profile-content { padding: 32px 28px 24px; }
+      .portrait-stage { min-height: 640px; }
+    }
+    @media (max-width: 680px) {
+      .topbar { height: 58px; }
+      .topbar-inner, .page { width: min(100% - 28px, 520px); }
+      .brand { gap: 8px; font-size: 14px; }
+      .brand-mark { width: 31px; height: 31px; border-radius: 10px; }
+      .brand-sub { padding-left: 8px; font-size: 11px; }
+      .team-total { font-size: 11px; }
+      .team-total strong { font-size: 14px; }
+      .page { padding-top: 28px; padding-bottom: 34px; }
+      .intro { align-items: flex-start; margin-bottom: 17px; }
+      .intro-count { margin-top: 2px; padding: 9px 11px; font-size: 11px; }
+      .intro-count strong { font-size: 18px; }
+      .eyebrow { margin-bottom: 9px; font-size: 11px; }
+      h1 { max-width: 320px; font-size: 29px; }
+      .intro p { margin-top: 8px; font-size: 12px; line-height: 1.65; }
+      .profile-card { display: flex; flex-direction: column; min-height: 0; border-radius: 18px; }
+      .portrait-stage { min-height: 350px; padding: 17px; }
+      .portrait-stage::before { width: 260px; height: 260px; top: 58px; }
+      .portrait-stage::after { width: 320px; height: 320px; top: 28px; }
+      .portrait-wrap { inset: 55px 0 56px; }
+      .portrait-card { width: min(67%, 250px); max-height: 255px; border-radius: 17px; }
+      .portrait-card img { object-position: center 26%; }
+      .portrait-controls { inset: 50% 9px auto; }
+      .portrait-button { width: 33px; height: 33px; }
+      .portrait-caption { left: 15px; bottom: 15px; }
+      .portrait-watermark { right: 14px; bottom: 13px; }
+      .profile-content { padding: 22px 18px 17px; }
+      .profile-overline { font-size: 11px; }
+      .name-row { margin-top: 13px; }
+      h2 { font-size: 36px; }
+      .credentials { margin-top: 7px; font-size: 13px; }
+      .subject-list { margin-top: 15px; }
+      .facts { gap: 8px; margin-top: 16px; }
+      .fact { padding: 10px 11px; }
+      .fact-value { font-size: 12px; }
+      .bio-heading { margin-top: 19px; font-size: 14px; }
+      .bio-copy { font-size: 12px; line-height: 1.8; }
+      .bio-copy p { margin-bottom: 9px; }
+      .quote { margin-top: 13px; padding: 11px 12px; font-size: 12px; }
+      .profile-navigation { padding-top: 18px; }
+      .nav-button { width: 36px; height: 36px; }
+      .roster { margin-top: 13px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-mark">牧</span><span>牧哲学堂</span><span class="brand-sub">教师团队</span></div>
+      <div class="team-total"><strong>31</strong> 位在岗教师</div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="intro" aria-labelledby="page-title">
+      <div class="intro-copy">
+        <div class="eyebrow">教师档案</div>
+        <h1 id="page-title">认识老师，也认识他的教学方式</h1>
+        <p>一次认识一位老师。从授课学科到课堂方法，看看老师如何陪伴孩子把知识学扎实。</p>
+      </div>
+      <div class="intro-count"><strong>31</strong>位老师</div>
+    </section>
+
+    <section class="profile-card" aria-label="教师介绍">
+      <div class="portrait-stage">
+        <div class="portrait-topline"><span>立绘素材 · 3D 展示</span><span id="portrait-index">08 / 08</span></div>
+        <div class="portrait-wrap" id="portrait-scene">
+          <div class="portrait-card" id="portrait-card"><img id="portrait" src="teacher-portraits/portrait-08.png" alt="教师立绘素材第 8 张"></div>
+        </div>
+        <div class="portrait-controls" aria-label="切换立绘素材">
+          <button class="portrait-button" id="portrait-previous" type="button" aria-label="上一张立绘">‹</button>
+          <button class="portrait-button" id="portrait-next" type="button" aria-label="下一张立绘">›</button>
+        </div>
+        <span class="portrait-caption" id="portrait-caption">立绘素材 08 / 08</span>
+        <span class="portrait-watermark" aria-hidden="true">牧哲学堂</span>
+      </div>
+      <article class="profile-content" aria-live="polite">
+        <div class="profile-overline"><span>一线教学力量</span><span class="tier-badge" id="tier">管理教师</span></div>
+        <div class="name-row"><h2 id="name">马老师</h2></div>
+        <p class="credentials" id="credentials">硕士 · 中国矿业大学</p>
+        <div class="subject-list" id="subjects" aria-label="授课科目"></div>
+        <div class="facts">
+          <div class="fact"><span class="fact-label">专业方向</span><span class="fact-value" id="major">选矿工程</span></div>
+          <div class="fact"><span class="fact-label">授课科目</span><span class="fact-value" id="subject-summary">数学、物理</span></div>
+        </div>
+        <h3 class="bio-heading">个人介绍</h3>
+        <div class="bio-copy" id="bio"></div>
+        <blockquote class="quote" id="quote">先找核心条件，再选择方法并检验结果。</blockquote>
+        <div class="profile-navigation">
+          <div class="nav-status"><strong id="current-index">01</strong><span>/ 02 位示例教师</span></div>
+          <div class="nav-controls" aria-label="切换教师">
+            <button class="nav-button" id="previous" type="button" aria-label="上一位教师">‹</button>
+            <button class="nav-button" id="next" type="button" aria-label="下一位教师">›</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <nav class="roster" id="roster" aria-label="选择教师">
+      <span class="roster-label">教师名录</span>
+    </nav>
+    <p class="preview-note">原型先展示 2 位教师的系统介绍，名字只保留姓氏。左侧 8 张人物图可切换并带有轻微 3D 视差，图片与教师档案的对应关系待确认。</p>
+  </main>
+
+  <script>
+    const profiles = [
+      {
+        name: '马老师',
+        tier: '管理教师',
+        education: '硕士',
+        university: '中国矿业大学',
+        major: '选矿工程',
+        portraitIndex: 7,
+        subjects: ['数学', '物理'],
+        quote: '先找核心条件，再选择方法并检验结果。',
+        bio: [
+          '数学和物理教学借助工程问题中的条件分析与模型意识。先找核心变量和约束，再选择方法并检验结果；对计算失误与概念混淆分别处理，帮助学生形成更可靠的解题过程。',
+          '学习数学和物理时，是否能独立判断题目的核心条件，比是否记住一道例题更值得关注。反馈会指出建模、运算和检验中最薄弱的一步，并针对这一环节调整练习。题目条件一旦变化，也会让学生重新解释方法为什么仍然适用。这样才能把熟悉的题型经验逐步转化为分析新题的能力。',
+          '数学和物理课可以借助工程问题中的约束意识，让学生先判断哪些条件真正有用，再决定如何列式。讲解时尽量把抽象关系画出来，帮助学生看清变量如何相互影响。计算题会检查单位、符号和合理范围；综合题则训练分段处理的能力。练习后通过条件变式判断学生掌握的是方法，还是只记住了原题的数字。'
+        ]
+      },
+      {
+        name: '任老师',
+        tier: '管理教师',
+        education: '硕士',
+        university: '中北大学',
+        major: '新一代电子信息技术',
+        portraitIndex: 7,
+        subjects: ['数学', '化学', '物理'],
+        quote: '先分析再作答，做完还能自查。',
+        bio: [
+          '理科教学强调先弄清题目中的条件与数量关系，再选择公式或方法。对于计算、实验与综合题，重视让学生把关键步骤说出来、写完整，减少只会套题型的情况。评价学习进展时，重点看学生能否独立复原推导，而不是只看当堂答对了几题。',
+          '对于数学计算中的跳步、物理分析中的对象不清和化学推断中的证据不足，会分别给出不同的修正办法。希望学生逐渐形成先分析再作答、做完还能自查的理科学习习惯。',
+          '在具体讲题时，会从生活或技术场景引出问题，再把题目条件整理成图示、表格或等量关系。遇到学生答对但说不清理由的情况，会把重点放在“为什么这一步成立”上。练习按基础识别、独立推导和综合应用逐层推进，课后优先回看同类错误是否再次出现，而不是单纯增加刷题量。'
+        ]
+      }
+    ];
+
+    let active = 0;
+    let activePortrait = 7;
+    const byId = id => document.getElementById(id);
+    const roster = byId('roster');
+    const portraitFiles = Array.from({ length: 8 }, (_, index) => `teacher-portraits/portrait-${String(index + 1).padStart(2, '0')}.png`);
+    const portraitCard = byId('portrait-card');
+
+    function setPortrait(index, direction = 'next') {
+      activePortrait = (index + portraitFiles.length) % portraitFiles.length;
+      portraitCard.classList.remove('is-turning-next', 'is-turning-previous');
+      portraitCard.classList.add(direction === 'previous' ? 'is-turning-previous' : 'is-turning-next');
+      window.setTimeout(() => {
+        const portrait = byId('portrait');
+        portrait.src = portraitFiles[activePortrait];
+        portrait.alt = `教师立绘素材第 ${activePortrait + 1} 张`;
+        byId('portrait-index').textContent = `${String(activePortrait + 1).padStart(2, '0')} / 08`;
+        byId('portrait-caption').textContent = `立绘素材 ${String(activePortrait + 1).padStart(2, '0')} / 08`;
+        portraitCard.classList.remove('is-turning-next', 'is-turning-previous');
+      }, 160);
+    }
+
+    function render() {
+      const profile = profiles[active];
+      const number = String(active + 1).padStart(2, '0');
+      setPortrait(profile.portraitIndex, 'next');
+      byId('name').textContent = profile.name;
+      byId('tier').textContent = profile.tier;
+      byId('credentials').textContent = `${profile.education} · ${profile.university}`;
+      byId('major').textContent = profile.major;
+      byId('subject-summary').textContent = profile.subjects.join('、');
+      byId('quote').textContent = profile.quote;
+      byId('current-index').textContent = number;
+      byId('subjects').replaceChildren(...profile.subjects.map(subject => {
+        const chip = document.createElement('span');
+        chip.className = 'subject-chip';
+        chip.textContent = subject;
+        return chip;
+      }));
+      byId('bio').replaceChildren(...profile.bio.map(copy => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = copy;
+        return paragraph;
+      }));
+      [...roster.querySelectorAll('.roster-button')].forEach((button, index) => {
+        button.setAttribute('aria-current', index === active ? 'true' : 'false');
+      });
+    }
+
+    profiles.forEach((profile, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'roster-button';
+      button.textContent = profile.name;
+      button.setAttribute('aria-current', index === active ? 'true' : 'false');
+      button.addEventListener('click', () => { active = index; render(); });
+      roster.append(button);
+    });
+    byId('previous').addEventListener('click', () => { active = (active - 1 + profiles.length) % profiles.length; render(); });
+    byId('next').addEventListener('click', () => { active = (active + 1) % profiles.length; render(); });
+    byId('portrait-previous').addEventListener('click', () => setPortrait(activePortrait - 1, 'previous'));
+    byId('portrait-next').addEventListener('click', () => setPortrait(activePortrait + 1, 'next'));
+
+    const portraitScene = byId('portrait-scene');
+    portraitScene.addEventListener('pointermove', event => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const bounds = portraitScene.getBoundingClientRect();
+      const x = (event.clientX - bounds.left) / bounds.width - .5;
+      const y = (event.clientY - bounds.top) / bounds.height - .5;
+      portraitCard.style.transform = `rotateY(${x * 14 - 4}deg) rotateX(${y * -10 + 2}deg) translateZ(22px)`;
+    });
+    portraitScene.addEventListener('pointerleave', () => {
+      portraitCard.style.transform = '';
+    });
+  </script>
+</body>
+</html>

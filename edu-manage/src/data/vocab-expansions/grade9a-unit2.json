@@ -1,0 +1,1370 @@
+[
+  {
+    "word": "inspiring",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 鼓舞人心的；激励的。-ing 形容事物带来的感受。",
+    "collocations": "an inspiring story; inspiring words; find sth inspiring",
+    "commonMistake": "inspiring 描述事物令人鼓舞；人感到鼓舞用 inspired，不要混用两者。",
+    "example": {
+      "english": "The young inventor gave an inspiring talk at the science club.",
+      "chinese": "这位年轻发明家在科学社团作了一场鼓舞人心的演讲。"
+    },
+    "application": {
+      "prompt": "The students felt hopeful after hearing the scientist's ___ story. A. inspiring B. inspired",
+      "solution": "A。解析：A 正确；story 给学生带来鼓舞，表示“令人鼓舞的”用 inspiring。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: inspiring",
+        "url": "https://dictionary.cambridge.org/dictionary/english/inspiring"
+      }
+    ]
+  },
+  {
+    "word": "admire",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "v. 钦佩；赞赏。常用 admire sb for sth；admire the view。",
+    "collocations": "admire a scientist; admire sb for courage; admire the view",
+    "commonMistake": "admire 是动词，后直接接宾语；不要说 admire of sb，也别与名词 admiration 混用。",
+    "example": {
+      "english": "I admire Dr Chen for her careful work in the laboratory.",
+      "chinese": "我钦佩陈博士在实验室里一丝不苟的工作。"
+    },
+    "application": {
+      "prompt": "Which sentence uses admire with the correct object pattern? A. We admire of the scientist. B. We admire the scientist for her patience.",
+      "solution": "B。解析：B 正确；admire 直接接人作宾语，原因用 for 引出。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: admire",
+        "url": "https://dictionary.cambridge.org/dictionary/english/admire"
+      }
+    ]
+  },
+  {
+    "word": "historian",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 历史学家。可数名词；history 是历史，historical 是历史的。",
+    "collocations": "a local historian; a famous historian; historian of science",
+    "commonMistake": "historian 指研究历史的人；historical 描述与历史有关的事物，不可代替表示人的名词。",
+    "example": {
+      "english": "A historian used old letters to study the town's past.",
+      "chinese": "一位历史学家用旧信件研究这座城镇的过去。"
+    },
+    "application": {
+      "prompt": "The museum asked a ___ to explain how the dynasty changed over time. A. historical B. historian",
+      "solution": "B。解析：B 正确；解释朝代历史的人是 historian（历史学家），historical 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: historian",
+        "url": "https://dictionary.cambridge.org/dictionary/english/historian"
+      }
+    ]
+  },
+  {
+    "word": "chemist",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 化学家；药剂师（英式英语）。可数名词；chemistry 为学科名。",
+    "collocations": "a research chemist; chemist's shop; work as a chemist",
+    "commonMistake": "chemist 指从事化学研究的人或药剂师；chemistry 指“化学”这门学科。",
+    "example": {
+      "english": "The chemist tested the water before it was sent to the village.",
+      "chinese": "化学家在水送往村里前检测了水质。"
+    },
+    "application": {
+      "prompt": "Which sentence uses chemist correctly? A. The chemist tested the water. B. The chemistry tested the water.",
+      "solution": "A。解析：A 正确；chemist 指做水质检测的人；chemistry 是学科名称，不能作这里的人的主语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chemist",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chemist"
+      }
+    ]
+  },
+  {
+    "word": "physicist",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 物理学家。可数名词；physics 为物理学。",
+    "collocations": "a famous physicist; a theoretical physicist; physicist at a university",
+    "commonMistake": "physicist 指研究物理的人；physics 是学科，拼写末尾为 -s 但常作单数学科名。",
+    "example": {
+      "english": "The physicist explained why the satellite stayed in orbit.",
+      "chinese": "物理学家解释了卫星为何留在轨道上。"
+    },
+    "application": {
+      "prompt": "A ___ measured the force needed to launch the small rocket. A. physicist B. physical",
+      "solution": "A。解析：A 正确；测量火箭受力的是 physicist（物理学家），physical 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: physicist",
+        "url": "https://dictionary.cambridge.org/dictionary/english/physicist"
+      }
+    ]
+  },
+  {
+    "word": "hunger",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 饥饿；渴望。常用 hunger for sth；形容词 hungry。",
+    "collocations": "die of hunger; hunger for knowledge; fight hunger",
+    "commonMistake": "hunger 是名词或动词；表示“感到饿”用 be hungry，不说 be hunger。",
+    "example": {
+      "english": "The aid workers delivered rice to families suffering from hunger.",
+      "chinese": "救援人员把大米送给挨饿的家庭。"
+    },
+    "application": {
+      "prompt": "The charity provides meals for children who go to school with ___. A. hungry B. hunger",
+      "solution": "B。解析：B 正确；with 后需名词 hunger，指饥饿。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hunger",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hunger"
+      }
+    ]
+  },
+  {
+    "word": "chemistry",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 化学；化学反应，学科名通常不可数。",
+    "collocations": "study chemistry; chemistry lesson; a chemistry experiment",
+    "commonMistake": "学科名 chemistry 通常不用复数；指化学家时用 chemist。",
+    "example": {
+      "english": "Marie Curie studied chemistry before beginning her research.",
+      "chinese": "玛丽·居里在开始研究前学习过化学。"
+    },
+    "application": {
+      "prompt": "We have a ___ lesson before lunch, so please bring your safety glasses. A. chemistry B. chemist",
+      "solution": "A。解析：A 正确；修饰 lesson 要用学科形容词用法 chemistry，表示化学课。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chemistry",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chemistry"
+      }
+    ]
+  },
+  {
+    "word": "drop out (of sth)",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "phr. 退学；退出。常用 drop out of school/a course。",
+    "collocations": "drop out of school; drop out of a race; decide to drop out",
+    "commonMistake": "drop out of 后接学校、课程或比赛；drop sth 不能表达主动退出。",
+    "example": {
+      "english": "He dropped out of the course when his family needed his help.",
+      "chinese": "家里需要他帮忙时，他退出了这门课程。"
+    },
+    "application": {
+      "prompt": "Which sentence describes leaving school before graduating? A. She dropped out of school. B. She dropped school out of.",
+      "solution": "A。解析：A 正确；drop out of school 表示“退学”，短语中的 out of 放在 school 前。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: drop out (of sth)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/drop-out"
+      }
+    ]
+  },
+  {
+    "word": "calendar",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 日历；历法。可数名词，复数 calendars。",
+    "collocations": "a wall calendar; mark a date on the calendar; school calendar",
+    "commonMistake": "calendar 显示日期和安排；不要与 calculator（计算器）混淆。",
+    "example": {
+      "english": "I marked the science fair on the calendar for next Friday.",
+      "chinese": "我把科学展定在下周五，并在日历上做了标记。"
+    },
+    "application": {
+      "prompt": "Please check the school ___ before booking a visit; the museum is closed on Monday. A. calendar B. calculator",
+      "solution": "A。解析：A 正确；需要查看学校日期安排用 calendar（日历），不是计算器。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: calendar",
+        "url": "https://dictionary.cambridge.org/dictionary/english/calendar"
+      }
+    ]
+  },
+  {
+    "word": "discovery",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 发现；被发现的事物。可数名词；动词 discover。",
+    "collocations": "make a discovery; a scientific discovery; discovery of a new planet",
+    "commonMistake": "discovery 是名词；表示发现动作的动词要用 discover，不能说 make a discover。",
+    "example": {
+      "english": "The discovery of a new planet changed the team's research plan.",
+      "chinese": "一颗新行星的发现改变了团队的研究计划。"
+    },
+    "application": {
+      "prompt": "The team announced its ___ after months of studying the telescope images. A. discover B. discovery",
+      "solution": "B。解析：B 正确；its 后接名词 discovery，指研究团队的发现。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: discovery",
+        "url": "https://dictionary.cambridge.org/dictionary/english/discovery"
+      }
+    ]
+  },
+  {
+    "word": "century",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 世纪；一百年。可数名词，复数 centuries。",
+    "collocations": "in the 20th century; for centuries; turn of the century",
+    "commonMistake": "一个世纪是一百年；序数表达用 the + 序数词 + century，如 the 19th century。",
+    "example": {
+      "english": "The stone bridge was built in the 18th century.",
+      "chinese": "这座石桥建于18世纪。"
+    },
+    "application": {
+      "prompt": "Which statement correctly describes a century? A. A century lasts ten years. B. A century lasts one hundred years.",
+      "solution": "B。解析：B 正确；century 是一百年，十年则是 a decade。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: century",
+        "url": "https://dictionary.cambridge.org/dictionary/english/century"
+      }
+    ]
+  },
+  {
+    "word": "wounded",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 受伤的；负伤的。由 wound 的过去分词作形容词。",
+    "collocations": "a wounded soldier; badly wounded; wounded in the leg",
+    "commonMistake": "wounded 常指被刀枪等造成创伤的人；形容身体不适或疼痛可用 ill 或 hurt。",
+    "example": {
+      "english": "The wounded climber was carried down the mountain by rescuers.",
+      "chinese": "受伤的登山者被救援人员抬下了山。"
+    },
+    "application": {
+      "prompt": "The ___ bird could not fly, so the children called a wildlife centre. A. wound B. wounded",
+      "solution": "B。解析：B 正确；修饰名词 bird 用形容词 wounded，表示“受伤的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wounded",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wounded"
+      }
+    ]
+  },
+  {
+    "word": "British",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 英国的；英国人的；n. 英国人（总称）。国家名 Britain。",
+    "collocations": "British history; a British scientist; the British",
+    "commonMistake": "British 作形容词时修饰名词；国家名是 Britain，不能说 a British。",
+    "example": {
+      "english": "The British scientist shared her research with schools abroad.",
+      "chinese": "这位英国科学家与海外学校分享了她的研究。"
+    },
+    "application": {
+      "prompt": "The museum invited a ___ historian to speak about the Industrial Revolution. A. British B. Britain",
+      "solution": "A。解析：A 正确；修饰 historian 需要形容词 British，Britain 是国名。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: British",
+        "url": "https://dictionary.cambridge.org/dictionary/english/British"
+      }
+    ]
+  },
+  {
+    "word": "airport",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 机场。可数名词，复数 airports。",
+    "collocations": "at the airport; airport bus; arrive at an airport",
+    "commonMistake": "说“在机场”通常用 at the airport；大型城市机场也可说 at the airport，不能用 in airport。",
+    "example": {
+      "english": "We met the visiting physicist at the airport.",
+      "chinese": "我们在机场接到了来访的物理学家。"
+    },
+    "application": {
+      "prompt": "The plane landed at the ___ just before noon. A. air B. airport",
+      "solution": "B。解析：B 正确；飞机降落的地点是 airport（机场）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: airport",
+        "url": "https://dictionary.cambridge.org/dictionary/english/airport"
+      }
+    ]
+  },
+  {
+    "word": "nation",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 国家；民族。可数名词，复数 nations；national 为形容词。",
+    "collocations": "a united nation; nation-wide debate; the whole nation",
+    "commonMistake": "nation 指具有共同政府或身份的国家/民族；national 是形容词，nationality 是国籍。",
+    "example": {
+      "english": "The invention brought people from different regions together as one nation.",
+      "chinese": "这项发明把来自不同地区的人们凝聚成一个民族。"
+    },
+    "application": {
+      "prompt": "The whole ___ watched the final as the team represented their country. A. nation B. national",
+      "solution": "A。解析：A 正确；whole 后接名词 nation，指全国人民。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nation"
+      }
+    ]
+  },
+  {
+    "word": "spread",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "v. 传播；散布；n. 传播；范围。过去式和过去分词均为 spread。",
+    "collocations": "spread a message; spread quickly; spread disease",
+    "commonMistake": "spread 三种基本形式拼写相同；不要给过去式再加 -ed 写成 spreaded。",
+    "example": {
+      "english": "The news of the discovery spread quickly through the university.",
+      "chinese": "这一发现的消息迅速传遍了大学。"
+    },
+    "application": {
+      "prompt": "Which sentence uses the past form of spread correctly? A. The message spreaded quickly. B. The message spread quickly.",
+      "solution": "B。解析：B 正确；spread 的过去式拼写仍是 spread，表示消息迅速传开。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spread",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spread"
+      }
+    ]
+  },
+  {
+    "word": "disease",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 疾病。可数或不可数，复数 diseases；形容词 diseased。",
+    "collocations": "a serious disease; spread disease; prevent disease",
+    "commonMistake": "disease 是名词；diseased 描述患病的动物或植物，不能说 a diseased（疾病）。",
+    "example": {
+      "english": "Clean water helps prevent disease in crowded communities.",
+      "chinese": "清洁饮用水有助于防止人口密集社区里的疾病。"
+    },
+    "application": {
+      "prompt": "The doctor studied how the ___ spread among the villagers. A. disease B. diseased",
+      "solution": "A。解析：A 正确；how 后需名词 disease 作 spread 的主语，意为疾病传播。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: disease",
+        "url": "https://dictionary.cambridge.org/dictionary/english/disease"
+      }
+    ]
+  },
+  {
+    "word": "pioneer",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 先驱；先锋；v. 开创。可数名词，复数 pioneers。",
+    "collocations": "a pioneer in science; pioneer a new method; early pioneers",
+    "commonMistake": "pioneer 可指开创者，也可作“开创”动词；表示人时不要用 pioneering 代替名词。",
+    "example": {
+      "english": "The pioneer developed a low-cost way to clean river water.",
+      "chinese": "这位先驱开发了一种低成本的河水净化方法。"
+    },
+    "application": {
+      "prompt": "She was a ___ in using radio to teach children in remote villages. A. pioneer B. pioneering",
+      "solution": "A。解析：A 正确；a 后需名词 pioneer，指开创这种教学方式的人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pioneer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pioneer"
+      }
+    ]
+  },
+  {
+    "word": "admirable",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 令人钦佩的；值得赞赏的。副词 admirably；名词 admiration。",
+    "collocations": "admirable courage; an admirable effort; highly admirable",
+    "commonMistake": "admirable 描述值得赞赏的人或事；admired 表示已受到钦佩，不能与 admirable 完全互换。",
+    "example": {
+      "english": "Her admirable patience helped the children finish the difficult experiment.",
+      "chinese": "她令人钦佩的耐心帮助孩子们完成了这项困难的实验。"
+    },
+    "application": {
+      "prompt": "The scientist's honesty and patience are truly ___. A. admired B. admirable",
+      "solution": "B。解析：B 正确；honesty 和 patience 值得赞赏，用 admirable 描述其品质。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: admirable",
+        "url": "https://dictionary.cambridge.org/dictionary/english/admirable"
+      }
+    ]
+  },
+  {
+    "word": "pyramid",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 金字塔；棱锥体。可数名词，复数 pyramids。",
+    "collocations": "the Great Pyramid; a stone pyramid; pyramid-shaped",
+    "commonMistake": "pyramid 指有方形底座、尖顶的建筑或形状；不要因建筑物高大就称为 tower。",
+    "example": {
+      "english": "The historian showed us a drawing of an ancient pyramid.",
+      "chinese": "历史学家给我们看了一幅古代金字塔的图。"
+    },
+    "application": {
+      "prompt": "The ancient stone ___ has a square base and a pointed top. A. pyramid B. period",
+      "solution": "A。解析：A 正确；方形底、尖顶的古代建筑是 pyramid（金字塔）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pyramid",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pyramid"
+      }
+    ]
+  },
+  {
+    "word": "balance",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 平衡；v. 使平衡。常用 keep/find a balance；balance A and B。",
+    "collocations": "keep a balance; balance work and study; lose one's balance",
+    "commonMistake": "balance 可作名词或动词；表示维持平衡用 keep a balance，不能说 keep balance 在所有语境中。",
+    "example": {
+      "english": "She learned to balance schoolwork with her music practice.",
+      "chinese": "她学会了平衡学业和音乐练习。"
+    },
+    "application": {
+      "prompt": "To stay healthy, he tries to ___ study with enough sleep. A. balanced B. balance",
+      "solution": "B。解析：B 正确；try to 后用动词原形 balance，表示平衡学习和睡眠。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: balance",
+        "url": "https://dictionary.cambridge.org/dictionary/english/balance"
+      }
+    ]
+  },
+  {
+    "word": "courage",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 勇气；胆量。通常不可数；形容词 courageous。",
+    "collocations": "show courage; have the courage to do sth; great courage",
+    "commonMistake": "courage 是名词，不能说 very courage；形容词“勇敢的”是 courageous。",
+    "example": {
+      "english": "It took courage to speak honestly in front of the whole class.",
+      "chinese": "在全班面前坦诚发言需要勇气。"
+    },
+    "application": {
+      "prompt": "Which sentence uses courage as a noun? A. The courage child spoke up. B. It took courage to speak up.",
+      "solution": "B。解析：B 正确；took 后接名词 courage，表示说出来需要勇气；形容词应为 courageous。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: courage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/courage"
+      }
+    ]
+  },
+  {
+    "word": "wisdom",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 智慧；学问。通常不可数；形容词 wise。",
+    "collocations": "show wisdom; words of wisdom; a piece of wisdom",
+    "commonMistake": "wisdom 是不可数名词；修饰人或决定时用 wise，不说 a wisdom person。",
+    "example": {
+      "english": "The elder's wisdom helped the village choose a safe place for the bridge.",
+      "chinese": "长者的智慧帮助村里选定了安全的建桥地点。"
+    },
+    "application": {
+      "prompt": "The judge made a ___ decision after listening to both sides. A. wisdom B. wise",
+      "solution": "B。解析：B 正确；修饰名词 decision 要用形容词 wise，wisdom 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wisdom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wisdom"
+      }
+    ]
+  },
+  {
+    "word": "live",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 现场直播的；adv. 现场地。常说 a live show/broadcast。",
+    "collocations": "a live programme; broadcast live; live music",
+    "commonMistake": "live 作“现场直播的”时读音不同于动词 live；作定语时通常放在名词前。",
+    "example": {
+      "english": "We watched a live radio programme from the science museum.",
+      "chinese": "我们收听了科学博物馆的现场直播节目。"
+    },
+    "application": {
+      "prompt": "Which sentence uses live to mean 'broadcast in real time'? A. The concert was recorded last week. B. The concert is being broadcast live now.",
+      "solution": "B。解析：B 正确；broadcast live 表示正在现场直播；A 说明节目已录制。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: live",
+        "url": "https://dictionary.cambridge.org/dictionary/english/live"
+      }
+    ]
+  },
+  {
+    "word": "look up to sb",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "phr. 钦佩；仰慕某人。宾语是受尊敬的人。",
+    "collocations": "look up to a teacher; look up to sb for courage; look up to her",
+    "commonMistake": "look up to 表示仰慕；look up a word 表示查词，二者结构和意思不同。",
+    "example": {
+      "english": "Many young scientists look up to Marie Curie for her courage.",
+      "chinese": "许多年轻科学家因玛丽·居里的勇气而仰慕她。"
+    },
+    "application": {
+      "prompt": "The students ___ their teacher because she never gives up on them. A. look her up B. look up to her",
+      "solution": "B。解析：B 正确；学生敬佩老师用 look up to her；look her up 是去拜访或查找她。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: look up to sb",
+        "url": "https://dictionary.cambridge.org/dictionary/english/look-up-to"
+      }
+    ]
+  },
+  {
+    "word": "brave",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 勇敢的；v. 勇敢面对。比较级 braver；名词 bravery。",
+    "collocations": "a brave choice; brave the cold; brave enough to speak",
+    "commonMistake": "brave 可作形容词或动词；作动词时直接接困难，不说 brave against the cold。",
+    "example": {
+      "english": "The brave child called for help when the fire alarm sounded.",
+      "chinese": "火警响起时，这个勇敢的孩子立刻呼救。"
+    },
+    "application": {
+      "prompt": "It was ___ of Maya to speak up when the others were afraid. A. brave B. bravery",
+      "solution": "A。解析：A 正确；It is + adj. + of sb 结构中需用形容词 brave。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: brave",
+        "url": "https://dictionary.cambridge.org/dictionary/english/brave"
+      }
+    ]
+  },
+  {
+    "word": "necessary",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 必要的；必需的。常用 it is necessary to do sth/for sb to do sth。",
+    "collocations": "necessary equipment; if necessary; be necessary for",
+    "commonMistake": "necessary 是形容词；副词 necessarily 意为“必然地”，不要用它作 be 动词后的表语。",
+    "example": {
+      "english": "A helmet is necessary when children ride their bicycles on the road.",
+      "chinese": "孩子们在路上骑自行车时，头盔是必需的。"
+    },
+    "application": {
+      "prompt": "It is ___ to check the radio before the research team leaves. A. necessarily B. necessary",
+      "solution": "B。解析：B 正确；It is 后作表语需用形容词 necessary，表示有必要检查设备。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: necessary",
+        "url": "https://dictionary.cambridge.org/dictionary/english/necessary"
+      }
+    ]
+  },
+  {
+    "word": "seed",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 种子。可数名词，复数 seeds；也可作动词“播种”。",
+    "collocations": "plant a seed; seed packet; seeds grow into plants",
+    "commonMistake": "seed 指种子，plant a seed 是“播下一粒种子”；不要与 feed（喂养）混淆。",
+    "example": {
+      "english": "Each seed needs water and sunlight before it can grow.",
+      "chinese": "每粒种子发芽前都需要水和阳光。"
+    },
+    "application": {
+      "prompt": "The children put one tomato ___ into each small pot. A. seed B. soil",
+      "solution": "A。解析：A 正确；放进每个小盆里的是一粒 tomato seed（番茄种子）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: seed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/seed"
+      }
+    ]
+  },
+  {
+    "word": "childhood",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 童年；儿童时期。通常不可数；复数较少用于不同人的童年阶段。",
+    "collocations": "during childhood; a happy childhood; childhood friend",
+    "commonMistake": "childhood 表示人生阶段，通常不加 a；一个童年常说 a happy childhood。",
+    "example": {
+      "english": "She spent her childhood near the old railway station.",
+      "chinese": "她在老火车站附近度过了童年。"
+    },
+    "application": {
+      "prompt": "He learned to build radios during his ___. A. child B. childhood",
+      "solution": "B。解析：B 正确；his 后此处需名词 childhood，表示他的童年时期。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: childhood",
+        "url": "https://dictionary.cambridge.org/dictionary/english/childhood"
+      }
+    ]
+  },
+  {
+    "word": "dynasty",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 朝代；王朝。可数名词，复数 dynasties。",
+    "collocations": "the Ming dynasty; a ruling dynasty; dynasties in China",
+    "commonMistake": "dynasty 以辅音字母加 y 结尾，变复数时 y 改 i 加 -es。",
+    "example": {
+      "english": "The historian compared trade under two different dynasties.",
+      "chinese": "历史学家比较了两个不同朝代时期的贸易。"
+    },
+    "application": {
+      "prompt": "The museum displays coins from the Tang ___. A. dynasty B. dynasties",
+      "solution": "A。解析：A 正确；Tang dynasty 指唐朝，朝代名称前用单数 dynasty。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dynasty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dynasty"
+      }
+    ]
+  },
+  {
+    "word": "western",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 西方的；西部的。由 west 加 -ern 构成。",
+    "collocations": "western culture; western region; the western part",
+    "commonMistake": "western 作形容词修饰名词；west 可作名词或方向副词，不能说 west culture。",
+    "example": {
+      "english": "The western region receives little rain in winter.",
+      "chinese": "西部地区冬季降雨很少。"
+    },
+    "application": {
+      "prompt": "The ___ part of the country has a colder climate than the coast. A. west B. western",
+      "solution": "B。解析：B 正确；修饰名词 part 要用形容词 western。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: western",
+        "url": "https://dictionary.cambridge.org/dictionary/english/western"
+      }
+    ]
+  },
+  {
+    "word": "region",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 地区；区域。可数名词，复数 regions。",
+    "collocations": "a remote region; in this region; region of the country",
+    "commonMistake": "region 指较大的地理区域；regional 是形容词，表示“地区的”。",
+    "example": {
+      "english": "Scientists collected soil samples from every region of the country.",
+      "chinese": "科学家从该国每个地区采集了土壤样本。"
+    },
+    "application": {
+      "prompt": "The northern ___ is known for its forests and rivers. A. region B. regional",
+      "solution": "A。解析：A 正确；The northern 后需要名词 region，指北部地区。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: region",
+        "url": "https://dictionary.cambridge.org/dictionary/english/region"
+      }
+    ]
+  },
+  {
+    "word": "scientific",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 科学的；科学（上）的。名词 science，副词 scientifically。",
+    "collocations": "scientific research; scientific method; scientific evidence",
+    "commonMistake": "scientific 是形容词；science 是学科名，scientifically 是副词，词形要与句中位置匹配。",
+    "example": {
+      "english": "The team used scientific methods to test the river water.",
+      "chinese": "团队用科学方法检测河水。"
+    },
+    "application": {
+      "prompt": "They collected ___ evidence before making a claim about the disease. A. science B. scientific",
+      "solution": "B。解析：B 正确；修饰名词 evidence 要用形容词 scientific。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: scientific",
+        "url": "https://dictionary.cambridge.org/dictionary/english/scientific"
+      }
+    ]
+  },
+  {
+    "word": "biologist",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 生物学家。可数名词；biology 为生物学。",
+    "collocations": "a marine biologist; study biology; biologist at a university",
+    "commonMistake": "biologist 指研究生物的人；biology 是学科名称，不要把 -ist 和 -y 词形混淆。",
+    "example": {
+      "english": "The biologist recorded the plants growing beside the river.",
+      "chinese": "生物学家记录了河边生长的植物。"
+    },
+    "application": {
+      "prompt": "A ___ studied how the disease affected local plants. A. biologist B. biology",
+      "solution": "A。解析：A 正确；研究植物的人是 biologist；biology 是学科。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: biologist",
+        "url": "https://dictionary.cambridge.org/dictionary/english/biologist"
+      }
+    ]
+  },
+  {
+    "word": "whole",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adj. 全部的；整体的。通常放在限定词后、名词前；the whole + 单数名词。",
+    "collocations": "the whole day; a whole country; whole grains",
+    "commonMistake": "whole 表示“整个的”，常用 the whole + 单数名词；all the 后可接复数，不要说 the whole students。",
+    "example": {
+      "english": "The whole class visited the museum to learn about the scientist.",
+      "chinese": "全班同学参观了博物馆，了解这位科学家。"
+    },
+    "application": {
+      "prompt": "Which phrase correctly refers to every member of the class? A. the whole class B. the whole of class",
+      "solution": "A。解析：A 正确；whole 作定语时用 the whole + 单数名词，故为 the whole class。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: whole",
+        "url": "https://dictionary.cambridge.org/dictionary/english/whole"
+      }
+    ]
+  },
+  {
+    "word": "bank",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 银行；河岸；库（贮藏处）。可数名词，复数 banks。",
+    "collocations": "a river bank; put money in the bank; a blood bank",
+    "commonMistake": "bank 可指金融机构或河岸；要根据附近的动作和地点判断，不要只按单一词义理解。",
+    "example": {
+      "english": "They planted trees along the bank to stop the river from eroding the soil.",
+      "chinese": "他们沿河岸种树以防河水侵蚀土壤。"
+    },
+    "application": {
+      "prompt": "The children sat on the grassy ___ and watched boats pass. A. bank B. banker",
+      "solution": "A。解析：A 正确；河边可供坐下的岸边是 bank（河岸），不是 bank 的职业形式 banker。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bank",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bank"
+      }
+    ]
+  },
+  {
+    "word": "forever",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "adv. 永远；长久地。表示持续时间，常放在句末。",
+    "collocations": "remember forever; last forever; friends forever",
+    "commonMistake": "forever 是副词，不能修饰名词作定语；“永远的友谊”可说 friendship forever 或 everlasting friendship。",
+    "example": {
+      "english": "The villagers will remember the volunteers' kindness forever.",
+      "chinese": "村民们将永远记得志愿者的善意。"
+    },
+    "application": {
+      "prompt": "Which sentence uses forever as an adverb? A. Her memory will remain forever. B. Her memory will remain foreverly.",
+      "solution": "A。解析：A 正确；forever 是副词，可修饰 remain；英语中没有副词形式 foreverly。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: forever",
+        "url": "https://dictionary.cambridge.org/dictionary/english/forever"
+      }
+    ]
+  },
+  {
+    "word": "radio",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 收音机；无线电。可数名词，复数 radios。",
+    "collocations": "listen to the radio; radio programme; by radio",
+    "commonMistake": "说收听广播用 listen to the radio；radio 以 -o 结尾的复数为 radios。",
+    "example": {
+      "english": "My grandfather listened to the news on the radio every morning.",
+      "chinese": "我爷爷每天早晨都通过收音机听新闻。"
+    },
+    "application": {
+      "prompt": "Which sentence uses the radio collocation correctly? A. The pilot sent the message by radio. B. The pilot listened the message by radio.",
+      "solution": "A。解析：A 正确；send a message by radio 是“通过无线电发送消息”；listen 后需要 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: radio",
+        "url": "https://dictionary.cambridge.org/dictionary/english/radio"
+      }
+    ]
+  },
+  {
+    "word": "leave behind",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "phr. 留下；遗留；把某人或某物落在后面。可分动词短语。",
+    "collocations": "leave a bag behind; leave behind a legacy; leave sb behind",
+    "commonMistake": "leave behind 可分开使用，宾语是代词时必须放中间：leave it behind。",
+    "example": {
+      "english": "The inventor left behind notebooks that explained her experiments.",
+      "chinese": "这位发明家留下了记录实验过程的笔记本。"
+    },
+    "application": {
+      "prompt": "Before leaving the laboratory, please do not ___ any glass equipment. A. leave out B. leave behind",
+      "solution": "B。解析：B 正确；leave behind 表示离开时把设备留下，符合实验室收尾语境。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: leave behind",
+        "url": "https://dictionary.cambridge.org/dictionary/english/leave-behind-leave-behind"
+      }
+    ]
+  },
+  {
+    "word": "collection",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 收集；收藏品；一批作品。可数或不可数，依语义而定。",
+    "collocations": "a stamp collection; a collection of stories; collect data",
+    "commonMistake": "collection 是名词，动词是 collect；表示一批收藏品可数，收集行为通常不可数。",
+    "example": {
+      "english": "Her collection of radio sets includes models from four decades.",
+      "chinese": "她收藏的收音机包括四个年代的型号。"
+    },
+    "application": {
+      "prompt": "The museum displayed a ___ of tools used by early inventors. A. collect B. collection",
+      "solution": "B。解析：B 正确；a 后需名词 collection，指博物馆展示的一批工具。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: collection",
+        "url": "https://dictionary.cambridge.org/dictionary/english/collection"
+      }
+    ]
+  },
+  {
+    "word": "live on",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "phr. 继续存在；继续活着；以……为生。live on sth 表示靠……为生。",
+    "collocations": "live on after; live on rice; memories live on",
+    "commonMistake": "live on 可指生命延续或靠某物维生；表示住在某地用 live in，不用 live on。",
+    "example": {
+      "english": "The inventor's ideas live on in the machines we use today.",
+      "chinese": "这位发明家的思想仍体现在我们今天使用的机器中。"
+    },
+    "application": {
+      "prompt": "Although the scientist died many years ago, her work continues to ___. A. live on B. live in",
+      "solution": "A。解析：A 正确；live on 表示思想或影响继续存在，live in 是居住在某地。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: live on",
+        "url": "https://dictionary.cambridge.org/dictionary/english/live-on"
+      }
+    ]
+  },
+  {
+    "word": "exploration",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 探索；勘探。通常不可数；动词 explore，探索者 explorer。",
+    "collocations": "space exploration; exploration of the ocean; explore a region",
+    "commonMistake": "exploration 是名词；表示探索的动作或领域可用该词，执行探索的人是 explorer。",
+    "example": {
+      "english": "Space exploration depends on careful work by scientists and engineers.",
+      "chinese": "太空探索依赖科学家和工程师的细致工作。"
+    },
+    "application": {
+      "prompt": "The ___ of the ocean floor requires special equipment. A. explore B. exploration",
+      "solution": "B。解析：B 正确；The 后需要名词 exploration，表示海底探索这项工作。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: exploration",
+        "url": "https://dictionary.cambridge.org/dictionary/english/exploration"
+      }
+    ]
+  },
+  {
+    "word": "universe",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 宇宙；天地万物。通常用 the universe。",
+    "collocations": "the universe; explore the universe; the size of the universe",
+    "commonMistake": "universe 表示整个宇宙时前通常加 the；不要与 university（大学）混淆。",
+    "example": {
+      "english": "The radio telescope helps scientists learn more about the universe.",
+      "chinese": "射电望远镜帮助科学家进一步了解宇宙。"
+    },
+    "application": {
+      "prompt": "The ___ contains billions of galaxies and is still being studied. A. universe B. university",
+      "solution": "A。解析：A 正确；包含星系并被研究的是 the universe（宇宙），不是大学。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: universe",
+        "url": "https://dictionary.cambridge.org/dictionary/english/universe"
+      }
+    ]
+  },
+  {
+    "word": "socialism",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 社会主义。通常不可数；形容词 socialist。",
+    "collocations": "the idea of socialism; socialist movement; discuss socialism",
+    "commonMistake": "socialism 是制度或思想的名词；描述支持者或相关制度的形容词为 socialist。",
+    "example": {
+      "english": "The class discussed how socialism shaped the country's history.",
+      "chinese": "全班讨论了社会主义如何影响这个国家的历史。"
+    },
+    "application": {
+      "prompt": "The book examines the history of ___ in the region. A. socialist B. socialism",
+      "solution": "B。解析：B 正确；of 后需名词 socialism，指一种社会制度或思想。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: socialism",
+        "url": "https://dictionary.cambridge.org/dictionary/english/socialism"
+      }
+    ]
+  },
+  {
+    "word": "hole",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 洞；孔；漏洞。可数名词，复数 holes。",
+    "collocations": "dig a hole; a hole in the wall; black hole",
+    "commonMistake": "hole 指贯穿或凹陷的洞，和 hole 的搭配常用 in；不要误用 whole（全部）。",
+    "example": {
+      "english": "The mouse escaped through a small hole in the wooden box.",
+      "chinese": "老鼠从木箱上的一个小洞逃了出去。"
+    },
+    "application": {
+      "prompt": "The farmer found a ___ in the fence where the sheep had escaped. A. hole B. whole",
+      "solution": "A。解析：A 正确；羊能从围栏穿过的是 hole（洞），whole 表示整体。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hole",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hole"
+      }
+    ]
+  },
+  {
+    "word": "daughter",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 女儿。可数名词，复数 daughters。",
+    "collocations": "their daughter; an only daughter; daughter of a scientist",
+    "commonMistake": "daughter 指女性子女；注意拼写中有 -gh-，不要写成 daugther。",
+    "example": {
+      "english": "Their daughter became a biologist and studied plants in the western region.",
+      "chinese": "他们的女儿成了一名生物学家，在西部地区研究植物。"
+    },
+    "application": {
+      "prompt": "The scientist's ___ helped her organize the old research papers. A. daugther B. daughter",
+      "solution": "B。解析：B 正确；daughter 意为“女儿”，注意 gh 位于 t 前。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: daughter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/daughter"
+      }
+    ]
+  },
+  {
+    "word": "herself",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "pron. 她自己；她本人。反身代词，与 she 对应。",
+    "collocations": "by herself; teach herself; she herself",
+    "commonMistake": "反身代词需与主语保持一致：she 对应 herself；主语是 he 时应用 himself。",
+    "example": {
+      "english": "Marie Curie herself carried out much of the early research.",
+      "chinese": "玛丽·居里本人承担了早期的大量研究工作。"
+    },
+    "application": {
+      "prompt": "Although no one showed her how, she taught ___ to use the radio. A. herself B. himself",
+      "solution": "A。解析：A 正确；主语 she 对应反身代词 herself，表示她自学操作收音机。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: herself",
+        "url": "https://dictionary.cambridge.org/dictionary/english/herself"
+      }
+    ]
+  },
+  {
+    "word": "flight",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 飞行；航班。可数名词，复数 flights。",
+    "collocations": "a direct flight; flight to London; take a flight",
+    "commonMistake": "flight 指一次飞行或航班；表示乘坐航班常用 take a flight 或 flight to a place。",
+    "example": {
+      "english": "Her flight to the conference was delayed by heavy snow.",
+      "chinese": "她飞往会议地点的航班因大雪延误了。"
+    },
+    "application": {
+      "prompt": "Our ___ to the science centre leaves at 8:30, so please arrive early. A. fly B. flight",
+      "solution": "B。解析：B 正确；our 后接名词 flight，指前往科学中心的航班。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flight",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flight"
+      }
+    ]
+  },
+  {
+    "word": "woodwork",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 木工手艺；木制品。通常不可数。",
+    "collocations": "do woodwork; woodwork class; a piece of woodwork",
+    "commonMistake": "woodwork 通常作不可数名词；若指一件木制品，可说 a piece of woodwork。",
+    "example": {
+      "english": "He learned woodwork from his grandfather and built a radio cabinet.",
+      "chinese": "他跟爷爷学木工，做了一个收音机柜。"
+    },
+    "application": {
+      "prompt": "The students made small boxes in their ___ class. A. woodwork B. woodworks",
+      "solution": "A。解析：A 正确；woodwork 表示木工课或木工手艺，通常不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: woodwork",
+        "url": "https://dictionary.cambridge.org/dictionary/english/woodwork"
+      }
+    ]
+  },
+  {
+    "word": "inventor",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 发明家。可数名词；动词 invent，名词 invention 指发明。",
+    "collocations": "a famous inventor; inventor of a device; invent a machine",
+    "commonMistake": "inventor 指发明东西的人；invention 指发明行为或发明物，二者不能互换。",
+    "example": {
+      "english": "The inventor tested her first machine in a small workshop.",
+      "chinese": "这位发明家在一间小作坊里测试了她的第一台机器。"
+    },
+    "application": {
+      "prompt": "The ___ of the radio received a prize for designing useful equipment. A. invention B. inventor",
+      "solution": "B。解析：B 正确；获奖的是设计设备的人 inventor，而 invention 是发明物或发明行为。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: inventor",
+        "url": "https://dictionary.cambridge.org/dictionary/english/inventor"
+      }
+    ]
+  },
+  {
+    "word": "above all",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "phr. 最重要的是；尤其是。用于强调优先事项。",
+    "collocations": "above all, remember; above all else; value honesty above all",
+    "commonMistake": "above all 表示最重要的事项，不等于 first of all（首先，按顺序）。",
+    "example": {
+      "english": "Above all, the team wanted to make the water safe for every child.",
+      "chinese": "最重要的是，团队希望确保每个孩子都能喝上安全的水。"
+    },
+    "application": {
+      "prompt": "The task has many steps, but ___, keep the laboratory safe. A. above all B. at all",
+      "solution": "A。解析：A 正确；此处突出首要要求，用 above all 表示“最重要的是”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: above all",
+        "url": "https://dictionary.cambridge.org/dictionary/english/above-all"
+      }
+    ]
+  },
+  {
+    "word": "thinker",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 思想家；善于思考的人。可数名词；动词 think。",
+    "collocations": "a political thinker; a great thinker; independent thinker",
+    "commonMistake": "thinker 指思考或提出思想的人；thinking 是思考过程或“有思想的”，词性不同。",
+    "example": {
+      "english": "The thinker wrote about how education could improve society.",
+      "chinese": "这位思想家写下了教育如何改善社会的文章。"
+    },
+    "application": {
+      "prompt": "Confucius is remembered as an influential ___ whose ideas shaped generations. A. thinking B. thinker",
+      "solution": "B。解析：B 正确；an 后需名词 thinker，指有重要思想的人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thinker",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thinker"
+      }
+    ]
+  },
+  {
+    "word": "period",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 时期；一段时间；句号。可数名词，复数 periods。",
+    "collocations": "a short period; during this period; a period of change",
+    "commonMistake": "period 可指时间段，也可指标点句号；表示某一时期常用 during a period。",
+    "example": {
+      "english": "The region experienced a period of rapid growth after the railway opened.",
+      "chinese": "铁路开通后，这个地区经历了一段快速发展的时期。"
+    },
+    "application": {
+      "prompt": "The historian studied a ___ of change that lasted nearly fifty years. A. period B. periodic",
+      "solution": "A。解析：A 正确；a 后需要名词 period，指持续近五十年的一段时期。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: period",
+        "url": "https://dictionary.cambridge.org/dictionary/english/period"
+      }
+    ]
+  },
+  {
+    "word": "kindness",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 善良；友善的行为。通常不可数；形容词 kind。",
+    "collocations": "show kindness; an act of kindness; kindness to strangers",
+    "commonMistake": "kindness 是名词，kind 是形容词；说“一件善举”可用 an act of kindness。",
+    "example": {
+      "english": "Her kindness to the wounded climber was remembered by everyone.",
+      "chinese": "她对受伤登山者的善意让大家一直记在心里。"
+    },
+    "application": {
+      "prompt": "Which sentence uses kindness as a noun? A. The villagers thanked her for her kind. B. The villagers thanked her for her kindness.",
+      "solution": "B。解析：B 正确；her 后需要名词 kindness；kind 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: kindness",
+        "url": "https://dictionary.cambridge.org/dictionary/english/kindness"
+      }
+    ]
+  },
+  {
+    "word": "mankind",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 人类；人。通常不可数，常不加冠词。",
+    "collocations": "the history of mankind; benefit mankind; mankind's future",
+    "commonMistake": "mankind 是集合意义的不可数名词，不说 many mankinds；也可用 humankind 表达同义。",
+    "example": {
+      "english": "The discovery opened a new chapter in mankind's understanding of space.",
+      "chinese": "这一发现开启了人类认识太空的新篇章。"
+    },
+    "application": {
+      "prompt": "The scientist hoped her work would benefit all ___. A. mankind B. mankinds",
+      "solution": "A。解析：A 正确；mankind 表示全人类，通常不可数，不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mankind",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mankind"
+      }
+    ]
+  },
+  {
+    "word": "belief",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "n. 信念；看法；相信。可数名词，复数 beliefs；动词 believe。",
+    "collocations": "a strong belief; belief in science; belief that sth is true",
+    "commonMistake": "belief 是名词；believe 是动词。注意 believe 变名词时去掉 e 再加 -f，拼作 belief。",
+    "example": {
+      "english": "His belief in careful research helped him question the first result.",
+      "chinese": "他相信严谨研究，这使他对最初的结果保持审慎。"
+    },
+    "application": {
+      "prompt": "Her ___ that every child can learn science encouraged the whole class. A. believe B. belief",
+      "solution": "B。解析：B 正确；Her 后需要名词 belief，表示她的信念。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: belief",
+        "url": "https://dictionary.cambridge.org/dictionary/english/belief"
+      }
+    ]
+  },
+  {
+    "word": "BCE (before the Common Era)",
+    "examTags": [
+      "词汇·人物与科学",
+      "语法·词形与搭配"
+    ],
+    "grammar": "abbr. 公元前。日期中置于年份之后，表示“公元前”。",
+    "collocations": "in 300 BCE; the 5th century BCE; dates before the Common Era",
+    "commonMistake": "BCE 是缩写，放在年份后；和 CE（公元）相对，不能把 BCE 的字母顺序写反。",
+    "example": {
+      "english": "The historian dated the pottery to 500 BCE.",
+      "chinese": "历史学家把这件陶器断代为公元前500年。"
+    },
+    "application": {
+      "prompt": "The ancient record says the city was founded in 300 ___, long before the Common Era. A. BCE B. CE",
+      "solution": "A。解析：A 正确；before the Common Era 表示“公元前”，年份后用 BCE。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: BCE (before the Common Era)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bce"
+      }
+    ]
+  }
+]

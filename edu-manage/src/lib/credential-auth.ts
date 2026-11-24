@@ -33,7 +33,7 @@ export async function authenticateCredentialInput(input: {
   const resolvedIdentifier = await resolveLoginIdentifier(input.email, input.loginRole, input.division, identifierType)
   if (!resolvedIdentifier.ok) return resolvedIdentifier
   const email = resolvedIdentifier.email
-  const accountKey = buildCredentialAccountKey(input.loginRole, input.division, email)
+  const accountKey = buildCredentialAccountKey(input.loginRole, input.division, email, input.meta.ip)
   const limit = checkCredentialRateLimit(input.meta.ip, accountKey)
   if (!limit.allowed) {
     return { ok: false as const, code: limit.code || 'RATE_LIMITED' }
@@ -47,10 +47,11 @@ export async function authenticateCredentialInput(input: {
     input.meta,
     input.division,
     identifierType,
+    resolvedIdentifier,
   )
 
   if (!result.ok) {
-    recordCredentialFailure(accountKey)
+    if (input.meta.ip !== 'unknown') recordCredentialFailure(accountKey)
     return result
   }
 

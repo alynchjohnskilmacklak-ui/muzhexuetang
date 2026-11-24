@@ -1,0 +1,1634 @@
+[
+  {
+    "word": "moss",
+    "examTags": [
+      "词汇·植物与自然",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 苔藓，通常作不可数名词；表示不同种类时可用 mosses。",
+    "collocations": "green moss; moss grows on rocks; a layer of moss",
+    "commonMistake": "泛指苔藓时通常不加 a，也不使用复数；可说 a patch of moss。",
+    "example": {
+      "english": "Soft moss grows on the wet stones.",
+      "chinese": "湿润的石头上长着柔软的苔藓。"
+    },
+    "application": {
+      "prompt": "After the rain, a green plant-like cover appeared on the stones. It was ___. A. moss B. pepper",
+      "solution": "A。解析：moss 指石头或地面上常见的苔藓。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: moss",
+        "url": "https://dictionary.cambridge.org/dictionary/english/moss"
+      }
+    ]
+  },
+  {
+    "word": "redwood",
+    "examTags": [
+      "词汇·植物与自然",
+      "阅读·描述树木"
+    ],
+    "grammar": "n. 红杉；红木。作可数名词时复数为 redwoods；redwood 也可作定语修饰 tree。",
+    "collocations": "a redwood tree; a redwood forest; tall redwoods",
+    "commonMistake": "redwood 指树种或红木，不要与表示“红色木头”的普通组合 red wood 混淆。",
+    "example": {
+      "english": "The redwood trees in the park are very tall.",
+      "chinese": "公园里的红杉树非常高。"
+    },
+    "application": {
+      "prompt": "Some of the world's tallest trees are ___. A. mushrooms B. redwoods",
+      "solution": "B。解析：redwood 是红杉树。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: redwood",
+        "url": "https://dictionary.cambridge.org/dictionary/english/redwood"
+      }
+    ]
+  },
+  {
+    "word": "cheetah",
+    "examTags": [
+      "词汇·野生动物",
+      "阅读·根据特征识别动物"
+    ],
+    "grammar": "n. 猎豹；可数名词，复数 cheetahs。",
+    "collocations": "a fast cheetah; a cheetah in the grassland; cheetahs run quickly",
+    "commonMistake": "cheetah 是猎豹，不是 leopard（花豹）；猎豹以奔跑速度快著称。",
+    "example": {
+      "english": "A cheetah can run very fast for a short time.",
+      "chinese": "猎豹能在短时间内跑得很快。"
+    },
+    "application": {
+      "prompt": "Which animal is known for running at great speed? A. frog B. cheetah",
+      "solution": "B。解析：cheetah（猎豹）以短距离高速奔跑闻名。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cheetah",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cheetah"
+      }
+    ]
+  },
+  {
+    "word": "folding",
+    "examTags": [
+      "词汇·构词法",
+      "语法·现在分词作形容词"
+    ],
+    "grammar": "adj. 折叠式的；可折叠的。由 fold 加 -ing 构成，常放在名词前作定语。",
+    "collocations": "a folding chair; a folding table; a folding screen",
+    "commonMistake": "folding 作形容词表示“可折叠的”；不要误解为动作正在进行。",
+    "example": {
+      "english": "We took a folding chair on the camping trip.",
+      "chinese": "我们带了一把折叠椅去露营。"
+    },
+    "application": {
+      "prompt": "The small chair can be folded and carried easily. It is a ___ chair. A. boiling B. folding",
+      "solution": "B。解析：能折叠的椅子可称为 a folding chair。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fold",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fold"
+      }
+    ]
+  },
+  {
+    "word": "folding fan",
+    "examTags": [
+      "词汇·日常物品",
+      "阅读·传统文化"
+    ],
+    "grammar": "n. 折扇；可数名词，复数 folding fans。folding 作定语修饰 fan。",
+    "collocations": "open a folding fan; a paper folding fan; paint a folding fan",
+    "commonMistake": "复数只需在中心名词 fan 后加 -s：folding fans。",
+    "example": {
+      "english": "She opened a folding fan to cool herself.",
+      "chinese": "她打开一把折扇给自己扇风。"
+    },
+    "application": {
+      "prompt": "You can open and close this traditional fan by folding it. It is a ___. A. frying pan B. folding fan",
+      "solution": "B。解析：可以折叠开合的扇子是 folding fan。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fan",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fan"
+      }
+    ]
+  },
+  {
+    "word": "bamboo",
+    "examTags": [
+      "词汇·植物与材料",
+      "语法·名词用法"
+    ],
+    "grammar": "n. 竹；竹子。通常作不可数名词；指一根竹子时可说 a bamboo plant。",
+    "collocations": "bamboo forest; bamboo shoots; a bamboo chair",
+    "commonMistake": "bamboo 泛指竹材或竹子时通常不加 -s；“竹笋”常说 bamboo shoots。",
+    "example": {
+      "english": "The pandas ate bamboo in the forest.",
+      "chinese": "熊猫在竹林里吃竹子。"
+    },
+    "application": {
+      "prompt": "Many pandas feed on ___. A. bamboo B. flour",
+      "solution": "A。解析：熊猫主要以竹子为食，bamboo 指竹子。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bamboo",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bamboo"
+      }
+    ]
+  },
+  {
+    "word": "yeah",
+    "examTags": [
+      "词汇·交际用语",
+      "语用·口语与正式表达"
+    ],
+    "grammar": "interj. 是的；对。较口语化，正式写作或较正式回答中通常用 yes。",
+    "collocations": "Yeah, sure.; Yeah, I know.; say yeah",
+    "commonMistake": "yeah 适合熟人间的口语对话；正式场合宜用 yes，且句首要大写。",
+    "example": {
+      "english": "“Are you ready?” “Yeah, let's go.”",
+      "chinese": "“你准备好了吗？”“嗯，走吧。”"
+    },
+    "application": {
+      "prompt": "In a formal interview, which answer is more suitable? A. Yes, I am. B. Yeah, I am.",
+      "solution": "A。解析：正式场合一般用 yes；yeah 更口语化。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yeah",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yeah"
+      }
+    ]
+  },
+  {
+    "word": "popular",
+    "examTags": [
+      "词汇·形容词",
+      "语法·介词搭配"
+    ],
+    "grammar": "adj. 受欢迎的；流行的。常用 be popular with/among sb；表示流行于某地可用 popular in。",
+    "collocations": "popular with students; popular among young people; a popular song",
+    "commonMistake": "表示“受某人欢迎”用 popular with/among，不说 popular to sb。",
+    "example": {
+      "english": "The nature club is popular with students at our school.",
+      "chinese": "自然社团在我们学校很受学生欢迎。"
+    },
+    "application": {
+      "prompt": "The new game is liked by many children. It is ___ with them. A. empty B. popular",
+      "solution": "B。解析：be popular with sb 表示“受某人欢迎”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: popular",
+        "url": "https://dictionary.cambridge.org/dictionary/english/popular"
+      }
+    ]
+  },
+  {
+    "word": "goodness",
+    "examTags": [
+      "词汇·名词派生",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 美德；善良；（食物的）营养成分。通常不可数；Goodness! 也可作感叹语。",
+    "collocations": "the goodness of fresh food; goodness and kindness; Goodness me!",
+    "commonMistake": "goodness 是 good 的名词形式；表示“好处、营养”时通常不说 a goodness。",
+    "example": {
+      "english": "Fresh vegetables keep much of their natural goodness.",
+      "chinese": "新鲜蔬菜保留了许多天然营养。"
+    },
+    "application": {
+      "prompt": "Fresh fruit is good for you and has natural ___. A. title B. goodness",
+      "solution": "B。解析：goodness 可指食物中有益的营养成分。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: goodness",
+        "url": "https://dictionary.cambridge.org/dictionary/english/goodness"
+      }
+    ]
+  },
+  {
+    "word": "tool",
+    "examTags": [
+      "词汇·工具与用途",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 工具；手段。可数名词，复数 tools；也可引申为完成某事的手段。",
+    "collocations": "a useful tool; gardening tools; a tool for learning",
+    "commonMistake": "tool 作“工具”时是可数名词，单数前通常要有 a、the 或其他限定词。",
+    "example": {
+      "english": "A map is a useful tool for planning a walk.",
+      "chinese": "地图是规划散步路线的有用工具。"
+    },
+    "application": {
+      "prompt": "A spade is a garden ___. A. tool B. planet",
+      "solution": "A。解析：spade（铁锹）属于 tool（工具）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tool",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tool"
+      }
+    ]
+  },
+  {
+    "word": "actually",
+    "examTags": [
+      "词汇·副词与语篇",
+      "阅读·理解转折和澄清"
+    ],
+    "grammar": "adv. 实际上；事实上；居然。常用于补充真实情况或委婉纠正，位置较灵活。",
+    "collocations": "actually know; actually be; but actually",
+    "commonMistake": "actually 表示“事实上”，不等于 currently（目前）；不要按中文“实际地”生硬翻译。",
+    "example": {
+      "english": "I thought the plant was small, but it is actually quite tall.",
+      "chinese": "我原以为这株植物很小，但它实际上相当高。"
+    },
+    "application": {
+      "prompt": "I expected the walk to be short, but it took two hours ___. A. actually B. loudly",
+      "solution": "A。解析：actually 用来说明实际情况与原先想法不同。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: actually",
+        "url": "https://dictionary.cambridge.org/dictionary/english/actually"
+      }
+    ]
+  },
+  {
+    "word": "shoot",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·不规则动词"
+    ],
+    "grammar": "n. 幼苗；嫩芽；v. 射击；发射。表示“射击”时过去式和过去分词为 shot；作植物“长出嫩芽”时也可用 shoot。",
+    "collocations": "a new shoot; bamboo shoots; shoot a ball",
+    "commonMistake": "表示“射击”的过去式是 shot，不是 shooted；本单元名词义可指植物嫩芽。",
+    "example": {
+      "english": "New green shoots appeared after the warm rain.",
+      "chinese": "一场暖雨后，新的绿芽长了出来。"
+    },
+    "application": {
+      "prompt": "Small new parts growing from a plant are called ___. A. shoots B. wings",
+      "solution": "A。解析：shoot 作名词可指植物的嫩芽。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shoot",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shoot"
+      }
+    ]
+  },
+  {
+    "word": "appear",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·系动词与不及物动词"
+    ],
+    "grammar": "v. 出现；显得、看起来好像。可用 appear in/on 表示出现于某处，也可用 appear + adj./to be 表示“似乎”。",
+    "collocations": "appear on the page; appear suddenly; appear to be healthy",
+    "commonMistake": "appear 表示“出现”时通常不直接接宾语；表示“看起来”可接形容词或 to be。",
+    "example": {
+      "english": "A small frog appeared beside the pond.",
+      "chinese": "一只小青蛙出现在池塘旁边。"
+    },
+    "application": {
+      "prompt": "A rainbow ___ in the sky after the rain. A. appeared B. protected",
+      "solution": "A。解析：彩虹“出现”用 appear；过去发生用 appeared。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: appear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/appear"
+      }
+    ]
+  },
+  {
+    "word": "feel free (to do sth)",
+    "examTags": [
+      "词汇·交际表达",
+      "语法·形容词与不定式"
+    ],
+    "grammar": "phr. 请随意（做某事）；尽管（做某事）。常用 feel free to do sth，表示友好地允许或邀请。",
+    "collocations": "feel free to ask; feel free to call; feel free to look around",
+    "commonMistake": "to 后接动词原形：feel free to ask；不要接动名词 asking。",
+    "example": {
+      "english": "Feel free to ask me about the plants in the garden.",
+      "chinese": "关于花园里的植物，尽管问我。"
+    },
+    "application": {
+      "prompt": "You may ask any question you like. Please feel free ___ me. A. asking B. to ask",
+      "solution": "B。解析：feel free 后接 to do，故用 to ask。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: free",
+        "url": "https://dictionary.cambridge.org/dictionary/english/free"
+      }
+    ]
+  },
+  {
+    "word": "land",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与动词"
+    ],
+    "grammar": "n. 陆地；土地；v. 降落、着陆。land on/in 表示降落在某处；作名词时常与 sea 对照。",
+    "collocations": "on land; farmland; land safely; land on the ground",
+    "commonMistake": "land 作名词表示陆地或土地；作动词表示着陆，过去式和过去分词均为 landed。",
+    "example": {
+      "english": "The butterfly landed on a flower near the path.",
+      "chinese": "蝴蝶落在小路旁的一朵花上。"
+    },
+    "application": {
+      "prompt": "The bird flew down and ___ on a branch. A. landed B. connected",
+      "solution": "A。解析：飞鸟“着陆、落在”树枝上用 land on。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: land",
+        "url": "https://dictionary.cambridge.org/dictionary/english/land"
+      }
+    ]
+  },
+  {
+    "word": "African",
+    "examTags": [
+      "词汇·洲名派生",
+      "拼写·国籍与地区形容词"
+    ],
+    "grammar": "adj. 非洲的；非洲人的；n. 非洲人。由 Africa 派生，首字母始终大写。",
+    "collocations": "African countries; African wildlife; an African writer",
+    "commonMistake": "Africa 是洲名，African 是其形容词或表示非洲人的名词；两者首字母均大写。",
+    "example": {
+      "english": "The book describes animals in an African grassland.",
+      "chinese": "这本书描写了非洲草原上的动物。"
+    },
+    "application": {
+      "prompt": "The adjective formed from Africa is ___. A. Africa B. African",
+      "solution": "B。解析：表示“非洲的”用形容词 African。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: African",
+        "url": "https://dictionary.cambridge.org/dictionary/english/african"
+      }
+    ]
+  },
+  {
+    "word": "rose",
+    "examTags": [
+      "词汇·植物与花卉",
+      "语法·名词与动词"
+    ],
+    "grammar": "n. 玫瑰；蔷薇；rose 也可作 rise 的过去式，须根据句子中的位置和语境区分。",
+    "collocations": "a red rose; a rose garden; a bunch of roses",
+    "commonMistake": "rose 作花名时是可数名词，复数 roses；作 rise 的过去式时是动词，不加 -s。",
+    "example": {
+      "english": "A red rose grew beside the garden gate.",
+      "chinese": "花园门边长着一朵红玫瑰。"
+    },
+    "application": {
+      "prompt": "She gave her mother a beautiful ___. A. frog B. rose",
+      "solution": "B。解析：送给妈妈的花可以是一朵 rose（玫瑰）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rose",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rose"
+      }
+    ]
+  },
+  {
+    "word": "peony",
+    "examTags": [
+      "词汇·植物与花卉",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 牡丹；芍药。可数名词，复数 peonies（辅音字母加 y 变 y 为 i 再加 -es）。",
+    "collocations": "a peony flower; peony blossoms; a garden of peonies",
+    "commonMistake": "peony 的复数是 peonies，不是 peonys；注意 y 变 i 再加 -es。",
+    "example": {
+      "english": "The peonies bloom in the garden in spring.",
+      "chinese": "牡丹在春天于花园里开放。"
+    },
+    "application": {
+      "prompt": "Several ___ are blooming near the wall. A. peonys B. peonies",
+      "solution": "B。解析：以辅音字母加 y 结尾的 peony 变复数为 peonies。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: peony",
+        "url": "https://dictionary.cambridge.org/dictionary/english/peony"
+      }
+    ]
+  },
+  {
+    "word": "lotus",
+    "examTags": [
+      "词汇·植物与花卉",
+      "语法·名词复数"
+    ],
+    "grammar": "n. 莲花；荷花。可数名词，复数可写 lotuses 或 loti；初中阶段常用 lotuses。",
+    "collocations": "a lotus flower; lotus leaves; a lotus pond",
+    "commonMistake": "lotus 的常见复数是 lotuses；不要把它与 lotus root（莲藕）混为一谈。",
+    "example": {
+      "english": "A pink lotus opened in the pond.",
+      "chinese": "池塘里一朵粉色的莲花开了。"
+    },
+    "application": {
+      "prompt": "The flower that grows on a pond is a ___. A. province B. lotus",
+      "solution": "B。解析：lotus 指莲花或荷花。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lotus",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lotus"
+      }
+    ]
+  },
+  {
+    "word": "butterfly",
+    "examTags": [
+      "词汇·昆虫与动物",
+      "语法·名词复数"
+    ],
+    "grammar": "n. 蝴蝶；可数名词，复数 butterflies（辅音字母加 y 变 y 为 i 再加 -es）。",
+    "collocations": "a colorful butterfly; butterfly wings; butterflies in the garden",
+    "commonMistake": "butterfly 的复数是 butterflies，不是 butterflys；注意 y 变 i。",
+    "example": {
+      "english": "A butterfly rested on the yellow flower.",
+      "chinese": "一只蝴蝶停在黄色的花上。"
+    },
+    "application": {
+      "prompt": "Two ___ flew over the flowers. A. butterflies B. butterflys",
+      "solution": "A。解析：butterfly 以辅音字母加 y 结尾，复数为 butterflies。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: butterfly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/butterfly"
+      }
+    ]
+  },
+  {
+    "word": "wing",
+    "examTags": [
+      "词汇·动物身体部位",
+      "语法·名词复数"
+    ],
+    "grammar": "n. 翅膀；翼；可数名词，复数 wings；也可指建筑物的侧翼。",
+    "collocations": "a bird's wing; spread its wings; butterfly wings",
+    "commonMistake": "wing 是可数名词；表示一只鸟的两只翅膀时通常用复数 wings。",
+    "example": {
+      "english": "The bird hurt one wing but soon recovered.",
+      "chinese": "这只鸟伤了一只翅膀，但很快恢复了。"
+    },
+    "application": {
+      "prompt": "A bird uses its ___ to fly. A. wings B. roots",
+      "solution": "A。解析：鸟用翅膀飞行，wing 的复数是 wings。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wing"
+      }
+    ]
+  },
+  {
+    "word": "frog",
+    "examTags": [
+      "词汇·动物与栖息地",
+      "语法·名词复数"
+    ],
+    "grammar": "n. 蛙；青蛙。可数名词，复数 frogs；可用 a frog / frogs 表示单复数。",
+    "collocations": "a green frog; a frog in the pond; frogs jump",
+    "commonMistake": "frog 的复数直接加 -s：frogs；不要写成 frogges。",
+    "example": {
+      "english": "A frog jumped into the pond.",
+      "chinese": "一只青蛙跳进了池塘。"
+    },
+    "application": {
+      "prompt": "This small animal can jump and often lives near water. It is a ___. A. frog B. mushroom",
+      "solution": "A。解析：能跳、常生活在水边的小动物是 frog。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: frog",
+        "url": "https://dictionary.cambridge.org/dictionary/english/frog"
+      }
+    ]
+  },
+  {
+    "word": "up to",
+    "examTags": [
+      "词汇·数量与范围表达",
+      "语法·介词短语"
+    ],
+    "grammar": "phr. 多达；至多；直到；还可表示由某人负责。具体意思需结合后接数字、时间或动作判断。",
+    "collocations": "up to ten people; up to now; be up to you",
+    "commonMistake": "up to + 数字表示“多达/至多”；up to now 表示“到目前为止”，不要一概译成“直到”。",
+    "example": {
+      "english": "The garden can hold up to thirty visitors.",
+      "chinese": "这个花园最多可容纳三十名游客。"
+    },
+    "application": {
+      "prompt": "The bus can carry ___ 40 passengers. A. up to B. without",
+      "solution": "A。解析：up to + 数字表示“多达、至多”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/up"
+      }
+    ]
+  },
+  {
+    "word": "weigh",
+    "examTags": [
+      "词汇·重量与测量",
+      "语法·动词搭配"
+    ],
+    "grammar": "v. 有……重；称重量。表示重量时常用 weigh + 数字 + 单位；weigh something 表示称某物重量。",
+    "collocations": "weigh 20 kilograms; weigh a bag; weigh more than",
+    "commonMistake": "询问重量常用 How much does it weigh?；不要把动词 weigh 与名词 weight 混用。",
+    "example": {
+      "english": "The young panda weighs about ten kilograms.",
+      "chinese": "这只熊猫幼崽重约十千克。"
+    },
+    "application": {
+      "prompt": "How much does the box ___? A. weight B. weigh",
+      "solution": "B。解析：助动词 does 后接动词原形 weigh；weight 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: weigh",
+        "url": "https://dictionary.cambridge.org/dictionary/english/weigh"
+      }
+    ]
+  },
+  {
+    "word": "kg",
+    "examTags": [
+      "词汇·度量单位",
+      "阅读·数值与单位"
+    ],
+    "grammar": "缩写，kilogram 的符号，表示千克（公斤）。数字后直接写 kg，符号不加复数 -s，也不加句点。",
+    "collocations": "5 kg of rice; weigh 20 kg; a 2 kg bag",
+    "commonMistake": "kg 是国际单位符号，大小写固定为小写 kg；数字后不写 kgs。",
+    "example": {
+      "english": "The sack of rice weighs 10 kg.",
+      "chinese": "这袋米重 10 千克。"
+    },
+    "application": {
+      "prompt": "Which is the standard symbol for kilogram? A. KG. B. kg",
+      "solution": "B。解析：千克符号写作 kg，小写且不加句点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: kilogram",
+        "url": "https://dictionary.cambridge.org/dictionary/english/kilogram"
+      }
+    ]
+  },
+  {
+    "word": "ginkgo",
+    "examTags": [
+      "词汇·植物名称",
+      "语法·名词复数"
+    ],
+    "grammar": "n. 银杏；可数名词，复数常写 ginkgoes，也可写 ginkgos。",
+    "collocations": "a ginkgo tree; ginkgo leaves; a row of ginkgoes",
+    "commonMistake": "ginkgo 的拼写中有 k；不要误写为 gingko。",
+    "example": {
+      "english": "The ginkgo leaves turn yellow in autumn.",
+      "chinese": "银杏叶在秋天变黄。"
+    },
+    "application": {
+      "prompt": "The tree with fan-shaped leaves is a ___. A. cheetah B. ginkgo",
+      "solution": "B。解析：扇形叶片是银杏树的典型特征之一。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ginkgo",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ginkgo"
+      }
+    ]
+  },
+  {
+    "word": "believe",
+    "examTags": [
+      "词汇·动词搭配",
+      "语法·宾语从句"
+    ],
+    "grammar": "v. 相信；认为。可接名词、that 从句或 sb/sth to be...；believe in 表示信任或相信其价值。",
+    "collocations": "believe a story; believe that it is true; believe in yourself",
+    "commonMistake": "believe 表示相信某个说法；believe in 常表示信任某人或相信某事物的价值。",
+    "example": {
+      "english": "I believe that every plant has a role in nature.",
+      "chinese": "我认为每种植物在自然界都有作用。"
+    },
+    "application": {
+      "prompt": "Many people ___ that trees help clean the air. A. believe B. weigh",
+      "solution": "A。解析：believe that... 表示“认为……”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: believe",
+        "url": "https://dictionary.cambridge.org/dictionary/english/believe"
+      }
+    ]
+  },
+  {
+    "word": "province",
+    "examTags": [
+      "词汇·地理与行政区划",
+      "语法·名词复数"
+    ],
+    "grammar": "n. 省份；可数名词，复数 provinces。专有地名中的省名首字母大写。",
+    "collocations": "a coastal province; in the province; provincial capital",
+    "commonMistake": "province 是普通名词，只有具体省名中的 Province 才按专名大写；注意复数 provinces。",
+    "example": {
+      "english": "This province is famous for its forests and rivers.",
+      "chinese": "这个省以森林和河流闻名。"
+    },
+    "application": {
+      "prompt": "A country may be divided into smaller areas called ___. A. provinces B. planets",
+      "solution": "A。解析：province 指省份。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: province",
+        "url": "https://dictionary.cambridge.org/dictionary/english/province"
+      }
+    ]
+  },
+  {
+    "word": "take a walk",
+    "examTags": [
+      "词汇·日常活动",
+      "语法·固定搭配"
+    ],
+    "grammar": "phr. 散步。常用 take a walk；walk 也可作动词，如 walk around the park。",
+    "collocations": "take a walk after dinner; take a long walk; take a walk in the park",
+    "commonMistake": "固定表达中用 take a walk；若直接用动词则说 walk，不说 take walk。",
+    "example": {
+      "english": "We take a walk by the river after dinner.",
+      "chinese": "晚饭后我们沿河散步。"
+    },
+    "application": {
+      "prompt": "After sitting all day, Mia went outside to ___. A. take a walk B. boil water",
+      "solution": "A。解析：外出散步可说 take a walk。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: walk",
+        "url": "https://dictionary.cambridge.org/dictionary/english/walk"
+      }
+    ]
+  },
+  {
+    "word": "connect",
+    "examTags": [
+      "词汇·联系与连接",
+      "语法·动词结构"
+    ],
+    "grammar": "v. 连接；使有联系。常用 connect A to/with B；connect with 也可表示与某人沟通或产生共鸣。",
+    "collocations": "connect a computer to the internet; connect two places; connect with people",
+    "commonMistake": "表达“把 A 和 B 连接起来”用 connect A to/with B；不要漏掉连接对象前的介词。",
+    "example": {
+      "english": "A path connects the village with the nature park.",
+      "chinese": "一条小路把村庄和自然公园连接起来。"
+    },
+    "application": {
+      "prompt": "This bridge ___ the two sides of the river. A. imagines B. connects",
+      "solution": "B。解析：连接两地用 connect；主语为单数，动词加 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: connect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/connect"
+      }
+    ]
+  },
+  {
+    "word": "connected",
+    "examTags": [
+      "词汇·词形变化",
+      "语法·形容词与过去分词"
+    ],
+    "grammar": "adj. 连接的；相关的。可用 be connected to/with；由 connect 加 -ed 构成。",
+    "collocations": "be connected to a network; closely connected with; a connected system",
+    "commonMistake": "表示“与……有关/相连”用 be connected with/to；connected 后需保留介词。",
+    "example": {
+      "english": "These ideas are connected with the health of the ecosystem.",
+      "chinese": "这些观点与生态系统的健康有关。"
+    },
+    "application": {
+      "prompt": "The two ponds are linked by a stream. They are ___ by water. A. disappointed B. connected",
+      "solution": "B。解析：connected 表示“连接在一起的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: connect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/connect"
+      }
+    ]
+  },
+  {
+    "word": "be connected with / to",
+    "examTags": [
+      "词汇·固定搭配",
+      "语法·被动结构与介词"
+    ],
+    "grammar": "phr. 与……相连；与……有关。be connected with/to + 名词或代词；主语与 connect 构成被动关系。",
+    "collocations": "be connected with nature; be connected to the road; be closely connected with health",
+    "commonMistake": "搭配中的介词 with/to 不能省略；主语是复数时用 are connected。",
+    "example": {
+      "english": "The health of bees is connected with the health of plants.",
+      "chinese": "蜜蜂的健康与植物的健康有关。"
+    },
+    "application": {
+      "prompt": "Air pollution is ___ people's health. A. connected with B. connected at",
+      "solution": "A。解析：表示“与……有关”用 be connected with。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: connect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/connect"
+      }
+    ]
+  },
+  {
+    "word": "without",
+    "examTags": [
+      "词汇·介词",
+      "语法·介词后接名词或动名词"
+    ],
+    "grammar": "prep. 没有；缺乏；不做。后接名词、代词或动名词，不能直接接动词原形。",
+    "collocations": "without water; without help; leave without saying goodbye",
+    "commonMistake": "without 是介词，后接 doing：without asking；不要说 without ask。",
+    "example": {
+      "english": "Many plants cannot live without enough water.",
+      "chinese": "许多植物没有足够的水就无法生存。"
+    },
+    "application": {
+      "prompt": "He left the room ___ saying goodbye. A. during B. without",
+      "solution": "B。解析：without 后可接动名词 saying，表示“没有道别就……”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: without",
+        "url": "https://dictionary.cambridge.org/dictionary/english/without"
+      }
+    ]
+  },
+  {
+    "word": "imagine",
+    "examTags": [
+      "词汇·动词搭配",
+      "语法·动名词与宾语从句"
+    ],
+    "grammar": "v. 想象；猜想。常用 imagine doing sth、imagine + 名词或 imagine (that) 从句。",
+    "collocations": "imagine a future; imagine living in the forest; imagine that it is possible",
+    "commonMistake": "imagine 后表示“想象做某事”用动名词：imagine doing，不用 imagine to do。",
+    "example": {
+      "english": "Can you imagine living without plants or animals?",
+      "chinese": "你能想象生活中没有植物或动物吗？"
+    },
+    "application": {
+      "prompt": "She can ___ walking through a forest full of flowers. A. imagine B. protect",
+      "solution": "A。解析：imagine 后接动名词 walking。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: imagine",
+        "url": "https://dictionary.cambridge.org/dictionary/english/imagine"
+      }
+    ]
+  },
+  {
+    "word": "honey",
+    "examTags": [
+      "词汇·食物与自然",
+      "语法·不可数名词与称呼语"
+    ],
+    "grammar": "n. 蜂蜜，通常不可数；也可作亲昵称呼语 honey。",
+    "collocations": "a spoonful of honey; honey bees; honey and lemon",
+    "commonMistake": "表示蜂蜜时通常不说 a honey；可说 some honey 或 a spoonful of honey。",
+    "example": {
+      "english": "Bees make honey from flower nectar.",
+      "chinese": "蜜蜂用花蜜酿造蜂蜜。"
+    },
+    "application": {
+      "prompt": "Add a little ___ to the tea if you like it sweet. A. honey B. butterfly",
+      "solution": "A。解析：蜂蜜可用来给茶调味，honey 通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: honey",
+        "url": "https://dictionary.cambridge.org/dictionary/english/honey"
+      }
+    ]
+  },
+  {
+    "word": "disappointed",
+    "examTags": [
+      "词汇·情感形容词",
+      "语法·形容词与介词"
+    ],
+    "grammar": "adj. 失望的；沮丧的。表示对结果失望用 disappointed with/about；对某人失望可用 disappointed in。",
+    "collocations": "feel disappointed; be disappointed with the result; disappointed in someone",
+    "commonMistake": "disappointed 描述感到失望的人；令人失望的事物用 disappointing。",
+    "example": {
+      "english": "We were disappointed with the low number of visitors.",
+      "chinese": "游客人数很少，我们对此感到失望。"
+    },
+    "application": {
+      "prompt": "The test result made Leo feel ___. A. disappointing B. disappointed",
+      "solution": "B。解析：Leo 是感到失望的人，用 disappointed；令人失望的事物用 disappointing。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: disappoint",
+        "url": "https://dictionary.cambridge.org/dictionary/english/disappoint"
+      }
+    ]
+  },
+  {
+    "word": "connection",
+    "examTags": [
+      "词汇·名词派生",
+      "语法·可数名词与介词"
+    ],
+    "grammar": "n. 联系；连接。可数名词，复数 connections；常用 connection between A and B 或 connection with。",
+    "collocations": "a connection between bees and flowers; internet connection; have a connection with",
+    "commonMistake": "表示 A 与 B 之间的联系用 a connection between A and B；不要遗漏 between 后的 and。",
+    "example": {
+      "english": "There is a close connection between bees and many plants.",
+      "chinese": "蜜蜂和许多植物之间有密切联系。"
+    },
+    "application": {
+      "prompt": "Scientists found a strong ___ between clean water and healthy plants. A. connection B. action",
+      "solution": "A。解析：connection 表示“联系”，常用 connection between。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: connection",
+        "url": "https://dictionary.cambridge.org/dictionary/english/connection"
+      }
+    ]
+  },
+  {
+    "word": "pollination",
+    "examTags": [
+      "词汇·自然科学主题",
+      "构词·动词派生名词"
+    ],
+    "grammar": "n. 授粉。通常不可数；由 pollinate（给……授粉）加名词后缀构成。",
+    "collocations": "plant pollination; pollination by bees; help with pollination",
+    "commonMistake": "pollination 是“授粉”这一过程；实施授粉用动词 pollinate，传粉者可称 pollinator。",
+    "example": {
+      "english": "Bees help with the pollination of many flowers.",
+      "chinese": "蜜蜂帮助许多花朵授粉。"
+    },
+    "application": {
+      "prompt": "The transfer of pollen that helps plants produce seeds is called ___. A. communication B. pollination",
+      "solution": "B。解析：pollination 指花粉传播并完成授粉的过程。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pollination",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pollination"
+      }
+    ]
+  },
+  {
+    "word": "pollen",
+    "examTags": [
+      "词汇·植物与自然科学",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 花粉；通常作不可数名词，指植物产生的细小粉末。",
+    "collocations": "pollen from flowers; carry pollen; pollen grains",
+    "commonMistake": "泛指花粉时 pollen 通常不可数；不能按普通可数名词直接说 a pollen。",
+    "example": {
+      "english": "The bee carried pollen from one flower to another.",
+      "chinese": "蜜蜂把花粉从一朵花带到另一朵花。"
+    },
+    "application": {
+      "prompt": "Bees carry ___ between flowers. A. climates B. pollen",
+      "solution": "B。解析：花朵之间由蜜蜂携带的是 pollen（花粉）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pollen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pollen"
+      }
+    ]
+  },
+  {
+    "word": "action",
+    "examTags": [
+      "词汇·名词与行动表达",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 行动；行为。可数名词，常用 take action 表示“采取行动”，action 也可指动作或举措。",
+    "collocations": "take action; a plan of action; an action to protect wildlife",
+    "commonMistake": "固定搭配通常说 take action，不说 make an action；具体一项举措可说 an action。",
+    "example": {
+      "english": "We must take action to protect the local river.",
+      "chinese": "我们必须采取行动保护当地河流。"
+    },
+    "application": {
+      "prompt": "The river is polluted, so the town must take ___ soon. A. action B. happiness",
+      "solution": "A。解析：take action 是“采取行动”的固定搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: action",
+        "url": "https://dictionary.cambridge.org/dictionary/english/action"
+      }
+    ]
+  },
+  {
+    "word": "in fact",
+    "examTags": [
+      "词汇·语篇衔接",
+      "语用·补充事实与澄清"
+    ],
+    "grammar": "phr. 事实上；实际上。常用于补充、强调或纠正前文信息，常置于句首或句中。",
+    "collocations": "in fact, ...; not easy—in fact, difficult; know the facts",
+    "commonMistake": "in fact 是副词性短语，通常不接 of；表示“事实上”不要误写为 in the fact。",
+    "example": {
+      "english": "Some insects look small. In fact, they are important to the ecosystem.",
+      "chinese": "有些昆虫看起来很小。事实上，它们对生态系统很重要。"
+    },
+    "application": {
+      "prompt": "I thought the island was empty. ___, many animals live there. A. For example of B. In fact",
+      "solution": "B。解析：in fact 用来补充真实情况。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fact",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fact"
+      }
+    ]
+  },
+  {
+    "word": "per cent",
+    "examTags": [
+      "词汇·百分数表达",
+      "语法·百分比与主谓一致"
+    ],
+    "grammar": "n./adj./adv. 百分之……；每一百中。数字 + per cent 表示百分数；作主语时谓语常按 of 后名词的单复数确定。",
+    "collocations": "50 per cent of the land; ten per cent; per cent of people",
+    "commonMistake": "per cent 与 percent 意义相同；表示“百分之五十”说 50 per cent，谓语依 of 后名词判断。",
+    "example": {
+      "english": "About 30 per cent of the land is covered by forest.",
+      "chinese": "大约百分之三十的土地被森林覆盖。"
+    },
+    "application": {
+      "prompt": "Forty ___ of the students joined the nature club. A. per cent B. kilograms",
+      "solution": "A。解析：表示百分比用 per cent；数字 forty 放在其前。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: percent",
+        "url": "https://dictionary.cambridge.org/dictionary/english/percent"
+      }
+    ]
+  },
+  {
+    "word": "for this reason",
+    "examTags": [
+      "词汇·因果衔接",
+      "语篇·说明原因与结果"
+    ],
+    "grammar": "phr. 出于这个原因；因此。常置于句首，后接逗号和结果分句。",
+    "collocations": "for this reason, ...; for this reason alone; explain the reason",
+    "commonMistake": "for this reason 后接结果；说明原因可用 because，避免同一句中重复 because...so。",
+    "example": {
+      "english": "Bees help many plants reproduce. For this reason, we should protect them.",
+      "chinese": "蜜蜂帮助许多植物繁殖。出于这个原因，我们应该保护它们。"
+    },
+    "application": {
+      "prompt": "The pond is home to many frogs. ___, the town keeps it clean. A. For this reason B. At least",
+      "solution": "A。解析：前句给出原因，后句说明因此采取的行动。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reason",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reason"
+      }
+    ]
+  },
+  {
+    "word": "planet",
+    "examTags": [
+      "词汇·自然与宇宙",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 行星；可数名词，复数 planets。the planet 常指地球或人类赖以生存的地球。",
+    "collocations": "the planet Earth; another planet; protect our planet",
+    "commonMistake": "planet 是行星；不要与表示“计划”的 plan 混淆拼写。",
+    "example": {
+      "english": "We should keep our planet clean and healthy.",
+      "chinese": "我们应该让自己的星球保持清洁、健康。"
+    },
+    "application": {
+      "prompt": "Earth is the ___ on which we live. A. planet B. province",
+      "solution": "A。解析：地球是一颗行星，planet 指行星。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: planet",
+        "url": "https://dictionary.cambridge.org/dictionary/english/planet"
+      }
+    ]
+  },
+  {
+    "word": "in order to",
+    "examTags": [
+      "词汇·目的表达",
+      "语法·不定式作目的状语"
+    ],
+    "grammar": "phr. 为了；以便。后接动词原形，表示目的；否定形式为 in order not to do sth。",
+    "collocations": "in order to protect nature; in order to learn; in order not to waste water",
+    "commonMistake": "in order to 后接动词原形；不定式表目的时可简化为 to，但不要接动名词。",
+    "example": {
+      "english": "We planted flowers in order to attract more bees.",
+      "chinese": "我们种花是为了吸引更多蜜蜂。"
+    },
+    "application": {
+      "prompt": "The school built a garden ___ give students a place to study nature. A. because of B. in order to",
+      "solution": "B。解析：后面接动词原形 give，表示建花园的目的。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: order",
+        "url": "https://dictionary.cambridge.org/dictionary/english/order"
+      }
+    ]
+  },
+  {
+    "word": "store",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·名词与动词"
+    ],
+    "grammar": "v. 贮存；存储；n. 商店。store sth in/on... 表示把东西存放在某处；需结合宾语判断词性。",
+    "collocations": "store food for winter; store information; a grocery store",
+    "commonMistake": "store 作动词是“贮存/储存”，作名词是“商店”；不要只按“商店”一个词义理解。",
+    "example": {
+      "english": "Squirrels store nuts for the winter.",
+      "chinese": "松鼠为冬天贮存坚果。"
+    },
+    "application": {
+      "prompt": "Some animals ___ food before the cold season. A. store B. title",
+      "solution": "A。解析：在冬季来临前动物会储存食物，store 作动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: store",
+        "url": "https://dictionary.cambridge.org/dictionary/english/store"
+      }
+    ]
+  },
+  {
+    "word": "honeycomb",
+    "examTags": [
+      "词汇·昆虫与自然",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 蜂巢；蜂窝。可数名词，复数 honeycombs；常指蜜蜂用蜡建成的六边形巢房结构。",
+    "collocations": "a honeycomb structure; a piece of honeycomb; cells in a honeycomb",
+    "commonMistake": "honeycomb 指蜂巢结构；蜂蜜是 honey，二者含义不同。",
+    "example": {
+      "english": "The bees built a honeycomb inside the wooden box.",
+      "chinese": "蜜蜂在木箱里筑了一个蜂巢。"
+    },
+    "application": {
+      "prompt": "Bees make a structure with many small wax cells called a ___. A. honeycomb B. mushroom",
+      "solution": "A。解析：蜜蜂用蜡筑成的蜂窝结构叫 honeycomb。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: honeycomb",
+        "url": "https://dictionary.cambridge.org/dictionary/english/honeycomb"
+      }
+    ]
+  },
+  {
+    "word": "communicate",
+    "examTags": [
+      "词汇·交流与表达",
+      "语法·动词介词搭配"
+    ],
+    "grammar": "v. 交流；沟通；传达。常用 communicate with sb、communicate sth to sb；communication 是名词。",
+    "collocations": "communicate with each other; communicate an idea; communicate by email",
+    "commonMistake": "表示“与某人交流”用 communicate with sb；表示把信息传达给某人可用 communicate sth to sb。",
+    "example": {
+      "english": "Bees communicate with one another through movement.",
+      "chinese": "蜜蜂通过动作彼此交流。"
+    },
+    "application": {
+      "prompt": "The students used a map to ___ their ideas to the group. A. communicate B. boil",
+      "solution": "A。解析：把想法传达给小组可用 communicate ideas to the group。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: communicate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/communicate"
+      }
+    ]
+  },
+  {
+    "word": "play a part (in sth)",
+    "examTags": [
+      "词汇·固定搭配",
+      "语法·play 与冠词"
+    ],
+    "grammar": "phr. 参与；在……中起作用。常用 play a part in sth/doing sth；主语为第三人称单数时 play 变 plays。",
+    "collocations": "play a part in nature; play an important part in; play a part in protecting wildlife",
+    "commonMistake": "固定搭配是 play a part in；in 后接名词或动名词，不说 play part on。",
+    "example": {
+      "english": "Every insect plays a part in the ecosystem.",
+      "chinese": "每一种昆虫都在生态系统中发挥作用。"
+    },
+    "application": {
+      "prompt": "Trees ___ an important part in keeping the air clean. A. play B. do",
+      "solution": "A。解析：固定搭配为 play a part in，主语 trees 为复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: part",
+        "url": "https://dictionary.cambridge.org/dictionary/english/part"
+      }
+    ]
+  },
+  {
+    "word": "ecosystem",
+    "examTags": [
+      "词汇·环境与生态",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 生态系统；可数名词，复数 ecosystems。指生物及其环境相互作用形成的系统。",
+    "collocations": "a forest ecosystem; a healthy ecosystem; protect the ecosystem",
+    "commonMistake": "ecosystem 是可数名词，单数前要有限定词，如 an ecosystem；拼写中 system 以 y 开头。",
+    "example": {
+      "english": "A pond is a small ecosystem full of life.",
+      "chinese": "池塘是一个充满生命的小型生态系统。"
+    },
+    "application": {
+      "prompt": "Plants, animals, and their environment together form an ___. A. instruction B. ecosystem",
+      "solution": "B。解析：生物与环境相互作用形成 ecosystem。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ecosystem",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ecosystem"
+      }
+    ]
+  },
+  {
+    "word": "protect",
+    "examTags": [
+      "词汇·环境保护",
+      "语法·动词介词搭配"
+    ],
+    "grammar": "v. 保护；防护。常用 protect sb/sth from/against sth；protection 为名词，protective 为形容词。",
+    "collocations": "protect wild animals; protect forests from fire; protect the environment",
+    "commonMistake": "表示保护某人免受某物伤害用 protect sb from/against sth；protect 后不直接接 against 作被保护对象。",
+    "example": {
+      "english": "We can protect bees by planting more flowers.",
+      "chinese": "我们可以通过种更多的花来保护蜜蜂。"
+    },
+    "application": {
+      "prompt": "People should ___ rivers from pollution. A. disappoint B. protect",
+      "solution": "B。解析：保护河流免受污染用 protect rivers from pollution。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: protect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/protect"
+      }
+    ]
+  },
+  {
+    "word": "importance",
+    "examTags": [
+      "词汇·形容词派生名词",
+      "语法·不可数名词与介词"
+    ],
+    "grammar": "n. 重要性；通常不可数。常用 the importance of sth/doing sth；由 important 加 -ance 构成。",
+    "collocations": "the importance of sleep; understand the importance of; of great importance",
+    "commonMistake": "表示“……的重要性”用 the importance of；不要与形容词 important 混用。",
+    "example": {
+      "english": "The lesson explains the importance of clean water.",
+      "chinese": "这节课说明了清洁饮水的重要性。"
+    },
+    "application": {
+      "prompt": "We learned about the ___ of protecting local wildlife. A. importance B. important",
+      "solution": "A。解析：the 后接名词 importance；important 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: importance",
+        "url": "https://dictionary.cambridge.org/dictionary/english/importance"
+      }
+    ]
+  },
+  {
+    "word": "title",
+    "examTags": [
+      "词汇·阅读与写作",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 标题；题目；名称；可数名词，复数 titles。标题中的实词通常按标题格式大写，具体依写作规范。",
+    "collocations": "the title of a book; give an article a title; a suitable title",
+    "commonMistake": "询问文章标题可说 What is the title?；不要与表示“风格”的 style 混淆。",
+    "example": {
+      "english": "The title of her report is “Life in a Pond.”",
+      "chinese": "她的报告题目是《池塘里的生活》。"
+    },
+    "application": {
+      "prompt": "Choose a suitable ___ for your article before you hand it in. A. title B. spoon",
+      "solution": "A。解析：文章或报告的题目是 title。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: title",
+        "url": "https://dictionary.cambridge.org/dictionary/english/title"
+      }
+    ]
+  },
+  {
+    "word": "human",
+    "examTags": [
+      "词汇·人与自然",
+      "语法·名词与形容词"
+    ],
+    "grammar": "n. 人；人类；adj. 人的；人类的。复数作“人”时为 humans；作形容词时修饰名词。",
+    "collocations": "human beings; human life; human activity",
+    "commonMistake": "human 作名词时复数为 humans，也可说 human beings；作形容词时修饰名词，如 human life。",
+    "example": {
+      "english": "Human activity can change the natural environment.",
+      "chinese": "人类活动会改变自然环境。"
+    },
+    "application": {
+      "prompt": "People are also called ___ beings. A. human B. lively",
+      "solution": "A。解析：human beings 表示“人类”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: human",
+        "url": "https://dictionary.cambridge.org/dictionary/english/human"
+      }
+    ]
+  },
+  {
+    "word": "ant",
+    "examTags": [
+      "词汇·昆虫与动物",
+      "语法·可数名词与冠词"
+    ],
+    "grammar": "n. 蚂蚁；可数名词，复数 ants；单数前用 an，因为发音以元音音素开头。",
+    "collocations": "an anthill; a line of ants; ants carry food",
+    "commonMistake": "ant 前用 an：an ant；复数直接加 -s：ants。",
+    "example": {
+      "english": "An ant carried a crumb across the path.",
+      "chinese": "一只蚂蚁把面包屑搬过小路。"
+    },
+    "application": {
+      "prompt": "___ ant can carry food many times its own weight. A. A B. An",
+      "solution": "B。解析：ant 发音以元音音素开头，单数前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ant",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ant"
+      }
+    ]
+  },
+  {
+    "word": "be home to sb / sth",
+    "examTags": [
+      "词汇·栖息地表达",
+      "语法·系动词与介词"
+    ],
+    "grammar": "phr. 是……的栖息地；是……的家乡。home 在此作名词，to 后接居住者或事物。",
+    "collocations": "be home to many birds; be home to rare plants; a forest home to wildlife",
+    "commonMistake": "固定结构为 be home to；不要说 be home of。主语为单数时用 is home to。",
+    "example": {
+      "english": "The wetland is home to many kinds of birds.",
+      "chinese": "这片湿地是许多种鸟类的栖息地。"
+    },
+    "application": {
+      "prompt": "This forest ___ hundreds of animal species. A. is home to B. is popular with",
+      "solution": "A。解析：说明某地是动物栖息地用 be home to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: home",
+        "url": "https://dictionary.cambridge.org/dictionary/english/home"
+      }
+    ]
+  },
+  {
+    "word": "happiness",
+    "examTags": [
+      "词汇·形容词派生名词",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 幸福；快乐；通常不可数。由 happy 变 y 为 i 再加 -ness 构成。",
+    "collocations": "a feeling of happiness; bring happiness to; health and happiness",
+    "commonMistake": "happiness 是不可数名词，通常不加 a；拼写由 happy 变 y 为 i 后加 -ness。",
+    "example": {
+      "english": "Spending time with family brings her happiness.",
+      "chinese": "和家人共度时光给她带来快乐。"
+    },
+    "application": {
+      "prompt": "Helping others can bring ___ to both people. A. happy B. happiness",
+      "solution": "B。解析：bring 后接名词 happiness；happy 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: happiness",
+        "url": "https://dictionary.cambridge.org/dictionary/english/happiness"
+      }
+    ]
+  },
+  {
+    "word": "disappoint",
+    "examTags": [
+      "词汇·情感动词",
+      "语法·动词词形与派生"
+    ],
+    "grammar": "v. 使失望；使破灭。disappoint—disappointed—disappointed；形容人的感受用 disappointed，事物令人失望用 disappointing。",
+    "collocations": "disappoint a friend; disappoint the team; be disappointed by the result",
+    "commonMistake": "disappoint 是“使某人失望”；描述人的感受用 disappointed，描述令人失望的事物用 disappointing。",
+    "example": {
+      "english": "I did not want to disappoint my teammates.",
+      "chinese": "我不想让队友失望。"
+    },
+    "application": {
+      "prompt": "The team worked hard and did not want to ___ its coach. A. connect B. disappoint",
+      "solution": "B。解析：disappoint sb 表示“使某人失望”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: disappoint",
+        "url": "https://dictionary.cambridge.org/dictionary/english/disappoint"
+      }
+    ]
+  },
+  {
+    "word": "mushroom",
+    "examTags": [
+      "词汇·食物与自然",
+      "语法·可数名词"
+    ],
+    "grammar": "n. 蘑菇；伞菌。可数名词，复数 mushrooms；有些蘑菇可食用，有些不可食用。",
+    "collocations": "wild mushrooms; mushroom soup; pick mushrooms",
+    "commonMistake": "mushroom 是可数名词，表示一朵时用 a mushroom；不可随意采食野生蘑菇。",
+    "example": {
+      "english": "Small mushrooms grew under the old tree.",
+      "chinese": "老树下长出了小蘑菇。"
+    },
+    "application": {
+      "prompt": "A ___ is a kind of fungus often used in cooking. A. planet B. mushroom",
+      "solution": "B。解析：蘑菇是一类常用于烹饪的真菌。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mushroom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mushroom"
+      }
+    ]
+  },
+  {
+    "word": "ton",
+    "examTags": [
+      "词汇·度量单位",
+      "阅读·数字与重量"
+    ],
+    "grammar": "n. 吨；可数名词，复数 tons。英制 ton 与公制 tonne 的具体重量不同，阅读时应看语境和单位标注。",
+    "collocations": "a ton of sand; two tons of waste; weigh several tons",
+    "commonMistake": "ton 是质量单位“吨”，可数；a ton of 后接名词，谓语通常随整体数量表达处理。",
+    "example": {
+      "english": "The truck carried two tons of soil.",
+      "chinese": "卡车运了两吨土。"
+    },
+    "application": {
+      "prompt": "The large truck can carry several ___ of stone. A. tons B. ton's",
+      "solution": "A。解析：ton 的复数直接加 -s，表示若干吨。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ton",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ton"
+      }
+    ]
+  },
+  {
+    "word": "role",
+    "examTags": [
+      "词汇·作用与职责",
+      "语法·名词搭配"
+    ],
+    "grammar": "n. 作用；职能；角色。可数名词，常用 the role of... 或 play a role in...。",
+    "collocations": "the role of bees; play an important role in; the role of a teacher",
+    "commonMistake": "表示“在……中起作用”用 play a role in；role 前通常有冠词或形容词修饰。",
+    "example": {
+      "english": "Bees play an important role in pollination.",
+      "chinese": "蜜蜂在授粉中发挥重要作用。"
+    },
+    "application": {
+      "prompt": "Trees have an important ___ in providing homes for birds. A. sour B. role",
+      "solution": "B。解析：have a role in 表示“在……中有作用”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: role",
+        "url": "https://dictionary.cambridge.org/dictionary/english/role"
+      }
+    ]
+  },
+  {
+    "word": "play a role (in)",
+    "examTags": [
+      "词汇·固定搭配",
+      "语法·动名词作介词宾语"
+    ],
+    "grammar": "phr. 在……中发挥作用；扮演角色。play a role in 后接名词或动名词；表示重要作用可加 important。",
+    "collocations": "play a role in nature; play a role in keeping balance; play an important role",
+    "commonMistake": "in 是介词，后接名词或 doing：play a role in protecting；不要接动词原形。",
+    "example": {
+      "english": "Small insects play a role in keeping the ecosystem balanced.",
+      "chinese": "小昆虫在维持生态系统平衡方面发挥作用。"
+    },
+    "application": {
+      "prompt": "Plants play a role in ___ oxygen. A. produce B. producing",
+      "solution": "B。解析：in 是介词，后接动名词 producing。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: role",
+        "url": "https://dictionary.cambridge.org/dictionary/english/role"
+      }
+    ]
+  },
+  {
+    "word": "pea",
+    "examTags": [
+      "词汇·食物与植物",
+      "语法·名词复数"
+    ],
+    "grammar": "n. 豌豆；可数名词，单数 pea，复数 peas；豌豆荚为 pea pod。",
+    "collocations": "green peas; a pea pod; a bowl of peas",
+    "commonMistake": "pea 指一粒豌豆，peas 指多粒豌豆；不要与 pea 的复数误写为 peases。",
+    "example": {
+      "english": "She added a handful of peas to the soup.",
+      "chinese": "她往汤里加了一把豌豆。"
+    },
+    "application": {
+      "prompt": "A small round green vegetable is a ___. A. wing B. pea",
+      "solution": "B。解析：pea 指豌豆。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pea",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pea"
+      }
+    ]
+  },
+  {
+    "word": "climate",
+    "examTags": [
+      "词汇·天气与环境",
+      "语法·可数名词与介词"
+    ],
+    "grammar": "n. 气候；可数名词，复数 climates。常说 the climate of/in a place；指长期天气特征。",
+    "collocations": "a warm climate; climate change; the climate in the north",
+    "commonMistake": "climate 指一个地区长期的气候；某一天的天气用 weather，不可互换。",
+    "example": {
+      "english": "The warm climate allows these plants to grow all year.",
+      "chinese": "温暖的气候让这些植物全年都能生长。"
+    },
+    "application": {
+      "prompt": "The long-term weather conditions of a region are its ___. A. action B. climate",
+      "solution": "B。解析：长期天气特征是 climate（气候）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: climate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/climate"
+      }
+    ]
+  },
+  {
+    "word": "ocean",
+    "examTags": [
+      "词汇·自然地理",
+      "语法·可数名词与专名"
+    ],
+    "grammar": "n. 大海；海洋。可数名词，复数 oceans；具体海洋名称前常用 the，如 the Pacific Ocean。",
+    "collocations": "across the ocean; ocean life; the Pacific Ocean",
+    "commonMistake": "普通名词 ocean 前通常用 an/the；具体海洋名称首字母大写并加 the。",
+    "example": {
+      "english": "Many kinds of sea life live in the ocean.",
+      "chinese": "许多种海洋生物生活在海洋里。"
+    },
+    "application": {
+      "prompt": "The Pacific ___ is the largest ocean on Earth. A. ocean's B. Ocean",
+      "solution": "B。解析：海洋专名写作 the Pacific Ocean，专名部分大写。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ocean",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ocean"
+      }
+    ]
+  },
+  {
+    "word": "except",
+    "examTags": [
+      "词汇·介词辨析",
+      "语法·排除关系"
+    ],
+    "grammar": "prep. 除……之外；不包括。常用于整体中排除一个或一些对象；except for 可用于对整体作补充说明。",
+    "collocations": "everyone except me; open every day except Sunday; except for one problem",
+    "commonMistake": "except 表示“除外、不包括”；besides 表示“除此之外还包括”，二者含义相反。",
+    "example": {
+      "english": "All the flowers except one are open.",
+      "chinese": "除一朵外，所有花都开了。"
+    },
+    "application": {
+      "prompt": "The garden is open every day ___ Monday. A. except B. besides",
+      "solution": "A。解析：不包括星期一用 except；besides 表示“除……之外还”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: except",
+        "url": "https://dictionary.cambridge.org/dictionary/english/except"
+      }
+    ]
+  },
+  {
+    "word": "tiny",
+    "examTags": [
+      "词汇·形容词与程度",
+      "语法·比较级和最高级"
+    ],
+    "grammar": "adj. 极小的；微小的。比较级 tinier，最高级 tiniest；可作定语或表语。",
+    "collocations": "a tiny insect; a tiny amount; tiny seeds",
+    "commonMistake": "tiny 表示“极小的”；比较级和最高级要变 y 为 i：tinier、tiniest。",
+    "example": {
+      "english": "A tiny ant carried a large crumb.",
+      "chinese": "一只小小的蚂蚁搬着一大块面包屑。"
+    },
+    "application": {
+      "prompt": "The seed is so ___ that it is hard to see. A. tiny B. lively",
+      "solution": "A。解析：tiny 表示“极小的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tiny",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tiny"
+      }
+    ]
+  },
+  {
+    "word": "lively",
+    "examTags": [
+      "词汇·形容词与性格",
+      "语法·形容词辨析"
+    ],
+    "grammar": "adj. 精力充沛的；生机勃勃的；热闹的。可形容人、活动或地方。",
+    "collocations": "a lively discussion; a lively child; a lively town",
+    "commonMistake": "lively 是形容词，描述有活力、热闹；副词“生动地”常用 lively 的近义表达 vividly，不把 lively 当副词。",
+    "example": {
+      "english": "The children had a lively discussion about animals.",
+      "chinese": "孩子们热烈地讨论了动物。"
+    },
+    "application": {
+      "prompt": "The students were active and full of energy during the game. They were ___. A. tiny B. lively",
+      "solution": "B。解析：lively 可形容人精力充沛、充满活力。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lively",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lively"
+      }
+    ]
+  }
+]

@@ -17,6 +17,7 @@ import {
 } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { suggestLessonForFile } from '@/lib/lesson-preview'
+import { groupLessonPreviewSlots } from '@/lib/lesson-preview-groups'
 import styles from './bulk.module.css'
 
 type LessonMaterial = {
@@ -28,6 +29,8 @@ type LessonMaterial = {
 
 type Lesson = {
   id: string
+  groupId: string
+  uploadGroupKey: string
   lessonDate: string
   startTime: string
   endTime: string
@@ -49,7 +52,7 @@ type LessonResponse = {
 type PendingFile = {
   id: string
   file: File
-  lessonId: string
+  uploadGroupKey: string
   autoMatched: boolean
 }
 
@@ -79,10 +82,6 @@ function fileSizeLabel(file: File) {
     : `${Math.max(1, Math.ceil(file.size / 1024))} KB`
 }
 
-function lessonOptionLabel(lesson: Lesson) {
-  return `${lesson.subject} · ${lesson.groupName} · ${lesson.startTime}`
-}
-
 function materialStatus(lesson: Lesson) {
   if (!lesson.material) return { key: 'pending', label: '待上传' }
   if (lesson.material.uploadedByRole === 'ADMIN') return { key: 'admin', label: '管理员已代传' }
@@ -93,7 +92,7 @@ export default function BulkLessonPreviewPage() {
   const [step, setStep] = useState(0)
   const [grade, setGrade] = useState('')
   const [date, setDate] = useState(nextWeekendDate)
-  const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([])
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([])
   const [files, setFiles] = useState<PendingFile[]>([])
   const [publishing, setPublishing] = useState(false)
   const initializedScope = useRef('')
@@ -105,6 +104,7 @@ export default function BulkLessonPreviewPage() {
     revalidateOnReconnect: true,
   })
   const lessons = useMemo(() => data?.lessons || [], [data?.lessons])
+  const uploadGroups = useMemo(() => groupLessonPreviewSlots(lessons), [lessons])
   const isHistoricalTerm = Boolean(data?.selectedTerm && data.selectedTerm.status !== 'ACTIVE')
 
   useEffect(() => {
@@ -115,36 +115,36 @@ export default function BulkLessonPreviewPage() {
     const scope = `${grade}:${dateKey}`
     if (!grade || isLoading || initializedScope.current === scope) return
     initializedScope.current = scope
-    setSelectedLessonIds(isHistoricalTerm ? [] : lessons.filter((lesson) => !lesson.material).map((lesson) => lesson.id))
+    setSelectedGroupIds(isHistoricalTerm ? [] : uploadGroups.filter((group) => group.pendingLessons.length > 0).map((group) => group.id))
     setFiles([])
     setStep(0)
-  }, [dateKey, grade, isHistoricalTerm, isLoading, lessons])
+  }, [dateKey, grade, isHistoricalTerm, isLoading, uploadGroups])
 
-  const selectedLessons = useMemo(
-    () => lessons.filter((lesson) => selectedLessonIds.includes(lesson.id) && !lesson.material),
-    [lessons, selectedLessonIds],
+  const selectedGroups = useMemo(
+    () => uploadGroups.filter((group) => selectedGroupIds.includes(group.id) && group.pendingLessons.length > 0),
+    [uploadGroups, selectedGroupIds],
   )
   const assignmentCounts = useMemo(() => files.reduce<Record<string, number>>((counts, item) => {
-    if (item.lessonId) counts[item.lessonId] = (counts[item.lessonId] || 0) + 1
+    if (item.uploadGroupKey) counts[item.uploadGroupKey] = (counts[item.uploadGroupKey] || 0) + 1
     return counts
   }, {}), [files])
   const conflictingLessonIds = useMemo(
-    () => new Set(Object.entries(assignmentCounts).filter(([, count]) => count > 1).map(([lessonId]) => lessonId)),
+    () => new Set(Object.entries(assignmentCounts).filter(([, count]) => count > 1).map(([groupId]) => groupId)),
     [assignmentCounts],
   )
   const assignedFiles = useMemo(
-    () => files.filter((item) => item.lessonId && !conflictingLessonIds.has(item.lessonId)),
+    () => files.filter((item) => item.uploadGroupKey && !conflictingLessonIds.has(item.uploadGroupKey)),
     [conflictingLessonIds, files],
   )
-  const hasUnassignedFiles = files.some((item) => !item.lessonId)
-  const assignedLessons = useMemo(() => new Map(selectedLessons.map((lesson) => [lesson.id, lesson])), [selectedLessons])
-  const familyReach = assignedFiles.reduce((total, item) => total + (assignedLessons.get(item.lessonId)?.studentCount || 0), 0)
+  const hasUnassignedFiles = files.some((item) => !item.uploadGroupKey)
+  const assignedGroups = useMemo(() => new Map(selectedGroups.map((group) => [group.id, group])), [selectedGroups])
+  const familyReach = assignedFiles.reduce((total, item) => total + (assignedGroups.get(item.uploadGroupKey)?.studentCount || 0), 0)
 
   const updateScope = (nextGrade: string, nextDate: Dayjs) => {
     initializedScope.current = ''
     setGrade(nextGrade)
     setDate(nextDate)
-    setSelectedLessonIds([])
+    setSelectedGroupIds([])
     setFiles([])
     setStep(0)
   }
@@ -156,8 +156,8 @@ export default function BulkLessonPreviewPage() {
       return
     }
     setFiles((current) => {
-      const available = selectedLessons
-      const occupied = new Set(current.map((item) => item.lessonId).filter(Boolean))
+      const available = selectedGroups
+      const occupied = new Set(current.map((item) => item.uploadGroupKey).filter(Boolean))
       const additions: PendingFile[] = []
       for (const file of incoming.slice(0, Math.max(0, 20 - current.length))) {
         const matched = suggestLessonForFile(file.name, available, occupied)
@@ -165,7 +165,7 @@ export default function BulkLessonPreviewPage() {
         additions.push({
           id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
           file,
-          lessonId: matched?.id || '',
+          uploadGroupKey: matched?.id || '',
           autoMatched: Boolean(matched),
         })
       }
@@ -173,12 +173,12 @@ export default function BulkLessonPreviewPage() {
     })
   }
 
-  const changeAssignment = (fileId: string, lessonId: string) => {
-    if (lessonId && files.some((item) => item.id !== fileId && item.lessonId === lessonId)) {
-      toast.warning('这个课次已经分配了另一个文件，请调整其中一份文件')
+  const changeAssignment = (fileId: string, uploadGroupKey: string) => {
+    if (uploadGroupKey && files.some((item) => item.id !== fileId && item.uploadGroupKey === uploadGroupKey)) {
+      toast.warning('这组同科目连堂课已经分配了另一个文件，请调整其中一份文件')
     }
     setFiles((current) => current.map((item) => item.id === fileId
-      ? { ...item, lessonId, autoMatched: false }
+      ? { ...item, uploadGroupKey, autoMatched: false }
       : item))
   }
 
@@ -192,13 +192,18 @@ export default function BulkLessonPreviewPage() {
       const assignments = assignedFiles.map((item, index) => {
         const fileKey = `file-${index}`
         formData.append(fileKey, item.file)
-        return { fileKey, lessonId: item.lessonId, title: item.file.name.replace(/\.[^.]+$/, '') }
+        const group = assignedGroups.get(item.uploadGroupKey)
+        return {
+          fileKey,
+          lessonIds: group?.pendingLessons.map((lesson) => lesson.id) || [],
+          title: item.file.name.replace(/\.[^.]+$/, ''),
+        }
       })
       formData.append('assignments', JSON.stringify(assignments))
       const response = await fetch('/api/admin/materials/lesson-previews', { method: 'POST', body: formData })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(payload.error || '批量发布失败')
-      toast.success(`已发布 ${payload.count || assignedFiles.length} 份讲义，家长端已同步更新`)
+      toast.success(`已上传 ${payload.count || assignedFiles.length} 份文件，覆盖 ${payload.sessionCount || assignedFiles.length} 个课次，家长端已同步更新`)
       setFiles([])
       setStep(0)
       initializedScope.current = ''
@@ -275,25 +280,26 @@ export default function BulkLessonPreviewPage() {
             <>
               <div className={styles.listHeading} id="scope-heading">
                 <strong>{grade}年级 · {readableDate(date)}</strong>
-                <span>共 {lessons.length} 个课次，已选 {selectedLessonIds.length} 个待上传课次</span>
+                <span>共 {lessons.length} 个课次，合并为 {uploadGroups.length} 组；已选 {selectedGroupIds.length} 组待上传内容</span>
               </div>
               <div className={styles.slotList}>
-                {lessons.map((lesson) => {
-                  const status = materialStatus(lesson)
-                  const pending = !lesson.material
+                {uploadGroups.map((group) => {
+                  const pending = group.pendingLessons.length > 0
+                  const representative = group.lessons[0]
+                  const status = pending ? { key: 'pending', label: `${group.pendingLessons.length}/${group.lessons.length}节待上传` } : materialStatus(representative)
                   return (
-                    <label className={`${styles.slotRow} ${!pending ? styles.locked : ''}`} key={lesson.id}>
+                    <label className={`${styles.slotRow} ${!pending ? styles.locked : ''}`} key={group.id}>
                       <Checkbox
-                        checked={selectedLessonIds.includes(lesson.id)}
+                        checked={selectedGroupIds.includes(group.id)}
                         disabled={!pending || isHistoricalTerm}
-                        onChange={(event) => setSelectedLessonIds((current) => event.target.checked
-                          ? [...current, lesson.id]
-                          : current.filter((id) => id !== lesson.id))}
+                        onChange={(event) => setSelectedGroupIds((current) => event.target.checked
+                          ? [...current, group.id]
+                          : current.filter((id) => id !== group.id))}
                       />
-                      <time>{lesson.startTime}–{lesson.endTime}</time>
+                      <time>{group.timeRanges.join('、')}</time>
                       <span className={styles.slotBody}>
-                        <strong>{lesson.subject} · {lesson.groupName}</strong>
-                        <small>{lesson.teacherName} · {lesson.studentCount} 人{lesson.material ? ` · ${lesson.material.fileName}` : ''}</small>
+                        <strong>{group.subject} · {group.groupName}</strong>
+                        <small>{group.teacherName} · {group.lessons.length} 节 · {group.studentCount} 人{!pending && representative?.material ? ` · ${representative.material.fileName}` : ''}</small>
                       </span>
                       <span className={`${styles.status} ${styles[status.key]}`}>{status.label}</span>
                     </label>
@@ -302,8 +308,8 @@ export default function BulkLessonPreviewPage() {
                 {!lessons.length && <div className={styles.empty}><CalendarOutlined /><strong>当天没有符合条件的周末课</strong><span>请换一个年级或周末日期查看。</span></div>}
               </div>
               <div className={styles.actions}>
-                <Button type="primary" size="large" disabled={!selectedLessons.length} onClick={() => setStep(1)}>
-                  下一步：上传 {selectedLessons.length || ''} 个课次讲义 <ArrowRightOutlined />
+                <Button type="primary" size="large" disabled={!selectedGroups.length} onClick={() => setStep(1)}>
+                  下一步：上传 {selectedGroups.length || ''} 份学科讲义 <ArrowRightOutlined />
                 </Button>
               </div>
             </>
@@ -315,7 +321,7 @@ export default function BulkLessonPreviewPage() {
         <section className={styles.pane}>
           <div className={styles.sectionHead}>
             <h2>批量上传与智能分配</h2>
-            <p>文件名包含学科时会自动匹配，你可以在发布前修改任何分配。</p>
+            <p>同班级、同日期、同学科、同任课教师的多节连堂课共用一份讲义；文件名包含学科时会自动匹配。</p>
           </div>
           <div className={styles.uploadLayout}>
             <Upload.Dragger
@@ -338,11 +344,11 @@ export default function BulkLessonPreviewPage() {
               <div className={styles.fileColumnHead}>
                 <strong>待发布文件</strong><span>{files.length} 份</span>
               </div>
-              {conflictingLessonIds.size > 0 && <Alert type="warning" showIcon message="存在重复分配" description="一个课次只能对应一份文件，请修改标红的分配。" />}
+              {conflictingLessonIds.size > 0 && <Alert type="warning" showIcon message="存在重复分配" description="同一组连堂课只能对应一份文件，请修改标红的分配。" />}
               {hasUnassignedFiles && <Alert type="info" showIcon message="还有文件未分配" description="请手动选择对应课次；本次不发布的文件请先从列表移除。" />}
               <div className={styles.fileList}>
                 {files.map((item) => {
-                  const conflict = item.lessonId && conflictingLessonIds.has(item.lessonId)
+                  const conflict = item.uploadGroupKey && conflictingLessonIds.has(item.uploadGroupKey)
                   return (
                     <article className={`${styles.fileItem} ${conflict ? styles.conflict : ''}`} key={item.id}>
                       <span className={styles.fileIcon}><FileTextOutlined /></span>
@@ -351,14 +357,14 @@ export default function BulkLessonPreviewPage() {
                         <small>{fileSizeLabel(item.file)}</small>
                       </span>
                       <Select
-                        value={item.lessonId || undefined}
+                        value={item.uploadGroupKey || undefined}
                         placeholder="请选择对应课次…"
                         status={conflict ? 'error' : undefined}
-                        options={selectedLessons.map((lesson) => ({ value: lesson.id, label: lessonOptionLabel(lesson) }))}
+                        options={selectedGroups.map((group) => ({ value: group.id, label: `${group.subject} · ${group.groupName} · ${group.teacherName} · ${group.timeRanges.join('、')}` }))}
                         onChange={(value) => changeAssignment(item.id, value)}
                       />
-                      <span className={`${styles.matchTag} ${item.lessonId ? styles.matched : styles.unmatched}`}>
-                        {conflict ? '分配冲突' : item.autoMatched ? '已自动匹配' : item.lessonId ? '已手动匹配' : '未识别，需手动选择'}
+                      <span className={`${styles.matchTag} ${item.uploadGroupKey ? styles.matched : styles.unmatched}`}>
+                        {conflict ? '分配冲突' : item.autoMatched ? '已自动匹配' : item.uploadGroupKey ? '已手动匹配' : '未识别，需手动选择'}
                       </span>
                       <Button type="text" danger aria-label={`移除 ${item.file.name}`} icon={<DeleteOutlined />} onClick={() => setFiles((current) => current.filter((file) => file.id !== item.id))} />
                     </article>
@@ -385,14 +391,15 @@ export default function BulkLessonPreviewPage() {
           </div>
           <div className={styles.summaryList}>
             {assignedFiles.map((item) => {
-              const lesson = assignedLessons.get(item.lessonId)
-              if (!lesson) return null
+              const group = assignedGroups.get(item.uploadGroupKey)
+              if (!group) return null
               return (
                 <article className={styles.summaryCard} key={item.id}>
                   <div className={styles.summaryTop}>
-                    <strong>{lesson.subject} · {lesson.groupName} · {lesson.startTime}–{lesson.endTime}</strong>
-                    <span>预计覆盖 {lesson.studentCount} 名学员家庭</span>
+                    <strong>{group.subject} · {group.groupName} · {group.teacherName} · {group.timeRanges.join('、')}</strong>
+                    <span>预计覆盖 {group.studentCount} 名学员家庭</span>
                   </div>
+                  <p>此文件会关联 {group.pendingLessons.length} 个待发布课次。</p>
                   <div className={styles.summaryFile}><FileTextOutlined /><span>{item.file.name}</span><small>{fileSizeLabel(item.file)}</small></div>
                   <p><SafetyCertificateOutlined /> 本条由管理员代传，教师端会显示“管理员代传”，不计入老师本人上传。</p>
                 </article>
@@ -401,7 +408,7 @@ export default function BulkLessonPreviewPage() {
           </div>
           <div className={styles.publishBar}>
             <div>
-              <strong>本次将发布 {assignedFiles.length} 份讲义，覆盖 {assignedFiles.length} 个课次、预计触达 {familyReach} 名学员家庭</strong>
+              <strong>本次将上传 {assignedFiles.length} 份文件，覆盖 {assignedFiles.reduce((count, item) => count + (assignedGroups.get(item.uploadGroupKey)?.pendingLessons.length || 0), 0)} 个课次、预计触达 {familyReach} 名学员家庭</strong>
               <span>发布后不可批量撤回，如需下架请单条删除。</span>
             </div>
             <Button type="primary" size="large" loading={publishing} icon={<CheckOutlined />} onClick={() => void publish()}>确认发布</Button>

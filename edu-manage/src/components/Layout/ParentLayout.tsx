@@ -5,15 +5,14 @@ import { Avatar, Badge, Dropdown, Layout, Menu, Space, Tooltip } from 'antd'
 import {
   AccountBookOutlined,
   BankOutlined,
-  AppstoreOutlined,
   BarChartOutlined,
   BellOutlined,
   BookOutlined,
   CalendarOutlined,
   CheckOutlined,
-  ClockCircleOutlined,
   CoffeeOutlined,
   CommentOutlined,
+  CompassOutlined,
   CrownFilled,
   CrownOutlined,
   EditOutlined,
@@ -42,13 +41,14 @@ import { summarizeUnreadByType } from '@/constants/notification-types'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
+import BrandBackground from '@/components/BrandBackground'
 import { ParentUsageGuideDrawerExtra } from '@/components/Parent/ParentUsageGuide'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
 import { LayoutHydrationFallback } from './LayoutHydrationFallback'
 import type { MembershipLevel } from '@/constants/membership'
 
 const { Sider, Content, Header } = Layout
-const fetcher = (url: string) => fetchJson<Record<string, number>>(url)
+const fetcher = ([url]: readonly [string, string]) => fetchJson<Record<string, number>>(url)
 
 function flattenNavItems(items: MobileNavItem[]): MobileNavItem[] {
   return items.flatMap(item => item.children ? flattenNavItems(item.children) : [item])
@@ -64,16 +64,24 @@ function resolveActiveKey(pathname: string, search: string, items: MobileNavItem
 
 export function ParentLayout({ children, initialMembershipLevel }: { children: React.ReactNode; initialMembershipLevel: MembershipLevel }) {
   const { data: session } = useSession()
+  const unreadUserId = (session?.user as { id?: string } | undefined)?.id
   const pathname = usePathname()
+  const isParentDashboard = pathname === '/parent/dashboard'
   const searchParams = useSearchParams()
   const router = useRouter()
   // 手机横屏时视口宽度可能超过 768px，仍应保持家长端的触控导航。
-  const isMobile = useIsMobile(768, true)
+  // Keep the drawer/tab navigation through tablet widths so pages get the
+  // full viewport instead of sharing it with an icon-only sidebar.
+  const isMobile = useIsMobile(1025, true)
+  const isTablet = useIsMobile(1025)
   const [collapsed, setCollapsed] = useState(false)
+  const [tabletNavExpanded, setTabletNavExpanded] = useState(false)
+  const effectiveCollapsed = isTablet ? !tabletNavExpanded : collapsed
   const [backgroundReady, setBackgroundReady] = useState(false)
+  const [markingAllRead, setMarkingAllRead] = useState(false)
   const [parentTheme, setParentTheme] = useState<'normal' | 'vip' | 'svip'>(() => initialMembershipLevel.toLowerCase() as 'normal' | 'vip' | 'svip')
   const { data: unreadData, error: unreadError, mutate: mutateUnread } = useSWR(
-    backgroundReady ? '/api/parent/unread-counts' : null,
+    backgroundReady && unreadUserId ? ['/api/parent/unread-counts', unreadUserId] as const : null,
     fetcher,
     { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
@@ -95,17 +103,64 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     return () => window.removeEventListener('parent-theme-change', onThemeChange)
   }, [])
 
+  // 学员等级主题系统（SVIP / VIP / 普通）：顶栏、底栏、主背景全流程贯穿
   const navTheme = parentTheme === 'svip'
-    ? { accent: '#C9A45C', tabBg: '#123C35', tabBorder: '1px solid rgba(201,164,92,.42)', accentBg: 'rgba(201,164,92,.12)', tabActive: '#F6E9C8', tabInactive: 'rgba(246,233,200,.78)' }
+    ? {
+        accent: '#C9A45C',
+        tabBg: 'rgba(13, 55, 50, 0.96)',
+        tabBorder: '1px solid rgba(201, 164, 92, 0.35)',
+        accentBg: 'linear-gradient(135deg, rgba(201, 164, 92, 0.32) 0%, rgba(201, 164, 92, 0.18) 100%)',
+        tabActive: '#F6E9C8',
+        tabInactive: 'rgba(246, 233, 200, 0.68)',
+      }
     : parentTheme === 'vip'
-      ? { accent: '#A9512A', tabBg: 'linear-gradient(180deg,#9A4622 0%,#7E3A1C 100%)', tabBorder: '1px solid rgba(255,236,222,.22)', accentBg: 'rgba(169,81,42,.10)', tabActive: '#FFF6EF', tabInactive: 'rgba(255,244,236,.74)' }
-      : { accent: 'var(--color-role-parent)', tabBg: '#ffffff', tabBorder: '1px solid rgba(0,0,0,.06)', accentBg: 'var(--color-role-parent-bg)' }
+      ? {
+          accent: '#E8784A',
+          tabBg: 'rgba(18, 64, 56, 0.95)',
+          tabBorder: '1px solid rgba(232, 120, 74, 0.28)',
+          accentBg: 'linear-gradient(135deg, rgba(232, 120, 74, 0.28) 0%, rgba(245, 158, 11, 0.18) 100%)',
+          tabActive: '#FFA26B',
+          tabInactive: 'rgba(255, 238, 226, 0.68)',
+        }
+      : {
+          accent: '#1B5B43',
+          tabBg: 'rgba(255, 255, 255, 0.96)',
+          tabBorder: '1px solid rgba(44, 110, 82, 0.15)',
+          accentBg: 'linear-gradient(135deg, rgba(62, 142, 110, 0.22) 0%, rgba(44, 110, 82, 0.12) 100%)',
+          tabActive: '#1B5B43',
+          tabInactive: '#6C8077',
+        }
+
+  const tierLabel = parentTheme === 'svip' ? 'SVIP' : parentTheme === 'vip' ? 'VIP' : '普通'
+  const tierBadge = parentTheme === 'svip'
+    ? { bg: '#EFE2BE', color: '#7C5F22', border: '1px solid rgba(168,135,61,.45)' }
+    : parentTheme === 'vip'
+      ? { bg: '#FBE3D2', color: '#C2541F', border: '1px solid rgba(232,120,74,.35)' }
+      : { bg: '#D8EAE2', color: '#0F4A3E', border: '1px solid rgba(20,87,77,.18)' }
 
   const headerTheme = parentTheme === 'svip'
-    ? undefined
+    ? {
+        bg: 'rgba(13, 55, 50, 0.96)',
+        fg: '#F6E9C8',
+        border: '1px solid rgba(201, 164, 92, 0.35)',
+        mainBg: 'radial-gradient(ellipse at 50% 0%, rgba(201, 164, 92, 0.09) 0%, transparent 65%), linear-gradient(180deg, #F8F5EC 0%, #F1EADC 100%)',
+        dark: true,
+      }
     : parentTheme === 'vip'
-      ? { bg: 'linear-gradient(180deg,#FFF9F4 0%,#FFEFE3 100%)', fg: '#7E3A1C', border: '1px solid rgba(169,81,42,.18)', mainBg: '#FFF7F1', dark: false }
-      : undefined
+      ? {
+          bg: 'rgba(255, 248, 242, 0.96)',
+          fg: '#14574D',
+          border: '1px solid rgba(232, 120, 74, 0.22)',
+          mainBg: 'radial-gradient(ellipse at 50% 0%, rgba(232, 120, 74, 0.08) 0%, transparent 65%), linear-gradient(180deg, #FDF9F5 0%, #F6ECE2 100%)',
+          dark: false,
+        }
+      : {
+          bg: 'rgba(246, 251, 248, 0.96)',
+          fg: '#14574D',
+          border: '1px solid rgba(44, 110, 82, 0.15)',
+          mainBg: 'radial-gradient(ellipse at 50% 0%, rgba(44, 110, 82, 0.07) 0%, transparent 65%), linear-gradient(180deg, #F7FAF8 0%, #EEF4F0 100%)',
+          dark: false,
+        }
 
   useEffect(() => {
     const saved = localStorage.getItem('parent_sider_collapsed')
@@ -124,7 +179,8 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     feedbacks: Number(unreadData?.feedbacks || 0),
     messages: Number(unreadData?.messages || 0),
   }
-  const totalUnread = unread.papers + unread.posts + unread.notifications + unread.feedbacks + unread.messages
+  const totalUnreadValue = Number(unreadData?.total ?? 0)
+  const totalUnread = Number.isFinite(totalUnreadValue) ? Math.max(0, totalUnreadValue) : 0
 
   // 未读通知按类型分组摘要（如：课堂反馈3·考勤2·试卷1…）
   const notificationSummary = summarizeUnreadByType(unreadData?.notificationsByType as Record<string, number> | undefined)
@@ -145,11 +201,11 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
 
   const navItems: MobileNavItem[] = [
     { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
-    { key: '/parent/services', icon: <AppstoreOutlined />, label: '业务总览' },
-    { key: 'growth-group', icon: <HomeOutlined />, label: '孩子学习', children: [
+    { key: 'growth-group', icon: <ReadOutlined />, label: '孩子学习', children: [
       { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课程表' },
       { key: '/parent/vip', icon: <CrownFilled />, label: 'VIP课程' },
       { key: '/parent/class-feedback', icon: <BookOutlined />, label: '课堂反馈', badge: unread.feedbacks },
+      { key: '/parent/homework', icon: <FileTextOutlined />, label: '普通课作业' },
       { key: '/parent/study-hall', icon: <ReadOutlined />, label: '晚托作业', badge: unread.studyHallHomework },
       { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长档案', badge: unread.papers + unread.posts },
       { key: '/parent/teachers', icon: <TeamOutlined />, label: '教师信息' },
@@ -159,21 +215,23 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
       { key: '/parent/messages', icon: <CommentOutlined />, label: '家校沟通', badge: unread.messages },
       { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
       { key: '/parent/meals', icon: <CoffeeOutlined />, label: '就餐安排' },
-      { key: '/parent/archive?tab=hours', icon: <ClockCircleOutlined />, label: '课时与考勤' },
       { key: '/parent/fees', icon: <AccountBookOutlined />, label: '缴费账单' },
     ] },
     { key: 'volunteer-group', icon: <BankOutlined />, label: '升学服务', children: [
       { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '高中学校库' },
       { key: '/parent/volunteer', icon: <ReadOutlined />, label: '志愿咨询' },
+      { key: '/parent/volunteer/simulation', icon: <EditOutlined />, label: '模拟填报' },
       { key: '/parent/volunteer/rank-query', icon: <BarChartOutlined />, label: '一分一档位次' },
     ] },
-    { key: 'resource-group', icon: <ReadOutlined />, label: '学习工具', children: [
+    { key: 'resource-group', icon: <CompassOutlined />, label: '学习工具', children: [
       { key: '/parent/materials', icon: <ReadOutlined />, label: '学习资料' },
       { key: '/parent/practice', icon: <EditOutlined />, label: '题库练习' },
+      { key: '/parent/vocab', icon: <BookOutlined />, label: '英语特训' },
+      { key: '/parent/poetry', icon: <FileTextOutlined />, label: '古诗文必背' },
       { key: '/parent/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
       { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
     ] },
-    { key: 'account-group', icon: <IdcardOutlined />, label: '账户与服务', children: [
+    { key: 'account-group', icon: <IdcardOutlined />, label: '我的', children: [
       { key: '/parent/benefits', icon: <CrownOutlined />, label: '会员权益' },
       { key: '/parent/bind', icon: <WechatOutlined />, label: '绑定微信' },
       { key: '/parent/profile', icon: <IdcardOutlined />, label: '个人中心' },
@@ -188,7 +246,7 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
   const bottomTabs: MobileNavItem[] = [
     { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
     { key: '/parent/class-feedback', icon: <BookOutlined />, label: '课堂反馈', badge: unread.feedbacks },
-    { key: '/parent/study-hall', icon: <ReadOutlined />, label: '晚托作业', badge: unread.studyHallHomework },
+    { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课程表' },
     { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
     { key: '__more', icon: <MenuOutlined />, label: '更多' },
   ]
@@ -196,33 +254,33 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
   const defaultOpenKeys = navItems.filter(item => item.children?.some(child => child.key === currentKey)).map(item => item.key)
 
   const markAllRead = async () => {
+    if (markingAllRead) return
+    setMarkingAllRead(true)
     try {
-      const responses = await Promise.all([
-        fetch('/api/parent/notifications/read-all', { method: 'PATCH' }),
-        fetch('/api/messages/read-all', { method: 'PATCH' }),
-      ])
-      if (responses.some((response) => !response.ok)) throw new Error('批量已读操作失败')
+      await fetchJson('/api/parent/unread-counts/read-all', { method: 'POST' })
       await mutateUnread()
       toast.success('已全部标为已读')
     } catch {
       toast.error('未能全部标为已读，请检查网络后重试')
+    } finally {
+      setMarkingAllRead(false)
     }
   }
 
   const menuItems = visibleNavItems.map(item => ({
     key: item.key,
-    icon: item.icon,
+    icon: effectiveCollapsed ? <Tooltip title={item.label} placement="right" trigger={['hover', 'focus']}>{item.icon}</Tooltip> : item.icon,
     label: item.label,
     children: item.children?.map(child => ({
       key: child.key,
-      icon: child.icon,
+      icon: effectiveCollapsed ? <Tooltip title={child.label} placement="right" trigger={['hover', 'focus']}>{child.icon}</Tooltip> : child.icon,
       label: (child.badge ?? 0) > 0 ? (
         <Badge dot size="small" offset={[4, 0]}><span>{child.label}</span></Badge>
       ) : child.label,
     })),
   }))
 
-  if (isMobile === null) return <LayoutHydrationFallback />
+  if (isMobile === null || isTablet === null) return <LayoutHydrationFallback />
 
   if (isMobile) {
     return (
@@ -242,18 +300,21 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
         tabInactiveColor={'tabInactive' in navTheme ? navTheme.tabInactive : undefined}
         headerTheme={headerTheme}
         pageTheme={parentTheme}
+        tierLabel={tierLabel}
+        tierBadge={tierBadge}
+        brandBackground={isParentDashboard}
         drawerHeaderExtra={(
           <Space direction="vertical" size={8} style={{ width: '100%' }}>
             <ParentUsageGuideDrawerExtra parentUserId={session?.user?.id} />
             {unreadError && <button type="button" onClick={() => void mutateUnread()} style={{ minHeight: 44, color: 'var(--color-ink)', background: 'var(--color-surface-1)', border: '1px solid var(--color-hairline-strong)', borderRadius: 10 }}>未读信息加载失败，点击重试</button>}
             {totalUnread > 0 && (
-              <button type="button" onClick={markAllRead} style={{
+              <button type="button" disabled={markingAllRead} onClick={markAllRead} style={{
                 width: '100%', padding: '10px 14px', borderRadius: 10,
                 background: 'rgba(232,120,74,.08)', border: '1px solid rgba(232,120,74,.2)',
-                color: '#E8784A', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                color: '#E8784A', fontWeight: 600, fontSize: 14, cursor: markingAllRead ? 'wait' : 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap',
               }}>
-                <CheckOutlined /> 一键已读（{totalUnread}条未读）
+                <CheckOutlined /> {markingAllRead ? '正在标记…' : `一键已读（${totalUnread}条未读）`}
                 {notificationSummary.parts.length > 0 && (
                   <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(232,120,74,.75)', whiteSpace: 'nowrap' }}>
                     {notificationSummary.parts.join(' · ')}
@@ -269,12 +330,23 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     )
   }
 
+  // 1024px 及以下默认使用紧凑侧栏，点开按钮仍可临时展开查看菜单名称。
+  const handleSiderCollapse = (nextCollapsed: boolean) => {
+    if (isTablet) setTabletNavExpanded(!nextCollapsed)
+    else setCollapsed(nextCollapsed)
+  }
+
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout
+      className={isParentDashboard ? 'brand-background-route' : undefined}
+      data-brand-background={isParentDashboard ? 'true' : undefined}
+      style={{ minHeight: '100vh', background: isParentDashboard ? 'transparent' : undefined, isolation: isParentDashboard ? 'isolate' : undefined }}
+    >
+      {isParentDashboard && <BrandBackground />}
       <Sider
         collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
+        collapsed={effectiveCollapsed}
+        onCollapse={handleSiderCollapse}
         trigger={null}
         width={220}
         collapsedWidth={72}
@@ -293,18 +365,18 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
           height: 56,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'space-between',
-          padding: collapsed ? 0 : '0 12px 0 20px',
+          justifyContent: effectiveCollapsed ? 'center' : 'space-between',
+          padding: effectiveCollapsed ? 0 : '0 12px 0 20px',
           borderBottom: '1px solid rgba(0,0,0,.06)',
         }}>
-          {!collapsed && (
+          {!effectiveCollapsed && (
             <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-ink)', whiteSpace: 'nowrap' }}>牧哲学堂 <small style={{ color: 'var(--color-role-parent)', fontSize: 11 }}>家长端</small></span>
           )}
-          <Tooltip title={collapsed ? '展开导航' : '收起导航'}>
+          <Tooltip title={effectiveCollapsed ? '展开导航' : '收起导航'}>
             <button
               type="button"
-              aria-label={collapsed ? '展开导航' : '收起导航'}
-              onClick={() => setCollapsed(!collapsed)}
+              aria-label={effectiveCollapsed ? '展开导航' : '收起导航'}
+              onClick={() => handleSiderCollapse(!effectiveCollapsed)}
               style={{
                 width: 44,
                 height: 44,
@@ -320,23 +392,24 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
                 flexShrink: 0,
               }}
             >
-              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              {effectiveCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             </button>
           </Tooltip>
         </div>
 
         <Menu
+          key={effectiveCollapsed ? 'tablet-collapsed' : 'expanded'}
           className="role-navigation role-navigation--parent"
           mode="inline"
           selectedKeys={[currentKey]}
-          defaultOpenKeys={defaultOpenKeys}
+          defaultOpenKeys={effectiveCollapsed ? [] : defaultOpenKeys}
           items={menuItems}
           onClick={({ key }) => router.push(key)}
           style={{ borderInlineEnd: 'none', background: 'transparent', marginTop: 8, fontSize: 14 }}
         />
       </Sider>
 
-      <Layout style={{ marginLeft: collapsed ? 72 : 220, background: '#faf8f5' }}>
+      <Layout style={{ marginLeft: effectiveCollapsed ? 72 : 220, background: isParentDashboard ? 'transparent' : '#faf8f5' }}>
         <Header style={{
           padding: '0 24px',
           display: 'flex',
@@ -350,7 +423,13 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
           background: '#fff',
           gap: 16,
         }}>
-          <span style={{ color: 'var(--color-ink-muted)', fontSize: 13, fontWeight: 600 }}>家长中心</span>
+          <div className="parent-layout-brand-heading">
+            {isParentDashboard && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="brand-background-header-logo" src="/brand/logo.png" alt="牧哲学堂" />
+            )}
+            <span style={{ color: 'var(--color-ink-muted)', fontSize: 13, fontWeight: 600 }}>家长中心</span>
+          </div>
           <Space size={12}>
           <Badge count={totalUnread} size="small">
             <button
@@ -371,7 +450,7 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
           </Space>
         </Header>
 
-        <Content style={{ padding: 24, maxWidth: pathname.startsWith('/parent/volunteer') ? 1140 : 800, margin: '0 auto', width: '100%' }}>
+        <Content style={{ padding: isTablet ? 16 : 24, maxWidth: pathname.startsWith('/parent/volunteer') ? 1140 : 800, margin: '0 auto', width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
           {children}
         </Content>
       </Layout>

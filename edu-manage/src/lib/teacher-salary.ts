@@ -158,6 +158,7 @@ export async function createLessonPayInTransaction(
   )) {
     return { success: true, skipped: true }
   }
+  if (!lesson.group.termId) return { success: false, error: 'LESSON_TERM_REQUIRED' }
 
   const cfg = await getTeacherSalaryConfig(teacherId, tx)
   const grade = inferGrade(lesson.group.course.grade, lesson.group.name, lesson.group.course.name)
@@ -574,7 +575,21 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       }
     }
 
+    if (!feedbackTermId) {
+      console.error('[salary] triggerFeedbackBonus: feedback has no academic term; bonus was not created', feedbackId)
+      return { success: false, error: '课堂反馈未关联教学批次，奖励未入账，请联系管理员核对' }
+    }
+
     const result = await prisma.$transaction(async (tx) => {
+      // Serialize bonus creation with admin revocation. If feedback revocation
+      // wins the row lock, this query returns no row and no reward is created.
+      const activeFeedback = await tx.$queryRaw<Array<{ id: string }>>`
+        SELECT "id" FROM "ClassroomFeedback"
+        WHERE "id" = ${feedbackId} AND "deletedAt" IS NULL
+        FOR UPDATE
+      `
+      if (!activeFeedback.length) return { success: false, error: '课堂反馈已撤销，奖励未生成' }
+
       const txExisting = await tx.teacherSalaryTransaction.findFirst({
         where: { feedbackId, type: 'FEEDBACK_BONUS' },
         select: { id: true },

@@ -1,0 +1,26 @@
+
+=== Q3a2 userId 与 parentId/parentUserId 都不一致（真换绑残留） ===
+[
+  {
+    "type": "PARENT_MESSAGE",
+    "n": 31
+  },
+  {
+    "type": "PARENT_MESSAGE_REMINDER",
+    "n": 13
+  },
+  {
+    "type": "leave",
+    "n": 8
+  },
+  {
+    "type": "FEEDBACK_REVIEW",
+    "n": 4
+  }
+]
+
+=== Q3a3 userId 只与 legacy parentId 一致、parentUserId 不同（旧字段残留） ===
+[]
+
+=== Q3a4 学生 parentId/parentUserId 双空 但通知仍在 ===
+[]

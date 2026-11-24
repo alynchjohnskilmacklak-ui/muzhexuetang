@@ -3,7 +3,7 @@ import { requireCurrentTeacher, teacherLessonScopeWhere } from '@/lib/teacher-po
 import { apiHandler } from '@/lib/api-handler'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
 import { dateRangeDays } from '@/lib/date/local-day'
-import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -114,9 +114,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
           },
         },
         teacher: { select: { id: true, name: true, subjects: true } },
-        attendances: { select: { id: true, status: true } },
+        attendances: { where: { deletedAt: null }, select: { id: true, studentId: true, status: true } },
         lessonStudents: { include: { student: { select: { id: true, name: true } } }, orderBy: { createdAt: 'asc' } },
-        classroomFeedbacks: { where: { teacherId: teacher.id, status: 'PUBLISHED' }, select: { studentIds: true } },
+        classroomFeedbacks: { where: { teacherId: teacher.id, status: 'PUBLISHED', deletedAt: null }, select: { studentIds: true } },
       },
       orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
     })
@@ -125,17 +125,28 @@ export const GET = apiHandler(async (req: NextRequest) => {
       currentTeacherId: teacher.id,
       lessons: lessons.map((lesson) => {
         const assignedSubject = lesson.subject || lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject
-        const eligibleStudentIds = new Set(lesson.group.enrollments
-          .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, assignedSubject))
-          .map((enrollment) => enrollment.student.id))
+        const lessonRosterIds = new Set(resolveSubjectLessonStudentIds(
+          lesson.lessonStudents.map((item) => item.student.id),
+          lesson.group.enrollments.map((enrollment) => ({
+            studentId: enrollment.student.id,
+            subjects: enrollment.subjects,
+          })),
+          assignedSubject,
+          lesson.lessonDate,
+        ))
         return {
           ...lesson,
           assignedSubject,
           group: {
             ...lesson.group,
-            enrollments: lesson.group.enrollments.filter((enrollment) => eligibleStudentIds.has(enrollment.student.id)),
+            enrollments: lesson.group.enrollments.filter((enrollment) => lessonRosterIds.has(enrollment.student.id)),
           },
-          lessonStudents: lesson.lessonStudents.filter((item) => eligibleStudentIds.has(item.student.id)),
+          lessonStudents: lesson.lessonStudents.filter((item) => lessonRosterIds.has(item.student.id)),
+          attendances: lesson.attendances.filter((attendance) => lessonRosterIds.has(attendance.studentId)),
+          classroomFeedbacks: lesson.classroomFeedbacks.map((feedback) => ({
+            ...feedback,
+            studentIds: feedback.studentIds.filter((studentId) => lessonRosterIds.has(studentId)),
+          })),
         }
       }),
     })

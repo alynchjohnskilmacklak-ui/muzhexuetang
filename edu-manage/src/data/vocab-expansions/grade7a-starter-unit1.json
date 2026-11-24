@@ -1,0 +1,1511 @@
+[
+  {
+    "commonMistake": "无。",
+    "examTags": [
+      "语篇结构·识别单元主题",
+      "词汇·单复数。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/unit",
+        "label": "Cambridge: unit"
+      }
+    ],
+    "word": "unit",
+    "example": {
+      "english": "Our English book has seven units.",
+      "chinese": "我们的英语书有七个单元。"
+    },
+    "collocations": "Unit 1; a unit of a book; study a unit。",
+    "grammar": "n. 可数；复数 units。课本标题常写 Unit 1。",
+    "application": {
+      "prompt": "Our book has six __. A. unit B. units",
+      "solution": "B。解析：six 后接名词复数；unit 的复数加 -s。"
+    }
+  },
+  {
+    "commonMistake": "普通单数名词前通常要有 a/the：read a section。",
+    "examTags": [
+      "语篇结构·定位部分信息",
+      "词汇·单复数。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/section",
+        "label": "Cambridge: section"
+      }
+    ],
+    "word": "section",
+    "example": {
+      "english": "Please read Section A first.",
+      "chinese": "请先读A部分。"
+    },
+    "collocations": "Section A; a section of a book; read this section。",
+    "grammar": "n. 可数；复数 sections。标题中 Section A/B 首字母大写。",
+    "application": {
+      "prompt": "Please read __ section on page two. A. a B. an",
+      "solution": "A。解析：section 以辅音音素开头，用 a。"
+    }
+  },
+  {
+    "commonMistake": "用 greet someone，不说 greet to someone。",
+    "examTags": [
+      "语言能力·日常问候",
+      "语言运用·动词搭配。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/greet",
+        "label": "Cambridge: greet"
+      }
+    ],
+    "word": "greet",
+    "example": {
+      "english": "We greet our teacher with a smile.",
+      "chinese": "我们微笑着向老师问好。"
+    },
+    "collocations": "greet sb; greet sb with a smile; greet sb by name。",
+    "grammar": "v. greets, greeted, greeting。常接人作宾语。",
+    "application": {
+      "prompt": "We __ our new classmate at the door. A. greet B. greets",
+      "solution": "A。解析：主语 We 是复数，动词用原形。"
+    }
+  },
+  {
+    "commonMistake": "everyone 作主语时用单数谓语；every one（两个词）可表示“每一个”并指代前文名词。",
+    "examTags": [
+      "词法·不定代词",
+      "语境理解·主谓一致。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/everyone",
+        "label": "Grammar: everyone"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/everyone",
+        "label": "Cambridge: everyone"
+      }
+    ],
+    "word": "everyone",
+    "example": {
+      "english": "Everyone in our class likes English.",
+      "chinese": "我们班每个人都喜欢英语。"
+    },
+    "collocations": "everyone in the class; everyone likes/has。",
+    "grammar": "pron. 意为“每个人”；作主语时通常接单数谓语。",
+    "application": {
+      "prompt": "Everyone __ ready. A. is B. are",
+      "solution": "A。解析：everyone 语法上按单数处理。"
+    }
+  },
+  {
+    "commonMistake": "不说 each students；each of the students 后通常接单数谓语。",
+    "examTags": [
+      "词法·限定词/代词",
+      "语境理解·主谓一致。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/each",
+        "label": "Grammar: each"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/each",
+        "label": "Cambridge: each"
+      }
+    ],
+    "word": "each",
+    "example": {
+      "english": "Each student has a name card.",
+      "chinese": "每个学生都有一张姓名卡。"
+    },
+    "collocations": "each student; each of us; each one。",
+    "grammar": "det./pron. each + 单数可数名词；each of + 复数名词/宾格代词，谓语通常用单数。",
+    "application": {
+      "prompt": "Each of the boys __ a book. A. has B. have",
+      "solution": "A。解析：each of 作主语时谓语通常用单数。"
+    }
+  },
+  {
+    "commonMistake": "单数可数名词前不能直接用 other：用 another book 或 the other book；others 后不再接名词。",
+    "examTags": [
+      "词汇辨析·other/others/the other/another",
+      "阅读·指代理解。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/other",
+        "label": "Cambridge: other"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/other-others-the-other-or-another",
+        "label": "Grammar: other/others/the other/another"
+      }
+    ],
+    "word": "other",
+    "example": {
+      "english": "Do you have any other questions?",
+      "chinese": "你还有其他问题吗？"
+    },
+    "collocations": "other students; the other one; some ... others ...。",
+    "grammar": "adj./pron. other 作限定词时可修饰复数或不可数名词；others 单独作代词；the other 常指两者中的另一个；another 是一个词。",
+    "application": {
+      "prompt": "I have two pens. One is blue; __ is red. A. other B. the other",
+      "solution": "B。解析：说两支笔中的“另一支”用 the other。"
+    }
+  },
+  {
+    "commonMistake": "spelling 中两个 l；疑问句说 How do you spell it?，do 后接原形。",
+    "examTags": [
+      "语言知识·动词词形",
+      "学习能力·拼读与拼写。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/spell",
+        "label": "Cambridge: spell"
+      }
+    ],
+    "word": "spell",
+    "example": {
+      "english": "Can you spell your name, please?",
+      "chinese": "请问你能拼一下你的名字吗？"
+    },
+    "collocations": "spell a word/name; How do you spell ...?",
+    "grammar": "v. spells, spelled/spelt, spelling；名词 spelling 表“拼写”。",
+    "application": {
+      "prompt": "How do you __ “bell”? A. spell B. spells",
+      "solution": "A。解析：do 后使用动词原形。"
+    }
+  },
+  {
+    "commonMistake": "一般现在时主语为 he/she/it 时写 starts；不要漏 -s。",
+    "examTags": [
+      "语言知识·动词词形",
+      "语言运用·动词搭配。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/start",
+        "label": "Cambridge: start"
+      }
+    ],
+    "word": "start",
+    "example": {
+      "english": "Our English class starts at eight.",
+      "chinese": "我们的英语课八点开始。"
+    },
+    "collocations": "start at eight; start with; start to read/reading。",
+    "grammar": "v. starts, started, starting。start to do 与 start doing 都可表示“开始做”。",
+    "application": {
+      "prompt": "The first lesson __ at nine. A. start B. starts",
+      "solution": "B。解析：主语 lesson 是单数，描述日常安排用 starts。"
+    }
+  },
+  {
+    "commonMistake": "单数可数名词前要有冠词或限定词：have a conversation。",
+    "examTags": [
+      "语言能力·对话理解",
+      "词汇·名词搭配与词形。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/conversation",
+        "label": "Cambridge: conversation"
+      }
+    ],
+    "word": "conversation",
+    "example": {
+      "english": "We have a short conversation after class.",
+      "chinese": "课后我们简短地聊了一会儿。"
+    },
+    "collocations": "have a conversation with sb; start a conversation; a short conversation。",
+    "grammar": "n. 可数；复数 conversations。",
+    "application": {
+      "prompt": "We had __ conversation about our new class. A. a B. an",
+      "solution": "A。解析：conversation 以辅音音素开头，用 a。"
+    }
+  },
+  {
+    "commonMistake": "无。",
+    "examTags": [
+      "语言能力·交际意图",
+      "阅读/听力·语气理解。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/oh",
+        "label": "Cambridge: oh"
+      }
+    ],
+    "word": "oh",
+    "example": {
+      "english": "Oh, I see your name on the list.",
+      "chinese": "哦，我在名单上看到你的名字了。"
+    },
+    "collocations": "Oh, really?; Oh, I see.; Oh!",
+    "grammar": "interj. 感叹词，无词形变化；常在句首或独立使用。",
+    "application": {
+      "prompt": "你刚发现自己的书在桌上，选择自然回应：A. Oh, here it is! B. At seven.",
+      "solution": "A。解析：Oh 可表达突然发现或理解；B 是时间信息，语境不合。"
+    }
+  },
+  {
+    "commonMistake": "主语 the bell 为单数时用 rings；不要写 the bell ring。",
+    "examTags": [
+      "词法·可数名词",
+      "听力·获取时间/事件信息。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/bell",
+        "label": "Cambridge: bell"
+      }
+    ],
+    "word": "bell",
+    "example": {
+      "english": "The school bell rings at eight.",
+      "chinese": "学校的铃八点响。"
+    },
+    "collocations": "a school bell; ring the bell; the bell rings。",
+    "grammar": "n. 可数；复数 bells。",
+    "application": {
+      "prompt": "The bell __ at 8:00 every morning. A. ring B. rings",
+      "solution": "B。解析：一般现在时中单数主语的谓语加 -s。"
+    }
+  },
+  {
+    "commonMistake": "说 say hello to someone；不要漏掉 to。",
+    "examTags": [
+      "语言能力·问候与回应",
+      "文化意识·交际得体。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/greetings-and-",
+        "label": "Grammar: greetings and farewells"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/hello",
+        "label": "Cambridge: hello"
+      }
+    ],
+    "word": "hello",
+    "example": {
+      "english": "Hello, Ben. How are you?",
+      "chinese": "你好，Ben。你好吗？"
+    },
+    "collocations": "Hello, ...; say hello to sb; Hello! How are you?",
+    "grammar": "interj./n. 作名词时可数；复数 hellos。句首问候通常首字母大写。",
+    "application": {
+      "prompt": "Please say hello __ your teacher. A. to B. at",
+      "solution": "A。解析：固定用法是 say hello to sb。"
+    }
+  },
+  {
+    "commonMistake": "疑问句中注意助动词/系动词置于主语前：How do you spell it?，不是 How you spell it?",
+    "examTags": [
+      "语言能力·特殊疑问句",
+      "语言运用·获取具体信息。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/how",
+        "label": "Cambridge: how"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/how",
+        "label": "Grammar: how"
+      }
+    ],
+    "word": "how",
+    "example": {
+      "english": "How do you spell your name?",
+      "chinese": "你的名字怎么拼？"
+    },
+    "collocations": "How are you?; How do you spell ...?; How old ...?",
+    "grammar": "adv. How + be/do + 主语 ...?；How + adj./adv. ...?；常用于询问方式、状态、年龄等。",
+    "application": {
+      "prompt": "把词语排成问句：you / how / are",
+      "solution": "How are you? 解析：特殊疑问词后接 be 动词，再接主语。"
+    }
+  },
+  {
+    "commonMistake": "Does 后用动词原形：Does she like ...?，不是 Does she likes ...?",
+    "examTags": [
+      "语言知识·助动词",
+      "语言运用·一般现在时疑问句。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/questions-typical-errors",
+        "label": "Grammar: questions, typical errors"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/do",
+        "label": "Cambridge: do"
+      }
+    ],
+    "word": "do",
+    "example": {
+      "english": "Do you like English?",
+      "chinese": "你喜欢英语吗？"
+    },
+    "collocations": "do homework; do you ...?; What do you ...?",
+    "grammar": "v./aux. do, does, did, done, doing。一般现在时疑问句：Do/Does + 主语 + 动词原形?",
+    "application": {
+      "prompt": "__ you have an English book? A. Do B. Does",
+      "solution": "A。解析：主语 you 的一般现在时疑问句用 Do。"
+    }
+  },
+  {
+    "commonMistake": "you 与 your 不同：you 是“你/你们”，your 是“你的/你们的”。",
+    "examTags": [
+      "语言知识·人称代词",
+      "阅读·人物指代。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/you",
+        "label": "Cambridge: you"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc",
+        "label": "Grammar: personal pronouns"
+      }
+    ],
+    "word": "you",
+    "example": {
+      "english": "You are in our English class.",
+      "chinese": "你在我们的英语班里。"
+    },
+    "collocations": "you and I; help you; your name。",
+    "grammar": "pron. 主格和宾格均为 you；可指一个或多个人，靠语境判断；物主限定词是 your。",
+    "application": {
+      "prompt": "Tom, __ are my new classmate. A. you B. your",
+      "solution": "A。解析：空格处作主语，需用人称代词 you。"
+    }
+  },
+  {
+    "commonMistake": "泛指“人们”时 people 作复数：People are ...，不是 People is ...。",
+    "examTags": [
+      "词法·不规则复数",
+      "语言知识·主谓一致。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/people",
+        "label": "Cambridge: people"
+      }
+    ],
+    "word": "people",
+    "example": {
+      "english": "Many people say hello in the morning.",
+      "chinese": "许多人早上会互相问好。"
+    },
+    "collocations": "many people; people in our class; people are。",
+    "grammar": "n. 通常作 people → people（复数）；单数为 a person。",
+    "application": {
+      "prompt": "People __ happy to see their friends. A. is B. are",
+      "solution": "B。解析：people 表“人们”时通常为复数名词。"
+    }
+  },
+  {
+    "commonMistake": "无。",
+    "examTags": [
+      "语言能力·日常问候",
+      "文化意识·正式度选择。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/hi",
+        "label": "Cambridge: hi"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/greetings-and-",
+        "label": "Grammar: greetings and farewells"
+      }
+    ],
+    "word": "hi",
+    "example": {
+      "english": "Hi, Anna! Nice to meet you.",
+      "chinese": "嗨，Anna！很高兴认识你。"
+    },
+    "collocations": "Hi, ...; say hi to sb; Hi there!",
+    "grammar": "interj. 无词形变化；比 hello 更随意。",
+    "application": {
+      "prompt": "同学在校园里见面，选择自然问候：A. Hi, Sam! B. Good night, Sam!",
+      "solution": "A。解析：Hi 是非正式见面问候；Good night 用于晚上分别或睡前。"
+    }
+  },
+  {
+    "commonMistake": "good 是形容词；描述动作通常用 well：She sings well。",
+    "examTags": [
+      "词法·形容词比较级",
+      "语言运用·固定搭配与词性辨析。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/good",
+        "label": "Cambridge: good"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/good-or-well",
+        "label": "Grammar: good or well"
+      }
+    ],
+    "word": "good",
+    "example": {
+      "english": "He is good at spelling names.",
+      "chinese": "他擅长拼写名字。"
+    },
+    "collocations": "good morning; a good friend; be good at sth/doing sth。",
+    "grammar": "adj. 比较级 better，最高级 best；修饰名词。",
+    "application": {
+      "prompt": "She is a __ singer. A. good B. well",
+      "solution": "A。解析：空格修饰名词 singer，需用形容词 good。"
+    }
+  },
+  {
+    "commonMistake": "问候说 Good morning，不加 in；表示时间说 in the morning。",
+    "examTags": [
+      "语言能力·时间表达与问候",
+      "语境理解·时间信息。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/morning",
+        "label": "Cambridge: morning"
+      }
+    ],
+    "word": "morning",
+    "example": {
+      "english": "I read for ten minutes every morning.",
+      "chinese": "我每天早上读十分钟。"
+    },
+    "collocations": "every morning; in the morning; Good morning!",
+    "grammar": "n. 可数；复数 mornings。固定问候 Good morning；表示早晨时常用 in the morning。",
+    "application": {
+      "prompt": "We have English __ the morning. A. in B. on",
+      "solution": "A。解析：表示一天中的早晨通常用 in the morning。"
+    }
+  },
+  {
+    "commonMistake": "无。",
+    "examTags": [
+      "语言知识·并列连词",
+      "阅读/写作·信息衔接。"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/conjunctions-and-",
+        "label": "Grammar: conjunctions"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/and",
+        "label": "Cambridge: and"
+      }
+    ],
+    "word": "and",
+    "example": {
+      "english": "Tom and I say hello to our teacher.",
+      "chinese": "Tom和我向老师问好。"
+    },
+    "collocations": "you and I; read and write; both ... and ...。",
+    "grammar": "conj. 连接语法功能相同的词、短语或分句。",
+    "application": {
+      "prompt": "I say “Hello” __ my friend says “Hi.” A. and B. because",
+      "solution": "A。解析：前后分句补充并列两个问候行为，用 and 连接。"
+    }
+  },
+  {
+    "commonMistake": "称谓通常放在人名前，不能代替名字单独作称呼。",
+    "examTags": [
+      "交际表达",
+      "语境理解"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/ms",
+        "label": "Cambridge Dictionary: Ms"
+      }
+    ],
+    "word": "Ms",
+    "example": {
+      "english": "Ms Wu is our English teacher.",
+      "chinese": "吴老师是我们的英语老师。"
+    },
+    "collocations": "Ms + 姓氏，如 *Ms Wu*。",
+    "grammar": "称谓缩写；置于姓或姓名前。",
+    "application": {
+      "prompt": "___ Wu teaches us English. (Ms / Class)",
+      "solution": "Ms，放在人名前作称谓。"
+    }
+  },
+  {
+    "commonMistake": "复数写 classes，不是 *classs*。",
+    "examTags": [
+      "词汇运用",
+      "语法运用"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/nouns-forming-the-plural",
+        "label": "Cambridge Grammar: 名词复数"
+      }
+    ],
+    "word": "class",
+    "example": {
+      "english": "Our English class starts at nine.",
+      "chinese": "我们的英语课九点开始。"
+    },
+    "collocations": "*English class, in class, after class*。",
+    "grammar": "名词；复数 *classes*（以 s 结尾加 -es）。",
+    "application": {
+      "prompt": "We have two English ___ today. (class / classes)",
+      "solution": "classes，two 后用复数。"
+    }
+  },
+  {
+    "commonMistake": "现在进行时写 sitting，注意双写 t。",
+    "examTags": [
+      "词汇运用",
+      "语法运用"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/imperative",
+        "label": "Cambridge Grammar: 祈使句"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/sit",
+        "label": "Cambridge Dictionary: sit"
+      }
+    ],
+    "word": "sit",
+    "example": {
+      "english": "Please sit down and open your book.",
+      "chinese": "请坐下并打开你的书。"
+    },
+    "collocations": "*sit down, sit on a chair, sit at a desk*。",
+    "grammar": "*sit–sat–sat*；现在分词 *sitting*。",
+    "application": {
+      "prompt": "Please ___ down. (sit / sitting)",
+      "solution": "sit，祈使句用动词原形。"
+    }
+  },
+  {
+    "commonMistake": "短语动词中 down 通常放在动词后，如 *sit down*。",
+    "examTags": [
+      "语境理解",
+      "词汇运用"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/down",
+        "label": "Cambridge Dictionary: down"
+      }
+    ],
+    "word": "down",
+    "example": {
+      "english": "Please write down your name.",
+      "chinese": "请写下你的名字。"
+    },
+    "collocations": "*sit down, write sth down*。",
+    "grammar": "本课中作副词；无比较级变化。",
+    "application": {
+      "prompt": "Please sit ___. (down / under)",
+      "solution": "down，sit down 表示“坐下”。"
+    }
+  },
+  {
+    "commonMistake": "礼貌祈使句仍用动词原形，如 *Please open…*。",
+    "examTags": [
+      "交际表达",
+      "语用得体"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/please-and-thank-you",
+        "label": "Cambridge Grammar: please and thank you"
+      }
+    ],
+    "word": "please",
+    "example": {
+      "english": "Please turn to page two.",
+      "chinese": "请翻到第二页。"
+    },
+    "collocations": "*Please + 动词原形*；*…, please*；*Yes, please.*",
+    "grammar": "用于祈使句前或句末；也可单独作礼貌答语。",
+    "application": {
+      "prompt": "___ open your book. (Please / Thanks)",
+      "solution": "Please，用于礼貌请求。"
+    }
+  },
+  {
+    "commonMistake": "不说 *can to swim* 或 *Do you can…?*",
+    "examTags": [
+      "语法运用",
+      "交际表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/can",
+        "label": "Cambridge Grammar: can"
+      }
+    ],
+    "word": "can",
+    "example": {
+      "english": "Can you say your name, please?",
+      "chinese": "请问你能说一下你的名字吗？"
+    },
+    "collocations": "*can swim, Can I…?, Can you…?*",
+    "grammar": "情态动词；*can + 动词原形*；否定 *can’t/cannot*；疑问句 *Can + 主语 + 动词原形*。",
+    "application": {
+      "prompt": "___ you swim? (Can / Is)",
+      "solution": "Can，询问能力时将 can 放句首。"
+    }
+  },
+  {
+    "commonMistake": "表示“对某人说”用 say sth to sb；不能写 *say sb sth*。",
+    "examTags": [
+      "词汇运用",
+      "交际表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/say-or-tell",
+        "label": "Cambridge Grammar: say or tell"
+      }
+    ],
+    "word": "say",
+    "example": {
+      "english": "She said “Hello” to her new classmate.",
+      "chinese": "她对新同学说了“你好”。"
+    },
+    "collocations": "*say hello, say sth, say sth to sb*。",
+    "grammar": "*say–said–said*；第三人称单数 *says*。",
+    "application": {
+      "prompt": "He ___ “Good morning.” (said / told)",
+      "solution": "said，后接直接说出的话用 say。"
+    }
+  },
+  {
+    "commonMistake": "*can* 后用动词原形，不加 to；*want* 后可用 *to + 动词原形*。",
+    "examTags": [
+      "语法运用",
+      "词汇运用"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/to",
+        "label": "Cambridge Grammar: to"
+      }
+    ],
+    "word": "to",
+    "example": {
+      "english": "I want to meet Ms Li.",
+      "chinese": "我想见李老师。"
+    },
+    "collocations": "*go to school, nice to meet you*。",
+    "grammar": "可作介词（*to school*）；也可构成 *to + 动词原形*（*to meet*）。",
+    "application": {
+      "prompt": "Nice ___ meet you. (to / at)",
+      "solution": "to，构成 to 不定式。"
+    }
+  },
+  {
+    "commonMistake": "不说 *the my name*。",
+    "examTags": [
+      "语法运用",
+      "语境理解"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/the",
+        "label": "Cambridge Grammar: a/an and the"
+      }
+    ],
+    "word": "the",
+    "example": {
+      "english": "This is a book. The book is new.",
+      "chinese": "这是一本书。这本书是新的。"
+    },
+    "collocations": "*the +* 已提及或语境中明确的人/物。",
+    "grammar": "定冠词；无词形变化；my/your/this 等限定词前通常不再加 the。",
+    "application": {
+      "prompt": "This is a book. ___ book is new. (A / The)",
+      "solution": "The，第二句指前面提到的那本书。"
+    }
+  },
+  {
+    "commonMistake": "动词前作主语用 I，不能用宾格 *me*。",
+    "examTags": [
+      "语法运用",
+      "交际表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc",
+        "label": "Cambridge Grammar: personal pronouns"
+      }
+    ],
+    "word": "I",
+    "example": {
+      "english": "I am in Starter Unit 1.",
+      "chinese": "我在学预备单元一。"
+    },
+    "collocations": "*I am…, I can…, Thank you.*",
+    "grammar": "第一人称单数主格；宾格是 *me*；I 始终大写。",
+    "application": {
+      "prompt": "___ am in Class 7. (I / Me)",
+      "solution": "I，位于 am 前作主语。"
+    }
+  },
+  {
+    "commonMistake": "I 后用 am，不说 *I is*。",
+    "examTags": [
+      "语法运用",
+      "交际表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/basic",
+        "label": "Cambridge Grammar: be 动词基本形式"
+      }
+    ],
+    "word": "am",
+    "example": {
+      "english": "I am a new student.",
+      "chinese": "我是一名新生。"
+    },
+    "collocations": "*I am +* 名词/形容词/地点短语。",
+    "grammar": "be 的第一人称单数现在式；*I am/I’m*；否定 *I am not/I’m not*；疑问 *Am I…?*",
+    "application": {
+      "prompt": "I ___ ready. (am / is)",
+      "solution": "am，主语 I 与 am 搭配。"
+    }
+  },
+  {
+    "commonMistake": "表达“感谢你做某事”用 *thank you for…*，不说 *thank for you*。",
+    "examTags": [
+      "交际表达",
+      "词汇运用"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/thank",
+        "label": "Cambridge Dictionary: thank"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/please-and-thank-you",
+        "label": "Cambridge Grammar: please and thank you"
+      }
+    ],
+    "word": "thank",
+    "example": {
+      "english": "Thank you for helping me.",
+      "chinese": "谢谢你帮助我。"
+    },
+    "collocations": "*thank sb for sth/doing sth*；*Thank you for…*",
+    "grammar": "*thank–thanked–thanked*；*thank you*；*thanks* 常作名词/感叹表达。",
+    "application": {
+      "prompt": "I want to ___ you for the card. (thank / thanks)",
+      "solution": "thank，to 后用动词原形。"
+    }
+  },
+  {
+    "commonMistake": "不要仅凭 now 就机械判定时态；结合动词和语境。",
+    "examTags": [
+      "语境理解",
+      "语法运用"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/now",
+        "label": "Cambridge Dictionary: now"
+      }
+    ],
+    "word": "now",
+    "example": {
+      "english": "We are in class now.",
+      "chinese": "我们现在在上课。"
+    },
+    "collocations": "*right now, now and then*。",
+    "grammar": "时间副词；本身不变化；可与一般现在时或现在进行时等结构同现，需看句意。",
+    "application": {
+      "prompt": "We are in class ___. (now / yesterday)",
+      "solution": "now，与“现在”语境相符。"
+    }
+  },
+  {
+    "commonMistake": "my 后接名词；不说 *My is Anna*。",
+    "examTags": [
+      "语法运用",
+      "信息表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc",
+        "label": "Cambridge Grammar: personal pronouns and possessives"
+      }
+    ],
+    "word": "my",
+    "example": {
+      "english": "My name is Anna.",
+      "chinese": "我叫安娜。"
+    },
+    "collocations": "*my name, my class, my book*。",
+    "grammar": "形容词性物主代词/限定词；后接名词；对应的名词性物主代词是 *mine*。",
+    "application": {
+      "prompt": "___ name is Anna. (My / Mine)",
+      "solution": "My，后面有名词 name。"
+    }
+  },
+  {
+    "commonMistake": "特殊疑问句需有 be 动词：What is your name?",
+    "examTags": [
+      "交际表达",
+      "语法运用"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/name",
+        "label": "Cambridge Dictionary: name"
+      }
+    ],
+    "word": "name",
+    "example": {
+      "english": "What is your name? My name is Ben.",
+      "chinese": "你叫什么名字？我叫本。"
+    },
+    "collocations": "*first name, full name, What’s your name?*",
+    "grammar": "名词可数，复数 *names*；本课常见结构 *What is your name?*",
+    "application": {
+      "prompt": "What ___ your name? (is / are)",
+      "solution": "is，your name 作单数主语。"
+    }
+  },
+  {
+    "commonMistake": "be 动词句提问不用 *Does he is…?*",
+    "examTags": [
+      "语法运用",
+      "交际表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/basic",
+        "label": "Cambridge Grammar: be 动词基本形式"
+      }
+    ],
+    "word": "is",
+    "example": {
+      "english": "My name is Li Hua.",
+      "chinese": "我叫李华。"
+    },
+    "collocations": "*He/She/It is…*；*My name is…*",
+    "grammar": "be 的第三人称单数现在式；否定 *isn’t*；一般疑问句将 is 放到主语前。",
+    "application": {
+      "prompt": "___ your name Alex? (Is / Are)",
+      "solution": "Is，your name 为单数。"
+    }
+  },
+  {
+    "commonMistake": "nice 后表达“很高兴做某事”用 nice to + 动词原形。",
+    "examTags": [
+      "词汇运用",
+      "交际表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/nice",
+        "label": "Cambridge Dictionary: nice"
+      }
+    ],
+    "word": "nice",
+    "example": {
+      "english": "It is nice to meet you.",
+      "chinese": "很高兴认识你。"
+    },
+    "collocations": "*nice to meet you*；*be nice to sb*；*It’s nice to…*",
+    "grammar": "形容词；比较级 *nicer*，最高级 *nicest*。",
+    "application": {
+      "prompt": "It is nice ___ you. (meet / to meet)",
+      "solution": "to meet，nice to 后接动词原形。"
+    }
+  },
+  {
+    "commonMistake": "meet sb 后直接接人；不要把 meet 和表示熟悉状态的 know 当成完全同义。",
+    "examTags": [
+      "词汇运用",
+      "语境理解"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/meet",
+        "label": "Cambridge Dictionary: meet"
+      }
+    ],
+    "word": "meet",
+    "example": {
+      "english": "I met Ms Green at school yesterday.",
+      "chinese": "我昨天在学校遇见了格林老师。"
+    },
+    "collocations": "*meet sb*；*Nice to meet you*；*meet a new classmate*。",
+    "grammar": "*meet–met–met*；第三人称单数 *meets*。",
+    "application": {
+      "prompt": "I ___ Ms Green yesterday. (meet / met)",
+      "solution": "met，yesterday 表示过去时间。"
+    }
+  },
+  {
+    "commonMistake": "同一因果句中通常不要同时用 because 和 so。",
+    "examTags": [
+      "语篇逻辑",
+      "词汇运用"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/conjunctions-causes-reasons-results-and-purpose",
+        "label": "Cambridge Grammar: so as a conjunction"
+      }
+    ],
+    "word": "so",
+    "example": {
+      "english": "I am new here, so I ask Ms Wu for help.",
+      "chinese": "我刚来这里，所以我向吴老师求助。"
+    },
+    "collocations": "*A, so B*；*so happy*；*so + adj. + that…*（后者按学情逐步拓展）。",
+    "grammar": "可作结果连词；也可作程度副词，*so + 形容词/副词*。",
+    "application": {
+      "prompt": "I am tired, ___ I will go to bed. (so / because)",
+      "solution": "so，后半句是结果。"
+    }
+  },
+  {
+    "commonMistake": "询问姓名用 What is your name?，不是 *How is your name?*",
+    "examTags": [
+      "语法运用",
+      "交际表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/questions",
+        "label": "Cambridge Grammar: questions"
+      }
+    ],
+    "word": "what",
+    "example": {
+      "english": "What color is your schoolbag?",
+      "chinese": "你的书包是什么颜色的？"
+    },
+    "collocations": "*What is…?*；*What color…?*；*What’s your name?*",
+    "grammar": "疑问代词/限定词；可单独用，也可 what + 名词。",
+    "application": {
+      "prompt": "___ is your name? (What / Who)",
+      "solution": "What，询问姓名用 what。"
+    }
+  },
+  {
+    "commonMistake": "your 后接名词；不能写 Your are... 表示“你是……”。",
+    "examTags": [
+      "词汇知识：词性与语境功能",
+      "语法知识：物主表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/your",
+        "label": "Cambridge 词条"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/pronouns-possessive-my-mine-your-yours-etc",
+        "label": "物主形式语法"
+      }
+    ],
+    "word": "your",
+    "example": {
+      "english": "Is this your pencil?",
+      "chinese": "这是你的铅笔吗？"
+    },
+    "collocations": "your name / your book / your friend；单独指“你的东西”用 yours。",
+    "grammar": "教材标注 pron.；语法上是物主限定词，放在名词前：your book。关系链：you—your—yours—yourself。",
+    "application": {
+      "prompt": "This is ___ book. (you)",
+      "solution": "your。解析：名词 book 前用物主限定词。"
+    }
+  },
+  {
+    "commonMistake": "勿与 to 混淆；表示“也”时通常放句末。",
+    "examTags": [
+      "词汇知识：语境辨义",
+      "语法知识：副词位置"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/too-enough",
+        "label": "too 语法"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/too",
+        "label": "Cambridge 词条"
+      }
+    ],
+    "word": "too",
+    "example": {
+      "english": "I have a red bag, too.",
+      "chinese": "我也有一个红书包。"
+    },
+    "collocations": "me too；too + adj.；可拓展 too ... to ...。",
+    "grammar": "副词，不变形；表示“也”时常放句末；表示“太”时放在形容词/副词前，如 too big。",
+    "application": {
+      "prompt": "I like this song, ___.",
+      "solution": "too。解析：这里表示“也”，放句末。"
+    }
+  },
+  {
+    "commonMistake": "看发音，不只看首字母；如 an apple。",
+    "examTags": [
+      "语法知识：冠词与名词",
+      "词汇知识：语音语境"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/a",
+        "label": "Cambridge a"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/the",
+        "label": "冠词语法"
+      }
+    ],
+    "word": "a",
+    "example": {
+      "english": "I have a pencil.",
+      "chinese": "我有一支铅笔。"
+    },
+    "collocations": "a book / a student / an apple。",
+    "grammar": "不定冠词；用于单数可数名词前。a/an 由后接单词的首音决定：辅音音素前用 a，元音音素前用 an。",
+    "application": {
+      "prompt": "She has ___ orange.",
+      "solution": "an。解析：orange 以元音音素开头。"
+    }
+  },
+  {
+    "commonMistake": "you/we/they 后用 are，不写 is。",
+    "examTags": [
+      "语法知识：be动词形式与句式"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/are",
+        "label": "Cambridge are"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/be",
+        "label": "be 动词形式"
+      }
+    ],
+    "word": "are",
+    "example": {
+      "english": "You are my new friend.",
+      "chinese": "你是我的新朋友。"
+    },
+    "collocations": "You are...；Are you...?；We are not...",
+    "grammar": "be 的现在时形式之一；I am, he/she/it is, you/we/they are。一般疑问句可将 are 提到主语前。",
+    "application": {
+      "prompt": "___ they in the classroom?",
+      "solution": "Are。解析：主语 they 与 be 动词 are 搭配，疑问句中 are 前置。"
+    }
+  },
+  {
+    "commonMistake": "用 say goodbye to me，不写 say goodbye me。",
+    "examTags": [
+      "语言运用：日常交际",
+      "词汇知识：固定语块"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/goodbye",
+        "label": "Cambridge goodbye"
+      }
+    ],
+    "word": "goodbye",
+    "example": {
+      "english": "We say goodbye to Mr Li after class.",
+      "chinese": "下课后我们向李老师道别。"
+    },
+    "collocations": "say goodbye to...；wave goodbye。",
+    "grammar": "感叹词；也可作名词，名词复数 goodbyes。告别表达常用 say goodbye to sb.。",
+    "application": {
+      "prompt": "We say goodbye ___ our teacher.",
+      "solution": "to。解析：固定搭配 say goodbye to sb.。"
+    }
+  },
+  {
+    "commonMistake": "不写 may to go，而写 may go。",
+    "examTags": [
+      "语法知识：情态动词",
+      "语言运用：请求许可"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/may",
+        "label": "Cambridge may"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/word-patterns-may",
+        "label": "may 用法"
+      }
+    ],
+    "word": "may",
+    "example": {
+      "english": "May I sit here?",
+      "chinese": "我可以坐在这里吗？"
+    },
+    "collocations": "May I come in?；may be...",
+    "grammar": "情态动词，无人称变化；后接动词原形，不加 to。May I...? 可礼貌请求许可；也可表示可能性。",
+    "application": {
+      "prompt": "May I ___ the window? (open)",
+      "solution": "open。解析：情态动词 may 后接动词原形。"
+    }
+  },
+  {
+    "commonMistake": "he/she/it has，不写 he have。",
+    "examTags": [
+      "语法知识：动词词形",
+      "词汇知识：语境义"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/have",
+        "label": "Cambridge have"
+      }
+    ],
+    "word": "have",
+    "example": {
+      "english": "They have two cats at home.",
+      "chinese": "他们家有两只猫。"
+    },
+    "collocations": "have a book / have a friend / have breakfast。",
+    "grammar": "have—has—had—had—having；一般现在时第三人称单数用 has。",
+    "application": {
+      "prompt": "Lucy ___ a blue schoolbag.",
+      "solution": "has。解析：Lucy 是第三人称单数。"
+    }
+  },
+  {
+    "commonMistake": "表示打电话时直接说 call me；不加 to。",
+    "examTags": [
+      "词汇知识：一词多义与语境",
+      "语法知识：动词搭配"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/call",
+        "label": "Cambridge call"
+      }
+    ],
+    "word": "call",
+    "example": {
+      "english": "Please call me after school.",
+      "chinese": "请放学后给我打电话。"
+    },
+    "collocations": "call sb.（给某人打电话）；call sb. + name（称某人为……）；give sb. a call。",
+    "grammar": "call—calls—called—called—calling。作动词可表示“给……打电话”“把……称作”；作名词可表示“电话”。",
+    "application": {
+      "prompt": "Please ___ your mum tonight.",
+      "solution": "call。解析：祈使句用动词原形；call + 人 表示给某人打电话。"
+    }
+  },
+  {
+    "commonMistake": "作主语用 I，作宾语用 me。",
+    "examTags": [
+      "语法知识：人称代词主宾格"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/me",
+        "label": "Cambridge me"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/uk/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc",
+        "label": "人称代词格"
+      }
+    ],
+    "word": "me",
+    "example": {
+      "english": "My sister is with me today.",
+      "chinese": "我姐姐今天和我在一起。"
+    },
+    "collocations": "help me / call me / with me / for me。",
+    "grammar": "I 的宾格；作动词或介词的宾语。对照：I—me。",
+    "application": {
+      "prompt": "My brother helps ___. (I)",
+      "solution": "me。解析：help 后需要宾格作宾语。"
+    }
+  },
+  {
+    "commonMistake": "描述状态时用 be fine，不写 I fine。",
+    "examTags": [
+      "词汇知识：语境义与词性",
+      "语言运用：日常问候"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/fine",
+        "label": "Cambridge fine"
+      }
+    ],
+    "word": "fine",
+    "example": {
+      "english": "I'm fine, thank you.",
+      "chinese": "我很好，谢谢。"
+    },
+    "collocations": "I'm fine, thanks.；feel fine；That's fine.（表示可以/没问题）。",
+    "grammar": "形容词；比较级 finer，最高级 finest。可作表语：be fine。",
+    "application": {
+      "prompt": "A: How are you? B: I ___ fine, thanks.",
+      "solution": "am。解析：fine 是形容词，前面需要 be 动词。"
+    }
+  },
+  {
+    "commonMistake": "无须机械扩展所有义项；根据上下文区分“很棒”和“伟大”。",
+    "examTags": [
+      "词汇知识：语境义与搭配",
+      "语法知识：形容词比较级"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/great",
+        "label": "Cambridge great"
+      }
+    ],
+    "word": "great",
+    "example": {
+      "english": "We had a great time at the park.",
+      "chinese": "我们在公园玩得很开心。"
+    },
+    "collocations": "a great idea / a great time；单独 Great! 可作回应。",
+    "grammar": "形容词；比较级 greater，最高级 greatest。本单元可先掌握“很棒的、美妙的”，再认识“伟大的”。",
+    "application": {
+      "prompt": "We had a ___ time at the zoo.",
+      "solution": "great。解析：搭配 have a great time 表示玩得开心。"
+    }
+  },
+  {
+    "commonMistake": "that + 单数名词；多个物品用 those。",
+    "examTags": [
+      "词汇知识：词性与语境功能",
+      "语法知识：指示代词单复数"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/that",
+        "label": "that 语法"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/that",
+        "label": "Cambridge that"
+      }
+    ],
+    "word": "that",
+    "example": {
+      "english": "That is my blue bag.",
+      "chinese": "那是我的蓝色书包。"
+    },
+    "collocations": "that book；That is...；对照 this—these / that—those。",
+    "grammar": "指示代词/限定词；指较远的单个人或物。复数对应 those；名词前作限定词，独立使用时作代词。",
+    "application": {
+      "prompt": "This is my book. ___ is yours.",
+      "solution": "That。解析：独立作主语，指较远的那本书。"
+    }
+  },
+  {
+    "commonMistake": "let me go，不写 let me to go。",
+    "examTags": [
+      "语法知识：动词结构",
+      "语言运用：建议表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/let",
+        "label": "Cambridge let"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/let",
+        "label": "let's/let 语法"
+      }
+    ],
+    "word": "let",
+    "example": {
+      "english": "Let's go to the park together.",
+      "chinese": "我们一起去公园吧。"
+    },
+    "collocations": "Let me see.；Let's go.；let sb. do sth.。",
+    "grammar": "let—let—let—letting；let + 人/物 + 动词原形。Let's 是 let us 的缩写，常用于提出建议。",
+    "application": {
+      "prompt": "Let's ___ home now. (go)",
+      "solution": "go。解析：let 后接动词原形。"
+    }
+  },
+  {
+    "commonMistake": "主语位置用 we，宾语位置用 us。",
+    "examTags": [
+      "语法知识：人称代词主宾格"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/us",
+        "label": "Cambridge us"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/uk/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc",
+        "label": "代词格"
+      }
+    ],
+    "word": "us",
+    "example": {
+      "english": "Our teacher helps us after class.",
+      "chinese": "我们的老师课后帮助我们。"
+    },
+    "collocations": "help us / teach us / with us / for us。",
+    "grammar": "we 的宾格；作动词或介词宾语。对照：we—us。",
+    "application": {
+      "prompt": "Mr Lee teaches ___ English. (we)",
+      "solution": "us。解析：teach 后的人是宾语，用宾格。"
+    }
+  },
+  {
+    "commonMistake": "home 前通常不加 to：go home。",
+    "examTags": [
+      "语法知识：不规则动词词形",
+      "词汇知识：介词搭配"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/go",
+        "label": "Cambridge go"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/go",
+        "label": "go 用法"
+      }
+    ],
+    "word": "go",
+    "example": {
+      "english": "We go home at five.",
+      "chinese": "我们五点回家。"
+    },
+    "collocations": "go to school；go home；go by bus；go + -ing（如 go shopping，可作后续拓展）。",
+    "grammar": "go—goes—went—gone—going；表示移动时通常不直接带宾语，常与地点/方向词搭配。",
+    "application": {
+      "prompt": "I often ___ home after school.",
+      "solution": "go。解析：一般现在时主语 I 搭配动词原形；go home 不加 to。"
+    }
+  },
+  {
+    "commonMistake": "辨清 bye（再见）、buy（买）、by（在旁边/通过）。",
+    "examTags": [
+      "语言运用：日常交际",
+      "词汇知识：拼写辨析"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/bye",
+        "label": "Cambridge bye"
+      }
+    ],
+    "word": "bye",
+    "example": {
+      "english": "Bye! See you tomorrow.",
+      "chinese": "再见！明天见。"
+    },
+    "collocations": "Bye!；say bye to sb.；Bye for now.",
+    "grammar": "感叹词，goodbye 的非正式短说法；无动词变化。",
+    "application": {
+      "prompt": "选择表示“再见”的词：by / buy / ___.",
+      "solution": "bye。解析：此处是告别用语。"
+    }
+  },
+  {
+    "commonMistake": "it's 和 its 不同：it's = it is/it has，its 表所属。",
+    "examTags": [
+      "词汇知识：指代与语境",
+      "语法知识：形式主语"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/it",
+        "label": "Cambridge it"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/uk/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc",
+        "label": "it 语法"
+      }
+    ],
+    "word": "it",
+    "example": {
+      "english": "It is sunny today.",
+      "chinese": "今天阳光明媚。"
+    },
+    "collocations": "It is...；look at it；天气、时间表达可用形式主语 it：It is sunny. / It is eight.。",
+    "grammar": "人称代词，可作主语或宾语，指已知的事物/动物/情况；物主限定词 its；it's 是 it is 或 it has 的缩写。",
+    "application": {
+      "prompt": "___ is cold today.",
+      "solution": "It。解析：天气表达用 it 作形式主语。"
+    }
+  },
+  {
+    "commonMistake": "表示“时间”时不说 many time；表示“次数”才用 times。",
+    "examTags": [
+      "词汇知识：词义与可数性",
+      "语法知识：疑问表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/time",
+        "label": "Cambridge time"
+      }
+    ],
+    "word": "time",
+    "example": {
+      "english": "What time is it now?",
+      "chinese": "现在几点了？"
+    },
+    "collocations": "What time is it?；have a good time；at eight o'clock。",
+    "grammar": "名词；“时间”常作不可数名词，表示“次数”时用可数复数 times。",
+    "application": {
+      "prompt": "We had a great ___ at the party.",
+      "solution": "time。解析：固定表达 have a great time。"
+    }
+  },
+  {
+    "commonMistake": "for two days 表持续两天；in two days 表两天后。",
+    "examTags": [
+      "词汇知识：介词语境义",
+      "语法知识：时间表达"
+    ],
+    "sources": [
+      {
+        "url": "https://dictionary.cambridge.org/dictionary/english/for",
+        "label": "Cambridge for"
+      },
+      {
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/for",
+        "label": "for 时间用法"
+      }
+    ],
+    "word": "for",
+    "example": {
+      "english": "This card is for you.",
+      "chinese": "这张卡片是给你的。"
+    },
+    "collocations": "a gift for you；for school；for two days。",
+    "grammar": "介词；可表示对象/接收者、用途或一段持续时间；介词后接名词、代词或动名词。",
+    "application": {
+      "prompt": "We stayed there ___ two days.",
+      "solution": "for。解析：for + 一段时间表示持续多久。"
+    }
+  }
+]

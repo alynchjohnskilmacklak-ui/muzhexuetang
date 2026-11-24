@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { precheckLoginAccount, type LoginRole } from '@/lib/login-accounts'
 import { apiHandler } from '@/lib/api-handler'
+import { getTrustedClientIp } from '@/lib/request-ip'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     )
   }
 
-  const result = await precheckLoginAccount(email, loginRole, division, identifierType)
+  const result = await precheckLoginAccount(email, loginRole, division, identifierType, getTrustedClientIp(req.headers))
   if (!result.ok) {
     return NextResponse.json(
       { ok: false, error: '账号信息暂不可用，请检查账号和登录入口后重试', code: 'LOGIN_CHECK_FAILED' },

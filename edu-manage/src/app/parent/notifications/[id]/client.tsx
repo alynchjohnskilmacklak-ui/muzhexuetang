@@ -4,8 +4,13 @@ import { Alert, Button, Card, Descriptions, Tag, Typography } from 'antd'
 import NextImage from 'next/image'
 import { ArrowLeftOutlined, BookOutlined, StarOutlined, FileTextOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+import { useSWRConfig } from 'swr'
+import { isParentUnreadCountsCacheKey } from '@/lib/parent-unread-cache'
+import { toast } from 'sonner'
 import { fmtDateTime } from '@/lib/format-date'
 import { normalizeUploadUrl } from '@/lib/upload-url'
+import { getArchiveEntryTransitionName, runDocumentViewTransition } from '@/lib/ui-motion'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -47,29 +52,65 @@ export function NotificationDetailClient({
   relatedData: RelatedNotificationData | null
 }) {
   const router = useRouter()
+  const { mutate: mutateSWR } = useSWRConfig()
+
+  useEffect(() => {
+    let cancelled = false
+    // The server page marks this notification and its related item read before rendering.
+    void mutateSWR(isParentUnreadCountsCacheKey).catch(() => {
+      if (!cancelled) toast.warning('通知已打开，但未读角标暂时无法同步')
+    })
+    return () => { cancelled = true }
+  }, [mutateSWR])
+
   const typeLabel = TYPE_LABELS[notification.type] || notification.type || '通知'
   const typeIcon = TYPE_ICONS[notification.type] || null
+  const transitionName = getArchiveEntryTransitionName(notification.relatedType || notification.type, notification.relatedId || notification.title, notification.title, notification.createdAt)
+
+  const returnToList = () => {
+    let navigationStarted = false
+    const transitioned = runDocumentViewTransition(async () => {
+      navigationStarted = true
+      router.push('/parent/notifications')
+      let frames = 0
+      while (frames < 108) {
+        if (transitionName && document.querySelector(`[data-notification-entry-source="${transitionName}"]`)) return
+        frames += 1
+        await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+      }
+    })
+    if (!transitioned && !navigationStarted) router.push('/parent/notifications')
+  }
+  const isExamPaper = ['EXAM_PAPER', 'PAPER_PUBLISHED'].includes((notification.relatedType || notification.type || '').toUpperCase())
   const hasMissingRelated = notification.relatedType && notification.relatedId && !relatedData
-  const fallbackAction = notification.relatedType === 'EXAM_PAPER'
+  const fallbackAction = isExamPaper
     ? { label: '去学习档案查看试卷', href: '/parent/archive' }
     : notification.relatedType === 'CLASSROOM_FEEDBACK'
       ? { label: '去课堂反馈查看', href: '/parent/class-feedback' }
       : notification.relatedType === 'PERFORMANCE_FEEDBACK'
         ? { label: '去成长档案查看', href: '/parent/archive' }
         : null
+  const contentHref = isExamPaper && notification.relatedId
+    ? `/parent/archive/${encodeURIComponent(notification.relatedId)}`
+    : notification.href
 
   return (
     <div>
       <Button
         type="text"
+        className="mobile-shell-back"
         icon={<ArrowLeftOutlined />}
-        onClick={() => router.push('/parent/notifications')}
+        onClick={returnToList}
         style={{ marginBottom: 16, padding: 0, color: '#5a4e3a' }}
       >
         返回通知列表
       </Button>
 
-      <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }}>
+      <Card
+        bordered={false}
+        data-notification-entry-transition-ready={transitionName}
+        style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', viewTransitionName: transitionName } as React.CSSProperties}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           {typeIcon}
           <Title level={4} style={{ margin: 0 }}>{notification.title}</Title>
@@ -180,12 +221,12 @@ export function NotificationDetailClient({
           />
         )}
 
-        {notification.href && (
+        {contentHref && (
           <div style={{ marginTop: 16 }}>
             <Button
               type="primary"
               style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', borderRadius: 8 }}
-              onClick={() => router.push(notification.href!)}
+              onClick={() => router.push(contentHref)}
             >
               查看完整内容
             </Button>

@@ -6,7 +6,7 @@ import { requireAdminUser } from '@/lib/auth/guards'
 import { isSuperAdminEmail } from '@/lib/super-admin'
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { getPasswordPolicyError } from '@/lib/password-policy'
-import { generateTemporaryPassword } from '@/lib/temporary-password'
+import { chineseToPinyin } from '@/lib/pinyin'
 import { normalizeLoginPhone } from '@/lib/login-accounts'
 import {
   isSupportedUserStatus,
@@ -244,9 +244,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
     })
     if (existing) return NextResponse.json({ error: '该教师已有关联账号或邮箱已被占用' }, { status: 409 })
 
-    const plainPassword = explicitPassword || generateTemporaryPassword()
-    const policyError = getPasswordPolicyError(plainPassword, { identifiers: [email, teacher.phone, teacher.name] })
-    if (policyError) return NextResponse.json({ error: policyError }, { status: 400 })
+    const plainPassword = explicitPassword || chineseToPinyin(teacher.name)
+    if (!plainPassword) return NextResponse.json({ error: '教师姓名无法生成拼音初始密码' }, { status: 400 })
+    if (explicitPassword) {
+      const policyError = getPasswordPolicyError(plainPassword, { identifiers: [email, teacher.phone, teacher.name] })
+      if (policyError) return NextResponse.json({ error: policyError }, { status: 400 })
+    }
 
     const user = await prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
@@ -278,9 +281,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const existing = await prisma.user.findUnique({ where: { email } })
     if (existing) return NextResponse.json({ error: '家长账号已存在或邮箱已被占用' }, { status: 409 })
 
-    const plainPassword = explicitPassword || generateTemporaryPassword()
-    const policyError = getPasswordPolicyError(plainPassword, { identifiers: [email, phone, name] })
-    if (policyError) return NextResponse.json({ error: policyError }, { status: 400 })
+    const firstLinkedStudent = studentIds.length
+      ? await prisma.student.findFirst({ where: { id: studentIds[0] }, select: { name: true } })
+      : null
+    const plainPassword = explicitPassword || chineseToPinyin(firstLinkedStudent?.name || name)
+    if (!plainPassword) return NextResponse.json({ error: '姓名无法生成拼音初始密码' }, { status: 400 })
+    if (explicitPassword) {
+      const policyError = getPasswordPolicyError(plainPassword, { identifiers: [email, phone, name] })
+      if (policyError) return NextResponse.json({ error: policyError }, { status: 400 })
+    }
     const user = await prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
         data: {

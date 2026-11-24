@@ -80,7 +80,15 @@ export default function ClosedLoopPage() {
   ]
 
   return (
-    <PageLayout title="今日课堂闭环" subtitle={data ? `${data.dateLabel} · 考勤 · 反馈 · 沟通 全览` : undefined}>
+    <PageLayout
+      title="今日课堂闭环"
+      subtitle={data ? `${data.dateLabel} · 考勤 · 反馈 · 沟通 全览` : undefined}
+      actions={
+        <Button icon={<FileTextOutlined />} onClick={() => router.push('/homework')}>
+          作业监管中心
+        </Button>
+      }
+    >
       <Card bordered={false} style={{ borderRadius: 16, border: '1px solid rgba(232,120,74,.14)' }} styles={{ body: { padding: 14 } }}>
         <Tabs
           activeKey={section}
@@ -163,7 +171,7 @@ export default function ClosedLoopPage() {
                                 <TeamOutlined style={{ color: '#9A8E7A', fontSize: 12 }} />
                                 <span style={{ fontSize: 12, color: '#5C4F3F', fontWeight: 600 }}>考勤明细（{lesson.students.length} 人）</span>
                               </div>
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 7 }}>
+                              <div className="closed-loop-student-grid">
                                 {lesson.students.map((s) => {
                                   const levelStyle =
                                     s.membershipLevel === 'SVIP'
@@ -176,9 +184,9 @@ export default function ClosedLoopPage() {
                                       : s.membershipLevel === 'VIP' ? '#B0552B'
                                         : '#285247'
                                   return (
-                                    <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 8px', borderRadius: 10, ...levelStyle }}>
-                                      <span style={{ fontSize: 12.5, color: nameColor, fontWeight: 700, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
-                                      <span style={{ flexShrink: 0 }}>
+                                    <div key={s.id} className="closed-loop-student-row" style={{ ...levelStyle }}>
+                                      <span className="closed-loop-student-name" style={{ color: nameColor }}>{s.name}</span>
+                                      <span className="closed-loop-student-status">
                                         {s.attendanceStatus === null
                                           ? <Tag color="default" style={{ margin: 0, borderRadius: 999, fontSize: 9, lineHeight: '15px', padding: '0 5px' }}>未录</Tag>
                                           : s.attendanceStatus === '出勤' || s.attendanceStatus === '补课'
@@ -224,7 +232,7 @@ export default function ClosedLoopPage() {
         )}
       </Card>
       <div style={{ marginTop: 14, textAlign: 'center' }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/dashboard')}>返回运营驾驶舱</Button>
+        <Button className="mobile-shell-back" icon={<ArrowLeftOutlined />} onClick={() => router.push('/dashboard')}>返回运营驾驶舱</Button>
       </div>
     </PageLayout>
   )

@@ -22,6 +22,7 @@ function getSizeLimit(uploadType: string | null): number {
     case 'admin-material':  return 50 * 1024 * 1024   // 50MB
     case 'avatar':          return 5 * 1024 * 1024    // 5MB
     case 'parent-message':  return 10 * 1024 * 1024   // 10MB
+    case 'admin-practice-reply': return 10 * 1024 * 1024 // 10MB
     default:                return 10 * 1024 * 1024   // 10MB
   }
 }
@@ -75,6 +76,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (uploadType === 'parent-message' && !studentId) {
     return NextResponse.json({ error: '沟通图片必须关联学生' }, { status: 400 })
   }
+  if (uploadType === 'admin-practice-reply' && (!studentId || !feedbackId)) {
+    return NextResponse.json({ error: '管理批示图片必须关联学员和课堂反馈' }, { status: 400 })
+  }
 
   await validateUploadAssociations(user, { studentId, lessonId, feedbackId, postId })
 
@@ -88,6 +92,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const ownerType = ownerTypeForUpload(uploadType, user.role)
   // 菜品图片专门面向家长展示，无论谁上传都设为家长可见
   const visibility = uploadType === 'parent-message' ? 'MESSAGE_PARTICIPANTS'
+    : uploadType === 'admin-practice-reply' ? 'PARENT_VISIBLE'
     : uploadType === 'meal-image' ? 'PARENT_VISIBLE'
     : user.role === 'parent' ? 'PARENT_VISIBLE'
     : user.role === 'admin' ? 'ADMIN_ONLY'
@@ -122,6 +127,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       mimeType: file.type,
       prefix: ownerType,
       allowLocalFallback: true,
+      privateObject: true,
     })
     const generatedVariants = isImage
       ? generateImageVariants(buffer).catch((variantError) => {
@@ -143,12 +149,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
           mimeType: 'image/webp',
           prefix: `${ownerType}-preview`,
           allowLocalFallback: true,
+          privateObject: true,
         }),
         uploadBuffer(generated.thumbnailBuffer, {
           originalName: `${file.name.replace(/\.[^.]+$/, '')}-thumbnail.webp`,
           mimeType: 'image/webp',
           prefix: `${ownerType}-thumbnail`,
           allowLocalFallback: true,
+          privateObject: true,
         }),
       ])
       if (variantUploads[0].status === 'fulfilled') {
@@ -176,7 +184,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         size: file.size,
         storageDriver: result.storageDriver,
         storageKey: result.storageKey,
-        url: uploadType === 'parent-message' ? `/api/uploads/${encodeURIComponent(result.storageKey)}` : result.url,
+        url: uploadType === 'parent-message' || uploadType === 'admin-practice-reply' ? `/api/uploads/${encodeURIComponent(result.storageKey)}` : result.url,
         ownerType,
         studentId,
         lessonId,
@@ -208,7 +216,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: '文件记录保存失败，请重试' }, { status: 500 })
     }
 
-    const responseUrl = uploadType === 'parent-message'
+    const protectedParentReplyUpload = uploadType === 'admin-practice-reply'
+    const responseUrl = uploadType === 'parent-message' || protectedParentReplyUpload
       ? `/api/uploads/${encodeURIComponent(result.storageKey)}`
       : result.url
 
@@ -219,7 +228,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       previewUrl: isMessageUpload ? null : preview?.url ?? null,
       thumbnailUrl: isMessageUpload ? null : thumbnail?.url ?? null,
       assetPersisted: true,
-      legacyUrl: uploadType === 'parent-message'
+      legacyUrl: uploadType === 'parent-message' || protectedParentReplyUpload
         ? responseUrl
         : result.url.replace('/api/uploads/', '/uploads/'),
       file: {

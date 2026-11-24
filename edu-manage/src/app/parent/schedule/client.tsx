@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Select, Tag, Typography } from 'antd'
+import { Segmented, Select, Tag, Typography } from 'antd'
 import {
   CheckCircleOutlined,
   CalendarOutlined,
@@ -19,16 +19,21 @@ import {
 } from '@ant-design/icons'
 import { findSchedulePeriod, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { shouldSearchChoices, shouldUseInlineChoices } from '@/lib/choice-thresholds'
 import { fmtDate } from '@/lib/format-date'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
 import { PullToRefresh } from '@/components/PullToRefresh'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import styles from './schedule.module.css'
 import { rememberParentChild } from '@/lib/parent-child-preference'
 import { resolveParentChildId } from '@/lib/parent-child-selection'
 import { isParentStudentInLesson } from '@/lib/parent-lesson-visibility'
 import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { AnimatedNumber } from '@/components/Common/AnimatedNumber'
+import { buildParentLessonDetailHref } from '@/lib/parent-lesson-detail'
 import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 import {
   calculateIntensiveDeductHours,
@@ -97,6 +102,21 @@ function getLessonStatus(lesson: ScheduleLesson): { text: string; color: string;
   if (now < start) return { text: '待上课', color: 'blue', deducted: '待上课' }
   if (now >= start && now <= end) return { text: '上课中', color: 'processing', deducted: '待确认' }
   return { text: '待老师确认', color: 'orange', deducted: '待确认' }
+}
+
+function cleanCourseName(name: string | null | undefined): string {
+  if (!name) return '小班课程'
+  return name.replace(/^牧哲学堂\s*/, '').trim() || '小班课程'
+}
+
+function getLessonDuration(start: string, end: string): string {
+  try {
+    const [sh, sm] = start.split(':').map(Number)
+    const [eh, em] = end.split(':').map(Number)
+    const diff = (eh * 60 + em) - (sh * 60 + sm)
+    if (diff > 0) return `${diff}m`
+  } catch {}
+  return ''
 }
 
 export function ParentScheduleClient({
@@ -229,45 +249,153 @@ export function ParentScheduleClient({
     return groups
   }, [mobileLessons])
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>(() => ({}))
+  const [selectedFilterDateKey, setSelectedFilterDateKey] = useState<string | null>(null)
+
+  const isCurrentWeek = useMemo(() => {
+    const now = new Date()
+    const weekStartMonday = new Date(monday)
+    const weekEndSunday = new Date(monday)
+    weekEndSunday.setDate(weekEndSunday.getDate() + 7)
+    return now >= weekStartMonday && now < weekEndSunday
+  }, [monday])
+
+  const dayClassCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    childLessons.forEach((l) => {
+      const key = new Date(l.lessonDate).toDateString()
+      counts.set(key, (counts.get(key) || 0) + 1)
+    })
+    return counts
+  }, [childLessons])
+
+  const filteredMobileLessonGroups = useMemo(() => {
+    if (!selectedFilterDateKey) return mobileLessonGroups
+    return mobileLessonGroups.filter((g) => g.key === selectedFilterDateKey)
+  }, [mobileLessonGroups, selectedFilterDateKey])
 
   const isDateExpanded = (key: string, index: number) => {
     if (key in expandedDates) return expandedDates[key]
+    if (selectedFilterDateKey) return true
     const todayKey = new Date().toDateString()
     const hasToday = mobileLessonGroups.some(group => group.key === todayKey)
-    return hasToday ? key === todayKey : index === 0
+    return hasToday ? key === todayKey : true
   }
 
   return (
     <PullToRefresh onRefresh={async () => { router.refresh(); await new Promise((resolve) => setTimeout(resolve, 500)) }}>
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14, flexWrap: 'nowrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontSize: 17, fontWeight: 700, color: '#1a1201', lineHeight: 1.2 }}>课程表</div>
           <div style={{ fontSize: 11.5, color: '#9a8e7a', marginTop: 2 }}>按周查看课程与停课记录</div>
         </div>
-        <Select
-          value={selectedStudentId || undefined}
-          style={{ width: 108, flexShrink: 0 }}
-          size="small"
-          getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
-          onChange={handleSelectStudent}
-          options={students.map((student) => ({ label: student.name, value: student.id }))}
-        />
+        {students.length > 1 && (shouldUseInlineChoices(students.length) ? (
+          <Segmented
+            aria-label="选择课表学员"
+            size="small"
+            block={isMobile}
+            style={{ width: isMobile ? '100%' : undefined }}
+            value={selectedStudentId}
+            onChange={(value) => handleSelectStudent(String(value))}
+            options={students.map((student) => ({ label: student.name, value: student.id }))}
+          />
+        ) : (
+          <Select
+            aria-label="选择课表学员"
+            value={selectedStudentId || undefined}
+            style={{ width: isMobile ? '100%' : 180, flexShrink: 0 }}
+            size="small"
+            getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+            onChange={handleSelectStudent}
+            options={students.map((student) => ({ label: student.name, value: student.id }))}
+            showSearch={shouldSearchChoices(students.length)}
+            optionFilterProp="label"
+            placement="bottomLeft"
+            listHeight={240}
+          />
+        ))}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16, width: '100%', maxWidth: '100%' }}>
-        <button type="button" aria-label="查看上一周课程" disabled={!canChangeWeek(-1)} onClick={() => changeWeek(-1)}
-          style={{ minWidth: 44, minHeight: 44, border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink-muted)' }}>
+      <div className={styles.weekNav}>
+        <button
+          type="button"
+          aria-label="查看上一周课程"
+          disabled={!canChangeWeek(-1)}
+          onClick={() => changeWeek(-1)}
+          className={styles.navArrowBtn}
+        >
           <LeftOutlined />
         </button>
-        <Text strong style={{ textAlign: 'center', fontSize: isMobile ? 13 : 15 }}>
-          {fmtDate(weekDates[0])} 至 {fmtDate(weekDates[6])}
-        </Text>
-        <button type="button" aria-label="查看下一周课程" disabled={!canChangeWeek(1)} onClick={() => changeWeek(1)}
-          style={{ minWidth: 44, minHeight: 44, border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink-muted)' }}>
+        <div className={styles.weekTitleBox}>
+          <span className={styles.weekTitle}>
+            {fmtDate(weekDates[0])} 至 {fmtDate(weekDates[6])}
+          </span>
+          {!isCurrentWeek && (
+            <button
+              type="button"
+              className={styles.todayQuickBtn}
+              onClick={() => router.push('/parent/schedule')}
+            >
+              本周
+            </button>
+          )}
+        </div>
+        <button
+          type="button"
+          aria-label="查看下一周课程"
+          disabled={!canChangeWeek(1)}
+          onClick={() => changeWeek(1)}
+          className={styles.navArrowBtn}
+        >
           <RightOutlined />
         </button>
       </div>
+
+      <div className={styles.weekRibbon} role="tablist" aria-label="本周日期">
+        {weekDates.map((date, idx) => {
+          const key = date.toDateString()
+          const isDateToday = key === today.toDateString()
+          const isSelected = selectedFilterDateKey === key
+          const count = dayClassCounts.get(key) || 0
+          return (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={isSelected}
+              className={`${styles.dayCell} ${isDateToday ? styles.dayCellToday : ''} ${isSelected ? styles.dayCellSelected : ''}`}
+              onClick={() => setSelectedFilterDateKey((prev) => (prev === key ? null : key))}
+            >
+              <span className={styles.weekdayLabel}>{WEEKDAYS[idx]}</span>
+              <span className={styles.dayNumber}>{date.getDate()}</span>
+              {count > 0 ? (
+                <span className={styles.dayDotIndicator} title={`${count}节课`} />
+              ) : (
+                <span className={styles.dayDotEmpty} />
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {selectedFilterDateKey && (
+        <div className={styles.filterSummaryBar}>
+          <span className={styles.filterSummaryText}>
+            <CalendarOutlined style={{ color: 'var(--color-primary)' }} />
+            正在查看：{fmtDate(new Date(selectedFilterDateKey))}
+            {dayClassCounts.get(selectedFilterDateKey)
+              ? `（${dayClassCounts.get(selectedFilterDateKey)} 节课）`
+              : '（暂无课程）'}
+          </span>
+          <button
+            type="button"
+            className={styles.clearFilterBtn}
+            onClick={() => setSelectedFilterDateKey(null)}
+          >
+            显示整周全部
+          </button>
+        </div>
+      )}
 
       {intensiveEnrollments.length > 0 && (
         <>
@@ -297,7 +425,7 @@ export function ParentScheduleClient({
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 16 }}>
-            {intensiveEnrollments.map((enrollment) => {
+            {intensiveEnrollments.map((enrollment, enrollmentIndex) => {
               const group = enrollment.group
               const teacher = group?.teacher
               const tier = teacher ? resolveTier(teacher.tierLevel) : null
@@ -313,9 +441,11 @@ export function ParentScheduleClient({
                 <button
                   key={enrollment.id}
                   type="button"
+                  className="stagger-item"
                   onClick={() => router.push(`/parent/intensive?groupId=${group?.id || ''}&studentId=${selectedStudentId}`)}
                   style={{
                     textAlign: 'left', padding: 0, border: 'none', background: 'transparent', width: '100%', maxWidth: '100%', cursor: 'pointer',
+                    animationDelay: `${Math.min(enrollmentIndex, 8) * 40}ms`,
                   }}
                 >
                   <ParentCard style={{ padding: 14, width: '100%', maxWidth: '100%', border: '1px solid rgba(201,164,92,.30)', boxShadow: '0 4px 16px rgba(18,60,53,.10)' }}>
@@ -346,19 +476,23 @@ export function ParentScheduleClient({
                       </div>
                       <CrownOutlined style={{ color: '#C9A45C', fontSize: 18 }} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 6, marginTop: 12, fontSize: 12, textAlign: 'center' }}>
-                      <span style={{ background: '#0E5E4E', borderRadius: 10, padding: '7px 2px', color: '#F2E3B6' }}>
-                        剩余课时<br /><strong style={{ fontSize: 14, color: '#F6E9C8' }}>{remain.toFixed(1)}h</strong>
-                      </span>
-                      <span style={{ background: '#F8F3E7', borderRadius: 10, padding: '7px 2px', color: '#123C35' }}>
-                        已审核授课<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{stats.approvedHours.toFixed(1)}h</strong>
-                      </span>
-                      <span style={{ background: '#F8F3E7', borderRadius: 10, padding: '7px 2px', color: '#123C35' }}>
-                        待审核授课<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{stats.pendingCount}节</strong>
-                      </span>
-                      <span style={{ background: '#F8F3E7', borderRadius: 10, padding: '7px 2px', color: '#123C35' }}>
-                        本周已约<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{stats.bookedCount}节</strong>
-                      </span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 6, marginTop: 12, fontSize: 11, textAlign: 'center' }}>
+                      <div style={{ background: '#0E5E4E', borderRadius: 10, padding: '7px 2px', color: '#F2E3B6', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                        <span style={{ opacity: 0.85, fontSize: 10.5 }}>剩余课时</span>
+                        <strong style={{ fontSize: 15, color: '#F6E9C8', fontWeight: 700 }}><AnimatedNumber value={remain} precision={1} />h</strong>
+                      </div>
+                      <div style={{ background: 'rgba(201,164,92,.12)', borderRadius: 10, padding: '7px 2px', color: '#123C35', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                        <span style={{ color: '#7A6A45', fontSize: 10.5 }}>已审核</span>
+                        <strong style={{ fontSize: 15, color: '#123C35', fontWeight: 700 }}><AnimatedNumber value={stats.approvedHours} precision={1} />h</strong>
+                      </div>
+                      <div style={{ background: 'rgba(201,164,92,.12)', borderRadius: 10, padding: '7px 2px', color: '#123C35', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                        <span style={{ color: '#7A6A45', fontSize: 10.5 }}>待审核</span>
+                        <strong style={{ fontSize: 15, color: '#123C35', fontWeight: 700 }}><AnimatedNumber value={stats.pendingCount} />节</strong>
+                      </div>
+                      <div style={{ background: 'rgba(201,164,92,.12)', borderRadius: 10, padding: '7px 2px', color: '#123C35', display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                        <span style={{ color: '#7A6A45', fontSize: 10.5 }}>本周已约</span>
+                        <strong style={{ fontSize: 15, color: '#123C35', fontWeight: 700 }}><AnimatedNumber value={stats.bookedCount} />节</strong>
+                      </div>
                     </div>
                     {latestFeedback && (
                       <div style={{ marginTop: 10, fontSize: 12, color: '#7A6A45', background: 'rgba(201,164,92,.10)', borderRadius: 10, padding: '8px 10px', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
@@ -366,7 +500,7 @@ export function ParentScheduleClient({
                         <span style={{ lineHeight: 1.5 }}>{String(latestFeedback.summary).slice(0, 56)}…</span>
                       </div>
                     )}
-                    <div style={{ marginTop: 10, fontSize: 12, color: '#C9A45C', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3 }}>
+                    <div style={{ marginTop: 10, fontSize: 12, color: 'var(--color-brand-gold)', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3 }}>
                       查看课程详情 <RightOutlined style={{ fontSize: 10 }} />
                     </div>
                   </ParentCard>
@@ -394,7 +528,7 @@ export function ParentScheduleClient({
                 <Text type="secondary" style={{ fontSize: 11.5 }}>{normalEnrollments.length} 个班级</Text>
               </div>
               <div style={{ display: 'grid', gap: 8 }}>
-                {normalEnrollments.map((enrollment) => {
+                {normalEnrollments.map((enrollment, enrollmentIndex) => {
                   const group = enrollment.group
                   const days = (group?.recurringDays || [])
                     .slice()
@@ -402,7 +536,7 @@ export function ParentScheduleClient({
                     .map((day) => WEEKDAYS[day])
                     .join('、')
                   return (
-                    <ParentCard key={enrollment.id} style={{ padding: 13, borderLeft: '3px solid #E8784A' }}>
+                    <ParentCard key={enrollment.id} className="stagger-item" style={{ padding: 13, borderLeft: '3px solid #E8784A', animationDelay: `${Math.min(enrollmentIndex, 8) * 40}ms` }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
                         <div style={{ minWidth: 0 }}>
                           <Text strong style={{ fontSize: 13.5, display: 'block', overflowWrap: 'anywhere' }}>
@@ -428,58 +562,160 @@ export function ParentScheduleClient({
           )}
         </div>
       ) : isMobile ? (
-        <div style={{ display: 'grid', gap: 10 }}>
-          {mobileLessonGroups.map((group, groupIndex) => {
-            const expanded = isDateExpanded(group.key, groupIndex)
-            const isToday = group.key === today.toDateString()
-            const isPast = group.date < new Date(today.getFullYear(), today.getMonth(), today.getDate())
-            return (
-              <div className="stagger-item" key={group.key} style={{ display: 'grid', gap: 8, opacity: isPast ? .62 : 1, animationDelay: `${Math.min(groupIndex, 8) * 40}ms` }}>
-                <button
-                  type="button"
-                  aria-expanded={expanded}
-                  aria-controls={`parent-schedule-day-${groupIndex}`}
-                  onClick={() => setExpandedDates(current => ({ ...current, [group.key]: !expanded }))}
-                  style={{
-                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(232,120,74,.18)',
-                    borderLeft: '4px solid #E8784A', background: '#fff6f1', color: isToday ? '#E8784A' : '#5a4e3a', cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {fmtDate(group.date)} · {group.lessons.length}节
-                    {isToday && <span style={{ background: '#FFF3EC', color: '#E8784A', border: '1px solid #F5C9AE', borderRadius: 999, fontSize: 11, padding: '1px 8px' }}>今天</span>}
-                  </span>
-                  {expanded ? <DownOutlined style={{ color: '#E8784A' }} /> : <RightOutlined style={{ color: '#E8784A' }} />}
-                </button>
-                {expanded && <div id={`parent-schedule-day-${groupIndex}`} style={{ display: 'grid', gap: 8 }}>
-                  {group.lessons.map((lesson, lessonIndex) => {
-                  const status = getLessonStatus(lesson)
-                  const statusBorder = { '已结束': '#1D9E75', '上课中': '#E8784A', '待上课': '#6B9FD8', '待老师确认': '#F0A24A' }[status.text] || '#EEE7E1'
-                  const studentNames = lesson.isManual || lesson.group?.intensiveMode === 'INTENSIVE'
-                    ? lesson.lessonStudents?.map((item) => item.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
-                    : lesson.group?.enrollments?.map((enrollment) => enrollment.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
-                  return (
-                    <ParentCard key={lesson.id} className="stagger-item" style={{ padding: 14, borderLeft: `3px solid ${statusBorder}`, animationDelay: `${Math.min(lessonIndex, 8) * 40}ms` }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
-                        <Text strong style={{ color: '#1F2329' }}>{lesson.group?.course?.name || '-'}</Text>
-                        <Tag className={status.text === '待老师确认' ? 'status-breathe' : undefined} color={status.color}>{status.text}</Tag>
-                      </div>
-                      <div style={{ display: 'grid', gap: 5, fontSize: 12, color: '#5a4e3a' }}>
-                        <span><ClockCircleOutlined style={{ marginRight: 5 }} />{fmtDate(lesson.lessonDate)} {lesson.startTime}-{lesson.endTime}</span>
-                        <span><TeamOutlined style={{ marginRight: 5 }} />{lesson.teacher?.name || lesson.group?.teacher?.name || '-'}老师 · {getLessonSubject(lesson) || '学科待定'}</span>
-                        <span><EnvironmentOutlined style={{ marginRight: 5 }} />{lesson.group?.room?.name || '-'}</span>
-                        <span>学生：{studentNames}</span>
-                        <span>考勤状态：{lesson.attendanceSubmittedAt ? '老师已确认' : '待老师确认'}</span>
-                        <span>课时扣除：{status.deducted}</span>
-                      </div>
-                    </ParentCard>
-                  )
-                  })}
-                </div>}
-              </div>
-            )
-          })}
+        <div className={styles.timelineContainer}>
+          {filteredMobileLessonGroups.length === 0 ? (
+            <ParentCard style={{ minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BrandEmpty
+                title={selectedFilterDateKey ? '该天暂无课程安排' : '所选周暂无课程'}
+                hint={selectedFilterDateKey ? '该日没有排课，可点击上方日期切换其他天或查看整周。' : '本周该同学没有小班课程安排，可切换其他周查看。'}
+                icon={<CalendarOutlined />}
+                actionText={selectedFilterDateKey ? '查看本周全部' : undefined}
+                onAction={selectedFilterDateKey ? () => setSelectedFilterDateKey(null) : undefined}
+              />
+            </ParentCard>
+          ) : (
+            filteredMobileLessonGroups.map((group, groupIndex) => {
+              const expanded = isDateExpanded(group.key, groupIndex)
+              const isToday = group.key === today.toDateString()
+              const isPast = group.date < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+              return (
+                <div key={group.key} className="stagger-item" style={{ display: 'grid', gap: 10, opacity: isPast ? 0.72 : 1, animationDelay: `${Math.min(groupIndex, 8) * 40}ms` }}>
+                  <div
+                    className={styles.daySectionHeader}
+                    onClick={() => setExpandedDates((current) => ({ ...current, [group.key]: !expanded }))}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setExpandedDates((current) => ({ ...current, [group.key]: !expanded }))
+                      }
+                    }}
+                  >
+                    <div className={styles.dayHeaderLeft}>
+                      <span className={styles.dayHeaderDate}>{fmtDate(group.date)}</span>
+                      <span className={styles.dayHeaderBadge}>{group.lessons.length} 节课程</span>
+                      {isToday && (
+                        <span className={`${styles.dayHeaderBadge} ${styles.dayHeaderTodayBadge}`}>
+                          今天
+                        </span>
+                      )}
+                    </div>
+                    {expanded ? (
+                      <DownOutlined style={{ color: 'var(--color-primary)', fontSize: 12 }} />
+                    ) : (
+                      <RightOutlined style={{ color: 'var(--color-ink-subtle)', fontSize: 12 }} />
+                    )}
+                  </div>
+
+                  {expanded && (
+                    <div className={styles.timelineList}>
+                      {group.lessons.map((lesson) => {
+                        const status = getLessonStatus(lesson)
+                        const subject = getLessonSubject(lesson) || '综合'
+                        const subjectColor = getSubjectColor(subject)
+                        const teacherName = lesson.teacher?.name || lesson.group?.teacher?.name || '授课老师'
+                        const roomName = lesson.group?.room?.name
+                        const duration = getLessonDuration(lesson.startTime, lesson.endTime)
+                        const cleanName = cleanCourseName(lesson.group?.course?.name)
+
+                        let statusBadgeClass = styles.statusUpcoming
+                        if (status.text === '已结束') statusBadgeClass = styles.statusEnded
+                        else if (status.text === '上课中') statusBadgeClass = styles.statusActive
+                        else if (status.text === '待老师确认') statusBadgeClass = styles.statusConfirm
+
+                        const feedback = lesson.classroomFeedbacks?.find((f) =>
+                          f.studentIds?.some((id) => selectedStudentRecordIds.has(id)) || f.summary,
+                        )
+
+                        const openLessonDetail = () => {
+                          router.push(buildParentLessonDetailHref({
+                            lessonId: lesson.id,
+                            teacher: teacherName,
+                            course: cleanName,
+                            childId: selectedStudentId,
+                            time: `${lesson.startTime}-${lesson.endTime}`,
+                            room: roomName || '',
+                            lessonDate: lesson.lessonDate ? String(lesson.lessonDate).slice(0, 10) : '',
+                          }))
+                        }
+
+                        return (
+                          <div key={lesson.id} className={styles.timelineItem} style={{ '--dot-color': subjectColor } as React.CSSProperties}>
+                            <span className={styles.timelineDot} />
+                            <article
+                              className={styles.lessonCard}
+                              onClick={openLessonDetail}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  openLessonDetail()
+                                }
+                              }}
+                            >
+                              <div className={styles.lessonTopRow}>
+                                <div className={styles.timeBlock}>
+                                  <span className={styles.timeStart}>{lesson.startTime}</span>
+                                  <span className={styles.timeDivider}>–</span>
+                                  <span className={styles.timeEnd}>{lesson.endTime}</span>
+                                  {duration && <span className={styles.durationPill}>{duration}</span>}
+                                </div>
+                                <span className={`${styles.statusBadge} ${statusBadgeClass}`}>
+                                  {status.text}
+                                </span>
+                              </div>
+
+                              <div className={styles.lessonMainRow}>
+                                <span className={styles.subjectTag} style={{ background: subjectColor }}>
+                                  {subject}
+                                </span>
+                                <h3 className={styles.courseTitle}>{cleanName}</h3>
+                              </div>
+
+                              <div className={styles.lessonDetailsRow}>
+                                <div className={styles.detailItem}>
+                                  <TeamOutlined className={styles.detailIcon} />
+                                  <span>{teacherName}老师</span>
+                                </div>
+                                {roomName && (
+                                  <div className={styles.detailItem}>
+                                    <EnvironmentOutlined className={styles.detailIcon} />
+                                    <span>{roomName}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className={styles.lessonFooter}>
+                                <span>
+                                  {lesson.attendanceSubmittedAt ? '已确认考勤' : '待老师确认考勤'} · 课时：{status.deducted}
+                                </span>
+                                {feedback ? (
+                                  <Link
+                                    href={`/parent/class-feedback/${feedback.id}${selectedStudentId ? `?childId=${selectedStudentId}` : ''}`}
+                                    className={styles.feedbackLink}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <ReadOutlined /> 查看课堂反馈 ›
+                                  </Link>
+                                ) : (
+                                  <span style={{ fontSize: 11, color: 'var(--color-ink-subtle)' }}>
+                                    详情 ›
+                                  </span>
+                                )}
+                              </div>
+                            </article>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })
+          )}
         </div>
       ) : (
         <ParentCard style={{ padding: 0, overflow: 'auto' }}>
@@ -540,8 +776,8 @@ export function ParentScheduleClient({
         <section aria-label="本周停课记录" style={{ marginTop: 18 }}>
           <Title level={5} style={{ marginBottom: 10 }}>本周停课记录</Title>
           <div style={{ display: 'grid', gap: 8 }}>
-            {childCancelledLessons.map((lesson) => (
-              <ParentCard key={lesson.id} style={{ padding: isMobile ? 12 : 16 }}>
+            {childCancelledLessons.map((lesson, lessonIndex) => (
+              <ParentCard key={lesson.id} className="stagger-item" style={{ padding: isMobile ? 12 : 16, animationDelay: `${Math.min(lessonIndex, 8) * 40}ms` }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
                   <div>
                     <Text strong>{lesson.group?.course?.name || '课程'} · {lesson.subject || lesson.group?.course?.subject || '学科待确认'}</Text>
@@ -558,7 +794,7 @@ export function ParentScheduleClient({
         </section>
       )}
 
-      {students.length > 0 && (
+      {students.length > 0 && (intensiveEnrollments.length > 0 || childHistoryLessons.length > 0) && (
         <section style={{ marginTop: 18 }}>
           <div style={{
             display: 'flex',
@@ -584,7 +820,7 @@ export function ParentScheduleClient({
             </ParentCard>
           ) : (
             <div style={{ display: 'grid', gap: 10 }}>
-              {childHistoryLessons.slice(0, 10).map((lesson) => {
+              {childHistoryLessons.slice(0, 10).map((lesson, lessonIndex) => {
     const attendance = lesson.attendances?.find((item) => selectedStudentRecordIds.has(item.studentId))
                 const review = lesson.intensiveReviews?.[0]
     const feedback = lesson.classroomFeedbacks?.find((item) => item.studentIds?.some((studentId) => selectedStudentRecordIds.has(studentId)))
@@ -601,9 +837,11 @@ export function ParentScheduleClient({
                 return (
                   <ParentCard
                     key={lesson.id}
+                    className="stagger-item"
                     style={{
                       padding: isMobile ? 14 : 16,
                       borderLeft: `3px solid ${reviewStatus === 'APPROVED' ? '#1D9E75' : '#E8784A'}`,
+                      animationDelay: `${Math.min(lessonIndex, 8) * 40}ms`,
                     }}
                   >
                     <div style={{

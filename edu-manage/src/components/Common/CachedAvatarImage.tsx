@@ -17,7 +17,10 @@ interface Props {
 
 /** Avatar image that retains a small, decoded session copy across route changes. */
 export function CachedAvatarImage({ src, fallbackSrc, alt, className, style, loading = 'lazy', onError, noCache = false }: Props) {
-  const source = src?.trim() || ''
+  const rawSource = src?.trim() || ''
+  const source = !noCache && rawSource.startsWith('/api/uploads/') && !/[?&]variant=/.test(rawSource)
+    ? `${rawSource}${rawSource.includes('?') ? '&' : '?'}variant=thumbnail`
+    : rawSource
   const fallback = fallbackSrc?.trim() || ''
   // noCache 时不参与 blob 缓存链，直接从原始 source 出图（避免截图/导出时 blob: 渲染空白）
   const initialState = useMemo(() => noCache

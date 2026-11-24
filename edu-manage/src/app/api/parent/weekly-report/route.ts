@@ -11,6 +11,7 @@ import {
 } from '@/lib/business-visibility'
 import { findParentChild, getParentChildren } from '@/lib/parent-children'
 import { buildWeeklyLessonRosters, summarizeWeeklyAttendance } from '@/lib/parent-weekly-report'
+import { getLocalWeekRange, todayLocal } from '@/lib/date/local-day'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,13 +28,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const students = childId ? (requestedChild ? [requestedChild] : []) : linkedChildren
   const studentIds = [...new Set(students.flatMap((student) => student.recordIds))]
 
-  const now = new Date()
-  const weekStart = new Date(now)
-  const day = now.getDay()
-  weekStart.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
-  weekStart.setHours(0, 0, 0, 0)
-  const weekEnd = new Date(weekStart)
-  weekEnd.setDate(weekStart.getDate() + 7)
+  const { start: weekStart, end: weekEnd } = getLocalWeekRange(todayLocal())
 
   const [classLessons, attendanceRows, gradeRows, notificationRows, leaveRows, feedbackRows] = await Promise.all([
       prisma.classLesson.findMany({
@@ -54,8 +49,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
         select: {
           id: true,
           subject: true,
+          teacherId: true,
+          lessonDate: true,
           group: {
             select: {
+              teacherId: true,
+              teacherAssignments: { select: { teacherId: true, subject: true } },
               course: { select: { subject: true } },
               enrollments: {
                 where: { studentId: { in: studentIds }, ...parentActiveEnrollmentWhere(userId) },
@@ -99,6 +98,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       prisma.leaveRequest.findMany({
         where: {
           studentId: { in: studentIds },
+          deletedAt: null,
           leaveDate: { gte: weekStart, lt: weekEnd },
         },
         select: { studentId: true },

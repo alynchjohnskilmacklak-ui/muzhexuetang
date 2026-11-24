@@ -3,6 +3,7 @@ import type { LessonStatus } from '@prisma/client'
 import { requireCurrentTeacher, teacherLessonScopeWhere } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { visibleStudentWhere } from '@/lib/business-visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,13 +32,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
             course: true,
             room: true,
             enrollments: {
-              where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
+              where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere },
               include: { student: { select: { id: true, name: true, grade: true, gender: true, school: true } } },
             },
             teacherAssignments: { where: { teacherId: teacher.id } },
           },
         },
-        attendances: true,
+        attendances: { where: { deletedAt: null }, select: { id: true, status: true } },
         lessonStudents: { select: { studentId: true } },
       },
       orderBy: [{ lessonDate: 'desc' }, { startTime: 'asc' }],

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
-import { parentLinkedStudentWhere, parentVisibleExamPaperWhere, parentVisiblePerformancePostWhere, visibleNotificationWhere } from '@/lib/business-visibility'
+import { parentLinkedStudentWhere, parentVisibleExamPaperWhere, parentVisibleNotificationWhere, parentVisiblePerformancePostWhere, visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { summarizeParentMessageWorkflow } from '@/lib/parent-message-workflow'
 import { unreadNotificationWhere } from '@/lib/notification-read-state'
@@ -23,6 +23,7 @@ export const GET = apiHandler(async () => {
       select: { id: true },
     })
   ).map(student => student.id)
+  const parentNotificationScope = { AND: [parentVisibleNotificationWhere(user.id)] }
 
   const [papers, posts, notifications, standaloneNotifications, feedbacks, studyHallHomework, messageRows, notificationByType] = await Promise.all([
     prisma.examPaper.count({
@@ -39,7 +40,7 @@ export const GET = apiHandler(async () => {
       },
     }),
     prisma.notification.count({
-      where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
+      where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere, ...parentNotificationScope },
     }),
     prisma.notification.count({
       where: {
@@ -47,6 +48,7 @@ export const GET = apiHandler(async () => {
         ...unreadNotificationWhere,
         ...visibleNotificationWhere,
         ...standaloneParentNotificationWhere,
+        ...parentNotificationScope,
       },
     }),
     prisma.classroomFeedback.count({
@@ -60,6 +62,7 @@ export const GET = apiHandler(async () => {
         ...unreadNotificationWhere,
         relatedType: 'STUDY_HALL_HOMEWORK',
         ...visibleNotificationWhere,
+        ...parentNotificationScope,
       },
     }),
     prisma.parentMessage.findMany({
@@ -78,7 +81,7 @@ export const GET = apiHandler(async () => {
     }),
     prisma.notification.groupBy({
       by: ['relatedType'],
-      where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
+      where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere, ...parentNotificationScope },
       _count: { _all: true },
     }),
   ])

@@ -1,0 +1,502 @@
+[
+  {
+    "word": "site",
+    "examTags": ["词汇·可数名词", "熟词多义·场所与网站"],
+    "grammar": "n. 场所；地点；遗址；网站。可数，复数 sites；语境可指施工地、考古遗址或互联网网站。",
+    "collocations": "an archaeological site; a building site; visit a website",
+    "commonMistake": "site 可指地点或遗址，也可指网站；不要与 sight（视力、景象）混淆拼写。",
+    "example": {"english": "The team discovered pottery at the archaeological site.", "chinese": "考察队在考古遗址发现了陶器。"},
+    "application": {"prompt": "The archaeologists set up camp at the excavation ___ where they found the old walls. A. site B. sight", "solution": "A。解析：挖掘地点的固定表达是 excavation site（挖掘现场/遗址）；sight 指景象或视力。"},
+    "sources": [{"label": "Cambridge Dictionary: site", "url": "https://dictionary.cambridge.org/dictionary/english/site"}]
+  },
+  {
+    "word": "artefact",
+    "examTags": ["词汇·可数名词", "拼写·英美变体"],
+    "grammar": "n. （有历史价值的）人工制品。可数，复数 artefacts；英式拼写 artefact，美式常拼 artifact。",
+    "collocations": "an ancient artefact; a museum artefact; discover artefacts",
+    "commonMistake": "artefact 与 artifact 都是正确拼写，前者偏英式、后者偏美式；此词表采用 artefact，不要把 artifact 判为拼写错误。",
+    "example": {"english": "The museum displayed an artefact made by early farmers.", "chinese": "博物馆展出了一件早期农民制作的人工制品。"},
+    "application": {"prompt": "The museum displayed a stone ___ made by people thousands of years ago. A. fossil B. artefact", "solution": "B。解析：古人制作并遗留下来的物品是 artefact（人工制品）；fossil 是化石。"},
+    "sources": [{"label": "Cambridge Dictionary: artefact", "url": "https://dictionary.cambridge.org/dictionary/english/artefact"}]
+  },
+  {
+    "word": "horn",
+    "examTags": ["词汇·可数名词", "熟词多义·动物角与喇叭"],
+    "grammar": "n. （牛、羊等的）角；号角；喇叭。可数，复数 horns；动物角常成对出现。",
+    "collocations": "a pair of horns; a bull's horn; sound the horn",
+    "commonMistake": "horn 可指动物的角，也可指车辆喇叭；谈牛羊头上的角时通常用复数 horns。",
+    "example": {"english": "The young goat's horns had begun to grow.", "chinese": "这只小山羊的角开始长出来了。"},
+    "application": {"prompt": "The goat has two curved ___ on its head. A. horns B. feathers", "solution": "A。解析：山羊头上长出的弯曲部分是 horns（角）；feathers 是羽毛。"},
+    "sources": [{"label": "Cambridge Dictionary: horn", "url": "https://dictionary.cambridge.org/dictionary/english/horn"}]
+  },
+  {
+    "word": "Egyptian",
+    "examTags": ["词汇·国籍形容词与名词", "拼写·国名派生"],
+    "grammar": "adj. 埃及的；n. 埃及人。作形容词修饰名词，首字母大写；复数名词 Egyptians。",
+    "collocations": "Egyptian history; an Egyptian museum; ancient Egyptians",
+    "commonMistake": "Egypt 是国名，Egyptian 才是“埃及的/埃及人”；国籍词首字母大写。",
+    "example": {"english": "The students learned about Egyptian history in the museum.", "chinese": "学生们在博物馆了解了埃及历史。"},
+    "application": {"prompt": "The collection includes pottery from ___ tombs near Cairo. A. Egypt B. Egyptian", "solution": "B。解析：名词 tombs 前需要形容词 Egyptian 修饰；Egypt 是国名，不能直接作此处的形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: Egyptian", "url": "https://dictionary.cambridge.org/dictionary/english/egyptian"}]
+  },
+  {
+    "word": "empress",
+    "examTags": ["词汇·王室称谓", "构词·阴性名词后缀"],
+    "grammar": "n. 女皇；皇后。可数，复数 empresses；男性对应词为 emperor。",
+    "collocations": "an empress of China; a powerful empress; the empress's tomb",
+    "commonMistake": "empress 指女皇或皇后，emperor 指男皇帝；复数需在 -ss 后加 -es，写作 empresses。",
+    "example": {"english": "The guide told us how the empress ruled the kingdom.", "chinese": "导游给我们讲了这位女皇如何统治王国。"},
+    "application": {"prompt": "The ruler was a woman who held the highest imperial position. She was an ___. A. emperor B. empress", "solution": "B。解析：女性皇帝称为 empress（女皇）；emperor 通常指男性皇帝。"},
+    "sources": [{"label": "Cambridge Dictionary: empress", "url": "https://dictionary.cambridge.org/dictionary/english/empress"}]
+  },
+  {
+    "word": "queen",
+    "examTags": ["词汇·王室称谓", "熟词多义·女王与王后"],
+    "grammar": "n. 女王；王后；蜂王。可数，复数 queens；在棋类中也指“后”。",
+    "collocations": "the queen of a country; a queen bee; the queen's palace",
+    "commonMistake": "queen 可指女王或国王的妻子，需结合语境辨义；男性对应词常为 king。",
+    "example": {"english": "The queen welcomed visitors to the royal palace.", "chinese": "女王在王宫欢迎来访者。"},
+    "application": {"prompt": "In the story, the king's wife wore a crown and was called the ___. A. queen B. king", "solution": "A。解析：国王的妻子称为 queen（王后）；king 是男性国王。"},
+    "sources": [{"label": "Cambridge Dictionary: queen", "url": "https://dictionary.cambridge.org/dictionary/english/queen"}]
+  },
+  {
+    "word": "mummy",
+    "examTags": ["词汇·可数名词", "熟词多义·木乃伊与儿语"],
+    "grammar": "n. 木乃伊；（儿语）妈妈。可数，复数 mummies；历史和博物馆语境中常指经过处理保存的遗体。",
+    "collocations": "an Egyptian mummy; a mummy in a tomb; unwrap a mummy",
+    "commonMistake": "mummy 可表示木乃伊，也可作儿童对妈妈的称呼；此处历史语境取“木乃伊”，不要与 mummy 的亲昵称呼混淆。",
+    "example": {"english": "The mummy was kept in a glass case at the museum.", "chinese": "这具木乃伊保存在博物馆的玻璃展柜里。"},
+    "application": {"prompt": "The preserved body of the ancient ruler was displayed as an Egyptian ___. A. mummy B. statue", "solution": "A。解析：经过保存处理的古代遗体是 mummy（木乃伊）；statue 是雕像。"},
+    "sources": [{"label": "Cambridge Dictionary: mummy", "url": "https://dictionary.cambridge.org/dictionary/english/mummy"}]
+  },
+  {
+    "word": "archaeologist",
+    "examTags": ["词汇·职业名词", "拼写·词根与后缀"],
+    "grammar": "n. 考古学家。可数，复数 archaeologists；由 archaeology（考古学）加 -ist 构成。",
+    "collocations": "a team of archaeologists; an archaeologist at work; become an archaeologist",
+    "commonMistake": "archaeologist 拼写中有 ae；archeologist 是美式简化变体，也正确，教材词表使用 archaeologist。",
+    "example": {"english": "An archaeologist examined the tools found near the tomb.", "chinese": "一位考古学家检查了在墓穴附近发现的工具。"},
+    "application": {"prompt": "The person studying the buried tools and buildings works as an ___. A. architect B. archaeologist", "solution": "B。解析：研究出土器物和古代遗址的人是 archaeologist（考古学家）；architect 是建筑师。"},
+    "sources": [{"label": "Cambridge Dictionary: archaeologist", "url": "https://dictionary.cambridge.org/dictionary/english/archaeologist"}]
+  },
+  {
+    "word": "wealthy",
+    "examTags": ["词汇·形容词派生", "词形辨析·wealth"],
+    "grammar": "adj. 富裕的；有财的。可作定语或表语；比较级 wealthier，最高级 wealthiest；名词为 wealth。",
+    "collocations": "a wealthy family; become wealthy; a wealthy country",
+    "commonMistake": "wealthy 是形容词，修饰名词；wealth 是名词，表示财富。比较级去 y 加 -ier：wealthier。",
+    "example": {"english": "The wealthy merchant paid for the village school.", "chinese": "这位富有的商人为村里的学校出资。"},
+    "application": {"prompt": "The family owned several businesses and had plenty of money. They were ___. A. wealth B. wealthy", "solution": "B。解析：be 动词后需要形容词作表语，wealthy 表示“富裕的”；wealth 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: wealthy", "url": "https://dictionary.cambridge.org/dictionary/english/wealthy"}]
+  },
+  {
+    "word": "clothing",
+    "examTags": ["词汇·集合名词", "语法·不可数名词"],
+    "grammar": "n. 衣物；服装，通常不可数，谓语用单数；一件衣物可说 an item/article of clothing。",
+    "collocations": "traditional clothing; protective clothing; an item of clothing",
+    "commonMistake": "clothing 通常不可数，不说 clothings；cloth 表示布料，clothes 表示衣服且通常用复数。",
+    "example": {"english": "The museum displayed traditional clothing from several regions.", "chinese": "博物馆展出了来自几个地区的传统服装。"},
+    "application": {"prompt": "The museum's collection of traditional ___ includes robes and sandals. A. clothings B. clothing", "solution": "B。解析：clothing 是不可数集合名词，不能加复数 -s；此处指各类传统服装。"},
+    "sources": [{"label": "Cambridge Dictionary: clothing", "url": "https://dictionary.cambridge.org/dictionary/english/clothing"}]
+  },
+  {
+    "word": "cotton",
+    "examTags": ["词汇·材料名词", "语法·不可数名词与材质"],
+    "grammar": "n. 棉；棉花；棉织物。作原料时通常不可数；作定语修饰名词时说 cotton clothes/shirt。",
+    "collocations": "cotton fabric; a cotton shirt; grow cotton",
+    "commonMistake": "cotton 表示棉这种材料时不可数；说一件棉衬衫用 a cotton shirt，而不是 a cotton。",
+    "example": {"english": "This soft shirt is made from locally grown cotton.", "chinese": "这件柔软的衬衫由当地种植的棉花制成。"},
+    "application": {"prompt": "The shirt feels soft because it is made of ___. A. cotton B. woollen", "solution": "A。解析：句中需要表示棉这种材料的名词 cotton；woollen 是形容词“羊毛制的”。"},
+    "sources": [{"label": "Cambridge Dictionary: cotton", "url": "https://dictionary.cambridge.org/dictionary/english/cotton"}]
+  },
+  {
+    "word": "gram",
+    "examTags": ["词汇·计量单位", "拼写·数词与复数"],
+    "grammar": "n. 克（重量单位）。可数；单数 gram，复数 grams；英式拼法 gramme 也存在。",
+    "collocations": "five grams of sugar; a 200-gram package; weigh in grams",
+    "commonMistake": "数字大于一时通常用 grams；作复合形容词时单位常用单数，如 a 200-gram bag。",
+    "example": {"english": "The recipe needs 150 grams of flour.", "chinese": "这个食谱需要150克面粉。"},
+    "application": {"prompt": "The recipe says to add 250 ___ of flour. A. gram B. grams", "solution": "B。解析：250 是复数数量，计量单位用 grams；作前置复合定语时才常用单数形式。"},
+    "sources": [{"label": "Cambridge Dictionary: gram", "url": "https://dictionary.cambridge.org/dictionary/english/gram"}]
+  },
+  {
+    "word": "pound",
+    "examTags": ["词汇·多义名词", "阅读·重量与货币"],
+    "grammar": "n. 磅（重量单位）；英镑等货币单位。可数，复数 pounds；意义由数字、货物或价格语境判断。",
+    "collocations": "a pound of apples; weigh ten pounds; five pounds sterling",
+    "commonMistake": "pound 可表示重量“磅”或货币“英镑”；有重量动词 weigh、食物等语境时取重量义。",
+    "example": {"english": "The box weighs about five pounds.", "chinese": "这个箱子大约重五磅。"},
+    "application": {"prompt": "The fruit seller put two ___ of apples on the scale. A. pounds B. dollars", "solution": "A。解析：苹果放在秤上称量，句中需要重量单位 pounds（磅），不是货币 dollars。"},
+    "sources": [{"label": "Cambridge Dictionary: pound", "url": "https://dictionary.cambridge.org/dictionary/english/pound"}]
+  },
+  {
+    "word": "matchbox",
+    "examTags": ["词汇·复合名词", "拼写·名词复数"],
+    "grammar": "n. 火柴盒。可数，复数 matchboxes；由 match + box 构成，box 以 x 结尾加 -es。",
+    "collocations": "a box of matches; an empty matchbox; matchboxes on a shelf",
+    "commonMistake": "matchbox 的复数是 matchboxes，词尾 x 加 -es；matchbox 是盒子，matches 才是盒中的火柴。",
+    "example": {"english": "He found an old matchbox in the drawer.", "chinese": "他在抽屉里发现了一个旧火柴盒。"},
+    "application": {"prompt": "There are three empty ___ in the kitchen drawer. A. matchboxs B. matchboxes", "solution": "B。解析：matchbox 以 x 结尾，变复数加 -es，写作 matchboxes。"},
+    "sources": [{"label": "Cambridge Dictionary: matchbox", "url": "https://dictionary.cambridge.org/dictionary/english/matchbox"}]
+  },
+  {
+    "word": "ash",
+    "examTags": ["词汇·不可数名词", "熟词多义·灰烬与树木"],
+    "grammar": "n. 灰烬；灰；废墟。作燃烧后的灰烬时通常不可数；ash tree 则指白蜡树。",
+    "collocations": "wood ash; a pile of ash; ash from a fire",
+    "commonMistake": "ash 表示灰烬时通常不可数；一堆灰可说 a pile of ash，不要直接说 an ash。",
+    "example": {"english": "After the fire went out, only a little ash remained.", "chinese": "火熄灭后，只剩下一点灰烬。"},
+    "application": {"prompt": "After the paper burned completely, a little ___ was left in the tray. A. ash B. asheses", "solution": "A。解析：此处 ash 表示燃烧后的灰烬，通常作不可数名词；asheses 不是正确形式。"},
+    "sources": [{"label": "Cambridge Dictionary: ash", "url": "https://dictionary.cambridge.org/dictionary/english/ash"}]
+  },
+  {
+    "word": "unlikely",
+    "examTags": ["词汇·形容词派生", "词形辨析·likely与unlikely"],
+    "grammar": "adj. 不大可能发生的。由 un- + likely 构成；常用 be unlikely to do 或 It is unlikely that...。",
+    "collocations": "be unlikely to happen; an unlikely result; it is unlikely that...",
+    "commonMistake": "unlikely 是形容词，常用 be unlikely to do；不能把 unlikely 当副词修饰动词。",
+    "example": {"english": "It is unlikely to snow here in the middle of summer.", "chinese": "盛夏时这里不太可能下雪。"},
+    "application": {"prompt": "The sky is clear and the forecast says 35°C, so it is ___ to snow today. A. likely B. unlikely", "solution": "B。解析：晴朗且气温很高时今天不大可能下雪，用 unlikely。"},
+    "sources": [{"label": "Cambridge Dictionary: unlikely", "url": "https://dictionary.cambridge.org/dictionary/english/unlikely"}]
+  },
+  {
+    "word": "jade",
+    "examTags": ["词汇·材料名词", "阅读·珠宝与文化"],
+    "grammar": "n. 玉；翡翠。表示材料时通常不可数；具体一件玉器可说 a piece of jade 或 a jade ornament。",
+    "collocations": "a jade bracelet; a piece of jade; carve jade",
+    "commonMistake": "jade 作材料名词通常不可数；说玉手镯用 a jade bracelet，不说 a jade 表示一件玉石制品。",
+    "example": {"english": "The small jade pendant had been passed down for generations.", "chinese": "这枚小玉坠已经代代相传。"},
+    "application": {"prompt": "The bracelet is made from a polished green stone called ___. A. jade B. glassy", "solution": "A。解析：made from 后接表示材料的名词 jade（玉）；glassy 是形容词，不能作此处宾语。"},
+    "sources": [{"label": "Cambridge Dictionary: jade", "url": "https://dictionary.cambridge.org/dictionary/english/jade"}]
+  },
+  {
+    "word": "wealth",
+    "examTags": ["词汇·抽象名词", "词形辨析·wealthy"],
+    "grammar": "n. 财富；财产，通常不可数；wealthy 是形容词“富裕的”。可说 a great deal of wealth。",
+    "collocations": "great wealth; a source of wealth; distribute wealth",
+    "commonMistake": "wealth 是名词，wealthy 是形容词；通常不说 many wealths，数量可用 much/a great deal of。",
+    "example": {"english": "The tomb contained objects that showed the ruler's great wealth.", "chinese": "墓中有一些物品，显示出这位统治者曾拥有巨额财富。"},
+    "application": {"prompt": "The treasures in the tomb revealed the ruler's great ___. A. wealthy B. wealth", "solution": "B。解析：所有格 ruler's 后需要名词作 great 的中心词，wealth 表示“财富”；wealthy 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: wealth", "url": "https://dictionary.cambridge.org/dictionary/english/wealth"}]
+  },
+  {
+    "word": "trade",
+    "examTags": ["词汇·名词与动词", "语法·固定搭配"],
+    "grammar": "n. 贸易；买卖；v. 交易；交换。常用 trade with sb、trade in goods；过去式 traded。",
+    "collocations": "international trade; trade with other countries; trade goods for food",
+    "commonMistake": "trade in + 商品表示经营或交易某类商品；trade sth for sth 表示用某物交换另一物。",
+    "example": {"english": "The two towns traded pottery and cloth for grain.", "chinese": "这两个城镇用陶器和布匹交换粮食。"},
+    "application": {"prompt": "In the past, the coastal town used to ___ salt for pottery from the inland village. A. trade B. travel", "solution": "A。解析：用盐换陶器的行为是 trade A for B（用 A 交换 B）；travel 是旅行。"},
+    "sources": [{"label": "Cambridge Dictionary: trade", "url": "https://dictionary.cambridge.org/dictionary/english/trade"}]
+  },
+  {
+    "word": "repair",
+    "examTags": ["词汇·名词与动词", "语法·搭配辨析"],
+    "grammar": "v. 修理；修补；n. 修理。可说 repair a wall、repair a machine；名词常用 make repairs 或 under repair。",
+    "collocations": "repair a roof; repair the damage; under repair",
+    "commonMistake": "repair 可直接接需要修理的物品；表示修理费用也可用 the cost of repairs，别把 repair 写成名词复数 repairs 的动词形式。",
+    "example": {"english": "Workers repaired the stone gate after the storm.", "chinese": "暴风雨后，工人修好了石门。"},
+    "application": {"prompt": "The old bridge was damaged, so engineers came to ___ it. A. repeat B. repair", "solution": "B。解析：工程师来修好受损的桥，用 repair（修理）；repeat 是“重复”。"},
+    "sources": [{"label": "Cambridge Dictionary: repair", "url": "https://dictionary.cambridge.org/dictionary/english/repair"}]
+  },
+  {
+    "word": "bring ... to life",
+    "examTags": ["词汇·动词短语", "阅读·描述与表达"],
+    "grammar": "phr. 使……鲜活起来；赋予生命。bring—brought—brought；宾语置于 bring 和 to life 之间。",
+    "collocations": "bring a story to life; bring history to life; bring the past to life",
+    "commonMistake": "宾语放在 bring 与 to life 之间，如 bring the past to life；不要把 to life 拆到宾语前。",
+    "example": {"english": "The guide's stories brought the ancient city to life.", "chinese": "导游的讲述让这座古城变得鲜活起来。"},
+    "application": {"prompt": "The guide used stories and pictures to ___ the ancient city ___ for the children. A. bring / to life B. bring to life / it", "solution": "A。解析：bring something to life 表示“使某物鲜活起来”，宾语 the ancient city 放在 bring 与 to life 之间。"},
+    "sources": [{"label": "Cambridge Dictionary: bring something to life", "url": "https://dictionary.cambridge.org/dictionary/english/bring-to-life"}]
+  },
+  {
+    "word": "archaeological",
+    "examTags": ["词汇·形容词派生", "词形辨析·职业与学科"],
+    "grammar": "adj. 考古学的。由 archaeology（考古学）派生，修饰 site、discovery、evidence 等名词。",
+    "collocations": "archaeological research; an archaeological discovery; an archaeological site",
+    "commonMistake": "archaeological 是形容词，名词 archaeology 指考古学；注意拼写中的 ae。",
+    "example": {"english": "The team made an important archaeological discovery near the river.", "chinese": "考察队在河边有了一项重要的考古发现。"},
+    "application": {"prompt": "The team used old maps and careful digging to make an ___ discovery. A. archaeologist B. archaeological", "solution": "B。解析：名词 discovery 前需要形容词 archaeological（考古学的）；archaeologist 是考古学家。"},
+    "sources": [{"label": "Cambridge Dictionary: archaeological", "url": "https://dictionary.cambridge.org/dictionary/english/archaeological"}]
+  },
+  {
+    "word": "millions (of ...)",
+    "examTags": ["词汇·数量表达", "语法·数词与介词"],
+    "grammar": "phr. 数百万（的）；大量（的）。不具体指数量时用 millions of + 复数名词；具体数词后用 three million people，不加 -s 或 of。",
+    "collocations": "millions of years; millions of people; cost millions of dollars",
+    "commonMistake": "泛指“大量”用 millions of + 复数名词；具体数目如 five million 后直接接名词，不加 -s，也通常不加 of。",
+    "example": {"english": "Millions of visitors come to the historic site each year.", "chinese": "每年有数百万游客来到这处历史遗址。"},
+    "application": {"prompt": "No exact number was given, but ___ people visit the ancient city every year. A. millions of B. three millions", "solution": "A。解析：泛指数百万游客用 millions of people；具体数词后 million 不加 -s。"},
+    "sources": [{"label": "Cambridge Dictionary: million", "url": "https://dictionary.cambridge.org/dictionary/english/million"}]
+  },
+  {
+    "word": "gate",
+    "examTags": ["词汇·可数名词", "熟词多义·大门与入口"],
+    "grammar": "n. 门；大门；入口。可数，复数 gates；常用 the gate to/of a place。",
+    "collocations": "the main gate; a garden gate; enter through the gate",
+    "commonMistake": "gate 通常指院落、围墙或场地出入口；room 的门常用 door。",
+    "example": {"english": "The visitors waited outside the main gate until it opened.", "chinese": "游客们在正门外等到它开放。"},
+    "application": {"prompt": "The wall surrounded the palace, and visitors entered through its huge stone ___. A. roof B. gate", "solution": "B。解析：穿过围墙进入宫殿的入口是 gate（大门）；roof 是屋顶。"},
+    "sources": [{"label": "Cambridge Dictionary: gate", "url": "https://dictionary.cambridge.org/dictionary/english/gate"}]
+  },
+  {
+    "word": "aware",
+    "examTags": ["词汇·形容词", "语法·表语与从句"],
+    "grammar": "adj. 知道的；意识到的。常作表语，用 be/become aware that... 或 be aware of + 名词。",
+    "collocations": "be aware of a problem; become aware that...; fully aware",
+    "commonMistake": "aware 通常不直接放在名词前作定语；常用 be aware of/that 作表语，aware 不可直接接名词。",
+    "example": {"english": "The visitors were aware that the floor was uneven.", "chinese": "游客们知道地面并不平整。"},
+    "application": {"prompt": "Before entering the tomb, the visitors were ___ that the floor could be slippery. A. aware B. notice", "solution": "A。解析：be aware that... 表示“知道/意识到……”，be 后需接形容词 aware；notice 是动词。"},
+    "sources": [{"label": "Cambridge Dictionary: aware", "url": "https://dictionary.cambridge.org/dictionary/english/aware"}]
+  },
+  {
+    "word": "aware of",
+    "examTags": ["词汇·形容词搭配", "语法·介词搭配"],
+    "grammar": "phr. 知道；意识到。结构为 be/become aware of + 名词或代词；若后接完整句子，通常用 aware that...。",
+    "collocations": "be aware of the danger; make someone aware of a fact; become aware of a sound",
+    "commonMistake": "aware of 后接名词或代词；接完整主谓句时用 aware that...，不要说 aware of that the gate is closed。",
+    "example": {"english": "The guide made us aware of the rules before the tour began.", "chinese": "参观开始前，导游让我们了解了这些规则。"},
+    "application": {"prompt": "After seeing the warning sign, the visitors became aware ___ the danger. A. at B. of", "solution": "B。解析：become aware of + 名词表示“意识到危险”；本句 danger 是名词，搭配用 of。"},
+    "sources": [{"label": "Cambridge Dictionary: aware", "url": "https://dictionary.cambridge.org/dictionary/english/aware"}]
+  },
+  {
+    "word": "underground",
+    "examTags": ["词汇·副词、形容词与名词", "熟词多义·地下与地铁"],
+    "grammar": "adv. 在地下；adj. 地下的；n. 地铁（英式用法）。可作定语，如 an underground room；也可作地点副词。",
+    "collocations": "an underground room; travel underground; take the underground",
+    "commonMistake": "underground 作副词时前面不加 to，如 go underground；作英国地铁名词时常说 the Underground。",
+    "example": {"english": "The ancient storage room was built underground to stay cool.", "chinese": "这间古代储藏室建在地下以保持凉爽。"},
+    "application": {"prompt": "To protect the food from heat, the villagers stored it in a room ___. A. underground B. upstairs", "solution": "A。解析：为避暑而建在地面以下的房间位于 underground（地下）。"},
+    "sources": [{"label": "Cambridge Dictionary: underground", "url": "https://dictionary.cambridge.org/dictionary/english/underground"}]
+  },
+  {
+    "word": "pit",
+    "examTags": ["词汇·可数名词", "熟词多义·深坑与果核"],
+    "grammar": "n. 深坑；矿井；（水果的）核。可数，复数 pits；含义根据 dig、fruit 等语境判断。",
+    "collocations": "dig a pit; a deep pit; a peach pit",
+    "commonMistake": "pit 可指地上的坑，也可指某些水果的硬核；句中出现挖掘、地面或深度时通常取“坑”义。",
+    "example": {"english": "The workers dug a deep pit beside the old wall.", "chinese": "工人在旧墙旁挖了一个深坑。"},
+    "application": {"prompt": "The workers dug a deep ___ to reach the buried stones below the ground. A. gate B. pit", "solution": "B。解析：向下挖掘以接近地下石块形成的是 pit（深坑）。"},
+    "sources": [{"label": "Cambridge Dictionary: pit", "url": "https://dictionary.cambridge.org/dictionary/english/pit"}]
+  },
+  {
+    "word": "world-famous",
+    "examTags": ["词汇·复合形容词", "拼写·连字符"],
+    "grammar": "adj. 举世闻名的；世界著名的。常作定语或表语；由 world + famous 构成，通常加连字符。",
+    "collocations": "a world-famous site; become world-famous; a world-famous collection",
+    "commonMistake": "world-famous 是连字符连接的复合形容词；名词前作定语时不要拆成 world famous 两词。",
+    "example": {"english": "The world-famous pyramid attracts visitors from many countries.", "chinese": "这座举世闻名的金字塔吸引着来自许多国家的游客。"},
+    "application": {"prompt": "The ancient monument is known by people around the globe; it is ___. A. world-famous B. famous-world", "solution": "A。解析：表示“举世闻名的”固定写作 world-famous，连字符连接且顺序不能颠倒。"},
+    "sources": [{"label": "Cambridge Dictionary: world-famous", "url": "https://dictionary.cambridge.org/dictionary/english/world-famous"}]
+  },
+  {
+    "word": "dig",
+    "examTags": ["词汇·不规则动词", "语法·动词词形变化"],
+    "grammar": "v. 挖（土）；掘（地）。dig—dug—dug；常用 dig a hole、dig for something。",
+    "collocations": "dig a hole; dig for ancient objects; dig up the ground",
+    "commonMistake": "dig 的过去式和过去分词都是 dug，不是 digged；表示挖掘寻找某物可用 dig for。",
+    "example": {"english": "The archaeologists dug carefully around the stone box.", "chinese": "考古学家在石箱周围小心地挖掘。"},
+    "application": {"prompt": "Yesterday the team ___ a narrow trench beside the wall. A. digged B. dug", "solution": "B。解析：dig 的过去式是 dug；句中 Yesterday 表明动作发生在过去。"},
+    "sources": [{"label": "Cambridge Dictionary: dig", "url": "https://dictionary.cambridge.org/dictionary/english/dig"}]
+  },
+  {
+    "word": "remains",
+    "examTags": ["词汇·复数名词", "熟词多义·遗迹与剩余物"],
+    "grammar": "n. 遗迹；遗骸；剩余部分，常用复数形式 remains；the remains of... 指某物留下的残余。",
+    "collocations": "the remains of a temple; human remains; ancient remains",
+    "commonMistake": "remains 作“遗迹/遗骸”时通常用复数形式，前面可接 the；不要因词尾 -s 误认为它一定是动词。",
+    "example": {"english": "The remains of the old bridge can still be seen near the river.", "chinese": "河边仍能看到这座旧桥的遗迹。"},
+    "application": {"prompt": "The walls that survived the earthquake are the ___ of the ancient palace. A. remains B. remained", "solution": "A。解析：此处需要名词表示宫殿留下的遗迹，the remains of... 是固定用法；remained 是动词过去式。"},
+    "sources": [{"label": "Cambridge Dictionary: remains", "url": "https://dictionary.cambridge.org/dictionary/english/remains"}]
+  },
+  {
+    "word": "era",
+    "examTags": ["词汇·可数名词", "阅读·历史时间表达"],
+    "grammar": "n. 时代；年代。可数，复数 eras；常用 the ... era 表示某一历史时期。",
+    "collocations": "an ancient era; the modern era; a new era begins",
+    "commonMistake": "era 指一段较长的历史时期，前有元音音素时用 an era；不要与一年的日期 year 混淆。",
+    "example": {"english": "The tools reveal how people lived in that era.", "chinese": "这些工具揭示了那个时代人们的生活方式。"},
+    "application": {"prompt": "The invention changed daily life and marked the beginning of a new ___. A. error B. era", "solution": "B。解析：改变社会生活并开启的新“时代”是 era；error 表示错误。"},
+    "sources": [{"label": "Cambridge Dictionary: era", "url": "https://dictionary.cambridge.org/dictionary/english/era"}]
+  },
+  {
+    "word": "highly",
+    "examTags": ["词汇·副词派生", "语法·副词修饰范围"],
+    "grammar": "adv. 非常；高度地。常修饰形容词、过去分词或表示评价的动词，如 highly skilled、highly valued。",
+    "collocations": "highly skilled; highly respected; highly likely",
+    "commonMistake": "highly 常用于评价程度较高或受重视的语境；物理高度通常用 high，不用 highly。",
+    "example": {"english": "The highly skilled workers repaired the stone carving.", "chinese": "这些技艺高超的工人修复了石雕。"},
+    "application": {"prompt": "The craft requires great ability, so only ___ trained workers can do it well. A. highly B. high", "solution": "A。解析：修饰过去分词 trained、表示“训练有素的/高度训练的”用 highly；high 通常表示物理高度。"},
+    "sources": [{"label": "Cambridge Dictionary: highly", "url": "https://dictionary.cambridge.org/dictionary/english/highly"}]
+  },
+  {
+    "word": "skilled",
+    "examTags": ["词汇·形容词派生", "词形辨析·skill"],
+    "grammar": "adj. 有技能的；熟练的。由 skill + -ed 构成；常修饰人或工人，也可用 highly skilled 加强程度。",
+    "collocations": "a skilled worker; highly skilled craftspeople; a skilled job",
+    "commonMistake": "skilled 是形容词，skill 是名词；可说 a skilled carver 或 have the skill to do sth。",
+    "example": {"english": "A skilled craftsperson can shape the metal without damaging it.", "chinese": "熟练的工匠能在不损坏金属的情况下将它塑形。"},
+    "application": {"prompt": "The ___ carver produced fine details on the stone statue. A. skill B. skilled", "solution": "B。解析：名词 carver 前需要形容词 skilled 修饰；skill 是名词，不能直接作此处的定语。"},
+    "sources": [{"label": "Cambridge Dictionary: skilled", "url": "https://dictionary.cambridge.org/dictionary/english/skilled"}]
+  },
+  {
+    "word": "skilled in",
+    "examTags": ["词汇·形容词搭配", "语法·介词与动名词"],
+    "grammar": "phr. 善于；精通。结构为 be skilled in + 名词或动名词，常说明某人擅长的领域或活动。",
+    "collocations": "be skilled in archaeology; skilled in carving; highly skilled in a craft",
+    "commonMistake": "skilled in 后接名词或动名词；谈领域可说 skilled in metalwork，不能说 skilled on metalwork。",
+    "example": {"english": "The artisan was skilled in carving delicate patterns in jade.", "chinese": "这位工匠擅长在玉上雕刻精致的纹样。"},
+    "application": {"prompt": "The researcher is highly skilled ___ identifying ancient tools. A. on B. in", "solution": "B。解析：表示擅长某领域或活动用 be skilled in；后接动名词 identifying。"},
+    "sources": [{"label": "Cambridge Dictionary: skilled", "url": "https://dictionary.cambridge.org/dictionary/english/skilled"}]
+  },
+  {
+    "word": "metal",
+    "examTags": ["词汇·材料名词", "语法·不可数名词与材质"],
+    "grammar": "n. 金属。材料义通常不可数；说不同种类可用 metals；metal 也可作定语修饰工具、门等。",
+    "collocations": "a piece of metal; metal tools; made of metal",
+    "commonMistake": "metal 表示金属材料时通常不可数；说一块金属用 a piece of metal，而不是 a metal（除非指一种金属）。",
+    "example": {"english": "The handle was made of metal and felt cold to the touch.", "chinese": "这个把手是金属制的，摸起来很凉。"},
+    "application": {"prompt": "The old key was made from a hard, shiny ___. A. metal B. wooden", "solution": "A。解析：a hard, shiny 后需要名词作 made from 的宾语，metal 表示金属；wooden 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: metal", "url": "https://dictionary.cambridge.org/dictionary/english/metal"}]
+  },
+  {
+    "word": "carve",
+    "examTags": ["词汇·动词", "语法·动词搭配与词形"],
+    "grammar": "v. 雕刻；刻出。carve—carved—carved；常用 carve sth from/out of wood、carve a pattern into stone。",
+    "collocations": "carve a statue; carve a pattern into stone; carve wood",
+    "commonMistake": "carve 指用工具切削材料做出形状；过去式和过去分词均加 -d，写作 carved。",
+    "example": {"english": "The artist carved a small bird from a piece of wood.", "chinese": "艺术家用一块木头雕出了一只小鸟。"},
+    "application": {"prompt": "The artist used a knife to ___ a bird from a block of wood. A. paint B. carve", "solution": "B。解析：用刀从木块上刻出鸟的形状是 carve；paint 表示绘画或涂色。"},
+    "sources": [{"label": "Cambridge Dictionary: carve", "url": "https://dictionary.cambridge.org/dictionary/english/carve"}]
+  },
+  {
+    "word": "style",
+    "examTags": ["词汇·可数与不可数名词", "写作·艺术与风格"],
+    "grammar": "n. 样式；风格；款式。可数，复数 styles；也可表示个人的表达方式或生活方式。",
+    "collocations": "a traditional style; in the style of; a unique style",
+    "commonMistake": "style 指作品或事物呈现的风格；in the style of + 人/时期表示“采用……的风格”，不可漏掉 the。",
+    "example": {"english": "The museum displays pottery in the style of the ancient Mayans.", "chinese": "博物馆展出了具有古代玛雅人风格的陶器。"},
+    "application": {"prompt": "The building is designed ___ the ancient palace. A. in the style of B. by a style of", "solution": "A。解析：表示“采用古代宫殿的风格”用 in the style of；by a style of 不能表达这一句意。"},
+    "sources": [{"label": "Cambridge Dictionary: style", "url": "https://dictionary.cambridge.org/dictionary/english/style"}]
+  },
+  {
+    "word": "unique",
+    "examTags": ["词汇·形容词", "语法·冠词与程度副词"],
+    "grammar": "adj. 独特的；罕见的；独一无二的。常作表语或定语；通常不用于比较级，常说 a unique feature。",
+    "collocations": "a unique design; unique to this region; a unique opportunity",
+    "commonMistake": "unique 本身含“独一无二”之意，通常不说 more unique；发音以辅音音素 /j/ 开头，前用 a unique...。",
+    "example": {"english": "Each hand-carved figure has a unique expression.", "chinese": "每个手工雕刻的人像都有独特的表情。"},
+    "application": {"prompt": "No other object in the collection is quite like it; the design is ___. A. unique B. usual", "solution": "A。解析：与收藏中其他物品都不同，说明设计是 unique（独特的）；usual 是“通常的”。"},
+    "sources": [{"label": "Cambridge Dictionary: unique", "url": "https://dictionary.cambridge.org/dictionary/english/unique"}]
+  },
+  {
+    "word": "evidence",
+    "examTags": ["词汇·不可数名词", "语法·证据表达"],
+    "grammar": "n. 证据；证明，通常不可数；一条证据可说 a piece of evidence；动词为 prove。",
+    "collocations": "strong evidence; a piece of evidence; evidence of a past civilization",
+    "commonMistake": "evidence 通常不可数，不说 an evidence 或 evidences；数一条证据时用 a piece of evidence。",
+    "example": {"english": "The tools provided evidence of a settlement near the river.", "chinese": "这些工具为河边曾有聚居点提供了证据。"},
+    "application": {"prompt": "The broken pottery is ___ that people lived here long ago. A. an evidence B. evidence", "solution": "B。解析：evidence 通常不可数，作表语时直接用 evidence，不能加不定冠词 an。"},
+    "sources": [{"label": "Cambridge Dictionary: evidence", "url": "https://dictionary.cambridge.org/dictionary/english/evidence"}]
+  },
+  {
+    "word": "aim",
+    "examTags": ["词汇·名词与动词", "语法·不定式搭配"],
+    "grammar": "n. 目的；目标；v. 力求达到；瞄准。常用 aim to do、aim at doing；名词常用 the aim of。",
+    "collocations": "aim to preserve the site; the main aim; aim at a target",
+    "commonMistake": "aim to 后接动词原形；aim at 后接名词或动名词。不要把 aim at do sth 与 aim to do sth 混用。",
+    "example": {"english": "The project aims to protect the ancient walls from further damage.", "chinese": "这个项目旨在保护古城墙免受进一步损坏。"},
+    "application": {"prompt": "The research team hopes to preserve the site. Its main aim is ___ the old walls. A. protect B. to protect", "solution": "B。解析：aim 作“目标”时常用 the aim is to do；后接不定式 to protect。"},
+    "sources": [{"label": "Cambridge Dictionary: aim", "url": "https://dictionary.cambridge.org/dictionary/english/aim"}]
+  },
+  {
+    "word": "dollar",
+    "examTags": ["词汇·货币名词", "语法·数词与复数"],
+    "grammar": "n. 元（美国、加拿大等国的货币单位）。可数，复数 dollars；数额前可用 $ 符号，符号后不再写 dollar。",
+    "collocations": "ten dollars; a dollar coin; pay in US dollars",
+    "commonMistake": "一个单位用 a dollar，多个用 dollars；$25 已含货币符号，通常不再写 25 dollars 并重复表达。",
+    "example": {"english": "The small guidebook costs five dollars at the museum shop.", "chinese": "这本小指南在博物馆商店售价五美元。"},
+    "application": {"prompt": "The ticket costs $12, which is twelve ___. A. dollar B. dollars", "solution": "B。解析：数词 twelve 后的可数货币单位用复数 dollars。"},
+    "sources": [{"label": "Cambridge Dictionary: dollar", "url": "https://dictionary.cambridge.org/dictionary/english/dollar"}]
+  },
+  {
+    "word": "cent",
+    "examTags": ["词汇·货币单位", "语法·数词与复数"],
+    "grammar": "n. 分；分币。可数，复数 cents；在使用美元的货币体系中 100 cents = 1 dollar。",
+    "collocations": "fifty cents; a ten-cent coin; cost 99 cents",
+    "commonMistake": "一个单位用 a cent，多个用 cents；作前置复合定语时常用单数，如 a ten-cent coin。",
+    "example": {"english": "The postcard costs eighty cents, less than one dollar.", "chinese": "这张明信片售价八十分，不到一美元。"},
+    "application": {"prompt": "One dollar is equal to one hundred ___. A. cents B. cent", "solution": "A。解析：100 是复数数量，因此用 cents；一个单位才用 cent。"},
+    "sources": [{"label": "Cambridge Dictionary: cent", "url": "https://dictionary.cambridge.org/dictionary/english/cent"}]
+  },
+  {
+    "word": "statue",
+    "examTags": ["词汇·可数名词", "阅读·艺术与历史"],
+    "grammar": "n. 雕塑；雕像。可数，复数 statues；常指塑造出人物或动物形象的立体作品。",
+    "collocations": "a stone statue; a statue of a king; a bronze statue",
+    "commonMistake": "statue 是可数名词，单数前通常要有冠词；它指立体雕像，statute（法规）拼写相近但含义不同。",
+    "example": {"english": "A bronze statue of the queen stands in the town square.", "chinese": "镇广场上立着一尊女王的青铜雕像。"},
+    "application": {"prompt": "The sculptor created a life-size figure of the ruler from stone. The finished work is a ___. A. statue B. statute", "solution": "A。解析：由石头塑成的立体人物作品是 statue（雕像）；statute 是法规。"},
+    "sources": [{"label": "Cambridge Dictionary: statue", "url": "https://dictionary.cambridge.org/dictionary/english/statue"}]
+  },
+  {
+    "word": "Mayan",
+    "examTags": ["词汇·民族与语言形容词", "拼写·专名首字母大写"],
+    "grammar": "adj. 玛雅人的；玛雅语的；n. 玛雅人；玛雅语。作民族、语言形容词或名词时首字母大写。",
+    "collocations": "Mayan culture; Mayan ruins; the Mayan language",
+    "commonMistake": "Mayan 是首字母大写的民族或语言名称；作普通形容词时也保留大写，不要写成 mayan。",
+    "example": {"english": "The guide explained how Mayan builders designed the stone temples.", "chinese": "导游讲解了玛雅建造者如何设计石庙。"},
+    "application": {"prompt": "The temples were built by an ancient Central American people, so they are described as ___ temples. A. Roman B. Mayan", "solution": "B。解析：题干指向玛雅文明，修饰 temples 用 Mayan（玛雅人的）；Roman 指古罗马的。"},
+    "sources": [{"label": "Cambridge Dictionary: Mayan", "url": "https://dictionary.cambridge.org/dictionary/english/mayan"}]
+  },
+  {
+    "word": "shadow",
+    "examTags": ["词汇·可数名词", "熟词多义·影子与阴影"],
+    "grammar": "n. 影子；阴影。可数，复数 shadows；常由光被人或物遮挡形成，也可作动词表示跟踪。",
+    "collocations": "cast a shadow; in the shadow of a tree; a long shadow",
+    "commonMistake": "shadow 常指光线被遮挡形成的影子；shade 多指阴凉处或遮蔽，不要把两词在所有语境中互换。",
+    "example": {"english": "At sunset, the statue cast a long shadow across the ground.", "chinese": "日落时，雕像在地面上投下了长长的影子。"},
+    "application": {"prompt": "With the sun behind it, the statue cast a long ___ across the path. A. shadow B. sunshine", "solution": "A。解析：雕像挡住阳光后投在地上的黑色轮廓是 shadow（影子）；sunshine 是阳光。"},
+    "sources": [{"label": "Cambridge Dictionary: shadow", "url": "https://dictionary.cambridge.org/dictionary/english/shadow"}]
+  },
+  {
+    "word": "crawl",
+    "examTags": ["词汇·动词", "语法·动词词形变化"],
+    "grammar": "v. 爬行；爬。crawl—crawled—crawled；常用 crawl on one's hands and knees、crawl under something。",
+    "collocations": "crawl on the ground; crawl under a table; a baby crawls",
+    "commonMistake": "crawl 的过去式直接加 -ed：crawled；不要把 y 改成 i，因为 y 前是元音字母 a。",
+    "example": {"english": "The baby crawled across the soft carpet toward his mother.", "chinese": "婴儿朝妈妈爬过柔软的地毯。"},
+    "application": {"prompt": "The baby moved on hands and knees across the floor; she ___ toward the toy. A. crawled B. crawlied", "solution": "A。解析：crawl 的过去式是 crawled；y 前是元音字母 a，因此直接加 -ed。"},
+    "sources": [{"label": "Cambridge Dictionary: crawl", "url": "https://dictionary.cambridge.org/dictionary/english/crawl"}]
+  },
+  {
+    "word": "interestingly",
+    "examTags": ["词汇·副词派生", "写作·句子副词"],
+    "grammar": "adv. 有趣地；有意思的是。由 interesting + -ly 构成；可置于句首修饰整句，后接逗号。",
+    "collocations": "Interestingly, ...; behave interestingly; an interestingly different result",
+    "commonMistake": "interestingly 是副词，常用 Interestingly, ... 引出值得注意的信息；interesting 是形容词，不能直接替代句首副词。",
+    "example": {"english": "Interestingly, the oldest tools were found far from the river.", "chinese": "有意思的是，最古老的工具是在远离河流的地方发现的。"},
+    "application": {"prompt": "___, the smallest statue was also the most carefully decorated. A. Interesting B. Interestingly", "solution": "B。解析：句首修饰整句话、引出“有意思的是”时用副词 Interestingly，并通常加逗号。"},
+    "sources": [{"label": "Cambridge Dictionary: interestingly", "url": "https://dictionary.cambridge.org/dictionary/english/interestingly"}]
+  },
+  {
+    "word": "CT scan",
+    "examTags": ["词汇·医学缩写", "语言运用·健康与科技"],
+    "grammar": "n. CT 扫描；计算机断层扫描。可数，复数 CT scans；CT 是 computerized tomography 的缩写，字母通常大写。",
+    "collocations": "have a CT scan; a CT scan of the head; CT scan results",
+    "commonMistake": "CT scan 是可数名词，做一次检查说 have a CT scan；缩写 CT 两个字母都大写。",
+    "example": {"english": "The doctor ordered a CT scan to examine the injury.", "chinese": "医生安排了一次 CT 扫描来检查伤情。"},
+    "application": {"prompt": "The doctor used a machine to create detailed images of the inside of the patient's body. She had a ___. A. CT scan B. blood type", "solution": "A。解析：用计算机断层成像检查身体内部的是 CT scan；blood type 是血型。"},
+    "sources": [{"label": "Cambridge Dictionary: CT scan", "url": "https://dictionary.cambridge.org/dictionary/english/ct-scan"}]
+  },
+  {
+    "word": "DNA test",
+    "examTags": ["词汇·医学与科学名词", "语法·可数名词搭配"],
+    "grammar": "n. DNA 检测。可数，复数 DNA tests；常说 have/take a DNA test，DNA 字母通常大写。",
+    "collocations": "take a DNA test; DNA test results; a DNA test for identification",
+    "commonMistake": "DNA test 是可数名词，单数前用 a；DNA 要大写，test 可按数量变化为 tests。",
+    "example": {"english": "The DNA test helped scientists identify the remains.", "chinese": "DNA 检测帮助科学家确认了遗骸的身份。"},
+    "application": {"prompt": "To learn whether the two people were related, the scientists carried out a ___. A. DNA test B. DNA tested", "solution": "A。解析：carry out a 后接名词短语 DNA test，表示进行一次 DNA 检测；tested 是动词过去式/过去分词。"},
+    "sources": [{"label": "Cambridge Dictionary: DNA test", "url": "https://dictionary.cambridge.org/dictionary/english/dna-test"}]
+  }
+]

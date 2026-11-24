@@ -42,6 +42,13 @@ export function checkCredentialRateLimit(ip: string, accountKey: string, now = D
     ipBucket.count += 1
   }
 
+  // Without a trusted source IP, account-scoped lockout would become global.
+  // Keep the shared IP request ceiling, but do not lock a user's account.
+  if (!ip || ip === 'unknown') {
+    pruneExpired(ipBuckets, now)
+    return { allowed: true }
+  }
+
   const accountBucket = accountBuckets.get(accountKey)
   if (accountBucket?.lockedUntil && now < accountBucket.lockedUntil) {
     return { allowed: false, code: 'ACCOUNT_LOCKED' }
@@ -70,9 +77,9 @@ export function clearCredentialFailures(accountKey: string) {
   accountBuckets.delete(accountKey)
 }
 
-export function buildCredentialAccountKey(role: string, division: string | undefined, email: string) {
+export function buildCredentialAccountKey(role: string, division: string | undefined, email: string, ip = 'unknown') {
   const scopedDivision = division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
-  return `${scopedDivision}:${role}:${email.trim().toLowerCase()}`
+  return `${ip}:${scopedDivision}:${role}:${email.trim().toLowerCase()}`
 }
 
 export function resetCredentialRateLimitsForTests() {

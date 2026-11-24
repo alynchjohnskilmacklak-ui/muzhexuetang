@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { App, Button, Card, Empty, Segmented, Space, Table, Tag, Typography } from 'antd'
+import { App, Button, Card, Col, Empty, Row, Segmented, Space, Statistic, Table, Tag, Typography } from 'antd'
 import { DeleteOutlined, ReloadOutlined, RestOutlined, UndoOutlined, WarningOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -42,6 +42,7 @@ export default function TrashPage() {
     revalidateOnReconnect: true,
   })
   const records: TrashItem[] = useMemo(() => data?.data || [], [data?.data])
+  const expiringSoonCount = useMemo(() => records.filter((r) => r.daysRemaining <= 7).length, [records])
 
   const restore = (record: TrashItem) => modal.confirm({
     title: '恢复这条记录？',
@@ -103,8 +104,51 @@ export default function TrashPage() {
     { title: '操作', key: 'actions', width: 210, render: (_: unknown, record: TrashItem) => actionButtons(record) },
   ]
 
-  return <PageLayout title="回收站" subtitle={`删除的数据会在这里保留 ${data?.retentionDays || 30} 天，期间可以恢复。过期后将自动彻底清理。`} actions={<Space><Button icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button><Button danger icon={<RestOutlined />} onClick={cleanupExpired}>清理过期记录</Button></Space>}>
-    <Card styles={{ body: { padding: isMobile ? 12 : 20 } }}>
+  return (
+    <PageLayout
+      title="回收站"
+      subtitle={`删除的数据会在这里保留 ${data?.retentionDays || 30} 天，期间可以恢复。过期后将自动彻底清理。`}
+      actions={
+        <Space>
+          <Button icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button>
+          <Button danger icon={<RestOutlined />} onClick={cleanupExpired}>清理过期记录</Button>
+        </Space>
+      }
+    >
+      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+        <Col xs={8}>
+          <Card bordered={false} style={{ borderRadius: 10, background: '#fff', border: '1px solid #EDE9E1' }}>
+            <Statistic
+              title={<span style={{ fontSize: isMobile ? 11 : 12, color: '#8C827A' }}>待清理记录</span>}
+              value={records.length}
+              suffix={<span style={{ fontSize: 12, color: '#8C827A' }}>条</span>}
+              valueStyle={{ fontWeight: 700, color: '#17352F', fontSize: isMobile ? 20 : 24 }}
+            />
+          </Card>
+        </Col>
+        <Col xs={8}>
+          <Card bordered={false} style={{ borderRadius: 10, background: expiringSoonCount > 0 ? '#FFF7F0' : '#fff', border: `1px solid ${expiringSoonCount > 0 ? '#F3D2BA' : '#EDE9E1'}` }}>
+            <Statistic
+              title={<span style={{ fontSize: isMobile ? 11 : 12, color: expiringSoonCount > 0 ? '#C45724' : '#8C827A' }}>即将到期 (≤7天)</span>}
+              value={expiringSoonCount}
+              suffix={<span style={{ fontSize: 12, color: expiringSoonCount > 0 ? '#C45724' : '#8C827A' }}>条</span>}
+              valueStyle={{ fontWeight: 700, color: expiringSoonCount > 0 ? '#E8784A' : '#17352F', fontSize: isMobile ? 20 : 24 }}
+            />
+          </Card>
+        </Col>
+        <Col xs={8}>
+          <Card bordered={false} style={{ borderRadius: 10, background: '#fff', border: '1px solid #EDE9E1' }}>
+            <Statistic
+              title={<span style={{ fontSize: isMobile ? 11 : 12, color: '#8C827A' }}>缓冲保留期</span>}
+              value={data?.retentionDays || 30}
+              suffix={<span style={{ fontSize: 12, color: '#8C827A' }}>天</span>}
+              valueStyle={{ fontWeight: 700, color: '#14574D', fontSize: isMobile ? 20 : 24 }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Card styles={{ body: { padding: isMobile ? 12 : 20 } }}>
       <Segmented block={isMobile} value={type} onChange={(value) => setType(String(value))} options={[
         { label: '全部', value: 'all' }, { label: '班级', value: 'ClassGroup' }, { label: '学员', value: 'Student' }, { label: '排课', value: 'ClassLesson' }, { label: '文件', value: 'FileAsset' },
       ]} style={{ marginBottom: 16 }} />
@@ -114,5 +158,6 @@ export default function TrashPage() {
         </Card>) : <Empty description="回收站是空的" image={Empty.PRESENTED_IMAGE_SIMPLE} />}
       </Space> : <Table rowKey="id" dataSource={records} columns={columns} loading={isLoading} pagination={{ pageSize: 12, showTotal: (total) => `共 ${total} 条` }} scroll={{ x: 'max-content' }} locale={{ emptyText: <Empty description="回收站是空的" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }} />}
     </Card>
-  </PageLayout>
+    </PageLayout>
+  )
 }

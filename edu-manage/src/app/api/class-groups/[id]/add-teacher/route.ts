@@ -12,7 +12,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   const prisma = await getRequestPrisma()
   const { id } = await params
-  if (!await isClassGroupInActiveTerm(prisma, id)) {
+  if (!await isClassGroupInActiveTerm(prisma, id, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能调整教师' }, { status: 409 })
   }
   const body = await req.json().catch(() => ({}))

@@ -7,7 +7,7 @@
 
 ## 0. 部署链路现状（一句话）
 
-本地 Docker（legacy 构建，无 buildx）→ 镜像 tag 发布 → tar 导出 → scp 上传 → 服务器 docker load → 切 latest → 迁移（migrator）→ compose 重建 → 健康检查。
+本地 Docker Buildx（持久 `mzt-release` builder）→ 镜像 tag 发布 → tar 导出 → scp 上传 → 服务器 docker load → 切 latest → 迁移（migrator）→ compose 重建 → 健康检查。
 
 **耗时构成（最近一次 908s）**：
 | 环节 | 耗时 | 能否复用 |
@@ -58,11 +58,11 @@ python deploy-release.py --tag 20261028 --migrator --no-cache
 | 项 | 固定值/规则 | 原因 |
 |---|---|---|
 | 镜像 tag | 日期版本，如 `20261028`（同一版本保持同一 tag） | tag 不变 → `--auto` 可整链路复用 |
-| buildx | 已禁用，自动回退 `docker build`（legacy） | 本地/服务器均无 buildx 插件，别再尝试安装 |
+| buildx | Windows 发布统一使用持久构建器 `mzt-release`，运行 `docker buildx build --builder mzt-release --load`；服务器只接收已构建镜像 | 复用 `/root/.npm` 和 `/app/.next/cache`，不要切回普通 `docker build` 或新建临时 builder |
 | NPM_REGISTRY | `https://registry.npmmirror.com` | 已固化进 Dockerfile build-arg 默认 |
 | apt 源 | `mirrors.aliyun.com`（debs 阶段） | 已固化进 Dockerfile |
 | Dockerfile | **不要改动 base 镜像 / deps 层结构** | 改动会击穿层缓存，构建回到 12 分钟 |
-| `--mount=type=cache` | 已全部移除 | legacy builder 不支持，加了必失败 |
+| `--mount=type=cache` | Dockerfile 使用 BuildKit 持久缓存；发布脚本必须指定 `mzt-release` | 新 builder 没有历史缓存，会退化为冷构建 |
 | release/ 目录 | 保留当前 + 上一版 tar | 服务器镜像旧备份由脚本自动清理（prune_old_backups） |
 
 ---
@@ -105,8 +105,8 @@ python deploy-release.py --tag <上一版本tag> --auto        # 旧 tag 镜像�
 
 | 症状 | 处理 |
 |---|---|
-| `docker buildx` unknown command | 正常，已自动回退 legacy；不要装插件 |
-| legacy builder DEPRECATED 警告 | 正常，忽略 |
+| `docker buildx` unknown command | 发布机应使用 Docker Desktop Buildx；先用 `docker buildx ls` 检查 `mzt-release`，不要静默回退普通 `docker build` |
+| `mzt-release` builder 不可用 | 先恢复该持久 builder，再发布；不要删除其 BuildKit 容器、状态卷或缓存 |
 | 双库迁移失败 `type ... already exists` | 生产库对象已存在但缺迁移记录 → 按 §3 补记 `_prisma_migrations` |
 | `database still differs from schema` | 生产库与 schema 有 drift → 服务器上 `prisma migrate diff --script` 定位差异，手动补 SQL 或补迁移 |
 | 上传中断 | 重跑同一条命令：服务器 sha256 校验会跳过已完整上传的 tar |

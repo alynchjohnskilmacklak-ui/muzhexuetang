@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { requireParentUser } from '@/lib/auth/guards'
-import { parentLinkedStudentWhere, visibleNotificationWhere } from '@/lib/business-visibility'
+import { parentLinkedStudentWhere, parentVisibleNotificationWhere, visibleNotificationWhere } from '@/lib/business-visibility'
 import { protectedUploadFallback } from '@/lib/upload-url'
 
 export const dynamic = 'force-dynamic'
@@ -61,7 +61,13 @@ export const PATCH = apiHandler(async (request: NextRequest) => {
   })
   if (!entry) return NextResponse.json({ error: '记录不存在或无权查看' }, { status: 404 })
   await parent.prisma.notification.updateMany({
-    where: { userId: parent.id, relatedType: 'STUDY_HALL_HOMEWORK', relatedId: entryId, ...visibleNotificationWhere },
+    where: {
+      userId: parent.id,
+      relatedType: 'STUDY_HALL_HOMEWORK',
+      relatedId: entryId,
+      ...visibleNotificationWhere,
+      AND: [parentVisibleNotificationWhere(parent.id)],
+    },
     data: { read: true, readAt: new Date() },
   })
   return NextResponse.json({ ok: true })

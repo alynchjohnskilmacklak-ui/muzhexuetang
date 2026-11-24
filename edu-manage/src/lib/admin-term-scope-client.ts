@@ -7,6 +7,7 @@ const TERM_SCOPED_API_PREFIXES = [
   '/api/schedules',
   '/api/attendance',
   '/api/admin/classroom-feedback',
+  '/api/admin/students',
   '/api/admin/intensive-reviews',
   '/api/admin/salary',
   '/api/reports',

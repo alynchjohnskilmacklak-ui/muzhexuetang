@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
 import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
 import { resolveTeacherForUser } from '@/lib/performance'
+import { markLinkedContentNotificationsRead } from '@/lib/notification-read-state'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,6 +46,34 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
 
   if (!paper) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
 
+  if (user.role === 'parent') {
+    const readAt = paper.isReadByParent && paper.readAt ? paper.readAt : new Date()
+    await prisma.$transaction(async (tx) => {
+      await tx.examPaper.updateMany({
+        where: { id, ...scope, isReadByParent: false },
+        data: { isReadByParent: true, readAt },
+      })
+      await markLinkedContentNotificationsRead(tx.notification, {
+        userId: user.id,
+        relatedId: id,
+        relatedTypes: ['EXAM_PAPER', 'PAPER_PUBLISHED'],
+        readAt,
+      })
+    })
+    paper.isReadByParent = true
+    paper.readAt = readAt
+  }
+
+  if (user.role === 'admin' || user.role === 'teacher') {
+    await prisma.paperComment.updateMany({
+      where: { paperId: id, author: { role: 'parent' }, isRead: false },
+      data: { isRead: true },
+    })
+    paper.comments = paper.comments.map((comment) => comment.author.role === 'parent'
+      ? { ...comment, isRead: true }
+      : comment)
+  }
+
   return NextResponse.json(paper)
 })
 
@@ -62,9 +91,21 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
     }
 
     const visibility = parentVisibleExamPaperWhere(user.id)
-    const result = await prisma.examPaper.updateMany({
-      where: { id, ...visibility },
-      data: { isReadByParent: true, readAt: new Date() },
+    const readAt = new Date()
+    const result = await prisma.$transaction(async (tx) => {
+      const updated = await tx.examPaper.updateMany({
+        where: { id, ...visibility },
+        data: { isReadByParent: true, readAt },
+      })
+      if (updated.count > 0) {
+        await markLinkedContentNotificationsRead(tx.notification, {
+          userId: user.id,
+          relatedId: id,
+          relatedTypes: ['EXAM_PAPER', 'PAPER_PUBLISHED'],
+          readAt,
+        })
+      }
+      return updated
     })
     if (!result.count) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
 

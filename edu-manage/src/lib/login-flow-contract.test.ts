@@ -117,10 +117,10 @@ describe('login client request contract', () => {
     expect(source).toContain('window.location.replace(destination)')
   })
 
-  it('shows the retained SplashScreen once per tab without replaying it on submit', () => {
+  it('plays the opening on each login page visit without a permanent seen flag or replay on submit', () => {
     expect(source).toContain('const [showSplash, setShowSplash] = useState(false)')
-    expect(source).toContain("window.sessionStorage.getItem('splash-shown')")
-    expect(source).toContain("window.sessionStorage.setItem('splash-shown', '1')")
+    expect(source).not.toContain('muzhe-login-splash-seen')
+    expect(source).toContain('setShowSplash(true)')
     expect(source).not.toContain('startSplash()')
     expect(source).not.toContain('waitForSplash()')
     expect(source).toContain('<SplashScreen')

@@ -1,0 +1,142 @@
+[
+  {
+    "role": "teacher",
+    "type": "PARENT_MESSAGE",
+    "cnt": 31,
+    "unread": 8,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 31
+  },
+  {
+    "role": "parent",
+    "type": "PARENT_MESSAGE_REPLY",
+    "cnt": 14,
+    "unread": 8,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 0
+  },
+  {
+    "role": "parent",
+    "type": "SCHEDULE_CHANGE",
+    "cnt": 13,
+    "unread": 12,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 0
+  },
+  {
+    "role": "teacher",
+    "type": "PARENT_MESSAGE_REMINDER",
+    "cnt": 13,
+    "unread": 12,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 13
+  },
+  {
+    "role": "parent",
+    "type": "CLASSROOM_FEEDBACK",
+    "cnt": 9,
+    "unread": 2,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 0
+  },
+  {
+    "role": "admin",
+    "type": "leave",
+    "cnt": 6,
+    "unread": 6,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 6
+  },
+  {
+    "role": "parent",
+    "type": "STUDY_HALL_HOMEWORK",
+    "cnt": 5,
+    "unread": 0,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 0
+  },
+  {
+    "role": "admin",
+    "type": "FEEDBACK_REVIEW",
+    "cnt": 4,
+    "unread": 4,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 4
+  },
+  {
+    "role": "parent",
+    "type": "CLASSROOM_PICK",
+    "cnt": 4,
+    "unread": 4,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 0
+  },
+  {
+    "role": "parent",
+    "type": "wxpusher_feedback",
+    "cnt": 2,
+    "unread": 0,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 0
+  },
+  {
+    "role": "parent",
+    "type": "leave",
+    "cnt": 2,
+    "unread": 2,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 0
+  },
+  {
+    "role": "teacher",
+    "type": "leave",
+    "cnt": 2,
+    "unread": 2,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_inactive": 0,
+    "student_unlinked": 0,
+    "bound_other": 2
+  }
+]
+
+--- bound-other disjoint ---
+[
+  {
+    "disjoint_total": 56,
+    "disjoint_unread": 32
+  }
+]

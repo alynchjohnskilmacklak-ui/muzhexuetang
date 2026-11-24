@@ -44,6 +44,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
             id: true,
             teacherId: true,
             studentIds: true,
+            studentNameSnapshot: true,
             createdAt: true,
             summary: true,
             overallComment: true,

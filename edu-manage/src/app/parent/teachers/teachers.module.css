@@ -1,0 +1,49 @@
+/* G1 教师卡片 · P01 3D 倾斜光影面板
+ * 倾斜角与高光位置由 `ui-motion.getTiltSurfacePosition` 驱动（≤4.5°），
+ * 指针离开 / pointercancel 复位；触屏 hover: none 不启动（见 client 处理器守卫）。
+ */
+.tiltCard {
+  --mz-tilt-x: 0deg;
+  --mz-tilt-y: 0deg;
+  --mz-light-x: 50%;
+  --mz-light-y: 50%;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: perspective(1000px) rotateX(var(--mz-tilt-x)) rotateY(var(--mz-tilt-y));
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 520ms cubic-bezier(.16, 1, .3, 1), box-shadow 620ms ease;
+  will-change: transform;
+}
+
+.tiltCard.isTilting {
+  transition-duration: 76ms, 620ms;
+}
+
+.tiltCard::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(180px circle at var(--mz-light-x) var(--mz-light-y), color-mix(in srgb, var(--color-surface-1) 50%, transparent), transparent 74%);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.tiltCard.isTilting::after {
+  opacity: .45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tiltCard {
+    transform: none;
+    transition: none;
+  }
+
+  .tiltCard::after {
+    opacity: 0;
+  }
+}

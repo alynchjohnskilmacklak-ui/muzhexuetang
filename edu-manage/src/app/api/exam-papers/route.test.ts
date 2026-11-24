@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   resolveLearningRecordTermId: vi.fn(),
   assertCanAccessStudent: vi.fn(),
   assertCanAccessClassLesson: vi.fn(),
+  getParentChildren: vi.fn(),
+  findParentChild: vi.fn(),
 }))
 vi.mock('@/lib/get-user', () => ({ getCurrentUser: mocks.getCurrentUser }))
 vi.mock('@/lib/prisma', () => ({ getRequestPrisma: mocks.getRequestPrisma }))
@@ -20,6 +22,10 @@ vi.mock('@/lib/division', () => ({ getRequestDivision: () => 'JUNIOR' }))
 vi.mock('@/lib/admin-term-scope', () => ({ resolveAdminTermScope: vi.fn() }))
 vi.mock('@/lib/academic-term', () => ({ getActiveAcademicTerm: vi.fn().mockResolvedValue(null) }))
 vi.mock('@/lib/learning-record-term', () => ({ resolveLearningRecordTermId: mocks.resolveLearningRecordTermId }))
+vi.mock('@/lib/parent-children', () => ({
+  getParentChildren: mocks.getParentChildren,
+  findParentChild: mocks.findParentChild,
+}))
 vi.mock('@/lib/api-handler', () => ({ apiHandler: (handler: unknown) => handler }))
 
 import { GET, POST } from './route'
@@ -37,6 +43,10 @@ describe('exam-paper list parent visibility', () => {
     mocks.resolveLearningRecordTermId.mockResolvedValue('term-1')
     mocks.assertCanAccessStudent.mockResolvedValue(undefined)
     mocks.assertCanAccessClassLesson.mockResolvedValue(undefined)
+    mocks.getParentChildren.mockResolvedValue([{ id: 'student-1', recordIds: ['student-1', 'student-old'] }])
+    mocks.findParentChild.mockImplementation((children: Array<{ id: string; recordIds: string[] }>, requested: string) => (
+      children.find((child) => child.recordIds.includes(requested)) || null
+    ))
     findMany.mockResolvedValue([])
     create.mockResolvedValue({ id: 'paper-1' })
   })
@@ -55,8 +65,23 @@ describe('exam-paper list parent visibility', () => {
       { parentId: 'parent-1' },
       { parentUserId: 'parent-1' },
     ])
-    expect(where.studentId).toBe(requestedStudentId)
+    expect(where.studentId).toEqual(requestedStudentId ? { in: [] } : undefined)
     expect(where.status).not.toBe('DRAFT')
+  })
+
+  it('includes only the selected child identity records in the archive list', async () => {
+    const response = await GET(new NextRequest('http://localhost/api/exam-papers?mine=true&studentId=student-old'))
+
+    expect(response.status).toBe(200)
+    const where = findMany.mock.calls[0][0].where
+    expect(where.studentId).toEqual({ in: ['student-1', 'student-old'] })
+    expect(where.student).toEqual(expect.objectContaining({
+      id: { in: ['student-1', 'student-old'] },
+      OR: [{ parentId: 'parent-1' }, { parentUserId: 'parent-1' }],
+      deletedAt: null,
+    }))
+    expect(where.student).not.toHaveProperty('status')
+    expect(where.status).toBe('PUBLISHED')
   })
 
   it('does not query papers for unauthenticated requests', async () => {

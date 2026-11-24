@@ -41,7 +41,7 @@ export const POST = apiHandler(async (_req: NextRequest, { params }: { params: P
         link: '/parent/grades',
         relatedType: 'EXAM_PAPER',
         relatedId: paper.id,
-        href: `/parent/archive?paperId=${paper.id}`,
+        href: `/parent/archive/${encodeURIComponent(paper.id)}`,
       })
     }
 

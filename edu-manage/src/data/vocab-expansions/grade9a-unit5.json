@@ -1,0 +1,1586 @@
+[
+  {
+    "word": "invention",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 发明；创造",
+    "collocations": "a useful invention; the invention of the telephone; a recent invention",
+    "commonMistake": "invention 是可数名词，动词是 invent，发明者是 inventor；不要把 invention（发明物/发明行为）误写成形容词 inventive。",
+    "example": {
+      "english": "The students presented an invention that saves water in the garden.",
+      "chinese": "学生们展示了一项能节约花园用水的发明。"
+    },
+    "application": {
+      "prompt": "The new device that cleans beach sand is an impressive ___. A. invention B. inventor",
+      "solution": "A。解析：invention 指“发明物”；inventor 指“发明者”，本句说的是新设备。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: invention",
+        "url": "https://dictionary.cambridge.org/dictionary/english/invention"
+      }
+    ]
+  },
+  {
+    "word": "camera",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 照相机；摄影机",
+    "collocations": "digital camera; take a photo with a camera; camera lens",
+    "commonMistake": "camera 是可数名词；“用相机拍照”可说 take a photo with a camera，不说 make a photo by camera。",
+    "example": {
+      "english": "I used my camera to photograph the birds in the park.",
+      "chinese": "我用相机拍下了公园里的鸟。"
+    },
+    "application": {
+      "prompt": "Lena zoomed in and took a clear picture with her ___. A. photography B. camera",
+      "solution": "B。解析：相机是 camera；photography 表示“摄影”这门活动，不是可握持的设备。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: camera",
+        "url": "https://dictionary.cambridge.org/dictionary/english/camera"
+      }
+    ]
+  },
+  {
+    "word": "laptop",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 笔记本电脑",
+    "collocations": "laptop screen; laptop battery; work on a laptop",
+    "commonMistake": "laptop 可数，复数 laptops；它是电脑设备，不等于 paper notebook（纸质笔记本）。",
+    "example": {
+      "english": "My laptop battery lasted through the whole train journey.",
+      "chinese": "我的笔记本电脑电池撑过了整段火车旅程。"
+    },
+    "application": {
+      "prompt": "I saved the presentation on my ___ before the classroom computer was turned off. A. laptop B. lap",
+      "solution": "A。解析：能保存演示文稿的便携电脑是 laptop；lap 指膝部。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: laptop",
+        "url": "https://dictionary.cambridge.org/dictionary/english/laptop"
+      }
+    ]
+  },
+  {
+    "word": "high-speed train",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 高速列车",
+    "collocations": "travel by high-speed train; a high-speed train station; high-speed rail",
+    "commonMistake": "high-speed 作复合形容词时加连字符并放在 train 前；乘坐某种交通工具常用 by train。",
+    "example": {
+      "english": "The high-speed train reached the next city in less than an hour.",
+      "chinese": "高速列车不到一小时就到达了下一个城市。"
+    },
+    "application": {
+      "prompt": "We chose a ___ to travel between the two cities quickly. A. high-speed travel B. high-speed train",
+      "solution": "B。解析：train 是可乘坐的列车；high-speed train 指“高速列车”，符合两城间快速出行的语境。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: train",
+        "url": "https://dictionary.cambridge.org/dictionary/english/train"
+      }
+    ]
+  },
+  {
+    "word": "super",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 超级的；顶好的",
+    "collocations": "super idea; super popular; a super-fast computer",
+    "commonMistake": "super 是非正式形容词，常放在名词前或 be 后；它不代替副词 very 去修饰动词。",
+    "example": {
+      "english": "The science fair was super, and we learned a lot from the exhibits.",
+      "chinese": "科学展览会棒极了，我们从展品中学到了很多。"
+    },
+    "application": {
+      "prompt": "The new library is ___ popular with students because it stays open late. A. superb B. super",
+      "solution": "B。解析：super 在非正式英语中可作副词修饰 popular，表示“非常受欢迎”；形容词 superb 不能这样修饰另一个形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: super",
+        "url": "https://dictionary.cambridge.org/dictionary/english/super"
+      }
+    ]
+  },
+  {
+    "word": "sunglasses",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 墨镜；太阳镜",
+    "collocations": "wear sunglasses; a pair of sunglasses; sunglasses case",
+    "commonMistake": "sunglasses 通常以复数形式出现；说“一副”用 a pair of sunglasses，不能说 a sunglasses。",
+    "example": {
+      "english": "He wore sunglasses to protect his eyes from the bright sun.",
+      "chinese": "他戴着太阳镜保护眼睛不受强光刺激。"
+    },
+    "application": {
+      "prompt": "The sun was bright, so Mei put on a pair of ___. A. sunglass B. sunglasses",
+      "solution": "B。解析：a pair of 后接复数 sunglasses；sunglass 单数不用于通常的“太阳镜”义。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sunglasses",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sunglasses"
+      }
+    ]
+  },
+  {
+    "word": "button",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 按钮；纽扣",
+    "collocations": "press a button; sew on a button; button your coat",
+    "commonMistake": "button 作名词指按钮或纽扣；作动词表示“扣上”，button up 可指扣好衣服。",
+    "example": {
+      "english": "Press the green button to start the washing machine.",
+      "chinese": "按绿色按钮启动洗衣机。"
+    },
+    "application": {
+      "prompt": "To turn on the recorder, press the red ___. A. button B. bottom",
+      "solution": "A。解析：recorder 上用于操作的按键是 button；bottom 表示“底部”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: button",
+        "url": "https://dictionary.cambridge.org/dictionary/english/button"
+      }
+    ]
+  },
+  {
+    "word": "itself",
+    "examTags": [
+      "词汇·常见词性",
+      "中考·词形与搭配"
+    ],
+    "grammar": "pron. 它自己；它本身",
+    "collocations": "by itself; the machine itself; enjoy itself",
+    "commonMistake": "itself 是 it 的反身代词，用于指物或动物；反身代词不能代替普通宾格 it 作及物动词宾语。",
+    "example": {
+      "english": "The robot can return to its charging station by itself.",
+      "chinese": "机器人能自己返回充电站。"
+    },
+    "application": {
+      "prompt": "The door closed ___ when the wind pushed it. A. it B. itself",
+      "solution": "B。解析：主语 the door 与动作主体相同，需用反身代词 itself；it 不能表示“门自己”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: itself",
+        "url": "https://dictionary.cambridge.org/dictionary/english/itself"
+      }
+    ]
+  },
+  {
+    "word": "hundreds (of ...)",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 数以百计；许多",
+    "collocations": "hundreds of stars; hundreds of people; two hundred pages",
+    "commonMistake": "确切数字前 hundred 不加 s 且不接 of；表示不确定的大量时用 hundreds of。",
+    "example": {
+      "english": "Hundreds of visitors came to see the new science centre.",
+      "chinese": "数百名参观者来参观新科学中心。"
+    },
+    "application": {
+      "prompt": "The museum welcomed ___ schoolchildren during the holiday week. A. hundreds of B. two hundreds",
+      "solution": "A。解析：没有确切数字时用 hundreds of 表示“数百名”；two hundreds 结构错误。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hundred",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hundred"
+      }
+    ]
+  },
+  {
+    "word": "printer",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 打印机；印刷公司",
+    "collocations": "a 3D printer; printer paper; connect a printer to a computer",
+    "commonMistake": "printer 是由 print 加 -er 构成的可数名词，指打印设备或印刷机构；动词是 print。",
+    "example": {
+      "english": "The printer ran out of paper just before we printed the maps.",
+      "chinese": "我们打印地图前，打印机恰好没纸了。"
+    },
+    "application": {
+      "prompt": "The office bought a colour ___ to make copies of the posters. A. printing B. printer",
+      "solution": "B。解析：make copies 的设备是 printer（打印机）；printing 是“印刷/打印”这一行为或行业。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: printer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/printer"
+      }
+    ]
+  },
+  {
+    "word": "produce",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 生产；制造；繁育",
+    "collocations": "produce electricity; produce food; produce a report",
+    "commonMistake": "produce 是动词，名词是 production；作“农产品”时 produce 通常作不可数集合名词。",
+    "example": {
+      "english": "This farm produces enough vegetables for three local schools.",
+      "chinese": "这个农场生产的蔬菜足够供应三所当地学校。"
+    },
+    "application": {
+      "prompt": "The factory can ___ 500 bicycle helmets each day. A. production B. produce",
+      "solution": "B。解析：can 后接动词原形 produce，表示“生产”；production 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: produce",
+        "url": "https://dictionary.cambridge.org/dictionary/english/produce"
+      }
+    ]
+  },
+  {
+    "word": "file",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. （计算机）文件；档案",
+    "collocations": "save a file; open a file; a file on the computer",
+    "commonMistake": "file 在计算机语境中是可数名词；file 也可作动词表示归档，复数 files 需加 s。",
+    "example": {
+      "english": "Please save the file before you close the program.",
+      "chinese": "关闭程序前请先保存文件。"
+    },
+    "application": {
+      "prompt": "I attached the report as a PDF ___ to the email. A. file B. folder",
+      "solution": "A。解析：PDF file 是电子文件；folder 通常指存放文件的文件夹。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: file",
+        "url": "https://dictionary.cambridge.org/dictionary/english/file"
+      }
+    ]
+  },
+  {
+    "word": "plastic",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 塑料；adj. 塑料制的",
+    "collocations": "plastic bottle; plastic waste; made of plastic",
+    "commonMistake": "plastic 作材料名词通常不可数；作形容词时修饰名词。塑料瓶常说 a plastic bottle，而不是 a plastic。",
+    "example": {
+      "english": "Our class collected plastic bottles for recycling.",
+      "chinese": "我们班收集塑料瓶进行回收。"
+    },
+    "application": {
+      "prompt": "The lunch box is light because it is made of ___. A. plastic B. plastics",
+      "solution": "A。解析：材料义 plastic 通常不可数；made of plastic 是“由塑料制成”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: plastic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/plastic"
+      }
+    ]
+  },
+  {
+    "word": "invent",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 发明；编造",
+    "collocations": "invent a machine; invent a story; invent a new method",
+    "commonMistake": "invent 强调创造以前不存在的东西；名词 inventor 指发明者，invention 指发明物或发明行为。",
+    "example": {
+      "english": "The engineer invented a simple tool for opening jars.",
+      "chinese": "这位工程师发明了一种简单的开罐工具。"
+    },
+    "application": {
+      "prompt": "Who ___ the first practical telephone? A. invention B. invented",
+      "solution": "B。解析：问“谁发明了”要用过去式动词 invented；invention 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: invent",
+        "url": "https://dictionary.cambridge.org/dictionary/english/invent"
+      }
+    ]
+  },
+  {
+    "word": "telephone",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 电话；v. 打电话",
+    "collocations": "answer the telephone; telephone number; telephone sb",
+    "commonMistake": "telephone 作动词时直接接人，不用 telephone to sb；现代语境也常用 phone/call。",
+    "example": {
+      "english": "The telephone rang while Dad was cooking dinner.",
+      "chinese": "爸爸做晚饭时电话响了。"
+    },
+    "application": {
+      "prompt": "If you arrive late, ___ the coach and explain the delay. A. telephone B. telephone to",
+      "solution": "A。解析：telephone sb 表示“给某人打电话”，后面不加 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: telephone",
+        "url": "https://dictionary.cambridge.org/dictionary/english/telephone"
+      }
+    ]
+  },
+  {
+    "word": "suppose",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 认为；猜想；假定",
+    "collocations": "suppose that; be supposed to do; I suppose so",
+    "commonMistake": "suppose 可引导宾语从句；be supposed to do 表示“应该做”，不能漏掉 be。",
+    "example": {
+      "english": "I suppose the museum will be less crowded on Tuesday.",
+      "chinese": "我想博物馆星期二会没那么拥挤。"
+    },
+    "application": {
+      "prompt": "I ___ the train is delayed because the station board shows a later time. A. supposition B. suppose",
+      "solution": "B。解析：suppose 在这里作谓语，表示“我猜想”；supposition 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suppose",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suppose"
+      }
+    ]
+  },
+  {
+    "word": "be supposed to do / be sth",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 应该做；按规定是",
+    "collocations": "be supposed to arrive early; be supposed to be quiet; what are we supposed to do?",
+    "commonMistake": "结构为 be supposed to + 动词原形；be supposed to be 后接名词或形容词。",
+    "example": {
+      "english": "Visitors are supposed to keep their voices low in the reading room.",
+      "chinese": "参观者在阅览室里应当轻声说话。"
+    },
+    "application": {
+      "prompt": "According to the notice, cyclists ___ wear helmets on this road. A. are supposed to B. suppose",
+      "solution": "A。解析：are supposed to wear 表示“应当佩戴”；notice 说明的是规则，不是骑车者的猜测。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suppose",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suppose"
+      }
+    ]
+  },
+  {
+    "word": "wheel",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 车轮；轮子",
+    "collocations": "a bicycle wheel; steering wheel; a wheel of cheese",
+    "commonMistake": "wheel 可指车辆的轮子或方向盘；wheels 是复数。短语 wheel of cheese 中 wheel 指圆轮状的一整块奶酪。",
+    "example": {
+      "english": "One wheel came loose, so we stopped the cart.",
+      "chinese": "一个轮子松了，所以我们停下了手推车。"
+    },
+    "application": {
+      "prompt": "The mechanic replaced the damaged front ___ of the bicycle. A. wheel B. whole",
+      "solution": "A。解析：自行车前轮是 wheel；whole 意为“完整的”，发音相近但词义不同。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wheel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wheel"
+      }
+    ]
+  },
+  {
+    "word": "eastern",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 东部的；东方的",
+    "collocations": "eastern China; the eastern coast; Eastern Europe",
+    "commonMistake": "eastern 是形容词，常指某地区的东部；the east 作名词表示“东方”，不要用 east 直接修饰名词。",
+    "example": {
+      "english": "Many fishing villages lie along the eastern coast of the island.",
+      "chinese": "这座岛的东海岸分布着许多渔村。"
+    },
+    "application": {
+      "prompt": "The sun rose over the ___ hills at dawn. A. east B. eastern",
+      "solution": "B。解析：hills 前需要形容词 eastern；east 作名词，不能直接这样作定语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eastern",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eastern"
+      }
+    ]
+  },
+  {
+    "word": "layer",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 层；表层",
+    "collocations": "a layer of paint; several layers of clothing; the top layer",
+    "commonMistake": "layer 是可数名词，常用 a layer of + 材料；多层用 layers。",
+    "example": {
+      "english": "A thin layer of ice covered the pond overnight.",
+      "chinese": "一夜之间，池塘表面结了一层薄冰。"
+    },
+    "application": {
+      "prompt": "The baker spread a final ___ of cream between the cakes. A. layer B. level",
+      "solution": "A。解析：夹在蛋糕之间的一层奶油是 layer；level 更常指高度或水平。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: layer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/layer"
+      }
+    ]
+  },
+  {
+    "word": "frozen",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 冻硬的；冰封的",
+    "collocations": "frozen food; frozen lake; be frozen solid",
+    "commonMistake": "frozen 是 freeze 的过去分词，也可作形容词；比较级不是 more freeze，动词过去式是 froze。",
+    "example": {
+      "english": "We found the lake frozen after three nights below zero.",
+      "chinese": "连续三个夜晚气温低于零度后，我们发现湖面结冰了。"
+    },
+    "application": {
+      "prompt": "The vegetables stayed fresh in the ___ section of the fridge. A. freezing B. frozen",
+      "solution": "B。解析：冰箱里的冷冻区称 frozen section；此处需要形容词 frozen 修饰 section。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: frozen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/frozen"
+      }
+    ]
+  },
+  {
+    "word": "melt",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. （使）融化；逐渐消失",
+    "collocations": "ice melts; melt butter; melt in the sun",
+    "commonMistake": "melt 可作不及物动词（冰融化）或及物动词（融化黄油）；过去式和过去分词均为 melted。",
+    "example": {
+      "english": "The snow began to melt when the afternoon sun came out.",
+      "chinese": "午后太阳出来时，积雪开始融化。"
+    },
+    "application": {
+      "prompt": "Leave the chocolate near the heater and it will ___. A. melt B. melted",
+      "solution": "A。解析：will 后接动词原形 melt；句子表示巧克力将会融化。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: melt",
+        "url": "https://dictionary.cambridge.org/dictionary/english/melt"
+      }
+    ]
+  },
+  {
+    "word": "pipe",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 管道；管子；烟斗",
+    "collocations": "water pipe; a pipe under the sink; a pipe leaks",
+    "commonMistake": "pipe 可指输送水或气体的管道，也可指烟斗；地下管道不等于 wire（电线）。",
+    "example": {
+      "english": "A plumber repaired the pipe beneath the kitchen sink.",
+      "chinese": "水管工修好了厨房水槽下面的管道。"
+    },
+    "application": {
+      "prompt": "Clean water flows to each apartment through a large ___. A. wire B. pipe",
+      "solution": "B。解析：输送水的设施是 pipe；wire 用于导电或传递信号。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pipe",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pipe"
+      }
+    ]
+  },
+  {
+    "word": "tourism",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 旅游业；旅游",
+    "collocations": "the tourism industry; tourism income; promote tourism",
+    "commonMistake": "tourism 是不可数名词，形容词为 tourist（游客的）或 touristic（旅游相关的）；不能说 many tourisms。",
+    "example": {
+      "english": "Tourism provides jobs for many families on the island.",
+      "chinese": "旅游业为岛上的许多家庭提供了工作。"
+    },
+    "application": {
+      "prompt": "The new airport has helped the island's ___ grow. A. tourism B. tourist",
+      "solution": "A。解析：岛屿发展的行业是 tourism（旅游业）；tourist 指游客。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tourism",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tourism"
+      }
+    ]
+  },
+  {
+    "word": "economic",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 经济的；经济学的",
+    "collocations": "economic growth; economic development; economic problem",
+    "commonMistake": "economic 是形容词，名词是 economy；economical 表示“节省的”，两者不可混淆。",
+    "example": {
+      "english": "The report describes the economic changes in the region.",
+      "chinese": "报告描述了这个地区的经济变化。"
+    },
+    "application": {
+      "prompt": "The city is planning new projects to support ___ growth. A. economy B. economic",
+      "solution": "B。解析：growth 前需要形容词 economic（经济的）；economy 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: economic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/economic"
+      }
+    ]
+  },
+  {
+    "word": "gain",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 获得；取得；n. 增加；收益",
+    "collocations": "gain experience; gain weight; a gain in confidence",
+    "commonMistake": "gain 可表示逐步获得经验、优势或体重；gain knowledge 不等同于 win knowledge，后者搭配不当。",
+    "example": {
+      "english": "Working with the team helped me gain valuable experience.",
+      "chinese": "和团队合作让我获得了宝贵的经验。"
+    },
+    "application": {
+      "prompt": "By volunteering at the clinic, Amir hopes to ___ experience in healthcare. A. gain B. win",
+      "solution": "A。解析：gain experience 是“获得经验”的常用搭配；win 通常用于比赛获胜。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: gain",
+        "url": "https://dictionary.cambridge.org/dictionary/english/gain"
+      }
+    ]
+  },
+  {
+    "word": "reality",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 现实；事实",
+    "collocations": "in reality; face reality; turn a dream into reality",
+    "commonMistake": "reality 是可数或不可数名词，形容词为 real；in reality 表示“事实上”，不要写成 in the reality 表示抽象现实。",
+    "example": {
+      "english": "In reality, the tiny island is home to hundreds of birds.",
+      "chinese": "事实上，这座小岛是数百只鸟的家园。"
+    },
+    "application": {
+      "prompt": "The film looked like science fiction, but it was based on ___. A. real B. reality",
+      "solution": "B。解析：based on reality 表示“以现实为基础”；real 是形容词，不能放在介词 on 后作名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reality",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reality"
+      }
+    ]
+  },
+  {
+    "word": "papermaking",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 造纸工艺；造纸业",
+    "collocations": "traditional papermaking; papermaking process; papermaking workshop",
+    "commonMistake": "papermaking 是由 paper 和 making 构成的名词；英语中通常连写，不写成 paper making 作这一工艺名称。",
+    "example": {
+      "english": "The museum showed how papermaking developed over many centuries.",
+      "chinese": "博物馆展示了造纸工艺数百年来的发展。"
+    },
+    "application": {
+      "prompt": "Visitors can watch the ancient ___ process in the village workshop. A. papermaking B. paper-made",
+      "solution": "A。解析：papermaking process 指“造纸工艺”；paper-made 不表示这项工艺。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: papermaking",
+        "url": "https://dictionary.cambridge.org/dictionary/english/papermaking"
+      }
+    ]
+  },
+  {
+    "word": "responsible",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 负有责任的；作为原因的",
+    "collocations": "be responsible for a task; responsible for the damage; a responsible decision",
+    "commonMistake": "responsible 后接 for；名词是 responsibility，副词是 responsibly。",
+    "example": {
+      "english": "Each group is responsible for cleaning its own work area.",
+      "chinese": "每个小组负责清理自己的工作区域。"
+    },
+    "application": {
+      "prompt": "The captain is ___ for checking that everyone wears a life jacket. A. responsibility B. responsible",
+      "solution": "B。解析：be responsible for 表示“负责”；is 后需要形容词 responsible。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: responsible",
+        "url": "https://dictionary.cambridge.org/dictionary/english/responsible"
+      }
+    ]
+  },
+  {
+    "word": "responsible for sth",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 是某事的原因；对某事负责",
+    "collocations": "be responsible for the delay; be responsible for a project; hold sb responsible for sth",
+    "commonMistake": "responsible for 后接名词或动名词；表示造成某结果时，主语可以是人或事物。",
+    "example": {
+      "english": "Heavy rain was responsible for the delay of the outdoor concert.",
+      "chinese": "大雨导致户外音乐会延期。"
+    },
+    "application": {
+      "prompt": "The broken cable was ___ the power cut in the building. A. responsible for B. responsible of",
+      "solution": "A。解析：be responsible for 表示“是停电的原因”；responsible 后不接 of。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: responsible",
+        "url": "https://dictionary.cambridge.org/dictionary/english/responsible"
+      }
+    ]
+  },
+  {
+    "word": "rapid",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 迅速的；快速的",
+    "collocations": "rapid growth; a rapid change; rapid progress",
+    "commonMistake": "rapid 是形容词，副词是 rapidly；快速增长可说 rapid growth 或 grow rapidly。",
+    "example": {
+      "english": "The rapid rise in temperature melted the snow on the road.",
+      "chinese": "气温迅速上升使路上的积雪融化。"
+    },
+    "application": {
+      "prompt": "The patient made a ___ recovery after receiving treatment. A. rapidly B. rapid",
+      "solution": "B。解析：recovery 前用形容词 rapid 作定语；rapidly 是副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rapid",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rapid"
+      }
+    ]
+  },
+  {
+    "word": "shape",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 形状；v. 塑造；使成形",
+    "collocations": "in the shape of a circle; shape the future; shape clay",
+    "commonMistake": "shape 作名词指外形，作动词可表示塑造；be in good shape 表示身体状况良好，不等于 have a good shape。",
+    "example": {
+      "english": "The potter shaped the wet clay into a small bowl.",
+      "chinese": "陶艺师把湿黏土塑成了一个小碗。"
+    },
+    "application": {
+      "prompt": "The artist used a knife to ___ the soft wood into a bird. A. shape B. shape of",
+      "solution": "A。解析：shape sth into 表示“把某物塑造成”；shape of 后需跟名词，不能直接接 the soft wood。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shape",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shape"
+      }
+    ]
+  },
+  {
+    "word": "bronze",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 青铜；青铜色",
+    "collocations": "a bronze statue; bronze medal; made of bronze",
+    "commonMistake": "bronze 作材料名词通常不可数；bronze medal 指铜牌，medal 是奖牌本身。",
+    "example": {
+      "english": "The museum displays a bronze statue from the ancient city.",
+      "chinese": "博物馆展出了一尊古城遗留下来的青铜雕像。"
+    },
+    "application": {
+      "prompt": "The old bell is heavy because it is made of ___. A. bronzed B. bronze",
+      "solution": "B。解析：made of bronze 表示“由青铜制成”；bronzed 是形容词，常表示晒成古铜色的。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bronze",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bronze"
+      }
+    ]
+  },
+  {
+    "word": "ware",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 制品；（某类）器皿",
+    "collocations": "glassware; kitchenware; bronze ware",
+    "commonMistake": "ware 常用于复合词表示某类商品或器皿；单独的 ware 常作集合名词，不通常写成 a ware。",
+    "example": {
+      "english": "The shop sells handmade pottery and other local ware.",
+      "chinese": "这家商店出售手工陶器和其他当地制品。"
+    },
+    "application": {
+      "prompt": "Plates, bowls and cups made from clay are examples of pottery ___. A. ware B. wear",
+      "solution": "A。解析：pottery ware 指陶制器皿或陶器制品；wear 是“穿戴/磨损”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ware",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ware"
+      }
+    ]
+  },
+  {
+    "word": "stone",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 石头；岩石",
+    "collocations": "a stone wall; a stone bridge; throw a stone",
+    "commonMistake": "stone 作材料名词时可不加冠词（made of stone）；作一块具体石头时是可数名词。",
+    "example": {
+      "english": "The children followed a narrow stone path through the garden.",
+      "chinese": "孩子们沿着一条狭窄的石径穿过花园。"
+    },
+    "application": {
+      "prompt": "The old bridge is built of ___, not wood or metal. A. stony B. stone",
+      "solution": "B。解析：built of stone 表示“用石头建成”；stone 在此作材料名词，stony 通常是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stone",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stone"
+      }
+    ]
+  },
+  {
+    "word": "jute",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 黄麻纤维；黄麻布",
+    "collocations": "jute fibre; a jute bag; grow jute",
+    "commonMistake": "jute 是通常不可数的植物纤维材料；由黄麻制成的袋子可说 a jute bag。",
+    "example": {
+      "english": "The farmer carried vegetables in a strong jute bag.",
+      "chinese": "农民用结实的黄麻袋装蔬菜。"
+    },
+    "application": {
+      "prompt": "This reusable shopping bag is made from ___. A. jute B. juice",
+      "solution": "A。解析：制作袋子的植物纤维材料是 jute（黄麻）；juice 是饮料。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: jute",
+        "url": "https://dictionary.cambridge.org/dictionary/english/jute"
+      }
+    ]
+  },
+  {
+    "word": "fibre",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 纤维；纤维素",
+    "collocations": "dietary fibre; natural fibre; fibre content",
+    "commonMistake": "fibre 是英式拼法，美式拼写为 fiber；通常不可数，指单根纤维时才可数。",
+    "example": {
+      "english": "Oats are a good source of dietary fibre.",
+      "chinese": "燕麦是膳食纤维的良好来源。"
+    },
+    "application": {
+      "prompt": "Whole-grain bread contains more dietary ___ than white bread. A. fibrous B. fibre",
+      "solution": "B。解析：dietary fibre 是“膳食纤维”；fibrous 是形容词，不能直接放在 dietary 后。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fibre",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fibre"
+      }
+    ]
+  },
+  {
+    "word": "expensive",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 昂贵的；价格高的",
+    "collocations": "an expensive watch; too expensive to buy; expensive for a student",
+    "commonMistake": "expensive 的反义词是 cheap；表示“某物对某人来说很贵”可说 expensive for sb，不能说 expensive to sb。",
+    "example": {
+      "english": "The museum shop sells beautiful but expensive handmade toys.",
+      "chinese": "博物馆商店出售精美但价格昂贵的手工玩具。"
+    },
+    "application": {
+      "prompt": "The camera is too ___ for me to buy with my savings. A. expensively B. expensive",
+      "solution": "B。解析：too 后接形容词 expensive，构成 too expensive to buy；expensively 是副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: expensive",
+        "url": "https://dictionary.cambridge.org/dictionary/english/expensive"
+      }
+    ]
+  },
+  {
+    "word": "officer",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 官员；军官；警察",
+    "collocations": "a police officer; a government officer; speak to an officer",
+    "commonMistake": "officer 指担任职务的人；office 指办公室或职务，不能把 officer 当作房间。",
+    "example": {
+      "english": "A park officer explained why the nesting area was closed.",
+      "chinese": "一名公园管理人员解释了为什么鸟类筑巢区暂时关闭。"
+    },
+    "application": {
+      "prompt": "The ___ checked our tickets before we entered the station platform. A. officer B. office",
+      "solution": "A。解析：检查车票的人是 officer（工作人员/官员）；office 是办公室或职务。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: officer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/officer"
+      }
+    ]
+  },
+  {
+    "word": "workshop",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 作坊；讲习班",
+    "collocations": "a pottery workshop; attend a writing workshop; workshop tools",
+    "commonMistake": "workshop 可指制作或修理物品的场所，也可指集中学习的讲习班；参加课程用 attend a workshop。",
+    "example": {
+      "english": "I joined a weekend workshop to learn how to make paper lanterns.",
+      "chinese": "我参加了周末讲习班，学习制作纸灯笼。"
+    },
+    "application": {
+      "prompt": "At the pottery ___, visitors can watch bowls being made by hand. A. workshop B. worksheet",
+      "solution": "A。解析：制作陶器的场所是 workshop（作坊）；worksheet 是练习单。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: workshop",
+        "url": "https://dictionary.cambridge.org/dictionary/english/workshop"
+      }
+    ]
+  },
+  {
+    "word": "none",
+    "examTags": [
+      "词汇·常见词性",
+      "中考·词形与搭配"
+    ],
+    "grammar": "pron. 没有一个；毫无",
+    "collocations": "none of the students; none left; none of them",
+    "commonMistake": "none of 后可接复数名词或代词；后接可数复数时，谓语可用单数或复数，语意侧重整体或个体。",
+    "example": {
+      "english": "None of the milk was left after breakfast.",
+      "chinese": "早餐后牛奶一点也没剩。"
+    },
+    "application": {
+      "prompt": "We checked all five batteries, but ___ of them worked. A. no B. none",
+      "solution": "B。解析：none of them 表示“它们没有一个”；no 后需直接修饰名词，不能接 of them。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: none",
+        "url": "https://dictionary.cambridge.org/dictionary/english/none"
+      }
+    ]
+  },
+  {
+    "word": "ideal",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 理想的；n. 理想；典范",
+    "collocations": "an ideal place; ideal for a picnic; a role model and ideal",
+    "commonMistake": "ideal 作形容词常用 ideal for；作名词可表示理想或典范，不要把 idea（想法）当作它的同义词。",
+    "example": {
+      "english": "The quiet beach is an ideal place to watch the sunrise.",
+      "chinese": "这片安静的海滩是观看日出的理想地点。"
+    },
+    "application": {
+      "prompt": "With shade, clean water and easy access, the park is ___ for a family picnic. A. idea B. ideal",
+      "solution": "B。解析：be ideal for 表示“很适合”；此处说明公园适合家庭野餐。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ideal",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ideal"
+      }
+    ]
+  },
+  {
+    "word": "bark",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 树皮；狗吠声；v. 吠叫",
+    "collocations": "tree bark; a dog's bark; bark at a stranger",
+    "commonMistake": "bark 作动词表示狗吠，名词可指树皮或吠声；树皮不可说 the bark of a tree 用在“吠声”义以外，需结合语境。",
+    "example": {
+      "english": "The gardener removed loose bark from the young tree.",
+      "chinese": "园丁清除了小树上松动的树皮。"
+    },
+    "application": {
+      "prompt": "The squirrel hid its food under the rough ___ of the oak. A. bark B. branch",
+      "solution": "A。解析：树干外层粗糙部分是 bark（树皮）；branch 是树枝。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bark",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bark"
+      }
+    ]
+  },
+  {
+    "word": "certain",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 某些；确定的；pron. 某些人或物",
+    "collocations": "certain students; be certain that; a certain amount of time",
+    "commonMistake": "certain 作“某些”修饰名词时不等于 all；be certain of/about 表示确信，certainly 是副词。",
+    "example": {
+      "english": "Certain birds return to this wetland every winter.",
+      "chinese": "某些鸟类每年冬天都会回到这片湿地。"
+    },
+    "application": {
+      "prompt": "___ students may leave early if their parents have signed the form. A. Certainly B. Certain",
+      "solution": "B。解析：students 前用形容词 certain，表示“某些学生”；certainly 是副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: certain",
+        "url": "https://dictionary.cambridge.org/dictionary/english/certain"
+      }
+    ]
+  },
+  {
+    "word": "suitable",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 合适的；适宜的",
+    "collocations": "suitable for children; suitable clothes; be suitable to do sth",
+    "commonMistake": "suitable 常与 for 连用，suit 是动词“适合”；不能说 suitable to someone 表示“适合某人”。",
+    "example": {
+      "english": "These shoes are suitable for walking on rocky paths.",
+      "chinese": "这双鞋适合在石头路上行走。"
+    },
+    "application": {
+      "prompt": "The guide chose a route ___ for beginners with little hiking experience. A. suitable B. suitably",
+      "solution": "A。解析：route 前需要形容词 suitable；suitable for beginners 表示“适合初学者”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suitable",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suitable"
+      }
+    ]
+  },
+  {
+    "word": "liquid",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 液体；adj. 液体的",
+    "collocations": "a clear liquid; liquid soap; turn into a liquid",
+    "commonMistake": "liquid 作名词可数也可作集合概念，作形容词时放在名词前；liquid 与 solid、gas 相对。",
+    "example": {
+      "english": "The medicine is a thick liquid with a sweet taste.",
+      "chinese": "这种药是一种甜味的黏稠液体。"
+    },
+    "application": {
+      "prompt": "At room temperature, water is a ___. A. liquefy B. liquid",
+      "solution": "B。解析：a 后需要名词 liquid，表示“液体”；liquefy 是动词“使液化”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: liquid",
+        "url": "https://dictionary.cambridge.org/dictionary/english/liquid"
+      }
+    ]
+  },
+  {
+    "word": "cheap",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 便宜的；adv. 便宜地",
+    "collocations": "a cheap ticket; buy sth cheap; cheap and cheerful",
+    "commonMistake": "cheap 作形容词修饰商品；副词义可修饰 buy/get，比较级 cheaper；不要用 cheaply 修饰 be。",
+    "example": {
+      "english": "We found a cheap hotel near the railway station.",
+      "chinese": "我们在火车站附近找到一家便宜的旅馆。"
+    },
+    "application": {
+      "prompt": "The family bought a ___ table at the weekend market. A. cheap B. cheaply",
+      "solution": "A。解析：table 前需要形容词 cheap；cheaply 是副词，不能修饰名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cheap",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cheap"
+      }
+    ]
+  },
+  {
+    "word": "creation",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 创造；作品",
+    "collocations": "the creation of a new tool; a creative idea; a work of creation",
+    "commonMistake": "creation 是名词，动词是 create，形容词是 creative；表示作品时可以说 a creation by the artist。",
+    "example": {
+      "english": "The paper dragon was Mei's creation for the school festival.",
+      "chinese": "这个纸龙是梅为校园节制作的作品。"
+    },
+    "application": {
+      "prompt": "The artist's latest ___ is a sculpture made from recycled metal. A. create B. creation",
+      "solution": "B。解析：latest 后需要名词 creation，表示“最新作品”；create 是动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: creation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/creation"
+      }
+    ]
+  },
+  {
+    "word": "later on",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 后来；以后",
+    "collocations": "later on that day; see you later; sooner or later",
+    "commonMistake": "later on 指之后某个时间；通常不与将来时间点 at 一起说 later on at Monday。",
+    "example": {
+      "english": "We visited the museum first and had lunch later on.",
+      "chinese": "我们先参观了博物馆，之后去吃了午饭。"
+    },
+    "application": {
+      "prompt": "The bus was full, so we took a taxi ___ and met the group at the hotel. A. later on B. later at",
+      "solution": "A。解析：later on 表示“后来”；此处说之后乘出租车赶到酒店。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: later",
+        "url": "https://dictionary.cambridge.org/dictionary/english/later"
+      }
+    ]
+  },
+  {
+    "word": "speed up",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 （使）加速；加快",
+    "collocations": "speed up the process; speed up to 60 km/h; speed up production",
+    "commonMistake": "speed up 可作及物或不及物短语动词；过去式 speeded up 或 sped up 均可。",
+    "example": {
+      "english": "The new machine will speed up the process of sorting letters.",
+      "chinese": "这台新机器会加快信件分拣过程。"
+    },
+    "application": {
+      "prompt": "To finish before sunset, the workers had to ___ the packing process. A. fast up B. speed up",
+      "solution": "B。解析：speed up the process 是“加快流程”；fast up 不是规范搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: speed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/speed"
+      }
+    ]
+  },
+  {
+    "word": "Arab",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 阿拉伯的；n. 阿拉伯人",
+    "collocations": "Arab culture; an Arab country; Arabs speak Arabic",
+    "commonMistake": "Arab 可作形容词或可数名词；语言是 Arabic，不能把 Arab 与 Arabic 当成同一词性。",
+    "example": {
+      "english": "The library has a section on Arab history and culture.",
+      "chinese": "图书馆设有阿拉伯历史与文化专区。"
+    },
+    "application": {
+      "prompt": "The exhibition explores ___ architecture across several countries. A. Arab B. Arabic",
+      "solution": "A。解析：architecture 前用形容词 Arab，表示“阿拉伯的建筑”；Arabic 是阿拉伯语或阿拉伯文的。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Arab",
+        "url": "https://dictionary.cambridge.org/dictionary/english/arab"
+      }
+    ]
+  },
+  {
+    "word": "result in",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 导致；造成",
+    "collocations": "result in a delay; result in changes; serious injuries resulted from the crash",
+    "commonMistake": "result in 后接结果；result from 后接原因，二者方向相反。",
+    "example": {
+      "english": "A blocked drain resulted in flooding after the heavy rain.",
+      "chinese": "暴雨后排水管堵塞，导致了洪水。"
+    },
+    "application": {
+      "prompt": "The team forgot to save its work, which may ___ the loss of an hour's effort. A. result from B. result in",
+      "solution": "B。解析：result in 后接结果“损失一小时的努力”；result from 后接原因。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: result",
+        "url": "https://dictionary.cambridge.org/dictionary/english/result"
+      }
+    ]
+  },
+  {
+    "word": "lead to",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 导致；通向",
+    "collocations": "lead to a problem; lead to success; a path leads to the lake",
+    "commonMistake": "lead to 可表示造成某结果，也可表示通向某地；lead 后不能直接接结果而省略 to。",
+    "example": {
+      "english": "Too little sleep can lead to trouble concentrating in class.",
+      "chinese": "睡眠太少会导致上课时难以集中注意力。"
+    },
+    "application": {
+      "prompt": "If the road is icy, driving too fast can ___ an accident. A. lead to B. lead for",
+      "solution": "A。解析：lead to an accident 表示“导致事故”；句子说明超速在冰路上可能造成的后果。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lead",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lead"
+      }
+    ]
+  },
+  {
+    "word": "birth",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 出生；诞生；起源",
+    "collocations": "give birth to a baby; date of birth; the birth of an idea",
+    "commonMistake": "birth 是名词，动词是 bear；“出生于某地”用 be born in，不能说 be birth in。",
+    "example": {
+      "english": "The birth of the baby brought great joy to the family.",
+      "chinese": "这个宝宝的出生给家人带来了极大的喜悦。"
+    },
+    "application": {
+      "prompt": "The form asks for your place and date of ___. A. born B. birth",
+      "solution": "B。解析：date of birth 是“出生日期”；born 是 bear 的过去分词，不能放在 of 后作名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: birth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/birth"
+      }
+    ]
+  },
+  {
+    "word": "rapidly",
+    "examTags": [
+      "词汇·副词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adv. 迅速地；快速地",
+    "collocations": "grow rapidly; change rapidly; spread rapidly",
+    "commonMistake": "rapidly 是副词，修饰动词；形容词是 rapid，不能用 rapid 修饰 move。",
+    "example": {
+      "english": "The small town has grown rapidly since the new road opened.",
+      "chinese": "新公路开通后，这座小镇发展迅速。"
+    },
+    "application": {
+      "prompt": "The ice melted ___ when the sun came out. A. rapidly B. rapid",
+      "solution": "A。解析：melted 是动词，需用副词 rapidly 修饰；rapid 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rapidly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rapidly"
+      }
+    ]
+  },
+  {
+    "word": "afford",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 买得起；承担得起；抽得出时间",
+    "collocations": "afford a car; afford to travel; can't afford to wait",
+    "commonMistake": "afford 后接名词或 to do；常用于 can/can't afford，表达经济或时间上的能力。",
+    "example": {
+      "english": "We cannot afford to replace the printer this month.",
+      "chinese": "我们这个月买不起一台新打印机。"
+    },
+    "application": {
+      "prompt": "The family saved for years so they could ___ their daughter's college fees. A. afford B. affordable",
+      "solution": "A。解析：could 后接动词原形 afford，表示“有能力承担学费”；affordable 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: afford",
+        "url": "https://dictionary.cambridge.org/dictionary/english/afford"
+      }
+    ]
+  },
+  {
+    "word": "company",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 公司；陪伴",
+    "collocations": "a technology company; keep sb company; in good company",
+    "commonMistake": "company 作“陪伴”时通常不可数；作“公司”时可数。keep sb company 表示陪伴某人。",
+    "example": {
+      "english": "My aunt works for a company that designs solar panels.",
+      "chinese": "我姑姑在一家设计太阳能板的公司工作。"
+    },
+    "application": {
+      "prompt": "Grandpa asked me to stay and keep him ___ while he waited for the doctor. A. company B. companion",
+      "solution": "A。解析：keep sb company 是“陪伴某人”的固定搭配；companion 指同伴，不能放在该短语中。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: company",
+        "url": "https://dictionary.cambridge.org/dictionary/english/company"
+      }
+    ]
+  },
+  {
+    "word": "sticky",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 黏的；闷热的",
+    "collocations": "sticky tape; a sticky floor; sticky weather",
+    "commonMistake": "sticky 可形容表面黏，也可形容天气闷热；副词是 stickily，名词是 stickiness。",
+    "example": {
+      "english": "The juice made the table sticky, so we wiped it at once.",
+      "chinese": "果汁把桌面弄黏了，所以我们马上擦干净。"
+    },
+    "application": {
+      "prompt": "The hot, humid afternoon felt uncomfortable and ___. A. stick B. sticky",
+      "solution": "B。解析：felt 后用形容词 sticky 描述天气闷热；stick 是名词“棍子”或动词“粘”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sticky",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sticky"
+      }
+    ]
+  },
+  {
+    "word": "songbook",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 歌曲集；歌本",
+    "collocations": "a school songbook; a songbook of folk music; read from a songbook",
+    "commonMistake": "songbook 是由 song 与 book 构成的可数名词；复数 songbooks。",
+    "example": {
+      "english": "The choir shared one songbook during the rehearsal.",
+      "chinese": "合唱团排练时共用了一本歌本。"
+    },
+    "application": {
+      "prompt": "Each singer opened the ___ to find the words for the next song. A. songbook B. songwriter",
+      "solution": "A。解析：查找歌词要翻开 songbook（歌本）；songwriter 是写歌的人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: songbook",
+        "url": "https://dictionary.cambridge.org/dictionary/english/songbook"
+      }
+    ]
+  },
+  {
+    "word": "production",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 生产；制作；产量",
+    "collocations": "mass production; film production; production costs",
+    "commonMistake": "production 是名词，动词是 produce；production of sth 表示某物的生产，不能写成 produce of sth。",
+    "example": {
+      "english": "The factory reduced plastic production by using recycled material.",
+      "chinese": "这家工厂通过使用回收材料减少了塑料产量。"
+    },
+    "application": {
+      "prompt": "The ___ of electric buses has increased this year. A. produce B. production",
+      "solution": "B。解析：句子主语需要名词 production（生产/产量）；produce 是动词或农产品。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: production",
+        "url": "https://dictionary.cambridge.org/dictionary/english/production"
+      }
+    ]
+  },
+  {
+    "word": "gradually",
+    "examTags": [
+      "词汇·副词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adv. 逐渐地；逐步地",
+    "collocations": "change gradually; gradually become; increase gradually",
+    "commonMistake": "gradually 是副词，形容词是 gradual；副词修饰动词时常放在动词后或句首。",
+    "example": {
+      "english": "The sky gradually became brighter as the storm passed.",
+      "chinese": "暴风雨过去后，天空逐渐亮了起来。"
+    },
+    "application": {
+      "prompt": "With daily practice, her pronunciation improved ___. A. gradual B. gradually",
+      "solution": "B。解析：improved 是动词，需用副词 gradually 修饰；gradual 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: gradually",
+        "url": "https://dictionary.cambridge.org/dictionary/english/gradually"
+      }
+    ]
+  },
+  {
+    "word": "widely",
+    "examTags": [
+      "词汇·副词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adv. 广泛地；普遍地",
+    "collocations": "widely used; widely known; vary widely",
+    "commonMistake": "widely 常修饰 used、known、accepted 等词；形容词 wide 表示“宽的”，不能说 widely road。",
+    "example": {
+      "english": "Solar panels are now widely used in sunny regions.",
+      "chinese": "太阳能板如今在阳光充足的地区得到广泛使用。"
+    },
+    "application": {
+      "prompt": "English is ___ spoken in many international airports. A. widely B. wide",
+      "solution": "A。解析：spoken 前用副词 widely，表示“被广泛使用”；wide 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: widely",
+        "url": "https://dictionary.cambridge.org/dictionary/english/widely"
+      }
+    ]
+  },
+  {
+    "word": "be looking to do sth",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 试图找到做某事的方法；打算做某事",
+    "collocations": "be looking to improve; be looking to hire; look to do sth",
+    "commonMistake": "be looking to do sth 后接动词原形，表示计划或希望采取行动；look for sth 才是“寻找某物”。",
+    "example": {
+      "english": "The company is looking to hire two more engineers this year.",
+      "chinese": "这家公司打算今年再招聘两名工程师。"
+    },
+    "application": {
+      "prompt": "The school is ___ reduce food waste in the cafeteria this term. A. looking for reduce B. looking to reduce",
+      "solution": "B。解析：be looking to reduce 表示“打算减少”；look for 后要接名词或动名词，不接动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: look",
+        "url": "https://dictionary.cambridge.org/dictionary/english/look"
+      }
+    ]
+  },
+  {
+    "word": "glider",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 滑翔机；滑翔者",
+    "collocations": "a glider pilot; fly a glider; a paper glider",
+    "commonMistake": "glider 是由 glide 加 -r 构成的名词，指无动力或少动力的滑翔机；glide 是动词“滑翔”。",
+    "example": {
+      "english": "The glider circled above the valley without an engine.",
+      "chinese": "滑翔机没有发动机，在山谷上空盘旋。"
+    },
+    "application": {
+      "prompt": "Unlike a powered plane, a ___ can stay aloft by riding rising air. A. glider B. glide",
+      "solution": "A。解析：能借上升气流飞行的飞行器是 glider；glide 是“滑翔”这一动作。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: glider",
+        "url": "https://dictionary.cambridge.org/dictionary/english/glider"
+      }
+    ]
+  },
+  {
+    "word": "3D",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 三维的；n. 三维影像",
+    "collocations": "3D film; 3D printer; watch a film in 3D",
+    "commonMistake": "3D 是 three-dimensional 的缩写，作名词或定语时通常保留大写 D；读作 three-D。",
+    "example": {
+      "english": "The children wore special glasses to watch the 3D film.",
+      "chinese": "孩子们戴上特制眼镜观看这部 3D 电影。"
+    },
+    "application": {
+      "prompt": "The model looked realistic because it was printed with a ___ printer. A. three dimensions B. 3D",
+      "solution": "B。解析：3D printer 是“三维打印机”；形容词缩写 3D 放在 printer 前作定语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: 3d",
+        "url": "https://dictionary.cambridge.org/dictionary/english/3d"
+      }
+    ]
+  },
+  {
+    "word": "CE (Common Era)",
+    "examTags": [
+      "词汇·常见词性",
+      "中考·词形与搭配"
+    ],
+    "grammar": "缩写 公元（公元纪年）",
+    "collocations": "the year 120 CE; dates in CE; BCE and CE",
+    "commonMistake": "CE 是 Common Era 的缩写，写在年份后；它与 BCE（公元前）相对，纪年方式与 AD 对应。",
+    "example": {
+      "english": "The ancient coin was made around 200 CE.",
+      "chinese": "这枚古钱币大约铸造于公元 200 年。"
+    },
+    "application": {
+      "prompt": "The inscription dates the temple to 350 ___, meaning 350 years in the Common Era. A. CE B. BCE",
+      "solution": "A。解析：CE 表示公元纪年；350 BCE 则是公元前 350 年，与句意相反。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: CE (Common Era)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ce-(common-era)"
+      }
+    ]
+  }
+]

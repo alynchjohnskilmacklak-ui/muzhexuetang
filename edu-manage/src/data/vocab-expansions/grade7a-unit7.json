@@ -1,0 +1,1250 @@
+[
+  {
+    "word": "celebrate",
+    "examTags": [
+      "词汇·动词搭配",
+      "语言运用·表达节日与纪念活动"
+    ],
+    "grammar": "v. 庆祝；庆贺；celebrate—celebrated—celebrated—celebrating。celebrate 后直接接节日、生日或事件。",
+    "collocations": "celebrate a birthday; celebrate a festival; celebrate with family。",
+    "commonMistake": "celebrate 后直接接庆祝的事情，不说 celebrate for a birthday。",
+    "example": {
+      "english": "We celebrate Grandma's birthday with a family dinner.",
+      "chinese": "我们和家人一起吃晚饭庆祝奶奶的生日。"
+    },
+    "application": {
+      "prompt": "Our school is having a party to ___ its 30th birthday. A. celebrate B. collect",
+      "solution": "A。解析：为生日举办聚会是 celebrate（庆祝）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: celebrate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/celebrate"
+      }
+    ]
+  },
+  {
+    "word": "surprise",
+    "examTags": [
+      "词汇·名词与动词",
+      "阅读·理解情感与事件"
+    ],
+    "grammar": "n. 惊奇；意外之事；v. 使惊讶。名词可数，复数 surprises；形容词 surprised 描述人的感受，surprising 描述令人惊讶的事。",
+    "collocations": "a birthday surprise; surprise someone; be surprised at/by sth.。",
+    "commonMistake": "surprise 作名词时单数前常用 a；surprised 描述人的感受，surprising 描述事情的特点。",
+    "example": {
+      "english": "The birthday cake was a lovely surprise for my sister.",
+      "chinese": "生日蛋糕给我妹妹带来了一个可爱的惊喜。"
+    },
+    "application": {
+      "prompt": "No one told Leo about the party, so it was a ___ for him. A. surprise B. list",
+      "solution": "A。解析：事先不知道、让人意外的事情是 surprise（惊喜/意外）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: surprise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/surprise"
+      }
+    ]
+  },
+  {
+    "word": "something",
+    "examTags": [
+      "语法·不定代词",
+      "阅读·理解不确定事物指代"
+    ],
+    "grammar": "pron. 某事；某物。通常用于肯定句；作主语时谓语常用单数，形容词放在 something 后面。",
+    "collocations": "something special; something to eat; something about the party。",
+    "commonMistake": "形容词放在 something 后面，如 something interesting；不定代词作主语时通常用单数谓语。",
+    "example": {
+      "english": "I want to buy something special for my dad.",
+      "chinese": "我想给爸爸买一件特别的东西。"
+    },
+    "application": {
+      "prompt": "The bag is not empty, but I cannot see what is inside. There is ___ in it. A. something B. nothing",
+      "solution": "A。解析：题目说明包里有东西但看不清是什么，用 something；nothing 表示什么都没有。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: something",
+        "url": "https://dictionary.cambridge.org/dictionary/english/something"
+      }
+    ]
+  },
+  {
+    "word": "sale",
+    "examTags": [
+      "词汇·购物场景与名词搭配",
+      "阅读·理解价格与促销信息"
+    ],
+    "grammar": "n. 出售；销售；特价销售活动。可数，复数 sales；for sale 表示待售，on sale 可表示正在销售或特价销售（依英语地区和语境而异）。",
+    "collocations": "for sale; on sale; have a sale; a book sale。",
+    "commonMistake": "sale 是名词，sell 是动词；for sale 表示“待售”，on sale 在不同地区可指“在售”或“特价”。",
+    "example": {
+      "english": "The shop has a sale on birthday cards this week.",
+      "chinese": "这家商店本周生日贺卡打折促销。"
+    },
+    "application": {
+      "prompt": "The shop sells some toys at lower prices this week. It is having a ___. A. sale B. kilo",
+      "solution": "A。解析：商店降价销售的促销活动是 sale。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sale",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sale"
+      }
+    ]
+  },
+  {
+    "word": "kilo",
+    "examTags": [
+      "词汇·重量单位与数量表达",
+      "听读·获取购物数量信息"
+    ],
+    "grammar": "n. 千克；公斤，是 kilogram 的常用简称。可数，复数 kilos；常用 a kilo of + 食物/物品。",
+    "collocations": "a kilo of apples; two kilos of rice; half a kilo。",
+    "commonMistake": "kilo 是可数单位，two 后用复数 kilos；a kilo of 后可接不可数名词，如 rice。",
+    "example": {
+      "english": "Please buy a kilo of oranges for the party.",
+      "chinese": "请为聚会买一公斤橙子。"
+    },
+    "application": {
+      "prompt": "We need one ___ of apples for the fruit salad. A. kilo B. kilos",
+      "solution": "A。解析：one 后用单数 kilo；a kilo of 表示一公斤。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: kilo",
+        "url": "https://dictionary.cambridge.org/dictionary/english/kilo"
+      }
+    ]
+  },
+  {
+    "word": "yogurt",
+    "examTags": [
+      "词汇·食物主题与不可数名词",
+      "阅读·理解购物清单"
+    ],
+    "grammar": "n. 酸奶；通常作不可数名词。yoghurt 是常见的英式拼写变体；表示一份时可说 a pot/cup of yogurt。",
+    "collocations": "some yogurt; a cup of yogurt; yogurt and fruit。",
+    "commonMistake": "yogurt 通常不可数，不说 yogurts 表示酸奶这种食物；可用 a cup of yogurt 表示一杯。",
+    "example": {
+      "english": "We put some yogurt and fruit on the birthday table.",
+      "chinese": "我们在生日餐桌上放了一些酸奶和水果。"
+    },
+    "application": {
+      "prompt": "There is ___ yogurt in the fridge for breakfast. A. some B. many",
+      "solution": "A。解析：yogurt 通常不可数，用 some 修饰；many 修饰可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yogurt",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yogurt"
+      }
+    ]
+  },
+  {
+    "word": "total",
+    "examTags": [
+      "词汇·名词与形容词",
+      "听读·计算与核对总价"
+    ],
+    "grammar": "n. 总数；总额；adj. 总的；全部的。常用 in total、a total of；结账时可说 The total is ...。",
+    "collocations": "in total; a total of ten; the total price。",
+    "commonMistake": "total 可作名词或形容词；the total 是“总数/总额”，total price 中 total 修饰名词 price。",
+    "example": {
+      "english": "The total for the cake and candles is 80 yuan.",
+      "chinese": "蛋糕和蜡烛的总价是80元。"
+    },
+    "application": {
+      "prompt": "The cake costs 60 yuan and the candles cost 10 yuan. The total ___ 70 yuan. A. is B. are",
+      "solution": "A。解析：the total 作主语表示一个总额，谓语用单数 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: total",
+        "url": "https://dictionary.cambridge.org/dictionary/english/total"
+      }
+    ]
+  },
+  {
+    "word": "price",
+    "examTags": [
+      "词汇·购物与价格表达",
+      "语言运用·询问商品价格"
+    ],
+    "grammar": "n. 价格；可数，复数 prices。可问 What's the price of ...?；日常询价也常用 How much is/are ...?。",
+    "collocations": "the price of a cake; a high/low price; price tag。",
+    "commonMistake": "price 表示“价格”，expensive 表示“昂贵的”；询问价格可说 What's the price? 或 How much is it?",
+    "example": {
+      "english": "The price of this chocolate cake is 120 yuan.",
+      "chinese": "这个巧克力蛋糕的价格是120元。"
+    },
+    "application": {
+      "prompt": "You want to ask how much the balloon costs. What is the ___ of the balloon? A. price B. language",
+      "solution": "A。解析：商品的价格是 price。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: price",
+        "url": "https://dictionary.cambridge.org/dictionary/english/price"
+      }
+    ]
+  },
+  {
+    "word": "chocolate",
+    "examTags": [
+      "词汇·食物主题与可数性",
+      "阅读·理解购物清单"
+    ],
+    "grammar": "n. 巧克力；通常作不可数名词，也可指一块巧克力糖而作可数名词。a bar/piece of chocolate 表示一块巧克力。",
+    "collocations": "a bar of chocolate; chocolate cake; some chocolate。",
+    "commonMistake": "表示巧克力这种食物通常不可数，可说 some chocolate；一块用 a piece/bar of chocolate。",
+    "example": {
+      "english": "Dad puts chocolate on top of the birthday cake.",
+      "chinese": "爸爸在生日蛋糕上放了巧克力。"
+    },
+    "application": {
+      "prompt": "We need ___ chocolate to make the cake. A. some B. many",
+      "solution": "A。解析：这里的 chocolate 指巧克力食材，通常不可数，用 some。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chocolate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chocolate"
+      }
+    ]
+  },
+  {
+    "word": "list",
+    "examTags": [
+      "词汇·名词与动词",
+      "写作·整理购物和任务信息"
+    ],
+    "grammar": "n. 名单；清单；v. 列出。名词可数，复数 lists；动词 list—listed—listed。",
+    "collocations": "make a list; a shopping list; list the names。",
+    "commonMistake": "list 可作名词或动词：make a list（列清单），list the items（把物品列出来）。",
+    "example": {
+      "english": "I made a list of food for the birthday party.",
+      "chinese": "我列了一张生日聚会食物清单。"
+    },
+    "application": {
+      "prompt": "Please ___ the three things we need to buy. A. list B. lists",
+      "solution": "A。解析：please 引导祈使句，用动词原形 list。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: list",
+        "url": "https://dictionary.cambridge.org/dictionary/english/list"
+      }
+    ]
+  },
+  {
+    "word": "own",
+    "examTags": [
+      "语法·物主表达",
+      "语言运用·表达个人所有"
+    ],
+    "grammar": "adj./pron. 自己的；本人的。常用物主限定词 + own + 名词，如 my own room；on one's own 表示独自。",
+    "collocations": "my own birthday; her own idea; on my own。",
+    "commonMistake": "own 前常有 my/your/his 等物主限定词：my own book；不要说 mine own book（现代普通用法）。",
+    "example": {
+      "english": "I made my own birthday card for Mum.",
+      "chinese": "我给妈妈做了自己的生日贺卡。"
+    },
+    "application": {
+      "prompt": "Lucy made the card without help. She made it on her ___. A. own B. own's",
+      "solution": "A。解析：on her own 表示“独自地、靠自己”；own's 不是这个固定表达的形式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: own",
+        "url": "https://dictionary.cambridge.org/dictionary/english/own"
+      }
+    ]
+  },
+  {
+    "word": "example",
+    "examTags": [
+      "词汇·名词搭配",
+      "阅读·理解举例与说明"
+    ],
+    "grammar": "n. 例子；范例；可数，复数 examples。for example 常用于引出例子，通常与前面的说明用逗号隔开。",
+    "collocations": "for example; an example of; set a good example。",
+    "commonMistake": "常说 for example（例如）；example 是可数名词，单数前需要 a/an/the 等限定词。",
+    "example": {
+      "english": "For example, a balloon can make a room look festive.",
+      "chinese": "例如，气球可以让房间看起来有节日气氛。"
+    },
+    "application": {
+      "prompt": "Fruit is a healthy snack. An apple is one ___. A. example B. total",
+      "solution": "A。解析：苹果是健康零食的一个例子，example 表示“例子”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: example",
+        "url": "https://dictionary.cambridge.org/dictionary/english/example"
+      }
+    ]
+  },
+  {
+    "word": "language",
+    "examTags": [
+      "词汇·语言名称与可数名词",
+      "语言运用·谈论交流方式"
+    ],
+    "grammar": "n. 语言；可数，复数 languages。表示使用某种语言常说 speak + 语言名称，如 speak English。",
+    "collocations": "a foreign language; body language; speak another language。",
+    "commonMistake": "language 是可数名词，单数前通常有 a/the；语言名称本身首字母大写，如 English、French。",
+    "example": {
+      "english": "English is the main language in our class today.",
+      "chinese": "今天英语是我们班主要使用的语言。"
+    },
+    "application": {
+      "prompt": "French is a ___, not a kind of food. A. language B. balloon",
+      "solution": "A。解析：French（法语）是一种 language（语言）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: language",
+        "url": "https://dictionary.cambridge.org/dictionary/english/language"
+      }
+    ]
+  },
+  {
+    "word": "international",
+    "examTags": [
+      "词汇·形容词与词根",
+      "阅读·理解国家间交流信息"
+    ],
+    "grammar": "adj. 国际的；由 inter-（相互、在……之间）+ national 构成。常修饰 school、event、language 等名词。",
+    "collocations": "an international school; an international event; international students。",
+    "commonMistake": "international 是形容词，通常放在名词前；注意和 national（国家的、全国的）区分。",
+    "example": {
+      "english": "Our city holds an international food festival every year.",
+      "chinese": "我们城市每年举办国际美食节。"
+    },
+    "application": {
+      "prompt": "Students from many countries study at this school. It is an ___ school. A. international B. national",
+      "solution": "A。解析：有来自许多国家的学生，符合 international（国际的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: international",
+        "url": "https://dictionary.cambridge.org/dictionary/english/international"
+      }
+    ]
+  },
+  {
+    "word": "mark",
+    "examTags": [
+      "词汇·动词与名词多义",
+      "阅读·理解评分与纪念活动"
+    ],
+    "grammar": "v. 做记号；纪念；给……打分；n. 记号；分数。动词规则变化 mark—marked—marked。",
+    "collocations": "mark a date on the calendar; mark an anniversary; get a high mark。",
+    "commonMistake": "mark 作动词可表示“做标记、纪念或打分”；作名词可表示“记号、分数”，需看搭配判断。",
+    "example": {
+      "english": "The school marks its 50th birthday with a concert.",
+      "chinese": "学校用一场音乐会纪念建校50周年。"
+    },
+    "application": {
+      "prompt": "The school holds a special event for its 100th year. The event helps ___ this anniversary. A. mark B. weigh",
+      "solution": "A。解析：mark an anniversary 表示“纪念一个周年”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mark",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mark"
+      }
+    ]
+  },
+  {
+    "word": "national",
+    "examTags": [
+      "词汇·形容词与词根",
+      "阅读·理解国家和民族信息"
+    ],
+    "grammar": "adj. 国家的；民族的；通常修饰名词。名词形式 nation 表示“国家”，nationality 表示“国籍”。",
+    "collocations": "national flag; national holiday; national team。",
+    "commonMistake": "national 是形容词，常修饰名词；不要与 international（国际的）混淆。",
+    "example": {
+      "english": "People hang the national flag on the holiday.",
+      "chinese": "人们在节日里挂起国旗。"
+    },
+    "application": {
+      "prompt": "A flag that represents one country is its ___ flag. A. national B. international",
+      "solution": "A。解析：代表一个国家的旗帜是 national flag（国旗）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: national",
+        "url": "https://dictionary.cambridge.org/dictionary/english/national"
+      }
+    ]
+  },
+  {
+    "word": "found",
+    "examTags": [
+      "词汇·熟词多义与动词词形",
+      "阅读·根据句意判断创建行为"
+    ],
+    "grammar": "v. 创立；创建。此义的变化是 found—founded—founded；注意它与 find 的过去式 found（找到）同形，但词义和动词变化不同。",
+    "collocations": "found a school; found a club; be founded in 2000。",
+    "commonMistake": "found 表“创立”时过去式为 founded；find 的过去式虽然也拼作 found，但表示“找到”。",
+    "example": {
+      "english": "A group of students plans to found a reading club.",
+      "chinese": "一群学生计划创立一个阅读社。"
+    },
+    "application": {
+      "prompt": "The students want to start a new club at school. They plan to ___ a science club. A. found B. find",
+      "solution": "A。解析：start/create a new club 表示创立社团，用 found；find 表示找到。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: found",
+        "url": "https://dictionary.cambridge.org/dictionary/english/found"
+      }
+    ]
+  },
+  {
+    "word": "balloon",
+    "examTags": [
+      "词汇·可数名词与复数",
+      "阅读·识别生日布置物品"
+    ],
+    "grammar": "n. 气球；可数，复数 balloons。可说 a balloon、blow up a balloon 或 a balloon filled with air。",
+    "collocations": "a birthday balloon; blow up balloons; a balloon party decoration。",
+    "commonMistake": "balloon 是可数名词，单数前要有限定词；复数直接加 -s：balloons。",
+    "example": {
+      "english": "We put blue balloons around the birthday table.",
+      "chinese": "我们在生日餐桌周围放了蓝色气球。"
+    },
+    "application": {
+      "prompt": "We need six ___ to decorate the room. A. balloons B. balloon",
+      "solution": "A。解析：six 后接可数名词复数 balloons。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: balloon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/balloon"
+      }
+    ]
+  },
+  {
+    "word": "pizza",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·食物与聚会"
+    ],
+    "grammar": "可数名词，表示比萨饼；复数通常为 pizzas。表示一部分时可说 a slice of pizza。",
+    "collocations": "a pizza；a slice of pizza；pizza party；order pizza",
+    "commonMistake": "表示一个完整比萨时用 a pizza；pizza 作食物泛称时也常作不可数名词。",
+    "example": {
+      "english": "We order two pizzas for the birthday party.",
+      "chinese": "我们为生日派对订了两个比萨。"
+    },
+    "application": {
+      "prompt": "The whole class shares three ___ at lunch. (pizza)",
+      "solution": "pizzas"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pizza",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pizza"
+      }
+    ]
+  },
+  {
+    "word": "meaningful",
+    "examTags": [
+      "词汇构词·形容词后缀 -ful",
+      "语言运用·表达意义与情感"
+    ],
+    "grammar": "形容词，表示重要的、有意义的；由 meaning 加后缀 -ful 构成。比较时常用 more meaningful。",
+    "collocations": "a meaningful gift；a meaningful conversation；a meaningful day",
+    "commonMistake": "meaningful 是形容词，修饰名词或放在 be 等系动词后；meaning 是名词，表示“意义”。",
+    "example": {
+      "english": "A handwritten card can be a meaningful birthday gift.",
+      "chinese": "一张手写卡片可以是一份有意义的生日礼物。"
+    },
+    "application": {
+      "prompt": "The gift has a special story and is important to me. It is ___.",
+      "solution": "meaningful"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: meaningful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/meaningful"
+      }
+    ]
+  },
+  {
+    "word": "post",
+    "examTags": [
+      "语法知识·名词与动词",
+      "语言运用·网络信息与邮寄"
+    ],
+    "grammar": "可作名词，表示帖子或邮政；也可作动词，表示发布信息或邮寄。动词过去式和过去分词为 posted。",
+    "collocations": "post a photo online；write a post；post a letter；post office",
+    "commonMistake": "post 作动词可表示在线发布或邮寄；根据宾语和语境判断具体意思，如 post a photo online。",
+    "example": {
+      "english": "I post one birthday photo on our class page each year.",
+      "chinese": "我每年都会在班级主页上发布一张生日照片。"
+    },
+    "application": {
+      "prompt": "After the party, Ella ___ three photos online. (post)",
+      "solution": "posted"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: post",
+        "url": "https://dictionary.cambridge.org/dictionary/english/post"
+      }
+    ]
+  },
+  {
+    "word": "contact",
+    "examTags": [
+      "语法知识·名词与动词",
+      "语言运用·沟通与联系"
+    ],
+    "grammar": "可作名词，表示联系或联系人；也可作动词，表示联系某人。过去式和过去分词为 contacted。",
+    "collocations": "contact a friend；contact details；keep in contact with sb",
+    "commonMistake": "contact 作动词时可直接接人，不加 with，如 contact your cousin；作名词时可说 get in contact with。",
+    "example": {
+      "english": "Please contact your cousin before you choose a party date.",
+      "chinese": "选定派对日期前，请联系你的表亲。"
+    },
+    "application": {
+      "prompt": "Please ___ your aunt to ask what time she can come. (contact)",
+      "solution": "contact"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: contact",
+        "url": "https://dictionary.cambridge.org/dictionary/english/contact"
+      }
+    ]
+  },
+  {
+    "word": "symbol",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "阅读能力·理解象征含义"
+    ],
+    "grammar": "可数名词，表示象征或符号；复数为 symbols。常用 a symbol of 表示“……的象征”。",
+    "collocations": "a symbol of peace；a national symbol；a mathematical symbol",
+    "commonMistake": "常用结构 a symbol of + 名词；symbol 指代表某种含义的事物或标记。",
+    "example": {
+      "english": "The candle is a symbol of hope on the birthday card.",
+      "chinese": "生日卡片上的蜡烛象征着希望。"
+    },
+    "application": {
+      "prompt": "A heart is often used as a ___ of love. (symbol / village)",
+      "solution": "symbol"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: symbol",
+        "url": "https://dictionary.cambridge.org/dictionary/english/symbol"
+      }
+    ]
+  },
+  {
+    "word": "village",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·地点与社区"
+    ],
+    "grammar": "可数名词，表示村庄或村镇；复数为 villages。",
+    "collocations": "a small village；village life；in the village；a village school",
+    "commonMistake": "village 的复数是 villages；词尾 -ge 后直接加 -s。",
+    "example": {
+      "english": "My grandparents live in a quiet village near the lake.",
+      "chinese": "我的祖父母住在湖边一个安静的村庄里。"
+    },
+    "application": {
+      "prompt": "A small community in the countryside is a ___.",
+      "solution": "village"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: village",
+        "url": "https://dictionary.cambridge.org/dictionary/english/village"
+      }
+    ]
+  },
+  {
+    "word": "grow",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语言运用·成长与变化"
+    ],
+    "grammar": "动词，表示成长、长大或增长；不规则变化为 grow—grew—grown。grow up 表示长大成人。",
+    "collocations": "grow up；grow taller；grow quickly；grow flowers",
+    "commonMistake": "grow 的过去式是 grew，过去分词是 grown；不要把 growed 当作过去式。",
+    "example": {
+      "english": "My little brother wants to grow taller before next year.",
+      "chinese": "我弟弟想在明年之前长高一些。"
+    },
+    "application": {
+      "prompt": "The children have ___ a lot since last year. (grow)",
+      "solution": "grown"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grow"
+      }
+    ]
+  },
+  {
+    "word": "blow",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语言运用·生日祝愿与动作"
+    ],
+    "grammar": "动词，表示吹或刮；不规则变化为 blow—blew—blown。",
+    "collocations": "blow out candles；blow your nose；the wind blows",
+    "commonMistake": "blow 的过去式是 blew，过去分词是 blown；blow out candles 表示吹灭蜡烛。",
+    "example": {
+      "english": "Maya makes a wish and blows out the candles.",
+      "chinese": "玛雅许了个愿，然后吹灭蜡烛。"
+    },
+    "application": {
+      "prompt": "Make a wish and ___ out the candles on your cake. (blow)",
+      "solution": "blow"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: blow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/blow"
+      }
+    ]
+  },
+  {
+    "word": "enjoy",
+    "examTags": [
+      "语法知识·动词后接动词-ing",
+      "语言运用·表达喜好与体验"
+    ],
+    "grammar": "动词，表示喜欢或享受；后接名词、代词或动词-ing形式，也可用于 enjoy yourself。",
+    "collocations": "enjoy a party；enjoy reading；enjoy yourself；enjoy the music",
+    "commonMistake": "enjoy 后接动词时用 -ing 形式，如 enjoy dancing；不说 enjoy to dance。",
+    "example": {
+      "english": "We enjoy playing games at birthday parties.",
+      "chinese": "我们喜欢在生日派对上玩游戏。"
+    },
+    "application": {
+      "prompt": "I enjoy ___ songs with my friends. (sing)",
+      "solution": "singing"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: enjoy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/enjoy"
+      }
+    ]
+  },
+  {
+    "word": "height",
+    "examTags": [
+      "语法知识·名词与形容词辨析",
+      "语言运用·描述身高与高度"
+    ],
+    "grammar": "名词，表示身高或高度；常用 the height of...。描述人有多高常用 tall，描述物体高度可用 high。",
+    "collocations": "the height of a person；in height；a height of two metres",
+    "commonMistake": "height 是名词；询问身高常说 How tall...?，回答可用 be + 数字 + tall。",
+    "example": {
+      "english": "The height of the birthday cake is about twenty centimetres.",
+      "chinese": "这个生日蛋糕大约有二十厘米高。"
+    },
+    "application": {
+      "prompt": "How tall is your cousin? His ___ is 1.6 metres. (height / high)",
+      "solution": "height"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: height",
+        "url": "https://dictionary.cambridge.org/dictionary/english/height"
+      }
+    ]
+  },
+  {
+    "word": "later",
+    "examTags": [
+      "语法知识·时间副词与形容词",
+      "词汇辨析·late 与 later"
+    ],
+    "grammar": "可作副词，表示后来或以后；也可作形容词，表示较后的。常见表达有 see you later 和 later this month。",
+    "collocations": "see you later；later today；later this month；at a later time",
+    "commonMistake": "later 表示“以后/后来”；late 常表示“迟到的/晚的”，如 arrive late。",
+    "example": {
+      "english": "We can choose the birthday gift later today.",
+      "chinese": "我们今天晚些时候可以选生日礼物。"
+    },
+    "application": {
+      "prompt": "I'll call you ___, after my music lesson. (later / late)",
+      "solution": "later"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: later",
+        "url": "https://dictionary.cambridge.org/dictionary/english/later"
+      }
+    ]
+  },
+  {
+    "word": "whom",
+    "examTags": [
+      "语法知识·人称代词宾格",
+      "阅读能力·理解人物关系从句"
+    ],
+    "grammar": "who 的宾格形式，较正式地用作动词或介词的宾语；口语疑问句中常用 who 代替 whom。",
+    "collocations": "to whom；with whom；the person whom I called",
+    "commonMistake": "介词后用宾格 whom，如 to whom；日常口语中也常把介词放句末并用 who。",
+    "example": {
+      "english": "The cousin to whom I sent a card lives nearby.",
+      "chinese": "我寄了贺卡给那位表亲，他/她住在附近。"
+    },
+    "application": {
+      "prompt": "The friend to ___ I gave the invitation is coming to the party. (who / whom)",
+      "solution": "whom"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: whom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/whom"
+      }
+    ]
+  },
+  {
+    "word": "birthday",
+    "examTags": [
+      "语法知识·可数名词与时间介词",
+      "语言运用·日期与庆祝"
+    ],
+    "grammar": "可数名词，表示生日；复数为 birthdays。表示在某人生日那天常用 on one's birthday。",
+    "collocations": "birthday party；birthday cake；birthday card；on my birthday",
+    "commonMistake": "表示生日当天通常说 on my birthday；表示年龄时用 be + 数字 + years old。",
+    "example": {
+      "english": "On her birthday, Ana invites her cousins for lunch.",
+      "chinese": "安娜生日那天会邀请表亲们来吃午饭。"
+    },
+    "application": {
+      "prompt": "The day each year that celebrates when someone was born is their ___.",
+      "solution": "birthday"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: birthday",
+        "url": "https://dictionary.cambridge.org/dictionary/english/birthday"
+      }
+    ]
+  },
+  {
+    "word": "month",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·日期与时间"
+    ],
+    "grammar": "可数名词，表示月；复数为 months。一年有 twelve months。",
+    "collocations": "next month；last month；this month；a month later",
+    "commonMistake": "month 的复数是 months；不要漏掉复数词尾 -s。",
+    "example": {
+      "english": "My birthday is in the same month as my sister's.",
+      "chinese": "我的生日和姐姐/妹妹的生日在同一个月份。"
+    },
+    "application": {
+      "prompt": "There are twelve ___ in a year. (month)",
+      "solution": "months"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: month",
+        "url": "https://dictionary.cambridge.org/dictionary/english/month"
+      }
+    ]
+  },
+  {
+    "word": "gift",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·礼物与表达心意"
+    ],
+    "grammar": "可数名词，表示礼物或天赋；复数为 gifts。表示“给某人礼物”可说 give sb a gift 或 give a gift to sb。",
+    "collocations": "a birthday gift；give/receive a gift；a gift for you",
+    "commonMistake": "gift 是可数名词，表示一份礼物时要有 a/the/物主代词等限定词。",
+    "example": {
+      "english": "My brother gives me a book as a birthday gift.",
+      "chinese": "我哥哥/弟弟送我一本书作为生日礼物。"
+    },
+    "application": {
+      "prompt": "I wrapped a small ___ for my friend's birthday. (gift)",
+      "solution": "gift"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: gift",
+        "url": "https://dictionary.cambridge.org/dictionary/english/gift"
+      }
+    ]
+  },
+  {
+    "word": "party",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·庆祝活动"
+    ],
+    "grammar": "可数名词，表示聚会或派对；复数为 parties，变复数时 y 改为 -ies。",
+    "collocations": "birthday party；have a party；party games；party invitation",
+    "commonMistake": "party 的复数为 parties，不是 partys；表示参加聚会常说 go to a party。",
+    "example": {
+      "english": "We play music games at my cousin's birthday party.",
+      "chinese": "我们在表亲的生日派对上玩音乐游戏。"
+    },
+    "application": {
+      "prompt": "We invite friends, eat cake, and play games at a birthday ___.",
+      "solution": "party"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: party",
+        "url": "https://dictionary.cambridge.org/dictionary/english/party"
+      }
+    ]
+  },
+  {
+    "word": "buy",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语言运用·购物与赠礼"
+    ],
+    "grammar": "动词，表示买；不规则变化为 buy—bought—bought。常用 buy sth for sb 或 buy sb sth。",
+    "collocations": "buy a gift；buy sth for a friend；buy sb a cake",
+    "commonMistake": "buy 的过去式是 bought；表示“给某人买某物”可说 buy sb sth 或 buy sth for sb。",
+    "example": {
+      "english": "Mum buys a fruit cake for my birthday each year.",
+      "chinese": "妈妈每年都会为我生日买一个水果蛋糕。"
+    },
+    "application": {
+      "prompt": "Mum ___ a cake for the party yesterday. (buy)",
+      "solution": "bought"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: buy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/buy"
+      }
+    ]
+  },
+  {
+    "word": "shop",
+    "examTags": [
+      "词汇·名词与动词",
+      "阅读·购物场景理解"
+    ],
+    "grammar": "n. 商店；可数，复数 shops；v. 购物，shop—shopped—shopped—shopping。常说 go shopping 或 shop for sth.。",
+    "collocations": "a book shop; shop for food; go shopping。",
+    "commonMistake": "shop 可作“商店”或“购物”；表示去购物常说 go shopping，不说 go shop。",
+    "example": {
+      "english": "My aunt shops for fruit at the market every Saturday.",
+      "chinese": "我阿姨每周六在市场买水果。"
+    },
+    "application": {
+      "prompt": "My uncle works in a flower ___. A. shop B. shopping",
+      "solution": "A。解析：flower shop 表示“花店”；shopping 是“购物”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shop",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shop"
+      }
+    ]
+  },
+  {
+    "word": "woman",
+    "examTags": [
+      "词汇·不规则名词复数",
+      "阅读·人物信息理解"
+    ],
+    "grammar": "n. 女人；可数，复数 women，是不规则变化；woman 和 women 的中间元音发音不同。",
+    "collocations": "a young woman; women and children; a businesswoman。",
+    "commonMistake": "woman 的复数是 women，不是 womans；one woman，two women。",
+    "example": {
+      "english": "The woman at the door is my teacher's sister.",
+      "chinese": "门口那位女士是我老师的姐姐。"
+    },
+    "application": {
+      "prompt": "There is one adult female in the photo. She is a ___. A. woman B. women",
+      "solution": "A。解析：one 后用单数 woman；women 是复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: woman",
+        "url": "https://dictionary.cambridge.org/dictionary/english/woman"
+      }
+    ]
+  },
+  {
+    "word": "candle",
+    "examTags": [
+      "词汇·可数名词与复数",
+      "阅读·理解生日活动信息"
+    ],
+    "grammar": "n. 蜡烛；可数，复数 candles。生日时常把蜡烛插在蛋糕上。",
+    "collocations": "light a candle; blow out the candles; a birthday cake with candles。",
+    "commonMistake": "candle 是可数名词，单数前通常需要 a/the；多个生日蜡烛用 candles。",
+    "example": {
+      "english": "Mum puts eight candles on my birthday cake.",
+      "chinese": "妈妈在我的生日蛋糕上插了八根蜡烛。"
+    },
+    "application": {
+      "prompt": "Make a wish, then blow out the birthday ___. A. candles B. dolls",
+      "solution": "A。解析：生日蛋糕上的蜡烛可以吹灭，candle 的复数是 candles。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: candle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/candle"
+      }
+    ]
+  },
+  {
+    "word": "will",
+    "examTags": [
+      "语法·一般将来时",
+      "听读·理解承诺与计划"
+    ],
+    "grammar": "modal v. 将要；会。will 后接动词原形；各种人称都用 will，否定式为 will not/won't。",
+    "collocations": "will come; will have a party; won't forget。",
+    "commonMistake": "will 后接动词原形，不加 to 或第三人称 -s：will eat，不说 will eats。",
+    "example": {
+      "english": "I will call you after the birthday party.",
+      "chinese": "生日聚会后我会给你打电话。"
+    },
+    "application": {
+      "prompt": "I promise I ___ bring a card tomorrow. A. will B. did",
+      "solution": "A。解析：tomorrow 表示将来，承诺将做的事用 will + 动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: will",
+        "url": "https://dictionary.cambridge.org/dictionary/english/will"
+      }
+    ]
+  },
+  {
+    "word": "egg",
+    "examTags": [
+      "词汇·可数名词与冠词",
+      "阅读·理解食物清单"
+    ],
+    "grammar": "n. 蛋；鸡蛋；可数，复数 eggs。单数前通常用 an，因 egg 以元音音素开头。",
+    "collocations": "an egg; boil an egg; a dozen eggs。",
+    "commonMistake": "单数 egg 前用 an：an egg；复数 eggs 直接加 -s。",
+    "example": {
+      "english": "We need an egg to make the birthday cake.",
+      "chinese": "我们做生日蛋糕需要一个鸡蛋。"
+    },
+    "application": {
+      "prompt": "A hen lays ___. Choose the correct phrase for one: A. an egg B. a eggs",
+      "solution": "A。解析：egg 是元音音素开头的单数可数名词，用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: egg",
+        "url": "https://dictionary.cambridge.org/dictionary/english/egg"
+      }
+    ]
+  },
+  {
+    "word": "juice",
+    "examTags": [
+      "词汇·不可数名词与量词",
+      "阅读·理解饮食信息"
+    ],
+    "grammar": "n. 果汁；通常作不可数名词。表示一杯果汁可说 a glass of juice；果汁种类也可用 juices。",
+    "collocations": "some orange juice; a glass of juice; fruit juice。",
+    "commonMistake": "juice 通常不可数，不说 a juice 表示一杯；可说 a glass of juice。",
+    "example": {
+      "english": "There is some apple juice on the table.",
+      "chinese": "桌上有一些苹果汁。"
+    },
+    "application": {
+      "prompt": "How much ___ would you like with your cake? A. juice B. eggs",
+      "solution": "A。解析：how much 修饰不可数名词，juice 通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: juice",
+        "url": "https://dictionary.cambridge.org/dictionary/english/juice"
+      }
+    ]
+  },
+  {
+    "word": "milk",
+    "examTags": [
+      "词汇·不可数名词与量词",
+      "阅读·理解食物与饮品信息"
+    ],
+    "grammar": "n. 牛奶；通常作不可数名词。可用 a glass/bottle/carton of milk 表示一杯、一瓶或一盒牛奶。",
+    "collocations": "a glass of milk; some milk; milk and cookies。",
+    "commonMistake": "milk 通常不可数，不说 two milks；需要计量时说 two glasses of milk。",
+    "example": {
+      "english": "My little brother drinks a glass of milk every morning.",
+      "chinese": "我弟弟每天早上喝一杯牛奶。"
+    },
+    "application": {
+      "prompt": "There is ___ milk in the bottle. A. some B. many",
+      "solution": "A。解析：milk 通常不可数，用 some 修饰；many 修饰可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: milk",
+        "url": "https://dictionary.cambridge.org/dictionary/english/milk"
+      }
+    ]
+  },
+  {
+    "word": "candy",
+    "examTags": [
+      "词汇·食物主题与名词可数性",
+      "阅读·理解生日零食信息"
+    ],
+    "grammar": "n. 糖果；美式英语中通常作不可数名词，也可指一颗糖果而作可数名词；英式英语常说 sweets。",
+    "collocations": "some candy; a piece of candy; candy shop。",
+    "commonMistake": "表示糖果这种食物时 candy 常作不可数名词；英式英语更常用 sweets。",
+    "example": {
+      "english": "We put some candy in small bags for the guests.",
+      "chinese": "我们把一些糖果装进小袋子送给客人。"
+    },
+    "application": {
+      "prompt": "The children share ___ candy after the party. A. some B. many",
+      "solution": "A。解析：这里 candy 指糖果，通常作不可数名词，用 some。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: candy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/candy"
+      }
+    ]
+  },
+  {
+    "word": "drink",
+    "examTags": [
+      "词汇·名词与不规则动词",
+      "语言运用·表达饮食与邀请"
+    ],
+    "grammar": "v. 喝；n. 饮料；一杯饮品。动词变化 drink—drank—drunk；名词可数，复数 drinks。",
+    "collocations": "drink water; have a drink; a cold drink。",
+    "commonMistake": "drink 作动词时过去式是 drank、过去分词是 drunk；作名词表示“一杯饮料”时可数。",
+    "example": {
+      "english": "Would you like a cold drink with your cake?",
+      "chinese": "你想配蛋糕喝一杯冷饮吗？"
+    },
+    "application": {
+      "prompt": "After the game, I had a cold ___. A. drink B. eat",
+      "solution": "A。解析：a 后需要名词；drink 可指一杯饮料。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: drink",
+        "url": "https://dictionary.cambridge.org/dictionary/english/drink"
+      }
+    ]
+  },
+  {
+    "word": "card",
+    "examTags": [
+      "词汇·可数名词与节日表达",
+      "写作·书写祝福信息"
+    ],
+    "grammar": "n. 卡片；厚纸片；可数，复数 cards。生日贺卡常说 birthday card 或 greeting card。",
+    "collocations": "a birthday card; write a card; a card for my friend。",
+    "commonMistake": "card 是可数名词，单数前要有 a/the 或物主限定词；“一张卡片”是 a card。",
+    "example": {
+      "english": "I wrote a birthday card for my cousin.",
+      "chinese": "我给表妹写了一张生日贺卡。"
+    },
+    "application": {
+      "prompt": "Write “Happy Birthday” inside a ___. A. card B. candle",
+      "solution": "A。解析：生日祝福通常写在 card（卡片）上。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: card",
+        "url": "https://dictionary.cambridge.org/dictionary/english/card"
+      }
+    ]
+  },
+  {
+    "word": "doll",
+    "examTags": [
+      "词汇·可数名词与玩具主题",
+      "阅读·理解礼物信息"
+    ],
+    "grammar": "n. 玩偶；玩具娃娃；可数，复数 dolls。常与 play with 或 give sb. a doll 搭配。",
+    "collocations": "a toy doll; play with a doll; a doll's dress。",
+    "commonMistake": "doll 是可数名词，单数前要有限定词；复数直接加 -s：dolls。",
+    "example": {
+      "english": "My niece received a doll for her birthday.",
+      "chinese": "我侄女生日时收到一个玩偶。"
+    },
+    "application": {
+      "prompt": "The toy has a face, hair and clothes, and children can play with it. It is a ___. A. doll B. juice",
+      "solution": "A。解析：像小人一样可供孩子玩的玩具是 doll（玩偶）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: doll",
+        "url": "https://dictionary.cambridge.org/dictionary/english/doll"
+      }
+    ]
+  },
+  {
+    "word": "Mrs",
+    "examTags": [
+      "词汇·称谓与礼貌表达",
+      "文化意识·姓名称呼格式"
+    ],
+    "grammar": "n. 夫人；太太；已婚女性的礼貌称呼，通常放在姓氏前，如 Mrs Green。美式书写也常写 Mrs.。",
+    "collocations": "Mrs Brown; Mrs Smith; Dear Mrs Green。",
+    "commonMistake": "Mrs 通常放在姓氏前；不要与 Miss（未婚女性称谓）或 Ms（不说明婚姻状况的称谓）混淆。",
+    "example": {
+      "english": "Mrs White brings a cake to the class party.",
+      "chinese": "怀特夫人给班级聚会带来一个蛋糕。"
+    },
+    "application": {
+      "prompt": "The letter is addressed to Mrs Brown, a married woman. Which title is used? A. Mrs B. Mr",
+      "solution": "A。解析：Mrs 是对已婚女性的礼貌称呼，Mr 用于男性。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Mrs",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mrs"
+      }
+    ]
+  },
+  {
+    "word": "eat",
+    "examTags": [
+      "词汇·不规则动词词形",
+      "语言运用·表达饮食活动"
+    ],
+    "grammar": "v. 吃；eat—ate—eaten—eating。可直接接食物作宾语，也可用 eat out 表示外出就餐。",
+    "collocations": "eat breakfast; eat a piece of cake; eat out。",
+    "commonMistake": "eat 的过去式是 ate，过去分词是 eaten；助动词 did 后用原形 eat。",
+    "example": {
+      "english": "We eat the birthday cake after dinner.",
+      "chinese": "我们晚饭后吃生日蛋糕。"
+    },
+    "application": {
+      "prompt": "Let's ___ the cake after we sing the birthday song. A. eat B. eats",
+      "solution": "A。解析：Let's 后接动词原形，使用 eat。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eat"
+      }
+    ]
+  },
+  {
+    "word": "wish",
+    "examTags": [
+      "词汇·动词与名词",
+      "语言运用·表达祝愿"
+    ],
+    "grammar": "v. 希望；祝愿；n. 愿望；祝福。常见表达 wish sb. a happy birthday、make a wish、wish for sth.。",
+    "collocations": "make a wish; wish you good luck; birthday wishes。",
+    "commonMistake": "祝某人生日快乐可说 wish sb. a happy birthday；不能把“祝愿某人”误写成 wish for sb.。",
+    "example": {
+      "english": "I wish my friend a happy birthday.",
+      "chinese": "我祝朋友生日快乐。"
+    },
+    "application": {
+      "prompt": "At the party, we ___ Grandma a happy birthday. A. wish B. hope",
+      "solution": "A。解析：常用 wish sb. a happy birthday；hope 后不能直接接“某人 + 祝福内容”这种结构。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wish"
+      }
+    ]
+  },
+  {
+    "word": "nurse",
+    "examTags": [
+      "词汇·职业与人物",
+      "阅读·根据工作职责识别职业"
+    ],
+    "grammar": "n. 护士；可数，复数 nurses。也可作 v. 照料、护理病人。",
+    "collocations": "a nurse at a hospital; a school nurse; nurse a patient。",
+    "commonMistake": "nurse 是照料病人的护士；patient 是病人，注意不要把职业和接受护理的人混淆。",
+    "example": {
+      "english": "The nurse helps the children feel better.",
+      "chinese": "护士帮助孩子们感觉好一些。"
+    },
+    "application": {
+      "prompt": "At the hospital, this worker cares for patients and helps the doctor. The worker is a ___. A. nurse B. patient",
+      "solution": "A。解析：照料病人并协助医生的医护人员是 nurse（护士）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nurse",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nurse"
+      }
+    ]
+  },
+  {
+    "word": "hear",
+    "examTags": [
+      "词汇·不规则动词与感官动词",
+      "听力·区分听见与倾听"
+    ],
+    "grammar": "v. 听见；hear—heard—heard—hearing。hear 强调声音进入耳朵；listen 通常表示主动倾听，后接 to。",
+    "collocations": "hear a sound; hear from a friend; hear about the party。",
+    "commonMistake": "hear 后可直接接听到的声音；listen 通常要加 to：hear music，但 listen to music。",
+    "example": {
+      "english": "I can hear the birthday song from the next room.",
+      "chinese": "我能从隔壁房间听到生日歌。"
+    },
+    "application": {
+      "prompt": "The music is loud, so I can ___ it from outside. A. hear B. listen",
+      "solution": "A。解析：hear 后可直接接声音作宾语；listen 通常需要 listen to it。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hear"
+      }
+    ]
+  },
+  {
+    "word": "door",
+    "examTags": [
+      "词汇·可数名词与方位表达",
+      "听读·理解地点和动作信息"
+    ],
+    "grammar": "n. 门；可数，复数 doors。常用 open/close the door、at the door；敲门说 knock on/at the door。",
+    "collocations": "open the door; knock on the door; at the front door。",
+    "commonMistake": "敲门常说 knock on/at the door；door 是可数名词，单数前通常有 a/the 或物主限定词。",
+    "example": {
+      "english": "Please knock on the door before you come in.",
+      "chinese": "请进来前先敲门。"
+    },
+    "application": {
+      "prompt": "Before entering the room, please knock on the ___. A. door B. card",
+      "solution": "A。解析：进房间前敲的是 door（门）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: door",
+        "url": "https://dictionary.cambridge.org/dictionary/english/door"
+      }
+    ]
+  }
+]

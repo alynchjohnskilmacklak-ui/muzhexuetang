@@ -38,7 +38,7 @@ export function TeacherWorkloadCard({ data }: { data: TeacherWorkload[] }) {
   }
 
   return (
-    <Card bordered={false} style={{ borderRadius: 16, height: '100%' }}>
+      <Card variant="borderless" style={{ borderRadius: 16, height: '100%' }}>
       <Title level={5} style={{ marginBottom: 16 }}>本月教师课时排行</Title>
       {data.length === 0 ? (
         <Empty description="本月暂无已结算课时数据" />

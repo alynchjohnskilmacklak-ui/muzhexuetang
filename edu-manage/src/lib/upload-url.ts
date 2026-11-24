@@ -6,6 +6,16 @@ export function normalizeUploadUrl(url?: string | null) {
   return url
 }
 
+/** Normalize an already-decoded Next route param without decoding it twice. */
+export function normalizeUploadRequestPath(raw: string) {
+  const candidate = raw.replace(/\\/g, '/')
+  if (!candidate || candidate.includes('\0')) return null
+
+  const segments = candidate.split('/').filter((segment) => segment && segment !== '.')
+  if (!segments.length || segments.some((segment) => segment === '..')) return null
+  return segments.join('/')
+}
+
 export function extractUploadStorageKey(value?: string | null) {
   const raw = value?.trim() || ''
   if (!raw) return ''
@@ -18,7 +28,10 @@ export function extractUploadStorageKey(value?: string | null) {
       return decodeURIComponent(raw.slice('/uploads/'.length)).replace(/^\/+/, '')
     }
     const url = new URL(raw)
-    return decodeURIComponent(url.pathname).replace(/^\/+/, '')
+    const pathname = decodeURIComponent(url.pathname).replace(/^\/+/, '')
+    if (pathname.startsWith('api/uploads/')) return pathname.slice('api/uploads/'.length)
+    if (pathname.startsWith('uploads/')) return pathname.slice('uploads/'.length)
+    return pathname
   } catch {
     return raw.replace(/^\/+/, '')
   }

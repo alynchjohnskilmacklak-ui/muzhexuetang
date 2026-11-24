@@ -91,7 +91,7 @@ export function ParentLessonPreviewHistory() {
       {isLoading ? <div className="preview-history__loading"><Skeleton active /><Skeleton active /></div> : error ? (
         <div className="preview-history__empty"><strong>讲义记录加载失败</strong><span>{error.message}</span><Button onClick={() => mutate()}>重新加载</Button></div>
       ) : materials.length ? (
-        <div className="preview-history__list">
+        <div className="preview-history__list" role="region" aria-label="周末课讲义横向列表" tabIndex={0}>
           {materials.map((material, index) => (
             <article key={material.id} className="preview-history__row">
               <div className={`preview-history__file is-${material.fileType}`}><FileIcon type={material.fileType} /><span>{materialFileLabel(material.fileType)}</span></div>
@@ -150,7 +150,9 @@ export function ParentLessonPreviewHistory() {
         .preview-history__image :global(img) { width: auto; height: auto; max-width: 100%; max-height: 80vh; object-fit: contain; }
         @media (max-width: 620px) {
           h1 { font-size: 22px; }
-          .preview-history__row { grid-template-columns: 50px minmax(0, 1fr); gap: 11px; padding: 12px; }
+          .preview-history__list { flex-direction: row; gap: 12px; margin-inline: -12px; padding: 0 12px 10px; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 12px; scrollbar-width: none; }
+          .preview-history__list::-webkit-scrollbar { display: none; }
+          .preview-history__row { flex: 0 0 86%; grid-template-columns: 50px minmax(0, 1fr); gap: 11px; padding: 12px; scroll-snap-align: start; scroll-snap-stop: always; }
           .preview-history__file { width: 50px; height: 60px; }
           .preview-history__actions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
         }

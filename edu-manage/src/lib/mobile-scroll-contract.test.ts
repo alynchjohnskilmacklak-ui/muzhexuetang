@@ -20,6 +20,6 @@ describe('mobile scroll safety contract', () => {
   it('keeps the mobile shell out of the vertical scroll-container chain', () => {
     expect(mobileLayout).not.toContain("overflowX: 'hidden'")
     expect(mobileLayout).toContain("overflowX: 'clip'")
-    expect(globalStyles).not.toMatch(/body\.ant-scrolling-effect\s*\{[\s\S]*?touch-action:\s*none/)
+    expect(globalStyles).not.toMatch(/body\.ant-scrolling-effect\s*\{[^}]*touch-action:\s*none/)
   })
 })

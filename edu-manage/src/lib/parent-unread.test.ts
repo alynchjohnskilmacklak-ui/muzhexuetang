@@ -9,6 +9,7 @@ describe('parent unread counters', () => {
   it('uses the feedback read receipt as the unread source of truth', () => {
     expect(parentUnreadClassroomFeedbackWhere('parent-1', ['student-1'])).toEqual({
       status: 'PUBLISHED',
+      deletedAt: null,
       studentIds: { hasSome: ['student-1'] },
       OR: [
         { parentReadReceipts: { none: { parentUserId: 'parent-1' } } },

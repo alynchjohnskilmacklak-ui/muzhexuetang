@@ -9,6 +9,7 @@ import useSWR from 'swr'
 import {
   CalendarOutlined,
   AppstoreOutlined,
+  BulbOutlined,
   CheckSquareOutlined,
   CoffeeOutlined,
   CrownOutlined,
@@ -16,6 +17,7 @@ import {
   DollarOutlined,
   ExperimentOutlined,
   FileImageOutlined,
+  FileAddOutlined,
   FileTextOutlined,
   FolderOutlined,
   LockOutlined,
@@ -43,7 +45,7 @@ import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
 import { LayoutHydrationFallback } from './LayoutHydrationFallback'
-import { resolveTier, TIER_APP } from '@/constants/teacher-tier'
+import { resolveTier, TIER_APP, TIER_THEME } from '@/constants/teacher-tier'
 
 const { Sider, Content, Header } = Layout
 
@@ -61,17 +63,22 @@ type NavItem = Omit<MobileNavItem, 'children'> & {
 
 const navItems: NavItem[] = [
   { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
-  { key: 'teaching-group', icon: <CalendarOutlined />, label: '教学工作', children: [
-    { key: '/teacher/teaching-schedule', icon: <CalendarOutlined />, label: '我的课表' },
+  { key: 'classroom-group', icon: <CalendarOutlined />, label: '课堂教学', children: [
+    { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
     { key: '/teacher/intensive', icon: <CrownOutlined />, label: 'VIP课程预约' },
     { key: '/teacher/lesson-previews', icon: <FileTextOutlined />, label: '讲义预告' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
+    { key: '/teacher/interaction', icon: <BulbOutlined />, label: '课堂互动' },
     { key: '/teacher/feedback', icon: <MessageOutlined />, label: '我的反馈', badgeKey: 'unpublished' },
+    { key: '/teacher/single-session-feedback', icon: <FileAddOutlined />, label: '单次课程反馈' },
+  ] },
+  { key: 'homework-group', icon: <ReadOutlined />, label: '作业与班级管理', children: [
+    { key: '/teacher/homework', icon: <FileTextOutlined />, label: '普通课作业' },
     { key: '/teacher/study-hall', icon: <ReadOutlined />, label: '作业班工作台' },
   ] },
-  { key: 'student-group', icon: <TeamOutlined />, label: '学员与沟通', children: [
+  { key: 'student-group', icon: <TeamOutlined />, label: '学员与家校', children: [
     { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
-    { key: '/teacher/messages', icon: <MessageOutlined />, label: '家长留言', badgeKey: 'unreadMessages' },
+    { key: '/teacher/messages', icon: <MessageOutlined />, label: '家校消息', badgeKey: 'unreadMessages' },
     { key: '/teacher/leave', icon: <CalendarOutlined />, label: '请假审批' },
   ] },
   { key: 'resource-group', icon: <FolderOutlined />, label: '教学资源', children: [
@@ -103,8 +110,13 @@ function flattenNavItems(items: NavItem[]): NavItem[] {
 export function TeacherLayout({ children, initialData }: { children: React.ReactNode; initialData?: TeacherData }) {
   const pathname = usePathname()
   const router = useRouter()
-  const isMobile = useIsMobile()
+  // Use the labeled touch navigation on tablets too; the narrow desktop rail
+  // makes both the content area and the navigation hard to use at tablet widths.
+  const isMobile = useIsMobile(1025)
+  const isTablet = useIsMobile(1025)
   const [collapsed, setCollapsed] = useState(false)
+  const [tabletNavExpanded, setTabletNavExpanded] = useState(false)
+  const effectiveCollapsed = isTablet ? !tabletNavExpanded : collapsed
   const [data, setData] = useState<TeacherData | null>(initialData || null)
   const [backgroundReady, setBackgroundReady] = useState(false)
   const [changingPwd, setChangingPwd] = useState(false)
@@ -141,26 +153,15 @@ export function TeacherLayout({ children, initialData }: { children: React.React
 
   useEffect(() => {
     if (dashData?.teacher) {
-      setData((current) => ({
+      setData({
         teacher: dashData.teacher,
         badges: {
           ...(dashData.badges || { unsubmitted: 0, unpublished: 0, unread: 0 }),
-          unreadMessages: Number(msgUnreadData?.count ?? current?.badges.unreadMessages ?? 0),
+          unreadMessages: Number(dashData.badges?.unreadMessages || 0) + Number(msgUnreadData?.count || 0),
         },
-      }))
+      })
     }
   }, [dashData, msgUnreadData])
-
-  useEffect(() => {
-    if (!msgUnreadData) return
-    setData((current) => current ? {
-      ...current,
-      badges: {
-        ...current.badges,
-        unreadMessages: Number(msgUnreadData.count || 0),
-      },
-    } : current)
-  }, [msgUnreadData])
 
   const appTier = data?.teacher ? resolveTier(data.teacher.tierLevel) : 'NEW'
   const appTheme = TIER_APP[appTier]
@@ -168,11 +169,12 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   const selectedKey = leafItems
     .filter(item => pathname === item.key || pathname.startsWith(`${item.key}/`))
     .sort((a, b) => b.key.length - a.key.length)[0]?.key || '/teacher/dashboard'
+  const selectedItem = leafItems.find(item => item.key === selectedKey)
   const defaultOpenKeys = navItems.filter(item => item.children?.some(child => child.key === selectedKey)).map(item => item.key)
   const mobileNavItems = withBadges(navItems, data)
   const bottomTabs: MobileNavItem[] = [
     { key: '/teacher/dashboard', icon: <HomeOutlined />, label: '首页' },
-    { key: '/teacher/teaching-schedule', icon: <CalendarOutlined />, label: '课表' },
+    { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '课表' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤', badge: data?.badges?.unsubmitted },
     { key: '/teacher/feedback', icon: <FileTextOutlined />, label: '反馈', badge: data?.badges?.unpublished },
     { key: '__more', icon: <MenuOutlined />, label: '更多' },
@@ -200,31 +202,35 @@ export function TeacherLayout({ children, initialData }: { children: React.React
 
   const menuItems = navItems.map((item) => ({
     key: item.key,
-    icon: item.icon,
+    icon: effectiveCollapsed ? <Tooltip title={item.label} placement="right" trigger={['hover', 'focus']}>{item.icon}</Tooltip> : item.icon,
     label: item.label,
     children: item.children?.map(child => ({
       key: child.key,
-      icon: child.icon,
+      icon: effectiveCollapsed ? <Tooltip title={child.label} placement="right" trigger={['hover', 'focus']}>{child.icon}</Tooltip> : child.icon,
       label: child.badgeKey && data ? (
         <Badge count={data.badges[child.badgeKey] || 0} size="small" offset={[8, 0]}>{child.label}</Badge>
       ) : child.label,
     })),
   }))
 
-  if (isMobile === null) return <LayoutHydrationFallback />
+  if (isMobile === null || isTablet === null) return <LayoutHydrationFallback />
 
   if (isMobile) {
+    const isFeedbackPage = pathname.startsWith('/teacher/feedback') || pathname.startsWith('/teacher/single-session-feedback')
     return (
       <MobileLayout
         mode="tabs"
         navItems={mobileNavItems}
         bottomTabs={bottomTabs}
         moreItems={mobileNavItems}
+        showBottomTabs={isFeedbackPage ? false : undefined}
         title="牧哲学堂"
         roleLabel="教师端"
         menuLabel="菜单"
-        accentColor="var(--color-role-teacher)"
-        accentBackground="var(--color-role-teacher-bg)"
+        accentColor={appTheme.siderFg}
+        accentBackground={appTheme.menuSelectedBg}
+        tierLabel={TIER_THEME[appTier].label}
+        tierBadge={{ bg: TIER_THEME[appTier].bg, color: TIER_THEME[appTier].accent, border: `1px solid ${TIER_THEME[appTier].border}` }}
         headerTheme={{ bg: appTheme.headerBg, fg: appTheme.headerFg, border: appTheme.headerBorder, mainBg: appTheme.mainBg, dark: appTheme.dark }}
         drawerHeaderExtra={(
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -241,12 +247,18 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     )
   }
 
+  // 1024px 及以下默认使用紧凑侧栏，点开按钮仍可临时展开查看菜单名称。
+  const handleSiderCollapse = (nextCollapsed: boolean) => {
+    if (isTablet) setTabletNavExpanded(!nextCollapsed)
+    else setCollapsed(nextCollapsed)
+  }
+
   return (
     <Layout style={{ minHeight: '100vh', background: appTheme.mainBg }}>
       <Sider
         collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
+        collapsed={effectiveCollapsed}
+        onCollapse={handleSiderCollapse}
         trigger={null}
         width={220}
         collapsedWidth={72}
@@ -266,16 +278,16 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           height: 56,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'space-between',
-          padding: collapsed ? 0 : '0 12px 0 20px',
+          justifyContent: effectiveCollapsed ? 'center' : 'space-between',
+          padding: effectiveCollapsed ? 0 : '0 12px 0 20px',
           borderBottom: '1px solid var(--color-hairline)',
         }}>
-          {!collapsed && <Link href="/teacher/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {!effectiveCollapsed && <Link href="/teacher/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Image src="/images/logo.jpg" alt="牧哲学堂" width={28} height={28} style={{ borderRadius: 6, objectFit: 'contain' }} unoptimized />
             <span style={{ fontSize: 14, fontWeight: 700, color: appTheme.siderFg, whiteSpace: 'nowrap' }}>牧哲学堂 <small style={{ color: appTheme.siderFg, opacity: .78, fontSize: 11 }}>教师端</small></span>
           </Link>}
-          <Tooltip title={collapsed ? '展开导航' : '收起导航'} trigger={['hover', 'focus']}>
-            <button type="button" aria-label={collapsed ? '展开导航' : '收起导航'} onClick={() => setCollapsed(!collapsed)} style={{
+          <Tooltip title={effectiveCollapsed ? '展开导航' : '收起导航'} trigger={['hover', 'focus']}>
+            <button type="button" aria-label={effectiveCollapsed ? '展开导航' : '收起导航'} onClick={() => handleSiderCollapse(!effectiveCollapsed)} style={{
               width: 44,
               height: 44,
               borderRadius: 10,
@@ -289,23 +301,24 @@ export function TeacherLayout({ children, initialData }: { children: React.React
               justifyContent: 'center',
               flexShrink: 0,
             }}>
-              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              {effectiveCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             </button>
           </Tooltip>
         </div>
 
         <Menu
+          key={effectiveCollapsed ? 'tablet-collapsed' : 'expanded'}
           className="role-navigation role-navigation--teacher"
           mode="inline"
           selectedKeys={[selectedKey]}
-          defaultOpenKeys={defaultOpenKeys}
+          defaultOpenKeys={effectiveCollapsed ? [] : defaultOpenKeys}
           items={menuItems}
           onClick={({ key }) => router.push(key)}
           style={{ borderInlineEnd: 'none', background: 'transparent', marginTop: 8, fontSize: 14, color: appTheme.siderFg }}
         />
       </Sider>
 
-      <Layout style={{ marginLeft: collapsed ? 72 : 220, background: '#faf8f5' }}>
+      <Layout style={{ marginLeft: effectiveCollapsed ? 72 : 220, background: '#faf8f5' }}>
         <Header style={{
           padding: '0 24px',
           display: 'flex',
@@ -319,7 +332,15 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           background: appTheme.headerBg,
           gap: 16,
         }}>
-          <span style={{ color: appTheme.headerFg, fontSize: 13, fontWeight: 600, opacity: .92 }}>教师工作台</span>
+          <div className="teacher-shell-breadcrumb" aria-label="当前位置" style={{ color: appTheme.headerFg }}>
+            <span>教师工作台</span>
+            {selectedItem && selectedItem.key !== '/teacher/dashboard' && (
+              <>
+                <span className="teacher-shell-breadcrumb__separator" aria-hidden="true">/</span>
+                <strong>{selectedItem.label}</strong>
+              </>
+            )}
+          </div>
           {data ? (
             <Dropdown menu={{ items: [
               { key: 'help', icon: <QuestionCircleOutlined />, label: '使用帮助', onClick: () => router.push('/teacher/dashboard?guide=1') },
@@ -344,7 +365,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
         </Header>
         <Content
           className={appTheme.dark ? 'teacher-main--dark' : 'teacher-main--light'}
-          style={{ padding: 24, maxWidth: 1280, margin: '0 auto', width: '100%', background: appTheme.mainBg }}
+          style={{ padding: isTablet ? 16 : 24, maxWidth: 1280, margin: '0 auto', width: '100%', minWidth: 0, boxSizing: 'border-box', background: appTheme.mainBg }}
         >
           {children}
         </Content>

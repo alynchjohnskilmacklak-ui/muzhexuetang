@@ -5,6 +5,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { selectReplacementTeachingDay } from '@/lib/class-schedule-plan'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { dateRangeDays, getLocalDayRange, localDateColumnValue, localDateKey, todayLocal } from '@/lib/date/local-day'
 import { recordCourseChangeEvent } from '@/lib/course-change-events'
 import { isSerializationConflict, runSerializableWithRetry } from '@/lib/serializable-retry'
 
@@ -27,14 +28,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '请提供有效日期 (yyyy-MM-dd)' }, { status: 400 })
   }
 
-  const targetDate = new Date(`${date}T00:00:00`)
-  const [year, month, dayOfMonth] = date.split('-').map(Number)
-  if (Number.isNaN(targetDate.getTime())
-    || targetDate.getFullYear() !== year
-    || targetDate.getMonth() !== month - 1
-    || targetDate.getDate() !== dayOfMonth) {
+  const parsedTargetDate = new Date(`${date}T00:00:00+08:00`)
+  if (Number.isNaN(parsedTargetDate.getTime()) || localDateKey(parsedTargetDate) !== date) {
     return NextResponse.json({ error: '日期格式不正确' }, { status: 400 })
   }
+  const targetDate = localDateColumnValue(date)
+  const { start: dayStart, end: dayEnd } = getLocalDayRange(date)
 
   // 1. 查出目标班级集合
   const groupWhere: Prisma.ClassGroupWhereInput = {
@@ -57,7 +56,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       status: true,
       division: true,
       totalLessons: true,
-      course: { select: { totalLessons: true } },
+      course: { select: { totalLessons: true, subject: true } },
       enrollments: {
         where: { status: 'ACTIVE', deletedAt: null },
         select: {
@@ -79,8 +78,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }, { status: 400 })
   }
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const today = localDateColumnValue(todayLocal())
 
   let affectedGroups = 0
   let createdLessons = 0
@@ -96,17 +94,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   // 2. 逐个班级处理
   for (const group of groups) {
-    // a. 幂等校验：该班在 targetDate 当天是否已存在非 CANCELLED 课次
-    const dayStart = new Date(targetDate)
-    const dayEnd = new Date(targetDate)
-    dayEnd.setDate(dayEnd.getDate() + 1)
-
+    // a. 幂等校验：该班在目标日期是否已有有效课次
     const existingLessons = await prisma.classLesson.findMany({
       where: {
         groupId: group.id,
         deletedAt: null,
         lessonDate: { gte: dayStart, lt: dayEnd },
-        status: { not: 'CANCELLED' },
+        status: { notIn: ['CANCELLED', 'POSTPONED'] },
       },
       select: {
         id: true,
@@ -130,6 +124,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       : await prisma.classLesson.findFirst({
           where: {
             groupId: group.id,
+            deletedAt: null,
             status: { notIn: ['CANCELLED', 'POSTPONED'] },
             lessonDate: { gte: today },
           },
@@ -142,6 +137,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       templateLesson = await prisma.classLesson.findFirst({
         where: {
           groupId: group.id,
+          deletedAt: null,
           status: { notIn: ['CANCELLED', 'POSTPONED'] },
           lessonDate: { lt: today },
         },
@@ -156,26 +152,24 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
 
     // 获取样板日当天的所有非取消课次作为 slots
-    const templateDayStart = new Date(templateLesson.lessonDate)
-    templateDayStart.setHours(0, 0, 0, 0)
-    const templateDayEnd = new Date(templateDayStart)
-    templateDayEnd.setDate(templateDayEnd.getDate() + 1)
+    const { start: templateDayStart, end: templateDayEnd } = getLocalDayRange(localDateKey(templateLesson.lessonDate))
 
     const slots = existingCount
       ? existingLessons.map(({ teacherId, subject, startTime, endTime }) => ({
           teacherId,
-          subject,
+          subject: subject || group.course.subject,
           startTime,
           endTime,
         }))
       : await prisma.classLesson.findMany({
           where: {
             groupId: group.id,
+            deletedAt: null,
             status: { notIn: ['CANCELLED', 'POSTPONED'] },
             lessonDate: { gte: templateDayStart, lt: templateDayEnd },
           },
           select: { teacherId: true, subject: true, startTime: true, endTime: true },
-        })
+        }).then((rows) => rows.map((slot) => ({ ...slot, subject: slot.subject || group.course.subject })))
 
     if (!slots.length) {
       skippedNoTemplate++
@@ -183,7 +177,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
 
     const activeLessonCount = await prisma.classLesson.count({
-      where: { groupId: group.id, status: { not: 'CANCELLED' } },
+      where: { groupId: group.id, deletedAt: null, status: { notIn: ['CANCELLED', 'POSTPONED'] } },
     })
     const plannedDays = Number(group.course.totalLessons || 0)
     const plannedLessonCount = plannedDays > 0 ? plannedDays * slots.length : 0
@@ -198,12 +192,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
         continue
       }
 
-      const tomorrow = new Date(today)
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      const replacementStart = new Date(Math.max(tomorrow.getTime(), dayEnd.getTime()))
+      const tomorrowDate = dateRangeDays(todayLocal(), 2)[1]
+      const nextTargetDate = dateRangeDays(date, 2)[1]
+      const replacementStartDate = tomorrowDate > nextTargetDate ? tomorrowDate : nextTargetDate
+      const replacementStart = localDateColumnValue(replacementStartDate)
       const candidates = await prisma.classLesson.findMany({
         where: {
           groupId: group.id,
+          deletedAt: null,
           lessonDate: { gte: replacementStart },
           status: 'SCHEDULED',
           isManual: false,
@@ -238,7 +234,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         where: {
           groupId: group.id,
           lessonDate: { gte: dayStart, lt: dayEnd },
-          status: { not: 'CANCELLED' },
+          status: { notIn: ['CANCELLED', 'POSTPONED'] },
           deletedAt: null,
         },
         select: { id: true },
@@ -260,7 +256,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       })
       const targetScheduleComplete = data.every((slot) => targetRows.some((lesson) =>
         lesson.teacherId === slot.teacherId
-        && lesson.subject === slot.subject
+        && (lesson.subject || group.course.subject) === slot.subject
         && lesson.startTime === slot.startTime
         && lesson.endTime === slot.endTime,
       ))
@@ -272,7 +268,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }
 
       const rosterRows = targetRows.flatMap((lesson) => group.enrollments
-        .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject))
+        .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject || group.course.subject))
         .map((enrollment) => ({ lessonId: lesson.id, studentId: enrollment.studentId })))
       if (rosterRows.length) await tx.classLessonStudent.createMany({ data: rosterRows, skipDuplicates: true })
 
@@ -296,13 +292,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
       let groupNotifiedParents = 0
       if (targetRows.length && (created > 0 || replaced > 0)) {
-        const lessonSubjects = new Set(targetRows.map((lesson) => lesson.subject))
+        const lessonSubjects = new Set(targetRows.map((lesson) => lesson.subject || group.course.subject))
         const lessonDetails = slots
           .filter((slot) => lessonSubjects.has(slot.subject))
           .map((slot) => `${slot.startTime}-${slot.endTime} ${slot.subject}`)
           .join('、')
         const replacementDetail = replacement && replaced > 0
-          ? `；原${replacement.date.toISOString().slice(0, 10)}安排已调整`
+          ? `；原${localDateKey(replacement.date)}安排已调整`
           : ''
         const affectedStudentIds = [...new Set(rosterRows.map((row) => row.studentId))]
         const event = await recordCourseChangeEvent(tx, {
@@ -319,7 +315,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }
 
       const nextTotal = await tx.classLesson.count({
-        where: { groupId: group.id, status: { not: 'CANCELLED' } },
+        where: { groupId: group.id, deletedAt: null, status: { notIn: ['CANCELLED', 'POSTPONED'] } },
       })
       await tx.classGroup.update({
         where: { id: group.id },
@@ -354,7 +350,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     notifiedParents += result.notifiedParents
     if (result.replaced > 0 && replacement) {
       replacedGroups++
-      replacementDates.add(replacement.date.toISOString().slice(0, 10))
+      replacementDates.add(localDateKey(replacement.date))
     }
     affectedGroups++
   }

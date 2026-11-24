@@ -1,5 +1,6 @@
 'use client'
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
+import { HorizontalScrollTable } from '@/components/Layout/HorizontalScrollTable'
 
 import React, { useCallback, useEffect, useState } from 'react'
 import useSWR, { mutate as globalMutate } from 'swr'
@@ -16,10 +17,8 @@ import {
   message,
   Modal,
   Pagination,
-  Select,
   Space,
   Spin,
-  Table,
   Tag,
   Tooltip,
   Typography,
@@ -54,8 +53,8 @@ import {
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { BrandModal } from '@/components/Common/BrandModal'
 import { useSession } from 'next-auth/react'
-import { DATA_ADMIN_ENTITIES, DATA_ADMIN_TRASH_ENTITIES, DATA_ADMIN_BUSINESS_LINKS, type EntityKey } from '@/lib/data-admin/entities'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { DATA_ADMIN_ENTITIES, DATA_ADMIN_TRASH_ENTITIES, type EntityKey } from '@/lib/data-admin/entities'
+import { useSearchParams } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import BackupRestorePanel from '@/components/DataAdmin/BackupRestorePanel'
 import { fetchJson } from '@/lib/fetch-json'
@@ -476,7 +475,6 @@ function HourAdjustmentModal({
 }
 
 export function DataAdminClient() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const isMobile = useIsMobile() ?? false
   const [activeTab, setActiveTab] = useState<EntityKey | 'health' | 'backup-restore'>(() => {
@@ -975,7 +973,7 @@ export function DataAdminClient() {
               <Button shape="round" icon={<DownloadOutlined />} onClick={handleExportHealth}>导出问题</Button>
             </>
           ) : gatedActiveTab === 'backup-restore' ? (
-            <Button shape="round" icon={<RestOutlined />} onClick={() => router.push('/trash')}>查看回收站</Button>
+            <Button shape="round" icon={<ReloadOutlined />} onClick={() => healthMutate()}>刷新</Button>
           ) : (
             <>
               <Button shape="round" icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button>
@@ -991,7 +989,6 @@ export function DataAdminClient() {
               {entityKey === 'enrollments' && (
                 <Button shape="round" type="primary" icon={<SettingOutlined />} onClick={() => setHourAdjustOpen(true)}>课时调整</Button>
               )}
-              <Button shape="round" onClick={() => router.push(DATA_ADMIN_BUSINESS_LINKS[entityKey])}>前往业务管理</Button>
             </>
           )}
         </Space>
@@ -1055,6 +1052,8 @@ export function DataAdminClient() {
           value={gatedActiveTab}
           onChange={value => setActiveTab(value as EntityKey | 'health' | 'backup-restore')}
           style={{ width: isMobile ? '100%' : 360, minHeight: 44, maxWidth: '100%' }}
+          showSearch
+          filterOption={(input, option) => String(option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
           options={[
             { label: '诊断与维护', keys: ['health', 'backup-restore'] },
             { label: '人员与报名', keys: ['students', 'teachers', 'enrollments'] },
@@ -1062,8 +1061,6 @@ export function DataAdminClient() {
             { label: '通知与服务', keys: ['notifications', 'meals'] },
           ].map(group => ({ label: group.label, options: visibleTabs.filter(tab => group.keys.includes(tab.key)).map(tab => ({ value: tab.key, label: tab.label })) }))}
         />
-        <Button shape="round" icon={<RestOutlined />} onClick={() => router.push('/trash')}>回收站</Button>
-        <Button shape="round" icon={<SettingOutlined />} onClick={() => router.push('/settings')}>系统设置</Button>
       </div>
 
       {gatedActiveTab === 'backup-restore' ? (
@@ -1073,36 +1070,132 @@ export function DataAdminClient() {
           {healthData?.data ? (
             healthData.data.length === 0 ? (
               <Empty description="未发现数据问题，数据状态良好" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            ) : isMobile ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {(healthData.data as unknown as Array<{ label: string; count: number; severity: string; description: string; sampleIds?: string[] }>).map((issue, i) => {
+                  const sevColor = issue.severity === 'high' ? 'red' : issue.severity === 'medium' ? 'orange' : 'blue'
+                  const labels = { high: '高', medium: '中', low: '低' }
+                  const isReview = issue.label?.includes('待人工核对')
+                  return (
+                    <Card
+                      key={i}
+                      size="small"
+                      style={{
+                        borderRadius: 12,
+                        border: '1px solid #E4EBE6',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                      }}
+                      styles={{ body: { padding: 14 } }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+                        <div style={{ fontWeight: 600, fontSize: 15, color: '#17352F', flex: 1, lineHeight: 1.4 }}>
+                          {issue.label}
+                        </div>
+                        <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
+                          <Tag color={sevColor} style={{ margin: 0 }}>
+                            {labels[issue.severity as keyof typeof labels] || issue.severity}
+                          </Tag>
+                          <Tag color="default" style={{ margin: 0, fontWeight: 600, color: '#17352F' }}>
+                            {issue.count.toLocaleString()} 条
+                          </Tag>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          fontSize: 13,
+                          color: '#38504B',
+                          lineHeight: 1.65,
+                          background: '#F8FAF8',
+                          padding: '10px 12px',
+                          borderRadius: 8,
+                          border: '1px solid #EBF1EC',
+                          marginBottom: issue.sampleIds?.length ? 10 : 0,
+                          whiteSpace: 'normal',
+                          wordBreak: 'break-word',
+                        }}
+                      >
+                        {issue.description}
+                      </div>
+
+                      {issue.sampleIds && issue.sampleIds.length > 0 && (
+                        <div style={{ fontSize: 12, color: '#6A7D78', paddingTop: 4 }}>
+                          <span style={{ color: '#8A9E99', marginRight: 6 }}>样例 ID:</span>
+                          {isReview ? (
+                            <Space wrap size={[4, 4]}>
+                              {issue.sampleIds.slice(0, 5).map((id) => (
+                                <Button
+                                  key={id}
+                                  type="link"
+                                  size="small"
+                                  style={{ padding: '0 4px', height: 'auto', fontSize: 12 }}
+                                  loading={identityReviewLoading}
+                                  onClick={() => void openIdentityReview(id)}
+                                >
+                                  {id}
+                                </Button>
+                              ))}
+                            </Space>
+                          ) : (
+                            <span style={{ fontFamily: 'monospace', color: '#555', wordBreak: 'break-all' }}>
+                              {issue.sampleIds.slice(0, 5).join(', ')}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </Card>
+                  )
+                })}
+              </div>
             ) : (
-              <Table
+              <HorizontalScrollTable
                 dataSource={(healthData.data as unknown as Array<{ label: string; count: number; severity: string; description: string; sampleIds?: string[] }>).map((issue, i) => ({ ...issue, key: i }))}
                 columns={[
-                  { title: '问题', dataIndex: 'label', key: 'label', width: 200 },
-                  { title: '数量', dataIndex: 'count', key: 'count', width: 80 },
+                  { title: '问题', dataIndex: 'label', key: 'label', width: 220 },
+                  {
+                    title: '数量',
+                    dataIndex: 'count',
+                    key: 'count',
+                    width: 90,
+                    align: 'right',
+                    render: (cnt: number) => cnt.toLocaleString(),
+                  },
                   {
                     title: '严重程度',
                     dataIndex: 'severity',
                     key: 'severity',
-                    width: 100,
+                    width: 90,
+                    align: 'center',
                     render: (s: string) => {
                       const color = s === 'high' ? 'red' : s === 'medium' ? 'orange' : 'blue'
                       const labels = { high: '高', medium: '中', low: '低' }
                       return <Tag color={color}>{labels[s as keyof typeof labels]}</Tag>
                     },
                   },
-                  { title: '说明', dataIndex: 'description', key: 'description' },
+                  {
+                    title: '说明',
+                    dataIndex: 'description',
+                    key: 'description',
+                    width: 480,
+                    render: (desc: string) => (
+                      <div style={{ whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.6, minWidth: 280 }}>
+                        {desc}
+                      </div>
+                    ),
+                  },
                   {
                     title: '样例ID',
                     dataIndex: 'sampleIds',
                     key: 'sampleIds',
-                    width: 200,
+                    width: 220,
                     render: (ids: string[], issue: { label?: string }) => issue.label?.includes('待人工核对')
                       ? <Space wrap>{ids?.slice(0, 5).map((id) => <Button key={id} type="link" size="small" loading={identityReviewLoading} onClick={() => void openIdentityReview(id)}>{id}</Button>)}</Space>
-                      : ids?.slice(0, 5).join(', ') || '-',
+                      : <span style={{ wordBreak: 'break-all', fontFamily: 'monospace' }}>{ids?.slice(0, 5).join(', ') || '-'}</span>,
                   },
                 ]}
                 size="small"
                 pagination={false}
+                scroll={{ x: 1100 }}
               />
             )
           ) : healthError ? (
@@ -1124,7 +1217,7 @@ export function DataAdminClient() {
             {courseChangeError ? (
               <Alert type="error" showIcon message={courseChangeError instanceof Error ? courseChangeError.message : '课程变更记录加载失败'} action={<Button size="small" onClick={() => void courseChangeMutate()}>重试</Button>} />
             ) : courseChangesLoading ? <Spin /> : Array.isArray((courseChangeData as { events?: unknown[] } | undefined)?.events) && (courseChangeData as { events: Array<Record<string, unknown>> }).events.length > 0 ? (
-              <Table
+              <HorizontalScrollTable
                 rowKey="id"
                 size="small"
                 pagination={false}
@@ -1234,7 +1327,7 @@ export function DataAdminClient() {
           )}
 
           {/* Table */}
-          <Table
+          <HorizontalScrollTable
             rowKey="id"
             rowSelection={{
               selectedRowKeys,

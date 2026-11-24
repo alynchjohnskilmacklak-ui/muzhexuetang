@@ -1,0 +1,252 @@
+
+=== Q1 ClassroomFeedback 状态 × 删除 × 单次课 分布 ===
+[
+  {
+    "status": "ARCHIVED",
+    "single": false,
+    "alive": 3,
+    "deleted": 2,
+    "n": 5
+  },
+  {
+    "status": "DRAFT",
+    "single": false,
+    "alive": 32,
+    "deleted": 0,
+    "n": 32
+  },
+  {
+    "status": "PUBLISHED",
+    "single": false,
+    "alive": 5335,
+    "deleted": 0,
+    "n": 5335
+  }
+]
+
+=== Q2 已发布反馈的家长映射完整性（学员缺家长归属） ===
+[
+  {
+    "published_feedbacks": 5335,
+    "students_in_feedbacks": 160,
+    "students_without_parent": 2,
+    "feedbacks_all_students_parentless": 59
+  }
+]
+
+=== Q3 回执覆盖率（已发布反馈 × FeedbackParentReadReceipt） ===
+[
+  {
+    "published": 5335,
+    "feedbacks_with_receipt": 301,
+    "feedbacks_read": 299,
+    "receipts_unread": 5036,
+    "receipts_rows": 5335,
+    "receipts_read": 299
+  }
+]
+
+=== Q3b 回执与反馈归属错位抽样（回执指向非已发布/已删反馈） ===
+[]
+
+=== Q4 三套已读口径核对：legacy parentReadAt vs 回执 ===
+[
+  {
+    "legacy_set": 1683,
+    "legacy_null": 3652,
+    "receipt_read": 299,
+    "legacy_read_but_receipt_not": 1528
+  }
+]
+
+=== Q5 评价表分布：reviewStatus × satisfied × 反馈状态 ===
+[
+  {
+    "review_status": "PENDING",
+    "satisfied": false,
+    "feedback_status": "PUBLISHED",
+    "n": 1,
+    "feedback_deleted": 0
+  }
+]
+
+=== Q5b 评价去重约束与教师侧可见性粗查（唯一键 feedbackId+parentUserId） ===
+[]
+
+=== Q6 两个不同家长的孩子与反馈可达性对照（页面 where: studentIds hasSome 自己孩子 id） ===
+[
+  {
+    "parent_uid": "cmpamjbfd0004cv8lwcxwxysf",
+    "kids": 4,
+    "visible_feedbacks": 204
+  },
+  {
+    "parent_uid": "cmr9b4w4001b993eizeubjmdg",
+    "kids": 2,
+    "visible_feedbacks": 166
+  },
+  {
+    "parent_uid": "cmr3dqq9o0016nvkf9dfz49d9",
+    "kids": 2,
+    "visible_feedbacks": 166
+  },
+  {
+    "parent_uid": "cmrbppvfk000anropeyxrxejp",
+    "kids": 2,
+    "visible_feedbacks": 161
+  },
+  {
+    "parent_uid": "cmq0vtaps00023upjnx204x4d",
+    "kids": 2,
+    "visible_feedbacks": 159
+  },
+  {
+    "parent_uid": "cmr9aal43017493ei1k5r8t4f",
+    "kids": 2,
+    "visible_feedbacks": 154
+  },
+  {
+    "parent_uid": "cmr3dpxct000wnvkfcci8nrid",
+    "kids": 2,
+    "visible_feedbacks": 152
+  },
+  {
+    "parent_uid": "cmquespu5001d69ns182pgwa7",
+    "kids": 2,
+    "visible_feedbacks": 151
+  },
+  {
+    "parent_uid": "cmpaml6p5000jcv8lwri1orc4",
+    "kids": 2,
+    "visible_feedbacks": 128
+  },
+  {
+    "parent_uid": "cmrakp8fc01zm12iv9swunr99",
+    "kids": 2,
+    "visible_feedbacks": 127
+  }
+]
+
+=== Q6b 家长-孩子-反馈 对照（重写，避免占位） ===
+[
+  {
+    "parent_uid": "cmpamjbfd0004cv8lwcxwxysf",
+    "kids": 4,
+    "visible_feedbacks": 204,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmr9b4w4001b993eizeubjmdg",
+    "kids": 2,
+    "visible_feedbacks": 166,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmr3dqq9o0016nvkf9dfz49d9",
+    "kids": 2,
+    "visible_feedbacks": 166,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmrbppvfk000anropeyxrxejp",
+    "kids": 2,
+    "visible_feedbacks": 161,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmq0vtaps00023upjnx204x4d",
+    "kids": 2,
+    "visible_feedbacks": 159,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmr9aal43017493ei1k5r8t4f",
+    "kids": 2,
+    "visible_feedbacks": 154,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmr3dpxct000wnvkfcci8nrid",
+    "kids": 2,
+    "visible_feedbacks": 152,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmquespu5001d69ns182pgwa7",
+    "kids": 2,
+    "visible_feedbacks": 151,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmpaml6p5000jcv8lwri1orc4",
+    "kids": 2,
+    "visible_feedbacks": 128,
+    "single_manual": 0
+  },
+  {
+    "parent_uid": "cmrakp8fc01zm12iv9swunr99",
+    "kids": 2,
+    "visible_feedbacks": 127,
+    "single_manual": 0
+  }
+]
+
+=== Q6c 单次课（studentIds 空）反馈的回执归属（家长直达通道） ===
+[]
+
+=== Q7 课堂互动 ClassroomPick 分布（parentVisible / result / 近30天） ===
+[]
+
+=== Q7b 近30天 picks 中 parentVisible=false 条数（是否存在隐藏开关未用） ===
+[
+  {
+    "total": 0,
+    "hidden": 0,
+    "students": 0
+  }
+]
+
+=== Q8 反馈图片一致性：imageUrls 条数 vs FileAsset 挂接 ===
+[
+  {
+    "feedbacks_with_images": 3050,
+    "image_url_slots": 5180,
+    "feedbacks_with_missing_asset": 0
+  }
+]
+
+=== Q9 反馈通知 href/relatedId 完整性 ===
+[
+  {
+    "total": 10236,
+    "href_empty": 0,
+    "related_null": 0,
+    "related_feedback_missing": 78
+  }
+]
+
+=== Q10 评价通知 FEEDBACK_REVIEW 条数 vs 评价条数 ===
+[
+  {
+    "evaluations": 1,
+    "review_notifications": 4
+  }
+]
+
+=== Q11 作业登记/练习回传 表行数（家长侧写动作回流核对） ===
+[
+  {
+    "tbl": "HomeworkCheckin",
+    "n": 0
+  },
+  {
+    "tbl": "PracticeReply",
+    "n": 0
+  },
+  {
+    "tbl": "ParentMessage",
+    "n": 39
+  }
+]
+
+DONE

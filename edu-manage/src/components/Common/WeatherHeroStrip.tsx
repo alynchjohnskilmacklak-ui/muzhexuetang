@@ -29,7 +29,15 @@ function WeatherDayItem({ day, index }: { day: WeatherDay; index: number }) {
   </li>
 }
 
-export function WeatherHeroStrip({ audience, variant = 'dark' }: { audience: WeatherAudience; variant?: 'dark' | 'light' }) {
+export function WeatherHeroStrip({
+  audience,
+  variant = 'dark',
+  compact = false,
+}: {
+  audience: WeatherAudience
+  variant?: 'dark' | 'light'
+  compact?: boolean
+}) {
   const { data } = useSWR<WeatherResult>('/api/weather/xinle', fetchWeather, {
     dedupingInterval: 30 * 60_000,
     refreshInterval: 30 * 60_000,
@@ -40,6 +48,19 @@ export function WeatherHeroStrip({ audience, variant = 'dark' }: { audience: Wea
 
   // 附属信息获取失败时不占位，也不阻断 HERO 的主要业务内容。
   if (!data || !data.available) return null
+
+  if (compact) {
+    const today = data.days[0]
+    return (
+      <div className={`hero-weather-compact hero-weather-compact--${variant}`} aria-label="今日天气与接送建议">
+        <span className="hero-weather-compact__badge">
+          <WeatherGlyph kind={today.icon} />
+          <strong>新乐 · {today.condition} {today.minTemp}～{today.maxTemp}°</strong>
+        </span>
+        <span className="hero-weather-compact__tip">{data.tips[audience]}</span>
+      </div>
+    )
+  }
 
   return <div className={`hero-weather hero-weather--${variant}`} aria-label="新乐市今明后三天天气">
     <div className="hero-weather__copy">

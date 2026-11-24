@@ -1,0 +1,170 @@
+.card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: 12px;
+  background: var(--color-surface-1);
+  color: var(--color-ink);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.date {
+  color: var(--color-ink-subtle);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.previousFocus {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.previousFocus strong {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+
+.previousFocus span {
+  overflow-wrap: anywhere;
+}
+
+.parentSignal {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 8px 9px;
+  border-radius: 9px;
+  background: var(--color-surface-1);
+  font-size: 12px;
+}
+
+.parentSignalHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px 8px;
+}
+
+.parentSignal span,
+.resultRow span {
+  color: var(--color-ink-muted);
+}
+
+.parentSignal strong,
+.resultRow strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.parentSignal small {
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+}
+
+.parentSignalDate {
+  color: var(--color-ink-subtle);
+  font-size: 11px;
+}
+
+.reviewLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.reviewLabel span {
+  color: var(--color-ink-subtle);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.outcomeChoices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.outcomeButton {
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: 9px;
+  background: var(--color-surface-1);
+  color: var(--color-ink-muted);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
+}
+
+.outcomeButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.outcomeButton.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.parentSummary {
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--color-primary-bg);
+}
+
+.topic {
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.resultRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.parentNote {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+@media (max-width: 420px) {
+  .outcomeChoices {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outcomeButton {
+    transition: none;
+  }
+}

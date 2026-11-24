@@ -69,6 +69,7 @@ export default function ClassDetailPage() {
         <>
           {/* 返回 */}
           <button
+            className="mobile-shell-back"
             onClick={() => router.push('/dashboard')}
             style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', color: '#A06E0B', fontSize: 13, cursor: 'pointer', marginBottom: 10, padding: 0 }}
           >
@@ -138,7 +139,7 @@ export default function ClassDetailPage() {
           {students.length === 0 ? (
             <Card bordered={false}><Empty description="暂无学员" /></Card>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+            <div className="admin-class-detail-student-grid">
               {students.map((s) => {
                 const levelStyle =
                   s.membershipLevel === 'SVIP'
@@ -151,9 +152,9 @@ export default function ClassDetailPage() {
                     : s.membershipLevel === 'VIP' ? '#B0552B'
                       : '#285247'
                 return (
-                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 8px', borderRadius: 10, ...levelStyle }}>
-                    <span style={{ fontSize: 12.5, color: nameColor, fontWeight: 700, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
-                    <span style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                  <div key={s.id} className="admin-class-detail-student-row" style={{ ...levelStyle }}>
+                    <span className="admin-class-detail-student-name" style={{ color: nameColor }}>{s.name}</span>
+                    <span className="admin-class-detail-student-status">
                       {s.attendanceStatus === null
                         ? <Tag color="default" style={{ margin: 0, borderRadius: 999, fontSize: 9, lineHeight: '15px', padding: '0 5px' }}>未录</Tag>
                         : s.attendanceStatus === '出勤' || s.attendanceStatus === '补课'

@@ -1,7 +1,26 @@
 type RuntimeEnv = Record<string, string | undefined>
 
+function isExplicitLocalDockerRuntime(env: RuntimeEnv): boolean {
+  if (env.APP_RUNTIME_MODE !== 'local-docker') return false
+
+  try {
+    const siteUrl = new URL(env.NEXTAUTH_URL || '')
+    const databaseUrl = new URL(env.DATABASE_URL || '')
+    const isLoopbackSite = siteUrl.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(siteUrl.hostname)
+    const isLocalDatabase = ['host.docker.internal', 'localhost', '127.0.0.1'].includes(databaseUrl.hostname)
+
+    return isLoopbackSite && isLocalDatabase
+  } catch {
+    return false
+  }
+}
+
 export function productionSecurityEnvErrors(env: RuntimeEnv): string[] {
-  if (env.NODE_ENV !== 'production' || env.NEXT_PHASE === 'phase-production-build') return []
+  if (
+    env.NODE_ENV !== 'production' ||
+    env.NEXT_PHASE === 'phase-production-build' ||
+    isExplicitLocalDockerRuntime(env)
+  ) return []
 
   const errors: string[] = []
   const authSecret = env.AUTH_SECRET || env.NEXTAUTH_SECRET || ''

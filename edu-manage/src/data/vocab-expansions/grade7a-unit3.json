@@ -1,0 +1,1358 @@
+[
+  {
+    "word": "hall",
+    "examTags": [
+      "词汇·校园场所",
+      "听读·定位活动地点"
+    ],
+    "grammar": "n. 大厅；走廊。可数，复数 halls；在学校的大礼堂可说 the school hall。",
+    "collocations": "school hall; entrance hall; in the hall。",
+    "commonMistake": "hall 可指大厅或走廊，具体含义看语境；表示在大厅里常说 in the hall。",
+    "example": {
+      "english": "Our class is waiting in the school hall.",
+      "chinese": "我们班正在学校大厅里等候。"
+    },
+    "application": {
+      "prompt": "The whole school meets in the large room for an assembly. They meet in the ___. A. hall B. drawer",
+      "solution": "A。解析：全校集会的大房间可以叫 school hall。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hall"
+      }
+    ]
+  },
+  {
+    "word": "building",
+    "examTags": [
+      "词汇·校园场所",
+      "阅读·描述建筑物"
+    ],
+    "grammar": "n. 建筑物；可数，复数 buildings。由 build + -ing 构成，但 building 本身常作名词。",
+    "collocations": "a school building; a tall building; an old building。",
+    "commonMistake": "building 作名词表示“建筑物”；build 是动词“建造”，注意根据句子位置区分词性。",
+    "example": {
+      "english": "The library is in the new building.",
+      "chinese": "图书馆在新教学楼里。"
+    },
+    "application": {
+      "prompt": "The school has a new ___. It has four floors and many classrooms. A. building B. violin",
+      "solution": "A。解析：有楼层和教室的建筑物是 building。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: building",
+        "url": "https://dictionary.cambridge.org/dictionary/english/building"
+      }
+    ]
+  },
+  {
+    "word": "across",
+    "examTags": [
+      "语法·方位介词与副词",
+      "听读·理解路线信息"
+    ],
+    "grammar": "prep./adv. 从一边到另一边；在对面。常用 walk/run across + 地点，表示穿过某处。",
+    "collocations": "across the field; across the road; across from the gym。",
+    "commonMistake": "across 常作介词，后接名词，如 across the field；cross 是动词，可直接说 cross the field。",
+    "example": {
+      "english": "Walk across the field to get to the gym.",
+      "chinese": "穿过操场就能到体育馆。"
+    },
+    "application": {
+      "prompt": "The gym is on the other side of the field. Walk ___ the field to get there. A. across B. inside",
+      "solution": "A。解析：从操场一边走到另一边用 across the field。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: across",
+        "url": "https://dictionary.cambridge.org/dictionary/english/across"
+      }
+    ]
+  },
+  {
+    "word": "field",
+    "examTags": [
+      "词汇·校园与运动场景",
+      "阅读·地点信息定位"
+    ],
+    "grammar": "n. 田地；运动场。可数，复数 fields；school field 常指学校操场或运动场。",
+    "collocations": "a football field; school field; play on the field。",
+    "commonMistake": "在运动场上活动可说 on the field；不要和 building（建筑物）混淆。",
+    "example": {
+      "english": "The students play football on the field after class.",
+      "chinese": "学生们课后在操场上踢足球。"
+    },
+    "application": {
+      "prompt": "The school has a large grassy place for football and running. It is a ___. A. field B. office",
+      "solution": "A。解析：用于踢球和跑步的场地是 field。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: field",
+        "url": "https://dictionary.cambridge.org/dictionary/english/field"
+      }
+    ]
+  },
+  {
+    "word": "gym",
+    "examTags": [
+      "词汇·校园场所",
+      "听读·获取活动地点"
+    ],
+    "grammar": "n. 体育馆；健身房，是 gymnasium 的常用简称。可数，复数 gyms。",
+    "collocations": "school gym; in the gym; go to the gym。",
+    "commonMistake": "gym 是可数名词，单数前通常要有 a、the 或物主限定词；表示去体育馆可说 go to the gym。",
+    "example": {
+      "english": "We have basketball practice in the gym today.",
+      "chinese": "我们今天在体育馆练篮球。"
+    },
+    "application": {
+      "prompt": "It is raining, so the students have PE inside the school ___. A. gym B. field",
+      "solution": "A。解析：下雨时在室内体育馆上体育课，用 gym。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: gym",
+        "url": "https://dictionary.cambridge.org/dictionary/english/gym"
+      }
+    ]
+  },
+  {
+    "word": "office",
+    "examTags": [
+      "词汇·校园场所",
+      "阅读·人物与地点信息"
+    ],
+    "grammar": "n. 办公室；可数，复数 offices。表示在办公室里常说 in the office；at the office 强调人在办公室上班或办事。",
+    "collocations": "school office; in the office; office staff。",
+    "commonMistake": "office 是可数名词；单数前通常有 a/the。拼写注意两个 f：office。",
+    "example": {
+      "english": "Please leave the form in the school office.",
+      "chinese": "请把表格留在学校办公室。"
+    },
+    "application": {
+      "prompt": "The principal is meeting a parent in the school ___. A. office B. field",
+      "solution": "A。解析：校长接待家长通常在学校办公室，office 表示“办公室”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: office",
+        "url": "https://dictionary.cambridge.org/dictionary/english/office"
+      }
+    ]
+  },
+  {
+    "word": "large",
+    "examTags": [
+      "词汇·形容词描述",
+      "阅读·比较事物大小"
+    ],
+    "grammar": "adj. 大的；大型的。比较级 larger，最高级 largest；可作定语或表语。",
+    "collocations": "a large classroom; a large family; a large number of books。",
+    "commonMistake": "large 的比较级和最高级分别是 larger、largest；注意 large 变比较级时要去掉末尾不发音的 e 再加 -er。",
+    "example": {
+      "english": "Our school has a large library.",
+      "chinese": "我们学校有一座很大的图书馆。"
+    },
+    "application": {
+      "prompt": "This classroom can hold 60 students. It is quite ___. A. large B. tiny",
+      "solution": "A。解析：能容纳很多学生说明教室很大，large 表示“大型的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: large",
+        "url": "https://dictionary.cambridge.org/dictionary/english/large"
+      }
+    ]
+  },
+  {
+    "word": "special",
+    "examTags": [
+      "词汇·形容词语境义",
+      "阅读·理解事物特点"
+    ],
+    "grammar": "adj. 特别的；特殊的。可作定语或表语；副词形式是 specially，表示“专门地”。",
+    "collocations": "a special day; a special class; something special。",
+    "commonMistake": "special 是形容词，specially 是副词；something special 中形容词放在不定代词后。",
+    "example": {
+      "english": "Today is a special day for our school.",
+      "chinese": "今天对我们学校来说是特别的一天。"
+    },
+    "application": {
+      "prompt": "The school is 100 years old today, so this is a ___ day. A. special B. usual",
+      "solution": "A。解析：百年校庆是特别的日子，special 表示“特别的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: special",
+        "url": "https://dictionary.cambridge.org/dictionary/english/special"
+      }
+    ]
+  },
+  {
+    "word": "smart",
+    "examTags": [
+      "词汇·形容词多义",
+      "阅读·根据语境判断人物或设备特点"
+    ],
+    "grammar": "adj. 聪明的；也可表示衣着整洁漂亮的，或用于 smart device（智能设备）。比较级 smarter，最高级 smartest。",
+    "collocations": "a smart student; a smart idea; a smart phone/device。",
+    "commonMistake": "smart 可形容人聪明，也可形容衣着整洁或设备智能；根据它修饰的名词和上下文判断词义。",
+    "example": {
+      "english": "Our smart board connects to the school computer.",
+      "chinese": "我们的智能白板可以连接学校电脑。"
+    },
+    "application": {
+      "prompt": "The new board can connect to the internet and show videos. It is a ___ board. A. smart B. wooden",
+      "solution": "A。解析：能连接网络并播放视频的设备可称 smart board（智能白板）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: smart",
+        "url": "https://dictionary.cambridge.org/dictionary/english/smart"
+      }
+    ]
+  },
+  {
+    "word": "white board",
+    "examTags": [
+      "词汇·复合名词与课堂物品",
+      "听读·识别课堂指令"
+    ],
+    "grammar": "n. 白板；可数。现代英语中通常合写为 whiteboard：a whiteboard，复数 whiteboards。",
+    "collocations": "write on the whiteboard; a whiteboard marker; clean the whiteboard。",
+    "commonMistake": "词表写作 white board，英语中通常也合写为 whiteboard；写“在白板上”用 on the whiteboard。",
+    "example": {
+      "english": "The teacher writes the new words on the whiteboard.",
+      "chinese": "老师把新单词写在白板上。"
+    },
+    "application": {
+      "prompt": "The teacher writes notes for the whole class to see on the ___. A. whiteboard B. locker",
+      "solution": "A。解析：全班都能看到的课堂书写板是 whiteboard（白板）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: whiteboard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/whiteboard"
+      }
+    ]
+  },
+  {
+    "word": "important",
+    "examTags": [
+      "词汇·形容词与介词搭配",
+      "阅读·识别重点信息"
+    ],
+    "grammar": "adj. 重要的。常用 be important to sb.（对某人重要）或 be important for sb. to do（对某人做某事重要）。",
+    "collocations": "an important person; an important question; important to me。",
+    "commonMistake": "important 是形容词，前面常用 be；说“对某人很重要”可说 important to sb.。",
+    "example": {
+      "english": "It is important to keep the school clean.",
+      "chinese": "保持学校整洁很重要。"
+    },
+    "application": {
+      "prompt": "The library helps us learn, so it is ___ to our school. A. important B. empty",
+      "solution": "A。解析：图书馆对学校有重要作用，important 表示“重要的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: important",
+        "url": "https://dictionary.cambridge.org/dictionary/english/important"
+      }
+    ]
+  },
+  {
+    "word": "notice",
+    "examTags": [
+      "词汇·名词与动词",
+      "阅读·提取公告与细节信息"
+    ],
+    "grammar": "n. 通知；告示；v. 注意到。作名词可数，复数 notices；作动词 notice—noticed—noticed。",
+    "collocations": "read a notice; notice board; notice a change; notice that ...。",
+    "commonMistake": "notice 可作“通知”或“注意到”；看句子位置区分：read a notice（名词），notice something（动词）。",
+    "example": {
+      "english": "I noticed a new notice beside the office door.",
+      "chinese": "我注意到办公室门旁有一张新通知。"
+    },
+    "application": {
+      "prompt": "The paper on the wall tells students about a school trip. It is a ___. A. notice B. drawer",
+      "solution": "A。解析：张贴并告知活动安排的文字是 notice（通知）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: notice",
+        "url": "https://dictionary.cambridge.org/dictionary/english/notice"
+      }
+    ]
+  },
+  {
+    "word": "locker",
+    "examTags": [
+      "词汇·校园物品",
+      "阅读·根据用途识别地点或物品"
+    ],
+    "grammar": "n. 带锁的储物柜；可数，复数 lockers。常见于学校或更衣室。",
+    "collocations": "a school locker; locker key; put books in a locker。",
+    "commonMistake": "locker 是储物柜，lock 是锁或“锁上”的动词；locker 通常可用来存放书包和书本。",
+    "example": {
+      "english": "I keep my sports shoes in my locker.",
+      "chinese": "我把运动鞋放在储物柜里。"
+    },
+    "application": {
+      "prompt": "Students keep their books in a small locked cupboard at school. It is a ___. A. locker B. screen",
+      "solution": "A。解析：学校里带锁的储物柜是 locker。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: locker",
+        "url": "https://dictionary.cambridge.org/dictionary/english/locker"
+      }
+    ]
+  },
+  {
+    "word": "drawer",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·物品位置理解"
+    ],
+    "grammar": "n. 抽屉；可数，复数 drawers。常说 a desk drawer 或 in the drawer。",
+    "collocations": "open a drawer; a desk drawer; put papers in a drawer。",
+    "commonMistake": "drawer（抽屉）和 draw（画、拉）拼写相近；drawer 末尾有 -er。",
+    "example": {
+      "english": "The keys are in the top drawer of the desk.",
+      "chinese": "钥匙在书桌最上层的抽屉里。"
+    },
+    "application": {
+      "prompt": "You pull it open to find pens inside a desk. It is a ___. A. drawer B. field",
+      "solution": "A。解析：书桌里可拉开的储物空间是 drawer（抽屉）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: drawer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/drawer"
+      }
+    ]
+  },
+  {
+    "word": "corner",
+    "examTags": [
+      "词汇·方位与空间表达",
+      "听读·理解物品位置"
+    ],
+    "grammar": "n. 角；角落。可数，复数 corners。房间里的角落常说 in the corner；街道拐角常说 at the corner。",
+    "collocations": "in the corner of the room; at the street corner; a quiet corner。",
+    "commonMistake": "通常说 in the corner of a room（在房间角落里）；注意不要和 across（穿过）混淆。",
+    "example": {
+      "english": "There is a bookcase in the corner of the classroom.",
+      "chinese": "教室的角落里有一个书架。"
+    },
+    "application": {
+      "prompt": "The plant is where two walls meet inside the room. It is ___ the corner. A. in B. across",
+      "solution": "A。解析：表示在房间的角落里用 in the corner。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: corner",
+        "url": "https://dictionary.cambridge.org/dictionary/english/corner"
+      }
+    ]
+  },
+  {
+    "word": "bookcase",
+    "examTags": [
+      "词汇·复合名词与教室物品",
+      "阅读·按用途识别物品"
+    ],
+    "grammar": "n. 书架；可数，复数 bookcases。由 book + case 构成，通常是带层板、用来放书的家具。",
+    "collocations": "a bookcase full of books; a wooden bookcase; put books on a bookcase。",
+    "commonMistake": "bookcase 是书架家具；bookshelf 常指书架的一层或书架，二者意思接近，但拼写不要漏掉 bookcase 中的 -case。",
+    "example": {
+      "english": "The new bookcase is beside the classroom door.",
+      "chinese": "新书架在教室门旁边。"
+    },
+    "application": {
+      "prompt": "Put the novels on the piece of furniture made for holding books. Put them on the ___. A. bookcase B. gym",
+      "solution": "A。解析：用来放书的家具是 bookcase（书架）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bookcase",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bookcase"
+      }
+    ]
+  },
+  {
+    "word": "screen",
+    "examTags": [
+      "词汇·多义名词与校园科技",
+      "阅读·识别设备信息"
+    ],
+    "grammar": "n. 屏幕；幕。可数，复数 screens。常指电脑、手机或电视的显示屏。",
+    "collocations": "a computer screen; a touch screen; look at the screen。",
+    "commonMistake": "screen 指显示画面的屏幕；不要与 scene（场景）混淆拼写和读音。",
+    "example": {
+      "english": "The teacher shows the map on the big screen.",
+      "chinese": "老师在大屏幕上展示地图。"
+    },
+    "application": {
+      "prompt": "You can see words and pictures on a computer ___. A. screen B. locker",
+      "solution": "A。解析：电脑显示文字和图片的部分是 screen（屏幕）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: screen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/screen"
+      }
+    ]
+  },
+  {
+    "word": "modern",
+    "examTags": [
+      "词汇·形容词与反义关系",
+      "阅读·描述学校设施"
+    ],
+    "grammar": "adj. 现代的；新式的。比较级 more modern，最高级 most modern；常修饰 building、design、technology 等名词。",
+    "collocations": "a modern school; modern buildings; modern technology。",
+    "commonMistake": "modern 是形容词，描述建筑或设备；其比较级常用 more modern，不写 moderner。",
+    "example": {
+      "english": "Our modern gym has a large screen.",
+      "chinese": "我们现代化的体育馆里有一块大屏幕。"
+    },
+    "application": {
+      "prompt": "The school has new computers and smart boards. Its classrooms are ___. A. modern B. ancient",
+      "solution": "A。解析：配有新电脑和智能白板的教室是 modern（现代化的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: modern",
+        "url": "https://dictionary.cambridge.org/dictionary/english/modern"
+      }
+    ]
+  },
+  {
+    "word": "amazing",
+    "examTags": [
+      "词汇·现在分词形容词",
+      "阅读·表达惊喜与评价"
+    ],
+    "grammar": "adj. 令人惊叹的；非常好的。amazing 描述引起惊奇的人或事；amazed 描述感到惊奇的人。",
+    "collocations": "an amazing school; an amazing view; look amazing。",
+    "commonMistake": "amazing 形容事物“令人惊叹”；amazed 形容人的感受“感到惊讶”，注意不要混用。",
+    "example": {
+      "english": "The science show at our school was amazing.",
+      "chinese": "我们学校的科学表演令人惊叹。"
+    },
+    "application": {
+      "prompt": "The school show surprised everyone in a wonderful way. It was ___. A. amazing B. amazed",
+      "solution": "A。解析：show 是令人惊叹的事物，用 amazing；感到惊讶的人用 amazed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: amazing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/amazing"
+      }
+    ]
+  },
+  {
+    "word": "raise",
+    "examTags": [
+      "语法知识·及物动词",
+      "词汇辨析·raise 与 rise"
+    ],
+    "grammar": "规则动词，raise—raised—raised；表示举起、提高时通常是及物动词，后面要接宾语。",
+    "collocations": "raise your hand；raise a flag；raise money",
+    "commonMistake": "raise 通常要带宾语，如 raise a hand；rise 表示自身升起或上升，后面通常不直接接宾语。",
+    "example": {
+      "english": "We raise the school flag every Monday morning.",
+      "chinese": "我们每周一早晨升学校的旗。"
+    },
+    "application": {
+      "prompt": "Please ___ your hand if you have a question. (raise)",
+      "solution": "raise"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: raise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/raise"
+      },
+      {
+        "label": "Cambridge Dictionary: rise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rise"
+      }
+    ]
+  },
+  {
+    "word": "flag",
+    "examTags": [
+      "语法知识·可数名词",
+      "语言运用·校园与国家标志"
+    ],
+    "grammar": "可数名词，表示旗；复数为 flags。",
+    "collocations": "a national flag；raise a flag；a flagpole",
+    "commonMistake": "表示一面旗时用 a flag；复数拼写为 flags。",
+    "example": {
+      "english": "A red flag hangs beside the school gate.",
+      "chinese": "学校大门旁挂着一面红旗。"
+    },
+    "application": {
+      "prompt": "A piece of cloth with a country's colours or symbol is a ___.",
+      "solution": "flag"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flag",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flag"
+      }
+    ]
+  },
+  {
+    "word": "most",
+    "examTags": [
+      "语法知识·数量限定词",
+      "阅读能力·概括主要信息"
+    ],
+    "grammar": "表示“大多数”时，most 可直接放在名词前；most of 后通常接有限定词或代词的名词短语，如 most of the students。",
+    "collocations": "most students；most of the class；most of us；the most interesting",
+    "commonMistake": "通常说 most students 或 most of the students；不说 most of students。",
+    "example": {
+      "english": "Most students in our class walk to school.",
+      "chinese": "我们班大多数学生步行上学。"
+    },
+    "application": {
+      "prompt": "___ students in our class bring a book to reading time. (Most / Much)",
+      "solution": "Most"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: most",
+        "url": "https://dictionary.cambridge.org/dictionary/english/most"
+      },
+      {
+        "label": "Cambridge Grammar: most of or most",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/determiners-most-of-or-most"
+      }
+    ]
+  },
+  {
+    "word": "change",
+    "examTags": [
+      "语法知识·名词与动词",
+      "语言运用·校园日常"
+    ],
+    "grammar": "可作动词，表示改变或更换，过去式和过去分词为 changed；也可作名词，表示变化。",
+    "collocations": "change seats；change your mind；a big change；change into",
+    "commonMistake": "表示“换座位”说 change seats；change 是动词时根据主语和时态变化形式。",
+    "example": {
+      "english": "After lunch, we change seats for group work.",
+      "chinese": "午饭后，我们为小组活动换座位。"
+    },
+    "application": {
+      "prompt": "Please ___ seats with your partner so you can join a new group. (change)",
+      "solution": "change"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: change",
+        "url": "https://dictionary.cambridge.org/dictionary/english/change"
+      }
+    ]
+  },
+  {
+    "word": "seat",
+    "examTags": [
+      "语法知识·可数名词",
+      "语言运用·课堂指令"
+    ],
+    "grammar": "可数名词，表示座位；复数为 seats。也可作动词，表示使某人就座。",
+    "collocations": "take a seat；seat number；front seat",
+    "commonMistake": "表示“请坐”可说 Please take a seat；seat 指座位，sit 是“坐”这个动作。",
+    "example": {
+      "english": "Please take a seat near the window.",
+      "chinese": "请在窗边坐下。"
+    },
+    "application": {
+      "prompt": "There is one empty ___ beside the classroom door. (seat / sit)",
+      "solution": "seat"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: seat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/seat"
+      }
+    ]
+  },
+  {
+    "word": "delicious",
+    "examTags": [
+      "语法知识·形容词作表语与定语",
+      "语言运用·描述食物"
+    ],
+    "grammar": "形容词，表示美味的；可放在名词前作定语，也可放在 be、look 等系动词后作表语。",
+    "collocations": "delicious food；a delicious lunch；look delicious",
+    "commonMistake": "delicious 是形容词，可说 The food is delicious；作表语时不要误用副词 deliciously。",
+    "example": {
+      "english": "The soup in the school cafeteria is delicious.",
+      "chinese": "学校食堂里的汤很好喝。"
+    },
+    "application": {
+      "prompt": "The lunch smells wonderful and tastes very good. It is ___.",
+      "solution": "delicious"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: delicious",
+        "url": "https://dictionary.cambridge.org/dictionary/english/delicious"
+      }
+    ]
+  },
+  {
+    "word": "yours",
+    "examTags": [
+      "语法知识·名词性物主代词",
+      "阅读能力·判断物品归属"
+    ],
+    "grammar": "名词性物主代词，表示“你的/你们的”，可单独作表语或主语，不直接修饰名词。",
+    "collocations": "This seat is yours.；Is this book yours?；a friend of yours",
+    "commonMistake": "名词前用 your，如 your book；名词省略、单独指“你的”时用 yours。",
+    "example": {
+      "english": "This seat is yours, and that one is mine.",
+      "chinese": "这个座位是你的，那个是我的。"
+    },
+    "application": {
+      "prompt": "This book belongs to you. It is ___. (your / yours)",
+      "solution": "yours"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yours",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yours"
+      },
+      {
+        "label": "Cambridge Grammar: possessive pronouns",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/pronouns-possessive-my-mine-your-yours-etc"
+      }
+    ]
+  },
+  {
+    "word": "send",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语言运用·信息传递"
+    ],
+    "grammar": "动词，表示发送或寄送；不规则变化为 send—sent—sent。常用 send sth to sb 或 send sb sth。",
+    "collocations": "send a message；send an email to sb；send sb a photo",
+    "commonMistake": "可说 send a note to Amy 或 send Amy a note；不要把 to 放在双宾语结构中。",
+    "example": {
+      "english": "I send my cousin a photo of our new library.",
+      "chinese": "我给表亲发了一张我们新图书馆的照片。"
+    },
+    "application": {
+      "prompt": "Yesterday, Mia ___ a message to her classmate. (send)",
+      "solution": "sent"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: send",
+        "url": "https://dictionary.cambridge.org/dictionary/english/send"
+      }
+    ]
+  },
+  {
+    "word": "similar",
+    "examTags": [
+      "语法知识·形容词与介词搭配",
+      "阅读能力·比较异同"
+    ],
+    "grammar": "形容词，表示相似的；常用 be similar to，表示与某人或某物相似；也可说 similar in size/colour。",
+    "collocations": "be similar to；similar in size；a similar idea",
+    "commonMistake": "常用搭配是 similar to，而不是 similar with。",
+    "example": {
+      "english": "The two classrooms are similar in size.",
+      "chinese": "这两间教室大小相似。"
+    },
+    "application": {
+      "prompt": "My new schoolbag is almost the same as yours. It is ___ to yours. (similar)",
+      "solution": "similar"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: similar",
+        "url": "https://dictionary.cambridge.org/dictionary/english/similar"
+      }
+    ]
+  },
+  {
+    "word": "sound",
+    "examTags": [
+      "语法知识·系动词与形容词",
+      "语言运用·表达听闻印象"
+    ],
+    "grammar": "可作名词，表示声音；也可作系动词，表示“听起来”，后接形容词；sound like 后接名词或名词短语。",
+    "collocations": "a loud sound；sound good；sound interesting；sound like fun",
+    "commonMistake": "sound 作“听起来”时，后接形容词，如 It sounds interesting；sound like 后接名词短语。",
+    "example": {
+      "english": "Your idea for the art club sounds interesting.",
+      "chinese": "你关于美术社团的想法听起来很有趣。"
+    },
+    "application": {
+      "prompt": "The new library has art books and a quiet reading room. It ___ great. (sound)",
+      "solution": "sounds"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sound",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sound"
+      }
+    ]
+  },
+  {
+    "word": "front",
+    "examTags": [
+      "语法知识·方位介词短语",
+      "阅读能力·理解空间位置"
+    ],
+    "grammar": "可作名词或形容词，表示前面/前部；常见短语有 in front of 和 at the front of。",
+    "collocations": "in front of the school；at the front of the classroom；front door",
+    "commonMistake": "in front of 表示在某物前面；at the front of 表示位于某个空间的前部。",
+    "example": {
+      "english": "The teacher's desk is at the front of the classroom.",
+      "chinese": "老师的桌子在教室前面。"
+    },
+    "application": {
+      "prompt": "The teacher stands at the ___ of the class so everyone can see the board.",
+      "solution": "front"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: front",
+        "url": "https://dictionary.cambridge.org/dictionary/english/front"
+      }
+    ]
+  },
+  {
+    "word": "art",
+    "examTags": [
+      "语法知识·不可数名词",
+      "语言运用·学科与兴趣"
+    ],
+    "grammar": "表示艺术或美术学科时通常作不可数名词；表示一件具体作品时可说 a work of art。",
+    "collocations": "art class；art teacher；a work of art；modern art",
+    "commonMistake": "表示学科或艺术这一概念时通常不加 a，如 I like art；具体的一件作品可说 a work of art。",
+    "example": {
+      "english": "Art is my favourite subject because I like drawing.",
+      "chinese": "美术是我最喜欢的学科，因为我喜欢画画。"
+    },
+    "application": {
+      "prompt": "We paint and draw in ___ class. (art / artist)",
+      "solution": "art"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: art",
+        "url": "https://dictionary.cambridge.org/dictionary/english/art"
+      }
+    ]
+  },
+  {
+    "word": "between",
+    "examTags": [
+      "语法知识·介词与并列结构",
+      "阅读能力·空间关系"
+    ],
+    "grammar": "介词，表示在两者之间；常用结构 between A and B，也可指明确列出的多个对象之间的关系。",
+    "collocations": "between the library and the art room；between two desks；the difference between A and B",
+    "commonMistake": "常用 between A and B；不要写成 between A to B。",
+    "example": {
+      "english": "The library is between the art room and the music room.",
+      "chinese": "图书馆在美术教室和音乐教室之间。"
+    },
+    "application": {
+      "prompt": "The library is ___ the art room and the music room. (between / behind)",
+      "solution": "between"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: between",
+        "url": "https://dictionary.cambridge.org/dictionary/english/between"
+      }
+    ]
+  },
+  {
+    "word": "library",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·校园设施"
+    ],
+    "grammar": "可数名词，表示图书馆；复数为 libraries，变复数时把辅音字母加 y 改为 -ies。",
+    "collocations": "school library；borrow books from the library；library card",
+    "commonMistake": "library 的复数是 libraries，不是 librarys；borrow 表示借入，常与 from 连用。",
+    "example": {
+      "english": "I borrow two storybooks from the school library each week.",
+      "chinese": "我每周从学校图书馆借两本故事书。"
+    },
+    "application": {
+      "prompt": "You can borrow books and read quietly in the school ___.",
+      "solution": "library"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: library",
+        "url": "https://dictionary.cambridge.org/dictionary/english/library"
+      }
+    ]
+  },
+  {
+    "word": "blackboard",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "语言运用·课堂物品"
+    ],
+    "grammar": "可数名词，由 black + board 构成，表示黑板；复数为 blackboards。",
+    "collocations": "write on the blackboard；clean the blackboard；a piece of chalk",
+    "commonMistake": "表示在黑板上写通常用 write on the blackboard；on 表示接触黑板表面。",
+    "example": {
+      "english": "Our teacher writes the date on the blackboard with chalk.",
+      "chinese": "老师用粉笔把日期写在黑板上。"
+    },
+    "application": {
+      "prompt": "The teacher writes with chalk on the ___.",
+      "solution": "blackboard"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: blackboard",
+        "url": "https://dictionary.cambridge.org/dictionary/english/blackboard"
+      }
+    ]
+  },
+  {
+    "word": "up",
+    "examTags": [
+      "语法知识·副词与短语动词",
+      "语言运用·课堂指令"
+    ],
+    "grammar": "副词，常与动词构成短语，表示向上或完成某个动作；如 stand up、get up、look up。",
+    "collocations": "stand up；get up；look up a word；put your hand up",
+    "commonMistake": "stand up 是常见短语，表示站起来；up 与 stand 一起表达这个动作。",
+    "example": {
+      "english": "We stand up when our teacher enters the classroom.",
+      "chinese": "老师走进教室时我们起立。"
+    },
+    "application": {
+      "prompt": "The teacher asks everyone to rise from their chairs: Please stand ___. ",
+      "solution": "up"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/up"
+      }
+    ]
+  },
+  {
+    "word": "back",
+    "examTags": [
+      "语法知识·方位与副词短语",
+      "阅读能力·理解空间位置"
+    ],
+    "grammar": "可作名词、副词或形容词；表示空间位置时可指后面，常见短语为 at the back of；go/come back 表示回去/回来。",
+    "collocations": "at the back of the classroom；go back；come back；back door",
+    "commonMistake": "at the back of the classroom 表示在教室后部；back 也可作副词表示返回，需结合短语判断。",
+    "example": {
+      "english": "Two students sit at the back of the classroom.",
+      "chinese": "两名学生坐在教室后面。"
+    },
+    "application": {
+      "prompt": "The teacher's desk is near the board, and the door is at the other end. The door is at the ___ of the room.",
+      "solution": "back"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: back",
+        "url": "https://dictionary.cambridge.org/dictionary/english/back"
+      }
+    ]
+  },
+  {
+    "word": "clock",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "词汇辨析·clock 与 watch"
+    ],
+    "grammar": "可数名词，表示钟；复数为 clocks。clock 通常指放置或挂置的钟，watch 通常指戴在手腕上的表。",
+    "collocations": "a wall clock；a clock on the wall；clock face",
+    "commonMistake": "clock 通常指挂钟或座钟；watch 通常指手表。",
+    "example": {
+      "english": "The clock above the blackboard shows nine o'clock.",
+      "chinese": "黑板上方的钟显示九点。"
+    },
+    "application": {
+      "prompt": "The object on the classroom wall shows the time. It is a ___.",
+      "solution": "clock"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: clock",
+        "url": "https://dictionary.cambridge.org/dictionary/english/clock"
+      }
+    ]
+  },
+  {
+    "word": "map",
+    "examTags": [
+      "词法·可数名词单复数",
+      "阅读·路线与位置理解"
+    ],
+    "grammar": "map 是可数名词，表示“地图”；复数为 maps。常用 a map of... 表示“……的地图”，on the map 表示“在地图上”。",
+    "collocations": "a map of the school; a world map; look at a map; find a place on the map",
+    "commonMistake": "map 是可数名词，单数前通常要有 a、the 或其他限定词；常说 a map of our school。",
+    "example": {
+      "english": "This map shows the way from my classroom to the library.",
+      "chinese": "这张地图标出了从我教室到图书馆的路线。"
+    },
+    "application": {
+      "prompt": "选词填空：Our classroom plan shows where the rooms are. It is a ___. A. map  B. email",
+      "solution": "A. map。标出房间位置的图是 map（地图）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: map",
+        "url": "https://dictionary.cambridge.org/dictionary/english/map"
+      }
+    ]
+  },
+  {
+    "word": "computer",
+    "examTags": [
+      "词法·可数名词与冠词",
+      "语境·校园科技场景"
+    ],
+    "grammar": "computer 是可数名词，表示“计算机、电脑”；单数前通常用 a，复数为 computers。",
+    "collocations": "a computer; use a computer; computer screen; computer room",
+    "commonMistake": "computer 以辅音音素开头，单数前用 a computer，不用 an computer。",
+    "example": {
+      "english": "We use the computer to find information for our project.",
+      "chinese": "我们用电脑为项目查找信息。"
+    },
+    "application": {
+      "prompt": "选词填空：We use a ___ to type and save our homework. A. computer  B. window",
+      "solution": "A. computer。打字并保存作业通常使用电脑。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: computer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/computer"
+      }
+    ]
+  },
+  {
+    "word": "window",
+    "examTags": [
+      "词法·可数名词复数",
+      "语境·教室设施"
+    ],
+    "grammar": "window 是可数名词，表示“窗户”；复数为 windows。常用 open/close the window 表示开窗/关窗。",
+    "collocations": "open/close a window; by the window; look out of the window; a classroom window",
+    "commonMistake": "window 是可数名词；表示多个窗户时用 windows，不能用单数 window。",
+    "example": {
+      "english": "Please open the window to let in some fresh air.",
+      "chinese": "请打开窗户，让新鲜空气进来。"
+    },
+    "application": {
+      "prompt": "选词填空：Our classroom has four big ___. A. window  B. windows",
+      "solution": "B. windows。four 后接可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: window",
+        "url": "https://dictionary.cambridge.org/dictionary/english/window"
+      }
+    ]
+  },
+  {
+    "word": "science",
+    "examTags": [
+      "词法·学科名词用法",
+      "语境·校园学科"
+    ],
+    "grammar": "science 表示“科学”或学校学科“科学”时通常作不可数名词；泛指学科时常说 study/learn science，通常不加 a。",
+    "collocations": "science class; science teacher; learn science; science and technology",
+    "commonMistake": "表示学校学科时通常说 science 或 science class，不说 a science；a science 可用于特指某一门科学领域等语境。",
+    "example": {
+      "english": "Science is my favorite subject because I like doing experiments.",
+      "chinese": "科学是我最喜欢的学科，因为我喜欢做实验。"
+    },
+    "application": {
+      "prompt": "选词填空：We learn about plants and animals in ___ class. A. science  B. a science",
+      "solution": "A. science。学科名称作定语时说 science class，不加 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: science",
+        "url": "https://dictionary.cambridge.org/dictionary/english/science"
+      }
+    ]
+  },
+  {
+    "word": "picture",
+    "examTags": [
+      "词法·可数名词",
+      "写作·描述图片内容"
+    ],
+    "grammar": "picture 是可数名词，表示“图画、照片、影像”；复数为 pictures。常用 a picture of... 表示“……的一张图/照片”。",
+    "collocations": "draw a picture; take a picture; a picture of my school; look at the picture",
+    "commonMistake": "picture 是可数名词，单数前通常要有冠词或限定词；“一张学校的照片/图画”可说 a picture of the school。",
+    "example": {
+      "english": "I drew a picture of our school garden.",
+      "chinese": "我画了一幅我们学校花园的图画。"
+    },
+    "application": {
+      "prompt": "选词填空：I drew a ___ of our school on paper. A. picture  B. question",
+      "solution": "A. picture。画在纸上的图画是 picture。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: picture",
+        "url": "https://dictionary.cambridge.org/dictionary/english/picture"
+      }
+    ]
+  },
+  {
+    "word": "famous",
+    "examTags": [
+      "词汇·形容词语境义",
+      "语法·be famous for 搭配"
+    ],
+    "grammar": "famous 是形容词，表示“著名的”。be famous for 后接出名的事物或原因；be famous as 后接身份或职业。",
+    "collocations": "be famous for sth; be famous as a writer; a famous school; become famous",
+    "commonMistake": "说因某事而出名用 be famous for；说作为某种身份出名用 be famous as。",
+    "example": {
+      "english": "Our school is famous for its friendly teachers.",
+      "chinese": "我们学校因老师们友善而出名。"
+    },
+    "application": {
+      "prompt": "选词填空：The city is ___ for its old bridge. A. famous  B. fame",
+      "solution": "A. famous。be 动词后需要形容词 famous；fame 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: famous",
+        "url": "https://dictionary.cambridge.org/dictionary/english/famous"
+      }
+    ]
+  },
+  {
+    "word": "table",
+    "examTags": [
+      "词法·可数名词",
+      "语境·教室与家庭物品"
+    ],
+    "grammar": "table 是可数名词，常表示“桌子、餐桌”；复数为 tables。at the table 常指坐在桌边用餐或做事，on the table 指在桌面上。",
+    "collocations": "a table; at the table; on the table; a dining table",
+    "commonMistake": "表示物品在桌面上用 on the table；表示坐在桌边用餐或做事常用 at the table。",
+    "example": {
+      "english": "The class picture is on the table by the window.",
+      "chinese": "班级照片在窗边的桌子上。"
+    },
+    "application": {
+      "prompt": "选词填空：We eat dinner at the kitchen ___. A. table  B. window",
+      "solution": "A. table。吃饭使用餐桌，at the table 表示在桌边。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: table",
+        "url": "https://dictionary.cambridge.org/dictionary/english/table"
+      }
+    ]
+  },
+  {
+    "word": "today",
+    "examTags": [
+      "语法·时间副词位置",
+      "语言运用·时间表达"
+    ],
+    "grammar": "today 可作副词表示“今天”，也可作名词；作时间副词时可放在句首或句末，前面通常不加介词。",
+    "collocations": "today's lesson; today and tomorrow; do something today; the world today",
+    "commonMistake": "表示“今天”通常直接说 today，不说 on today 或 at today；但可说 today's lesson。",
+    "example": {
+      "english": "Today we have a computer lesson in the library.",
+      "chinese": "今天我们在图书馆上电脑课。"
+    },
+    "application": {
+      "prompt": "选词填空：Our class has a science test ___. A. today  B. on today",
+      "solution": "A. today。today 作时间副词时前面通常不加介词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: today",
+        "url": "https://dictionary.cambridge.org/dictionary/english/today"
+      }
+    ]
+  },
+  {
+    "word": "email",
+    "examTags": [
+      "词法·可数与不可数用法",
+      "语言运用·电子邮件表达"
+    ],
+    "grammar": "email 可作名词或动词。表示一封邮件时是可数名词，复数为 emails；表示邮件系统时可作不可数名词；作动词表示“给某人发邮件”。",
+    "collocations": "send an email; get an email; email address; email sb; reply to an email",
+    "commonMistake": "表示一封邮件时用 an email；说“回复邮件”常用 reply to an email，reply 后不要漏掉 to。",
+    "example": {
+      "english": "I will send an email to my teacher after class.",
+      "chinese": "下课后我会给老师发一封电子邮件。"
+    },
+    "application": {
+      "prompt": "选词填空：I sent an ___ to my teacher this morning. A. email  B. emails",
+      "solution": "A. email。an 后接单数名词；此处表示一封邮件。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: email",
+        "url": "https://dictionary.cambridge.org/dictionary/english/email"
+      }
+    ]
+  },
+  {
+    "word": "answer",
+    "examTags": [
+      "词性辨析·名词与动词",
+      "语法·动词宾语搭配"
+    ],
+    "grammar": "answer 可作名词“答案、回答”，也可作动词“回答”。动词 answer 可直接接问题或人作宾语；名词常用 the answer to a question。",
+    "collocations": "answer a question; answer the teacher; the answer to a question; a correct answer",
+    "commonMistake": "answer 作动词时直接说 answer a question，不加 to；作名词时才常说 the answer to a question。",
+    "example": {
+      "english": "Please answer the question in a complete sentence.",
+      "chinese": "请用完整的句子回答这个问题。"
+    },
+    "application": {
+      "prompt": "选词填空：When the teacher asks me a question, I ___ it. A. answer  B. ask",
+      "solution": "A. answer。对问题作出回应是 answer it；ask 表示提出问题。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: answer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/answer"
+      }
+    ]
+  },
+  {
+    "word": "question",
+    "examTags": [
+      "词法·可数名词",
+      "阅读·提取问题与信息"
+    ],
+    "grammar": "question 是可数名词，表示“问题、提问、试题”；复数为 questions。常用 ask a question 和 answer a question。",
+    "collocations": "ask a question; answer a question; a question about science; question mark",
+    "commonMistake": "question 是可数名词，单数前通常需要 a、the 或其他限定词；提出问题说 ask a question。",
+    "example": {
+      "english": "I have a question about the science homework.",
+      "chinese": "我有一个关于科学作业的问题。"
+    },
+    "application": {
+      "prompt": "选词填空：The teacher wants to know your name, so she asks a ___. A. question  B. answer",
+      "solution": "A. question。询问信息时提出的是 question（问题）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: question",
+        "url": "https://dictionary.cambridge.org/dictionary/english/question"
+      }
+    ]
+  },
+  {
+    "word": "exercise",
+    "examTags": [
+      "词汇·名词与动词辨析",
+      "语境·练习与健康活动"
+    ],
+    "grammar": "exercise 可作名词或动词。表示练习题时是可数名词；表示一般体育锻炼时通常作不可数名词；作动词时表示锻炼。",
+    "collocations": "do an exercise; Exercise 2; get some exercise; do exercises; exercise regularly",
+    "commonMistake": "表示一般体育锻炼常说 get/do some exercise；表示一道练习题时可说 an exercise 或 Exercise 2。",
+    "example": {
+      "english": "We do one English exercise before lunch.",
+      "chinese": "午饭前我们做一道英语练习题。"
+    },
+    "application": {
+      "prompt": "选词填空：Please finish the grammar ___ on page 10; it has five sentences to complete. A. exercise  B. computer",
+      "solution": "A. exercise。需要完成的语法练习题是 exercise。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: exercise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/exercise"
+      }
+    ]
+  },
+  {
+    "word": "way",
+    "examTags": [
+      "词汇·路线与方法语境",
+      "语法·way 的常见结构"
+    ],
+    "grammar": "way 是可数名词，可表示“路线、方法、方式”；常用 the way to a place 表示“去某地的路”，a way to do sth 或 a way of doing sth 表示“做某事的方法”。",
+    "collocations": "the way to school; a way to do sth; a way of learning; on the way to",
+    "commonMistake": "表示“去某地的路”用 the way to + 地点；表示“做某事的方法”可用 a way to do 或 a way of doing。",
+    "example": {
+      "english": "This is the way to our school library.",
+      "chinese": "这是去我们学校图书馆的路。"
+    },
+    "application": {
+      "prompt": "选词填空：Our school map shows the ___ from the gate to the music room. A. way  B. subject",
+      "solution": "A. way。表示从校门到音乐教室的路线用 way。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: way",
+        "url": "https://dictionary.cambridge.org/dictionary/english/way"
+      }
+    ]
+  },
+  {
+    "word": "best",
+    "examTags": [
+      "语法·形容词最高级",
+      "阅读·比较与选择"
+    ],
+    "grammar": "best 是 good 和 well 的最高级，常表示“最好的、最好地”；最高级前通常用 the。比较三者或以上时可用 the best。",
+    "collocations": "the best student; the best way; do one's best; best friend",
+    "commonMistake": "good–better–best 是不规则变化；比较三者或以上常用 the best，不用 better。",
+    "example": {
+      "english": "The library is the best place to read at school.",
+      "chinese": "图书馆是学校里读书最好的地方。"
+    },
+    "application": {
+      "prompt": "选词填空：Of the three routes, this one is the ___ way to school. A. best  B. better",
+      "solution": "A. best。of the three 表示三者比较，用最高级 best。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: best",
+        "url": "https://dictionary.cambridge.org/dictionary/english/best"
+      }
+    ]
+  },
+  {
+    "word": "because",
+    "examTags": [
+      "语法·原因状语从句",
+      "阅读·因果关系识别"
+    ],
+    "grammar": "because 是从属连词，表示“因为”，后接含主语和谓语的句子；because of 是介词短语，后接名词或名词短语。",
+    "collocations": "because + 从句; because of + 名词; ... because ...",
+    "commonMistake": "because 后接句子，because of 后接名词或名词短语；不要把 because of 直接放在完整从句前。",
+    "example": {
+      "english": "I like science because we learn about the world.",
+      "chinese": "我喜欢科学，因为我们能了解世界。"
+    },
+    "application": {
+      "prompt": "选词填空：We use the computer in class ___ it helps us find information. A. because  B. because of",
+      "solution": "A. because。空格后是完整句子 it helps us find information，因此用 because。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: Because, because of and cos",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/because-because-of-"
+      }
+    ]
+  },
+  {
+    "word": "why",
+    "examTags": [
+      "语法·特殊疑问词",
+      "口语·询问原因并回应"
+    ],
+    "grammar": "why 是疑问副词，常用于询问原因；特殊疑问句中通常用 Why + 助动词/be 动词 + 主语...? 回答原因常用 because 引出。",
+    "collocations": "Why...?; Why not...?; That's why...; the reason why",
+    "commonMistake": "why 用来问“为什么”，because 用来说明“因为”；不要用 because 代替 why 提问。",
+    "example": {
+      "english": "Why is the classroom so quiet today?",
+      "chinese": "今天教室里为什么这么安静？"
+    },
+    "application": {
+      "prompt": "选词填空：___ do you like science? Because we do fun experiments. A. Why  B. Who",
+      "solution": "A. Why。答句 Because... 给出原因，问句应用 Why。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: why",
+        "url": "https://dictionary.cambridge.org/dictionary/english/why"
+      }
+    ]
+  },
+  {
+    "word": "dear",
+    "examTags": [
+      "写作·电子邮件称呼",
+      "语言运用·书信格式"
+    ],
+    "grammar": "dear 可作形容词表示“亲爱的、珍贵的”；在信件或电子邮件开头，Dear + 称呼/姓名是常见的称呼格式，后面通常加逗号。",
+    "collocations": "Dear Mom; Dear Mr Lee; my dear friend; a dear friend",
+    "commonMistake": "邮件或书信开头可写 Dear + 称呼/姓名，后加逗号；Dear 在这里不是“昂贵的”。",
+    "example": {
+      "english": "Dear Mr Lee, thank you for your email.",
+      "chinese": "李老师，感谢您的邮件。"
+    },
+    "application": {
+      "prompt": "补全邮件称呼：___ Grandma, Thank you for your message. A. Dear  B. Best",
+      "solution": "A. Dear。邮件开头称呼收件人用 Dear + 称呼。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dear"
+      }
+    ]
+  },
+  {
+    "word": "tell",
+    "examTags": [
+      "动词·不规则过去式",
+      "语法·双宾语与动词搭配"
+    ],
+    "grammar": "tell 是动词，过去式和过去分词均为 told。常用 tell sb sth、tell sb about sth 或 tell sb to do sth。",
+    "collocations": "tell me a story; tell sb about sth; tell sb to do sth; tell the truth",
+    "commonMistake": "tell 的过去式是 told；“告诉某人某事”说 tell sb sth，不能说 tell sth sb。",
+    "example": {
+      "english": "Please tell me about your science project.",
+      "chinese": "请告诉我你的科学项目是关于什么的。"
+    },
+    "application": {
+      "prompt": "选词填空：Please tell ___ the way to the library. A. me  B. to me",
+      "solution": "A. me。tell sb sth 结构中，tell 后直接接人称代词宾格 me。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tell",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tell"
+      }
+    ]
+  },
+  {
+    "word": "interesting",
+    "examTags": [
+      "词汇·-ing/-ed 形容词辨析",
+      "阅读·表达感受与特征"
+    ],
+    "grammar": "interesting 是形容词，表示“有趣的、引人注意的”，常描述事物或人带给他人的感受；interested 描述人的感受。",
+    "collocations": "an interesting book; an interesting lesson; find sth interesting; be interested in sth",
+    "commonMistake": "interesting 通常描述“令人感兴趣的事物”，interested 描述“感到有兴趣的人”；注意 -ing 和 -ed 的区别。",
+    "example": {
+      "english": "The picture of the solar system is interesting.",
+      "chinese": "这张太阳系图片很有趣。"
+    },
+    "application": {
+      "prompt": "选词填空：The science show is ___; it makes all of us want to watch. A. interesting  B. interested",
+      "solution": "A. interesting。科学节目让人想看，说明节目“有趣”，用 interesting；interested 描述人的感受。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: interesting",
+        "url": "https://dictionary.cambridge.org/dictionary/english/interesting"
+      }
+    ]
+  }
+]

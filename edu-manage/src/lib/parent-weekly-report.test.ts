@@ -7,8 +7,11 @@ describe('parent weekly report accuracy', () => {
       {
         id: 'math-lesson',
         subject: '数学',
+        lessonDate: new Date('2026-10-20T00:00:00.000Z'),
         lessonStudents: [],
         group: {
+          teacherId: 'teacher-1',
+          teacherAssignments: [],
           course: { subject: '语文' },
           enrollments: [
             { studentId: 'student-a', subjects: ['数学', '英语'] },
@@ -27,13 +30,32 @@ describe('parent weekly report accuracy', () => {
       {
         id: 'lesson-snapshot',
         subject: '数学',
+        lessonDate: new Date('2026-10-20T00:00:00.000Z'),
         lessonStudents: [{ studentId: 'student-a' }, { studentId: 'other-student' }],
-        group: { course: { subject: '数学' }, enrollments: [] },
+        group: { teacherAssignments: [], course: { subject: '数学' }, enrollments: [] },
       },
     ], ['student-a'])
 
     expect([...rosters.get('student-a') || []]).toEqual(['lesson-snapshot'])
     expect(rosters.has('other-student')).toBe(false)
+  })
+
+  it('excludes a current lesson snapshot when its child is not enrolled in that lesson subject', () => {
+    const rosters = buildWeeklyLessonRosters([
+      {
+        id: 'english-lesson',
+        subject: '英语',
+        lessonDate: new Date(Date.now() + 86_400_000),
+        lessonStudents: [{ studentId: 'student-a' }],
+        group: {
+          teacherAssignments: [],
+          course: { subject: '英语' },
+          enrollments: [{ studentId: 'student-a', subjects: ['数学'] }],
+        },
+      },
+    ], ['student-a'])
+
+    expect(rosters.has('student-a')).toBe(false)
   })
 
   it('does not call an in-progress week fully attended when later lessons are unrecorded', () => {

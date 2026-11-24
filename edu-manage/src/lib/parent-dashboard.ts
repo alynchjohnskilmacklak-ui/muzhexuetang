@@ -1,6 +1,5 @@
 import { getRequestPrisma } from '@/lib/prisma'
 import { Prisma, type PrismaClient } from '@prisma/client'
-import { getEffectiveMealMenuForDate } from '@/lib/meal-template'
 import {
   parentActiveEnrollmentWhere,
   parentLinkedStudentWhere,
@@ -15,14 +14,8 @@ import { redactFeedbackForParent } from '@/lib/classroom-feedback/access'
 import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
 import { groupParentStudentRecords, sortParentStudentsByCurrentTerm, currentTermLabel } from '@/lib/parent-student-selection'
 import { resolveTier, TIER_RANK } from '@/constants/teacher-tier'
-
-/** 姓名脱敏：王*然 / 李*（保留首末字，同姓同学也能区分；仅家长端对外展示用） */
-function maskNameForParent(name: string) {
-  if (!name) return '同学'
-  const trimmed = name.trim()
-  if (trimmed.length <= 2) return `${trimmed[0]}*`
-  return `${trimmed[0]}*${trimmed[trimmed.length - 1]}`
-}
+import { getLocalDayRange, todayLocal } from '@/lib/date/local-day'
+import { isParentStudentInLesson } from '@/lib/parent-lesson-visibility'
 
 type DashboardLinkedStudent = {
   id: string
@@ -87,16 +80,6 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
   const studentIds = students.flatMap((student) => student.recordIds)
   const canonicalId = (id: string) => students.find((student) => student.recordIds.includes(id))?.id
   const canonicalIds = (ids: string[]) => [...new Set(ids.map(canonicalId).filter((id): id is string => Boolean(id)))]
-  const studentTeachers: Record<string, string[]> = {}
-  for (const student of students) {
-    const teacherSet = new Set<string>()
-    if (student.mainTeacher?.name) teacherSet.add(student.mainTeacher.name)
-    for (const enrollment of student.enrollments) {
-      if (enrollment.group?.teacher?.name) teacherSet.add(enrollment.group.teacher.name)
-    }
-    studentTeachers[student.id] = [...teacherSet]
-  }
-
   // 家长端 hero 卡：从主负责老师 + 报名学科老师中取等级最高的老师展示
   const studentTopTeacher: Record<string, { name: string; tierLevel?: string | null }> = {}
   for (const student of students) {
@@ -114,12 +97,16 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
     studentTopTeacher[student.id] = top ?? { name: '待分配' }
   }
 
-  const today = new Date()
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-  const todayEnd = new Date(todayStart.getTime() + 86400000)
-  const tomorrowStart = new Date(todayStart.getTime() + 86400000)
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 1)
+  const todayKey = todayLocal()
+  const { start: todayStart, end: todayEnd } = getLocalDayRange(todayKey)
+  const tomorrowStart = todayEnd
+  const [localYear, localMonth] = todayKey.split('-').map(Number)
+  const monthStartKey = `${localYear}-${String(localMonth).padStart(2, '0')}-01`
+  const monthEndKey = localMonth === 12
+    ? `${localYear + 1}-01-01`
+    : `${localYear}-${String(localMonth + 1).padStart(2, '0')}-01`
+  const monthStart = getLocalDayRange(monthStartKey).start
+  const monthEnd = getLocalDayRange(monthEndKey).start
 
   const [
     todayClassLessons,
@@ -127,16 +114,12 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
     latestPost,
     latestClassroomFeedback,
     latestFeedbackRows,
-    monthMoods,
-    monthClassroomFeedbacks,
-    monthAttendances,
-    badgeRows,
-    todayAttendances,
+    monthAttendanceGroups,
+    badgeCountGroups,
+    todayAttendanceGroups,
     todayFeedbackRows,
-    todayPaperRows,
-    todayMeal,
+    todayPaperGroups,
     upcomingParentLessons,
-    nextUpcomingLessons,
     upcomingLessonMaterials,
   ] = await Promise.all([
     prisma.classLesson.findMany({
@@ -150,15 +133,19 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
         startTime: true,
         endTime: true,
         lessonDate: true,
+        subject: true,
+        isManual: true,
         attendanceSubmittedAt: true,
+        lessonStudents: { select: { studentId: true } },
         group: {
           select: {
-            course: { select: { name: true } },
+            intensiveMode: true,
+            course: { select: { name: true, subject: true } },
             teacher: { select: { name: true } },
             room: { select: { name: true } },
             enrollments: {
               where: parentActiveEnrollmentWhere(userId),
-              select: { student: { select: { id: true, name: true } } },
+              select: { studentId: true, subjects: true, student: { select: { id: true, name: true } } },
             },
           },
         },
@@ -168,12 +155,30 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
     }),
     prisma.notification.findMany({
       where: { userId, ...visibleNotificationWhere },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        relatedType: true,
+        relatedId: true,
+        href: true,
+        read: true,
+        studentId: true,
+        createdAt: true,
+      },
       take: 20,
       orderBy: { createdAt: 'desc' },
     }),
     prisma.performancePost.findFirst({
       where: parentVisiblePerformancePostWhere(userId),
-      include: { student: { select: { name: true } }, teacher: { select: { name: true } } },
+      select: {
+        id: true,
+        studentId: true,
+        content: true,
+        createdAt: true,
+        student: { select: { name: true } },
+        teacher: { select: { name: true } },
+      },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.classroomFeedback.findFirst({
@@ -182,7 +187,16 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
         studentIds: { hasSome: studentIds },
         teacher: visibleTeacherWhere,
       },
-      include: { teacher: { select: { name: true } } },
+      include: {
+        teacher: { select: { name: true, subjects: true } },
+        classLesson: {
+          select: {
+            lessonDate: true,
+            subject: true,
+            group: { select: { course: { select: { subject: true, name: true } } } },
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.classroomFeedback.findMany({
@@ -196,52 +210,44 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
         createdAt: true,
         studentIds: true,
         summary: true,
-        teacher: { select: { name: true } },
+        knowledgeCard: true,
+        lessonContent: true,
+        overallComment: true,
+        tags: true,
+        teacher: { select: { id: true, name: true, subjects: true, avatar: true, gender: true } },
         classLesson: {
           select: {
             lessonDate: true,
             subject: true,
-            group: { select: { course: { select: { subject: true } } } },
+            group: { select: { course: { select: { subject: true, name: true } } } },
           },
         },
       },
       orderBy: { createdAt: 'desc' },
       take: 60,
     }),
-    prisma.performancePost.findMany({
-      where: { ...parentVisiblePerformancePostWhere(userId), createdAt: { gte: monthStart, lt: monthEnd } },
-      select: { createdAt: true, mood: true, id: true },
-      orderBy: { createdAt: 'asc' },
-    }),
-    prisma.classroomFeedback.findMany({
-      where: {
-        ...visibleClassroomFeedbackWhere,
-        studentIds: { hasSome: studentIds },
-        teacher: visibleTeacherWhere,
-        createdAt: { gte: monthStart, lt: monthEnd },
-      },
-      select: { id: true, createdAt: true, summary: true, studentIds: true },
-      orderBy: { createdAt: 'asc' },
-    }),
-    prisma.attendance.findMany({
+    prisma.attendance.groupBy({
+      by: ['studentId', 'status'],
       where: {
         student: parentLinkedStudentWhere(userId),
         deletedAt: null,
         createdAt: { gte: monthStart, lt: monthEnd },
       },
-      select: { status: true, studentId: true },
+      _count: { _all: true },
     }),
-    prisma.achievementBadge.findMany({
+    prisma.achievementBadge.groupBy({
+      by: ['studentId'],
       where: { student: parentLinkedStudentWhere(userId) },
-      select: { studentId: true },
+      _count: { _all: true },
     }),
-    prisma.attendance.findMany({
+    prisma.attendance.groupBy({
+      by: ['studentId'],
       where: {
         student: parentLinkedStudentWhere(userId),
         deletedAt: null,
         lesson: { lessonDate: { gte: todayStart, lt: todayEnd } },
       },
-      select: { id: true, status: true, hoursDeducted: true, createdAt: true, lessonId: true, studentId: true },
+      _max: { createdAt: true },
     }),
     prisma.classroomFeedback.findMany({
       where: {
@@ -271,14 +277,14 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
       },
       orderBy: { createdAt: 'asc' },
     }),
-    prisma.examPaper.findMany({
+    prisma.examPaper.groupBy({
+      by: ['studentId'],
       where: {
         ...parentVisibleExamPaperWhere(userId),
         createdAt: { gte: todayStart, lt: todayEnd },
       },
-      select: { id: true, studentId: true },
+      _count: { _all: true },
     }),
-    getEffectiveMealMenuForDate(today, prisma),
     prisma.classLesson.findMany({
       where: {
         ...parentVisibleLessonWhere(userId),
@@ -287,50 +293,26 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
       },
       select: {
         id: true,
-        teacherId: true,
         lessonDate: true,
         startTime: true,
         endTime: true,
         subject: true,
+        isManual: true,
+        lessonStudents: { select: { studentId: true } },
+        teacher: { select: { name: true } },
         group: {
           select: {
             name: true,
-            teacherId: true,
-            teacherAssignments: { select: { teacherId: true } },
-            course: { select: { subject: true } },
-            enrollments: { where: parentActiveEnrollmentWhere(userId), select: { studentId: true } },
+            intensiveMode: true,
+            teacher: { select: { name: true } },
+            room: { select: { name: true } },
+            course: { select: { name: true, subject: true } },
+            enrollments: { where: parentActiveEnrollmentWhere(userId), select: { studentId: true, subjects: true } },
           },
         },
       },
       orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
       take: 180,
-    }),
-    // 未来最近课程（明天起，含课程/老师/教室/学员，供首页"今日无课→显示下一次课"）
-    prisma.classLesson.findMany({
-      where: {
-        status: { notIn: ['CANCELLED', 'POSTPONED'] },
-        lessonDate: { gte: tomorrowStart },
-        group: {
-          enrollments: { some: { studentId: { in: studentIds } } },
-        },
-      },
-      select: {
-        id: true,
-        lessonDate: true,
-        startTime: true,
-        endTime: true,
-        group: {
-          select: {
-            course: { select: { name: true, subject: true } },
-            teacher: { select: { name: true } },
-            room: { select: { name: true } },
-            enrollments: { where: { studentId: { in: studentIds } }, select: { studentId: true } },
-          },
-        },
-        teacher: { select: { name: true } },
-      },
-      orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
-      take: 30,
     }),
     prisma.studyMaterial.findMany({
       where: {
@@ -377,31 +359,46 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
   const filteredTodayClassLessons = todayClassLessons.map((lesson) => ({
     id: lesson.id,
     title: lesson.group?.course?.name || '-',
+    subject: lesson.subject || lesson.group?.course?.subject || null,
     startTime: lesson.startTime,
     endTime: lesson.endTime,
     teacherName: lesson.teacher?.name || lesson.group?.teacher?.name || null,
     roomName: lesson.group?.room?.name || null,
-    studentIds: canonicalIds(lesson.group?.enrollments?.map((enrollment) => enrollment.student.id) || []),
+    studentIds: canonicalIds(lesson.group?.enrollments
+      ?.filter((enrollment) => isParentStudentInLesson(lesson, enrollment.studentId))
+      .map((enrollment) => enrollment.student.id) || []),
     startTimeRaw: lesson.lessonDate ? `${new Date(lesson.lessonDate).toISOString().slice(0, 10)}T${lesson.startTime}` : null,
     endTimeRaw: lesson.lessonDate ? `${new Date(lesson.lessonDate).toISOString().slice(0, 10)}T${lesson.endTime}` : null,
     attendanceSubmittedAt: lesson.attendanceSubmittedAt?.toISOString() || null,
   }))
 
-  const presentCount = monthAttendances.filter((attendance) => attendance.status === 'PRESENT').length
-  const totalCount = monthAttendances.length
+  const monthlyAttendanceByStudent = new Map<string, { total: number; present: number }>()
+  for (const row of monthAttendanceGroups) {
+    const counts = monthlyAttendanceByStudent.get(row.studentId) || { total: 0, present: 0 }
+    counts.total += row._count._all
+    if (row.status === 'PRESENT') counts.present += row._count._all
+    monthlyAttendanceByStudent.set(row.studentId, counts)
+  }
+  const badgeCountsByStudent = new Map(badgeCountGroups.map((row) => [row.studentId, row._count._all]))
+  const todayPaperCountsByStudent = new Map(todayPaperGroups.map((row) => [row.studentId, row._count._all]))
+  const sumStudentCounts = (recordIds: string[], counts: Map<string, number>) => (
+    recordIds.reduce((total, id) => total + (counts.get(id) || 0), 0)
+  )
+  const totalCount = [...monthlyAttendanceByStudent.values()].reduce((total, row) => total + row.total, 0)
+  const presentCount = [...monthlyAttendanceByStudent.values()].reduce((total, row) => total + row.present, 0)
   // 无考勤记录时为 null（前端显示"暂无考勤记录"），避免把 0 条记录误判为 100% 全勤
   const attendanceRate: number | null = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : null
-  const badgeCount = badgeRows.length
+  const badgeCount = [...badgeCountsByStudent.values()].reduce((total, count) => total + count, 0)
   const todayFeedbackCount = todayFeedbackRows.length
-  const todayPaperCount = todayPaperRows.length
+  const todayPaperCount = [...todayPaperCountsByStudent.values()].reduce((total, count) => total + count, 0)
   const studentStats = Object.fromEntries(students.map(({ id: studentId, recordIds }) => {
-    const studentAttendances = monthAttendances.filter((attendance) => recordIds.includes(attendance.studentId))
-    const studentPresentCount = studentAttendances.filter((attendance) => attendance.status === 'PRESENT').length
+    const studentAttendanceTotal = recordIds.reduce((total, id) => total + (monthlyAttendanceByStudent.get(id)?.total || 0), 0)
+    const studentPresentCount = recordIds.reduce((total, id) => total + (monthlyAttendanceByStudent.get(id)?.present || 0), 0)
     return [studentId, {
-      attendanceRate: studentAttendances.length > 0 ? Math.round((studentPresentCount / studentAttendances.length) * 100) : null,
-      badgeCount: badgeRows.filter((badge) => recordIds.includes(badge.studentId)).length,
+      attendanceRate: studentAttendanceTotal > 0 ? Math.round((studentPresentCount / studentAttendanceTotal) * 100) : null,
+      badgeCount: sumStudentCounts(recordIds, badgeCountsByStudent),
       todayFeedbackCount: todayFeedbackRows.filter((feedback) => feedback.studentIds.some((id) => recordIds.includes(id))).length,
-      todayPaperCount: todayPaperRows.filter((paper) => recordIds.includes(paper.studentId)).length,
+      todayPaperCount: sumStudentCounts(recordIds, todayPaperCountsByStudent),
     }]
   }))
   const parentLatestClassroomFeedback = latestClassroomFeedback
@@ -415,9 +412,45 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
     lessonDate: string | null
     subject: string | null
     teacherName: string | null
+    teacherAvatar?: string | null
+    teacherGender?: string | null
     summary: string | null
+    topic?: string | null
+    tags?: string[]
   }> = {}
   for (const feedback of latestFeedbackRows) {
+    const cardInfo = feedback.knowledgeCard
+      ? parseStoredKnowledgeCard(feedback.knowledgeCard)
+      : null
+    const cardSubject = cardInfo?.subject || null
+    const cardTopic = cardInfo?.topic || null
+    const teacherSubject = feedback.teacher?.subjects
+      ? feedback.teacher.subjects.split(/[,，、]/)[0]?.trim() || null
+      : null
+    const resolvedSubject =
+      feedback.classLesson?.subject
+      || feedback.classLesson?.group?.course?.subject
+      || cardSubject
+      || teacherSubject
+      || null
+
+    const firstSentence = (text: string | null | undefined) => {
+      if (!text) return null
+      const clean = text.trim()
+      if (!clean) return null
+      const match = clean.match(/^[^。！？\n]+[。！？]?/)
+      return match ? match[0].trim() : clean.slice(0, 80)
+    }
+    const cleanSummary = feedback.summary?.trim()
+    const rawRecord = feedback as { overallComment?: string | null; lessonContent?: string | null; tags?: string[] | null }
+    const cleanComment = firstSentence(rawRecord.overallComment)
+    const cleanLesson = firstSentence(rawRecord.lessonContent)
+    const displaySummary = cleanSummary && cleanSummary !== '课堂反馈已更新'
+      ? cleanSummary
+      : cleanComment || cleanLesson || (cardTopic ? `围绕「${cardTopic}」开展教学与针对练习，点击查看学情详情。` : '已完成本节课学情记录与建议，点击查看专属成长档案。')
+
+    const rawTags = Array.isArray(rawRecord.tags) ? rawRecord.tags.filter(Boolean).slice(0, 3) : []
+
     for (const studentId of canonicalIds(feedback.studentIds)) {
       if (latestFeedbackByStudent[studentId]) continue
       latestFeedbackByStudent[studentId] = {
@@ -426,82 +459,34 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
         lessonDate: feedback.classLesson?.lessonDate
           ? new Date(feedback.classLesson.lessonDate).toISOString().slice(0, 10)
           : null,
-        subject:
-          feedback.classLesson?.subject
-          || feedback.classLesson?.group?.course?.subject
-          || null,
+        subject: resolvedSubject,
         teacherName: feedback.teacher?.name || null,
-        summary: feedback.summary || null,
+        teacherAvatar: (feedback.teacher as { avatar?: string | null })?.avatar || null,
+        teacherGender: (feedback.teacher as { gender?: string | null })?.gender || null,
+        summary: displaySummary,
+        topic: cardTopic,
+        tags: rawTags,
       }
     }
   }
 
-  // ===== 课时领先榜（家长端）：我的课时 vs 同班同学 =====
-  // 同班同学 = 孩子所有活跃班级（enrollment.group）内的其他学员；
-  // 课时口径 = 本月考勤记录 hoursDeducted 累计（与课时记录页一致）。
-  const myEnrollments = await prisma.enrollment.findMany({
-    where: { studentId: { in: studentIds }, ...parentActiveEnrollmentWhere(userId) },
-    select: { studentId: true, groupId: true },
-  })
-  const relatedGroupIds = [...new Set(myEnrollments.map((item) => item.groupId).filter((id): id is string => Boolean(id)))]
-  let classHoursByStudent: Record<string, { mineHours: number; classmates: Array<{ maskedName: string; hours: number }>; hasData: boolean }> = {}
-  if (relatedGroupIds.length > 0) {
-    const classmates = await prisma.enrollment.findMany({
-      where: { groupId: { in: relatedGroupIds }, status: 'ACTIVE', student: { deletedAt: null } },
-      select: { groupId: true, student: { select: { id: true, name: true } } },
-    })
-    const classmateIds = [...new Set(classmates.map((item) => item.student.id))]
-    const hoursRows = classmateIds.length > 0 ? await prisma.attendance.groupBy({
-      by: ['studentId'],
-      where: {
-        studentId: { in: classmateIds },
-        lesson: { lessonDate: { gte: monthStart, lt: monthEnd } },
-        deletedAt: null,
-      },
-      _sum: { hoursDeducted: true },
-    }) : []
-    const hoursByStudent = new Map(hoursRows.map((row) => [row.studentId, Number(row._sum.hoursDeducted || 0)]))
-    const nameById = new Map(classmates.map((item) => [item.student.id, item.student.name]))
-    const studentGroupIds = new Map<string, Set<string>>()
-    for (const item of classmates) {
-      if (!studentGroupIds.has(item.student.id)) studentGroupIds.set(item.student.id, new Set())
-      studentGroupIds.get(item.student.id)?.add(item.groupId)
-    }
-    classHoursByStudent = Object.fromEntries(students.map(({ id: studentId, recordIds }) => {
-      const myGroupIds = new Set(myEnrollments.filter((item) => recordIds.includes(item.studentId)).map((item) => item.groupId))
-      const peerIds = [...studentGroupIds.keys()].filter((peerId) => {
-        if (recordIds.includes(peerId)) return false
-        const peerGroups = studentGroupIds.get(peerId)
-        return !!peerGroups && [...myGroupIds].some((groupId) => peerGroups.has(groupId))
-      })
-      const mine = recordIds.reduce((sum, id) => sum + (hoursByStudent.get(id) || 0), 0)
-      const classmatesData = peerIds.map((peerId) => ({
-        maskedName: maskNameForParent(nameById.get(peerId) || ''),
-        hours: Number((hoursByStudent.get(peerId) || 0).toFixed(1)),
-      }))
-      return [studentId, {
-        mineHours: Number(mine.toFixed(1)),
-        classmates: classmatesData,
-        hasData: mine > 0 && classmatesData.some((item) => item.hours > 0),
-      }]
-    }))
-  }
-
-  const parentMonthClassroomFeedbacks = monthClassroomFeedbacks.map((feedback) => ({
-    ...feedback,
-    studentIds: canonicalIds(feedback.studentIds),
-  }))
   const upcomingLessonsById = new Map(upcomingParentLessons.map((lesson) => [lesson.id, lesson]))
-  const nextUpcomingLessonsMapped = nextUpcomingLessons.map((lesson) => ({
-    id: lesson.id,
-    lessonDate: lesson.lessonDate,
-    startTime: lesson.startTime,
-    endTime: lesson.endTime,
-    title: lesson.group?.course?.name || lesson.group?.course?.subject || '课程',
-    teacherName: lesson.group?.teacher?.name || lesson.teacher?.name || null,
-    roomName: lesson.group?.room?.name || null,
-    studentIds: canonicalIds(lesson.group?.enrollments?.map((item) => item.studentId) || []),
-  }))
+  const nextUpcomingLessonsMapped = upcomingParentLessons
+    .filter((lesson) => lesson.lessonDate >= tomorrowStart)
+    .slice(0, 30)
+    .map((lesson) => ({
+      id: lesson.id,
+      lessonDate: lesson.lessonDate,
+      startTime: lesson.startTime,
+      endTime: lesson.endTime,
+      subject: lesson.subject || lesson.group.course?.subject || null,
+      title: lesson.group.course?.name || lesson.group.course?.subject || '课程',
+      teacherName: lesson.group.teacher?.name || lesson.teacher?.name || null,
+      roomName: lesson.group.room?.name || null,
+      studentIds: canonicalIds(lesson.group.enrollments
+        .filter((item) => isParentStudentInLesson(lesson, item.studentId))
+        .map((item) => item.studentId)),
+    }))
   const lessonPreviews = upcomingLessonMaterials.flatMap((material) => {
     if (!material.classLesson) return []
     const lesson = upcomingLessonsById.get(material.classLesson.id)
@@ -527,21 +512,18 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
   return {
     parentUserId: userId,
     students: students.map(({ id, name, grade, gender, membershipLevel, termName, recordIds }) => ({ id, name, grade, gender, membershipLevel, termName, recordIds })),
-    studentTeachers,
     studentTopTeacher,
-    todaySchedules: [],
     todayClassLessons: filteredTodayClassLessons,
     notifications,
     latestPost,
     latestClassroomFeedback: parentLatestClassroomFeedback,
     latestFeedbackByStudent,
-    monthMoods,
-    monthClassroomFeedbacks: parentMonthClassroomFeedbacks,
     attendanceRate,
     badgeCount,
     studentStats,
-    classHoursByStudent,
-    todayAttendances: todayAttendances.map((row) => ({ ...row, studentId: canonicalId(row.studentId) || row.studentId })),
+    todayAttendances: todayAttendanceGroups.flatMap((row) => row._max.createdAt
+      ? [{ studentId: canonicalId(row.studentId) || row.studentId, createdAt: row._max.createdAt }]
+      : []),
     todayFeedbacks: todayFeedbackRows.map((feedback) => ({
       id: feedback.id,
       createdAt: feedback.createdAt,
@@ -553,10 +535,10 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
         || feedback.classLesson?.group?.course?.subject
         || (feedback.knowledgeCard ? parseStoredKnowledgeCard(feedback.knowledgeCard)?.subject || null : null)
         || null,
+      topic: feedback.knowledgeCard ? parseStoredKnowledgeCard(feedback.knowledgeCard)?.topic || null : null,
     })),
     todayFeedbackCount,
     todayPaperCount,
-    todayMeal,
     lessonPreviews,
     nextUpcomingLessons: nextUpcomingLessonsMapped,
   }

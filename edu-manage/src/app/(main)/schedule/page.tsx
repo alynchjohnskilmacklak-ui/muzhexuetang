@@ -1,23 +1,20 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { Card, Input, Spin, message } from 'antd'
+import { Button, Card, Input, Spin, message } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
 import { format, startOfWeek } from 'date-fns'
 import useSWR from 'swr'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { ClassMatrixView } from './ClassMatrixView'
-import { SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 import { useDivision } from '@/contexts/DivisionContext'
 import { useSWRConfig } from 'swr'
 import {
-  ApartmentOutlined, AppstoreOutlined, CalendarOutlined, CheckCircleOutlined,
-  ClockCircleOutlined, CloseCircleOutlined, CrownOutlined, EnvironmentOutlined, HeatMapOutlined, PlusOutlined,
-  TeamOutlined,
+  ApartmentOutlined, AppstoreOutlined, CalendarOutlined, CloseCircleOutlined,
+  CrownOutlined, EnvironmentOutlined, HeatMapOutlined, PlusOutlined, TeamOutlined,
 } from '@ant-design/icons'
 import { OneOnOneView } from './OneOnOneView'
 
@@ -27,10 +24,6 @@ const WeekHeatmapView = dynamic(() => import('./WeekHeatmapView').then((module) 
 const MobileRoomView = dynamic(() => import('./MobileRoomView').then((module) => module.MobileRoomView))
 const OneOnOneModal = dynamic(() => import('./OneOnOneModal').then((module) => module.OneOnOneModal))
 const ScheduleDetailPanel = dynamic(() => import('./_components/ScheduleDetailPanel').then((module) => module.ScheduleDetailPanel))
-const ScheduleFormModal = dynamic(() => import('./_components/ScheduleFormModal').then((module) => module.ScheduleFormModal))
-const SchedulePeriodSettingsModal = dynamic(() => import('./_components/SchedulePeriodSettingsModal').then((module) => module.SchedulePeriodSettingsModal))
-const CopyFridayToSaturdayModal = dynamic(() => import('./_components/CopyFridayToSaturdayModal').then((module) => module.CopyFridayToSaturdayModal))
-const ManualLessonModal = dynamic(() => import('./_components/ManualLessonModal').then((module) => module.ManualLessonModal))
 
 const VIEW_TABS = [
   { key: 'class-matrix', label: '班级课表', icon: <AppstoreOutlined /> },
@@ -57,6 +50,7 @@ export default function SchedulePage() {
 
 function SchedulePageInner() {
   const searchParamsHook = useSearchParams()
+  const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
   const { mutate: mutateSWR } = useSWRConfig()
@@ -80,14 +74,9 @@ function SchedulePageInner() {
   const [selectedLesson, setSelectedLesson] = useState<Record<string, unknown> | null>(null)
   const [editLesson, setEditLesson] = useState<Record<string, string>>({})
   const [savingLesson, setSavingLesson] = useState(false)
-  const [scheduleFormOpen, setScheduleFormOpen] = useState(false)
-  const [periodSettingsOpen, setPeriodSettingsOpen] = useState(false)
-  const [copyFridayOpen, setCopyFridayOpen] = useState(false)
-  const [manualLessonOpen, setManualLessonOpen] = useState(false)
   const [cancelLessonId, setCancelLessonId] = useState('')
   const [cancelReason, setCancelReason] = useState('')
   const [cancelling, setCancelling] = useState(false)
-  const { periods, mutate: mutatePeriods } = useSchedulePeriods(division)
 
   const { data: overviewData } = useSWR(
     `/api/schedules/overview?division=${encodeURIComponent(division)}`,
@@ -96,8 +85,8 @@ function SchedulePageInner() {
   )
   const overview = (overviewData as { data?: Record<string, number> } | undefined)?.data
 
-  const handleRoomCellClick = (_room: Record<string, unknown>, _period: SchedulePeriod) => {
-    setManualLessonOpen(true)
+  const handleRoomCellClick = (_room: Record<string, unknown>, _period: unknown) => {
+    router.push(`/schedule/workbench?action=extra&date=${encodeURIComponent(format(selectedDate, 'yyyy-MM-dd'))}`)
   }
 
   const handleLessonClick = (lesson: Record<string, unknown>) => {
@@ -170,135 +159,217 @@ function SchedulePageInner() {
   }
 
   return (
-    <PageLayout title="排课系统" subtitle="今日课次 · 教室矩阵 · 教师课表 · VIP课程 · 周总览">
-      {/* 综合概览大卡 */}
+    <PageLayout
+      title="排课系统"
+      subtitle="今日课次 · 教室矩阵 · 教师课表 · VIP课程 · 周总览"
+    >
+      {/* 统一排课调度控制台 (Unified Scheduling Console - 统一排列放在页面内) */}
       <div style={{
+        background: '#FAF6EE',
         borderRadius: 16,
-        background: 'linear-gradient(135deg,#123C35 0%,#0E5E4E 60%,#0B4B40 100%)',
-        boxShadow: '0 8px 24px rgba(14,94,78,.18)',
-        padding: isMobile ? '14px' : '18px 22px',
-        marginBottom: 12,
-        overflow: 'hidden',
+        border: '1.5px solid rgba(214, 180, 91, 0.38)',
+        boxShadow: '0 3px 12px rgba(58, 50, 39, 0.05)',
+        padding: isMobile ? '12px 10px 10px' : '14px 18px',
+        marginBottom: 10,
       }}>
-        <div style={{ display: 'flex', alignItems: 'stretch', gap: isMobile ? 10 : 24, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(242,227,182,.8)', fontSize: isMobile ? 11.5 : 13, fontWeight: 600, letterSpacing: 1 }}>
-              <CalendarOutlined /> 本周排课总览
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 6 }}>
-              <span style={{ color: '#F7F3E8', fontSize: isMobile ? 34 : 44, fontWeight: 800, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{overview?.weekTotal ?? 0}</span>
-              <span style={{ color: 'rgba(242,227,182,.7)', fontSize: isMobile ? 12 : 14, fontWeight: 600 }}>节课次</span>
-            </div>
-            <div style={{ marginTop: 6, display: 'flex', gap: isMobile ? 10 : 18, flexWrap: 'wrap', color: 'rgba(247,243,232,.72)', fontSize: isMobile ? 10.5 : 12 }}>
-              <span><CalendarOutlined style={{ marginRight: 3 }} />今日 {overview?.todayTotal ?? 0} 节</span>
-              <span><CloseCircleOutlined style={{ marginRight: 3 }} />今日取消 {overview?.todayCancelled ?? 0}</span>
-              <span><CloseCircleOutlined style={{ marginRight: 3 }} />本周取消 {overview?.weekCancelled ?? 0}</span>
-            </div>
+        {/* 控制台顶栏：标题与当前状态指示 */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 9,
+          paddingLeft: 2,
+          paddingRight: 2,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 3.5, height: 13, borderRadius: 2, background: 'linear-gradient(180deg, #D6B45B 0%, #14574D 100%)' }} />
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#14574D', letterSpacing: 0.3 }}>
+              排课视图模式
+            </span>
+            <span style={{ fontSize: 11, color: '#8C7E6A' }}>
+              (点击即切换对应课表)
+            </span>
           </div>
-          <div style={{
+          <span style={{ fontSize: 11.5, color: '#14574D', fontWeight: 700 }}>
+            当前：{VIEW_TABS.find(t => t.key === viewMode)?.label}
+          </span>
+        </div>
+
+        {/* 5 大课表视图切换：移动端 3+2 对齐统一网格，桌面端 5 列平铺 */}
+        <div
+          role="tablist"
+          aria-label="排课视图导航"
+          style={{
             display: 'grid',
-            gridTemplateColumns: isMobile ? 'repeat(3, minmax(0,1fr))' : 'repeat(3, minmax(0,120px))',
-            gap: isMobile ? 8 : 14,
-            borderLeft: isMobile ? 'none' : '1px solid rgba(242,227,182,.22)',
-            borderTop: isMobile ? '1px solid rgba(242,227,182,.22)' : 'none',
-            paddingLeft: isMobile ? 0 : 24,
-            paddingTop: isMobile ? 10 : 0,
-            width: isMobile ? '100%' : 'auto',
-          }}>
-            {[
-              { label: '活跃教室', value: overview?.activeRooms ?? 0, icon: <EnvironmentOutlined /> },
-              { label: '上课教师', value: overview?.weekTeachers ?? 0, icon: <TeamOutlined /> },
-              { label: '运行班级', value: overview?.runningGroups ?? 0, icon: <ApartmentOutlined /> },
-            ].map((item) => (
-              <div key={item.label} style={{ display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start', gap: 4, minWidth: 0 }}>
-                <span style={{ color: 'rgba(242,227,182,.75)', fontSize: isMobile ? 11 : 12 }}>{item.icon} {item.label}</span>
-                <span style={{ color: '#F7F3E8', fontSize: isMobile ? 20 : 26, fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{item.value}</span>
-              </div>
-            ))}
-          </div>
+            gridTemplateColumns: isMobile ? 'repeat(6, 1fr)' : 'repeat(5, 1fr)',
+            gap: isMobile ? 6 : 8,
+          }}
+        >
+          {VIEW_TABS.map((tab, idx) => {
+            const isActive = viewMode === tab.key
+            const colSpan = isMobile ? (idx < 3 ? 'span 2' : 'span 3') : 'span 1'
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => switchView(tab.key)}
+                style={{
+                  gridColumn: colSpan,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  padding: isMobile ? '10px 6px' : '10px 14px',
+                  borderRadius: 10,
+                  border: isActive ? '1.5px solid #D6B45B' : '1px solid rgba(58, 50, 39, 0.12)',
+                  cursor: 'pointer',
+                  fontSize: isMobile ? 13 : 13.5,
+                  fontWeight: isActive ? 800 : 600,
+                  color: isActive ? '#FFFFFF' : '#3A3020',
+                  backgroundColor: isActive ? '#14574D' : '#FFFFFF',
+                  boxShadow: isActive ? '0 3px 10px rgba(20, 87, 77, 0.28)' : '0 1px 3px rgba(0,0,0,0.03)',
+                  transition: 'all 0.16s ease',
+                  whiteSpace: 'nowrap',
+                  outline: 'none',
+                }}
+              >
+                <span style={{ fontSize: 14.5, color: isActive ? '#D6B45B' : '#756A58' }}>
+                  {tab.icon}
+                </span>
+                <span>{tab.label}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* 核心排课功能快捷通道 (双通道并排，高对比突出) */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: isMobile ? 6 : 10,
+          marginTop: 8,
+          paddingTop: 8,
+          borderTop: '1px dashed rgba(214, 180, 91, 0.3)',
+        }}>
+          <button
+            type="button"
+            onClick={() => router.push('/schedule/workbench')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 5,
+              padding: isMobile ? '8px 8px' : '9px 14px',
+              borderRadius: 9,
+              border: '1px solid rgba(20, 87, 77, 0.25)',
+              background: '#FFFFFF',
+              color: '#14574D',
+              fontSize: isMobile ? 12 : 12.5,
+              fontWeight: 750,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 3px rgba(20, 87, 77, 0.05)',
+            }}
+          >
+            <CalendarOutlined />
+            <span>进入排课工作台 ›</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/schedule/intensive')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 5,
+              padding: isMobile ? '8px 8px' : '9px 14px',
+              borderRadius: 9,
+              border: '1px solid rgba(214, 180, 91, 0.4)',
+              background: '#FFFDF7',
+              color: '#8C6B1B',
+              fontSize: isMobile ? 12 : 12.5,
+              fontWeight: 750,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 3px rgba(214, 180, 91, 0.08)',
+            }}
+          >
+            <CrownOutlined />
+            <span>个性化集训排课 ›</span>
+          </button>
         </div>
       </div>
 
-      <Card bordered={false} style={{ marginBottom: 12, borderRadius: 14, background: '#ffffff', border: '1px solid #EDE9E1', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }} styles={{ body: { padding: '10px 14px' } }}>
-        <div className="mobile-scroll-x" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: isMobile ? 'nowrap' : 'wrap', overflowX: isMobile ? 'auto' : undefined }}>
-          {VIEW_TABS.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => {
-                switchView(tab.key)
-              }}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: isMobile ? '7px 12px' : '8px 18px',
-                border: viewMode === tab.key ? '1px solid rgba(14,94,78,.45)' : '1px solid #EEE7E1',
-                borderRadius: 999,
-                background: viewMode === tab.key ? 'linear-gradient(135deg,#123C35,#0E5E4E)' : '#FAF8F4',
-                color: viewMode === tab.key ? '#F2E3B6' : '#5A6472',
-                fontWeight: viewMode === tab.key ? 700 : 500,
-                fontSize: 13,
-                cursor: 'pointer',
-                transition: 'all .18s',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                boxShadow: viewMode === tab.key ? '0 3px 10px rgba(14,94,78,.25)' : 'none',
-              }}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-          <button onClick={() => setManualLessonOpen(true)} style={{
-            marginLeft: isMobile ? 0 : 'auto',
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 16px',
-            borderRadius: 999,
-            background: 'linear-gradient(135deg,#0E5E4E,#0B4B40)',
-            color: '#F7F3E8',
-            border: 'none',
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-            boxShadow: '0 3px 10px rgba(14,94,78,.25)',
+      {/* 2. 紧凑型排课总览小盘 (Compact Overview Strip) */}
+      <div style={{
+        borderRadius: 14,
+        background: 'linear-gradient(135deg, #14574D 0%, #0D3E36 100%)',
+        boxShadow: '0 4px 14px rgba(20, 87, 77, 0.12)',
+        padding: isMobile ? '10px 12px' : '12px 18px',
+        marginBottom: 12,
+        color: '#FAF6EE',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 10,
+        }}>
+          {/* 左侧：本周课次核心指标 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+              <span style={{ fontSize: 11.5, color: 'rgba(214, 180, 91, 0.9)', fontWeight: 600 }}>本周排课</span>
+              <span style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: '#FFFFFF', fontVariantNumeric: 'tabular-nums' }}>
+                {overview?.weekTotal ?? 0}
+              </span>
+              <span style={{ fontSize: 11.5, color: '#FAF6EE', opacity: 0.8 }}>节</span>
+            </div>
+            <div style={{ width: 1, height: 16, background: 'rgba(214, 180, 91, 0.3)' }} />
+            <div style={{ fontSize: 11.5, color: '#FAF6EE', opacity: 0.85, display: 'flex', gap: 8 }}>
+              <span>今日 {overview?.todayTotal ?? 0} 节</span>
+              {(overview?.todayCancelled ?? 0) > 0 && (
+                <span style={{ color: '#FF7875' }}>今日取消 {overview?.todayCancelled}</span>
+              )}
+            </div>
+          </div>
+
+          {/* 右侧：活跃教室/教师/班级紧凑展示 */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: isMobile ? 10 : 16,
+            fontSize: 12,
           }}>
-            <PlusOutlined /> 临时加课
-          </button>
-          <button onClick={() => setScheduleFormOpen(true)} style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 14px', borderRadius: 999, background: '#fff', color: '#0E5E4E',
-            border: '1px solid rgba(14,94,78,.4)', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-          }}>
-            <PlusOutlined /> 新建课次
-          </button>
-          <button onClick={() => setCopyFridayOpen(true)} style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 14px', borderRadius: 999, background: '#fff', color: '#1D9E75',
-            border: '1px solid #1D9E75', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-          }}>
-            <CheckCircleOutlined /> 周五复制到周六
-          </button>
-          <button onClick={() => setPeriodSettingsOpen(true)} style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 14px', borderRadius: 999, background: '#fff', color: '#8A6B2F',
-            border: '1px solid rgba(201,164,92,.55)', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-          }}>
-            <ClockCircleOutlined /> 时间段设置
-          </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'rgba(250, 246, 238, 0.9)' }}>
+              <EnvironmentOutlined style={{ color: '#D6B45B' }} />
+              <span>教室 <strong style={{ color: '#FFFFFF', fontSize: 13.5 }}>{overview?.activeRooms ?? 0}</strong></span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'rgba(250, 246, 238, 0.9)' }}>
+              <TeamOutlined style={{ color: '#D6B45B' }} />
+              <span>教师 <strong style={{ color: '#FFFFFF', fontSize: 13.5 }}>{overview?.weekTeachers ?? 0}</strong></span>
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'rgba(250, 246, 238, 0.9)' }}>
+              <ApartmentOutlined style={{ color: '#D6B45B' }} />
+              <span>班级 <strong style={{ color: '#FFFFFF', fontSize: 13.5 }}>{overview?.runningGroups ?? 0}</strong></span>
+            </span>
+          </div>
         </div>
-      </Card>
+      </div>
 
       <div style={{ maxWidth: '100%' }}>
         {viewMode === 'class-matrix' ? (
           <ClassMatrixView selectedDate={selectedDate} setSelectedDate={setSelectedDate} onLessonClick={handleLessonClick} />
         ) : viewMode === 'room-matrix' && isMobile ? (
           <MobileRoomView selectedDate={selectedDate} setSelectedDate={setSelectedDate}
-            onNewCourseClick={() => setManualLessonOpen(true)} onLessonClick={handleLessonClick} />
+            onNewCourseClick={() => router.push(`/schedule/workbench?action=extra&date=${encodeURIComponent(format(selectedDate, 'yyyy-MM-dd'))}`)} onLessonClick={handleLessonClick} />
         ) : viewMode === 'room-matrix' ? (
           <div style={{ overflowX: 'auto' }}>
             <RoomMatrixView selectedDate={selectedDate} setSelectedDate={setSelectedDate}
               onCellClick={handleRoomCellClick} onLessonClick={handleLessonClick}
-              onNewCourseClick={() => setManualLessonOpen(true)} />
+              onNewCourseClick={() => router.push(`/schedule/workbench?action=extra&date=${encodeURIComponent(format(selectedDate, 'yyyy-MM-dd'))}`)} />
           </div>
         ) : viewMode === 'teacher-week' ? (
           <TeacherWeekView onLessonClick={handleLessonClick} />
@@ -319,15 +390,6 @@ function SchedulePageInner() {
         onCancel={cancelLesson}
       />}
 
-      {scheduleFormOpen && <ScheduleFormModal open={scheduleFormOpen} onClose={() => setScheduleFormOpen(false)} onSuccess={() => mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/')))} />}
-      {manualLessonOpen && (
-        <ManualLessonModal
-          initialDate={format(selectedDate, 'yyyy-MM-dd')}
-          onClose={() => setManualLessonOpen(false)}
-          onSuccess={() => mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/') || key.startsWith('/api/class-groups')))}
-        />
-      )}
-
       <BrandModal
         title="取消本次课"
         open={Boolean(cancelLessonId)}
@@ -343,23 +405,6 @@ function SchedulePageInner() {
 
       {oneOnOneOpen && <OneOnOneModal open={oneOnOneOpen} onClose={() => setOneOnOneOpen(false)}
         defaultDate={oneOnOneDate} onSuccess={() => setOneOnOneOpen(false)} />}
-      {periodSettingsOpen && <SchedulePeriodSettingsModal
-        open={periodSettingsOpen}
-        periods={periods}
-        onClose={() => setPeriodSettingsOpen(false)}
-        onSaved={() => {
-          mutatePeriods()
-          mutateSWR(key => typeof key === 'string' && key.startsWith('/api/schedules/'))
-        }}
-      />}
-
-      {copyFridayOpen && <CopyFridayToSaturdayModal
-        open={copyFridayOpen}
-        onClose={() => setCopyFridayOpen(false)}
-        onSuccess={() => {
-          mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/')))
-        }}
-      />}
     </PageLayout>
   )
 }

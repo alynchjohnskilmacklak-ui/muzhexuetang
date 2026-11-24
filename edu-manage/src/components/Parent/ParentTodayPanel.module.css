@@ -1,0 +1,654 @@
+/* 家长端今日学习日程舱与微光金刚区样式 */
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* ==============================================
+   金刚区 (Quick Actions Grid)
+   ============================================== */
+.quickActionsSection {
+  margin-top: 2px;
+}
+
+.quickActionsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.quickActionItem {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 4px 9px;
+  border: 1px solid rgba(20, 87, 77, 0.1);
+  border-radius: 14px;
+  color: inherit;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 245, 238, 0.88) 100%);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 3px 10px rgba(20, 60, 50, 0.04);
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 160ms ease, background 160ms ease, border-color 160ms ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.quickActionItem:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 6px 18px rgba(20, 87, 77, 0.1);
+  background: linear-gradient(165deg, #FFFFFF 0%, #F5F0E6 100%);
+  border-color: rgba(20, 87, 77, 0.2);
+}
+
+.quickActionItem:active {
+  transform: scale(0.95);
+}
+
+.quickActionItem:focus-visible {
+  outline: 2px solid var(--color-primary, #14574d);
+  outline-offset: 2px;
+}
+
+.iconBox {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 13px;
+  font-size: 20px;
+  position: relative;
+  isolation: isolate;
+  flex-shrink: 0;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 160ms ease;
+  overflow: hidden;
+}
+
+/* 顶部琉璃微高光反射 */
+.iconBox::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  pointer-events: none;
+}
+
+.iconBox :global(.anticon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto !important;
+  height: auto !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: inherit;
+  color: inherit;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+}
+
+.quickActionItem:hover .iconBox {
+  transform: scale(1.06);
+  filter: brightness(1.05);
+}
+
+.actionLabel {
+  max-width: 100%;
+  overflow: hidden;
+  color: #17352F;
+  font-size: 13px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+/* ==============================================
+   今日学习日程舱 (Today's Learning Schedule Cabin) - 通透去盒化
+   ============================================== */
+.scheduleSection {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 4px;
+  margin-bottom: 2px;
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 750;
+  color: var(--color-ink, #1a1201);
+  letter-spacing: -0.01em;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1E7A3C;
+  background: #DFF5E8;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(30, 122, 60, 0.2);
+}
+
+.pulseDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1E7A3C;
+  animation: pulseAnim 1.6s infinite;
+}
+
+@keyframes pulseAnim {
+  0% { transform: scale(0.9); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
+  100% { transform: scale(0.9); opacity: 1; }
+}
+
+.dateHint {
+  font-size: 12px;
+  color: var(--color-ink-muted, #73695b);
+  font-weight: 500;
+}
+
+/* ==============================================
+   焦点核心课（Spotlight Hero Lesson）- 墨玉沉浸卡
+   ============================================== */
+.heroCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  background: linear-gradient(140deg, #134E44 0%, #1A5E53 45%, #0D3B33 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 8px 24px rgba(13, 59, 51, 0.28) !important;
+  color: #FFFFFF !important;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 160ms ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.heroCard:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 12px 28px rgba(13, 59, 51, 0.35) !important;
+}
+
+.heroCard:active {
+  transform: scale(0.985);
+}
+
+.heroCardLive {
+  background: linear-gradient(140deg, #0F5E45 0%, #157355 45%, #0B4633 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 8px 24px rgba(15, 94, 69, 0.32) !important;
+}
+
+.heroHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.heroTimeWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.heroClockIcon {
+  font-size: 14px;
+  color: #E6C875;
+}
+
+.heroTimeText {
+  color: #FFFFFF;
+  font-size: 17.5px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 核心卡动态倒计时/状态胶囊 */
+.heroStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 750;
+  padding: 2.5px 9px;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.heroStatusBadgeUpcoming {
+  color: #F6E9C8;
+  background: rgba(246, 233, 200, 0.18);
+  border: 1px solid rgba(246, 233, 200, 0.42);
+}
+
+.heroStatusBadgeLive {
+  color: #8BF7B8;
+  background: rgba(46, 204, 113, 0.24);
+  border: 1px solid rgba(139, 247, 184, 0.45);
+}
+
+.heroStatusBadgeCompleted {
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.heroSubjectPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  flex-shrink: 0;
+}
+
+.heroBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heroCourseTitle {
+  margin: 0;
+  font-size: 16.5px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.heroMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: rgba(240, 248, 245, 0.85);
+}
+
+.heroMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.heroMetaIcon {
+  font-size: 12px;
+  color: #E6C875;
+}
+
+.heroDetailCta {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #FCE8B3;
+  transition: transform 140ms ease;
+}
+
+.heroCard:hover .heroDetailCta {
+  transform: translateX(2px);
+}
+
+/* ==============================================
+   全天后续日程列表 (Subsequent Lessons List) - 极简时间线与通透去盒化
+   ============================================== */
+.subsequentWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.subsequentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.subsequentTitle {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #173831;
+}
+
+.subsequentList {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(20, 87, 77, 0.12);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 4px 16px rgba(20, 70, 55, 0.04);
+}
+
+.subsequentItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgba(20, 87, 77, 0.06);
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.subsequentItem:last-child {
+  border-bottom: none;
+}
+
+.subsequentItem:hover {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.subsequentItem:active {
+  background: rgba(240, 246, 242, 0.9);
+}
+
+.subsequentItemCompleted {
+  opacity: 0.68;
+}
+
+/* 时间线竖线与节点 */
+.timelineCol {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.timelineTrackLine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: rgba(20, 87, 77, 0.12);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.timelineTrackLineFirst {
+  top: 50%;
+}
+
+.timelineTrackLineLast {
+  bottom: 50%;
+}
+
+.timelineTrackLineFirst.timelineTrackLineLast {
+  display: none;
+}
+
+.timelineDot {
+  position: relative;
+  z-index: 2;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.timelineDotUpcoming {
+  background: #14574D;
+  box-shadow: 0 0 0 2.5px rgba(20, 87, 77, 0.18);
+}
+
+.timelineDotLive {
+  background: #1E7A3C;
+  box-shadow: 0 0 0 3px rgba(30, 122, 60, 0.28);
+  animation: pulseAnim 1.6s infinite;
+}
+
+.timelineDotCompleted {
+  background: #B8B0A3;
+  box-shadow: 0 0 0 2px rgba(184, 176, 163, 0.2);
+}
+
+/* 统一横向时间区间 */
+.subsequentTimeCol {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 82px;
+}
+
+.subsequentTimeRange {
+  font-size: 13px;
+  font-weight: 750;
+  color: #143831;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.subsequentItemCompleted .subsequentTimeRange {
+  color: #8C8273;
+  font-weight: 600;
+}
+
+.subsequentMain {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.subsequentTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.miniSubjectBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.subsequentCourseName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ink, #1A1201);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subsequentMeta {
+  font-size: 11.5px;
+  color: var(--color-ink-subtle, #756a58);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subsequentRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.subsequentStatus {
+  padding: 2.5px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(138, 101, 23, 0.08) !important;
+  color: #8A6517 !important;
+  border: 1px solid rgba(138, 101, 23, 0.22) !important;
+}
+
+.subsequentArrow {
+  font-size: 10px;
+  color: var(--color-ink-subtle, #756a58);
+  opacity: 0.6;
+  transition: transform 140ms ease;
+}
+
+.subsequentItem:hover .subsequentArrow {
+  transform: translateX(2px);
+  opacity: 1;
+}
+
+/* 展开收起按钮与外层包围 */
+.expandToggleWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+  margin-bottom: 6px;
+}
+
+.expandToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 20px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid rgba(20, 87, 77, 0.26);
+  color: var(--color-primary, #14574D);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 150ms ease;
+  box-shadow: 0 2px 8px rgba(20, 87, 77, 0.05);
+}
+
+.expandToggleBtn:hover {
+  background: #F4F8F6;
+  border-color: var(--color-primary, #14574D);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(20, 87, 77, 0.1);
+}
+
+.expandToggleBtn:active {
+  transform: scale(0.97);
+}
+
+/* ==============================================
+   空状态卡片 (Empty Schedule State)
+   ============================================== */
+.emptyCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 26px 16px;
+  border-radius: 16px;
+  border: 1px dashed rgba(20, 87, 77, 0.2);
+  background: var(--color-surface-1, #ffffff);
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+.emptyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 87, 77, 0.25);
+  background: var(--color-primary-bg, #EAF4F1);
+  color: var(--color-primary, #14574d);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.emptyBtn:hover {
+  background: rgba(20, 87, 77, 0.12);
+}
+
+.emptyBtn:active {
+  transform: scale(0.96);
+}

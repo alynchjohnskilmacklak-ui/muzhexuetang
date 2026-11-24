@@ -1,0 +1,1010 @@
+[
+  {
+    "word": "club",
+    "examTags": [
+      "词汇·校园社团场景",
+      "阅读·获取活动与组织信息"
+    ],
+    "grammar": "n. 俱乐部；社团。可数，复数 clubs；club 也可指体育俱乐部或夜总会，结合语境判断。",
+    "collocations": "a school club; join a club; an art club。",
+    "commonMistake": "club 是可数名词，单数前通常要有 a/the 或物主限定词，如 a school club。",
+    "example": {
+      "english": "Our school has a club for young musicians.",
+      "chinese": "我们学校有一个面向年轻音乐爱好者的社团。"
+    },
+    "application": {
+      "prompt": "A group of students meets after school to paint together. They are in an art ___. A. club B. feeling",
+      "solution": "A。解析：学生课后一起活动的社团是 club。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: club",
+        "url": "https://dictionary.cambridge.org/dictionary/english/club"
+      }
+    ]
+  },
+  {
+    "word": "join",
+    "examTags": [
+      "词汇·动词搭配辨析",
+      "语言运用·表达加入社团"
+    ],
+    "grammar": "v. 加入；参加。join—joined—joined；join + 人/组织，join in + 活动。",
+    "collocations": "join a club; join the team; join in a game。",
+    "commonMistake": "说“加入社团”用 join a club；join in 后接活动，如 join in the game。",
+    "example": {
+      "english": "I want to join the school drama club.",
+      "chinese": "我想加入学校戏剧社。"
+    },
+    "application": {
+      "prompt": "Mia likes acting and wants to become a member of the drama club. She wants to ___ it. A. join B. join in",
+      "solution": "A。解析：join 后直接接组织名称，join the drama club 表示加入戏剧社。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: join",
+        "url": "https://dictionary.cambridge.org/dictionary/english/join"
+      }
+    ]
+  },
+  {
+    "word": "choose",
+    "examTags": [
+      "词汇·不规则动词词形",
+      "语言运用·表达选择"
+    ],
+    "grammar": "v. 选择；挑选。choose—chose—chosen；可接名词、疑问词 + to do 或 choose to do。",
+    "collocations": "choose a club; choose between A and B; choose to paint。",
+    "commonMistake": "choose 的过去式是 chose，过去分词是 chosen；不要把 chose 写成 choose。",
+    "example": {
+      "english": "She chose the music club last year.",
+      "chinese": "她去年选择了音乐社。"
+    },
+    "application": {
+      "prompt": "Yesterday, Ben ___ the climbing club. A. chose B. choose",
+      "solution": "A。解析：yesterday 表示过去，choose 的过去式是 chose。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: choose",
+        "url": "https://dictionary.cambridge.org/dictionary/english/choose"
+      }
+    ]
+  },
+  {
+    "word": "drama",
+    "examTags": [
+      "词汇·艺术与社团主题",
+      "阅读·识别活动类别"
+    ],
+    "grammar": "n. 戏剧；戏剧艺术。表示学科或表演活动时常作不可数名词；一部戏剧作品也可作可数名词。",
+    "collocations": "drama club; a drama lesson; perform a drama。",
+    "commonMistake": "drama 常与 club、lesson 等名词搭配；表示参加戏剧社说 join the drama club。",
+    "example": {
+      "english": "The drama club is preparing a play for Friday.",
+      "chinese": "戏剧社正在为周五准备一出戏。"
+    },
+    "application": {
+      "prompt": "Students in this club practise acting in plays. It is the ___ club. A. drama B. chess",
+      "solution": "A。解析：练习戏剧表演的社团是 drama club。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: drama",
+        "url": "https://dictionary.cambridge.org/dictionary/english/drama"
+      }
+    ]
+  },
+  {
+    "word": "feeling",
+    "examTags": [
+      "词汇·名词与动词词形",
+      "语言运用·表达情感"
+    ],
+    "grammar": "n. 感觉；感情；可数，复数 feelings。由动词 feel + -ing 构成；feel 是动词“感觉、觉得”。",
+    "collocations": "a happy feeling; feelings about music; have a feeling that ...。",
+    "commonMistake": "feeling 是名词，feel 是动词；表示一种感觉可说 a feeling，不能漏掉冠词。",
+    "example": {
+      "english": "I have a good feeling about the school musical.",
+      "chinese": "我对学校音乐剧有种很好的预感。"
+    },
+    "application": {
+      "prompt": "After hearing the good news, Ella has a happy ___. A. feeling B. feel",
+      "solution": "A。解析：a 后需要名词，feeling 是名词，表示“感觉”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: feeling",
+        "url": "https://dictionary.cambridge.org/dictionary/english/feeling"
+      }
+    ]
+  },
+  {
+    "word": "news",
+    "examTags": [
+      "词汇·不可数名词",
+      "语法·主谓一致与信息理解"
+    ],
+    "grammar": "n. 新闻；消息。通常不可数，形式以 -s 结尾但谓语用单数；一条消息可说 a piece of news。",
+    "collocations": "good news; hear the news; a piece of news。",
+    "commonMistake": "news 虽以 -s 结尾，通常仍用单数谓语：The news is good；不说 a news。",
+    "example": {
+      "english": "The news about the club is exciting.",
+      "chinese": "关于社团的消息令人兴奋。"
+    },
+    "application": {
+      "prompt": "The news about the art show ___ good. A. is B. are",
+      "solution": "A。解析：news 通常作不可数名词，谓语用单数 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: news",
+        "url": "https://dictionary.cambridge.org/dictionary/english/news"
+      }
+    ]
+  },
+  {
+    "word": "musical",
+    "examTags": [
+      "词汇·名词与形容词辨析",
+      "阅读·理解表演类型"
+    ],
+    "grammar": "n. 音乐剧；adj. 音乐的、有音乐才能的。作名词时可数，复数 musicals；作形容词可修饰 voice、instrument 等。",
+    "collocations": "a school musical; musical instruments; musical talent。",
+    "commonMistake": "musical 可作名词“音乐剧”，也可作形容词“音乐的”；注意 a musical 中它是名词。",
+    "example": {
+      "english": "Our drama club is putting on a musical this spring.",
+      "chinese": "今年春天，我们戏剧社要上演一部音乐剧。"
+    },
+    "application": {
+      "prompt": "The show tells a story with songs and dancing. It is a ___. A. musical B. drum",
+      "solution": "A。解析：用歌曲和舞蹈讲故事的舞台作品可以是 musical（音乐剧）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: musical",
+        "url": "https://dictionary.cambridge.org/dictionary/english/musical"
+      }
+    ]
+  },
+  {
+    "word": "exactly",
+    "examTags": [
+      "词汇·副词与形容词辨析",
+      "听读·确认时间和细节"
+    ],
+    "grammar": "adv. 恰好；正是；确切地。可修饰时间、数量或强调完全相同；形容词形式是 exact。",
+    "collocations": "exactly at six; exactly the same; that's exactly right。",
+    "commonMistake": "exactly 是副词，常修饰数字或时间；exact 是形容词，如 the exact time。",
+    "example": {
+      "english": "The club meeting starts at exactly four.",
+      "chinese": "社团活动恰好四点开始。"
+    },
+    "application": {
+      "prompt": "The clock shows 4:00, not 3:59 or 4:01. The meeting starts at ___ 4:00. A. exactly B. exact",
+      "solution": "A。解析：修饰时间 4:00 要用副词 exactly；exact 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: exactly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/exactly"
+      }
+    ]
+  },
+  {
+    "word": "drum",
+    "examTags": [
+      "词汇·乐器与可数名词",
+      "语言运用·介绍音乐活动"
+    ],
+    "grammar": "n. 鼓；可数，复数 drums。演奏鼓时常说 play the drums；一只鼓可说 a drum。",
+    "collocations": "play the drums; a drum kit; beat a drum。",
+    "commonMistake": "表达演奏鼓类乐器常说 play the drums；表示一个鼓时用 a drum。",
+    "example": {
+      "english": "Leo plays the drums in the school band.",
+      "chinese": "Leo 在学校乐队里打鼓。"
+    },
+    "application": {
+      "prompt": "The musician hits this instrument to make a strong beat. It is a ___. A. drum B. feeling",
+      "solution": "A。解析：通过敲击发出节奏声的乐器是 drum（鼓）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: drum",
+        "url": "https://dictionary.cambridge.org/dictionary/english/drum"
+      }
+    ]
+  },
+  {
+    "word": "ability",
+    "examTags": [
+      "词汇·名词搭配与词形",
+      "阅读·理解能力描述"
+    ],
+    "grammar": "n. 能力；可数或不可数。常用 ability to do sth.；复数 abilities。",
+    "collocations": "the ability to sing; reading ability; develop an ability。",
+    "commonMistake": "常说 the ability to do something，不说 the ability of do；ability 的复数为 abilities。",
+    "example": {
+      "english": "Mia has the ability to learn songs quickly.",
+      "chinese": "Mia 有快速学会歌曲的能力。"
+    },
+    "application": {
+      "prompt": "Ben can paint very well. He has the ___ to make beautiful pictures. A. ability B. news",
+      "solution": "A。解析：做某事的能力可以说 the ability to do it。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ability",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ability"
+      }
+    ]
+  },
+  {
+    "word": "paint",
+    "examTags": [
+      "词汇·动词与名词词性",
+      "语言运用·描述艺术活动"
+    ],
+    "grammar": "v. 用颜料画；给……刷漆；paint—painted—painted—painting。也可作 n. 颜料，通常不可数。",
+    "collocations": "paint a picture; paint the wall; paint with watercolours。",
+    "commonMistake": "paint 作动词时可直接接宾语：paint a picture；作名词表示颜料时通常不可数。",
+    "example": {
+      "english": "We paint pictures of flowers in the art club.",
+      "chinese": "我们在美术社画花的图画。"
+    },
+    "application": {
+      "prompt": "The art club wants to ___ a poster for its show. A. paint B. paints",
+      "solution": "A。解析：to 后接动词原形，使用 paint。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: paint",
+        "url": "https://dictionary.cambridge.org/dictionary/english/paint"
+      }
+    ]
+  },
+  {
+    "word": "climb",
+    "examTags": [
+      "词汇·动词词形与搭配",
+      "阅读·理解户外活动"
+    ],
+    "grammar": "v. 攀登；爬；climb—climbed—climbed—climbing。也可作 n. 攀登；常用 climb a hill/tree 或 go climbing。",
+    "collocations": "climb a mountain; climb up a tree; go climbing。",
+    "commonMistake": "climb 的 b 不发音；表示爬树常说 climb a tree，后面通常不再加 up。",
+    "example": {
+      "english": "The club members climb the hill together.",
+      "chinese": "社团成员们一起爬山。"
+    },
+    "application": {
+      "prompt": "The hill is not very high, so we can ___ it before lunch. A. climb B. drum",
+      "solution": "A。解析：爬上小山用动词 climb。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: climb",
+        "url": "https://dictionary.cambridge.org/dictionary/english/climb"
+      }
+    ]
+  },
+  {
+    "word": "more",
+    "examTags": [
+      "语法·数量与比较",
+      "阅读·理解增加或比较信息"
+    ],
+    "grammar": "det./pron./adv. 更多；更。可修饰复数可数名词或不可数名词；也用于比较级，如 more exciting。",
+    "collocations": "more time; more activities; more than one; more interesting。",
+    "commonMistake": "more 可修饰 more books 或 more time；most 常表示三者及以上中的“最多/最……”。",
+    "example": {
+      "english": "I need more time to practise the drum.",
+      "chinese": "我需要更多时间练鼓。"
+    },
+    "application": {
+      "prompt": "The club has only ten minutes left, but we need ___ time to finish. A. more B. most",
+      "solution": "A。解析：这里表示需要“更多”时间，用 more；most 表示“最多”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: more",
+        "url": "https://dictionary.cambridge.org/dictionary/english/more"
+      }
+    ]
+  },
+  {
+    "word": "act",
+    "examTags": [
+      "词汇·动词搭配与派生词",
+      "语言运用·描述戏剧表演"
+    ],
+    "grammar": "v. 表演；行动；表现。act—acted—acted—acting；可说 act in a play 或 act as ...；名词 actor 表示演员。",
+    "collocations": "act in a play; act as a guide; act well。",
+    "commonMistake": "表示“在戏剧中表演”说 act in a play；act 是动词，演员是 actor。",
+    "example": {
+      "english": "Two students act in the drama club's new play.",
+      "chinese": "两名学生在戏剧社的新戏中表演。"
+    },
+    "application": {
+      "prompt": "Students in the drama club ___ in a play on Friday. A. act B. acts",
+      "solution": "A。解析：主语 students 是复数，一般现在时用动词原形 act。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: act",
+        "url": "https://dictionary.cambridge.org/dictionary/english/act"
+      }
+    ]
+  },
+  {
+    "word": "interested",
+    "examTags": [
+      "语法知识·形容词与介词搭配",
+      "语言运用·表达兴趣"
+    ],
+    "grammar": "形容词，描述某人对事物感兴趣；常用 be interested in + 名词或动词-ing。",
+    "collocations": "be interested in nature；interested in collecting；become interested in",
+    "commonMistake": "interested 描述感兴趣的人；interesting 通常描述让人感兴趣的事物。",
+    "example": {
+      "english": "Nina is interested in learning about insects.",
+      "chinese": "妮娜对了解昆虫感兴趣。"
+    },
+    "application": {
+      "prompt": "Leo loves learning about animals. He is ___ in wildlife. (interested / interesting)",
+      "solution": "interested"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: interested",
+        "url": "https://dictionary.cambridge.org/dictionary/english/interested"
+      },
+      {
+        "label": "Cambridge Grammar: interesting or interested",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/word-choice-interesting-or-interested"
+      }
+    ]
+  },
+  {
+    "word": "nature",
+    "examTags": [
+      "语法知识·不可数名词",
+      "阅读能力·自然主题词汇"
+    ],
+    "grammar": "名词，表示自然界或自然；泛指自然时通常作不可数名词。",
+    "collocations": "nature club；in nature；nature reserve；enjoy nature",
+    "commonMistake": "泛指自然界时通常说 nature，不在前面加 a；a nature 通常不能表示“自然界”。",
+    "example": {
+      "english": "Our club walks in nature and watches birds.",
+      "chinese": "我们社团在大自然中徒步并观察鸟类。"
+    },
+    "application": {
+      "prompt": "Plants, animals, and the world around us are part of ___.",
+      "solution": "nature"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nature",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nature"
+      }
+    ]
+  },
+  {
+    "word": "beef",
+    "examTags": [
+      "语法知识·不可数名词",
+      "语言运用·食物与饮食"
+    ],
+    "grammar": "名词，表示牛肉，通常作不可数名词；说明份量时可用 some beef 或 a piece of beef。",
+    "collocations": "beef soup；beef noodles；a piece of beef",
+    "commonMistake": "泛指牛肉时通常不加 a，也不加复数 -s；可说 some beef。",
+    "example": {
+      "english": "Dad cooks beef with carrots for dinner.",
+      "chinese": "爸爸晚饭做胡萝卜炖牛肉。"
+    },
+    "application": {
+      "prompt": "We need some ___ for the stew. (beef)",
+      "solution": "beef"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: beef",
+        "url": "https://dictionary.cambridge.org/dictionary/english/beef"
+      }
+    ]
+  },
+  {
+    "word": "soon",
+    "examTags": [
+      "语法知识·时间副词",
+      "语言运用·时间顺序"
+    ],
+    "grammar": "副词，表示不久、很快；常放在动词后或句末，也可用于 as soon as。",
+    "collocations": "see you soon；soon after；as soon as；come back soon",
+    "commonMistake": "soon 表示时间上“不久”；quickly 通常表示动作速度快。",
+    "example": {
+      "english": "Our nature club will meet again soon.",
+      "chinese": "我们的自然社团很快会再次活动。"
+    },
+    "application": {
+      "prompt": "It is 2:55, and the club meeting begins at 3:00. It starts ___.",
+      "solution": "soon"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: soon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/soon"
+      }
+    ]
+  },
+  {
+    "word": "than",
+    "examTags": [
+      "语法知识·比较结构",
+      "书写规范·易混词辨析"
+    ],
+    "grammar": "连词或介词，用于比较；常跟在比较级后，如 taller than 或 more interesting than。",
+    "collocations": "bigger than；more than；better than；rather than",
+    "commonMistake": "than 用于比较；then 常表示“然后/那时”，两者拼写相近但用法不同。",
+    "example": {
+      "english": "A whale is much bigger than a fish.",
+      "chinese": "鲸鱼比鱼大得多。"
+    },
+    "application": {
+      "prompt": "A nature walk is longer ___ our usual club meeting. (than / then)",
+      "solution": "than"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: than",
+        "url": "https://dictionary.cambridge.org/dictionary/english/than"
+      }
+    ]
+  },
+  {
+    "word": "mind",
+    "examTags": [
+      "语法知识·动词与动词-ing",
+      "交际表达·礼貌请求"
+    ],
+    "grammar": "可作名词，表示头脑或想法；也可作动词，表示介意。mind 后接动词时常用动词-ing；Would you mind...? 可用于礼貌请求。",
+    "collocations": "change your mind；keep in mind；mind doing sth；Would you mind...?",
+    "commonMistake": "mind 后接另一动作时常用动词-ing，如 I don't mind helping；不说 mind to help。",
+    "example": {
+      "english": "I don't mind helping the nature club collect leaves.",
+      "chinese": "我不介意帮自然社团收集树叶。"
+    },
+    "application": {
+      "prompt": "Would you mind ___ the box while I open the door? (hold)",
+      "solution": "holding"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mind",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mind"
+      }
+    ]
+  },
+  {
+    "word": "fall",
+    "examTags": [
+      "语法知识·不规则动词",
+      "词汇拓展·季节表达"
+    ],
+    "grammar": "可作动词，表示落下或跌倒，不规则变化为 fall—fell—fallen；在美式英语中也可作名词表示秋天，英式英语常说 autumn。",
+    "collocations": "leaves fall；fall down；fall asleep；in the fall (US)",
+    "commonMistake": "fall 作动词的过去式是 fell、过去分词是 fallen；表示季节时 fall 是美式用法，autumn 也常用。",
+    "example": {
+      "english": "In the fall, leaves turn red and fall from the trees.",
+      "chinese": "秋天，树叶变红并从树上落下。"
+    },
+    "application": {
+      "prompt": "In the US, the season after summer is often called ___. (fall / fallen)",
+      "solution": "fall"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fall"
+      },
+      {
+        "label": "Cambridge Grammar: fall",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/fall"
+      }
+    ]
+  },
+  {
+    "word": "collect",
+    "examTags": [
+      "语法知识·动词形式",
+      "语言运用·兴趣与收集"
+    ],
+    "grammar": "动词，表示收集或采集；规则变化为 collect—collected—collected。",
+    "collocations": "collect stamps；collect leaves；collect information",
+    "commonMistake": "collect 表示收集，collection 是名词“收藏品/收集”；不要把两种词性混用。",
+    "example": {
+      "english": "The club collects fallen leaves for a science project.",
+      "chinese": "社团为一个科学项目收集落叶。"
+    },
+    "application": {
+      "prompt": "Every Saturday, we ___ leaves for our nature display. (collect)",
+      "solution": "collect"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: collect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/collect"
+      }
+    ]
+  },
+  {
+    "word": "insect",
+    "examTags": [
+      "语法知识·可数名词与复数",
+      "阅读能力·动物分类"
+    ],
+    "grammar": "可数名词，表示昆虫；复数为 insects。以元音音素开头，单数前用 an。",
+    "collocations": "an insect；insect life；insect collection",
+    "commonMistake": "insect 以元音音素开头，单数前用 an；蜘蛛有八条腿，不属于昆虫。",
+    "example": {
+      "english": "A butterfly is an insect with six legs.",
+      "chinese": "蝴蝶是一种有六条腿的昆虫。"
+    },
+    "application": {
+      "prompt": "An ant has six legs, so it is an ___.",
+      "solution": "insect"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: insect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/insect"
+      }
+    ]
+  },
+  {
+    "word": "discover",
+    "examTags": [
+      "语法知识·动词形式",
+      "阅读能力·理解发现与探索"
+    ],
+    "grammar": "动词，表示发现或了解到；规则变化为 discover—discovered—discovered；可接名词或 that 从句。",
+    "collocations": "discover a new place；discover a fact；discover that...",
+    "commonMistake": "discover 表示发现原先未知的事物；其名词形式 discovery 的复数为 discoveries。",
+    "example": {
+      "english": "The students discovered a small pond behind the nature centre.",
+      "chinese": "学生们在自然中心后面发现了一个小池塘。"
+    },
+    "application": {
+      "prompt": "Yesterday, our club found a new bird near the lake. We ___ it there. (discover)",
+      "solution": "discovered"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: discover",
+        "url": "https://dictionary.cambridge.org/dictionary/english/discover"
+      }
+    ]
+  },
+  {
+    "word": "wildlife",
+    "examTags": [
+      "语法知识·不可数名词",
+      "阅读能力·自然环境与动物"
+    ],
+    "grammar": "名词，泛指自然环境中的野生动物和植物时通常作不可数名词。",
+    "collocations": "protect wildlife；wildlife park；wildlife around the world",
+    "commonMistake": "泛指野生生物时通常用 wildlife，不加复数 -s；具体动物可用 wild animals。",
+    "example": {
+      "english": "The nature club learns how to protect local wildlife.",
+      "chinese": "自然社团学习如何保护当地野生生物。"
+    },
+    "application": {
+      "prompt": "The animals and plants that live in nature are known as ___.",
+      "solution": "wildlife"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wildlife",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wildlife"
+      }
+    ]
+  },
+  {
+    "word": "sing",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语言运用·音乐与社团活动"
+    ],
+    "grammar": "动词，表示唱歌；不规则变化为 sing—sang—sung，第三人称单数为 sings。",
+    "collocations": "sing a song；sing along；sing in a choir",
+    "commonMistake": "sing 的过去式是 sang，过去分词是 sung；不要把两种形式混淆。",
+    "example": {
+      "english": "The music club sings a new song every month.",
+      "chinese": "音乐社每个月唱一首新歌。"
+    },
+    "application": {
+      "prompt": "Our club ___ folk songs at the spring show. (sing)",
+      "solution": "sings"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sing"
+      }
+    ]
+  },
+  {
+    "word": "swim",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语言运用·运动与健康"
+    ],
+    "grammar": "动词，表示游泳；不规则变化为 swim—swam—swum；进行时 swimming 要双写 m。",
+    "collocations": "swim in a pool；go swimming；swimming lesson",
+    "commonMistake": "swim 的过去式是 swam；现在分词 swimming 要双写 m。",
+    "example": {
+      "english": "We swim in the school pool after lessons on Friday.",
+      "chinese": "周五放学后，我们在学校泳池游泳。"
+    },
+    "application": {
+      "prompt": "Jake ___ in the pool every Tuesday. (swim)",
+      "solution": "swims"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: swim",
+        "url": "https://dictionary.cambridge.org/dictionary/english/swim"
+      }
+    ]
+  },
+  {
+    "word": "run",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语言运用·运动与日常活动"
+    ],
+    "grammar": "动词，表示跑；不规则变化为 run—ran—run；现在分词 running 要双写 n。",
+    "collocations": "run fast；run around；run a race；go for a run",
+    "commonMistake": "run 的过去式是 ran；running 要双写 n，不能写成 runing。",
+    "example": {
+      "english": "I run around the field with my friends after school.",
+      "chinese": "放学后我和朋友在操场上跑步。"
+    },
+    "application": {
+      "prompt": "At the sports club, we ___ around the field each week. (run)",
+      "solution": "run"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: run",
+        "url": "https://dictionary.cambridge.org/dictionary/english/run"
+      }
+    ]
+  },
+  {
+    "word": "fast",
+    "examTags": [
+      "语法知识·形容词和副词同形",
+      "语言运用·描述速度"
+    ],
+    "grammar": "adj./adv. 快的；快速地。fast 作形容词和副词时形式相同，比较级 faster，最高级 fastest。",
+    "collocations": "a fast train；run fast；fast food",
+    "commonMistake": "fast 作副词时不加 -ly：run fast；quick 的副词形式是 quickly。",
+    "example": {
+      "english": "The blue train is fast, but the red one is faster.",
+      "chinese": "蓝色的火车很快，但红色的那辆更快。"
+    },
+    "application": {
+      "prompt": "This train can travel at high speed. It is a ___ train. (fast / quickly)",
+      "solution": "fast。解析：train 前需要形容词；fast 是形容词，quickly 是副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fast",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fast"
+      },
+      {
+        "label": "Cambridge Grammar: fast, quick or quickly",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/fast"
+      }
+    ]
+  },
+  {
+    "word": "dance",
+    "examTags": [
+      "语法知识·动词形式",
+      "语言运用·兴趣与社团活动"
+    ],
+    "grammar": "v. 跳舞；n. 舞蹈。作动词时规则变化为 dance—danced—danced；dance to music 表示随着音乐跳舞。",
+    "collocations": "dance to music；dance with a partner；a dance club",
+    "commonMistake": "表示“随着音乐跳舞”用 dance to music；dance 的过去式为 danced。",
+    "example": {
+      "english": "Mia likes to dance to music after school.",
+      "chinese": "米娅喜欢放学后随着音乐跳舞。"
+    },
+    "application": {
+      "prompt": "Mia likes to ___ to music after school. (dance / dances)",
+      "solution": "dance。解析：like to 后接动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dance",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dance"
+      }
+    ]
+  },
+  {
+    "word": "fly",
+    "examTags": [
+      "语法知识·不规则动词",
+      "语言运用·描述动作"
+    ],
+    "grammar": "v. 飞；放飞。作动词时不规则变化为 fly—flew—flown；fly a kite 表示放风筝。",
+    "collocations": "birds fly；fly a kite；fly to another city",
+    "commonMistake": "fly 的过去式是 flew，过去分词是 flown；不要写成 flied。",
+    "example": {
+      "english": "Yesterday, our kite flew over the school field.",
+      "chinese": "昨天，我们的风筝飞过了学校操场。"
+    },
+    "application": {
+      "prompt": "Yesterday, the kite ___ above the field. (flew / flown)",
+      "solution": "flew。解析：Yesterday 表示过去，fly 的过去式是 flew。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fly"
+      }
+    ]
+  },
+  {
+    "word": "watch",
+    "examTags": [
+      "语法知识·动词与名词辨析",
+      "语言运用·描述观看活动"
+    ],
+    "grammar": "v. 观看；注视；n. 手表。作动词时规则变化为 watch—watched—watched；watch 后直接接观看的内容。",
+    "collocations": "watch TV；watch a film；watch a game；a wristwatch",
+    "commonMistake": "表示观看节目时说 watch TV，不在 watch 后加 to；名词 watch 表示“手表”。",
+    "example": {
+      "english": "We watch the club show together every Friday.",
+      "chinese": "我们每周五一起观看社团演出。"
+    },
+    "application": {
+      "prompt": "We ___ the club show together every Friday. (watch / watches)",
+      "solution": "watch。解析：主语 We 是复数人称，谓语用动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: watch",
+        "url": "https://dictionary.cambridge.org/dictionary/english/watch"
+      }
+    ]
+  },
+  {
+    "word": "cake",
+    "examTags": [
+      "语法知识·可数与不可数名词",
+      "语言运用·食物与份量表达"
+    ],
+    "grammar": "n. 蛋糕。表示一个完整的蛋糕时可数，如 a cake；泛指蛋糕或一份时可作不可数用法，如 a piece of cake。",
+    "collocations": "a birthday cake；a piece of cake；make a cake",
+    "commonMistake": "piece of 后接 cake，不说 a piece of cakes；表示完整的一个蛋糕可说 a cake。",
+    "example": {
+      "english": "I would like a piece of cake after lunch.",
+      "chinese": "午饭后我想吃一块蛋糕。"
+    },
+    "application": {
+      "prompt": "I would like a piece of ___ after lunch. (cake / cakes)",
+      "solution": "cake。解析：piece of 后接表示食物整体的 cake。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cake",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cake"
+      }
+    ]
+  },
+  {
+    "word": "cook",
+    "examTags": [
+      "语法知识·情态动词后接动词原形",
+      "语言运用·食物制作"
+    ],
+    "grammar": "v. 烹饪；煮。规则变化为 cook—cooked—cooked；cook 也可作可数名词，表示厨师。",
+    "collocations": "cook dinner；cook noodles；a good cook",
+    "commonMistake": "can 后接动词原形：can cook；不能写成 can cooks。",
+    "example": {
+      "english": "My brother can cook noodles for the club.",
+      "chinese": "我哥哥会为社团煮面条。"
+    },
+    "application": {
+      "prompt": "My brother can ___ noodles for the club. (cook / cooks)",
+      "solution": "cook。解析：情态动词 can 后用动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cook",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cook"
+      }
+    ]
+  },
+  {
+    "word": "noodle",
+    "examTags": [
+      "语法知识·名词单复数",
+      "语言运用·食物与份量表达"
+    ],
+    "grammar": "n. 面条；常以复数 noodles 表示一份面条或面食；单数 noodle 可指一根面条。",
+    "collocations": "a bowl of noodles；noodle soup；cook noodles",
+    "commonMistake": "说一碗面通常用 a bowl of noodles；noodles 以 -s 结尾，但这里表示食物，不是多个完整份数。",
+    "example": {
+      "english": "We shared two bowls of noodles after the dance class.",
+      "chinese": "舞蹈课后我们分吃了两碗面条。"
+    },
+    "application": {
+      "prompt": "We ordered two bowls of ___ for lunch. (noodle / noodles)",
+      "solution": "noodles。解析：表示面食通常用复数 noodles。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: noodle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/noodle"
+      }
+    ]
+  },
+  {
+    "word": "open",
+    "examTags": [
+      "语法知识·动词与形容词",
+      "语言运用·请求与指令"
+    ],
+    "grammar": "v. 打开；adj. 开着的、开放的。动词过去式和过去分词为 opened；形容词 open 描述未关闭的状态。",
+    "collocations": "open the door；open a window；be open",
+    "commonMistake": "open 作动词表示“打开”，opened 是过去式；open 作形容词表示“开着的”，如 The door is open。",
+    "example": {
+      "english": "Please open the window before the club meeting.",
+      "chinese": "社团活动开始前请打开窗户。"
+    },
+    "application": {
+      "prompt": "Please ___ the window before the club meeting. (open / opens)",
+      "solution": "open。解析：祈使句以动词原形开头。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: open",
+        "url": "https://dictionary.cambridge.org/dictionary/english/open"
+      },
+      {
+        "label": "Cambridge Grammar: open or opened?",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/open"
+      }
+    ]
+  },
+  {
+    "word": "take",
+    "examTags": [
+      "语法知识·不规则动词",
+      "词汇搭配·动词与名词搭配"
+    ],
+    "grammar": "v. 拿；带；参加等。不规则变化为 take—took—taken；常见结构有 take part in sth.（参加某活动）。",
+    "collocations": "take part in；take a photo；take a bus；take a break",
+    "commonMistake": "固定搭配是 take part in；take 的过去式是 took，过去分词是 taken。",
+    "example": {
+      "english": "Our club will take part in the school art show.",
+      "chinese": "我们社团将参加学校艺术展。"
+    },
+    "application": {
+      "prompt": "Our club will ___ part in the school art show. (take / make)",
+      "solution": "take。解析：表示“参加”用 take part in。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: take",
+        "url": "https://dictionary.cambridge.org/dictionary/english/take"
+      },
+      {
+        "label": "Cambridge Grammar: take",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/take"
+      }
+    ]
+  },
+  {
+    "word": "visit",
+    "examTags": [
+      "语法知识·及物动词",
+      "语言运用·描述参观与拜访"
+    ],
+    "grammar": "v. 参观；拜访。visit 后直接接地点或人作宾语；规则变化为 visit—visited—visited。",
+    "collocations": "visit a museum；visit a friend；visit a city",
+    "commonMistake": "动词 visit 后直接接地点或人，不说 visit to a place；名词短语可说 pay a visit to a place。",
+    "example": {
+      "english": "We will visit the science museum on Saturday.",
+      "chinese": "我们周六将参观科学博物馆。"
+    },
+    "application": {
+      "prompt": "On Saturday, we will ___ the science museum. (visit / go)",
+      "solution": "visit。解析：visit 可直接接地点作宾语；go 后通常需用 to 再接地点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: visit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/visit"
+      }
+    ]
+  },
+  {
+    "word": "park",
+    "examTags": [
+      "词汇·场所名词",
+      "阅读·理解地点信息"
+    ],
+    "grammar": "n. 公园；停车场。作可数名词，单数前通常需有冠词或限定词，复数为 parks；也可作动词表示停车。",
+    "collocations": "in the park；go to a park；a city park",
+    "commonMistake": "表示“在公园里”说 in the park；park 也可作动词“停车”，需结合上下文判断词性。",
+    "example": {
+      "english": "The club has a picnic in the park every spring.",
+      "chinese": "社团每年春天都在公园里野餐。"
+    },
+    "application": {
+      "prompt": "The children play outside in the ___ near their school. (park / classroom)",
+      "solution": "park。解析：学校附近供户外活动的地点是公园。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: park",
+        "url": "https://dictionary.cambridge.org/dictionary/english/park"
+      }
+    ]
+  },
+  {
+    "word": "when",
+    "examTags": [
+      "语法知识·疑问副词",
+      "语法知识·时间状语从句"
+    ],
+    "grammar": "adv./conj. 什么时候；当……时。疑问句中询问时间；作连词时引导时间状语从句，表示“当……时”。",
+    "collocations": "when to start；when the class begins；since when",
+    "commonMistake": "when 询问时间，where 询问地点；谈将来时，when 从句中通常用一般现在时表示将来。",
+    "example": {
+      "english": "When does the dance club meet? It meets on Friday.",
+      "chinese": "舞蹈社团什么时候活动？周五活动。"
+    },
+    "application": {
+      "prompt": "___ does the dance club meet? — On Friday. (When / Where)",
+      "solution": "When。解析：回答是 On Friday，表示时间，因此询问时间用 When。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: when",
+        "url": "https://dictionary.cambridge.org/dictionary/english/when"
+      },
+      {
+        "label": "Cambridge Grammar: when",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/when"
+      }
+    ]
+  },
+  {
+    "word": "share",
+    "examTags": [
+      "语法知识·动词搭配",
+      "语言运用·分享与合作"
+    ],
+    "grammar": "v. 分享；共用；分配。规则变化为 share—shared—shared；表示与某人分享某物，常用 share sth. with sb.。",
+    "collocations": "share sth. with sb.；share a room；share ideas",
+    "commonMistake": "表示“和某人分享某物”用 share sth. with sb.，不用 share sth. to sb.。",
+    "example": {
+      "english": "I like to share my ideas with the club members.",
+      "chinese": "我喜欢和社团成员分享我的想法。"
+    },
+    "application": {
+      "prompt": "Please share the cake ___ your friends. (with / to)",
+      "solution": "with。解析：固定搭配为 share sth. with sb.。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: share",
+        "url": "https://dictionary.cambridge.org/dictionary/english/share"
+      }
+    ]
+  }
+]

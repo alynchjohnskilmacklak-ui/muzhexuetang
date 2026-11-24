@@ -23,6 +23,7 @@ interface MobileSelectProps {
   disabled?: boolean
   popupMatchSelectWidth?: boolean | number
   dropdownStyle?: CSSProperties
+  styles?: { popup?: { root?: CSSProperties } }
   listHeight?: number
   searchable?: boolean
   nativeOnMobile?: boolean
@@ -31,9 +32,6 @@ interface MobileSelectProps {
 const isGroup = (option: MobileSelectOption | MobileSelectGroup): option is MobileSelectGroup => (
   Array.isArray((option as MobileSelectGroup).options)
 )
-
-// antd Select 类型未暴露 inputAutoComplete，但运行时 rc-select 支持，用于关闭 iOS Safari 自动填充
-const selectAutoCompleteOff = { inputAutoComplete: 'off' } as Record<string, string>
 
 export function MobileSelect({
   value,
@@ -47,6 +45,7 @@ export function MobileSelect({
   disabled,
   popupMatchSelectWidth,
   dropdownStyle,
+  styles: customStyles,
   listHeight = 220,
   searchable = true,
   nativeOnMobile = false,
@@ -63,6 +62,11 @@ export function MobileSelect({
   const handleSelectClick = () => {
     if (!suppressClick.current) setOpen((current) => !current)
   }
+
+  const mergedStyles = dropdownStyle
+    ? { popup: { root: dropdownStyle }, ...customStyles }
+    : customStyles
+  const allowClearProp = allowClear ? { clearIcon: <CloseCircleFilled style={{ fontSize: 18 }} /> } : false
 
   // Native picker is reserved for simple controls; it never focuses a text input.
   if (isMobile && nativeOnMobile) {
@@ -97,19 +101,17 @@ export function MobileSelect({
         onClick={handleSelectClick}
         showSearch={searchable}
         mobileSearch={searchable}
-        allowClear={allowClear}
+        allowClear={allowClearProp}
         placeholder={placeholder}
         style={style}
         size={size}
         disabled={disabled}
         value={value || undefined}
-        clearIcon={<CloseCircleFilled style={{ fontSize: 18 }} />}
-        {...selectAutoCompleteOff}
         onChange={(nextValue) => onChange?.(typeof nextValue === 'string' ? nextValue : String(nextValue ?? ''))}
         onClear={() => { onChange?.(''); onClear?.() }}
         options={options}
         popupMatchSelectWidth={popupMatchSelectWidth}
-        dropdownStyle={dropdownStyle}
+        styles={mergedStyles}
         listHeight={listHeight}
         virtual={false}
         getPopupContainer={() => document.body}
@@ -120,18 +122,16 @@ export function MobileSelect({
   return (
     <Select
       open={open}
-      onDropdownVisibleChange={setOpen}
+      onOpenChange={setOpen}
       onMouseDown={handleSelectMouseDown}
       onClick={handleSelectClick}
       showSearch={searchable}
-      allowClear={allowClear}
+      allowClear={allowClearProp}
       placeholder={placeholder}
       style={style}
       size={size}
       disabled={disabled}
       value={value || undefined}
-      clearIcon={<CloseCircleFilled style={{ fontSize: 18 }} />}
-      {...selectAutoCompleteOff}
       onChange={(nextValue) => onChange?.(nextValue || '')}
       onClear={() => { onChange?.(''); onClear?.() }}
       filterOption={searchable ? ((input, option) =>
@@ -139,7 +139,7 @@ export function MobileSelect({
       ) : false}
       options={options}
       popupMatchSelectWidth={popupMatchSelectWidth}
-      dropdownStyle={dropdownStyle}
+      styles={mergedStyles}
       listHeight={listHeight}
     />
   )

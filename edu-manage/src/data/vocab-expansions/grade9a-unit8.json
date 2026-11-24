@@ -1,0 +1,522 @@
+[
+  {
+    "word": "pull-up",
+    "examTags": ["词汇·可数名词", "阅读·体能训练"],
+    "grammar": "n. 引体向上。可数，复数 pull-ups；作定语时常写 pull-up bar（单杠）。",
+    "collocations": "do a pull-up; do ten pull-ups; a pull-up bar",
+    "commonMistake": "pull-up 是名词，复数在整个复合词后加 -s：pull-ups；动词短语“拉起”则写 pull up。",
+    "example": {"english": "I could do five pull-ups after weeks of training.", "chinese": "训练了几周后，我能做五个引体向上。"},
+    "application": {"prompt": "At the fitness test, Mia hung from the bar and lifted her chin above it. She completed one ___. A. pull-up B. relay", "solution": "A。解析：悬挂在杠上并把下巴拉过横杠是 pull-up（引体向上）。"},
+    "sources": [{"label": "Cambridge Dictionary: pull-up", "url": "https://dictionary.cambridge.org/dictionary/english/pull-up"}]
+  },
+  {
+    "word": "relay",
+    "examTags": ["词汇·名词与动词", "阅读·田径比赛"],
+    "grammar": "n. 接力赛；接力。可数，复数 relays；relay race 指接力赛，relay 作动词时表示转交或转播。",
+    "collocations": "a relay race; run a relay; a relay team",
+    "commonMistake": "relay 表示比赛时，选手要依次接棒；接力赛不是每位选手同时起跑的个人赛。",
+    "example": {"english": "Our relay team won the race by two seconds.", "chinese": "我们的接力队以两秒优势赢得了比赛。"},
+    "application": {"prompt": "Four runners each covered one part of the race and passed a baton to the next teammate. They competed in a ___. A. marathon B. relay", "solution": "B。解析：多名跑者依次跑一段并交接接力棒，是 relay（接力赛）。"},
+    "sources": [{"label": "Cambridge Dictionary: relay", "url": "https://dictionary.cambridge.org/dictionary/english/relay"}]
+  },
+  {
+    "word": "shot-put",
+    "examTags": ["词汇·体育项目", "语法·复合名词"],
+    "grammar": "n. 推铅球（比赛）。可作 shot put（常见分写形式），通常作单数项目名称。",
+    "collocations": "the shot-put event; compete in the shot put; a shot-put athlete",
+    "commonMistake": "shot-put 是田径投掷项目，动作是从肩部推出重球；不是把球像棒球一样投出去。",
+    "example": {"english": "Liu entered the shot-put event at the school sports meet.", "chinese": "刘参加了学校运动会的推铅球项目。"},
+    "application": {"prompt": "The athlete held a heavy metal ball near his neck and pushed it as far as he could. Which event was this? A. shot-put B. shot-putter", "solution": "A。解析：从肩部推出重球的项目是 shot-put（推铅球）；shot-putter 指运动员。"},
+    "sources": [{"label": "Cambridge Dictionary: shot put", "url": "https://dictionary.cambridge.org/dictionary/english/shot-put"}]
+  },
+  {
+    "word": "boxing",
+    "examTags": ["词汇·不可数名词", "阅读·体育项目"],
+    "grammar": "n. 拳击（运动）。通常不可数；boxer 指拳击手，boxing match 指拳击比赛。",
+    "collocations": "learn boxing; a boxing match; a professional boxer",
+    "commonMistake": "表示拳击这项运动通常说 boxing，不加 a；指一场比赛时可说 a boxing match。",
+    "example": {"english": "My uncle began boxing when he was in high school.", "chinese": "我叔叔高中时开始练拳击。"},
+    "application": {"prompt": "The two athletes wore gloves and took turns punching inside a ring. The sport was ___. A. fencing B. boxing", "solution": "B。解析：戴拳击手套、在拳台上对打的运动是 boxing（拳击）。"},
+    "sources": [{"label": "Cambridge Dictionary: boxing", "url": "https://dictionary.cambridge.org/dictionary/english/boxing"}]
+  },
+  {
+    "word": "competition",
+    "examTags": ["词汇·可数名词", "语法·动词派生"],
+    "grammar": "n. 比赛；竞赛；竞争。动词 compete；形容词 competitive；复数 competitions。",
+    "collocations": "enter a competition; win a competition; a sports competition",
+    "commonMistake": "competition 是比赛或竞争，competitor 是参赛者；表示“参加比赛”用 compete in/at a competition。",
+    "example": {"english": "The school held a swimming competition on Friday.", "chinese": "学校周五举办了一场游泳比赛。"},
+    "application": {"prompt": "More than 100 students entered the event, and the fastest swimmer won a prize. It was a swimming ___. A. competition B. competitor", "solution": "A。解析：有多人参赛并决出胜者的活动是 competition（比赛）；competitor 是选手。"},
+    "sources": [{"label": "Cambridge Dictionary: competition", "url": "https://dictionary.cambridge.org/dictionary/english/competition"}]
+  },
+  {
+    "word": "tryout",
+    "examTags": ["词汇·可数名词", "阅读·选拔赛"],
+    "grammar": "n. 预赛；选拔赛；试用。可数，复数 tryouts；常用于美式英语，英式英语也常写 trial。",
+    "collocations": "a team tryout; go to a tryout; hold tryouts for the team",
+    "commonMistake": "tryout 是名词“选拔赛”；动词短语 try out 表示参加选拔或试用，书写时分开。",
+    "example": {"english": "Several students came to the basketball tryout after school.", "chinese": "放学后，几名学生来参加篮球队选拔。"},
+    "application": {"prompt": "Before the season starts, the coach will watch each hopeful player and choose who joins the team. Nora will attend a ___. A. tournament B. tryout", "solution": "B。解析：赛季开始前通过展示能力选队员，是参加 tryout（选拔赛）。"},
+    "sources": [{"label": "Cambridge Dictionary: tryout", "url": "https://dictionary.cambridge.org/dictionary/english/tryout"}]
+  },
+  {
+    "word": "handoff",
+    "examTags": ["词汇·可数名词", "阅读·接力交接"],
+    "grammar": "n. 交接；（接力赛中的）递棒。可数，复数 handoffs；也可写 hand-off。",
+    "collocations": "a baton handoff; a clean handoff; practice the handoff",
+    "commonMistake": "handoff 是“交接”这一动作或过程；接力棒本身是 baton，二者不要混为一词。",
+    "example": {"english": "A clean handoff helped the team keep its speed.", "chinese": "顺畅的交接帮助队伍保持了速度。"},
+    "application": {"prompt": "The outgoing runner placed the stick directly into her teammate's hand without slowing down. Their ___ was smooth. A. handoff B. hurdle", "solution": "A。解析：跑者把棒交到队友手中的动作是 handoff（交接）。"},
+    "sources": [{"label": "Cambridge Dictionary: handoff", "url": "https://dictionary.cambridge.org/dictionary/english/handoff"}]
+  },
+  {
+    "word": "baton",
+    "examTags": ["词汇·可数名词", "阅读·接力比赛"],
+    "grammar": "n. 接力棒；指挥棒。可数，复数 batons；a relay baton 指接力赛中传递的短棒。",
+    "collocations": "pass the baton; carry a baton; a relay baton",
+    "commonMistake": "接力赛交接的是 baton（接力棒）；handoff 指交接动作，runner 是跑者。",
+    "example": {"english": "The runner dropped the baton near the final turn.", "chinese": "跑者在最后一个弯道附近掉了接力棒。"},
+    "application": {"prompt": "The next runner was waiting in the exchange zone with an empty hand. The first runner passed her the ___. A. medal B. baton", "solution": "B。解析：接力跑者依次传递的短棒叫 baton（接力棒）。"},
+    "sources": [{"label": "Cambridge Dictionary: baton", "url": "https://dictionary.cambridge.org/dictionary/english/baton"}]
+  },
+  {
+    "word": "judge",
+    "examTags": ["词汇·名词与动词", "语法·熟词多义"],
+    "grammar": "n. 裁判员；法官；v. 判断、评判。过去式 judged；judgment/judgement 为名词“判断”。",
+    "collocations": "a sports judge; judge a contest; judge someone by their actions",
+    "commonMistake": "judge 作“判断”时不能直接接形容词作宾语；可说 judge the performance good 或 judge that it is good。",
+    "example": {"english": "The judge gave the diver a score of nine.", "chinese": "裁判给这名跳水运动员打了九分。"},
+    "application": {"prompt": "She watched every turn and awarded points to each skater. She was one of the ___. A. judges B. jumpers", "solution": "A。解析：负责观看动作并打分的人是 judge（裁判员）。"},
+    "sources": [{"label": "Cambridge Dictionary: judge", "url": "https://dictionary.cambridge.org/dictionary/english/judge"}]
+  },
+  {
+    "word": "runner",
+    "examTags": ["词汇·名词", "语法·动词派生"],
+    "grammar": "n. 参加赛跑的人；跑步者。由 run + -er 构成，双写 n；复数 runners。",
+    "collocations": "a fast runner; a long-distance runner; a relay runner",
+    "commonMistake": "run 加 -er 时双写 n：runner；run 的现在分词 running 也双写 n。",
+    "example": {"english": "The runner crossed the finish line first.", "chinese": "这名跑者第一个冲过终点线。"},
+    "application": {"prompt": "In the relay, each ___ ran one section of the track before passing the baton. A. run B. runner", "solution": "B。解析：句中需要表示参赛者的名词 runner；run 是动词“跑”。"},
+    "sources": [{"label": "Cambridge Dictionary: runner", "url": "https://dictionary.cambridge.org/dictionary/english/runner"}]
+  },
+  {
+    "word": "take the lead",
+    "examTags": ["词汇·动词短语", "阅读·比赛进程"],
+    "grammar": "phr. 领先；带头。比赛中 take the lead 指取得领先位置，过去式 took the lead。",
+    "collocations": "take the lead in a race; take the lead from someone; be in the lead",
+    "commonMistake": "take the lead 表示取得领先；已经领先的状态常说 be in the lead，lead 在此处是名词。",
+    "example": {"english": "The blue team took the lead on the final lap.", "chinese": "蓝队在最后一圈取得了领先。"},
+    "application": {"prompt": "After two runners stumbled, Mei moved ahead of everyone else. She began to ___. A. take a break B. take the lead", "solution": "B。解析：超过所有选手并跑在最前面，表示 take the lead（取得领先）。"},
+    "sources": [{"label": "Cambridge Dictionary: lead", "url": "https://dictionary.cambridge.org/dictionary/english/lead"}]
+  },
+  {
+    "word": "smooth",
+    "examTags": ["词汇·形容词与动词", "语法·词性派生"],
+    "grammar": "adj. 光滑的；顺利的；平稳的。v. 使平滑；smoothly 是副词，smoothness 是名词。",
+    "collocations": "a smooth surface; a smooth ride; a smooth handoff",
+    "commonMistake": "smooth 作形容词修饰名词；修饰动词时要用 smoothly，如 pass the baton smoothly。",
+    "example": {"english": "The team made a smooth change from one runner to the next.", "chinese": "队员之间的交接很顺畅。"},
+    "application": {"prompt": "The relay runners passed the baton without dropping it or losing speed. The exchange was ___. A. smooth B. rough", "solution": "A。解析：交接没有失误也没有减速，说明 handoff 很 smooth（顺利）。"},
+    "sources": [{"label": "Cambridge Dictionary: smooth", "url": "https://dictionary.cambridge.org/dictionary/english/smooth"}]
+  },
+  {
+    "word": "make up ground on sb/sth",
+    "examTags": ["词汇·动词短语", "阅读·追赶与差距"],
+    "grammar": "phr. 逐渐缩小与某人或某物的距离、差距。make up 后接 ground，再接 on + 对象；make 变过去式为 made。",
+    "collocations": "make up ground on the leader; make up lost ground; slowly make up ground",
+    "commonMistake": "make up ground on sb/sth 表示逐渐追近对方；on 后要接被追赶者，不说 make ground up on。",
+    "example": {"english": "The cyclist made up ground on the leader during the climb.", "chinese": "骑手在爬坡时逐渐缩小了与领骑者的距离。"},
+    "application": {"prompt": "The leader was 20 metres ahead, but Jo pedaled faster and reduced the gap. She began to ___ the leader. A. give ground to B. make up ground on", "solution": "B。解析：加速缩小与领骑者的距离，用 make up ground on（逐步追近）。"},
+    "sources": [{"label": "Cambridge Dictionary: ground", "url": "https://dictionary.cambridge.org/dictionary/english/ground"}]
+  },
+  {
+    "word": "catch up with",
+    "examTags": ["词汇·动词短语", "语法·短语动词搭配"],
+    "grammar": "phr. 赶上；追上。catch up with 后接被追赶的人或物；catch 的过去式、过去分词是 caught。",
+    "collocations": "catch up with the runner; catch up with the group; try to catch up",
+    "commonMistake": "catch up with sb 表示追到对方；宾语代词放在 with 后，如 catch up with him，不说 catch him up with。",
+    "example": {"english": "I ran faster to catch up with the group.", "chinese": "我加快了速度，想赶上那群人。"},
+    "application": {"prompt": "The last runner increased her speed until she was beside the others. She managed to ___ them. A. catch up with B. get away from", "solution": "A。解析：跑到其他人身边、追上他们用 catch up with them。"},
+    "sources": [{"label": "Cambridge Dictionary: catch up with someone", "url": "https://dictionary.cambridge.org/dictionary/english/catch-up-with"}]
+  },
+  {
+    "word": "figure",
+    "examTags": ["词汇·名词与动词", "熟词多义·数字与人物"],
+    "grammar": "n. 花样（冰上动作）；数字；人物；v. 认为、计算。可数名词复数 figures；figure skating 指花样滑冰。",
+    "collocations": "a figure on the ice; a public figure; a six-figure number",
+    "commonMistake": "figure 可表示数字、人物或动作花样；figure out 表示弄明白，不能与名词 figure 的“数字”义混淆。",
+    "example": {"english": "The skater finished her routine with a difficult figure.", "chinese": "这名滑冰运动员以一个高难度动作结束了整套表演。"},
+    "application": {"prompt": "The skater spun, jumped, and traced a beautiful pattern on the ice. The final ___ impressed the judges. A. figure B. figurehead", "solution": "A。解析：花样滑冰中的一个特定冰上动作可称为 a figure。"},
+    "sources": [{"label": "Cambridge Dictionary: figure", "url": "https://dictionary.cambridge.org/dictionary/english/figure"}]
+  },
+  {
+    "word": "figure skating",
+    "examTags": ["词汇·体育项目", "阅读·冬季运动"],
+    "grammar": "n. 花样滑冰，通常不可数。figure skater 指花样滑冰运动员；比赛可说 a figure-skating competition。",
+    "collocations": "compete in figure skating; figure-skating event; a figure skater",
+    "commonMistake": "figure skating 是一项运动名称；skating 作此用法不加复数 -s，也不说 a figure skating。",
+    "example": {"english": "She has trained in figure skating since she was six.", "chinese": "她从六岁起就开始练习花样滑冰。"},
+    "application": {"prompt": "The sport combines skating with jumps, turns, and patterns on ice. She has practiced ___ for years. A. speed skating B. figure skating", "solution": "B。解析：包含跳跃、旋转和冰上图形动作的项目是 figure skating（花样滑冰）。"},
+    "sources": [{"label": "Cambridge Dictionary: figure skating", "url": "https://dictionary.cambridge.org/dictionary/english/figure-skating"}]
+  },
+  {
+    "word": "amaze",
+    "examTags": ["词汇·动词", "语法·情感动词"],
+    "grammar": "v. 使惊奇；使惊讶。现在分词 amazing 常修饰事物，过去分词 amazed 常描述人的感受。",
+    "collocations": "amaze the audience; be amazed at; an amazing performance",
+    "commonMistake": "事物“令人惊讶”用 amazing，人的感受“感到惊讶”用 amazed；不要写成 the judges were amazing（评委很惊人）。",
+    "example": {"english": "The young skater amazed the crowd with a perfect landing.", "chinese": "这名年轻滑冰选手以完美落地让观众惊叹。"},
+    "application": {"prompt": "The athlete completed a triple jump without a mistake. Her performance ___ the judges. A. amazed B. tired", "solution": "A。解析：高难度动作令评委惊讶，用 amaze 的过去式 amazed，意为“使惊叹”。"},
+    "sources": [{"label": "Cambridge Dictionary: amaze", "url": "https://dictionary.cambridge.org/dictionary/english/amaze"}]
+  },
+  {
+    "word": "truly",
+    "examTags": ["词汇·副词", "语法·形容词派生"],
+    "grammar": "adv. 真正地；诚恳地。形容词 true；true 去 e 加 -ly 构成 truly。",
+    "collocations": "truly believe; truly amazing; a truly kind person",
+    "commonMistake": "true 变副词时去掉 e：truly；不要按一般规则写 true-ly。",
+    "example": {"english": "I truly believe our team can improve.", "chinese": "我真心相信我们的队伍能够进步。"},
+    "application": {"prompt": "The coach was not just being polite; she honestly believed the young runner could win. She ___ believed in him. A. true B. truly", "solution": "B。解析：副词 truly 修饰 believed，表达“真心相信”；true 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: truly", "url": "https://dictionary.cambridge.org/dictionary/english/truly"}]
+  },
+  {
+    "word": "swimming",
+    "examTags": ["词汇·动名词", "语法·运动名称"],
+    "grammar": "n. 游泳。作运动名称时通常不可数；动词 swim 的现在分词 swimming，过去式 swam，过去分词 swum。",
+    "collocations": "go swimming; swimming pool; a swimming competition",
+    "commonMistake": "表示去游泳用 go swimming；swim 的现在分词双写 m：swimming，不是 swiming。",
+    "example": {"english": "Swimming is my favorite way to exercise in summer.", "chinese": "游泳是我夏天最喜欢的锻炼方式。"},
+    "application": {"prompt": "It is hot outside, so we plan to spend the afternoon in the pool. We are going ___. A. swimming B. running", "solution": "A。解析：在泳池里活动对应 go swimming（去游泳）。"},
+    "sources": [{"label": "Cambridge Dictionary: swimming", "url": "https://dictionary.cambridge.org/dictionary/english/swimming"}]
+  },
+  {
+    "word": "anyway",
+    "examTags": ["词汇·副词", "语法·转折与让步"],
+    "grammar": "adv. 无论如何；不管怎样；况且。常用于句首或句末，表示尽管有前述情况仍继续做某事。",
+    "collocations": "try anyway; do it anyway; anyway, let's begin",
+    "commonMistake": "anyway 是副词，标准写法不带 -s；表示“无论如何”不写 anyways（非正式变体）。",
+    "example": {"english": "It started raining, but the runners finished the race anyway.", "chinese": "虽然开始下雨了，跑者们还是完成了比赛。"},
+    "application": {"prompt": "The court was wet after the rain, but the players decided to finish the match ___. A. somewhere B. anyway", "solution": "B。解析：尽管球场湿了，选手还是决定继续比赛，用 anyway 表示“尽管如此”。"},
+    "sources": [{"label": "Cambridge Dictionary: anyway", "url": "https://dictionary.cambridge.org/dictionary/english/anyway"}]
+  },
+  {
+    "word": "ceremony",
+    "examTags": ["词汇·可数名词", "阅读·仪式与典礼"],
+    "grammar": "n. 典礼；仪式。可数，复数 ceremonies；形容词 ceremonial。",
+    "collocations": "an opening ceremony; a medal ceremony; attend a ceremony",
+    "commonMistake": "ceremony 的复数将 y 变 i 加 -es：ceremonies；不要写成 ceremonys。",
+    "example": {"english": "The medal ceremony took place after the final race.", "chinese": "决赛结束后举行了颁奖仪式。"},
+    "application": {"prompt": "The athletes stood on a platform while medals were presented and the anthem played. It was the award ___. A. ceremony B. audience", "solution": "A。解析：颁发奖牌、奏国歌的正式活动是 ceremony（仪式）。"},
+    "sources": [{"label": "Cambridge Dictionary: ceremony", "url": "https://dictionary.cambridge.org/dictionary/english/ceremony"}]
+  },
+  {
+    "word": "neither",
+    "examTags": ["词汇·限定词与代词", "语法·两者都不"],
+    "grammar": "det./pron. 两者都不。neither of + 复数名词作主语时，正式语法常用单数谓语；也可与 nor 构成并列结构。",
+    "collocations": "neither answer; neither of them; neither one",
+    "commonMistake": "neither 指两者中一个也不；说“二者都不”不再与 not 连用，以免双重否定。",
+    "example": {"english": "Neither answer was correct, so we checked the question again.", "chinese": "两个答案都不正确，所以我们又检查了一遍题目。"},
+    "application": {"prompt": "There were two routes to the stadium, but both were closed for repairs. ___ route was open. A. Either B. Neither", "solution": "B。解析：两个路线都关闭了，表示“两者都不开放”用 neither。"},
+    "sources": [{"label": "Cambridge Dictionary: neither", "url": "https://dictionary.cambridge.org/dictionary/english/neither"}]
+  },
+  {
+    "word": "nor",
+    "examTags": ["词汇·连词与副词", "语法·否定并列"],
+    "grammar": "conj./adv. 也不；也没有。常与 neither 连用，也可置于否定句后构成倒装：nor + 助动词 + 主语。",
+    "collocations": "neither A nor B; nor did she; nor can we",
+    "commonMistake": "neither 后的并列连接词是 nor；单独放在否定句后时要倒装，如 nor did he，不说 nor he did。",
+    "example": {"english": "He did not miss practice, nor did he arrive late.", "chinese": "他没有缺席训练，也没有迟到。"},
+    "application": {"prompt": "The first runner did not slow down. ___ did the second. A. Nor B. So", "solution": "A。解析：前句是否定信息，补充“第二位也一样”用 nor，倒装为 nor did the second。"},
+    "sources": [{"label": "Cambridge Dictionary: nor", "url": "https://dictionary.cambridge.org/dictionary/english/nor"}]
+  },
+  {
+    "word": "neither ... nor ...",
+    "examTags": ["语法·并列连词", "写作·否定选择"],
+    "grammar": "phr. 既不……也不……。连接两个并列成分；谓语常与靠近它的主语保持一致。",
+    "collocations": "neither fast nor slow; neither A nor B; neither...nor...is/are",
+    "commonMistake": "neither...nor... 本身已含否定，不能再在同一分句加 not；连接词两端的成分应保持平行。",
+    "example": {"english": "Neither the coach nor the players were ready to leave.", "chinese": "教练和队员们都还没有准备好离开。"},
+    "application": {"prompt": "The sports hall has no running track and no swimming pool. It has ___. A. either a track or a pool B. neither a track nor a pool", "solution": "B。解析：跑道和泳池都没有，用 neither...nor... 表示“既没有……也没有……”。"},
+    "sources": [{"label": "Cambridge Dictionary: neither ... nor", "url": "https://dictionary.cambridge.org/dictionary/english/neither-nor"}]
+  },
+  {
+    "word": "try out",
+    "examTags": ["词汇·动词短语", "语法·短语动词"],
+    "grammar": "phr. 参加选拔；试用。try out for + 队伍或角色表示参加……选拔；宾语为代词时 try it out。",
+    "collocations": "try out for the team; try out a new racket; try something out",
+    "commonMistake": "参加球队选拔说 try out for the team；试用物品可说 try the racket out 或 try it out，代词放中间。",
+    "example": {"english": "Maya will try out for the volleyball team next week.", "chinese": "玛雅下周将参加排球队选拔。"},
+    "application": {"prompt": "Leo wants a place on the school team, so he will ___ the basketball team on Tuesday. A. try out for B. look after", "solution": "A。解析：为争取进入球队而参加选拔，用 try out for the team。"},
+    "sources": [{"label": "Cambridge Dictionary: try out (for something)", "url": "https://dictionary.cambridge.org/dictionary/english/try-out-for"}]
+  },
+  {
+    "word": "unique",
+    "examTags": ["词汇·形容词", "写作·描述特点"],
+    "grammar": "adj. 独一无二的；独特的。通常不用于比较级和最高级；副词 uniquely，名词 uniqueness。",
+    "collocations": "a unique style; a unique opportunity; unique to a place",
+    "commonMistake": "unique 本身含“独一无二”之意，通常不用 more/most 修饰；避免写 very unique。",
+    "example": {"english": "Each team designed a unique uniform for the event.", "chinese": "每支队伍都为活动设计了独特的队服。"},
+    "application": {"prompt": "No other team has a uniform like ours; the pattern was designed only for us. Our uniform is ___. A. common B. unique", "solution": "B。解析：没有其他队伍拥有同样的队服，说明它是 unique（独特的）。"},
+    "sources": [{"label": "Cambridge Dictionary: unique", "url": "https://dictionary.cambridge.org/dictionary/english/unique"}]
+  },
+  {
+    "word": "bouldering",
+    "examTags": ["词汇·不可数名词", "阅读·攀岩运动"],
+    "grammar": "n. 攀岩；抱石。通常不可数，指不使用绳索、在较低岩壁或人工墙上攀爬的活动。",
+    "collocations": "go bouldering; a bouldering wall; practice bouldering",
+    "commonMistake": "bouldering 通常不需要绳索，常在低岩壁上进行；不要和需要绳索保护的高墙攀登混为一谈。",
+    "example": {"english": "We tried bouldering at the indoor climbing gym.", "chinese": "我们在室内攀岩馆尝试了抱石。"},
+    "application": {"prompt": "At the gym, Nina climbed a low wall without a rope while a padded mat covered the floor. She was doing ___. A. bouldering B. rowing", "solution": "A。解析：不系绳索、在低墙上攀爬属于 bouldering（抱石）。"},
+    "sources": [{"label": "Cambridge Dictionary: bouldering", "url": "https://dictionary.cambridge.org/dictionary/english/bouldering"}]
+  },
+  {
+    "word": "compete",
+    "examTags": ["词汇·动词", "语法·介词搭配"],
+    "grammar": "v. 参加比赛；竞争。compete in + 比赛/项目；compete for + 奖项或机会；名词 competition。",
+    "collocations": "compete in a race; compete for a medal; compete with others",
+    "commonMistake": "表示参加某项比赛用 compete in；争夺奖牌或名额用 compete for，介词随宾语含义变化。",
+    "example": {"english": "Six schools will compete in the relay this year.", "chinese": "今年将有六所学校参加接力赛。"},
+    "application": {"prompt": "The students trained for months because they wanted to take part in the city race. They will ___ in the race. A. complete B. compete", "solution": "B。解析：参加比赛并与他人争胜用 compete；complete 是“完成”。"},
+    "sources": [{"label": "Cambridge Dictionary: compete", "url": "https://dictionary.cambridge.org/dictionary/english/compete"}]
+  },
+  {
+    "word": "compete against",
+    "examTags": ["词汇·动词短语", "语法·介词搭配"],
+    "grammar": "phr. 与……竞争；和……比赛。compete against 后接对手；compete against a team。",
+    "collocations": "compete against a rival; compete against other schools; compete against one another",
+    "commonMistake": "against 后接竞争对手；表示参加比赛项目通常用 compete in，不要把 in 与 against 的对象互换。",
+    "example": {"english": "Our school will compete against three strong teams.", "chinese": "我们学校将与三支实力强劲的队伍比赛。"},
+    "application": {"prompt": "In the final, Green School will face Blue School on the court. Green School will ___ Blue School. A. compete against B. compete in", "solution": "A。解析：Blue School 是对手，因此用 compete against；compete in 后接比赛项目。"},
+    "sources": [{"label": "Cambridge Dictionary: compete", "url": "https://dictionary.cambridge.org/dictionary/english/compete"}]
+  },
+  {
+    "word": "mascot",
+    "examTags": ["词汇·可数名词", "阅读·赛事文化"],
+    "grammar": "n. 吉祥物。可数，复数 mascots；常由动物或卡通形象代表队伍或活动。",
+    "collocations": "a team mascot; an Olympic mascot; choose a mascot",
+    "commonMistake": "mascot 是代表队伍或活动的吉祥物；它不等于 motto（口号），也不一定是真实动物。",
+    "example": {"english": "The school mascot waved to the children before the game.", "chinese": "比赛前，学校吉祥物向孩子们挥手。"},
+    "application": {"prompt": "A smiling tiger in a team shirt greeted fans outside the stadium. The tiger was the team's ___. A. medal B. mascot", "solution": "B。解析：代表队伍并迎接粉丝的老虎形象是 mascot（吉祥物）。"},
+    "sources": [{"label": "Cambridge Dictionary: mascot", "url": "https://dictionary.cambridge.org/dictionary/english/mascot"}]
+  },
+  {
+    "word": "motto",
+    "examTags": ["词汇·可数名词", "写作·口号与格言"],
+    "grammar": "n. 口号；格言。可数，复数 mottos 或 mottoes；常表达个人或团体信念。",
+    "collocations": "a school motto; live by a motto; a team motto",
+    "commonMistake": "motto 是简短的信念或口号；复数可写 mottos，也可写 mottoes，不要误写成 motto's。",
+    "example": {"english": "The team's motto is “Never give up.”", "chinese": "这支队伍的格言是“永不放弃”。"},
+    "application": {"prompt": "The club's short guiding words are “Practice with purpose.” The club's ___ is easy to remember. A. motto B. mascot", "solution": "A。解析：用来表达团队信念的短句是 motto（格言、口号）；mascot 是吉祥物。"},
+    "sources": [{"label": "Cambridge Dictionary: motto", "url": "https://dictionary.cambridge.org/dictionary/english/motto"}]
+  },
+  {
+    "word": "dramatic",
+    "examTags": ["词汇·形容词", "写作·描述变化"],
+    "grammar": "adj. 戏剧性的；激动人心的；巨大的。名词 drama；副词 dramatically。",
+    "collocations": "a dramatic finish; a dramatic change; a dramatic performance",
+    "commonMistake": "dramatic 可形容变化或结尾出乎意料、引人注目；dramatically 修饰动词，如 scores rose dramatically。",
+    "example": {"english": "The race had a dramatic finish in the last few metres.", "chinese": "比赛在最后几米出现了扣人心弦的结局。"},
+    "application": {"prompt": "The runner passed two rivals in the final step and won by a tiny margin. The race ended in a ___ finish. A. ordinary B. dramatic", "solution": "B。解析：最后一步反超并以微弱优势获胜，结局十分 dramatic（扣人心弦）。"},
+    "sources": [{"label": "Cambridge Dictionary: dramatic", "url": "https://dictionary.cambridge.org/dictionary/english/dramatic"}]
+  },
+  {
+    "word": "freestyle",
+    "examTags": ["词汇·名词与形容词", "阅读·游泳比赛"],
+    "grammar": "n./adj. 自由式体育比赛；自由式的。游泳中 freestyle 通常指自由泳项目。",
+    "collocations": "the 100-metre freestyle; a freestyle race; freestyle swimming",
+    "commonMistake": "freestyle 作游泳项目名时常指自由泳；free style 分开写可表示“自由的风格”，含义不同。",
+    "example": {"english": "He won the 100-metre freestyle at the school meet.", "chinese": "他赢得了校运会的 100 米自由泳比赛。"},
+    "application": {"prompt": "In the pool, swimmers may choose their own stroke for this race. Ella entered the 200-metre ___. A. freestyle B. butterfly", "solution": "A。解析：允许选手自行选择泳姿的游泳项目通常称 freestyle（自由泳）。"},
+    "sources": [{"label": "Cambridge Dictionary: freestyle", "url": "https://dictionary.cambridge.org/dictionary/english/freestyle"}]
+  },
+  {
+    "word": "talented",
+    "examTags": ["词汇·形容词", "语法·词性派生"],
+    "grammar": "adj. 有才能的；天才的。名词 talent；常用 be talented at/in + 名词或动名词。",
+    "collocations": "a talented athlete; be talented at music; a talented young player",
+    "commonMistake": "talented 是形容词，talent 是名词；说某人有才华可用 be talented at drawing 或 have a talent for drawing。",
+    "example": {"english": "The talented runner broke the school record twice.", "chinese": "这位有天赋的跑者两次打破了校纪录。"},
+    "application": {"prompt": "Jin learned three sports quickly and won his first race at age ten. He is a ___ young athlete. A. talent B. talented", "solution": "B。解析：名词 athlete 前要用形容词 talented（有天赋的）；talent 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: talented", "url": "https://dictionary.cambridge.org/dictionary/english/talented"}]
+  },
+  {
+    "word": "in wonder",
+    "examTags": ["词汇·介词短语", "阅读·情绪描写"],
+    "grammar": "phr. 惊奇地；惊叹地。常与 look、watch、stare 等动词连用，表示带着惊讶的心情。",
+    "collocations": "look in wonder; watch in wonder; stare in wonder at something",
+    "commonMistake": "in wonder 表示“惊奇地”这一状态；wonder 在这里是名词，不要误用形容词 wonderful。",
+    "example": {"english": "The children watched the acrobats in wonder.", "chinese": "孩子们惊奇地看着杂技演员。"},
+    "application": {"prompt": "The crowd watched silently as the skater jumped over a row of chairs. They watched ___. A. in wonder B. on purpose", "solution": "A。解析：观众惊叹地看着高难度跳跃，表达“惊奇地”用 in wonder。"},
+    "sources": [{"label": "Cambridge Dictionary: wonder", "url": "https://dictionary.cambridge.org/dictionary/english/wonder"}]
+  },
+  {
+    "word": "set a record",
+    "examTags": ["词汇·动词短语", "语法·固定搭配"],
+    "grammar": "phr. 创造纪录。set 的过去式和过去分词仍是 set；break a record 表示打破已有纪录。",
+    "collocations": "set a world record; set a new record; break the record",
+    "commonMistake": "set a record 表示创造纪录，动词 set 不加 -ed；打破已有纪录可说 break a record。",
+    "example": {"english": "The swimmer set a new record in the 200-metre race.", "chinese": "这名游泳运动员在 200 米比赛中创造了新纪录。"},
+    "application": {"prompt": "No one had ever finished the school race so quickly; the new time was the fastest on record. She managed to ___. A. make a promise B. set a record", "solution": "B。解析：创造了学校比赛最快用时，表示 set a record（创造纪录）。"},
+    "sources": [{"label": "Cambridge Dictionary: record", "url": "https://dictionary.cambridge.org/dictionary/english/record"}]
+  },
+  {
+    "word": "gold",
+    "examTags": ["词汇·名词与形容词", "阅读·奖牌与材质"],
+    "grammar": "n. 金；金牌；adj. 金色的、金质的。形容词 golden 常指金色的或珍贵的。",
+    "collocations": "win gold; a gold medal; gold jewelry",
+    "commonMistake": "win gold 表示赢得金牌，gold 在此作不可数名词；具体奖牌可说 a gold medal。",
+    "example": {"english": "She won gold in the 400-metre race.", "chinese": "她在 400 米比赛中获得了金牌。"},
+    "application": {"prompt": "Mina finished first in the final and stood on the top step of the podium. She won ___. A. gold B. golden", "solution": "A。解析：表示赢得金牌用 win gold；golden 是形容词，不能直接作 win 的宾语。"},
+    "sources": [{"label": "Cambridge Dictionary: gold", "url": "https://dictionary.cambridge.org/dictionary/english/gold"}]
+  },
+  {
+    "word": "medal",
+    "examTags": ["词汇·可数名词", "阅读·体育奖项"],
+    "grammar": "n. 奖章；勋章。可数，复数 medals；金牌、银牌、铜牌分别是 gold、silver、bronze medal。",
+    "collocations": "win a medal; a gold medal; award someone a medal",
+    "commonMistake": "medal 是可数名词，前面要有冠词或其他限定词；“赢得一枚奖牌”说 win a medal。",
+    "example": {"english": "The runner received a medal for finishing second.", "chinese": "这名跑者因获得第二名而拿到了一枚奖牌。"},
+    "application": {"prompt": "After placing third, Ana received a bronze ___ that hung from a ribbon around her neck. A. trophy B. medal", "solution": "B。解析：挂在颈间、颁给第三名的奖章是 medal（奖牌）；bronze medal 指铜牌。"},
+    "sources": [{"label": "Cambridge Dictionary: medal", "url": "https://dictionary.cambridge.org/dictionary/english/medal"}]
+  },
+  {
+    "word": "reform",
+    "examTags": ["词汇·名词与动词", "阅读·社会发展"],
+    "grammar": "n. 改革；变革；v. 改革、改进。可数名词复数 reforms；常用 reform a system。",
+    "collocations": "education reform; reform a rule; introduce reforms",
+    "commonMistake": "reform 作名词时表示改革措施，作动词时表示进行改革；不要与 perform（表演、履行）混淆。",
+    "example": {"english": "The reform improved access to sports facilities.", "chinese": "这项改革改善了人们使用体育设施的条件。"},
+    "application": {"prompt": "The city changed its school rules to give every child more time for sports. The new policy was an education ___. A. reform B. report", "solution": "A。解析：改变教育制度以改善学校体育条件属于 reform（改革）。"},
+    "sources": [{"label": "Cambridge Dictionary: reform", "url": "https://dictionary.cambridge.org/dictionary/english/reform"}]
+  },
+  {
+    "word": "reform and opening-up",
+    "examTags": ["词汇·固定表达", "阅读·中国发展"],
+    "grammar": "phr. 改革开放。作专名性历史表达时常指中国自 20 世纪 70 年代末开始的改革与对外开放政策。",
+    "collocations": "the reform and opening-up policy; since reform and opening-up; an era of reform and opening-up",
+    "commonMistake": "固定表达中 opening-up 作名词性成分并带连字符；不要拆成 opening up 来表示“开门”。",
+    "example": {"english": "Reform and opening-up brought major changes to the country.", "chinese": "改革开放给国家带来了重大变化。"},
+    "application": {"prompt": "The museum display describes the policy changes that expanded economic activity and international exchange from the late 1970s. It describes ___. A. a sports meeting B. reform and opening-up", "solution": "B。解析：扩大经济活动和对外交往的历史政策通常称为 reform and opening-up（改革开放）。"},
+    "sources": [{"label": "Cambridge Dictionary: reform", "url": "https://dictionary.cambridge.org/dictionary/english/reform"}]
+  },
+  {
+    "word": "worldwide",
+    "examTags": ["词汇·形容词与副词", "语法·词性用法"],
+    "grammar": "adj./adv. 世界范围的；在全世界。可作定语或状语，常作定语不加连字符。",
+    "collocations": "worldwide attention; a worldwide event; known worldwide",
+    "commonMistake": "worldwide 作副词时前面不加介词，说 known worldwide；作形容词可说 worldwide competition。",
+    "example": {"english": "The race attracted worldwide attention.", "chinese": "这场比赛吸引了全世界的关注。"},
+    "application": {"prompt": "Fans in many countries watched the final online. The event became known ___. A. worldwide B. nearby", "solution": "A。解析：许多国家的观众都观看比赛，说明赛事 worldwide（在全世界范围内）受到关注。"},
+    "sources": [{"label": "Cambridge Dictionary: worldwide", "url": "https://dictionary.cambridge.org/dictionary/english/worldwide"}]
+  },
+  {
+    "word": "citizen",
+    "examTags": ["词汇·可数名词", "阅读·身份与社会"],
+    "grammar": "n. 市民；公民。可数，复数 citizens；citizenship 指公民身份。",
+    "collocations": "a citizen of a country; local citizens; a good citizen",
+    "commonMistake": "citizen 指拥有某国公民身份的人或城市居民；city 是城市本身，二者词形相似但词性和含义不同。",
+    "example": {"english": "Every citizen can help keep the city clean.", "chinese": "每位市民都可以帮助保持城市整洁。"},
+    "application": {"prompt": "A person who legally belongs to a country and has its rights is a ___. A. visitor B. citizen", "solution": "B。解析：拥有一国法律身份和相应权利的人是 citizen（公民）。"},
+    "sources": [{"label": "Cambridge Dictionary: citizen", "url": "https://dictionary.cambridge.org/dictionary/english/citizen"}]
+  },
+  {
+    "word": "pride",
+    "examTags": ["词汇·名词", "语法·形容词搭配"],
+    "grammar": "n. 自豪（感）；骄傲。形容词 proud；常用 take pride in 或 be proud of。",
+    "collocations": "take pride in; be proud of; a source of pride",
+    "commonMistake": "pride 是名词，proud 是形容词；“为……感到自豪”可说 take pride in sth 或 be proud of sth。",
+    "example": {"english": "The whole town felt pride in its young athletes.", "chinese": "全镇都为年轻运动员感到自豪。"},
+    "application": {"prompt": "The volunteers cared deeply about their town's success. They took great ___ in the team's victory. A. pride B. proud", "solution": "A。解析：take great pride in 是固定搭配，表示“为……感到自豪”；pride 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: pride", "url": "https://dictionary.cambridge.org/dictionary/english/pride"}]
+  },
+  {
+    "word": "harmony",
+    "examTags": ["词汇·名词", "阅读·和谐共处"],
+    "grammar": "n. 和谐；和睦；（音乐）和声。形容词 harmonious；通常不可数，表示一段和声时可数。",
+    "collocations": "live in harmony; social harmony; sing in harmony",
+    "commonMistake": "harmony 可指人际和睦，也可指音乐和声；形容词“和谐的”用 harmonious，不用 harmony。",
+    "example": {"english": "The choir sang in harmony at the ceremony.", "chinese": "合唱团在典礼上和谐地演唱。"},
+    "application": {"prompt": "The singers listened to one another and blended their notes beautifully. They sang in ___. A. silence B. harmony", "solution": "B。解析：歌手的音符融合得很协调，表示他们 in harmony（和谐地）演唱。"},
+    "sources": [{"label": "Cambridge Dictionary: harmony", "url": "https://dictionary.cambridge.org/dictionary/english/harmony"}]
+  },
+  {
+    "word": "deeply",
+    "examTags": ["词汇·副词", "语法·形容词派生"],
+    "grammar": "adv. 深深地；非常。形容词 deep；deeply 常修饰 feel、move、care、regret 等动词。",
+    "collocations": "deeply moved; care deeply about; deeply sorry",
+    "commonMistake": "deeply 常修饰抽象感受或程度；表示实际深度时也可用 deep，如 dive deep。",
+    "example": {"english": "The story deeply moved the audience.", "chinese": "这个故事深深打动了观众。"},
+    "application": {"prompt": "The athlete was so touched by the crowd's support that she felt it strongly. She was ___ moved. A. deeply B. deep", "solution": "A。解析：副词 deeply 修饰 moved，说明运动员“深受感动”；deep 是形容词或表示实际深度的副词。"},
+    "sources": [{"label": "Cambridge Dictionary: deeply", "url": "https://dictionary.cambridge.org/dictionary/english/deeply"}]
+  },
+  {
+    "word": "master",
+    "examTags": ["词汇·名词与动词", "语法·熟词多义"],
+    "grammar": "n. 能手；主人；硕士；v. 掌握、精通。过去式 mastered；mastery 是名词“精通”。",
+    "collocations": "master a skill; a master of chess; master the basics",
+    "commonMistake": "master 作动词可直接接技能或知识，不需介词：master a skill；不要说 master of a skill（除非作名词）。",
+    "example": {"english": "It took Ava years to master the violin.", "chinese": "艾娃花了数年时间才熟练掌握小提琴演奏。"},
+    "application": {"prompt": "After daily practice, Ava could play every difficult passage with confidence. She had managed to ___ the violin. A. write B. master", "solution": "B。解析：熟练掌握乐器演奏技能用 master（精通、掌握）。"},
+    "sources": [{"label": "Cambridge Dictionary: master", "url": "https://dictionary.cambridge.org/dictionary/english/master"}]
+  },
+  {
+    "word": "satisfy",
+    "examTags": ["词汇·动词", "语法·词性派生"],
+    "grammar": "v. 使满意；满足。形容词 satisfied（感到满意的）、satisfying（令人满意的）；名词 satisfaction。",
+    "collocations": "satisfy a need; satisfy the judges; be satisfied with",
+    "commonMistake": "人感到满意用 satisfied，事物令人满意用 satisfying；be satisfied 后常接 with。",
+    "example": {"english": "The final score satisfied both teams.", "chinese": "最终比分让两支队伍都满意。"},
+    "application": {"prompt": "The meal was exactly what the hungry runners wanted. It ___ their need for a warm dinner. A. satisfying B. satisfied", "solution": "B。解析：句子谓语需要动词过去式 satisfied，表示晚餐“满足了”跑者的需要；satisfying 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: satisfy", "url": "https://dictionary.cambridge.org/dictionary/english/satisfy"}]
+  },
+  {
+    "word": "Greek",
+    "examTags": ["词汇·形容词与名词", "语法·国籍与语言"],
+    "grammar": "adj. 希腊的；n. 希腊人、希腊语。首字母大写；Greece 是国家名，复数 Greeks 指希腊人。",
+    "collocations": "Greek history; a Greek citizen; speak Greek",
+    "commonMistake": "Greek 表示希腊的、希腊人或希腊语时首字母大写；greek 小写不能表示国籍或语言。",
+    "example": {"english": "The athlete learned a few words of Greek before the trip.", "chinese": "出行前，这名运动员学了几句希腊语。"},
+    "application": {"prompt": "The museum guide was born in Athens and spoke the language of Greece. She spoke ___. A. greek B. Greek", "solution": "B。解析：语言名称 Greek 必须大写首字母；greek 的小写形式不符合此处拼写规则。"},
+    "sources": [{"label": "Cambridge Dictionary: Greek", "url": "https://dictionary.cambridge.org/dictionary/english/greek"}]
+  },
+  {
+    "word": "Roman",
+    "examTags": ["词汇·形容词与名词", "阅读·古代文明"],
+    "grammar": "adj. 古罗马的；罗马的；n. 古罗马人、罗马人；也可指罗马字体。首字母大写。",
+    "collocations": "Roman history; the Roman Empire; Roman citizens",
+    "commonMistake": "表示古罗马文明或罗马人的 Roman 首字母大写；roman 小写通常指普通字体，不表示国籍。",
+    "example": {"english": "The athletes ran past the remains of a Roman stadium.", "chinese": "运动员们跑过一座古罗马体育场的遗址。"},
+    "application": {"prompt": "The history book describes roads built in the ancient empire centered in Rome. It describes ___ roads. A. Roman B. roman", "solution": "A。解析：形容古罗马帝国的道路，Roman 作为专名派生形容词要大写。"},
+    "sources": [{"label": "Cambridge Dictionary: Roman", "url": "https://dictionary.cambridge.org/dictionary/english/roman"}]
+  },
+  {
+    "word": "drown",
+    "examTags": ["词汇·动词", "语法·及物与不及物"],
+    "grammar": "v.（使）淹死；溺水。过去式和过去分词 drowned；可不及物表示溺水，也可及物表示使某人溺水。",
+    "collocations": "drown in a river; nearly drown; drown someone out",
+    "commonMistake": "drown in water 表示溺水；drown out 表示声音盖过另一种声音，不能和“溺水”义混淆。",
+    "example": {"english": "The lifeguard pulled the swimmer from the deep water before he could drown.", "chinese": "救生员在游泳者可能溺水前把他从深水中拉了出来。"},
+    "application": {"prompt": "The child fell into the lake but was rescued before he lost his life underwater. He nearly ___. A. drowned B. dived", "solution": "A。解析：差点在水中丧命是 nearly drowned（差点溺水身亡）。"},
+    "sources": [{"label": "Cambridge Dictionary: drown", "url": "https://dictionary.cambridge.org/dictionary/english/drown"}]
+  },
+  {
+    "word": "cheer",
+    "examTags": ["词汇·名词与动词", "阅读·观众反应"],
+    "grammar": "n. 欢呼声；v. 欢呼、喝彩；使高兴。过去式 cheered；cheerful 是形容词“高兴的”。",
+    "collocations": "cheer for a team; cheer loudly; a loud cheer",
+    "commonMistake": "cheer for sb 表示为某人或队伍喝彩；cheer up 表示使振作或振作起来，介词短语含义不同。",
+    "example": {"english": "The crowd cheered for the runners as they entered the stadium.", "chinese": "跑者进入体育场时，人群为他们欢呼。"},
+    "application": {"prompt": "The fans shouted happily when their team scored. They began to ___ for the players. A. cheer B. judge", "solution": "A。解析：球迷因队伍得分而欢呼，用 cheer for the players（为球员喝彩）。"},
+    "sources": [{"label": "Cambridge Dictionary: cheer", "url": "https://dictionary.cambridge.org/dictionary/english/cheer"}]
+  },
+  {
+    "word": "crowd",
+    "examTags": ["词汇·可数名词与动词", "语法·集体名词"],
+    "grammar": "n. 人群；观众；v. 挤满；聚集。a crowd of + 复数名词；作主语时谓语常用单数。",
+    "collocations": "a large crowd; a crowd of fans; crowd around someone",
+    "commonMistake": "a crowd of fans 的中心词是 crowd，作主语通常用单数谓语；crowd around 表示围聚在周围。",
+    "example": {"english": "A large crowd gathered outside the sports hall.", "chinese": "一大群人聚集在体育馆外。"},
+    "application": {"prompt": "Hundreds of spectators filled the square to watch the parade. A huge ___ had gathered there. A. queue B. crowd", "solution": "B。解析：聚集观看游行的许多观众构成一群人，即 a crowd。"},
+    "sources": [{"label": "Cambridge Dictionary: crowd", "url": "https://dictionary.cambridge.org/dictionary/english/crowd"}]
+  }
+]

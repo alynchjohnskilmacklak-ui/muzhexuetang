@@ -1,12 +1,12 @@
 'use client'
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import useSWR from 'swr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Alert, Badge, Button, Card, Carousel, Drawer, Form, Input, Segmented, Select, Spin, Tag, Tooltip, Typography, Upload, message as antdMessage } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
-import { ArrowLeftOutlined, CalendarOutlined, CheckCircleOutlined, DownloadOutlined, HistoryOutlined, InboxOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, RightOutlined, SearchOutlined, SendOutlined, ShareAltOutlined, TeamOutlined, WarningOutlined, CameraOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CalendarOutlined, CheckCircleOutlined, DownloadOutlined, DownOutlined, HistoryOutlined, InboxOutlined, MessageOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, RightOutlined, SearchOutlined, SendOutlined, ShareAltOutlined, TeamOutlined, UpOutlined, WarningOutlined, CameraOutlined, BellOutlined } from '@ant-design/icons'
 import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { TIER_THEME, resolveTier } from '@/constants/teacher-tier'
@@ -16,11 +16,19 @@ import { useDivision } from '@/contexts/DivisionContext'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
+import { getOverallEvaluationContent, getParentClassroomFeedbackContent } from '@/lib/classroom-feedback/parent-feedback-content'
 import { KnowledgePointDetail } from '@/components/Feedback/KnowledgePointDetail'
+import { PersonalizedLearningPath } from '@/components/Feedback/PersonalizedLearningPath'
+import { FeedbackPosterCommunication, FeedbackPosterParentSections } from '@/components/Feedback/FeedbackPosterParentSections'
+import { AdminPracticeReplyPanel, type AdminPracticeReply } from '@/components/Feedback/AdminPracticeReplyPanel'
+import { normalizePracticeCheckin } from '@/lib/classroom-feedback/feedback-followup'
+import type { KnowledgeProgressEntry } from '@/lib/classroom-feedback/knowledge-progress'
 import { AdminTeachingRecordSwitcher } from '@/components/study-hall/AdminTeachingRecordSwitcher'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
 import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
+import { todayLocal } from '@/lib/date/local-day'
+import { useMobileBackHandler } from '@/components/Layout/MobileLayout'
 import styles from './classroom-feedback.module.css'
 
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
@@ -41,6 +49,8 @@ type AdminFeedback = {
   imageCount: number
   hasImage: boolean
   status: string
+  isConsecutive?: boolean
+  sessionSpan?: string
 }
 
 type AdminFeedbackImage = {
@@ -50,6 +60,18 @@ type AdminFeedbackImage = {
   thumbnailUrl: string
 }
 
+type AdminStudentLearningSnapshot = {
+  performance: string | null
+  mastery: string | null
+  tags: string[]
+  teacherRemark: string | null
+  nextLessonFocus: string | null
+  personalizedLearning?: unknown
+  practiceCheckin?: unknown
+  followupReview?: unknown
+  knowledgeProgressEntries?: KnowledgeProgressEntry[]
+}
+
 type AdminFeedbackDetail = {
   id: string
   date: string
@@ -57,7 +79,18 @@ type AdminFeedbackDetail = {
   subject: string
   course: string | null
   className: string | null
-  students: Array<{ id: string; name: string; grade?: string | null; studentRating?: unknown }>
+  students: Array<{
+    id: string
+    name: string
+    grade?: string | null
+    studentRating?: unknown
+    learningSnapshot?: AdminStudentLearningSnapshot
+    practiceReplies?: AdminPracticeReply[]
+    parentReply?: string | null
+    replyTime?: string | null
+    teacherReply?: string | null
+    teacherReplyTime?: string | null
+  }>
   overallComment: string | null
   lessonContent: string | null
   summary: string | null
@@ -69,11 +102,25 @@ type AdminFeedbackDetail = {
   mood: string | null
   images: AdminFeedbackImage[]
   parentReply: string | null
+  replyTime?: string | null
+  teacherReply?: string | null
+  teacherReplyTime?: string | null
   adminReply: string | null
   parentMessages: Array<{
     id: string
     title: string
     replies: Array<{ id: string; authorName: string; role: string; content: string; createdAt: string }>
+  }>
+  parentEvaluations?: Array<{
+    id: string
+    satisfied: boolean
+    reason: string | null
+    createdAt: string
+    reviewStatus: 'PENDING' | 'IN_PROGRESS' | 'RESOLVED'
+    reviewNote: string | null
+    reviewedAt: string | null
+    parent: { name: string }
+    reviewedBy: { name: string } | null
   }>
   status: string
   createdAt: string
@@ -88,7 +135,27 @@ type AdminLesson = {
   subject: string
   time: string
   hasFeedback: boolean
+  hasDirectFeedback?: boolean
+  isCombinedFeedback?: boolean
+  isConsecutive?: boolean
+  consecutiveIndex?: number
+  sessionSpan?: string
+  partnerLessonIds?: string[]
+  hasAnyFeedback: boolean
+  draftFeedbackId: string | null
+  feedbackEligible: boolean
   students: Array<{ id: string; name: string; grade?: string | null }>
+}
+
+type OverdueLesson = {
+  id: string
+  teacherId: string
+  teacherName: string
+  groupName: string
+  courseName: string
+  subject: string
+  lessonDate: string
+  time: string
 }
 
 // 学科配色（与家长端一致）
@@ -230,46 +297,31 @@ function AdminFeedbackRow({ item, onOpen }: { item: AdminFeedback; onOpen: (item
     <button
       type="button"
       onClick={() => onOpen(item)}
-      style={{
-        display: 'flex', gap: 12, width: '100%', textAlign: 'left',
-        padding: '14px 16px', background: '#fff', border: '1px solid #EEE7E1',
-        borderRadius: 14, cursor: 'pointer', transition: 'all .2s ease',
-      }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(232,120,74,.08)' }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#EEE7E1'; e.currentTarget.style.boxShadow = 'none' }}
+      className={styles.feedbackRow}
     >
-      <span style={{
-        flex: '0 0 44px', width: 44, height: 44, borderRadius: 12,
-        display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: 18,
-        color: sm.tagColor, background: sm.tagBg,
-      }}>
+      <span className={styles.feedbackRowGlyph} style={{ color: sm.tagColor, background: sm.tagBg }}>
         {sm.glyph}
       </span>
-      <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <strong style={{ color: '#1A1201', fontSize: 14 }}>{item.teacherName}</strong>
-          <span style={{
-            padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 500,
-            color: sm.tagColor, background: sm.tagBg, border: `1px solid ${sm.tagColor}33`,
-          }}>{item.subject}</span>
-          {item.studentName && (
-            <span style={{ fontSize: 12, color: '#E8784A', fontWeight: 600 }}>学员：{item.studentName}</span>
-          )}
-          {item.classGroupName && (
-            <span style={{ fontSize: 11, color: '#9A8E7A' }}>{item.classGroupName}</span>
-          )}
-          <span style={{ marginLeft: 'auto', fontSize: 11, color: '#9A8E7A' }}>{formatFeedbackTime(item.createdAt)}</span>
+      <span className={styles.feedbackRowContent}>
+        <span className={styles.feedbackRowTopline}>
+          <strong>{item.studentName || '班级反馈'}</strong>
+          <span className={styles.feedbackSubject} style={{ color: sm.tagColor, background: sm.tagBg }}>{item.subject}</span>
+          <time>{formatFeedbackTime(item.createdAt)}</time>
         </span>
-        <span style={{
-          fontSize: 13, color: '#5A4E3A', lineHeight: 1.55,
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-        }}>{summary}</span>
-        <span style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 11, color: '#9A8E7A' }}>
+        <span className={styles.feedbackRowMeta}>
+          <span>{item.classGroupName || '未关联班级'}</span>
           {item.courseName && <span>{item.courseName}</span>}
-          {item.imageCount > 0 && <span><CameraOutlined /> {item.imageCount}张课堂照片</span>}
+          {item.isConsecutive && (
+            <span className={styles.consecutiveTag}>
+              双课合并反馈 · {item.sessionSpan || '连堂'}
+            </span>
+          )}
+          {item.imageCount > 0 && <span><CameraOutlined /> {item.imageCount} 张照片</span>}
           <Badge status={item.status === 'PUBLISHED' ? 'success' : 'warning'} text={item.status === 'PUBLISHED' ? '已发布' : '草稿'} />
         </span>
+        <span className={styles.feedbackRowSummary}>{summary}</span>
       </span>
+      <RightOutlined className={styles.feedbackRowArrow} />
     </button>
   )
 }
@@ -292,12 +344,13 @@ export default function ClassroomFeedbackAdminPage() {
   const searchParams = useSearchParams()
   const selectedTeacherId = searchParams.get('teacherId') || ''
 
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayLocal()
   const [date, setDate] = useState(today)
   const [teacherFilter, setTeacherFilter] = useState('')
   const [q, setQ] = useState('')
   const [viewAll, setViewAll] = useState(false)
   const [selectedClass, setSelectedClass] = useState<string>('')
+  const [pendingExpanded, setPendingExpanded] = useState(false)
 
   // Compose drawer state
   const [composeOpen, setComposeOpen] = useState(false)
@@ -308,6 +361,7 @@ export default function ClassroomFeedbackAdminPage() {
   const [composeLessonId, setComposeLessonId] = useState('')
   const [detailFeedback, setDetailFeedback] = useState<AdminFeedbackDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const autoOpenedFeedbackId = useRef('')
   const [adminReply, setAdminReply] = useState('')
   const [replying, setReplying] = useState(false)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
@@ -324,6 +378,9 @@ export default function ClassroomFeedbackAdminPage() {
   // 生成分享图
   const shareCardRef = useRef<HTMLDivElement>(null)
   const [generatingImage, setGeneratingImage] = useState(false)
+  const [sharePreviewDataUrl, setSharePreviewDataUrl] = useState<string | null>(null)
+  const [sharePreviewDownloadUrl, setSharePreviewDownloadUrl] = useState<string | null>(null)
+  const [sharePreviewFilename, setSharePreviewFilename] = useState('课堂反馈.png')
   const detailImages = detailFeedback?.images || []
   const {
     urls: signedDetailImages,
@@ -342,8 +399,56 @@ export default function ClassroomFeedbackAdminPage() {
 
   const feedbacks: AdminFeedback[] = useMemo(() => Array.isArray(data?.feedbacks) ? data.feedbacks : [], [data])
   const allLessons: AdminLesson[] = useMemo(() => Array.isArray(data?.lessons) ? data.lessons : [], [data])
-  const missingLessons = allLessons.filter(l => !l.hasFeedback)
-  const noFeedback: Array<{ id: string; name: string }> = Array.isArray(data?.teachersWithoutFeedback) ? data.teachersWithoutFeedback : []
+  const eligibleLessons = allLessons.filter((lesson) => lesson.feedbackEligible)
+  const missingLessons = eligibleLessons.filter((lesson) => !lesson.hasFeedback)
+  const publishedFeedbacks = feedbacks.filter((feedback) => feedback.status === 'PUBLISHED')
+  const publishedTeacherCount = new Set(publishedFeedbacks.map((feedback) => feedback.teacherId)).size
+  const pendingTeacherCount = new Set(missingLessons.map((lesson) => lesson.teacherId).filter(Boolean)).size
+
+  // 超时督导课次（过去3天已考勤但教师尚未发布随堂反馈）
+  const overdueLessons: OverdueLesson[] = useMemo(() => Array.isArray(data?.overdueLessons) ? data.overdueLessons : [], [data])
+  const [remindingTeacherId, setRemindingTeacherId] = useState<string | null>(null)
+  const [supervisorExpanded, setSupervisorExpanded] = useState(true)
+  const [composePartnerLessonIds, setComposePartnerLessonIds] = useState<string[]>([])
+
+  // 待反馈课次做连堂课去重聚合，避免同一双课连堂重复显示两条待办
+  const missingSessions = useMemo(() => {
+    const visitedPartnerIds = new Set<string>()
+    const list: AdminLesson[] = []
+    for (const lesson of missingLessons) {
+      if (visitedPartnerIds.has(lesson.id)) continue
+      if (lesson.isConsecutive && lesson.partnerLessonIds?.length) {
+        lesson.partnerLessonIds.forEach((id) => visitedPartnerIds.add(id))
+      }
+      list.push(lesson)
+    }
+    return list
+  }, [missingLessons])
+
+  const handleRemindTeacher = async (teacherId: string, lessonId?: string, lessonInfo?: string) => {
+    setRemindingTeacherId(teacherId)
+    try {
+      const res = await fetch('/api/admin/classroom-feedback/remind', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teacherId, lessonId, lessonInfo }),
+      })
+      const payload = await res.json()
+      if (!res.ok) {
+        toast.error(payload.error || '催办提醒发送失败')
+        return
+      }
+      if (payload.reminded) {
+        toast.success(payload.message || '催办提醒已发送给教师')
+      } else {
+        toast.info(payload.message || '15分钟内已提醒过，请勿重复催促')
+      }
+    } catch {
+      toast.error('网络错误，请稍后重试')
+    } finally {
+      setRemindingTeacherId(null)
+    }
+  }
 
   const { data: composeStudentsData } = useSWR(
     composeTeacherId && !composeLessonId ? `/api/students?status=ACTIVE&limit=200&division=${division}` : null,
@@ -363,6 +468,11 @@ export default function ClassroomFeedbackAdminPage() {
       const lesson = allLessons.find(l => l.id === lessonId)
       if (lesson) {
         setComposeTeacherId(lesson.teacherId)
+        if (lesson.partnerLessonIds) {
+          setComposePartnerLessonIds(lesson.partnerLessonIds)
+        } else {
+          setComposePartnerLessonIds([])
+        }
         composeForm.setFieldsValue({
           teacherId: lesson.teacherId,
           studentIds: lesson.students.map((student) => student.id)
@@ -370,6 +480,7 @@ export default function ClassroomFeedbackAdminPage() {
       }
     } else {
       setComposeTeacherId('')
+      setComposePartnerLessonIds([])
       composeForm.setFieldsValue({ teacherId: undefined, studentIds: [] })
     }
   }
@@ -377,6 +488,7 @@ export default function ClassroomFeedbackAdminPage() {
   const handleTeacherChange = (teacherId: string) => {
     setComposeTeacherId(teacherId)
     setComposeLessonId('')
+    setComposePartnerLessonIds([])
     composeForm.setFieldsValue({ lessonId: undefined, studentIds: [] })
   }
 
@@ -406,6 +518,27 @@ export default function ClassroomFeedbackAdminPage() {
       setDetailLoading(false)
     }
   }
+
+  const requestedFeedbackId = searchParams.get('feedbackId') || ''
+  useEffect(() => {
+    if (!requestedFeedbackId || autoOpenedFeedbackId.current === requestedFeedbackId) return
+    autoOpenedFeedbackId.current = requestedFeedbackId
+    let cancelled = false
+    setDetailLoading(true)
+    void fetch(`/api/admin/classroom-feedback/${encodeURIComponent(requestedFeedbackId)}/detail`)
+      .then(async (response) => {
+        const payload = await response.json()
+        if (!response.ok) throw new Error(payload.error || '评价详情加载失败')
+        if (cancelled) return
+        setDetailFeedback(payload)
+        setAdminReply(payload.adminReply || '')
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) toast.error(error instanceof Error ? error.message : '评价详情加载失败')
+      })
+      .finally(() => { if (!cancelled) setDetailLoading(false) })
+    return () => { cancelled = true }
+  }, [requestedFeedbackId])
 
   const submitAdminReply = async () => {
     if (!detailFeedback) return
@@ -510,11 +643,26 @@ export default function ClassroomFeedbackAdminPage() {
         scale: 2,
         backgroundColor: '#ffffff',
       })
+      const [dataHeader, encodedImage] = dataUrl.split(',', 2)
+      if (!dataHeader || !encodedImage) throw new Error('SHARE_IMAGE_INVALID_DATA')
+      const imageType = dataHeader.match(/^data:([^;]+);base64$/)?.[1] || 'image/png'
+      const binaryImage = window.atob(encodedImage)
+      const imageBytes = new Uint8Array(binaryImage.length)
+      for (let i = 0; i < binaryImage.length; i += 1) imageBytes[i] = binaryImage.charCodeAt(i)
+      const imageBlob = new Blob([imageBytes], { type: imageType })
+      const downloadUrl = URL.createObjectURL(imageBlob)
       const link = document.createElement('a')
       const fname = `课堂反馈_${detailFeedback.teacher.name}_${new Date().toISOString().slice(0, 10)}.png`
+      setSharePreviewDataUrl(dataUrl)
+      setSharePreviewDownloadUrl(downloadUrl)
+      setSharePreviewFilename(fname)
       link.download = fname
-      link.href = dataUrl
+      link.href = downloadUrl
+      link.style.position = 'fixed'
+      link.style.left = '-9999px'
+      document.body.appendChild(link)
       link.click()
+      link.remove()
       toast.success('分享图已生成并下载')
     } catch (err) {
       console.error('生成分享图失败', err)
@@ -548,7 +696,7 @@ export default function ClassroomFeedbackAdminPage() {
     if (!selectedTeacher) return []
     const set = new Set<string>()
     for (const f of selectedTeacher.items) {
-      if (f.classGroupName) set.add(f.classGroupName)
+      set.add(f.classGroupName || '未关联班级')
     }
     return Array.from(set)
   }, [selectedTeacher])
@@ -557,7 +705,7 @@ export default function ClassroomFeedbackAdminPage() {
   const filteredFeedbacks = useMemo(() => {
     if (!selectedTeacher) return []
     let items = selectedTeacher.items
-    if (selectedClass) items = items.filter(f => f.classGroupName === selectedClass)
+    if (selectedClass) items = items.filter(f => (f.classGroupName || '未关联班级') === selectedClass)
     const keyword = q.trim()
     if (keyword) {
       items = items.filter(f =>
@@ -567,19 +715,53 @@ export default function ClassroomFeedbackAdminPage() {
     return items
   }, [selectedTeacher, selectedClass, q])
 
+  const feedbackGroupsByClass = useMemo(() => {
+    const groups = new Map<string, AdminFeedback[]>()
+    for (const feedback of filteredFeedbacks) {
+      const key = feedback.classGroupName || '未关联班级'
+      const items = groups.get(key) || []
+      items.push(feedback)
+      groups.set(key, items)
+    }
+    return Array.from(groups.entries()).map(([className, items]) => ({ className, items }))
+  }, [filteredFeedbacks])
+
   // 切换老师时重置班级筛选
   useEffect(() => { setSelectedClass('') }, [selectedTeacherId])
+  useEffect(() => { setPendingExpanded(false) }, [date, viewAll])
 
   const openTeacher = (teacherId: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('teacherId', teacherId)
     router.push(`/feedback-performance?${params.toString()}`)
   }
-  const backToTeachers = () => {
+  const backToTeachers = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString())
     params.delete('teacherId')
-    router.push(`/feedback-performance?${params.toString()}`)
-  }
+    router.replace(`/feedback-performance?${params.toString()}`)
+  }, [router, searchParams])
+
+  const handleMobileBack = useCallback(() => {
+    if (viewerIndex !== null) { setViewerIndex(null); return true }
+    if (composeOpen) {
+      setComposeOpen(false)
+      composeForm.resetFields()
+      setComposeTeacherId('')
+      setComposeLessonId('')
+      return true
+    }
+    if (detailFeedback) {
+      setDetailFeedback(null)
+      setAdminReply('')
+      setViewerIndex(null)
+      setEditing(false)
+      return true
+    }
+    if (selectedTeacher) { backToTeachers(); return true }
+    return false
+  }, [backToTeachers, composeForm, composeOpen, detailFeedback, selectedTeacher, viewerIndex])
+
+  useMobileBackHandler(handleMobileBack, 10)
 
   const submitOnBehalf = async (status: 'DRAFT' | 'PUBLISHED') => {
     const values = await composeForm.validateFields().catch(() => null)
@@ -596,6 +778,7 @@ export default function ClassroomFeedbackAdminPage() {
         body: JSON.stringify({
           teacherId: composeTeacherId,
           classLessonId: composeLessonId || null,
+          additionalLessonIds: composePartnerLessonIds,
           studentIds: values.studentIds,
           knowledgePoints: (values.knowledgePoints || []),
           summary: values.summary || '',
@@ -607,12 +790,13 @@ export default function ClassroomFeedbackAdminPage() {
       })
       const data = await res.json()
       if (!res.ok) { toast.error(data.error || '提交失败'); return }
-      toast.success(status === 'PUBLISHED' ? '已代发并通知家长' : '草稿已保存')
+      toast.success(status === 'PUBLISHED' ? (composePartnerLessonIds.length > 0 ? '连堂反馈已同步代发并通知家长' : '已代发并通知家长') : '草稿已保存')
       setComposeOpen(false)
       composeForm.resetFields()
       setComposeImages([])
       setComposeTeacherId('')
       setComposeLessonId('')
+      setComposePartnerLessonIds([])
       mutate()
     } finally {
       setSubmitting(false)
@@ -626,7 +810,7 @@ export default function ClassroomFeedbackAdminPage() {
       actions={
         <div style={{ display: 'flex', gap: 8 }}>
           {selectedTeacher && (
-            <Button icon={<ArrowLeftOutlined />} onClick={backToTeachers}>返回全部老师</Button>
+            <Button className="mobile-shell-back" icon={<ArrowLeftOutlined />} onClick={backToTeachers}>返回全部老师</Button>
           )}
           <Button type="primary" icon={<PlusOutlined />}
             style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', fontWeight: 600 }}
@@ -639,38 +823,110 @@ export default function ClassroomFeedbackAdminPage() {
     >
       <AdminTeachingRecordSwitcher />
 
-      {/* 顶部统计 */}
-       <Card variant="borderless" className={styles.overview} styles={{ body: { padding: 0 } }}>
-        <div className={styles.overviewBody}>
-          <div className={styles.overviewMetric}>
-            <div className={styles.metricIcon}><CheckCircleOutlined /></div>
-            <div>
-              <div className={styles.metricValue}>{feedbacks.length}</div>
-              <div className={styles.metricLabel}>{viewAll ? '历史反馈' : '当日反馈'}</div>
+      {/* 教学督导 · 随堂反馈时效监控看板 */}
+      {!selectedTeacher && overdueLessons.length > 0 && (
+        <section className={styles.supervisorCard} aria-label="教学督导超时未反馈看板">
+          <div className={styles.supervisorHead}>
+            <div className={styles.supervisorTitle}>
+              <span style={{ fontSize: 16, color: '#E03E2D' }}><BellOutlined /></span>
+              <h3>教学督导 · 随堂反馈时效预警</h3>
+              <span className={styles.supervisorBadge}>
+                {overdueLessons.length} 节超时未反馈 · {new Set(overdueLessons.map((l) => l.teacherId)).size} 位教师
+              </span>
             </div>
+            <Button
+              type="text"
+              size="small"
+              onClick={() => setSupervisorExpanded(!supervisorExpanded)}
+              icon={supervisorExpanded ? <UpOutlined /> : <DownOutlined />}
+              style={{ color: '#8A5340' }}
+            >
+              {supervisorExpanded ? '收起督导清单' : '展开督导清单'}
+            </Button>
           </div>
-          <div className={styles.overviewDivider} />
-          <div className={styles.overviewMetric}>
-            <div className={styles.metricIcon}><TeamOutlined /></div>
-            <div>
-              <div className={styles.metricValue}>{teacherGroups.length}</div>
-              <div className={styles.metricLabel}>已提交反馈老师</div>
-            </div>
-          </div>
-          {!viewAll && noFeedback.length > 0 && (
-            <>
-              <div className={styles.overviewDivider} />
-              <div className={styles.overviewMetric}>
-                <div className={styles.metricIcon}><WarningOutlined style={{ color: 'var(--color-warning)' }} /></div>
-                <div>
-                  <div className={styles.metricValue} style={{ color: 'var(--color-warning)' }}>{noFeedback.length}</div>
-                  <div className={styles.metricLabel}>待提交反馈老师</div>
-                </div>
+          {supervisorExpanded && (
+            <div className={styles.supervisorBody}>
+              <div style={{ fontSize: 12, color: '#8A5340', marginBottom: 4 }}>
+                以下为近3天已完成考勤但超过24小时仍未提交随堂成长反馈的课次，建议及时督促教师提交或教研代发：
               </div>
-            </>
+              {overdueLessons.map((item) => (
+                <div key={item.id} className={styles.supervisorItem}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                    <span style={{
+                      width: 28, height: 28, borderRadius: 8, background: '#FFEBEA',
+                      color: '#E03E2D', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 700
+                    }}>
+                      !
+                    </span>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <strong style={{ fontSize: 13, color: '#1F2329' }}>{item.teacherName} 老师</strong>
+                        <span style={{ fontSize: 12, color: '#4B5563' }}>{item.groupName} · {item.subject}</span>
+                        <span style={{ fontSize: 11, color: '#9CA3AF' }}>{item.lessonDate.slice(0, 10)} {item.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Button
+                      size="small"
+                      danger
+                      icon={<BellOutlined />}
+                      loading={remindingTeacherId === item.teacherId}
+                      onClick={() => handleRemindTeacher(item.teacherId, item.id, `${item.groupName} ${item.subject}（${item.lessonDate.slice(0, 10)} ${item.time}）`)}
+                    >
+                      督促提交
+                    </Button>
+                    <Button
+                      size="small"
+                      type="primary"
+                      style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}
+                      onClick={() => openCompose(item.teacherId, item.id)}
+                    >
+                      代发
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
-        </div>
-      </Card>
+        </section>
+      )}
+
+      {/* 成长反馈进度 */}
+      {!selectedTeacher && (
+        <Card variant="borderless" className={styles.overview} styles={{ body: { padding: 0 } }}>
+          <div className={styles.overviewHead}>
+            <div>
+              <h2>{viewAll ? '反馈记录概览' : '当日反馈进度'}</h2>
+              <span>{viewAll ? '按已关联课次日期与发布时间汇总' : date}</span>
+            </div>
+            <span className={styles.overviewPill}><CalendarOutlined /> {viewAll ? '全部历史' : '按课日统计'}</span>
+          </div>
+          <div className={styles.overviewBody}>
+            <div className={styles.overviewMetric}>
+              <div className={`${styles.metricIcon} ${styles.metricPublished}`}><CheckCircleOutlined /></div>
+              <div>
+                <div className={styles.metricValue}>{publishedFeedbacks.length}</div>
+                <div className={styles.metricLabel}>已发布反馈</div>
+              </div>
+            </div>
+            <div className={styles.overviewMetric}>
+              <div className={`${styles.metricIcon} ${styles.metricTeachers}`}><TeamOutlined /></div>
+              <div>
+                <div className={styles.metricValue}>{publishedTeacherCount}</div>
+                <div className={styles.metricLabel}>已发布教师</div>
+              </div>
+            </div>
+            <div className={styles.overviewMetric}>
+              <div className={`${styles.metricIcon} ${styles.metricPending}`}><WarningOutlined /></div>
+              <div>
+                <div className={styles.metricValue}>{viewAll ? '—' : missingSessions.length}</div>
+                <div className={styles.metricLabel}>{viewAll ? '历史不统计待办' : '待反馈课次'}</div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* 筛选条（仅在一级视图显示） */}
       {!selectedTeacher && (
@@ -689,71 +945,149 @@ export default function ClassroomFeedbackAdminPage() {
         </Card>
       )}
 
-      {/* 待提交老师提醒（仅一级视图） */}
-      {!selectedTeacher && !viewAll && noFeedback.length > 0 && (
-        <Card
-          variant="borderless"
-          style={{ borderRadius: 14, border: '1px solid var(--color-hairline)', background: 'var(--color-primary-bg)', marginBottom: 16 }}
-          title={<span style={{ color: 'var(--color-ink)', fontSize: 14, fontWeight: 600 }}><WarningOutlined style={{ color: 'var(--color-warning)' }} /> 今日尚未提交反馈</span>}
-        >
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {noFeedback.map((teacher) => (
-              <Button key={teacher.id} size="small" icon={<PlusOutlined />} onClick={() => openCompose(teacher.id)}>
-                {teacher.name}补发
-              </Button>
-            ))}
-          </div>
-          {missingLessons.length > 0 && (
-            <div style={{ marginTop: 12, borderTop: '1px solid var(--color-hairline)', paddingTop: 12 }}>
-              <div style={{ fontSize: 12, color: 'var(--color-ink-muted)', marginBottom: 8 }}>待补发的课次</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {missingLessons.map(lesson => (
-                  <Button key={lesson.id} size="small" onClick={() => openCompose(undefined, lesson.id)}>
-                    <strong>{lesson.groupName}</strong>
-                    <span style={{ color: 'var(--color-ink-muted)' }}>{lesson.teacherName} · {lesson.time}</span>
-                  </Button>
-                ))}
+      {!selectedTeacher && !viewAll && missingSessions.length > 0 && (
+        <section className={styles.pendingPanel} aria-label="待反馈课次">
+          <div className={styles.pendingHead}>
+            <div className={styles.pendingTitle}>
+              <span className={styles.pendingIcon}><WarningOutlined /></span>
+              <div>
+                <h2>待反馈课次</h2>
+                <p>仅统计已完成考勤且有学员到课、还没有已发布反馈的课次（连堂课已自动合并）</p>
               </div>
             </div>
+            <div className={styles.pendingControls}>
+              <span className={styles.pendingCount}>{missingSessions.length}<small>节</small></span>
+              <Button
+                type="text"
+                className={styles.pendingToggle}
+                aria-expanded={pendingExpanded}
+                onClick={() => setPendingExpanded((expanded) => !expanded)}
+                icon={pendingExpanded ? <UpOutlined /> : <DownOutlined />}
+              >
+                {pendingExpanded ? '收起课次' : '查看课次'}
+              </Button>
+            </div>
+          </div>
+          {pendingExpanded && (
+            <div className={styles.pendingList}>
+              {missingSessions.map((lesson) => (
+                <button
+                  key={lesson.id}
+                  type="button"
+                  className={styles.pendingLesson}
+                  onClick={() => {
+                    const draft = lesson.draftFeedbackId
+                      ? feedbacks.find((feedback) => feedback.id === lesson.draftFeedbackId)
+                      : null
+                    if (lesson.draftFeedbackId) {
+                      if (draft) openDetail(draft)
+                      else toast.error('这节课已有反馈草稿，请刷新列表后再查看')
+                    } else {
+                      openCompose(undefined, lesson.id)
+                    }
+                  }}
+                  aria-label={lesson.draftFeedbackId
+                    ? `查看${lesson.groupName} ${lesson.teacherName} ${lesson.time}的反馈草稿`
+                    : `为${lesson.groupName} ${lesson.teacherName} ${lesson.time}代发反馈`}
+                >
+                  <span className={styles.pendingLessonIcon}><CalendarOutlined /></span>
+                  <span className={styles.pendingLessonInfo}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <strong>{lesson.groupName}</strong>
+                      {lesson.isConsecutive && (
+                        <span className={styles.consecutiveTag}>
+                          双课连堂 · {lesson.sessionSpan || '2节'}
+                        </span>
+                      )}
+                    </div>
+                    <small>{lesson.teacherName} · {lesson.subject} · {lesson.time}</small>
+                  </span>
+                  <span className={styles.pendingLessonAction}>{lesson.draftFeedbackId ? '查看草稿' : '代发'} <RightOutlined /></span>
+                </button>
+              ))}
+            </div>
           )}
-        </Card>
+        </section>
+      )}
+      {!selectedTeacher && !viewAll && eligibleLessons.length > 0 && missingLessons.length === 0 && (
+        <div className={styles.completePanel}>
+          <CheckCircleOutlined />
+          <span><strong>当日反馈已齐</strong><small>已完成考勤的课次均已发布反馈</small></span>
+        </div>
       )}
 
       {/* ========== 一级视图：老师卡片网格 ========== */}
       {!selectedTeacher && (
         isLoading ? (
           <CardSkeleton rows={3} />
-        ) : teacherGroups.length === 0 && noFeedback.length === 0 ? (
+        ) : teacherGroups.length === 0 && missingLessons.length === 0 ? (
           <div className={styles.emptyState}>
-            <InboxOutlined aria-hidden style={{ fontSize: 72, color: 'var(--color-ink-muted)', opacity: 0.35, marginBottom: 16 }} />
-            <GuidedEmpty title={viewAll ? '还没有课堂反馈记录' : `${date}没有课堂反馈`} description="教师发布的课堂内容、评价和照片会显示在这里，便于教务检查反馈是否完整。" />
+            <InboxOutlined aria-hidden style={{ fontSize: 44, color: 'var(--color-primary)', opacity: 0.7, marginBottom: 12 }} />
+            <GuidedEmpty
+              title={viewAll ? '还没有课堂反馈记录' : `${date}暂无已发布反馈`}
+              description={viewAll ? '教师发布的课堂内容、评价和照片会显示在这里。' : '课次完成考勤后，仍未发布的反馈才会出现在上方待反馈清单。'}
+            />
+            {!viewAll && (
+              <Button icon={<HistoryOutlined />} onClick={() => setViewAll(true)}>
+                查看全部历史反馈
+              </Button>
+            )}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+          <div className={styles.teacherGrid}>
             {teacherGroups.map((group) => {
               const teacherInfo = teachers.find(t => t.id === group.teacherId)
+              const publishedItems = group.items.filter((item) => item.status === 'PUBLISHED')
+              const previewItems = (publishedItems.length ? publishedItems : group.items).slice(0, 2)
+              const classCount = new Set(group.items.map((item) => item.classGroupName).filter(Boolean)).size
+              const draftCount = group.items.filter((item) => item.status !== 'PUBLISHED').length
               return (
-                <Card
+                <button
                   key={group.teacherId}
-                  hoverable
+                  type="button"
+                  className={styles.teacherCard}
                   onClick={() => openTeacher(group.teacherId)}
-                  style={{ borderRadius: 14, cursor: 'pointer' }}
-                  styles={{ body: { padding: 16 } }}
+                  aria-label={`查看${group.teacherName}的${group.items.length}条课堂反馈`}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className={styles.teacherCardHead}>
                     <CachedAvatarImage
                       src={getTeacherAvatarUrl(teacherInfo?.avatar, teacherInfo?.gender, teacherInfo?.id ?? group.teacherId)}
                       fallbackSrc={getTeacherAvatarUrl(null, teacherInfo?.gender, teacherInfo?.id ?? group.teacherId)}
                       alt={`${group.teacherName}头像`}
-                      style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                      className={styles.teacherAvatar}
                     />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, color: '#1A1201', marginBottom: 2 }}>{group.teacherName}</div>
-                      <div style={{ fontSize: 12, color: '#9A8E7A' }}>今日反馈 {group.items.length} 条</div>
+                    <div className={styles.teacherIdentity}>
+                      <strong>{group.teacherName}</strong>
+                      <span>{viewAll ? '历史课堂反馈' : `${date} · 课堂反馈`}</span>
                     </div>
-                    <RightOutlined style={{ color: '#CCC', fontSize: 12 }} />
+                    <RightOutlined className={styles.teacherArrow} />
                   </div>
-                </Card>
+                  <div className={styles.teacherStats}>
+                    <span><b>{publishedItems.length}</b> 已发布</span>
+                    <span><b>{classCount}</b> 个班级</span>
+                    {draftCount > 0 && <span className={styles.draftStat}><b>{draftCount}</b> 草稿</span>}
+                  </div>
+                  <div className={styles.teacherPreviewList}>
+                    {previewItems.map((item) => (
+                      <div key={item.id} className={styles.teacherPreview}>
+                        <div className={styles.teacherPreviewHeading}>
+                          <span>{item.classGroupName || '未关联班级'}</span>
+                          <span>{item.subject}</span>
+                          <span className={item.status === 'PUBLISHED' ? styles.publishedFlag : styles.draftFlag}>
+                            {item.status === 'PUBLISHED' ? '已发布' : '草稿'}
+                          </span>
+                        </div>
+                        <strong>{item.studentName || '班级反馈'}</strong>
+                        <p>{item.summary || item.lessonContent || '已记录课堂反馈，点开查看完整内容。'}</p>
+                      </div>
+                    ))}
+                    {previewItems.length === 0 && <p className={styles.noPublishedPreview}>暂无反馈内容</p>}
+                  </div>
+                  <div className={styles.teacherCardFooter}>
+                    <span>查看班级与学员反馈</span>
+                    <RightOutlined />
+                  </div>
+                </button>
               )
             })}
           </div>
@@ -762,10 +1096,10 @@ export default function ClassroomFeedbackAdminPage() {
 
       {/* ========== 二级视图：老师详情（班级 Tab + 反馈卡片） ========== */}
       {selectedTeacher && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={styles.teacherDetail}>
           {/* 老师信息头 */}
-          <Card variant="borderless" style={{ borderRadius: 14 }} styles={{ body: { padding: 16 } }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+          <Card variant="borderless" className={styles.teacherDetailCard} styles={{ body: { padding: 16 } }}>
+            <div className={styles.teacherDetailIdentity}>
               <CachedAvatarImage
                 src={getTeacherAvatarUrl(
                   teachers.find((teacher) => teacher.id === selectedTeacher.teacherId)?.avatar,
@@ -778,17 +1112,17 @@ export default function ClassroomFeedbackAdminPage() {
                   selectedTeacher.teacherId,
                 )}
                 alt={`${selectedTeacher.teacherName}头像`}
-                style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                className={styles.teacherDetailAvatar}
               />
-              <div>
-                <div style={{ fontSize: 16, fontWeight: 600, color: '#1A1201' }}>{selectedTeacher.teacherName}</div>
-                <div style={{ fontSize: 12, color: '#9A8E7A' }}>共 {selectedTeacher.items.length} 条反馈 · {teacherClasses.length} 个班级</div>
+              <div className={styles.teacherDetailName}>
+                <strong>{selectedTeacher.teacherName}</strong>
+                <span>已发布 {publishedFeedbacks.filter((item) => item.teacherId === selectedTeacher.teacherId).length} 条 · {teacherClasses.length} 个班级</span>
               </div>
             </div>
 
             {/* 班级 Tab */}
             {teacherClasses.length > 0 && (
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
+              <div className={styles.teacherClassFilters}>
                 <Button
                   size="small"
                   type={selectedClass === '' ? 'primary' : 'default'}
@@ -812,7 +1146,7 @@ export default function ClassroomFeedbackAdminPage() {
             )}
 
             {/* 搜索框 */}
-            <div style={{ marginTop: 12 }}>
+            <div className={styles.teacherSearch}>
               <Input
                 prefix={<SearchOutlined />}
                 placeholder="搜索反馈内容/学员"
@@ -833,9 +1167,17 @@ export default function ClassroomFeedbackAdminPage() {
               </div>
             </Card>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {filteredFeedbacks.map(item => (
-                <AdminFeedbackRow key={item.id} item={item} onOpen={openDetail} />
+            <div className={styles.feedbackClassList}>
+              {feedbackGroupsByClass.map(({ className, items }) => (
+                <section key={className} className={styles.feedbackClassSection}>
+                  <header className={styles.feedbackClassHeader}>
+                    <div><strong>{className}</strong><span>{items.length} 条反馈</span></div>
+                    <span>{new Set(items.map((item) => item.studentName).filter(Boolean)).size} 位学员</span>
+                  </header>
+                  <div className={styles.feedbackRows}>
+                    {items.map((item) => <AdminFeedbackRow key={item.id} item={item} onOpen={openDetail} />)}
+                  </div>
+                </section>
               ))}
             </div>
           )}
@@ -909,6 +1251,56 @@ export default function ClassroomFeedbackAdminPage() {
                   </div>
                 )}
 
+                {detailFeedback.parentEvaluations && detailFeedback.parentEvaluations.length > 0 && (
+                  <section aria-label="家长教学评价" style={{ display: 'grid', gap: 8 }}>
+                    <Typography.Text strong style={{ fontSize: 13 }}>家长教学评价 · 管理端可见</Typography.Text>
+                    {detailFeedback.parentEvaluations.map((evaluation) => (
+                      <div key={evaluation.id} style={{ background: '#fff', border: '1px solid var(--color-hairline)', borderRadius: 12, padding: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                          <Tag color={evaluation.satisfied ? 'green' : 'orange'} style={{ margin: 0 }}>
+                            {evaluation.satisfied ? '满意' : '不满意'}
+                          </Tag>
+                          <Tag color={evaluation.reviewStatus === 'RESOLVED' ? 'success' : evaluation.reviewStatus === 'IN_PROGRESS' ? 'processing' : 'warning'} style={{ margin: 0 }}>
+                            {evaluation.reviewStatus === 'RESOLVED' ? '已跟进' : evaluation.reviewStatus === 'IN_PROGRESS' ? '跟进中' : '待跟进'}
+                          </Tag>
+                          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            {evaluation.parent.name} · {formatFeedbackTime(evaluation.createdAt)}
+                          </Typography.Text>
+                        </div>
+                        <Typography.Paragraph style={{ margin: '8px 0 0', color: 'var(--color-ink)', fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+                          {evaluation.reason || (evaluation.satisfied ? '家长认可本节课的教学内容。' : '家长未填写具体原因。')}
+                        </Typography.Paragraph>
+                        {evaluation.reviewNote && <Typography.Paragraph type="secondary" style={{ margin: '6px 0 0', fontSize: 12, whiteSpace: 'pre-wrap' }}>管理跟进：{evaluation.reviewNote}</Typography.Paragraph>}
+                        <Button type="link" style={{ padding: '4px 0 0', minHeight: 40 }} onClick={() => router.push(`/parent-feedback-reviews?evaluationId=${encodeURIComponent(evaluation.id)}`)}>
+                          打开家长评价跟进
+                        </Button>
+                      </div>
+                    ))}
+                  </section>
+                )}
+
+                {detailFeedback.students.some((student) => (
+                  Boolean(normalizePracticeCheckin(student.learningSnapshot?.practiceCheckin))
+                  || Boolean(student.practiceReplies?.length)
+                )) && (
+                  <section aria-label="家庭练习回传与管理批示" style={{ display: 'grid', gap: 9 }}>
+                    <Typography.Text strong style={{ fontSize: 13 }}>家庭练习回传 · 管理端查看与批示</Typography.Text>
+                    {detailFeedback.students.filter((student) => (
+                      Boolean(normalizePracticeCheckin(student.learningSnapshot?.practiceCheckin))
+                      || Boolean(student.practiceReplies?.length)
+                    )).map((student) => (
+                      <AdminPracticeReplyPanel
+                        key={`practice-reply-${student.id}`}
+                        feedbackId={detailFeedback.id}
+                        studentId={student.id}
+                        studentName={student.name}
+                        checkin={normalizePracticeCheckin(student.learningSnapshot?.practiceCheckin)}
+                        initialReplies={student.practiceReplies || []}
+                      />
+                    ))}
+                  </section>
+                )}
+
                 {/* 编辑模式 */}
                 {editing ? (
                   <div style={{ background: '#fff', borderRadius: 14, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -971,32 +1363,12 @@ export default function ClassroomFeedbackAdminPage() {
                       </div>
                     )}
 
-                    {/* 授课内容 */}
-                    {detailFeedback.lessonContent && (
-                      <div style={{ background: '#fff', borderRadius: 14, padding: 16, border: '1px solid #F0DDD2' }}>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 8, fontSize: 13 }}>本节授课内容</Typography.Text>
-                        <Typography.Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-                          {detailFeedback.lessonContent}
-                        </Typography.Paragraph>
-                      </div>
-                    )}
-
                     {/* 总体评价 */}
                     {detailFeedback.overallComment && (
                       <div style={{ background: '#fff', borderRadius: 14, padding: 16, border: '1px solid #F0DDD2' }}>
                         <Typography.Text strong style={{ display: 'block', marginBottom: 8, fontSize: 13 }}>总体评价</Typography.Text>
                         <Typography.Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
                           {detailFeedback.overallComment}
-                        </Typography.Paragraph>
-                      </div>
-                    )}
-
-                    {/* 课堂小结 */}
-                    {detailFeedback.summary && (
-                      <div style={{ background: '#fff', borderRadius: 14, padding: 16, border: '1px solid #F0DDD2' }}>
-                        <Typography.Text strong style={{ display: 'block', marginBottom: 8, fontSize: 13 }}>课堂小结</Typography.Text>
-                        <Typography.Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-                          {detailFeedback.summary}
                         </Typography.Paragraph>
                       </div>
                     )}
@@ -1019,6 +1391,40 @@ export default function ClassroomFeedbackAdminPage() {
                           {performanceTags.map((tag) => <Tag key={tag} style={{ borderRadius: 9999, margin: 0 }}>{tag}</Tag>)}
                         </div>
                       </div>
+                    )}
+
+                    {students.some((student) => {
+                      const snapshot = student.learningSnapshot
+                      return Boolean(snapshot && (snapshot.performance || snapshot.mastery || snapshot.tags.length || snapshot.teacherRemark || snapshot.nextLessonFocus || snapshot.personalizedLearning))
+                    }) && (
+                      <section aria-label="学生个性化学情" style={{ display: 'grid', gap: 10 }}>
+                        <Typography.Text strong style={{ fontSize: 13 }}>学生个性化学情</Typography.Text>
+                        {students.filter((student) => {
+                          const snapshot = student.learningSnapshot
+                          return Boolean(snapshot && (snapshot.performance || snapshot.mastery || snapshot.tags.length || snapshot.teacherRemark || snapshot.nextLessonFocus || snapshot.personalizedLearning))
+                        }).map((student) => {
+                          const snapshot = student.learningSnapshot!
+                          return (
+                            <div key={`learning-${student.id}`} style={{ background: '#fff', border: '1px solid var(--color-hairline)', borderRadius: 12, padding: 12 }}>
+                              <strong style={{ color: 'var(--color-ink)', fontSize: 13 }}>{student.name}{student.grade ? ` · ${student.grade}` : ''}</strong>
+                              <PersonalizedLearningPath
+                                compact
+                                studentName={student.name}
+                                topic={points[0] || knowledgeCard?.topic}
+                                mastery={snapshot.mastery}
+                                performance={snapshot.performance}
+                                tags={snapshot.tags}
+                                teacherRemark={snapshot.teacherRemark}
+                                overallComment={detailFeedback.overallComment}
+                                nextLessonFocus={snapshot.nextLessonFocus}
+                                homework={homework}
+                                extension={snapshot.personalizedLearning}
+                                knowledgeCard={knowledgeCard}
+                              />
+                            </div>
+                          )
+                        })}
+                      </section>
                     )}
 
                     {/* 家长回复 */}
@@ -1063,13 +1469,17 @@ export default function ClassroomFeedbackAdminPage() {
       {/* 隐藏的分享卡（用于生成图片） */}
       {detailFeedback && (() => {
         const shareKnowledgeCard = parseStoredKnowledgeCard(detailFeedback.knowledgeCard)
+        const targetStudent = detailFeedback.students.length === 1 ? detailFeedback.students[0] : null
+        const studentTeacherRemark = targetStudent?.learningSnapshot?.teacherRemark?.trim()
+        const cleanedClassroomFeedback = getParentClassroomFeedbackContent(detailFeedback.overallComment, targetStudent?.name)
+        const shareOverallEvaluation = studentTeacherRemark || cleanedClassroomFeedback || getOverallEvaluationContent(detailFeedback.overallComment)
         return (
         <div style={{ position: 'fixed', left: -9999, top: 0, width: 420, background: '#FAF8F5', fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif' }}>
           <div ref={shareCardRef} style={{ width: 420, background: '#FAF8F5' }}>
             {/* 顶部品牌区 - logo 铺满 + 文字叠图上 */}
             <div style={{ position: 'relative', height: 140, overflow: 'hidden' }}>
               {/* logo 铺满 */}
-              <img src="/muzhe-logo.jpg" alt="牧哲学堂" style={{
+              <img src="/logo-banner.jpg" alt="牧哲学堂" loading="eager" style={{
                 width: '100%', height: '100%', objectFit: 'cover',
               }} />
               {/* 渐变遮罩让文字可读 */}
@@ -1146,7 +1556,24 @@ export default function ClassroomFeedbackAdminPage() {
                   <div style={{ fontSize: 11, color: '#8A6D3B', marginBottom: 8, fontWeight: 700 }}>本节知识点</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {detailFeedback.knowledgePoints.map((kp, i) => (
-                      <span key={i} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 12, background: 'rgba(201,164,92,.15)', color: '#8A6D3B', border: '1px solid rgba(201,164,92,.4)' }}>{kp}</span>
+                      <span
+                        key={i}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          whiteSpace: 'nowrap',
+                          maxWidth: '100%',
+                          lineHeight: 1.4,
+                          padding: '4px 12px',
+                          borderRadius: 999,
+                          fontSize: 12,
+                          background: 'rgba(201,164,92,.15)',
+                          color: '#8A6D3B',
+                          border: '1px solid rgba(201,164,92,.4)',
+                        }}
+                      >
+                        {kp}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -1160,12 +1587,53 @@ export default function ClassroomFeedbackAdminPage() {
               </div>
             )}
 
-            {/* 授课内容 */}
-            {detailFeedback.lessonContent && (
+            {/* 将学生状态、老师观察与家庭练习收拢为一张清晰的学情卡片。 */}
+            {detailFeedback.students.length > 0 && (
               <div style={{ padding: '12px 16px 0' }}>
-                <div style={{ background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #F0DDD2' }}>
-                  <div style={{ fontSize: 11, color: '#9A8E7A', marginBottom: 6, fontWeight: 700 }}>本节授课内容</div>
-                  <div style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailFeedback.lessonContent}</div>
+                <div style={{ display: 'grid', gap: 8 }}>
+                  {detailFeedback.students.map((student) => {
+                    const snapshot = student.learningSnapshot
+                    const hasLearningPath = Boolean(snapshot && (
+                      snapshot.performance || snapshot.mastery || snapshot.tags.length || snapshot.teacherRemark || snapshot.nextLessonFocus || snapshot.personalizedLearning
+                    ))
+                    return (
+                      <div key={student.id} style={{ display: 'grid', gap: 10 }}>
+                        {hasLearningPath && snapshot && (
+                          <PersonalizedLearningPath
+                            compact
+                            posterMode
+                            studentName={student.name}
+                            topic={detailFeedback.knowledgePoints[0] || shareKnowledgeCard?.topic}
+                            mastery={snapshot.mastery}
+                            performance={snapshot.performance}
+                            tags={snapshot.tags}
+                            teacherRemark={snapshot.teacherRemark}
+                            overallComment={detailFeedback.overallComment}
+                            nextLessonFocus={snapshot.nextLessonFocus}
+                            homework={formatHomework(detailFeedback.homework)}
+                            extension={snapshot.personalizedLearning}
+                            knowledgeCard={shareKnowledgeCard}
+                          />
+                        )}
+                        {detailFeedback.status === 'PUBLISHED' && (
+                          <>
+                            <FeedbackPosterParentSections
+                              knowledgeProgressEntries={snapshot?.knowledgeProgressEntries || []}
+                              practiceCheckin={snapshot?.practiceCheckin}
+                              followupReview={snapshot?.followupReview}
+                            />
+                            <FeedbackPosterCommunication
+                              parentReply={student.parentReply || null}
+                              replyTime={student.replyTime || null}
+                              teacherReply={student.teacherReply || null}
+                              teacherReplyTime={student.teacherReplyTime || null}
+                              teacherName={detailFeedback.teacher.name}
+                            />
+                          </>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -1190,22 +1658,20 @@ export default function ClassroomFeedbackAdminPage() {
               </div>
             )}
 
-            {/* 总体评价 */}
-            {detailFeedback.overallComment && (
+            {/* 海报保留教师面向家长的总体评价，不拼接课堂小结或本节授课内容。 */}
+            {shareOverallEvaluation && (
               <div style={{ padding: '12px 16px 0' }}>
-                <div style={{ background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #F0DDD2' }}>
-                  <div style={{ fontSize: 11, color: '#9A8E7A', marginBottom: 6, fontWeight: 700 }}>总体评价</div>
-                  <div style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailFeedback.overallComment}</div>
-                </div>
-              </div>
-            )}
-
-            {/* 课堂小结（高亮） */}
-            {detailFeedback.summary && (
-              <div style={{ padding: '12px 16px 0' }}>
-                <div style={{ background: '#FFF6EF', borderRadius: 12, padding: 16, border: '1px solid rgba(232,120,74,.25)' }}>
-                  <div style={{ fontSize: 11, color: '#D46B3A', marginBottom: 6, fontWeight: 700 }}>课堂小结</div>
-                  <div style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailFeedback.summary}</div>
+                <div style={{ background: 'var(--color-surface-1)', borderRadius: 14, padding: 15, border: '1px solid var(--color-hairline)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 9 }}>
+                    <span style={{ display: 'grid', width: 28, height: 28, placeItems: 'center', borderRadius: 9, background: 'var(--color-brand-gold-bg)', color: 'var(--color-brand-gold)' }}>
+                      <SendOutlined />
+                    </span>
+                    <div>
+                      <div style={{ fontSize: 12, color: 'var(--color-ink)', fontWeight: 750 }}>总体评价</div>
+                      <div style={{ marginTop: 2, fontSize: 10, color: 'var(--color-ink-subtle)' }}>老师给家长的课堂反馈</div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--color-ink-muted)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{shareOverallEvaluation}</div>
                 </div>
               </div>
             )}
@@ -1275,7 +1741,7 @@ export default function ClassroomFeedbackAdminPage() {
               options={allLessons.map(l => ({
                 label: `${l.groupName} (${l.teacherName}) ${l.time}`,
                 value: l.id,
-                disabled: l.hasFeedback
+                disabled: l.hasAnyFeedback
               }))}
             />
           </Form.Item>
@@ -1366,6 +1832,45 @@ export default function ClassroomFeedbackAdminPage() {
           </Form.Item>
         </Form>
       </Drawer>
+
+      <BrandModal
+        open={Boolean(sharePreviewDataUrl)}
+        title="课堂反馈分享图"
+        onClose={() => {
+          setSharePreviewDataUrl(null)
+          setSharePreviewDownloadUrl((url) => {
+            if (url) URL.revokeObjectURL(url)
+            return null
+          })
+        }}
+        width={560}
+        mobileHeight="92dvh"
+        footer={sharePreviewDataUrl ? (
+          <a
+            href={sharePreviewDownloadUrl || sharePreviewDataUrl}
+            download={sharePreviewFilename}
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              minHeight: 40, padding: '0 18px', borderRadius: 10,
+              background: 'var(--color-primary)', color: '#fff', fontWeight: 600,
+              textDecoration: 'none',
+            }}
+          >
+            下载完整分享图
+          </a>
+        ) : null}
+        bodyStyle={{ padding: 12, background: 'var(--color-canvas)' }}
+      >
+        {sharePreviewDataUrl && (
+          <div style={{ maxHeight: '68dvh', overflow: 'auto', padding: 8, borderRadius: 12, background: '#eee9e0' }}>
+            <img
+              src={sharePreviewDataUrl}
+              alt="课堂反馈完整分享图"
+              style={{ display: 'block', width: '100%', height: 'auto', margin: '0 auto', borderRadius: 8 }}
+            />
+          </div>
+        )}
+      </BrandModal>
     </PageLayout>
   )
 }

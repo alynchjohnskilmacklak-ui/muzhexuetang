@@ -120,6 +120,27 @@ export interface TeacherCompliance {
   pendingFeedback: number
 }
 
+export interface StudentGradeBreakdown {
+  grade: string
+  count: number
+  percentage: number
+}
+
+export interface TeacherRosterSummary {
+  teacherId: string
+  name: string
+  gender: string | null
+  avatar: string | null
+  tierLevel?: string | null
+  subjects?: string | null
+  activeStudents: number
+  monthlyHours: number
+  todayLessons: number
+  pendingAttendance: number
+  pendingFeedback: number
+  pendingReplies: number
+}
+
 export interface AdminDashboardData {
   metrics: AdminDashboardMetrics
   growthData: StudentGrowthData
@@ -129,4 +150,6 @@ export interface AdminDashboardData {
   workloads: TeacherWorkload[]
   logs: ActivityLog[]
   intensiveAppointments: IntensiveAppointment[]
+  studentGrades?: StudentGradeBreakdown[]
+  teachersSummary?: TeacherRosterSummary[]
 }

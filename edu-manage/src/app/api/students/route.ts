@@ -58,8 +58,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const requestedTermId = searchParams.get('termId')?.trim() || null
   const requestedSort = searchParams.get('sortBy')
   const sortBy: StudentSortBy = STUDENT_SORTS.includes(requestedSort as StudentSortBy) ? requestedSort as StudentSortBy : 'createdAt'
-  const page = parseInt(searchParams.get('page') || '1')
-  const limit = parseInt(searchParams.get('limit') || '100')
+  const requestedPage = Number.parseInt(searchParams.get('page') || '1', 10)
+  const requestedLimit = Number.parseInt(searchParams.get('limit') || '100', 10)
+  const page = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1
+  const limit = Number.isFinite(requestedLimit) ? Math.min(500, Math.max(1, requestedLimit)) : 100
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
   const skip = (page - 1) * limit
 
@@ -69,15 +71,21 @@ export const GET = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '运营批次不存在或不属于当前学部' }, { status: 404 })
   }
   if (!selectedTerm) {
-    return NextResponse.json(groupByGrade ? {} : { students: [], total: 0, page, limit, contextState: 'NO_SELECTED_TERM' })
+    return NextResponse.json(groupByGrade
+      ? { studentsByGrade: {}, gradeCounts: {}, total: 0, page, limit, contextState: 'NO_SELECTED_TERM' }
+      : { students: [], total: 0, page, limit, contextState: 'NO_SELECTED_TERM' })
   }
-  where.termMemberships = { some: { termId: selectedTerm.id } }
+  where.termMemberships = {
+    some: {
+      termId: selectedTerm.id,
+      ...(grade && grade !== 'all' ? { grade } : {}),
+    },
+  }
   if (status) {
     where.status = status.toUpperCase()
   } else if (selectedTerm.status !== 'ARCHIVED') {
     where.status = { not: 'INACTIVE' }
   }
-  if (grade && grade !== 'all') where.grade = grade
   if (lowHours) where.status = 'ACTIVE'
   if (courseType && courseType !== 'all') {
     const normalizedCourseType = normalizeCourseTypeFilter(courseType)
@@ -91,6 +99,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       some: {
         status: 'ACTIVE',
         group: {
+          termId: selectedTerm.id,
           status: { not: 'ARCHIVED' },
           course: {
             isActive: true,
@@ -109,13 +118,31 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ]
   }
 
+  const loadGradeCounts = () => prisma.studentTermMembership.groupBy({
+    by: ['grade'],
+    where: {
+      termId: selectedTerm.id,
+      status: { not: 'WITHDRAWN' },
+      student: { division, status: { not: 'INACTIVE' } },
+    },
+    _count: { _all: true },
+  }).then((rows) => rows.reduce<Record<string, number>>((counts, row) => {
+    counts[row.grade || '未设年级'] = row._count._all
+    return counts
+  }, {}))
+
   if (lowHours) {
     const lowHourRows = await prisma.enrollment.groupBy({
       by: ['studentId'],
       where: {
         status: 'ACTIVE',
-        student: { status: 'ACTIVE', division },
+        student: {
+          status: 'ACTIVE',
+          division,
+          termMemberships: { some: { termId: selectedTerm.id } },
+        },
         group: {
+          termId: selectedTerm.id,
           intensiveMode: { not: 'INTENSIVE' },
           status: { not: 'ARCHIVED' },
           course: { isActive: true },
@@ -126,26 +153,36 @@ export const GET = apiHandler(async (req: NextRequest) => {
     })
     const lowHourStudentIds = lowHourRows.map((row) => row.studentId)
     if (!lowHourStudentIds.length) {
+      if (groupByGrade) {
+        const gradeCounts = await loadGradeCounts()
+        return NextResponse.json({ studentsByGrade: {}, gradeCounts, total: 0, page, limit })
+      }
       return NextResponse.json({ students: [], total: 0, page, limit })
     }
     where.id = { in: lowHourStudentIds }
   }
 
-  const [students, total] = await Promise.all([
+  const [students, total, gradeCounts] = await Promise.all([
     prisma.student.findMany({
       where,
+      ...(groupByGrade ? { skip, take: limit } : {}),
       include: {
         mainTeacher: { select: { id: true, name: true } },
+        termMemberships: {
+          where: { termId: selectedTerm.id },
+          select: { grade: true },
+          take: 1,
+        },
         enrollments: {
           where: {
             status: 'ACTIVE',
-            group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
+            group: { termId: selectedTerm.id, status: { not: 'ARCHIVED' }, course: { isActive: true } },
           },
           include: { group: { include: { course: { select: { id: true, name: true, type: true, isActive: true } } } } },
           orderBy: { enrolledAt: 'desc' },
         },
         fees: {
-          where: { status: 'pending', deletedAt: null },
+          where: { termId: selectedTerm.id, status: 'pending', deletedAt: null },
           select: { id: true, status: true, dueDate: true, amount: true },
           orderBy: { dueDate: 'asc' },
         },
@@ -158,6 +195,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       orderBy: { createdAt: 'desc' },
     }),
     prisma.student.count({ where }),
+    groupByGrade ? loadGradeCounts() : Promise.resolve({} as Record<string, number>),
   ])
   const approvedIntensiveAttendances = students.length
     ? await prisma.attendance.findMany({
@@ -167,6 +205,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
             intensiveReviewStatus: 'APPROVED',
             group: {
               intensiveMode: 'INTENSIVE',
+              termId: selectedTerm.id,
               status: { not: 'ARCHIVED' },
               course: { isActive: true },
             },
@@ -190,6 +229,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
         select: { studentId: true, classRecord: { select: { classId: true, studyDate: true } } },
       })
     : []
+  const studyHallAttendanceDatesByStudentClass = new Map<string, string[]>()
+  for (const row of studyHallAttendanceRows) {
+    const key = `${row.studentId}\u0000${row.classRecord.classId}`
+    const dates = studyHallAttendanceDatesByStudentClass.get(key) || []
+    dates.push(dateKey(row.classRecord.studyDate))
+    studyHallAttendanceDatesByStudentClass.set(key, dates)
+  }
   const approvedIntensiveByStudent = new Map<string, typeof approvedIntensiveAttendances>()
   for (const attendance of approvedIntensiveAttendances) {
     const current = approvedIntensiveByStudent.get(attendance.studentId) || []
@@ -210,13 +256,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
       calculateApprovedIntensiveHours(approvedIntensiveByStudent.get(student.id) || []),
     )
     const studyHallMemberships = student.studyHallClasses.map((membership) => {
-      const dates = studyHallAttendanceRows
-        .filter((row) => row.studentId === student.id && row.classRecord.classId === membership.classId)
-        .map((row) => dateKey(row.classRecord.studyDate))
+      const dates = studyHallAttendanceDatesByStudentClass.get(`${student.id}\u0000${membership.classId}`) || []
       return { ...membership, ...calculatePurchasedDayBalance(membership.purchasedDays, membership.adjustedDays, dates) }
     })
     return {
       ...student,
+      grade: student.termMemberships[0]?.grade ?? student.grade,
+      termMemberships: undefined,
       enrollments: activeEnrollments,
       remainHours,
       totalHours,
@@ -236,7 +282,14 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }
     const otherStudents = sorted.filter((student) => !student.grade || !gradeOrder.includes(student.grade))
     if (otherStudents.length) grouped['未设年级'] = otherStudents
-    return NextResponse.json(grouped)
+    return NextResponse.json({
+      studentsByGrade: grouped,
+      gradeCounts,
+      total,
+      page,
+      limit,
+      truncated: total > limit,
+    })
   }
 
   return NextResponse.json({ students: sorted.slice(skip, skip + limit), total, page, limit })
@@ -325,6 +378,31 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
     if (previousStudent?.termMemberships.length) return NextResponse.json({ error: '该学员已在当前运营批次中，无需再次建档' }, { status: 409 })
 
+    if (!previousStudent && parentUserId) {
+      const sameFamilyCandidates = await prisma.student.findMany({
+        where: {
+          division,
+          deletedAt: null,
+          name: { equals: name, mode: 'insensitive' },
+          OR: [{ parentId: parentUserId }, { parentUserId }],
+        },
+        select: { id: true, name: true, birthYear: true },
+        take: 20,
+      })
+      const likelyExistingRecords = sameFamilyCandidates.filter((candidate) => canReuseStudentRecord(candidate, {
+        name,
+        birthYear: body.birthYear ? Number(body.birthYear) : null,
+      }))
+      if (likelyExistingRecords.length > 0 && body.confirmNewStudentIdentity !== true) {
+        return NextResponse.json({
+          error: '同一家庭已有姓名和出生年份相符的学员档案。请回到“沿用已有学员档案”选择历史档案；如确认是另一名孩子，请勾选“新建独立档案”后重试。',
+        }, { status: 409 })
+      }
+    }
+
+    if (!selectedParent && !chineseToPinyin(name)) {
+      return NextResponse.json({ error: '学员姓名无法生成拼音初始密码，请检查姓名后重试' }, { status: 400 })
+    }
     const creds = selectedParent ? null : await generateParentCredentialsHashed(name)
     if (creds && await prisma.user.findUnique({ where: { email: creds.email }, select: { id: true } })) {
       return NextResponse.json({ error: '系统发现同名学员关联的家长账号，请先在“绑定已有家长账号”中确认归属，避免把不同家庭误绑到一起' }, { status: 409 })

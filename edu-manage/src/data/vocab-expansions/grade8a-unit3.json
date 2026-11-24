@@ -1,0 +1,1586 @@
+[
+  {
+    "word": "compare",
+    "examTags": [
+      "词汇·动词派生",
+      "语法·compare结构"
+    ],
+    "grammar": "v. 比较；对比。compare A with/to B；compare ... with ... 可表示把两者作比较；名词 comparison。",
+    "collocations": "compare prices; compare A with B; compared with last year",
+    "commonMistake": "compare A with B 表示把 A 与 B 比较；不要漏掉介词 with/to。",
+    "example": {
+      "english": "The report compares the rainfall in two cities.",
+      "chinese": "这份报告比较了两座城市的降雨量。"
+    },
+    "application": {
+      "prompt": "We compared the two routes ___ find the shorter one. A. to B. for",
+      "solution": "A。解析：compare 后接宾语；此处 to find 表示比较的目的。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: compare",
+        "url": "https://dictionary.cambridge.org/dictionary/english/compare"
+      }
+    ]
+  },
+  {
+    "word": "shy",
+    "examTags": [
+      "词汇·形容词",
+      "语法·比较级拼写"
+    ],
+    "grammar": "adj. 害羞的；腼腆的。比较级 shyer/shier，最高级 shyest/shiest；可说 be shy about/of sth。",
+    "collocations": "a shy child; feel shy; be shy about speaking",
+    "commonMistake": "shy 的比较级可写 shyer 或 shier；描述人的性格用 shy，不用 ashamed。",
+    "example": {
+      "english": "The shy student spoke quietly at first.",
+      "chinese": "那个害羞的学生一开始说话很轻。"
+    },
+    "application": {
+      "prompt": "Tom is less ___ now and talks more with his classmates. A. lazy B. shy",
+      "solution": "B。解析：less shy 表示“没那么害羞”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shy"
+      }
+    ]
+  },
+  {
+    "word": "lazy",
+    "examTags": [
+      "词汇·形容词派生",
+      "语法·比较级与副词"
+    ],
+    "grammar": "adj. 懒惰的；懒洋洋的。比较级 lazier，最高级 laziest；副词 lazily。",
+    "collocations": "a lazy afternoon; feel lazy; a lazy student",
+    "commonMistake": "lazy 的比较级变 y 为 i 加 -er：lazier；副词为 lazily。",
+    "example": {
+      "english": "I felt lazy on the hot afternoon and stayed indoors.",
+      "chinese": "炎热的下午我懒得动，就待在室内。"
+    },
+    "application": {
+      "prompt": "Of the three dogs, the old one is the ___. A. laziest B. lazyest",
+      "solution": "A。解析：lazy 的最高级变 y 为 i 加 -est，写作 laziest。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lazy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lazy"
+      }
+    ]
+  },
+  {
+    "word": "loud",
+    "examTags": [
+      "词汇·形容词与副词",
+      "语法·感官动词搭配"
+    ],
+    "grammar": "adj. 大声的；响亮的；adv. 大声地。作方式副词时常用 loudly；say/speak loudly。",
+    "collocations": "a loud noise; speak loudly; turn the music up loud",
+    "commonMistake": "loud 可作形容词或副词；正式表达“响亮地”常用 loudly。",
+    "example": {
+      "english": "The music was too loud for the small room.",
+      "chinese": "音乐对这间小房间来说太响了。"
+    },
+    "application": {
+      "prompt": "The speaker is too ___. Could you turn it down? A. loudly B. loud",
+      "solution": "B。解析：be 动词后作表语用形容词 loud。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: loud",
+        "url": "https://dictionary.cambridge.org/dictionary/english/loud"
+      }
+    ]
+  },
+  {
+    "word": "outgoing",
+    "examTags": [
+      "词汇·形容词",
+      "阅读·性格描述"
+    ],
+    "grammar": "adj. 外向的；友善健谈的。常修饰人；名词为 outgoingness（较少用）。",
+    "collocations": "an outgoing person; be outgoing and friendly; an outgoing personality",
+    "commonMistake": "outgoing 描述乐于与人交往的性格；不要与 go out（外出）混为一谈。",
+    "example": {
+      "english": "Her outgoing nature helps her make friends easily.",
+      "chinese": "她外向的性格让她很容易交到朋友。"
+    },
+    "application": {
+      "prompt": "Leo enjoys meeting new people and starting conversations. He is ___. A. outgoing B. shy",
+      "solution": "A。解析：喜欢认识新朋友、主动交谈说明性格 outgoing（外向）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: outgoing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/outgoing"
+      }
+    ]
+  },
+  {
+    "word": "hard-working",
+    "examTags": [
+      "词汇·复合形容词",
+      "写作·人物品质"
+    ],
+    "grammar": "adj. 勤奋的；努力工作的。通常作定语或表语；比较级可用 more hard-working。",
+    "collocations": "a hard-working student; be hard-working; hard-working staff",
+    "commonMistake": "hard-working 是形容词，修饰名词；hardly 意为“几乎不”，不要混淆。",
+    "example": {
+      "english": "The hard-working team finished the project on time.",
+      "chinese": "这支勤奋的团队按时完成了项目。"
+    },
+    "application": {
+      "prompt": "She studies every evening and never gives up. She is ___. A. careless B. hard-working",
+      "solution": "B。解析：持续认真学习体现 hard-working（勤奋）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hard-working",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hard-working"
+      }
+    ]
+  },
+  {
+    "word": "perform",
+    "examTags": [
+      "词汇·动词多义",
+      "熟词多义·表演与执行"
+    ],
+    "grammar": "v. 表演；执行；表现。perform—performed—performed；名词 performer（表演者）、performance（表演/表现）。",
+    "collocations": "perform on stage; perform a task; perform well",
+    "commonMistake": "perform 可表示公开表演或执行任务；名词形式 performance，不是 performation。",
+    "example": {
+      "english": "The students performed a short play at the school festival.",
+      "chinese": "学生们在校园节上表演了一部短剧。"
+    },
+    "application": {
+      "prompt": "The band will ___ live at the community event. A. perform B. solve",
+      "solution": "A。解析：乐队在活动中现场表演，用 perform。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: perform",
+        "url": "https://dictionary.cambridge.org/dictionary/english/perform"
+      }
+    ]
+  },
+  {
+    "word": "alone",
+    "examTags": [
+      "词汇·形容词与副词",
+      "熟词多义·独自与孤独"
+    ],
+    "grammar": "adj./adv. 独自；单独。作形容词通常置于名词后或 be 后；表示“孤独的”常用 lonely。",
+    "collocations": "live alone; leave sb alone; be alone at home",
+    "commonMistake": "alone 只表示没有别人陪伴，不一定感到孤独；lonely 强调寂寞感。",
+    "example": {
+      "english": "My brother walked home alone after the game.",
+      "chinese": "比赛后我哥哥独自步行回家。"
+    },
+    "application": {
+      "prompt": "She lives by herself, but she doesn't feel ___. A. alone B. lonely",
+      "solution": "B。解析：题干说明她独自生活但不感到寂寞，空格用 lonely；alone 仅指独自。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: alone",
+        "url": "https://dictionary.cambridge.org/dictionary/english/alone"
+      }
+    ]
+  },
+  {
+    "word": "solve",
+    "examTags": [
+      "词汇·动词派生",
+      "语法·solve与answer辨析"
+    ],
+    "grammar": "v. 解决；解答。常接 problem、puzzle、mystery；名词 solution，常用 a solution to sth。",
+    "collocations": "solve a problem; solve a puzzle; solve the mystery",
+    "commonMistake": "solve 常接 problem；answer 常接 question。表示“……的解决办法”用 solution to。",
+    "example": {
+      "english": "We worked together to solve the difficult puzzle.",
+      "chinese": "我们一起努力解开了这个难题。"
+    },
+    "application": {
+      "prompt": "The class discussed how to ___ the traffic problem. A. solve B. answer",
+      "solution": "A。解析：problem 常与 solve 搭配；answer 多与 question 搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: solve",
+        "url": "https://dictionary.cambridge.org/dictionary/english/solve"
+      }
+    ]
+  },
+  {
+    "word": "flute",
+    "examTags": [
+      "词汇·可数名词",
+      "语言运用·乐器"
+    ],
+    "grammar": "n. 长笛。可数，复数 flutes；表示演奏乐器常用 play the flute。",
+    "collocations": "play the flute; a flute player; flute music",
+    "commonMistake": "乐器前通常用 the：play the flute；表示吹奏长笛的人可说 flute player。",
+    "example": {
+      "english": "Ella began to play the flute when she was nine.",
+      "chinese": "Ella 九岁时开始学习吹长笛。"
+    },
+    "application": {
+      "prompt": "Sam practices ___ flute after school. A. a B. the",
+      "solution": "B。解析：play/practice 后接乐器名称时通常加 the。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: flute",
+        "url": "https://dictionary.cambridge.org/dictionary/english/flute"
+      }
+    ]
+  },
+  {
+    "word": "congratulation",
+    "examTags": [
+      "词汇·名词派生",
+      "语法·祝贺表达"
+    ],
+    "grammar": "n. 祝贺；恭喜。单数较少独立使用；常用复数 congratulations，或 offer/send congratulations。",
+    "collocations": "congratulations on your success; offer congratulations; a letter of congratulation",
+    "commonMistake": "祝贺某人时通常用复数 Congratulations!；说明原因用 on + 名词/动名词。",
+    "example": {
+      "english": "We sent our congratulations on her graduation.",
+      "chinese": "她毕业时我们向她表示了祝贺。"
+    },
+    "application": {
+      "prompt": "Which is the natural way to congratulate a friend? A. Congratulations on your prize! B. Congratulation for your prize!",
+      "solution": "A。解析：祝贺时常用复数 Congratulations，原因前用 on。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: congratulation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/congratulation"
+      }
+    ]
+  },
+  {
+    "word": "Congratulations (on ...)!",
+    "examTags": [
+      "语言运用·祝贺与回应",
+      "语法·介词搭配"
+    ],
+    "grammar": "expr. （对……表示）祝贺！常用 Congratulations on + 名词/动名词；回应可说 Thank you。",
+    "collocations": "Congratulations on your success!; Congratulations on winning!; offer sb congratulations",
+    "commonMistake": "祝贺的固定表达用复数 Congratulations；on 后接名词或动名词。",
+    "example": {
+      "english": "“Congratulations on your new job!” “Thank you!”",
+      "chinese": "“祝贺你找到新工作！”“谢谢！”"
+    },
+    "application": {
+      "prompt": "Your classmate won first prize. You say, “___!” A. Good luck B. Congratulations",
+      "solution": "B。解析：对已经获得的成绩表示祝贺用 Congratulations。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: congratulation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/congratulation"
+      }
+    ]
+  },
+  {
+    "word": "prize",
+    "examTags": [
+      "词汇·可数名词",
+      "熟词多义·奖项与奖品"
+    ],
+    "grammar": "n. 奖；奖品；奖励。可数；win/receive a prize；prize 也可作形容词“珍贵的”。",
+    "collocations": "win first prize; a cash prize; prize money",
+    "commonMistake": "表示获奖常说 win a prize；“奖项”与 price（价格）拼写相近，注意区分。",
+    "example": {
+      "english": "The winner received a prize for her painting.",
+      "chinese": "获胜者因她的画作获得了一份奖励。"
+    },
+    "application": {
+      "prompt": "He won first ___ in the school music competition. A. prize B. price",
+      "solution": "A。解析：比赛中获得的是 prize（奖），price 意为价格。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: prize",
+        "url": "https://dictionary.cambridge.org/dictionary/english/prize"
+      }
+    ]
+  },
+  {
+    "word": "attend",
+    "examTags": [
+      "词汇·动词",
+      "熟词多义·出席与照料"
+    ],
+    "grammar": "v. 参加；出席；上（学）；照料。attend—attended—attended；参加会议/课程说 attend a meeting/class/school；表示照料用 attend to sb/sth。",
+    "collocations": "attend a meeting; attend school; attend a wedding; attend to a patient",
+    "commonMistake": "attend a meeting/school 中 attend 直接接宾语；attend to sb/sth 表示“照料”，不要把 to 加到 attend a meeting 中。",
+    "example": {
+      "english": "More than two hundred people attended the concert.",
+      "chinese": "两百多人参加了这场音乐会。"
+    },
+    "application": {
+      "prompt": "Maya will ___ the school concert on Friday. A. join to B. attend",
+      "solution": "B。解析：参加会议、课程或活动可用及物动词 attend。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: attend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/attend"
+      }
+    ]
+  },
+  {
+    "word": "as ... as ...",
+    "examTags": [
+      "语法·同级比较",
+      "语法·否定比较结构"
+    ],
+    "grammar": "phr. 像……一样……。结构 as + 形容词/副词原级 + as；否定形式可用 not as/so ... as。",
+    "collocations": "as tall as; run as quickly as; not as expensive as",
+    "commonMistake": "as...as 中间用形容词或副词原级，不用比较级；两处 as 均不可省。",
+    "example": {
+      "english": "This route is as safe as the main road.",
+      "chinese": "这条路线和主路一样安全。"
+    },
+    "application": {
+      "prompt": "The new apartment is ___ large ___ the old one. A. as; as B. so; than",
+      "solution": "A。解析：同级比较用 as + 形容词原级 + as。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: as",
+        "url": "https://dictionary.cambridge.org/dictionary/english/as"
+      }
+    ]
+  },
+  {
+    "word": "besides",
+    "examTags": [
+      "词汇·介词与副词",
+      "熟词多义·除……之外还"
+    ],
+    "grammar": "prep./adv. 除……之外（还）；而且。作介词时表示包含在内；beside（没有 s）意为“在旁边”。",
+    "collocations": "besides English; besides that; what besides?",
+    "commonMistake": "besides 表“除……之外还”，包含所说内容；except 表排除；beside 意为“在……旁边”。",
+    "example": {
+      "english": "Besides English, she can speak Russian.",
+      "chinese": "除了英语，她还会说俄语。"
+    },
+    "application": {
+      "prompt": "___ the guide, three students helped us find the station. A. Except B. Besides",
+      "solution": "B。解析：句意表示除导游外还有三名学生帮忙，包含导游，故用 besides。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: besides",
+        "url": "https://dictionary.cambridge.org/dictionary/english/besides"
+      }
+    ]
+  },
+  {
+    "word": "spare",
+    "examTags": [
+      "词汇·形容词与动词",
+      "熟词多义·空闲与备用"
+    ],
+    "grammar": "adj. 空闲的；备用的；v. 抽出（时间）；饶恕。常见 spare time、spare sb a minute、spare no effort。",
+    "collocations": "spare time; a spare key; spare a few minutes",
+    "commonMistake": "spare time 作“空闲时间”；spare 作动词表示抽出时可接时间或人。",
+    "example": {
+      "english": "Could you spare a few minutes to help me?",
+      "chinese": "你能抽几分钟帮帮我吗？"
+    },
+    "application": {
+      "prompt": "I keep a ___ key in my bag in case I lose the first one. A. spare B. serious",
+      "solution": "A。解析：备用钥匙是 a spare key。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spare",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spare"
+      }
+    ]
+  },
+  {
+    "word": "spare time",
+    "examTags": [
+      "词汇·名词短语",
+      "语法·时间与活动表达"
+    ],
+    "grammar": "phr. 空闲时间。spare 作形容词修饰 time；常作不可数概念，常用 in one's spare time。",
+    "collocations": "in my spare time; have some spare time; use spare time to read",
+    "commonMistake": "固定表达 in one's spare time；不要用 during my spare time 替代常见结构。",
+    "example": {
+      "english": "In her spare time, Lina practices the flute.",
+      "chinese": "Lina 空闲时练习吹长笛。"
+    },
+    "application": {
+      "prompt": "___ my spare time, I enjoy reading novels. A. On B. In",
+      "solution": "B。解析：表示“在空闲时间”常用 in one's spare time。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spare",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spare"
+      }
+    ]
+  },
+  {
+    "word": "pleasure",
+    "examTags": [
+      "词汇·名词派生",
+      "语言运用·礼貌回应"
+    ],
+    "grammar": "n. 乐事；愉快；荣幸。常见 It's a pleasure to do sth；My pleasure 可回应感谢。",
+    "collocations": "with pleasure; take pleasure in reading; a great pleasure",
+    "commonMistake": "回应感谢可说 My pleasure；pleased 是“感到高兴的”，pleasant 是“令人愉快的”。",
+    "example": {
+      "english": "It was a pleasure to meet your family.",
+      "chinese": "见到你的家人很荣幸。"
+    },
+    "application": {
+      "prompt": "“Thanks for showing me around.” “My ___.” A. pleasure B. pleasant",
+      "solution": "A。解析：My pleasure 是回应感谢的礼貌表达。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pleasure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pleasure"
+      }
+    ]
+  },
+  {
+    "word": "have sth in common",
+    "examTags": [
+      "语法·固定结构",
+      "阅读·比较人物特点"
+    ],
+    "grammar": "phr. 有共同之处。常见 have a lot/much/nothing in common with sb；sth 可为特点、兴趣等。",
+    "collocations": "have a lot in common; have little in common with sb; interests in common",
+    "commonMistake": "表示与某人有共同点用 have sth in common with sb；不要漏掉介词 with。",
+    "example": {
+      "english": "The two friends have a lot in common, including their love of music.",
+      "chinese": "这两位朋友有许多共同点，包括都热爱音乐。"
+    },
+    "application": {
+      "prompt": "We both enjoy hiking, so we have something ___ common. A. on B. in",
+      "solution": "B。解析：固定结构为 have sth in common。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: common",
+        "url": "https://dictionary.cambridge.org/dictionary/english/common"
+      }
+    ]
+  },
+  {
+    "word": "appearance",
+    "examTags": [
+      "词汇·名词多义",
+      "熟词多义·外表与出现"
+    ],
+    "grammar": "n. 外表；外貌；出现；露面。可数或不可数依义而定；动词 appear。",
+    "collocations": "physical appearance; make an appearance; change one's appearance",
+    "commonMistake": "appearance 可指外貌，也可指露面；不要与动词 appear 混淆词性。",
+    "example": {
+      "english": "People should not judge others by their appearance.",
+      "chinese": "人们不应以貌取人。"
+    },
+    "application": {
+      "prompt": "The twins look alike in ___. A. appearance B. opinion",
+      "solution": "A。解析：look alike in appearance 表示外貌相似。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: appearance",
+        "url": "https://dictionary.cambridge.org/dictionary/english/appearance"
+      }
+    ]
+  },
+  {
+    "word": "personality",
+    "examTags": [
+      "词汇·名词派生",
+      "阅读·性格描述"
+    ],
+    "grammar": "n. 性格；个性；人格。可数，复数 personalities；形容词 personal 表示“个人的”，含义不同。",
+    "collocations": "a friendly personality; personality traits; have a strong personality",
+    "commonMistake": "personality 表示性格；personal 表示个人的，不要混淆。",
+    "example": {
+      "english": "Her warm personality makes visitors feel welcome.",
+      "chinese": "她热情的性格让访客感到宾至如归。"
+    },
+    "application": {
+      "prompt": "His cheerful ___ helps him make friends easily. A. population B. personality",
+      "solution": "B。解析：描述一个人开朗的性格用 personality。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: personality",
+        "url": "https://dictionary.cambridge.org/dictionary/english/personality"
+      }
+    ]
+  },
+  {
+    "word": "serious",
+    "examTags": [
+      "词汇·形容词多义",
+      "熟词多义·严肃与严重"
+    ],
+    "grammar": "adj. 严肃的；认真的；严重的。副词 seriously；常用 be serious about sth/doing sth。",
+    "collocations": "a serious problem; look serious; be serious about learning",
+    "commonMistake": "serious 可描述神情严肃、态度认真或问题严重；修饰动词用 seriously。",
+    "example": {
+      "english": "The doctor said the injury was not serious.",
+      "chinese": "医生说伤势不严重。"
+    },
+    "application": {
+      "prompt": "The weather report warns of a ___ storm tonight. A. serious B. spare",
+      "solution": "A。解析：严重的风暴可用 serious 修饰。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: serious",
+        "url": "https://dictionary.cambridge.org/dictionary/english/serious"
+      }
+    ]
+  },
+  {
+    "word": "strength",
+    "examTags": [
+      "词汇·名词派生",
+      "熟词多义·优势与力量"
+    ],
+    "grammar": "n. 力量；优势；长处。可数或不可数依义而定；形容词 strong，副词 strongly。",
+    "collocations": "physical strength; a person's strength; strength and weakness",
+    "commonMistake": "strength 的形容词是 strong；表示“优势/长处”时常说 one of sb's strengths。",
+    "example": {
+      "english": "Patience is one of her greatest strengths.",
+      "chinese": "耐心是她最大的优点之一。"
+    },
+    "application": {
+      "prompt": "Working well in a team is one of his ___. A. strong B. strengths",
+      "solution": "B。解析：one of 后接名词复数，且此处需要“优点”名词 strengths。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: strength",
+        "url": "https://dictionary.cambridge.org/dictionary/english/strength"
+      }
+    ]
+  },
+  {
+    "word": "slim",
+    "examTags": [
+      "词汇·形容词",
+      "熟词多义·苗条与微小可能性"
+    ],
+    "grammar": "adj. 苗条的；细长的；微小的（可能性）。比较级 slimmer，最高级 slimmest；变比较级时双写 m。",
+    "collocations": "a slim figure; a slim chance; a slim book",
+    "commonMistake": "slim 的比较级双写 m：slimmer；描述可能性时 a slim chance 表示机会很小。",
+    "example": {
+      "english": "There is still a slim chance of catching the last bus.",
+      "chinese": "赶上末班车仍有一线可能。"
+    },
+    "application": {
+      "prompt": "We have only a ___ chance of reaching the station before the train leaves. A. slim B. huge",
+      "solution": "A。解析：时间紧，机会很小，可用 a slim chance。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: slim",
+        "url": "https://dictionary.cambridge.org/dictionary/english/slim"
+      }
+    ]
+  },
+  {
+    "word": "fact",
+    "examTags": [
+      "词汇·名词",
+      "语法·固定表达"
+    ],
+    "grammar": "n. 事实；现实。可数；常见 in fact（事实上）、the fact that...（……这一事实）。",
+    "collocations": "a well-known fact; in fact; face the facts",
+    "commonMistake": "in fact 是句子副词短语，意为“事实上”；不要与 fact（单个事实）混淆。",
+    "example": {
+      "english": "In fact, the town is much older than it looks.",
+      "chinese": "事实上，这座小镇比看起来古老得多。"
+    },
+    "application": {
+      "prompt": "I thought the museum was closed. ___, it was open until six. A. For example B. In fact",
+      "solution": "B。解析：补充真实情况时可用 in fact（事实上）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fact",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fact"
+      }
+    ]
+  },
+  {
+    "word": "population",
+    "examTags": [
+      "词汇·集合名词",
+      "语法·数量与主谓一致"
+    ],
+    "grammar": "n. 人口。常用 the population of...；询问人口用 What is the population...?；修饰数量用 large/small。",
+    "collocations": "the population of a city; a large population; population growth",
+    "commonMistake": "population 表示人口总数时常作单数；问人口数量用 What is...，不说 How many people is...?",
+    "example": {
+      "english": "The population of the town is growing slowly.",
+      "chinese": "这个小镇的人口正在缓慢增长。"
+    },
+    "application": {
+      "prompt": "What ___ the population of this city? A. is B. are",
+      "solution": "A。解析：the population 作整体概念，谓语通常用单数 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: population",
+        "url": "https://dictionary.cambridge.org/dictionary/english/population"
+      }
+    ]
+  },
+  {
+    "word": "km",
+    "examTags": [
+      "词汇·长度单位缩写",
+      "阅读·地图与距离"
+    ],
+    "grammar": "缩写 n. 千米；公里，完整拼法为 kilometre（英）/ kilometer（美）。数值与 km 之间留空格，缩写不加复数 -s。",
+    "collocations": "5 km away; 10 km per hour; a 3-km walk",
+    "commonMistake": "km 是 kilometre/kilometer 的缩写，大小写固定；数值后写 5 km，不写 5 kms。",
+    "example": {
+      "english": "The lake is about 8 km from the town centre.",
+      "chinese": "湖离镇中心约八公里。"
+    },
+    "application": {
+      "prompt": "The station is 4 ___ from our hotel. A. kms B. km",
+      "solution": "B。解析：单位缩写 km 不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: kilometre",
+        "url": "https://dictionary.cambridge.org/dictionary/english/kilometre"
+      }
+    ]
+  },
+  {
+    "word": "average",
+    "examTags": [
+      "词汇·形容词与名词",
+      "语法·平均数表达"
+    ],
+    "grammar": "adj. 平均的；平常的；n. 平均数；平均水平。on average 表示平均而言；the average of...。",
+    "collocations": "average temperature; on average; an average of 20 mm",
+    "commonMistake": "“平均而言”用 on average；average 作形容词直接修饰名词，如 average rainfall。",
+    "example": {
+      "english": "The average temperature is lower in January.",
+      "chinese": "一月份的平均气温更低。"
+    },
+    "application": {
+      "prompt": "___, each student read four novels last year. A. On average B. In average",
+      "solution": "A。解析：固定搭配为 on average，表示“平均而言”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: average",
+        "url": "https://dictionary.cambridge.org/dictionary/english/average"
+      }
+    ]
+  },
+  {
+    "word": "rainfall",
+    "examTags": [
+      "词汇·天气名词",
+      "语法·不可数名词"
+    ],
+    "grammar": "n. 降雨量；降雨。通常不可数；常与 high/low、heavy/light 连用，描述某地或某时期的降雨情况。",
+    "collocations": "annual rainfall; heavy rainfall; average rainfall",
+    "commonMistake": "rainfall 表示降雨量时通常不可数；不说 many rainfalls 表示雨量大。",
+    "example": {
+      "english": "The area gets less rainfall in winter.",
+      "chinese": "这个地区冬季降雨量较少。"
+    },
+    "application": {
+      "prompt": "This region receives very little ___ each year. A. rainfalls B. rainfall",
+      "solution": "B。解析：表示降雨量的 rainfall 通常不可数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rainfall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rainfall"
+      }
+    ]
+  },
+  {
+    "word": "per",
+    "examTags": [
+      "词汇·介词",
+      "阅读·比率与单位表达"
+    ],
+    "grammar": "prep. 每；每一。用于比率、价格和速度，如 per person、per year、kilometres per hour。",
+    "collocations": "per person; per day; kilometres per hour",
+    "commonMistake": "per 表示“每”，后接单位或时间段；不要与 percent（百分比）混淆。",
+    "example": {
+      "english": "The bus travels at 40 kilometres per hour.",
+      "chinese": "这辆公交车以每小时四十公里的速度行驶。"
+    },
+    "application": {
+      "prompt": "The hotel charges $80 ___ night for a single room. A. per B. during",
+      "solution": "A。解析：表示每晚收费用 per night。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: per",
+        "url": "https://dictionary.cambridge.org/dictionary/english/per"
+      }
+    ]
+  },
+  {
+    "word": "mm",
+    "examTags": [
+      "词汇·长度单位缩写",
+      "阅读·降雨量与测量"
+    ],
+    "grammar": "缩写 n. 毫米，完整拼法 millimetre（英）/ millimeter（美）。数值与 mm 之间留空格；缩写不加复数 -s。",
+    "collocations": "5 mm of rain; 10 mm thick; measure in millimetres",
+    "commonMistake": "单位缩写写作 mm，不加 -s；数值与单位之间通常留空格，如 20 mm。",
+    "example": {
+      "english": "The rainfall reached 30 mm yesterday.",
+      "chinese": "昨天的降雨量达到三十毫米。"
+    },
+    "application": {
+      "prompt": "The board is 12 ___ thick. A. mms B. mm",
+      "solution": "B。解析：毫米缩写 mm 不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: millimetre",
+        "url": "https://dictionary.cambridge.org/dictionary/english/millimetre"
+      }
+    ]
+  },
+  {
+    "word": "pleasant",
+    "examTags": [
+      "词汇·形容词派生",
+      "语法·pleasant与pleased辨析"
+    ],
+    "grammar": "adj. 宜人的；令人愉快的；友好的。pleasant 描述事物/经历；pleased 描述人的感受；副词 pleasantly。",
+    "collocations": "pleasant weather; a pleasant surprise; pleasant to talk to",
+    "commonMistake": "pleasant 表示“令人愉快的”；人感到高兴用 pleased，感到愉快不说 pleasant。",
+    "example": {
+      "english": "We had a pleasant walk by the river.",
+      "chinese": "我们在河边散步，感觉很惬意。"
+    },
+    "application": {
+      "prompt": "We enjoyed the ___ weather during our visit. A. pleasant B. pleased",
+      "solution": "A。解析：weather 是令人愉快的事物，用 pleasant；pleased 描述人的感受。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pleasant",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pleasant"
+      }
+    ]
+  },
+  {
+    "word": "difference",
+    "examTags": [
+      "词汇·名词派生",
+      "语法·difference结构"
+    ],
+    "grammar": "n. 差异；不同之处。可数，复数 differences；常用 the difference between A and B。",
+    "collocations": "a big difference; the difference between two places; make a difference",
+    "commonMistake": "difference 表示“差异”；常说 the difference between A and B，不说 difference of A and B。",
+    "example": {
+      "english": "There is a clear difference between the two maps.",
+      "chinese": "这两张地图之间有明显差异。"
+    },
+    "application": {
+      "prompt": "Can you tell me the ___ between these two pictures? A. different B. difference",
+      "solution": "B。解析：the 后需要名词 difference；different 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: difference",
+        "url": "https://dictionary.cambridge.org/dictionary/english/difference"
+      }
+    ]
+  },
+  {
+    "word": "alike",
+    "examTags": [
+      "词汇·形容词与副词",
+      "语法·位置与搭配"
+    ],
+    "grammar": "adj./adv. 相像的；相似地。作形容词时通常置于 be/look/seem 后；不能直接放在名词前。",
+    "collocations": "look alike; be alike in appearance; treat people alike",
+    "commonMistake": "alike 通常作表语，不说 an alike person；名词前用 similar，如 similar people。",
+    "example": {
+      "english": "The sisters look alike, but their personalities are different.",
+      "chinese": "这对姐妹看起来相像，但性格不同。"
+    },
+    "application": {
+      "prompt": "The two brothers look very ___. A. alike B. alikes",
+      "solution": "A。解析：alike 作表语不加词尾 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: alike",
+        "url": "https://dictionary.cambridge.org/dictionary/english/alike"
+      }
+    ]
+  },
+  {
+    "word": "mirror",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·镜子与反映"
+    ],
+    "grammar": "n. 镜子；v. 反映；映照。可数，复数 mirrors；动词过去式 mirrored。",
+    "collocations": "look in the mirror; a full-length mirror; mirror someone's feelings",
+    "commonMistake": "mirror 作“镜子”是可数名词；look at yourself in the mirror 表示照镜子。",
+    "example": {
+      "english": "She checked her appearance in the mirror before leaving.",
+      "chinese": "离开前她照镜子检查了一下自己的仪表。"
+    },
+    "application": {
+      "prompt": "I looked at my face in the ___. A. novel B. mirror",
+      "solution": "B。解析：照看自己的脸要用 mirror（镜子）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mirror",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mirror"
+      }
+    ]
+  },
+  {
+    "word": "interest",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·兴趣与使感兴趣"
+    ],
+    "grammar": "n. 兴趣；爱好；利息；v. 使感兴趣。常用 be interested in sth/doing；interesting 描述令人感兴趣的事物。",
+    "collocations": "have an interest in music; show interest in; interest sb",
+    "commonMistake": "人对某事感兴趣用 be interested in；事物令人感兴趣用 interesting。",
+    "example": {
+      "english": "The museum's model trains interested the children.",
+      "chinese": "博物馆的火车模型让孩子们很感兴趣。"
+    },
+    "application": {
+      "prompt": "Ella is interested ___ learning about local history. A. in B. on",
+      "solution": "A。解析：固定搭配 be interested in，介词后接名词或动名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: interest",
+        "url": "https://dictionary.cambridge.org/dictionary/english/interest"
+      }
+    ]
+  },
+  {
+    "word": "novel",
+    "examTags": [
+      "词汇·名词与形容词",
+      "熟词多义·小说与新颖"
+    ],
+    "grammar": "n. 小说；adj. 新颖的（较正式）。可数名词，复数 novels；指篇幅较长的虚构作品。",
+    "collocations": "read a novel; a historical novel; a novel idea",
+    "commonMistake": "novel 作名词是“小说”；形容词 novel 表示新颖的，注意与 adjective new 的语体差异。",
+    "example": {
+      "english": "She borrowed a novel from the library for the weekend.",
+      "chinese": "她从图书馆借了一本小说，准备周末看。"
+    },
+    "application": {
+      "prompt": "The book tells a long fictional story. It is a ___. A. mirror B. novel",
+      "solution": "B。解析：篇幅较长的虚构故事是 novel（小说）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: novel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/novel"
+      }
+    ]
+  },
+  {
+    "word": "sense",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·感觉与意识到"
+    ],
+    "grammar": "n. 感觉；理解力；意识；v. 感觉到；意识到。常用 a sense of humour、make sense。",
+    "collocations": "a sense of direction; make sense; sense danger",
+    "commonMistake": "make sense 表示“有道理/讲得通”；make sense of sth 表示“理解某事物”。",
+    "example": {
+      "english": "The directions make sense when you look at the map.",
+      "chinese": "看着地图，这些路线说明就讲得通了。"
+    },
+    "application": {
+      "prompt": "I can't ___ why the bus is late without checking the traffic report. A. make sense of B. take care of",
+      "solution": "A。解析：make sense of 表示“理解、弄明白”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sense",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sense"
+      }
+    ]
+  },
+  {
+    "word": "humour",
+    "examTags": [
+      "词汇·不可数名词",
+      "拼写·英美变体"
+    ],
+    "grammar": "n. 幽默；幽默感，通常不可数。英式拼写 humour，美式拼写 humor；形容词 humorous。",
+    "collocations": "a sense of humour; have a good sense of humour; British humour",
+    "commonMistake": "按教材使用英式拼法 humour；美式拼法 humor 含义相同。",
+    "example": {
+      "english": "His sense of humour made the long journey more enjoyable.",
+      "chinese": "他的幽默感让漫长的旅程变得更愉快。"
+    },
+    "application": {
+      "prompt": "She can always make us laugh. She has a great sense of ___. A. humorous B. humour",
+      "solution": "B。解析：sense of 后接名词 humour；humorous 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: humour",
+        "url": "https://dictionary.cambridge.org/dictionary/english/humour"
+      }
+    ]
+  },
+  {
+    "word": "thanks to",
+    "examTags": [
+      "词汇·介词短语",
+      "语法·原因表达"
+    ],
+    "grammar": "phr. 多亏；由于；因为。后接名词或代词，表示原因；可用于正面或中性结果。",
+    "collocations": "thanks to your help; thanks to the good weather; thanks to modern technology",
+    "commonMistake": "thanks to 后接名词性成分；表示负面原因时也可用，但注意上下文语气。",
+    "example": {
+      "english": "Thanks to the clear map, we found the museum easily.",
+      "chinese": "多亏了清晰的地图，我们很容易就找到了博物馆。"
+    },
+    "application": {
+      "prompt": "___ the driver's help, we reached the station on time. A. Thanks to B. Instead of",
+      "solution": "A。解析：司机的帮助是按时到达的原因，用 thanks to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thanks",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thanks"
+      }
+    ]
+  },
+  {
+    "word": "opinion",
+    "examTags": [
+      "词汇·名词",
+      "语法·观点表达"
+    ],
+    "grammar": "n. 看法；意见。可数；常用 in one's opinion、have an opinion about/on sth。",
+    "collocations": "in my opinion; share an opinion; ask for sb's opinion",
+    "commonMistake": "表达“依我看”用 in my opinion；询问意见可说 What's your opinion of/about...?",
+    "example": {
+      "english": "In my opinion, the train is the easiest way to travel.",
+      "chinese": "依我看，乘火车是最方便的出行方式。"
+    },
+    "application": {
+      "prompt": "___ my opinion, both routes are safe. A. On B. In",
+      "solution": "B。解析：固定表达为 in my opinion。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: opinion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/opinion"
+      }
+    ]
+  },
+  {
+    "word": "make a mistake",
+    "examTags": [
+      "词汇·固定搭配",
+      "语法·名词单复数"
+    ],
+    "grammar": "phr. 犯错误。可说 make a mistake，也可说 make mistakes；过去式 made a mistake。",
+    "collocations": "make a spelling mistake; make a mistake in a test; learn from mistakes",
+    "commonMistake": "mistake 是可数名词；泛指犯错常用 make a mistake/make mistakes。",
+    "example": {
+      "english": "I made a mistake when I copied the address.",
+      "chinese": "我抄地址时犯了一个错误。"
+    },
+    "application": {
+      "prompt": "Everyone can ___ from time to time. A. make a mistake B. do a mistake",
+      "solution": "A。解析：英语中说 make a mistake，不说 do a mistake。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mistake",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mistake"
+      }
+    ]
+  },
+  {
+    "word": "less",
+    "examTags": [
+      "语法·比较级与数量词",
+      "熟词多义·较少"
+    ],
+    "grammar": "adj./adv./pron. 较少的；更少地；较少。通常修饰不可数名词；比较级 little 的形式，反义词 more。",
+    "collocations": "less time; less expensive; spend less",
+    "commonMistake": "less 通常修饰不可数名词，fewer 修饰可数名词复数；less 是 little 的比较级。",
+    "example": {
+      "english": "We had less time than we expected, so we took a taxi.",
+      "chinese": "我们比预想的时间少，所以坐了出租车。"
+    },
+    "application": {
+      "prompt": "There is ___ rainfall here in winter than in summer. A. fewer B. less",
+      "solution": "B。解析：rainfall 通常不可数，用 less；fewer 修饰可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: less",
+        "url": "https://dictionary.cambridge.org/dictionary/english/less"
+      }
+    ]
+  },
+  {
+    "word": "straightforward",
+    "examTags": [
+      "词汇·形容词多义",
+      "熟词多义·简单与坦率"
+    ],
+    "grammar": "adj. 简单易懂的；坦率的；直接的。可作定语或表语；副词 straightforwardly。",
+    "collocations": "a straightforward question; a straightforward explanation; be straightforward with sb",
+    "commonMistake": "straightforward 可指事情简单，也可形容人坦率；由语境判断，不等同于 straight（笔直的）。",
+    "example": {
+      "english": "The instructions are straightforward and easy to follow.",
+      "chinese": "这些说明简单明了，容易照着做。"
+    },
+    "application": {
+      "prompt": "The directions were clear and simple. They were ___. A. straightforward B. serious",
+      "solution": "A。解析：straightforward 可表示“简单易懂的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: straightforward",
+        "url": "https://dictionary.cambridge.org/dictionary/english/straightforward"
+      }
+    ]
+  },
+  {
+    "word": "honest",
+    "examTags": [
+      "词汇·形容词",
+      "语法·冠词与派生"
+    ],
+    "grammar": "adj. 诚实的；坦诚的。名词 honesty；honest 以元音音素开头，单数前用 an。",
+    "collocations": "an honest person; be honest with sb; an honest answer",
+    "commonMistake": "honest 的 h 不发音，因此说 an honest answer；honestly 是副词。",
+    "example": {
+      "english": "Please be honest with me about what happened.",
+      "chinese": "请坦诚地告诉我发生了什么。"
+    },
+    "application": {
+      "prompt": "He admitted his mistake and gave ___ answer. A. a honest B. an honest",
+      "solution": "B。解析：honest 的首音为元音音素，前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: honest",
+        "url": "https://dictionary.cambridge.org/dictionary/english/honest"
+      }
+    ]
+  },
+  {
+    "word": "direct",
+    "examTags": [
+      "词汇·形容词与动词",
+      "熟词多义·直接与指路"
+    ],
+    "grammar": "adj. 直接的；率直的；v. 指引；指导；导演。副词 directly；directly 可表示“直接地/立即”。",
+    "collocations": "a direct answer; direct sb to a place; a direct train",
+    "commonMistake": "direct 可作形容词或动词；副词为 directly；direct train 指直达列车。",
+    "example": {
+      "english": "Could you direct us to the nearest metro station?",
+      "chinese": "你能告诉我们去最近地铁站的路吗？"
+    },
+    "application": {
+      "prompt": "The hotel clerk ___ us to the lift. A. directed B. direction",
+      "solution": "A。解析：句中需要动词，directed 是 direct 的过去式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: direct",
+        "url": "https://dictionary.cambridge.org/dictionary/english/direct"
+      }
+    ]
+  },
+  {
+    "word": "similarity",
+    "examTags": [
+      "词汇·名词派生",
+      "语法·similarity介词搭配"
+    ],
+    "grammar": "n. 相似之处。可数，复数 similarities；常用 similarity between A and B；形容词 similar。",
+    "collocations": "a striking similarity; similarities between two places; look for similarities",
+    "commonMistake": "名词为 similarity，形容词为 similar；“A 与 B 相似”用 be similar to。",
+    "example": {
+      "english": "There are many similarities between the two towns.",
+      "chinese": "这两个小镇有许多相似之处。"
+    },
+    "application": {
+      "prompt": "We noticed a strong ___ between their ideas. A. similar B. similarity",
+      "solution": "B。解析：a strong 后需要名词 similarity。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: similarity",
+        "url": "https://dictionary.cambridge.org/dictionary/english/similarity"
+      }
+    ]
+  },
+  {
+    "word": "friendship",
+    "examTags": [
+      "词汇·名词派生",
+      "语法·抽象名词"
+    ],
+    "grammar": "n. 友谊；友情。通常不可数；形容词 friendly 表示友好的，friend 是朋友。",
+    "collocations": "a close friendship; build a friendship; value friendship",
+    "commonMistake": "friendship 表示抽象的友谊，通常不可数；friendly 是形容词，不是 friendship 的副词。",
+    "example": {
+      "english": "Their friendship grew stronger as they worked together.",
+      "chinese": "他们在合作中建立了更深厚的友谊。"
+    },
+    "application": {
+      "prompt": "The story is about the ___ between two classmates. A. friendship B. friendly",
+      "solution": "A。解析：the 后需要名词 friendship；friendly 是形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: friendship",
+        "url": "https://dictionary.cambridge.org/dictionary/english/friendship"
+      }
+    ]
+  },
+  {
+    "word": "metre",
+    "examTags": [
+      "词汇·长度单位",
+      "拼写·英美变体"
+    ],
+    "grammar": "n. 米，长度单位。可数，复数 metres；英式拼写 metre，美式拼写 meter。数值后可作单位。",
+    "collocations": "two metres long; a 100-metre race; metres above sea level",
+    "commonMistake": "按教材用英式拼写 metre；美式拼写 meter 也表示米，但 meter 还可指测量仪表。",
+    "example": {
+      "english": "The pool is twenty metres long.",
+      "chinese": "这个游泳池长二十米。"
+    },
+    "application": {
+      "prompt": "The room is six ___ wide. A. metre B. metres",
+      "solution": "B。解析：数值 six 后用复数单位 metres。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: metre",
+        "url": "https://dictionary.cambridge.org/dictionary/english/metre"
+      }
+    ]
+  },
+  {
+    "word": "prince",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·人物身份"
+    ],
+    "grammar": "n. 王子；亲王。可数，复数 princes；女性对应词为 princess。",
+    "collocations": "a young prince; the prince of Wales; a prince and princess",
+    "commonMistake": "prince 是男性王子，princess 是公主；拼写注意 prince 结尾为 -ce。",
+    "example": {
+      "english": "The prince greeted the visitors at the palace.",
+      "chinese": "王子在宫殿迎接了来访者。"
+    },
+    "application": {
+      "prompt": "In the story, the king's son is a ___. A. prince B. pauper",
+      "solution": "A。解析：国王的儿子可称为 prince（王子）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: prince",
+        "url": "https://dictionary.cambridge.org/dictionary/english/prince"
+      }
+    ]
+  },
+  {
+    "word": "character",
+    "examTags": [
+      "词汇·名词多义",
+      "熟词多义·人物与性格"
+    ],
+    "grammar": "n. 人物；性格；特点；文字/字符。可数；the main character 指主要人物。",
+    "collocations": "a main character; a strong character; Chinese characters",
+    "commonMistake": "character 可指故事人物或性格，也可指文字；结合语境判断具体含义。",
+    "example": {
+      "english": "The main character in the novel learns to be more honest.",
+      "chinese": "小说中的主人公学会了变得更加诚实。"
+    },
+    "application": {
+      "prompt": "The ___ in the story is a brave young prince. A. rainfall B. character",
+      "solution": "B。解析：故事中的人物用 character 表示。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: character",
+        "url": "https://dictionary.cambridge.org/dictionary/english/character"
+      }
+    ]
+  },
+  {
+    "word": "pauper",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·人物与社会背景"
+    ],
+    "grammar": "n. 贫民；穷人（较正式，文学语境常见）。可数，复数 paupers；现代日常英语更常用 poor person。",
+    "collocations": "a poor pauper; a pauper's life; prince and pauper",
+    "commonMistake": "pauper 是较正式或文学用词，意为极贫困的人；不要误认为 paper（纸）。",
+    "example": {
+      "english": "The tale tells of a prince who meets a pauper.",
+      "chinese": "这个故事讲述了一位王子遇见一名穷人的经历。"
+    },
+    "application": {
+      "prompt": "A person with very little money may be called a ___. A. pauper B. prince",
+      "solution": "A。解析：pauper 指贫民；prince 指王子。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pauper",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pauper"
+      }
+    ]
+  },
+  {
+    "word": "exchange",
+    "examTags": [
+      "词汇·动词与名词",
+      "语法·exchange结构"
+    ],
+    "grammar": "v. & n. 交换；交流。exchange A for B 表示以 A 换 B；exchange ideas/addresses。",
+    "collocations": "exchange gifts; exchange ideas; exchange A for B",
+    "commonMistake": "exchange A for B 表示用 A 换 B；exchange sth with sb 表示与某人交换某物。",
+    "example": {
+      "english": "The students exchanged addresses before the trip.",
+      "chinese": "旅行前学生们互留了地址。"
+    },
+    "application": {
+      "prompt": "We ___ small gifts with our host family. A. expected B. exchanged",
+      "solution": "B。解析：互相交换礼物用 exchange sth with sb。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: exchange",
+        "url": "https://dictionary.cambridge.org/dictionary/english/exchange"
+      }
+    ]
+  },
+  {
+    "word": "accident",
+    "examTags": [
+      "词汇·名词",
+      "语法·固定搭配"
+    ],
+    "grammar": "n. 意外；事故。可数；常见 by accident（偶然）、have an accident（出事故）。",
+    "collocations": "a traffic accident; have an accident; happen by accident",
+    "commonMistake": "by accident 表示“偶然地”；accident 是可数名词，单数前常用 an。",
+    "example": {
+      "english": "Luckily, no one was hurt in the accident.",
+      "chinese": "幸运的是，事故中没有人受伤。"
+    },
+    "application": {
+      "prompt": "The glass broke ___ when I moved the box. A. by accident B. in common",
+      "solution": "A。解析：表示意外地、偶然地用 by accident。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: accident",
+        "url": "https://dictionary.cambridge.org/dictionary/english/accident"
+      }
+    ]
+  },
+  {
+    "word": "by accident",
+    "examTags": [
+      "词汇·介词短语",
+      "熟词多义·偶然与故意"
+    ],
+    "grammar": "phr. 偶然；意外地。作状语，修饰动词；反义表达 on purpose（故意地）。",
+    "collocations": "meet by accident; break sth by accident; happen by accident",
+    "commonMistake": "by accident 与 on purpose 意思相反；注意按语境选择。",
+    "example": {
+      "english": "I found the old photo by accident while cleaning the drawer.",
+      "chinese": "我清理抽屉时偶然发现了这张旧照片。"
+    },
+    "application": {
+      "prompt": "She didn't mean to send the message to everyone; she did it ___. A. on purpose B. by accident",
+      "solution": "B。解析：didn't mean to 表明并非故意，因此是 by accident。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: accident",
+        "url": "https://dictionary.cambridge.org/dictionary/english/accident"
+      }
+    ]
+  },
+  {
+    "word": "expect",
+    "examTags": [
+      "词汇·动词多义",
+      "语法·expect结构"
+    ],
+    "grammar": "v. 预料；期待；认为。expect to do sth、expect sb to do sth、expect that...；名词 expectation。",
+    "collocations": "expect a visitor; expect to arrive; expect sb to help",
+    "commonMistake": "expect 后接不定式或宾语 + 不定式；“期待某人做某事”用 expect sb to do。",
+    "example": {
+      "english": "We expect the bus to arrive in ten minutes.",
+      "chinese": "我们预计公交车十分钟后到达。"
+    },
+    "application": {
+      "prompt": "The guide expects us ___ at the museum by nine. A. to arrive B. arriving",
+      "solution": "A。解析：expect sb to do sth 后接带 to 的不定式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: expect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/expect"
+      }
+    ]
+  },
+  {
+    "word": "silver",
+    "examTags": [
+      "词汇·形容词与名词",
+      "熟词多义·颜色与金属"
+    ],
+    "grammar": "adj. 银色的；n. 银（金属）。表示材质的银通常不可数；颜色可作定语或表语。",
+    "collocations": "a silver ring; silver hair; made of silver",
+    "commonMistake": "silver 可指银这种金属，也可描述银色；形容物品颜色时常作定语，如 a silver car。",
+    "example": {
+      "english": "She wore a silver necklace to the concert.",
+      "chinese": "她戴着一条银色项链去听音乐会。"
+    },
+    "application": {
+      "prompt": "The medal is made of ___. A. situation B. silver",
+      "solution": "B。解析：奖章的材质是银，可用名词 silver。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: silver",
+        "url": "https://dictionary.cambridge.org/dictionary/english/silver"
+      }
+    ]
+  },
+  {
+    "word": "lining",
+    "examTags": [
+      "词汇·名词派生",
+      "熟词多义·内衬与希望"
+    ],
+    "grammar": "n. 内衬；衬里。可数，复数 linings；由 line（给……加衬里）加 -ing 构成。",
+    "collocations": "a jacket lining; the lining of a coat; a silver lining",
+    "commonMistake": "lining 指衣物或容器的内衬；silver lining 是“困境中的一线希望”的比喻表达。",
+    "example": {
+      "english": "The coat has a soft lining to keep you warm.",
+      "chinese": "这件外套有柔软的内衬，可以保暖。"
+    },
+    "application": {
+      "prompt": "The warm ___ inside the jacket makes it comfortable in winter. A. lining B. rainfall",
+      "solution": "A。解析：衣服里面用于衬托和保暖的一层是 lining（内衬）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lining",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lining"
+      }
+    ]
+  },
+  {
+    "word": "silver lining",
+    "examTags": [
+      "词汇·比喻表达",
+      "阅读·转折与积极意义"
+    ],
+    "grammar": "phr. 一线光明；困境中的积极一面。常见 every cloud has a silver lining，意为“黑暗中总有一线希望”。",
+    "collocations": "a silver lining; find a silver lining; every cloud has a silver lining",
+    "commonMistake": "该短语用比喻义表示坏事中仍有好的一面；不是“银色的衬里”的字面描述。",
+    "example": {
+      "english": "Losing the game had a silver lining: we learned how to work better as a team.",
+      "chinese": "输掉比赛也有积极的一面：我们学会了如何更好地团队合作。"
+    },
+    "application": {
+      "prompt": "The cancelled trip was disappointing, but we spent a fun day together at home. That was a ___. A. traffic accident B. silver lining",
+      "solution": "B。解析：不愉快事情中出现的好处可称为 a silver lining。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lining",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lining"
+      }
+    ]
+  },
+  {
+    "word": "situation",
+    "examTags": [
+      "词汇·名词派生",
+      "阅读·事件背景与条件"
+    ],
+    "grammar": "n. 情况；状况；处境。可数，复数 situations；常用 in a difficult situation、the present situation。",
+    "collocations": "a difficult situation; in this situation; improve the situation",
+    "commonMistake": "situation 是可数名词；表示“在这种情况下”常说 in this situation。",
+    "example": {
+      "english": "The guide stayed calm in a difficult situation.",
+      "chinese": "导游在困难情况下保持了冷静。"
+    },
+    "application": {
+      "prompt": "The road is closed, so we need to change our plan. We must deal with the ___. A. situation B. personality",
+      "solution": "A。解析：需要处理的是眼前的情况，用 situation。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: situation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/situation"
+      }
+    ]
+  },
+  {
+    "word": "care about",
+    "examTags": [
+      "词汇·动词短语",
+      "熟词多义·关心与照料"
+    ],
+    "grammar": "phr. 关心；在意；担心。about 为介词，后接名词、代词或动名词；care for 可表示照顾或喜欢。",
+    "collocations": "care about the environment; care about what others think; really care about sb",
+    "commonMistake": "care about 表示关心/在意；照顾某人常用 care for 或 take care of。",
+    "example": {
+      "english": "Many students care about protecting the environment.",
+      "chinese": "许多学生关心保护环境。"
+    },
+    "application": {
+      "prompt": "She always listens to her friends and wants to help them. She ___ them. A. looks for B. cares about",
+      "solution": "B。解析：在意并关心朋友用 care about。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: care",
+        "url": "https://dictionary.cambridge.org/dictionary/english/care"
+      }
+    ]
+  },
+  {
+    "word": "reach",
+    "examTags": [
+      "词汇·动词多义",
+      "熟词多义·到达与伸手"
+    ],
+    "grammar": "v. 到达；伸手够到；达到（数量/水平）。及物动词，后直接接地点，不与 arrive at/in 的介词搭配。",
+    "collocations": "reach the station; reach for a book; reach an agreement",
+    "commonMistake": "reach 后直接接地点，如 reach the station；不要说 reach to the station。",
+    "example": {
+      "english": "We reached the station just before the train left.",
+      "chinese": "火车开走前我们赶到了车站。"
+    },
+    "application": {
+      "prompt": "After a long walk, we finally ___ the village. A. reached B. arrived",
+      "solution": "A。解析：空格后有地点名词 village，reach 是及物动词，直接接地点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reach",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reach"
+      }
+    ]
+  },
+  {
+    "word": "reach for",
+    "examTags": [
+      "词汇·动词短语",
+      "阅读·动作与意图"
+    ],
+    "grammar": "phr. 伸手去拿；伸向。reach 为动词，for 后接想拿到的对象；reach for sth 不表示已经拿到。",
+    "collocations": "reach for a glass; reach for the phone; reach for the top shelf",
+    "commonMistake": "reach for 表示伸手去够某物；表示已经够到或拿到用 reach/grab/take。",
+    "example": {
+      "english": "He reached for the handle but couldn't open the door.",
+      "chinese": "他伸手去够门把手，但没能打开门。"
+    },
+    "application": {
+      "prompt": "The book is on a high shelf, so she stood on tiptoe to ___ it. A. care about B. reach for",
+      "solution": "B。解析：伸手去够高处的书用 reach for。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reach",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reach"
+      }
+    ]
+  },
+  {
+    "word": "touch",
+    "examTags": [
+      "词汇·动词多义",
+      "熟词多义·触碰与感动"
+    ],
+    "grammar": "v. 触碰；触动（情感）；n. 触觉；触摸。touch—touched—touched；常用 touch sth gently。",
+    "collocations": "touch the screen; touch someone's heart; keep in touch",
+    "commonMistake": "touch 可指身体接触，也可指情感上使人感动；keep in touch 表示保持联系。",
+    "example": {
+      "english": "The story about the lost dog touched many readers.",
+      "chinese": "这个关于走失小狗的故事打动了许多读者。"
+    },
+    "application": {
+      "prompt": "The film was so moving that it ___ the audience. A. touched B. exchanged",
+      "solution": "A。解析：touch 可表示“打动、触动（某人的情感）”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: touch",
+        "url": "https://dictionary.cambridge.org/dictionary/english/touch"
+      }
+    ]
+  },
+  {
+    "word": "lend (sb) a hand",
+    "examTags": [
+      "词汇·动词短语",
+      "语言运用·请求与提供帮助"
+    ],
+    "grammar": "phr. 帮助某人；搭把手。lend sb a hand 或 lend a hand to sb；lend—lent—lent。",
+    "collocations": "lend me a hand; lend a hand with the bags; lend a helping hand",
+    "commonMistake": "lend a hand 表示帮忙；lend 的过去式是 lent，不是 lended。",
+    "example": {
+      "english": "Could you lend me a hand with these boxes?",
+      "chinese": "你能帮我搬一下这些箱子吗？"
+    },
+    "application": {
+      "prompt": "The table is heavy. Can you ___ and move it? A. take a novel B. lend me a hand",
+      "solution": "B。解析：请求帮忙可用 lend sb a hand。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hand",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hand"
+      }
+    ]
+  }
+]

@@ -114,6 +114,19 @@ function createSettlementHarness(mode: 'INTENSIVE' | 'NORMAL' = 'INTENSIVE') {
 }
 
 describe('INTENSIVE settlement consistency', () => {
+  it('keeps minute-based attendance deductions precise when adjusting lesson duration', () => {
+    expect(calculateIntensiveAdjustmentHours({
+      status: 'PRESENT',
+      oldDeductedHours: 0,
+      newMinutes: 40,
+      remainHours: 2,
+    })).toMatchObject({
+      newDeductedHours: 0.66666667,
+      deductionDelta: 0.66666667,
+      afterHours: 1.33333333,
+    })
+  })
+
   it('keeps settlement migrations additive and preserves immutable lesson pay', () => {
     const settlementMigration = readFileSync(
       new URL('../../prisma/migrations/20260719173000_add_intensive_settlement_consistency/migration.sql', import.meta.url),

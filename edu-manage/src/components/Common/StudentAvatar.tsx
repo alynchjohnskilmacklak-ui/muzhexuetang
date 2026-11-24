@@ -17,7 +17,8 @@ interface Props {
 export function StudentAvatar({ photoUrl, gender, name, size = 40, className, rounded = true }: Props) {
   const g = (gender || '').toUpperCase()
   const isFemale = g === 'F' || g === 'FEMALE' || g === '女'
-  const defaultSrc = isFemale ? '/avatars/student-female.png' : '/avatars/student-male.png'
+  // Use the existing JPEG path for mobile webviews and CDN cache compatibility.
+  const defaultSrc = isFemale ? '/avatars/student-female.jpg' : '/avatars/student-male.jpg'
   const src = normalizeAvatarUrl(photoUrl) || defaultSrc
   const radius = rounded ? '50%' : 10
   return (
@@ -32,6 +33,7 @@ export function StudentAvatar({ photoUrl, gender, name, size = 40, className, ro
         src={src}
         fallbackSrc={defaultSrc}
         alt={name || 'avatar'}
+        noCache={!photoUrl}
         style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'cover', display: 'block', background: 'transparent' }}
       />
     </div>

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { Card, Typography } from 'antd'
@@ -14,6 +14,7 @@ import {
   CalendarOutlined,
 } from '@ant-design/icons'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { useRouter } from 'next/navigation'
 
 const { Text } = Typography
@@ -42,6 +43,8 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
   const [choices, setChoices] = useState<Record<string, boolean | null>>({})
   const [submitting, setSubmitting] = useState(false)
   const [loadError, setLoadError] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const [showAssuranceDetail, setShowAssuranceDetail] = useState(false)
 
   useEffect(() => {
     fetch('/api/parent/meal-choice').then(r => r.json()).then(data => {
@@ -51,7 +54,7 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
       data.students?.forEach((s: StudentOption) => { map[s.id] = null })
       data.choices?.forEach((c: { studentId: string; eating: boolean }) => { map[c.studentId] = c.eating })
       setChoices(map)
-    }).catch(() => setLoadError(true))
+    }).catch(() => setLoadError(true)).finally(() => setLoaded(true))
   }, [])
 
   const handleChoice = async (studentId: string, eating: boolean) => {
@@ -64,7 +67,7 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
       })
       if (res.ok) {
         setChoices(prev => ({ ...prev, [studentId]: eating }))
-        toast.success(eating ? '已选择用餐' : '已选择不用餐')
+        toast.success(eating ? '已选就餐，后厨已接收备餐' : '已选择不用餐')
       } else toast.error('提交失败')
     } catch { toast.error('网络错误') }
     finally { setSubmitting(false) }
@@ -78,105 +81,194 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
         </div>
       )}
 
-      {/* 就餐承诺（精简版） */}
+      {/* 就餐保障（紧凑首屏设计 + 可展开详情） */}
       <div style={{
         position: 'relative',
-        marginBottom: 16,
-        borderRadius: 16,
+        marginBottom: 12,
+        borderRadius: 14,
         overflow: 'hidden',
         background: 'linear-gradient(135deg, #16392A 0%, #1E4D3A 55%, #2E6B50 100%)',
-        boxShadow: '0 8px 24px rgba(22, 57, 42, 0.25)',
+        boxShadow: '0 4px 16px rgba(22, 57, 42, 0.18)',
       }}>
-        {/* 装饰 */}
-        <div style={{ position: 'absolute', right: -30, top: -40, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-        <div style={{ position: 'absolute', right: 20, bottom: -50, width: 100, height: 100, borderRadius: '50%', background: 'rgba(217,179,106,0.12)' }} />
-
-        <div style={{ position: 'relative', padding: '18px 18px 16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <div style={{ width: 4, height: 24, borderRadius: 2, backgroundColor: '#D9B36A' }} />
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#F3D98F', letterSpacing: 1 }}>牧哲学堂 · 就餐保障</div>
-          </div>
-
-          {/* 四个核心承诺，用图标+短句，不用大段文字 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 10px' }}>
-              <CoffeeOutlined style={{ color: '#F3D98F', fontSize: 16 }} />
-              <div>
-                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>吃饱吃好</div>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10.5 }}>不赚饭钱，不够免费续</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 10px' }}>
+        <div style={{ padding: '12px 14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <SafetyCertificateOutlined style={{ color: '#F3D98F', fontSize: 16 }} />
               <div>
-                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>食品安全</div>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10.5 }}>每日留样，安全可追溯</div>
+                <span style={{ fontSize: 13.5, fontWeight: 700, color: '#F3D98F', letterSpacing: 0.5 }}>
+                  牧哲学堂 · 就餐保障
+                </span>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.78)', marginLeft: 8 }}>
+                  不赚饭钱 · 免费续饭 · 每日留样
+                </span>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 10px' }}>
-              <CheckCircleOutlined style={{ color: '#F3D98F', fontSize: 16 }} />
-              <div>
-                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>用心服务</div>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10.5 }}>随时沟通，及时响应</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 10px' }}>
-              <HeartOutlined style={{ color: '#F3D98F', fontSize: 16 }} />
-              <div>
-                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>困难帮扶</div>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10.5 }}>家庭困难学生可申请支持</div>
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowAssuranceDetail(v => !v)}
+              style={{
+                background: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(243,217,143,0.3)',
+                color: '#F3D98F',
+                borderRadius: 9999,
+                padding: '3px 9px',
+                fontSize: 11,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {showAssuranceDetail ? '收起保障' : '保障承诺'}
+            </button>
           </div>
+
+          {/* 可展开的四大核心承诺 */}
+          {showAssuranceDetail && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.08)', borderRadius: 8, padding: '7px 9px' }}>
+                <CoffeeOutlined style={{ color: '#F3D98F', fontSize: 14 }} />
+                <div>
+                  <div style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>吃饱吃好</div>
+                  <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10 }}>不赚饭钱，不够免费续</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.08)', borderRadius: 8, padding: '7px 9px' }}>
+                <SafetyCertificateOutlined style={{ color: '#F3D98F', fontSize: 14 }} />
+                <div>
+                  <div style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>食品安全</div>
+                  <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10 }}>每日留样，安全可溯</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.08)', borderRadius: 8, padding: '7px 9px' }}>
+                <CheckCircleOutlined style={{ color: '#F3D98F', fontSize: 14 }} />
+                <div>
+                  <div style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>用心服务</div>
+                  <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10 }}>随时沟通，按需调整</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.08)', borderRadius: 8, padding: '7px 9px' }}>
+                <HeartOutlined style={{ color: '#F3D98F', fontSize: 14 }} />
+                <div>
+                  <div style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>困难帮扶</div>
+                  <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10 }}>家庭困难可申请支持</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* 今日午餐卡片 */}
-      {todayMenu ? (
-        <Card style={{ marginBottom: 14, borderRadius: 16, border: '2px solid rgba(217,179,106,0.5)', background: 'rgba(217,179,106,0.05)', boxShadow: '0 4px 12px rgba(217,179,106,0.12)' }} styles={{ body: { padding: '16px 18px' } }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-            <CoffeeOutlined style={{ color: '#A6781F', fontSize: 13 }} />
-            <Text style={{ color: '#A6781F', fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>今日午餐</Text>
+      {!loaded && !loadError ? (
+        <CardSkeleton rows={1} />
+      ) : todayMenu ? (
+        <Card style={{ marginBottom: 12, borderRadius: 16, border: '2px solid rgba(217,179,106,0.5)', background: 'rgba(217,179,106,0.05)', boxShadow: '0 4px 12px rgba(217,179,106,0.12)' }} styles={{ body: { padding: '15px 18px' } }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CoffeeOutlined style={{ color: '#A6781F', fontSize: 14 }} />
+              <Text style={{ color: '#A6781F', fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>今日午餐</Text>
+            </div>
+            <span style={{ fontSize: 11, color: '#8A7A68' }}>现做现配 · 热菜供应</span>
           </div>
-          <div style={{ fontSize: 21, fontWeight: 700, color: '#111827', margin: '4px 0' }}>{todayMenu.mainDish}</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: '3px 0' }}>{todayMenu.mainDish}</div>
           <Text style={{ fontSize: 13, color: '#4B5563' }}>{todayMenu.sideDish || '菜品新鲜搭配，营养均衡'}</Text>
         </Card>
       ) : (
-        <Card style={{ marginBottom: 14, borderRadius: 16, border: '1px solid #EDE5DA' }} styles={{ body: { padding: '16px 18px' } }}>
+        <Card style={{ marginBottom: 12, borderRadius: 16, border: '1px solid #EDE5DA' }} styles={{ body: { padding: '16px 18px' } }}>
           <Text style={{ fontSize: 14, color: '#4B5563', fontWeight: 500 }}>今日菜单待公布</Text>
           <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>老师/管理员发布后，家长可在这里确认是否用餐</div>
         </Card>
       )}
 
       {/* Student meal choices (compact inline rows) */}
+      {!loaded && !loadError && <CardSkeleton rows={2} />}
       {students.length > 0 && todayMenu && (
-        <Card title="孩子用餐选择" style={{ marginBottom: 14, borderRadius: 16 }} styles={{ body: { padding: '0 16px 12px' }, header: { borderBottom: 'none', paddingBottom: 0 } }}>
-          {students.map(student => (
-            <div key={student.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,.04)' }}>
-              <div>
-                <Text strong style={{ fontSize: 14 }}>{student.name}</Text>
-                {choices[student.id] !== null && choices[student.id] !== undefined && (
-                  <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>
-                    {choices[student.id] ? '已选：用餐' : '已选：不用餐'}
-                  </Text>
+        <Card title="孩子用餐选择" style={{ marginBottom: 14, borderRadius: 16 }} styles={{ body: { padding: '0 16px 14px' }, header: { borderBottom: 'none', paddingBottom: 0 } }}>
+          {students.map((student, studentIndex) => {
+            const hasChoice = choices[student.id] !== null && choices[student.id] !== undefined
+            const isEating = choices[student.id] === true
+            return (
+              <div key={student.id} className="stagger-item" style={{ padding: '12px 0', borderBottom: '1px solid rgba(0,0,0,.05)', animationDelay: `${Math.min(studentIndex, 8) * 40}ms` }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                  <div>
+                    <Text strong style={{ fontSize: 15, color: '#1E293B' }}>{student.name}</Text>
+                    {hasChoice ? (
+                      <div style={{ marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{
+                          fontSize: 11,
+                          borderRadius: 9999,
+                          padding: '1px 8px',
+                          background: isEating ? '#E8F5E9' : '#FFF1F0',
+                          color: isEating ? '#2E7D32' : '#C62828',
+                          fontWeight: 600,
+                        }}>
+                          {isEating ? '✅ 已选：用餐' : '❌ 已选：不用餐'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: 2 }}>
+                        <span style={{ fontSize: 11, borderRadius: 9999, padding: '1px 8px', background: '#FFF7E6', color: '#D46B08', fontWeight: 600 }}>
+                          ⏳ 待确认（请在今日10:30前选择）
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => handleChoice(student.id, false)}
+                      disabled={submitting}
+                      style={{
+                        padding: '6px 14px', fontSize: 12.5, borderRadius: 999, border: '1px solid', cursor: 'pointer',
+                        background: choices[student.id] === false ? '#FFF1F0' : '#ffffff',
+                        borderColor: choices[student.id] === false ? '#FFA39E' : 'rgba(60,80,72,.18)',
+                        color: choices[student.id] === false ? '#CF1322' : '#7A869A',
+                        fontWeight: choices[student.id] === false ? 700 : 500,
+                        transition: 'all .16s ease',
+                      }}
+                    >
+                      不用餐
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleChoice(student.id, true)}
+                      disabled={submitting}
+                      style={{
+                        padding: '6px 16px', fontSize: 12.5, borderRadius: 999, border: '1px solid', cursor: 'pointer',
+                        background: choices[student.id] === true ? '#14574D' : '#ffffff',
+                        borderColor: choices[student.id] === true ? '#14574D' : 'rgba(60,80,72,.18)',
+                        color: choices[student.id] === true ? '#ffffff' : '#14574D',
+                        fontWeight: choices[student.id] === true ? 700 : 600,
+                        boxShadow: choices[student.id] === true ? '0 2px 8px rgba(20,87,77,.22)' : 'none',
+                        transition: 'all .16s ease',
+                      }}
+                    >
+                      用餐
+                    </button>
+                  </div>
+                </div>
+
+                {/* 用餐安心提示卡 */}
+                {isEating && (
+                  <div style={{
+                    marginTop: 8,
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    background: 'rgba(20, 87, 77, 0.05)',
+                    border: '1px dashed rgba(20, 87, 77, 0.2)',
+                    fontSize: 11.5,
+                    color: '#14574D',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}>
+                    <span>👨‍🍳 后厨已收到就餐名单，中午将为孩子准备热菜热饭，不够随时免费添。</span>
+                  </div>
                 )}
               </div>
-              <div style={{ display: 'flex', border: '1px solid #E8E2DA', borderRadius: 8, overflow: 'hidden' }}>
-                <button onClick={() => handleChoice(student.id, false)} disabled={submitting} style={{
-                  padding: '6px 16px', fontSize: 13, border: 'none', cursor: 'pointer',
-                  background: choices[student.id] === false ? '#f5f5f5' : '#fff', color: choices[student.id] === false ? '#E24B4A' : '#7A869A',
-                  fontWeight: choices[student.id] === false ? 600 : 400,
-                }}>不用餐</button>
-                <button onClick={() => handleChoice(student.id, true)} disabled={submitting} style={{
-                  padding: '6px 16px', fontSize: 13, border: 'none', borderLeft: '1px solid #E8E2DA', cursor: 'pointer',
-                  background: choices[student.id] === true ? 'var(--color-primary)' : '#fff', color: choices[student.id] === true ? 'var(--color-on-primary)' : 'var(--color-ink-subtle)',
-                  fontWeight: choices[student.id] === true ? 600 : 400,
-                }}>用餐</button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
           <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 10, textAlign: 'center' }}>
-            选择结果将同步至管理端，可在截止时间前修改
+            选择结果将实时同步至校区后厨备餐表，可在截止时间前修改
           </Text>
         </Card>
       )}
@@ -218,11 +310,12 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
             const card = (
               <div style={{
                 position: 'relative', display: 'flex', alignItems: 'center', gap: 12,
-                borderRadius: 14, padding: '10px 12px',
-                background: isToday ? 'rgba(217,179,106,0.10)' : '#FAF7F1',
-                border: isToday ? '1.5px solid rgba(217,179,106,0.55)' : '1px solid #F0E9DD',
+                borderRadius: 14, padding: '11px 13px',
+                background: isToday ? '#FFFDF8' : '#FAF7F1',
+                border: isToday ? '1.5px solid rgba(201,164,92,0.65)' : '1px solid rgba(0,0,0,0.06)',
+                boxShadow: isToday ? '0 4px 14px rgba(201,164,92,0.14)' : '0 1px 4px rgba(0,0,0,0.02)',
                 cursor: canOpen ? 'pointer' : 'default',
-                transition: 'all .18s ease',
+                transition: 'all .18s cubic-bezier(0.2, 0.8, 0.2, 1)',
                 overflow: 'hidden',
               }}>
                 {/* 菜品缩略图 */}
@@ -284,12 +377,12 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
 
             if (canOpen) {
               return (
-                <div key={day} onClick={() => router.push(`/parent/meals/${menu!.id}`)} className="pressable">
+                <div key={day} onClick={() => router.push(`/parent/meals/${menu!.id}`)} className="pressable stagger-item" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
                   {card}
                 </div>
               )
             }
-            return <div key={day}>{card}</div>
+            return <div key={day} className="stagger-item" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>{card}</div>
           })}
         </div>
       </div>

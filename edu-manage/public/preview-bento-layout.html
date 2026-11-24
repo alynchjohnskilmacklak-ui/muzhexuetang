@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>家长端首页 · 卡片布局提案（静态原型）</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23123C35'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23C9A45C'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --canvas:#faf8f5; --surface:#ffffff; --surface-3:#f5f2ee;
+    --ink:#1a1201; --muted:#5a4e3a; --subtle:#756A58;
+    --primary:#14574D; --dark:#123C35; --gold:#C9A45C; --gold-bg:#F8F1DE;
+    --hairline:rgba(0,0,0,.06); --hairline-strong:rgba(0,0,0,.12);
+    --radius-card:16px; --radius-inner:12px;
+    --shadow-card:0 8px 24px rgba(26,18,1,.04);
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Microsoft YaHei',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:#ece7df;color:var(--ink);-webkit-font-smoothing:antialiased;padding:28px 24px 60px}
+  .page-head{max-width:1280px;margin:0 auto 20px}
+  .page-head h1{font-size:20px;font-weight:700;letter-spacing:.01em}
+  .page-head p{font-size:13px;color:var(--muted);margin-top:6px}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);background:#fff;border:1px solid var(--hairline);border-radius:999px;padding:6px 12px}
+  .swatch{width:14px;height:14px;border-radius:4px;display:inline-block}
+  .sw-dark{background:var(--dark)}
+  .sw-glass{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35)}
+  .sw-white{background:#fff;border:1px solid var(--hairline)}
+
+  .stage{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;max-width:1280px;margin:0 auto}
+  .frame{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:20px;box-shadow:0 18px 50px rgba(26,18,1,.12);overflow:hidden}
+  .frame__bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--hairline);background:#f7f4ee}
+  .frame__bar i{width:10px;height:10px;border-radius:50%;background:#d8d0c2;display:inline-block}
+  .frame__bar em{font-style:normal;font-size:12px;color:var(--subtle);margin-left:6px}
+  .frame-pc{width:100%;max-width:1180px}
+  .frame-pc .screen{height:780px;overflow-y:auto}
+  .frame-mobile{width:390px;flex:0 0 390px}
+  .frame-mobile .screen{height:780px;overflow-y:auto}
+
+  /* ===== 应用外壳 ===== */
+  .app{background:var(--canvas);min-height:100%;padding:20px 22px 32px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .topbar__brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+  .topbar__mark{width:30px;height:30px;border-radius:9px;background:var(--dark);display:grid;place-items:center;color:var(--gold);font-size:14px;font-weight:700}
+  .topbar__avatar{width:32px;height:32px;border-radius:50%;background:var(--surface-3);border:1px solid var(--hairline);display:grid;place-items:center;font-size:13px;color:var(--muted)}
+
+  /* ===== 便当盒 ===== */
+  .bento{display:grid;gap:16px}
+  .hero{background:var(--dark);border:1px solid rgba(201,164,92,.65);border-radius:var(--radius-card);box-shadow:0 10px 30px rgba(18,60,53,.25);padding:22px;position:relative;overflow:hidden;color:#F5EBD2}
+  .hero::before{content:"";position:absolute;top:-45%;right:-12%;width:190px;height:270px;background:radial-gradient(circle,rgba(255,255,255,.17),transparent 70%);transform:rotate(12deg);pointer-events:none}
+  .hero-id{display:flex;align-items:center;gap:14px;position:relative}
+  .avatar{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);display:grid;place-items:center;font-size:20px;font-weight:700;color:#F5EBD2;flex:0 0 56px}
+  .name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .name-row strong{font-size:19px}
+  .hero-id small{display:block;margin-top:5px;font-size:12.5px;color:rgba(245,235,210,.72)}
+  .badge{font-size:11px;font-weight:700;color:#123C35;background:linear-gradient(135deg,#C9A45C,#A8873D);border-radius:999px;padding:3px 10px;letter-spacing:.04em}
+  .quote{margin-top:18px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:var(--radius-inner);padding:13px 15px;display:flex;gap:10px;position:relative}
+  .quote svg{flex:0 0 auto;margin-top:3px}
+  .quote span{font-size:13.5px;line-height:1.6;color:#F5EBD2}
+  .quote small{display:block;margin-top:4px;font-size:11.5px;color:rgba(245,235,210,.6)}
+  .hero-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px;position:relative;flex-wrap:wrap}
+  .status{font-size:13px;color:rgba(245,235,210,.85)}
+  .status strong{color:#F5EBD2}
+  .status small{margin-left:8px;font-size:11.5px;color:rgba(245,235,210,.55)}
+  .cta{border:0;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--dark);background:linear-gradient(135deg,#D6B45B,#C9A45C);border-radius:999px;padding:9px 18px}
+
+  .stats{display:grid;gap:12px}
+  .stat{background:rgba(255,255,255,.12);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:var(--radius-inner);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+  .stat strong{font-size:26px;font-weight:700;color:#F5EBD2;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12.5px;color:rgba(245,235,210,.72)}
+
+  /* ===== 白卡与列表（保持行形态） ===== */
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:18px 20px}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .sec-head h2{font-size:15px;font-weight:700}
+  .link{border:0;background:none;cursor:pointer;font-family:inherit;font-size:12.5px;color:var(--primary);padding:4px 2px}
+  .badge-soft{font-size:11px;color:#123C35;background:var(--gold-bg);border:1px solid rgba(201,164,92,.35);border-radius:999px;padding:3px 10px}
+  .row{display:flex;gap:13px;padding:13px 0;border-top:1px solid var(--hairline)}
+  .row:first-of-type{border-top:0;padding-top:2px}
+  .row-icon{flex:0 0 38px;height:38px;border-radius:11px;background:var(--surface-3);display:grid;place-items:center;color:var(--primary)}
+  .row-body{min-width:0;flex:1}
+  .row-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .row-top strong{font-size:13.5px}
+  .row-top small{font-size:11.5px;color:var(--subtle);margin-left:auto}
+  .tag{font-style:normal;font-size:11px;color:var(--muted);background:var(--surface-3);border-radius:6px;padding:2px 8px}
+  .row-body p{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:6px}
+  .row-body>div:last-child small{display:block;font-size:11.5px;color:var(--subtle);margin-top:5px}
+
+  .benefits{display:grid;gap:12px}
+  .benefit{display:flex;gap:12px;align-items:flex-start;background:var(--surface-3);border-radius:var(--radius-inner);padding:13px 15px}
+  .benefit__icon{flex:0 0 36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#C9A45C,#A8873D);display:grid;place-items:center;color:#fff;font-size:15px}
+  .benefit strong{font-size:13px;display:block}
+  .benefit small{font-size:11.5px;color:var(--muted);line-height:1.55;display:block;margin-top:3px}
+
+  .section-stack{display:grid;gap:16px;margin-top:16px}
+
+  /* ===== PC 便当盒栅格 ===== */
+  .frame-pc .bento{grid-template-columns:repeat(12,1fr)}
+  .frame-pc .hero{grid-column:span 8}
+  .frame-pc .stats{grid-column:span 4;grid-template-rows:repeat(3,1fr)}
+  .frame-pc .benefits{grid-template-columns:repeat(3,1fr)}
+
+  /* ===== 手机栅格 ===== */
+  .frame-mobile .bento{grid-template-columns:1fr}
+  .frame-mobile .stats{grid-template-columns:repeat(3,1fr);gap:10px}
+  .frame-mobile .stat{padding:12px 10px;align-items:center;text-align:center}
+  .frame-mobile .stat strong{font-size:20px}
+  .frame-mobile .benefits{grid-template-columns:repeat(2,1fr)}
+
+  /* ===== 标注（仅 PC 稿显示） ===== */
+  .note{position:absolute;font-size:11px;color:var(--primary);background:var(--gold-bg);border:1px dashed rgba(201,164,92,.6);border-radius:8px;padding:4px 9px;pointer-events:none;white-space:nowrap}
+  .frame-mobile .note{display:none}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--dark);color:#F5EBD2;font-size:13px;border-radius:999px;padding:10px 18px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>家长端首页 · 卡片布局提案（静态原型）</h1>
+  <p>仅演示外形与栅格：大格放重点身份与今日状态，小格做指标玻璃浮层；列表保持行形态不重构。等级 / 标签 / 徽标配色与业务文案保持现状。数据为示例。</p>
+  <div class="legend">
+    <span><i class="swatch sw-dark"></i>SVIP 深绿主题底（保持不变）</span>
+    <span><i class="swatch sw-glass"></i>玻璃小格（仅深色底上糊背景）</span>
+    <span><i class="swatch sw-white"></i>白卡列表（奶油底上不做玻璃）</span>
+  </div>
+</div>
+
+<div class="stage">
+
+  <!-- ============ PC 稿 ============ -->
+  <section class="frame frame-pc">
+    <div class="frame__bar"><i></i><i></i><i></i><em>桌面端 · 1180px</em></div>
+    <div class="screen">
+      <div class="app">
+        <header class="topbar">
+          <div class="topbar__brand"><span class="topbar__mark">牧</span>牧哲学堂 · 家长端</div>
+          <div class="topbar__avatar">马</div>
+        </header>
+
+        <div class="bento">
+          <section class="hero">
+            <span class="note" style="top:-12px;left:18px">大格：身份 + 语录 + 今日状态</span>
+            <div class="hero-id">
+              <div class="avatar">马</div>
+              <div class="hero-id__text">
+                <div class="name-row"><strong>马紫晨</strong><span class="badge">SVIP</span></div>
+                <small>初三 · 负责老师：待分配</small>
+              </div>
+            </div>
+            <div class="quote">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D6B45B" stroke-width="1.8"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.5h6c0-1.2.4-2 1-2.5A6 6 0 0 0 12 3Z"/></svg>
+              <div><span>「示例：教育的本质是一棵树摇动另一棵树。」</span><small>—— 示例语录</small></div>
+            </div>
+            <div class="hero-foot">
+              <div class="status">今日状态：<strong>无课</strong><small>更新于 11:30</small></div>
+              <button class="cta demo-btn">查看成长档案</button>
+            </div>
+          </section>
+
+          <aside class="stats">
+            <span class="note" style="top:-12px;right:18px">小格：指标 · 玻璃浮层</span>
+            <div class="stat"><strong>0</strong><span>今日课次</span></div>
+            <div class="stat"><strong>100%</strong><span>本月出勤</span></div>
+            <div class="stat"><strong>1</strong><span>待处理通知</span></div>
+          </aside>
+        </div>
+
+        <div class="section-stack">
+          <section class="card">
+            <div class="sec-head"><h2>老师最新关注</h2><button class="link demo-btn">查看全部</button></div>
+            <div class="row demo-row">
+              <span class="row-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg></span>
+              <div class="row-body">
+                <div class="row-top"><strong>示例老师</strong><em class="tag">课堂反馈</em><em class="tag">数学</em><small>11月5日</small></div>
+                <p>课堂专注度较好，例题跟进及时，继续保持计算准确率。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="sec-head"><h2>SVIP 用户 · 核心陪伴家庭</h2><span class="badge-soft">SVIP 用户</span></div>
+            <div class="benefits">
+              <div class="benefit"><span class="benefit__icon">优</span><div><strong>学习问题优先跟进</strong><small>状态波动、薄弱环节优先沟通</small></div></div>
+              <div class="benefit"><span class="benefit__icon">析</span><div><strong>深度试卷分析</strong><small>深挖失分原因与后续提升方向</small></div></div>
+              <div class="benefit"><span class="benefit__icon">荐</span><div><strong>个性化学习建议</strong><small>结合基础与习惯给针对性建议</small></div></div>
+              <div class="benefit"><span class="benefit__icon">愿</span><div><strong>志愿填报一对一跟进</strong><small>中考/高考志愿填报专人服务</small></div></div>
+              <div class="benefit"><span class="benefit__icon">醒</span><div><strong>重点考试节点提醒</strong><small>期中期末、中考高考关键节点提醒</small></div></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="sec-head"><h2>待办与通知</h2><button class="link demo-btn">查看全部</button></div>
+            <div class="row demo-row">
+              <span class="row-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></span>
+              <div class="row-body">
+                <div class="row-top"><strong>课后反馈已更新</strong><small>11月5日 18:20</small></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 手机稿 ============ -->
+  <section class="frame frame-mobile">
+    <div class="frame__bar"><i></i><i></i><i></i><em>手机端 · 390px</em></div>
+    <div class="screen">
+      <div class="app">
+        <header class="topbar">
+          <div class="topbar__brand"><span class="topbar__mark">牧</span>牧哲学堂 · 家长端</div>
+          <div class="topbar__avatar">马</div>
+        </header>
+
+        <div class="bento">
+          <section class="hero">
+            <div class="hero-id">
+              <div class="avatar">马</div>
+              <div class="hero-id__text">
+                <div class="name-row"><strong>马紫晨</strong><span class="badge">SVIP</span></div>
+                <small>初三 · 负责老师：待分配</small>
+              </div>
+            </div>
+            <div class="quote">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D6B45B" stroke-width="1.8"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.5h6c0-1.2.4-2 1-2.5A6 6 0 0 0 12 3Z"/></svg>
+              <div><span>「示例：教育的本质是一棵树摇动另一棵树。」</span><small>—— 示例语录</small></div>
+            </div>
+            <div class="hero-foot">
+              <div class="status">今日状态：<strong>无课</strong></div>
+              <button class="cta demo-btn">查看成长档案</button>
+            </div>
+          </section>
+
+          <aside class="stats">
+            <div class="stat"><strong>0</strong><span>今日课次</span></div>
+            <div class="stat"><strong>100%</strong><span>本月出勤</span></div>
+            <div class="stat"><strong>1</strong><span>待处理通知</span></div>
+          </aside>
+        </div>
+
+        <div class="section-stack">
+          <section class="card">
+            <div class="sec-head"><h2>老师最新关注</h2><button class="link demo-btn">查看全部</button></div>
+            <div class="row demo-row">
+              <span class="row-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg></span>
+              <div class="row-body">
+                <div class="row-top"><strong>示例老师</strong><em class="tag">课堂反馈</em><small>11月5日</small></div>
+                <p>课堂专注度较好，例题跟进及时。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="sec-head"><h2>SVIP 用户 · 核心陪伴家庭</h2></div>
+            <div class="benefits">
+              <div class="benefit"><span class="benefit__icon">优</span><div><strong>优先跟进</strong><small>薄弱环节优先沟通</small></div></div>
+              <div class="benefit"><span class="benefit__icon">析</span><div><strong>试卷分析</strong><small>深挖失分原因</small></div></div>
+              <div class="benefit"><span class="benefit__icon">荐</span><div><strong>学习建议</strong><small>针对性建议</small></div></div>
+              <div class="benefit"><span class="benefit__icon">愿</span><div><strong>志愿跟进</strong><small>专人服务</small></div></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="sec-head"><h2>待办与通知</h2><button class="link demo-btn">查看全部</button></div>
+            <div class="row demo-row">
+              <span class="row-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></span>
+              <div class="row-body">
+                <div class="row-top"><strong>课后反馈已更新</strong><small>11月5日 18:20</small></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast">静态原型，未绑定真实操作</div>
+
+<script>
+  var toast = document.getElementById('toast');
+  var timer = null;
+  document.querySelectorAll('.demo-btn,.demo-row').forEach(function(el){
+    el.addEventListener('click', function(){
+      toast.classList.add('show');
+      clearTimeout(timer);
+      timer = setTimeout(function(){ toast.classList.remove('show'); }, 1600);
+    });
+  });
+</script>
+</body>
+</html>

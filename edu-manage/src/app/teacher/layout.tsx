@@ -5,12 +5,15 @@ import { requireTeacherPage } from '@/lib/teacher-portal'
 export default async function TeacherRouteLayout({ children }: { children: React.ReactNode }) {
   const teacher = await requireTeacherPage()
   return (
-    <TeacherLayout initialData={{
-      teacher: { id: teacher.id, name: teacher.name, gender: teacher.gender, avatar: teacher.avatar || undefined, tierLevel: teacher.tierLevel },
-      badges: { unsubmitted: 0, unpublished: 0, unread: 0, unreadMessages: 0 },
-    }}>
-      {children}
+    <>
+      <TeacherLayout initialData={{
+        teacher: { id: teacher.id, name: teacher.name, gender: teacher.gender, avatar: teacher.avatar || undefined, tierLevel: teacher.tierLevel },
+        badges: { unsubmitted: 0, unpublished: 0, unread: 0, unreadMessages: 0 },
+      }}>
+        {children}
+      </TeacherLayout>
+      {/* Keep viewport-fixed assistant layers outside the mobile route's transform/stacking context. */}
       <AIFloatingLauncher />
-    </TeacherLayout>
+    </>
   )
 }

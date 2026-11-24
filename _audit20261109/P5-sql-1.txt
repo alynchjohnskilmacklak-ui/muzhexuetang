@@ -1,0 +1,120 @@
+
+=== Q1 Notification 总量 / 状态 / 已读 分布 ===
+[
+  {
+    "status": "ACTIVE",
+    "total": 10529,
+    "read_cnt": 2166,
+    "unread_cnt": 8363
+  }
+]
+
+=== Q2 发给家长角色的通知 按 type / relatedType 分组 ===
+[
+  {
+    "type": "CLASSROOM_FEEDBACK",
+    "related_type": "CLASSROOM_FEEDBACK",
+    "cnt": 10236,
+    "unread": 8168,
+    "active": 10236
+  },
+  {
+    "type": "CLASS_ENROLLMENT",
+    "related_type": "(none)",
+    "cnt": 102,
+    "unread": 74,
+    "active": 102
+  },
+  {
+    "type": "CLASS_START",
+    "related_type": "(none)",
+    "cnt": 79,
+    "unread": 50,
+    "active": 79
+  },
+  {
+    "type": "PAPER_PUBLISHED",
+    "related_type": "EXAM_PAPER",
+    "cnt": 15,
+    "unread": 12,
+    "active": 15
+  },
+  {
+    "type": "SCHEDULE_CHANGE",
+    "related_type": "COURSE_CHANGE_EVENT",
+    "cnt": 14,
+    "unread": 13,
+    "active": 14
+  },
+  {
+    "type": "PARENT_MESSAGE_REPLY",
+    "related_type": "PARENT_MESSAGE",
+    "cnt": 14,
+    "unread": 8,
+    "active": 14
+  },
+  {
+    "type": "STUDY_HALL_HOMEWORK",
+    "related_type": "STUDY_HALL_HOMEWORK",
+    "cnt": 5,
+    "unread": 0,
+    "active": 5
+  },
+  {
+    "type": "CLASSROOM_PICK",
+    "related_type": "CLASSROOM_PICK",
+    "cnt": 4,
+    "unread": 4,
+    "active": 4
+  },
+  {
+    "type": "wxpusher_feedback",
+    "related_type": "(none)",
+    "cnt": 2,
+    "unread": 0,
+    "active": 2
+  },
+  {
+    "type": "leave",
+    "related_type": "LEAVE_REQUEST",
+    "cnt": 2,
+    "unread": 2,
+    "active": 2
+  }
+]
+
+=== Q3 与当前绑定脱节的 ACTIVE 家长通知（学生已解绑/失效或学生不存在） ===
+[
+  {
+    "orphan_active": 49,
+    "orphan_unread": 28,
+    "student_missing": 0,
+    "student_deleted": 0,
+    "student_unlinked": 0,
+    "student_bound_other_parent": 0
+  }
+]
+
+=== Q3b 脱节通知明细（前 20） ===
+[]
+
+=== Q4 Fee 行数 / 状态 / 金额合计 ===
+[]
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Raw query failed. Code: `42703`. Message: `column "membershipbenefits" does not exist`
+    at $n.handleRequestError (D:\01muzhexuetang\muzhexuetang\coding\edu-manage\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (D:\01muzhexuetang\muzhexuetang\coding\edu-manage\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (D:\01muzhexuetang\muzhexuetang\coding\edu-manage\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at async l (D:\01muzhexuetang\muzhexuetang\coding\edu-manage\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async show (D:\01muzhexuetang\muzhexuetang\coding\_audit20261109\P5-query.js:14:16)
+    at async D:\01muzhexuetang\muzhexuetang\coding\_audit20261109\P5-query.js:72:3 {
+  code: 'P2010',
+  clientVersion: '5.22.0',
+  meta: {
+    code: '42703',
+    message: 'column "membershipbenefits" does not exist'
+  }
+}

@@ -64,7 +64,7 @@ export function buildFeedbackContent(studentName: string): string {
  * Safe home notification content.
  */
 export function buildSafeHomeContent(studentName: string): string {
-  return `【牧哲学堂】${studentName}同学已经平安前往回家的路上，牧哲学堂站好最后一班岗。当您看到这条消息已经说明${studentName}同学已上车。如有问题请联系老师。`
+  return `【牧哲学堂】关于${studentName}同学的平安回家提醒已记录，请登录牧哲学堂家长端查看详情。如需帮助，请联系老师。`
 }
 
 /**
@@ -73,7 +73,7 @@ export function buildSafeHomeContent(studentName: string): string {
  */
 export function buildPushPayload(type: string, studentName: string): { content: string; summary: string } {
   if (type === 'wxpusher_safe') {
-    return { content: buildSafeHomeContent(studentName), summary: '平安回家通知' }
+    return { content: buildSafeHomeContent(studentName), summary: '平安回家提醒' }
   }
   return { content: buildFeedbackContent(studentName), summary: '课堂反馈通知' }
 }

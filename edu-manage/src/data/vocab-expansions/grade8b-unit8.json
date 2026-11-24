@@ -1,0 +1,1346 @@
+[
+  {
+    "word": "make a difference",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·介词搭配"
+    ],
+    "grammar": "phr. 有作用；有影响。常用 make a difference to sb/sth。",
+    "collocations": "make a difference to the community; make a big difference; make a difference in the world",
+    "commonMistake": "difference 作名词时前常加 a；表示对某人或某事有影响用介词 to。",
+    "example": {
+      "english": "A kind word can make a difference to someone who feels lonely.",
+      "chinese": "一句友善的话能对感到孤独的人产生影响。"
+    },
+    "application": {
+      "prompt": "Even a small donation can ___ to the local shelter. A. make a difference B. do a difference",
+      "solution": "A。解析：固定表达是 make a difference，表示“产生影响”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: make a difference",
+        "url": "https://dictionary.cambridge.org/dictionary/english/make-a-difference"
+      }
+    ]
+  },
+  {
+    "word": "visitor",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·visit 与 visitor"
+    ],
+    "grammar": "n. 参观者；来访者。",
+    "collocations": "a visitor to the museum; welcome visitors; visitor centre",
+    "commonMistake": "visitor 是“来访者”，地点前常用介词 to；visit 是动词或名词“参观”。",
+    "example": {
+      "english": "The museum gives each visitor a free map.",
+      "chinese": "博物馆给每位参观者一张免费地图。"
+    },
+    "application": {
+      "prompt": "Each ___ must show a ticket at the entrance. A. visit B. visitor",
+      "solution": "B。解析：each 后接单数可数名词 visitor，指每位参观者。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: visitor",
+        "url": "https://dictionary.cambridge.org/dictionary/english/visitor"
+      }
+    ]
+  },
+  {
+    "word": "elderly",
+    "examTags": [
+      "词汇·形容词",
+      "语法·elderly 与 elder"
+    ],
+    "grammar": "adj. 年纪较大的；上了年纪的。",
+    "collocations": "elderly people; an elderly neighbour; care for elderly people",
+    "commonMistake": "elderly 常修饰 people/person；elder 主要用于家庭成员比较年龄，如 elder sister。",
+    "example": {
+      "english": "The elderly woman walks in the park every morning.",
+      "chinese": "这位年长的女士每天早晨在公园散步。"
+    },
+    "application": {
+      "prompt": "The volunteers helped an ___ man cross the street. A. elderly B. elder than",
+      "solution": "A。解析：名词 man 前用形容词 elderly；elder than 不是规范结构。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: elderly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/elderly"
+      }
+    ]
+  },
+  {
+    "word": "the elderly",
+    "examTags": [
+      "词汇·集合名词短语",
+      "语法·the + 形容词"
+    ],
+    "grammar": "phr. 老人；上了年纪的人。the + 形容词表示一类人，谓语通常用复数。",
+    "collocations": "care for the elderly; services for the elderly; help the elderly",
+    "commonMistake": "the elderly 指一群老人，作主语时通常用复数谓语；不要再加复数 -s。",
+    "example": {
+      "english": "The elderly in our neighbourhood enjoy free exercise classes.",
+      "chinese": "我们社区的老人喜欢免费的健身课。"
+    },
+    "application": {
+      "prompt": "___ need safe places to meet and exercise. A. The elderly needs B. The elderly need",
+      "solution": "B。解析：the elderly 指一类人，谓语用复数 need。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: the elderly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/elderly"
+      }
+    ]
+  },
+  {
+    "word": "organization",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·organize 与 organization"
+    ],
+    "grammar": "n. 组织；团体；机构。英式拼写 organisation。",
+    "collocations": "a local organization; a non-profit organization; join an organization",
+    "commonMistake": "organization 是名词，动词为 organize；英式拼写 organisation 也正确。",
+    "example": {
+      "english": "She works for an organization that protects wild animals.",
+      "chinese": "她在一个保护野生动物的组织工作。"
+    },
+    "application": {
+      "prompt": "The volunteers joined a local ___ that helps families. A. organization B. organize",
+      "solution": "A。解析：形容词 local 后需要名词 organization。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: organization",
+        "url": "https://dictionary.cambridge.org/dictionary/english/organization"
+      }
+    ]
+  },
+  {
+    "word": "stadium",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·复数变化"
+    ],
+    "grammar": "n. 体育馆；运动场。复数常用 stadiums。",
+    "collocations": "a football stadium; a crowded stadium; at the stadium",
+    "commonMistake": "stadium 是可数名词；复数常用 stadiums，避免漏写复数标记。",
+    "example": {
+      "english": "Thousands of fans filled the stadium for the final.",
+      "chinese": "成千上万的球迷涌进体育场观看决赛。"
+    },
+    "application": {
+      "prompt": "Our city built two new ___ last year. A. stadium B. stadiums",
+      "solution": "B。解析：two 后用复数 stadiums。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stadium",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stadium"
+      }
+    ]
+  },
+  {
+    "word": "provide",
+    "examTags": [
+      "词汇·动词",
+      "语法·provide 的双宾语结构"
+    ],
+    "grammar": "v. 提供；给予。常用 provide sb with sth 或 provide sth for sb。",
+    "collocations": "provide food for families; provide sb with information; provide help",
+    "commonMistake": "用 provide 时通常说 provide sb with sth 或 provide sth for sb；不要漏掉介词 with/for。",
+    "example": {
+      "english": "The charity provides hot meals for people in need.",
+      "chinese": "这家慈善机构为有需要的人提供热餐。"
+    },
+    "application": {
+      "prompt": "The school will ___ each student with a notebook. A. provide B. lend to",
+      "solution": "A。解析：固定结构为 provide sb with sth。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: provide",
+        "url": "https://dictionary.cambridge.org/dictionary/english/provide"
+      }
+    ]
+  },
+  {
+    "word": "can",
+    "examTags": [
+      "词汇·名词",
+      "熟词多义·金属罐"
+    ],
+    "grammar": "n. （食品或饮料的）金属罐；一罐的量。复数 cans。",
+    "collocations": "a can of soup; a drinks can; open a can",
+    "commonMistake": "本单元的 can 是名词“罐头、金属罐”；情态动词 can 后接动词原形。",
+    "example": {
+      "english": "He opened a can of tomato soup for lunch.",
+      "chinese": "他午餐时打开了一罐番茄汤。"
+    },
+    "application": {
+      "prompt": "We need a ___ of beans for the soup. A. bowl B. can",
+      "solution": "B。解析：表示一罐豆子用 a can of beans。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: can",
+        "url": "https://dictionary.cambridge.org/dictionary/english/can"
+      }
+    ]
+  },
+  {
+    "word": "owner",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·own 与 owner"
+    ],
+    "grammar": "n. 主人；物主。",
+    "collocations": "the owner of a dog; shop owner; become the owner",
+    "commonMistake": "表示“某物的主人”用 the owner of sth；own 可作动词“拥有”或形容词“自己的”。",
+    "example": {
+      "english": "The owner of the café gives leftover food to a shelter.",
+      "chinese": "这家咖啡馆的老板把剩余食物送给收容所。"
+    },
+    "application": {
+      "prompt": "The ___ of the lost bicycle came to collect it. A. own B. owner",
+      "solution": "B。解析：句中需要表示“主人”的名词 owner。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: owner",
+        "url": "https://dictionary.cambridge.org/dictionary/english/owner"
+      }
+    ]
+  },
+  {
+    "word": "cage",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·介词搭配"
+    ],
+    "grammar": "n. 笼子；囚笼。",
+    "collocations": "a bird cage; keep an animal in a cage; open the cage",
+    "commonMistake": "表示“在笼子里”用 in a cage；cage 是可数名词，单数前需有限定词。",
+    "example": {
+      "english": "The bird flew out when the cage door opened.",
+      "chinese": "笼门打开时，那只鸟飞了出去。"
+    },
+    "application": {
+      "prompt": "The rabbit is safe inside its ___. A. cave B. cage",
+      "solution": "B。解析：兔子待在笼子里，用 cage。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cage",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cage"
+      }
+    ]
+  },
+  {
+    "word": "donation",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·donate 与 donation"
+    ],
+    "grammar": "n. 捐赠物；捐赠。",
+    "collocations": "make a donation; a donation to charity; food donations",
+    "commonMistake": "donation 是名词；donate 是动词。表示捐款常说 make a donation to...。",
+    "example": {
+      "english": "The school made a donation to the animal shelter.",
+      "chinese": "学校向动物收容所捐了一笔款。"
+    },
+    "application": {
+      "prompt": "The school made a ___ to the shelter. A. donation B. donate",
+      "solution": "A。解析：make a donation 表示“进行捐赠”；冠词 a 后接名词 donation。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: donation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/donation"
+      }
+    ]
+  },
+  {
+    "word": "shelter",
+    "examTags": [
+      "词汇·可数名词",
+      "熟词多义·庇护所与遮蔽"
+    ],
+    "grammar": "n. 庇护所；居所；避难处；v. 遮蔽；庇护。",
+    "collocations": "an animal shelter; take shelter from the rain; homeless shelter",
+    "commonMistake": "表示“躲避雨雪”可说 take shelter from；shelter 也可作动词，表示提供庇护。",
+    "example": {
+      "english": "The volunteers built a warm shelter for the stray cats.",
+      "chinese": "志愿者为流浪猫建了一处温暖的庇护所。"
+    },
+    "application": {
+      "prompt": "The hikers found ___ from the storm in a small cave. A. sheltering B. shelter",
+      "solution": "B。解析：表示“躲避风暴”用 find shelter from the storm。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shelter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shelter"
+      }
+    ]
+  },
+  {
+    "word": "interviewer",
+    "examTags": [
+      "词汇·职业名词",
+      "词形·interview 派生词"
+    ],
+    "grammar": "n. 面试官；采访者。",
+    "collocations": "a job interviewer; answer the interviewer; interview questions",
+    "commonMistake": "interviewer 是提问的人；interviewee 是接受面试或采访的人。",
+    "example": {
+      "english": "The interviewer asked me why I wanted to join the team.",
+      "chinese": "面试官问我为什么想加入这个团队。"
+    },
+    "application": {
+      "prompt": "The person who asks questions in an interview is the ___. A. interviewer B. interviewee",
+      "solution": "A。解析：提问的一方是 interviewer，接受提问的是 interviewee。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: interviewer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/interviewer"
+      }
+    ]
+  },
+  {
+    "word": "youth",
+    "examTags": [
+      "词汇·名词",
+      "语法·集合意义与搭配"
+    ],
+    "grammar": "n. 青年；青年时期。表示年轻人群体时常作集合名词。",
+    "collocations": "youth group; in one’s youth; youth work",
+    "commonMistake": "youth 可表示“青年时期”或“青年群体”；表示一个年轻人时用 a young person，而非 a youth 在所有语境通用。",
+    "example": {
+      "english": "She spent her youth helping at the community centre.",
+      "chinese": "她在青年时期常在社区中心帮忙。"
+    },
+    "application": {
+      "prompt": "She joined a ___ group at school. A. youths B. youth",
+      "solution": "B。解析：固定搭配是 youth group；youth 作名词修饰 group 时不用复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: youth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/youth"
+      }
+    ]
+  },
+  {
+    "word": "nursing home",
+    "examTags": [
+      "词汇·名词短语",
+      "阅读·社区服务"
+    ],
+    "grammar": "n. 养老院；护理院。",
+    "collocations": "live in a nursing home; visit a nursing home; nursing home residents",
+    "commonMistake": "nursing home 指提供居住和护理服务的机构；不要按 nursing 单独理解成“护理工作”。",
+    "example": {
+      "english": "The students visit a nursing home once a month.",
+      "chinese": "学生们每月去养老院探访一次。"
+    },
+    "application": {
+      "prompt": "The volunteers read stories to older people at a ___. A. nursing home B. train station",
+      "solution": "A。解析：为年长者提供居住和护理的地方是 nursing home。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nursing home",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nursing-home"
+      }
+    ]
+  },
+  {
+    "word": "active",
+    "examTags": [
+      "词汇·形容词",
+      "词形·activity 与 actively"
+    ],
+    "grammar": "adj. 活跃的；积极的；主动的。",
+    "collocations": "be active in a club; take an active part; stay active",
+    "commonMistake": "active 是形容词；修饰动词用 actively，名词为 activity。",
+    "example": {
+      "english": "He is active in the school volunteer club.",
+      "chinese": "他积极参加学校志愿者俱乐部的活动。"
+    },
+    "application": {
+      "prompt": "Mia takes an ___ part in every community project. A. actively B. active",
+      "solution": "B。解析：名词 part 前需要形容词 active。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: active",
+        "url": "https://dictionary.cambridge.org/dictionary/english/active"
+      }
+    ]
+  },
+  {
+    "word": "come along",
+    "examTags": [
+      "词汇·动词短语",
+      "熟词多义·加入与进展"
+    ],
+    "grammar": "phr. 一起来；跟着来；出现；进展。",
+    "collocations": "come along with us; come along to the event; things come along",
+    "commonMistake": "邀请某人一起参加可说 come along；表示“进展”时常用 how is ... coming along?。",
+    "example": {
+      "english": "Would you like to come along to the beach clean-up?",
+      "chinese": "你愿意一起来参加海滩清洁活动吗？"
+    },
+    "application": {
+      "prompt": "We are going to visit the shelter. Do you want to ___? A. come along B. come across",
+      "solution": "A。解析：邀请对方一同前往用 come along。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: come along",
+        "url": "https://dictionary.cambridge.org/dictionary/english/come-along"
+      }
+    ]
+  },
+  {
+    "word": "army",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·the army 搭配"
+    ],
+    "grammar": "n. 军队；陆军。",
+    "collocations": "join the army; an army of volunteers; army service",
+    "commonMistake": "表示参军常用 join the army，army 前通常用 the；不要说 join to the army。",
+    "example": {
+      "english": "Her grandfather joined the army when he was young.",
+      "chinese": "她的祖父年轻时参了军。"
+    },
+    "application": {
+      "prompt": "He decided to ___ after finishing school. A. join to the army B. join the army",
+      "solution": "B。解析：固定搭配为 join the army，不用介词 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: army",
+        "url": "https://dictionary.cambridge.org/dictionary/english/army"
+      }
+    ]
+  },
+  {
+    "word": "soldier",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·职业名词"
+    ],
+    "grammar": "n. 军人；士兵。",
+    "collocations": "an army soldier; a brave soldier; soldiers in uniform",
+    "commonMistake": "soldier 是可数名词；单数前用 a/an，复数加 -s。",
+    "example": {
+      "english": "The soldier helped the family find a safe place.",
+      "chinese": "那名士兵帮助这家人找到了安全的地方。"
+    },
+    "application": {
+      "prompt": "A ___ carried the child away from the fire. A. soldier B. soldiers",
+      "solution": "A。解析：冠词 a 后用单数可数名词 soldier。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: soldier",
+        "url": "https://dictionary.cambridge.org/dictionary/english/soldier"
+      }
+    ]
+  },
+  {
+    "word": "primary",
+    "examTags": [
+      "词汇·形容词",
+      "语法·primary 的常见含义"
+    ],
+    "grammar": "adj. 小学教育的；首要的；主要的。",
+    "collocations": "primary school; primary purpose; primary responsibility",
+    "commonMistake": "primary school 指小学；primary 也可表示“首要的”，须结合上下文判断。",
+    "example": {
+      "english": "My little brother starts primary school next year.",
+      "chinese": "我弟弟明年开始上小学。"
+    },
+    "application": {
+      "prompt": "The most important reason is the ___ reason. A. primary B. primarily",
+      "solution": "A。解析：名词 reason 前需要形容词 primary。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: primary",
+        "url": "https://dictionary.cambridge.org/dictionary/english/primary"
+      }
+    ]
+  },
+  {
+    "word": "help out",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·help sb out"
+    ],
+    "grammar": "phr. 分担工作；帮忙；帮助摆脱困难。",
+    "collocations": "help out at a shelter; help sb out with sth; help out a neighbour",
+    "commonMistake": "help out 可单独使用，也可说 help sb out with sth；代词宾语放 help 与 out 中间。",
+    "example": {
+      "english": "My friends helped out at the food bank on Saturday.",
+      "chinese": "星期六我的朋友们在食品救济站帮忙。"
+    },
+    "application": {
+      "prompt": "Can you ___ me out with these boxes? A. help B. give",
+      "solution": "A。解析：help sb out with sth 表示帮某人处理某事。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: help out",
+        "url": "https://dictionary.cambridge.org/dictionary/english/help-out"
+      }
+    ]
+  },
+  {
+    "word": "charity",
+    "examTags": [
+      "词汇·可数与不可数名词",
+      "词形·charitable"
+    ],
+    "grammar": "n. 慈善机构；慈善事业。",
+    "collocations": "a charity; charity work; give money to charity",
+    "commonMistake": "charity 指机构时可数；表示慈善事业时常不可数，短语 give to charity 通常不加冠词。",
+    "example": {
+      "english": "They raised money for a local children’s charity.",
+      "chinese": "他们为一家当地儿童慈善机构筹款。"
+    },
+    "application": {
+      "prompt": "Our class will give the money to a local ___. A. charitable B. charity",
+      "solution": "B。解析：local 后需要名词 charity，表示慈善机构。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: charity",
+        "url": "https://dictionary.cambridge.org/dictionary/english/charity"
+      }
+    ]
+  },
+  {
+    "word": "warmly",
+    "examTags": [
+      "词汇·副词",
+      "词形·warm 与 warmly"
+    ],
+    "grammar": "adv. 热情地；温暖地。",
+    "collocations": "greet sb warmly; welcome sb warmly; smile warmly",
+    "commonMistake": "warmly 是副词，修饰动词；warm 是形容词，可修饰 clothes、weather 等名词。",
+    "example": {
+      "english": "The volunteers warmly welcomed the new members.",
+      "chinese": "志愿者们热情地欢迎新成员。"
+    },
+    "application": {
+      "prompt": "The host ___ greeted every visitor at the door. A. warmly B. warm",
+      "solution": "A。解析：修饰动词 greeted 要用副词 warmly。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: warmly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/warmly"
+      }
+    ]
+  },
+  {
+    "word": "lady",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·复数变化"
+    ],
+    "grammar": "n. 女士；淑女。复数 ladies。",
+    "collocations": "a young lady; ladies and gentlemen; a lady’s bag",
+    "commonMistake": "lady 的复数是 ladies（辅音字母加 y 结尾变 ies）；lady’s 表示“女士的”。",
+    "example": {
+      "english": "A kind lady showed us the way to the station.",
+      "chinese": "一位好心的女士给我们指了去车站的路。"
+    },
+    "application": {
+      "prompt": "Two ___ helped carry the boxes upstairs. A. ladys B. ladies",
+      "solution": "B。解析：lady 的正确复数拼写是 ladies。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lady",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lady"
+      }
+    ]
+  },
+  {
+    "word": "gentleman",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·不规则复数"
+    ],
+    "grammar": "n. 先生；君子。复数 gentlemen。",
+    "collocations": "a kind gentleman; ladies and gentlemen; act like a gentleman",
+    "commonMistake": "gentleman 的复数是不规则形式 gentlemen，不是 gentlemans。",
+    "example": {
+      "english": "The gentleman offered his seat to an elderly passenger.",
+      "chinese": "这位先生把座位让给了一名年长的乘客。"
+    },
+    "application": {
+      "prompt": "The two ___ helped an elderly woman with her bags. A. gentlemen B. gentlemans",
+      "solution": "A。解析：gentleman 的复数形式是 gentlemen。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: gentleman",
+        "url": "https://dictionary.cambridge.org/dictionary/english/gentleman"
+      }
+    ]
+  },
+  {
+    "word": "bark",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·吠叫声"
+    ],
+    "grammar": "n. （狗的）吠叫声；v. （狗）吠叫；厉声说。",
+    "collocations": "a loud bark; bark at a stranger; bark an order",
+    "commonMistake": "狗对某人叫用 bark at sb；bark 作名词时表示吠声，也可指树皮，需看语境。",
+    "example": {
+      "english": "The dog barked at the postman but did not bite him.",
+      "chinese": "那只狗冲邮递员吠叫，但没有咬他。"
+    },
+    "application": {
+      "prompt": "Our dog ___ whenever someone knocks. A. bark B. barks",
+      "solution": "B。解析：主语 our dog 是第三人称单数，谓语用 barks。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bark",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bark"
+      }
+    ]
+  },
+  {
+    "word": "sign up",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·介词搭配"
+    ],
+    "grammar": "phr. 报名；注册。常用 sign up for sth 或 sign up to do sth。",
+    "collocations": "sign up for a course; sign up to volunteer; sign up online",
+    "commonMistake": "报名参加活动用 sign up for；表示报名去做某事用 sign up to do，不说 sign up doing。",
+    "example": {
+      "english": "I signed up for a first-aid course at school.",
+      "chinese": "我报名参加了学校的急救课程。"
+    },
+    "application": {
+      "prompt": "Sam wants to ___ for the weekend clean-up. A. sign up B. put up",
+      "solution": "A。解析：报名参加活动用 sign up for。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sign up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sign-up"
+      }
+    ]
+  },
+  {
+    "word": "ever since",
+    "examTags": [
+      "词汇·时间短语",
+      "语法·现在完成时"
+    ],
+    "grammar": "phr. 自从；从……以后一直。常与现在完成时连用。",
+    "collocations": "ever since then; have known sb ever since; ever since I was young",
+    "commonMistake": "ever since 表示过去某个起点持续到现在，主句常用现在完成时；不是一般过去时的标志。",
+    "example": {
+      "english": "She has volunteered at the shelter ever since she was twelve.",
+      "chinese": "她从十二岁起就一直在收容所做志愿服务。"
+    },
+    "application": {
+      "prompt": "They have been close friends ___ they met at primary school. A. for B. ever since",
+      "solution": "B。解析：ever since 后接过去起点，主句用现在完成时。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ever since",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ever-since"
+      }
+    ]
+  },
+  {
+    "word": "adult",
+    "examTags": [
+      "词汇·名词与形容词",
+      "语法·冠词与复数"
+    ],
+    "grammar": "n. 成年人；adj. 成年的；成熟的。",
+    "collocations": "an adult; adult education; adult life",
+    "commonMistake": "adult 作名词时是可数的；单数前用 an，因为 adult 以元音音素开头。",
+    "example": {
+      "english": "Children must be with an adult at the swimming pool.",
+      "chinese": "儿童在游泳池必须有一位成年人陪同。"
+    },
+    "application": {
+      "prompt": "___ adult must sign the form. A. An B. A",
+      "solution": "A。解析：adult 以元音音素开头，单数前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: adult",
+        "url": "https://dictionary.cambridge.org/dictionary/english/adult"
+      }
+    ]
+  },
+  {
+    "word": "missing",
+    "examTags": [
+      "词汇·形容词与现在分词",
+      "熟词多义·失踪与缺少"
+    ],
+    "grammar": "adj. 失踪的；丢失的；缺少的；也是 miss 的现在分词。",
+    "collocations": "a missing child; go missing; a page is missing",
+    "commonMistake": "missing 作形容词表示“失踪、丢失、缺少”；miss sb 表示“想念某人”，不等于 missing person 的词义。",
+    "example": {
+      "english": "The police are looking for a missing child.",
+      "chinese": "警方正在寻找一名失踪儿童。"
+    },
+    "application": {
+      "prompt": "One page is ___ from this book. A. losing B. missing",
+      "solution": "B。解析：表示书中缺少某页，用 missing。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: missing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/missing"
+      }
+    ]
+  },
+  {
+    "word": "practical",
+    "examTags": [
+      "词汇·形容词",
+      "词形·practice 与 practically"
+    ],
+    "grammar": "adj. 实用的；实际的；切实可行的。",
+    "collocations": "practical advice; a practical solution; practical experience",
+    "commonMistake": "practical 是形容词；名词 practice 拼写不同，副词是 practically。",
+    "example": {
+      "english": "The guide gives practical advice for helping stray animals.",
+      "chinese": "这本指南提供了帮助流浪动物的实用建议。"
+    },
+    "application": {
+      "prompt": "We need a ___ plan that volunteers can follow easily. A. practical B. practice",
+      "solution": "A。解析：名词 plan 前需要形容词 practical。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: practical",
+        "url": "https://dictionary.cambridge.org/dictionary/english/practical"
+      }
+    ]
+  },
+  {
+    "word": "life-saving",
+    "examTags": [
+      "词汇·复合形容词",
+      "语法·连字符与修饰名词"
+    ],
+    "grammar": "adj. 救命的；救生的。常作定语修饰名词。",
+    "collocations": "life-saving skills; life-saving treatment; a life-saving device",
+    "commonMistake": "life-saving 作定语时用连字符；life 是名词，saving 在此参与构成形容词。",
+    "example": {
+      "english": "The course teaches life-saving skills to teenagers.",
+      "chinese": "这门课程教青少年救生技能。"
+    },
+    "application": {
+      "prompt": "Knowing how to give CPR can be a ___ skill. A. save life B. life-saving",
+      "solution": "B。解析：名词 skill 前需要复合形容词 life-saving。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: life-saving",
+        "url": "https://dictionary.cambridge.org/dictionary/english/life-saving"
+      }
+    ]
+  },
+  {
+    "word": "teamwork",
+    "examTags": [
+      "词汇·不可数名词",
+      "语法·名词用法"
+    ],
+    "grammar": "n. 团队合作。通常作不可数名词。",
+    "collocations": "good teamwork; teamwork skills; work as a team",
+    "commonMistake": "teamwork 通常不可数，不加 -s；也可用 work as a team 表达团队合作。",
+    "example": {
+      "english": "Good teamwork helped the volunteers finish early.",
+      "chinese": "良好的团队合作帮助志愿者们提前完成了工作。"
+    },
+    "application": {
+      "prompt": "The project succeeded because everyone showed great ___. A. teamwork B. teamworks",
+      "solution": "A。解析：teamwork 通常是不可数名词，不加复数 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: teamwork",
+        "url": "https://dictionary.cambridge.org/dictionary/english/teamwork"
+      }
+    ]
+  },
+  {
+    "word": "successful",
+    "examTags": [
+      "词汇·形容词",
+      "词形·success 与 successfully"
+    ],
+    "grammar": "adj. 成功的；有成就的。",
+    "collocations": "a successful event; be successful in doing sth; a successful team",
+    "commonMistake": "successful 是形容词；名词为 success，副词为 successfully；be successful in 后接名词或动名词。",
+    "example": {
+      "english": "The book fair was successful because many students came.",
+      "chinese": "这次书展很成功，因为有许多学生参加。"
+    },
+    "application": {
+      "prompt": "The school play was very ___ with both parents and students. A. success B. successful",
+      "solution": "B。解析：very 后接形容词 successful；success 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: successful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/successful"
+      }
+    ]
+  },
+  {
+    "word": "most of all",
+    "examTags": [
+      "词汇·副词短语",
+      "语法·强调重点"
+    ],
+    "grammar": "phr. 最重要的是；尤其。用于突出最重要的一点。",
+    "collocations": "most of all, remember; like sth most of all; what matters most of all",
+    "commonMistake": "most of all 用来强调“最重要”；most of + 名词表示“大多数……”，结构不同。",
+    "example": {
+      "english": "Most of all, we want every child to feel welcome.",
+      "chinese": "最重要的是，我们希望每个孩子都感到受欢迎。"
+    },
+    "application": {
+      "prompt": "___, remember to thank the people who helped you. A. Most of all B. Most of students",
+      "solution": "A。解析：此处要表达“最重要的是”，用 most of all。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: most of all",
+        "url": "https://dictionary.cambridge.org/dictionary/english/most"
+      }
+    ]
+  },
+  {
+    "word": "value",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·价值与重视"
+    ],
+    "grammar": "n. 价值；重要作用；v. 重视；珍视。",
+    "collocations": "the value of teamwork; be of great value; value sb’s help",
+    "commonMistake": "value 作“价值”时是名词；value sb/sth 作“重视”时是动词，后直接接宾语。",
+    "example": {
+      "english": "The volunteers value the trust of the people they help.",
+      "chinese": "志愿者们珍视他们所帮助的人对自己的信任。"
+    },
+    "application": {
+      "prompt": "Our club truly ___ the time and effort of all volunteers. A. valuable B. values",
+      "solution": "B。解析：句中需要谓语动词；主语 club 为单数，故用 values。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: value",
+        "url": "https://dictionary.cambridge.org/dictionary/english/value"
+      }
+    ]
+  },
+  {
+    "word": "voluntary",
+    "examTags": [
+      "词汇·形容词",
+      "词形·volunteer"
+    ],
+    "grammar": "adj. 自愿的；无偿的。",
+    "collocations": "voluntary work; voluntary service; on a voluntary basis",
+    "commonMistake": "voluntary 是形容词，volunteer 可作名词“志愿者”或动词“自愿做”。",
+    "example": {
+      "english": "Voluntary work gives students a chance to help others.",
+      "chinese": "志愿服务给学生们一个帮助他人的机会。"
+    },
+    "application": {
+      "prompt": "The students do ___ work at the animal shelter after school. A. voluntary B. volunteer",
+      "solution": "A。解析：名词 work 前需要形容词 voluntary。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: voluntary",
+        "url": "https://dictionary.cambridge.org/dictionary/english/voluntary"
+      }
+    ]
+  },
+  {
+    "word": "ordinary",
+    "examTags": [
+      "词汇·形容词",
+      "词形·ordinarily"
+    ],
+    "grammar": "adj. 普通的；平凡的。",
+    "collocations": "an ordinary day; ordinary people; nothing ordinary",
+    "commonMistake": "ordinary 修饰名词；副词为 ordinarily；注意不要漏写 -n-。",
+    "example": {
+      "english": "An ordinary neighbour can make a big difference by being kind.",
+      "chinese": "一位普通邻居也能通过善意带来很大影响。"
+    },
+    "application": {
+      "prompt": "It was just an ___ day until the students began helping others. A. ordinarily B. ordinary",
+      "solution": "B。解析：名词 day 前需要形容词 ordinary。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ordinary",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ordinary"
+      }
+    ]
+  },
+  {
+    "word": "worth",
+    "examTags": [
+      "词汇·形容词",
+      "语法·worth doing"
+    ],
+    "grammar": "adj. 值得；有价值。常用 be worth doing 或 be worth + 金额。",
+    "collocations": "be worth reading; be worth a visit; worth the effort",
+    "commonMistake": "worth 后接动名词表示“值得做”；不说 be worth to do。",
+    "example": {
+      "english": "The old book is worth reading even today.",
+      "chinese": "这本旧书即使在今天也值得一读。"
+    },
+    "application": {
+      "prompt": "The museum is small but it is ___ visiting. A. worth B. worthy to",
+      "solution": "A。解析：固定结构为 be worth doing，故用 worth visiting。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: worth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/worth"
+      }
+    ]
+  },
+  {
+    "word": "audience",
+    "examTags": [
+      "词汇·可数集合名词",
+      "语法·集合名词主谓一致"
+    ],
+    "grammar": "n. 听众；观众。",
+    "collocations": "a large audience; audience members; speak to an audience",
+    "commonMistake": "audience 是集合名词；本题按整体看待时谓语用单数；具体成员可说 audience members。",
+    "example": {
+      "english": "The audience listened quietly to the young singer.",
+      "chinese": "观众们安静地听着这位年轻歌手演唱。"
+    },
+    "application": {
+      "prompt": "The whole audience ___ loudly after the performance. A. clap B. claps",
+      "solution": "B。解析：whole audience 作为整体看待，谓语用单数 claps。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: audience",
+        "url": "https://dictionary.cambridge.org/dictionary/english/audience"
+      }
+    ]
+  },
+  {
+    "word": "willing",
+    "examTags": [
+      "词汇·形容词",
+      "语法·be willing to do"
+    ],
+    "grammar": "adj. 乐意的；愿意的。",
+    "collocations": "be willing to help; willing volunteers; be willing to learn",
+    "commonMistake": "willing 后常接不定式 to do；不说 be willing doing。",
+    "example": {
+      "english": "Many students are willing to spend their weekends helping others.",
+      "chinese": "许多学生愿意在周末帮助他人。"
+    },
+    "application": {
+      "prompt": "Are you ___ to help at the food bank this Saturday? A. willing B. willingly",
+      "solution": "A。解析：be 动词后作表语用形容词 willing，结构为 be willing to do。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: willing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/willing"
+      }
+    ]
+  },
+  {
+    "word": "on the go",
+    "examTags": [
+      "词汇·介词短语",
+      "语境·忙碌与移动"
+    ],
+    "grammar": "phr. 忙个不停；在活动中；在路上。",
+    "collocations": "be on the go all day; people on the go; food on the go",
+    "commonMistake": "on the go 表示持续忙碌或在移动中；不要按字面译成“在去……的路上”而漏掉语境。",
+    "example": {
+      "english": "Our volunteers are on the go from morning until night.",
+      "chinese": "我们的志愿者从早到晚都忙个不停。"
+    },
+    "application": {
+      "prompt": "The delivery workers are ___ all day, taking meals to families. A. at a loss B. on the go",
+      "solution": "B。解析：全天忙着送餐，符合 on the go（忙个不停）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: on the go",
+        "url": "https://dictionary.cambridge.org/dictionary/english/on-the-go"
+      }
+    ]
+  },
+  {
+    "word": "in need",
+    "examTags": [
+      "词汇·介词短语",
+      "语法·固定搭配"
+    ],
+    "grammar": "phr. 需要帮助的；生活困难的。常用 people/families in need。",
+    "collocations": "people in need; help families in need; a friend in need",
+    "commonMistake": "in need 常放在名词后作后置修饰；表达帮助对象可说 help those in need。",
+    "example": {
+      "english": "The group collects warm clothes for families in need.",
+      "chinese": "这个团体为有需要的家庭收集保暖衣物。"
+    },
+    "application": {
+      "prompt": "The charity provides meals for people ___. A. in need B. on need",
+      "solution": "A。解析：固定短语为 people in need，表示需要帮助的人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in need",
+        "url": "https://dictionary.cambridge.org/dictionary/english/in-need"
+      }
+    ]
+  },
+  {
+    "word": "completely",
+    "examTags": [
+      "词汇·副词",
+      "词形·complete 与 completely"
+    ],
+    "grammar": "adv. 完全地；彻底地。",
+    "collocations": "completely different; completely understand; completely change",
+    "commonMistake": "completely 是副词，修饰形容词或动词；形容词是 complete。",
+    "example": {
+      "english": "The volunteers completely cleaned the beach before noon.",
+      "chinese": "志愿者们中午前彻底清理了海滩。"
+    },
+    "application": {
+      "prompt": "The old playground looks ___ different after the repairs. A. complete B. completely",
+      "solution": "B。解析：修饰形容词 different 需用副词 completely。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: completely",
+        "url": "https://dictionary.cambridge.org/dictionary/english/completely"
+      }
+    ]
+  },
+  {
+    "word": "success",
+    "examTags": [
+      "词汇·可数与不可数名词",
+      "词形·successful 与 successfully"
+    ],
+    "grammar": "n. 成功；成功的人或事。",
+    "collocations": "achieve success; a great success; success in doing sth",
+    "commonMistake": "success 表示抽象的“成功”时通常不可数；表示成功的人或事时可数，如 a success。",
+    "example": {
+      "english": "The charity concert was a great success.",
+      "chinese": "这场慈善音乐会非常成功。"
+    },
+    "application": {
+      "prompt": "The fundraiser was a great ___. A. success B. successful",
+      "solution": "A。解析：冠词 a 和形容词 great 后需要名词 success。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: success",
+        "url": "https://dictionary.cambridge.org/dictionary/english/success"
+      }
+    ]
+  },
+  {
+    "word": "elder",
+    "examTags": [
+      "词汇·形容词",
+      "语法·elder 与 older"
+    ],
+    "grammar": "adj. （两人中）年纪较长的，尤指兄弟姐妹之间。",
+    "collocations": "my elder brother; an elder sister; the elder of the two",
+    "commonMistake": "elder 常用于家庭成员或两者比较，通常不与 than 连用；一般年龄比较用 older than。",
+    "example": {
+      "english": "My elder sister taught me how to ride a bike.",
+      "chinese": "我姐姐教会了我骑自行车。"
+    },
+    "application": {
+      "prompt": "Tom is my ___ brother, and he is two years older than me. A. elder than B. elder",
+      "solution": "B。解析：在家庭成员称谓前可用 elder；比较结构已由后句表达，不接 than。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: elder",
+        "url": "https://dictionary.cambridge.org/dictionary/english/elder"
+      }
+    ]
+  },
+  {
+    "word": "donate",
+    "examTags": [
+      "词汇·动词",
+      "语法·donate sth to"
+    ],
+    "grammar": "v. 捐赠；赠送。",
+    "collocations": "donate money to charity; donate blood; donate books",
+    "commonMistake": "donate 后直接接捐赠物，接受方前用 to；donation 是名词。",
+    "example": {
+      "english": "Local businesses donated food to the shelter.",
+      "chinese": "当地商家向收容所捐赠了食物。"
+    },
+    "application": {
+      "prompt": "You can ___ old books to the school library. A. donate B. donation",
+      "solution": "A。解析：情态动词 can 后接动词原形 donate。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: donate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/donate"
+      }
+    ]
+  },
+  {
+    "word": "pocket",
+    "examTags": [
+      "词汇·可数名词",
+      "熟词多义·口袋"
+    ],
+    "grammar": "n. 衣袋；口袋；小块区域。",
+    "collocations": "put sth in a pocket; a coat pocket; pocket-sized",
+    "commonMistake": "pocket 是可数名词；表示某件衣服上的口袋常用 a pocket，不能漏掉冠词。",
+    "example": {
+      "english": "He put the note in his coat pocket.",
+      "chinese": "他把纸条放进了外套口袋。"
+    },
+    "application": {
+      "prompt": "She found a small card in the ___ of her jacket. A. packet B. pocket",
+      "solution": "B。解析：夹克上的口袋是 pocket；packet 表示小包。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pocket",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pocket"
+      }
+    ]
+  },
+  {
+    "word": "pocket money",
+    "examTags": [
+      "词汇·名词短语",
+      "语法·money 不可数"
+    ],
+    "grammar": "n. 零花钱。money 不可数。",
+    "collocations": "get pocket money; save pocket money; spend pocket money on",
+    "commonMistake": "pocket money 中 money 不可数，不加复数 -s；表示金额可用 some/a little pocket money。",
+    "example": {
+      "english": "I save some pocket money to buy books for the children.",
+      "chinese": "我存下一些零花钱，给孩子们买书。"
+    },
+    "application": {
+      "prompt": "Leo uses his ___ to buy a birthday card for his friend. A. pocket money B. pocket moneys",
+      "solution": "A。解析：money 不可数，pocket money 不加 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pocket money",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pocket-money"
+      }
+    ]
+  },
+  {
+    "word": "effort",
+    "examTags": [
+      "词汇·可数与不可数名词",
+      "语法·固定搭配"
+    ],
+    "grammar": "n. 努力；艰难的尝试。",
+    "collocations": "make an effort; put effort into sth; make every effort to do",
+    "commonMistake": "常说 make an effort to do sth；effort 作“努力”时可数或不可数，按语境使用冠词。",
+    "example": {
+      "english": "With a little effort, everyone can keep the park clean.",
+      "chinese": "只要稍微努力一下，每个人都能保持公园清洁。"
+    },
+    "application": {
+      "prompt": "We should make an ___ to include every new student. A. effect B. effort",
+      "solution": "B。解析：make an effort 是固定搭配，表示“作出努力”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: effort",
+        "url": "https://dictionary.cambridge.org/dictionary/english/effort"
+      }
+    ]
+  },
+  {
+    "word": "hand out",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·可分动词短语"
+    ],
+    "grammar": "phr. 分发；散发。",
+    "collocations": "hand out leaflets; hand sth out to sb; hand out food",
+    "commonMistake": "hand out 可分开：hand out the forms/hand the forms out；代词宾语必须放中间。",
+    "example": {
+      "english": "The volunteers handed out water to runners after the race.",
+      "chinese": "比赛结束后，志愿者们给跑步者分发饮用水。"
+    },
+    "application": {
+      "prompt": "Please ___ these information sheets to the visitors. A. hand out B. look after",
+      "solution": "A。解析：向来访者分发资料用 hand out。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hand out",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hand-out"
+      }
+    ]
+  },
+  {
+    "word": "familiar with",
+    "examTags": [
+      "词汇·形容词短语",
+      "语法·介词搭配"
+    ],
+    "grammar": "phr. 熟悉；通晓。常用 be familiar with sth/sb。",
+    "collocations": "be familiar with the rules; become familiar with; quite familiar with",
+    "commonMistake": "be familiar with 表示“某人熟悉某物”；be familiar to 表示“某物为某人所熟悉”。",
+    "example": {
+      "english": "The new volunteer is familiar with the safety rules.",
+      "chinese": "这位新志愿者熟悉安全规定。"
+    },
+    "application": {
+      "prompt": "I am not ___ this computer program, so please show me how to use it. A. similar to B. familiar with",
+      "solution": "B。解析：表示“熟悉某程序”用 be familiar with。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: familiar with",
+        "url": "https://dictionary.cambridge.org/dictionary/english/familiar"
+      }
+    ]
+  },
+  {
+    "word": "etc.",
+    "examTags": [
+      "词汇·缩写",
+      "书写·列举标点"
+    ],
+    "grammar": "adv. 等等；以及诸如此类。是 et cetera 的缩写。",
+    "collocations": "books, clothes, etc.; food, water, etc.; and so on",
+    "commonMistake": "etc. 用于列举末尾，前面通常用逗号；避免写 and etc.，因为 etc. 本身已有“等等”之意。",
+    "example": {
+      "english": "The centre needs books, toys, clothes, etc.",
+      "chinese": "中心需要书籍、玩具、衣物等物品。"
+    },
+    "application": {
+      "prompt": "We collected blankets, food, and ___ for the shelter. A. etc. B. et cetera things",
+      "solution": "A。解析：列举末尾可用 etc.；不需要再加 and。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: etc.",
+        "url": "https://dictionary.cambridge.org/dictionary/english/etc"
+      }
+    ]
+  },
+  {
+    "word": "talent",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·talented"
+    ],
+    "grammar": "n. 才能；天赋；有才能的人。",
+    "collocations": "have a talent for music; show a talent; a talented artist",
+    "commonMistake": "表示在某方面有天赋用 have a talent for sth/doing；形容词是 talented。",
+    "example": {
+      "english": "Nina has a talent for making everyone feel welcome.",
+      "chinese": "妮娜很有天赋，总能让每个人感到受欢迎。"
+    },
+    "application": {
+      "prompt": "He has a natural ___ for working with animals. A. talented B. talent",
+      "solution": "B。解析：形容词 natural 后需要名词 talent。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: talent",
+        "url": "https://dictionary.cambridge.org/dictionary/english/talent"
+      }
+    ]
+  },
+  {
+    "word": "madam",
+    "examTags": [
+      "词汇·称呼名词",
+      "语用·正式称呼"
+    ],
+    "grammar": "n. （正式、礼貌的称呼）女士；夫人。也可作信件称呼。",
+    "collocations": "Dear Madam; excuse me, madam; ladies and gentlemen",
+    "commonMistake": "madam 用于正式称呼女性；一般日常交流中可用 ma’am（美式口语）或称呼姓名。",
+    "example": {
+      "english": "The shop assistant asked, “May I help you, madam?”",
+      "chinese": "店员问道：“女士，需要帮忙吗？”"
+    },
+    "application": {
+      "prompt": "At the start of a formal letter to an unknown woman, you may write “Dear ___”. A. Madam B. Mrs",
+      "solution": "A。解析：收信人姓名和婚姻状况未知时，正式称呼可用 Dear Madam。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: madam",
+        "url": "https://dictionary.cambridge.org/dictionary/english/madam"
+      }
+    ]
+  },
+  {
+    "word": "advertisement",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·advertise 与 ad"
+    ],
+    "grammar": "n. 广告；启事。常缩写为 ad。",
+    "collocations": "an advertisement for a job; put an advertisement in a paper; TV advertisement",
+    "commonMistake": "advertisement 是可数名词，单数前用 an；动词为 advertise，缩写 ad 也常见。",
+    "example": {
+      "english": "I saw an advertisement for a weekend volunteer event.",
+      "chinese": "我看到一则周末志愿活动的广告。"
+    },
+    "application": {
+      "prompt": "The school posted an ___ for new volunteers. A. advertise B. advertisement",
+      "solution": "B。解析：an 后需要名词 advertisement。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: advertisement",
+        "url": "https://dictionary.cambridge.org/dictionary/english/advertisement"
+      }
+    ]
+  }
+]

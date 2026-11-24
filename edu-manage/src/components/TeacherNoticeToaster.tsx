@@ -1,12 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { notification } from 'antd'
-import {
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  CloseOutlined,
-} from '@ant-design/icons'
+import { useEffect } from 'react'
+import { Button, notification } from 'antd'
+import { useSWRConfig } from 'swr'
+import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 
 type TeacherMessageItem = {
   id: string
@@ -16,63 +13,179 @@ type TeacherMessageItem = {
   createdAt: string
 }
 
-/**
- * 教师端首页弹窗：拉取管理员发来的未读提醒/表扬，依次弹出；
- * 关闭即标记已读（管理端可看到已查看状态）。
- * 仅挂载一次，不在页面重复渲染。
- */
+type QueuedPrompt =
+  | { kind: 'message'; item: TeacherMessageItem }
+  | { kind: 'read-error'; id: string }
+  | { kind: 'load-error' }
+
+/** 教师端提醒逐条显示；当前提示退场后才让下一条进入。 */
 export function TeacherNoticeToaster() {
-  const shownRef = useRef(false)
+  const { mutate: mutateSWR } = useSWRConfig()
 
   useEffect(() => {
-    if (shownRef.current) return
-    shownRef.current = true
     let cancelled = false
+    let activeKey: string | null = null
+    let queue: QueuedPrompt[] = []
+    const openKeys = new Set<string>()
+    const queuedReadErrors = new Set<string>()
 
-    const load = async () => {
+    const finish = (key: string) => {
+      if (activeKey !== key) return
+      activeKey = null
+      openKeys.delete(key)
+      window.setTimeout(showNext, 80)
+    }
+
+    const markRead = async (id: string) => {
       try {
-        const res = await fetch('/api/teacher/messages')
-        if (!res.ok) return
-        const data = await res.json()
-        if (cancelled) return
-        const messages = (data.messages || []) as TeacherMessageItem[]
-        if (!messages.length) return
-
-        // 依次弹出，最多同时展示前 3 条，其余进入队列由用户关闭时释放
-        messages.forEach((item, index) => {
-          const isPraise = item.type === 'praise'
-          notification.open({
-            key: item.id,
-            message: item.title,
-            description: item.content,
-            placement: 'topRight',
-            duration: isPraise ? 6 : 8,
-            icon: isPraise ? (
-              <span style={{ color: '#27a644', fontSize: 20 }}><CheckCircleOutlined /></span>
-            ) : (
-              <span style={{ color: '#E8784A', fontSize: 20 }}><ExclamationCircleOutlined /></span>
-            ),
-            closeIcon: <CloseOutlined />,
-            style: isPraise
-              ? { background: '#f6fbf5', border: '1px solid #cde7cd', borderRadius: 10 }
-              : { background: '#fffaf5', border: '1px solid #f0dcc8', borderRadius: 10 },
-            onClose: () => {
-              void fetch(`/api/teacher/messages/${item.id}/read`, { method: 'POST' }).catch(() => undefined)
-            },
-            // 延迟弹出避免首屏通知堆叠
-            ...(index > 0 ? { } : { }),
-          })
-        })
+        const response = await fetch(`/api/teacher/messages/${id}/read`, { method: 'POST' })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        await mutateSWR('/api/messages/unread-count')
+        return true
       } catch {
-        // 静默失败，不影响首页
+        return false
       }
     }
-    const timer = window.setTimeout(load, 600)
+
+    const showLoadError = (key: string, retrying = false) => {
+      notification.open({
+        key,
+        message: '教师提醒暂时无法加载',
+        description: (
+          <Button
+            type="primary"
+            size="small"
+            loading={retrying}
+            style={{ minHeight: 44, paddingInline: 12 }}
+            onClick={(event) => {
+              event.stopPropagation()
+              void load(key, true)
+            }}
+          >
+            重新加载提醒
+          </Button>
+        ),
+        placement: 'topRight',
+        duration: 0,
+        onClose: () => finish(key),
+      })
+    }
+
+    const load = async (activeLoadKey?: string, retrying = false) => {
+      try {
+        const response = await fetch('/api/teacher/messages')
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const data = await response.json()
+        if (cancelled) return
+
+        const messages = (data.messages || []) as TeacherMessageItem[]
+        if (activeLoadKey) {
+          notification.destroy(activeLoadKey)
+          finish(activeLoadKey)
+        }
+        if (!messages.length) return
+        queue.push(...messages.map((item): QueuedPrompt => ({ kind: 'message', item })))
+        showNext()
+      } catch {
+        if (cancelled) return
+        if (activeLoadKey && activeKey === activeLoadKey) showLoadError(activeLoadKey, false)
+        else {
+          const key = `teacher-message-load-error-${Date.now()}`
+          queue.push({ kind: 'load-error' })
+          loadErrorKey = key
+          showNext()
+        }
+        if (retrying) return
+      }
+    }
+
+    let loadErrorKey = 'teacher-message-load-error'
+
+    const showNext = () => {
+      if (cancelled || activeKey || queue.length === 0) return
+      const prompt = queue.shift()
+      if (!prompt) return
+
+      if (prompt.kind === 'message') {
+        const { item } = prompt
+        const key = item.id
+        const isPraise = item.type === 'praise'
+        activeKey = key
+        openKeys.add(key)
+        notification.open({
+          key,
+          message: item.title,
+          description: item.content,
+          placement: 'topRight',
+          duration: isPraise ? 6 : 8,
+          icon: isPraise ? <CheckCircleOutlined style={{ color: 'var(--color-success)', fontSize: 20 }} /> : <ExclamationCircleOutlined style={{ color: 'var(--color-warning)', fontSize: 20 }} />,
+          onClick: () => {
+            notification.destroy(key)
+            finish(key)
+          },
+          onClose: () => finish(key),
+        })
+        // 只在提醒真正进入可见提示位后标记已读；排队项仍保留未读状态。
+        void markRead(item.id).then((ok) => {
+          if (!ok && !cancelled && !queuedReadErrors.has(item.id)) {
+            queuedReadErrors.add(item.id)
+            queue.push({ kind: 'read-error', id: item.id })
+          }
+        })
+        return
+      }
+
+      if (prompt.kind === 'read-error') {
+        const key = `teacher-message-read-error-${prompt.id}`
+        activeKey = key
+        openKeys.add(key)
+        const showError = (retrying = false) => notification.open({
+          key,
+          message: '提醒已显示，但已读状态暂未同步',
+          description: (
+            <Button
+              type="primary"
+              size="small"
+              loading={retrying}
+              style={{ minHeight: 44, paddingInline: 12 }}
+              onClick={async (event) => {
+                event.stopPropagation()
+                showError(true)
+                if (await markRead(prompt.id)) {
+                  notification.destroy(key)
+                  queuedReadErrors.delete(prompt.id)
+                  finish(key)
+                } else {
+                  showError(false)
+                }
+              }}
+            >
+              重试同步已读状态
+            </Button>
+          ),
+          placement: 'topRight',
+          duration: 0,
+          onClose: () => finish(key),
+        })
+        showError()
+        return
+      }
+
+      const key = loadErrorKey
+      activeKey = key
+      openKeys.add(key)
+      showLoadError(key)
+    }
+
+    const timer = window.setTimeout(() => { void load() }, 600)
     return () => {
       cancelled = true
       window.clearTimeout(timer)
+      openKeys.forEach((key) => notification.destroy(key))
+      openKeys.clear()
+      notification.destroy('teacher-message-load-error')
     }
-  }, [])
+  }, [mutateSWR])
 
   return null
 }

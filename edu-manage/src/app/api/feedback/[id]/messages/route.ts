@@ -16,14 +16,31 @@ export const GET = apiHandler(async (
 
   const { id } = await params
   const prisma = await getRequestPrisma()
-  const conversation = await prisma.parentMessage.findFirst({
+  const parentMessage = await prisma.parentMessage.findFirst({
     where: { feedbackId: id, parentId: user.id },
-    include: {
-      parent: { select: { id: true, name: true } },
-      student: { select: { id: true, name: true } },
-      teacher: { select: { id: true, name: true } },
-      replies: { orderBy: { createdAt: 'asc' } },
-    },
+    select: { id: true },
+  })
+  if (!parentMessage) return NextResponse.json({ conversation: null })
+
+  const conversation = await prisma.$transaction(async (tx) => {
+    await tx.parentMessageReply.updateMany({
+      where: {
+        messageId: parentMessage.id,
+        role: { not: 'parent' },
+        isReadByParent: false,
+      },
+      data: { isReadByParent: true },
+    })
+
+    return tx.parentMessage.findFirst({
+      where: { id: parentMessage.id, parentId: user.id },
+      include: {
+        parent: { select: { id: true, name: true } },
+        student: { select: { id: true, name: true } },
+        teacher: { select: { id: true, name: true } },
+        replies: { orderBy: { createdAt: 'asc' } },
+      },
+    })
   })
   return NextResponse.json({ conversation })
 })

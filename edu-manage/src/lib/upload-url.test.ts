@@ -1,26 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import {
-  extractUploadStorageKey,
-  normalizeAvatarUrl,
-  protectedUploadFallback,
-} from './upload-url'
+import { normalizeUploadRequestPath, protectedUploadFallback } from './upload-url'
 
-describe('protected upload URLs', () => {
-  it('extracts the object key from private OSS and protected local URLs', () => {
-    expect(extractUploadStorageKey('https://bucket.oss-cn-hangzhou.aliyuncs.com/feedback-preview-1.webp'))
-      .toBe('feedback-preview-1.webp')
-    expect(extractUploadStorageKey('/api/uploads/feedback-thumbnail-1.webp'))
-      .toBe('feedback-thumbnail-1.webp')
+describe('protected upload paths', () => {
+  it('keeps newly returned OSS objects behind the authenticated upload route', () => {
+    expect(protectedUploadFallback('feedback/lesson/photo 1.jpg'))
+      .toBe('/api/uploads/feedback%2Flesson%2Fphoto%201.jpg')
   })
 
-  it('never falls back to an unsigned private OSS URL', () => {
-    expect(protectedUploadFallback('https://bucket.oss-cn-hangzhou.aliyuncs.com/feedback-preview-1.webp'))
-      .toBe('/api/uploads/feedback-preview-1.webp')
+  it('normalizes route params without decoding literal percent characters twice', () => {
+    expect(normalizeUploadRequestPath('feedback\\lesson\\photo%')).toBe('feedback/lesson/photo%')
   })
 
-  it('keeps bundled portraits public and proxies uploaded portraits', () => {
-    expect(normalizeAvatarUrl('/people/teacher.jpg')).toBe('/people/teacher.jpg')
-    expect(normalizeAvatarUrl('https://bucket.oss-cn-hangzhou.aliyuncs.com/avatar-1.jpg'))
-      .toBe('/api/uploads/avatar-1.jpg')
+  it('rejects traversal and empty upload paths', () => {
+    expect(normalizeUploadRequestPath('../secret')).toBeNull()
+    expect(normalizeUploadRequestPath('a/../secret')).toBeNull()
+    expect(normalizeUploadRequestPath('')).toBeNull()
   })
 })

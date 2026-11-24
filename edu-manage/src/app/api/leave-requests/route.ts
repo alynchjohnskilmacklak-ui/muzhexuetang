@@ -20,7 +20,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
 
   const role = session.user.role
-  const where: Prisma.LeaveRequestWhereInput = {}
+  const where: Prisma.LeaveRequestWhereInput = { deletedAt: null }
   if (status) where.status = status
   let prisma = await getRequestPrisma()
   if (role === 'teacher') {

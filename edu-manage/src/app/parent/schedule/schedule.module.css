@@ -1,0 +1,505 @@
+/* 家长端课程表现代高品质样式 */
+
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  position: relative;
+  background: transparent;
+}
+
+/* 顶部学员与标题 */
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--color-ink-muted, #73695b);
+}
+
+/* 周选择导航条 */
+.weekNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(20, 87, 77, 0.09);
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(20, 60, 50, 0.04);
+}
+
+.navArrowBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-ink, #1a1201);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.navArrowBtn:hover:not(:disabled) {
+  background: var(--color-surface-2, rgba(20, 87, 77, 0.06));
+  color: var(--color-primary, #14574d);
+}
+
+.navArrowBtn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.navArrowBtn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.weekTitleBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weekTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #17352F;
+  letter-spacing: 0.02em;
+}
+
+.todayQuickBtn {
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 87, 77, 0.25);
+  background: rgba(20, 87, 77, 0.08);
+  color: var(--color-primary, #14574d);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.todayQuickBtn:active {
+  transform: scale(0.94);
+}
+
+/* 7天日历周条 (Week Ribbon) */
+.weekRibbon {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 8px 6px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(20, 87, 77, 0.09);
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(20, 60, 50, 0.04);
+}
+
+.dayCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 2px 7px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.dayCell:hover {
+  background: rgba(20, 87, 77, 0.04);
+}
+
+.dayCell:active {
+  transform: scale(0.95);
+}
+
+.dayCellToday {
+  border-color: rgba(232, 120, 74, 0.45);
+  background: rgba(232, 120, 74, 0.06);
+}
+
+.dayCellSelected {
+  background: linear-gradient(135deg, #18665A 0%, #0F4A40 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(20, 87, 77, 0.32);
+}
+
+.weekdayLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-ink-muted, #73695b);
+}
+
+.dayCellSelected .weekdayLabel {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dayNumber {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dayCellSelected .dayNumber {
+  color: #ffffff;
+}
+
+.dayDotIndicator {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #c9a45c;
+  margin-top: 2px;
+}
+
+.dayCellSelected .dayDotIndicator {
+  background: #ffffff;
+}
+
+.dayDotEmpty {
+  width: 5px;
+  height: 5px;
+  margin-top: 2px;
+  visibility: hidden;
+}
+
+/* 筛选状态栏（显示当前选中的那一天或全部） */
+.filterSummaryBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f8f6f2;
+  border: 1px solid rgba(201, 164, 92, 0.25);
+  border-radius: 12px;
+}
+
+.filterSummaryText {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink, #1a1201);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clearFilterBtn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary, #14574d);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+/* 课程时光轴 (Timeline) 容器 */
+.timelineContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  padding-left: 4px;
+}
+
+/* 单日分组标头 */
+.daySectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.07));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 160ms ease;
+}
+
+.daySectionHeader:active {
+  background: var(--color-surface-2, rgba(0, 0, 0, 0.04));
+  transform: scale(0.99);
+}
+
+.dayHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dayHeaderDate {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+}
+
+.dayHeaderBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(20, 87, 77, 0.08);
+  color: var(--color-primary, #14574d);
+}
+
+.dayHeaderTodayBadge {
+  background: #fcf5ec;
+  color: #8a6517;
+  border: 1px solid rgba(201, 164, 92, 0.4);
+}
+
+/* 时光轴列表 */
+.timelineList {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 20px;
+  border-left: 2px dashed rgba(20, 87, 77, 0.18);
+  margin-left: 10px;
+  gap: 12px;
+}
+
+.timelineItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 时光轴上的连接点圆圈 */
+.timelineDot {
+  position: absolute;
+  left: -26px;
+  top: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2.5px solid var(--dot-color, var(--color-primary, #14574d));
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* 课程卡片 */
+.lessonCard {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(20, 87, 77, 0.09);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 3px 12px rgba(20, 60, 50, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease, border-color 180ms ease;
+  position: relative;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.lessonCard:hover {
+  border-color: rgba(20, 87, 77, 0.2);
+  box-shadow: 0 6px 20px rgba(20, 60, 50, 0.08);
+  transform: translateY(-2px);
+}
+
+.lessonCard:active {
+  transform: scale(0.985);
+}
+
+/* 卡片顶部：时间与状态 */
+.lessonTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.timeBlock {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: inherit;
+}
+
+.timeStart {
+  font-size: 16px;
+  font-weight: 800;
+  color: #17352F;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.timeDivider {
+  font-size: 12px;
+  color: var(--color-ink-subtle, #9a8e7a);
+}
+
+.timeEnd {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink-muted, #73695b);
+  font-variant-numeric: tabular-nums;
+}
+
+.durationPill {
+  font-size: 10px;
+  font-weight: 600;
+  color: #14574D;
+  background: rgba(20, 87, 77, 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 2px;
+}
+
+/* 状态药丸 */
+.statusBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.statusEnded {
+  background: #f1f1f2;
+  color: #756a58;
+}
+
+.statusActive {
+  background: #dff5e8;
+  color: #1e7a3c;
+  border: 1px solid rgba(30, 122, 60, 0.2);
+}
+
+.statusUpcoming {
+  background: rgba(24, 95, 165, 0.08);
+  color: #155FA0;
+  border: 1px solid rgba(24, 95, 165, 0.22);
+}
+
+.statusConfirm {
+  background: #fff2d9;
+  color: #a06e0b;
+  border: 1px solid rgba(160, 110, 11, 0.2);
+}
+
+/* 卡片主内容：学科标签与课程名 */
+.lessonMainRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.subjectTag {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2.5px 8.5px;
+  border-radius: 6px;
+  color: #ffffff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.courseTitle {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--color-ink, #1a1201);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* 师资与教室信息 */
+.lessonDetailsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+  flex-wrap: wrap;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detailIcon {
+  font-size: 12px;
+  color: var(--color-ink-subtle, #9a8e7a);
+}
+
+/* 卡片底部辅助状态条 (Subtle Footer) */
+.lessonFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.06);
+  font-size: 11px;
+  color: var(--color-ink-subtle, #8a7e6b);
+}
+
+.feedbackLink {
+  color: var(--color-primary, #14574d);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: opacity 140ms ease;
+}
+
+.feedbackLink:hover {
+  opacity: 0.8;
+}
+
+/* 停课折叠区域 */
+.cancelledSection {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

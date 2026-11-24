@@ -1,0 +1,72 @@
+[
+  {
+    "word": "Monday",
+    "examTags": ["书写规范：星期首字母大写", "语法知识：星期前用 on"],
+    "grammar": "n. 星期一。星期名是专有名词，首字母大写；表示某个星期一用 on Monday，表示每周一可说 on Mondays 或 every Monday。",
+    "collocations": "on Monday；on Mondays；Monday morning",
+    "commonMistake": "星期名前用 on；every 后接单数 Monday 且不加 on：every Monday。",
+    "example": {"english": "Our reading club meets on Monday after school.", "chinese": "我们的阅读社团星期一放学后活动。"},
+    "application": {"prompt": "The club meeting is ___ Monday after school. (on / in)", "solution": "on。解析：具体星期前用 on。"},
+    "sources": [{"label": "Cambridge Dictionary: Monday", "url": "https://dictionary.cambridge.org/dictionary/english/monday"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "Tuesday",
+    "examTags": ["书写规范：星期首字母大写", "语法知识：频率表达"],
+    "grammar": "n. 星期二。星期名首字母大写；on Tuesday 表示某个周二，on Tuesdays 表示每逢周二。",
+    "collocations": "on Tuesday；on Tuesdays；Tuesday afternoon",
+    "commonMistake": "表示“在星期二”用 on Tuesday，不用 in Tuesday；表示每周二可用复数 Tuesdays。",
+    "example": {"english": "We have a music lesson on Tuesday afternoon.", "chinese": "我们星期二下午有一节音乐课。"},
+    "application": {"prompt": "The club meets ___ Tuesdays, once a week. (on / in)", "solution": "on。解析：具体星期或重复发生的星期前用 on。"},
+    "sources": [{"label": "Cambridge Dictionary: Tuesday", "url": "https://dictionary.cambridge.org/dictionary/english/tuesday"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "Wednesday",
+    "examTags": ["书写规范：星期首字母大写", "语法知识：every 后接单数名词"],
+    "grammar": "n. 星期三。首字母大写；可说 on Wednesday、on Wednesdays 或 every Wednesday。every 后接单数形式且前面不加 on。",
+    "collocations": "on Wednesday；every Wednesday；Wednesday evening",
+    "commonMistake": "every Wednesday 前不加 on，且 Wednesday 不加 -s；表示惯常发生也可说 on Wednesdays。",
+    "example": {"english": "Every Wednesday, we read stories after lunch.", "chinese": "每周三午饭后我们都会读故事。"},
+    "application": {"prompt": "Our reading group meets every ___. (Wednesday / Wednesdays)", "solution": "Wednesday。解析：every 后接单数名词，故用 Wednesday。"},
+    "sources": [{"label": "Cambridge Dictionary: Wednesday", "url": "https://dictionary.cambridge.org/dictionary/english/wednesday"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "Thursday",
+    "examTags": ["书写规范：星期首字母大写", "语法知识：星期与日期表达"],
+    "grammar": "n. 星期四。星期名首字母大写；星期或具体日期前常用 on，如 on Thursday、on 14 May。",
+    "collocations": "on Thursday；Thursday morning；next Thursday",
+    "commonMistake": "next Thursday 前通常不加 on；表示“在下周四”说 next Thursday，不说 on next Thursday。",
+    "example": {"english": "Our science class visits the library on Thursday.", "chinese": "我们的科学课星期四去图书馆。"},
+    "application": {"prompt": "Choose the usual phrase for the coming Thursday: (next Thursday / on next Thursday)", "solution": "next Thursday。解析：next、last、this 等词修饰星期时，前面通常不加 on。"},
+    "sources": [{"label": "Cambridge Dictionary: Thursday", "url": "https://dictionary.cambridge.org/dictionary/english/thursday"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "Friday",
+    "examTags": ["书写规范：星期首字母大写", "语法知识：every 与介词 on"],
+    "grammar": "n. 星期五。首字母大写；可说 on Friday 或 on Fridays；every Friday 前不加 on。",
+    "collocations": "on Friday；on Fridays；Friday night",
+    "commonMistake": "on Friday 表示在某个周五；every Friday 表示每周五，every 前不加 on。",
+    "example": {"english": "My cousins play volleyball on Fridays.", "chinese": "我的表亲们每周五都打排球。"},
+    "application": {"prompt": "Which sentence is correct for a weekly meeting? A. We meet on every Friday. B. We meet every Friday.", "solution": "B。解析：every Friday 前不加 on。"},
+    "sources": [{"label": "Cambridge Dictionary: Friday", "url": "https://dictionary.cambridge.org/dictionary/english/friday"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "Saturday",
+    "examTags": ["书写规范：星期首字母大写", "语法知识：复数表示习惯频率"],
+    "grammar": "n. 星期六。首字母大写；on Saturday 可指某个周六，on Saturdays 常表示每周六。",
+    "collocations": "on Saturday；on Saturdays；Saturday morning",
+    "commonMistake": "表示每周六的习惯可说 on Saturdays；every Saturday 后用单数且不加 on。",
+    "example": {"english": "We clean the classroom together on Saturday morning.", "chinese": "我们星期六早上一起打扫教室。"},
+    "application": {"prompt": "My family visits the park ___ Saturdays. (on / in)", "solution": "on。解析：星期前用 on；复数 Saturdays 表示每周六。"},
+    "sources": [{"label": "Cambridge Dictionary: Saturday", "url": "https://dictionary.cambridge.org/dictionary/english/saturday"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  },
+  {
+    "word": "Sunday",
+    "examTags": ["书写规范：星期首字母大写", "语法知识：星期与时段搭配"],
+    "grammar": "n. 星期日。首字母大写；具体星期前用 on，星期加 morning/afternoon/evening 时也常用 on。",
+    "collocations": "on Sunday；on Sunday morning；every Sunday",
+    "commonMistake": "说“在星期日早上”用 on Sunday morning；every Sunday 前不加 on。",
+    "example": {"english": "I usually read at home on Sunday evening.", "chinese": "我通常星期日晚上在家阅读。"},
+    "application": {"prompt": "Choose the correct sentence for a weekly activity: A. We read on every Sunday. B. We read every Sunday.", "solution": "B。解析：every Sunday 前不加介词 on。"},
+    "sources": [{"label": "Cambridge Dictionary: Sunday", "url": "https://dictionary.cambridge.org/dictionary/english/sunday"}, {"label": "Cambridge Grammar: at, on and in (time)", "url": "https://dictionary.cambridge.org/grammar/british-grammar/at-in-on-time"}]
+  }
+]

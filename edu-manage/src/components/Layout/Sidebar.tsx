@@ -21,6 +21,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.ok ? res.json() : 
 type SidebarMenuItem = Omit<MobileNavItem, 'label' | 'children'> & {
   label: React.ReactNode
   children?: SidebarMenuItem[]
+  title?: string
 }
 const menuItems: SidebarMenuItem[] = adminNavItems
 
@@ -104,18 +105,27 @@ export function Sidebar({
   }, [isSenior])
 
   const items = useMemo(() => {
-    const decorate = (item: SidebarMenuItem): SidebarMenuItem => ({
-      ...item,
-      label: item.key.startsWith('/') ? (
-        <span onMouseEnter={() => router.prefetch(item.key)} style={{ display: 'block', width: '100%' }}>
-          {item.key === '/teacher-logs' ? <Badge count={alertCount} size="small" offset={[8, 0]}>行为日志</Badge> : item.label}
-          {pendingKey === item.key && <span style={{ marginInlineStart: 8, fontSize: 11, color: 'var(--color-ink-subtle)' }}>打开中…</span>}
-        </span>
-      ) : item.label,
-      children: item.children?.map(decorate),
-    })
+    const decorate = (item: SidebarMenuItem): SidebarMenuItem => {
+      const itemName = typeof item.label === 'string' ? item.label : undefined
+      return {
+        ...item,
+        title: itemName,
+        icon: collapsed && itemName && item.icon ? (
+          <Tooltip title={itemName} placement="right" mouseEnterDelay={0.2}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</span>
+          </Tooltip>
+        ) : item.icon,
+        label: item.key.startsWith('/') ? (
+          <span onMouseEnter={() => router.prefetch(item.key)} style={{ display: 'block', width: '100%' }}>
+            {item.key === '/teacher-logs' ? <Badge count={alertCount} size="small" offset={[8, 0]}>行为日志</Badge> : item.label}
+            {pendingKey === item.key && <span style={{ marginInlineStart: 8, fontSize: 11, color: 'var(--color-ink-subtle)' }}>打开中…</span>}
+          </span>
+        ) : item.label,
+        children: item.children?.map(decorate),
+      }
+    }
     return visibleMenuItems.map(decorate)
-  }, [visibleMenuItems, alertCount, pendingKey, router])
+  }, [visibleMenuItems, alertCount, pendingKey, router, collapsed])
 
   const handleClick: MenuProps['onClick'] = ({ key }) => {
     if (!key.startsWith('/')) return
@@ -158,10 +168,11 @@ export function Sidebar({
         </Tooltip>
       </div>
       <Menu
+        key={collapsed ? 'tablet-collapsed' : 'expanded'}
         className="role-navigation role-navigation--admin"
         mode="inline"
         selectedKeys={[selectedKey]}
-        defaultOpenKeys={defaultOpenKeys}
+        defaultOpenKeys={collapsed ? [] : defaultOpenKeys}
         items={items}
         onClick={handleClick}
         style={{ background: 'transparent', borderInlineEnd: 'none', marginTop: 8 }}

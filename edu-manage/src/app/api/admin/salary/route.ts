@@ -7,6 +7,7 @@ import { classifySalaryBucket, type SalaryBucket } from '@/lib/salary-bucket'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { TRASH_RETENTION_DAYS } from '@/lib/data-correction/trash'
 import { salaryPeriodStart, pendingSalaryTransactions } from '@/lib/salary-settlement'
+import { createManualSalaryAdjustmentIdempotently } from '@/lib/admin-salary-adjustment'
 
 export const dynamic = 'force-dynamic'
 
@@ -223,10 +224,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (!selectedTerm || selectedTerm.status !== 'ACTIVE') {
       return NextResponse.json({ error: '历史批次工资只允许查看，请切换到当前运营批次后再调整工资' }, { status: 409 })
     }
-    const body = await req.json() as { teacherId?: unknown; amount?: unknown; description?: unknown; salaryBucket?: unknown }
+    const body = await req.json() as { teacherId?: unknown; amount?: unknown; description?: unknown; salaryBucket?: unknown; idempotencyKey?: unknown }
     const teacherId = typeof body.teacherId === 'string' ? body.teacherId.trim() : ''
     const amount = body.amount
     const description = typeof body.description === 'string' ? body.description.trim() : ''
+    const idempotencyKey = typeof body.idempotencyKey === 'string' ? body.idempotencyKey.trim() : ''
     const salaryBucket: SalaryBucket = body.salaryBucket === 'INTENSIVE' ? 'INTENSIVE' : 'SMALL_CLASS'
 
     if (!teacherId) return NextResponse.json({ error: '请选择教师' }, { status: 400 })
@@ -234,6 +236,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: '调整金额必须是非0有效数字' }, { status: 400 })
     }
     if (!description) return NextResponse.json({ error: '请填写调整原因' }, { status: 400 })
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey)) {
+      return NextResponse.json({ error: '缺少有效的调整请求编号，请刷新页面后重试' }, { status: 400 })
+    }
 
     const teacher = await adminUser.prisma.teacher.findFirst({
       where: { id: teacherId, division },
@@ -241,18 +246,22 @@ export const POST = apiHandler(async (req: NextRequest) => {
     })
     if (!teacher) return NextResponse.json({ error: '当前学部没有该教师' }, { status: 404 })
 
-    const transaction = await adminUser.prisma.teacherSalaryTransaction.create({
-      data: {
-        teacherId,
-        termId: selectedTerm.id,
-        type: 'manual_adjust',
-        amount,
-        description: `${salaryBucket === 'INTENSIVE' ? '[一对一/二/三]' : '[小班课]'} ${description}`,
-        createdAt: new Date(),
-      },
+    const storedDescription = `${salaryBucket === 'INTENSIVE' ? '[一对一/二/三]' : '[小班课]'} ${description}`
+    const result = await createManualSalaryAdjustmentIdempotently(adminUser.prisma, {
+      requestKey: idempotencyKey,
+      teacherId,
+      termId: selectedTerm.id,
+      amount,
+      description: storedDescription,
     })
+    if (result.status === 'conflict') {
+      return NextResponse.json({ error: '该调整请求编号已用于不同内容，请刷新页面后重新提交' }, { status: 409 })
+    }
 
-    return NextResponse.json({ success: true, transaction: { ...transaction, teacherName: teacher.name } }, { status: 201 })
+    return NextResponse.json(
+      { success: true, replayed: result.status === 'replayed', transaction: { ...result.transaction, teacherName: teacher.name } },
+      { status: result.status === 'created' ? 201 : 200 },
+    )
   } catch (error) {
     if (error instanceof Error && error.message === 'ADMIN_UNAUTHORIZED') {
       return NextResponse.json({ error: '无权限' }, { status: 403 })

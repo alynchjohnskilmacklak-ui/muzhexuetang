@@ -78,6 +78,108 @@ export function lessonStartAt(lessonDate: string | Date, startTime: string) {
   return new Date(`${date}T${startTime}:00+08:00`)
 }
 
+export const TEACHER_ATTENDANCE_EARLY_WINDOW_MINUTES = 30
+export const TEACHER_ATTENDANCE_CUTOFF_HOUR = 18
+
+export function teacherAttendanceCutoffAt(lessonDate: string | Date) {
+  const date = typeof lessonDate === 'string'
+    ? lessonDate.slice(0, 10)
+    : localDateKey(lessonDate)
+  return new Date(`${date}T${String(TEACHER_ATTENDANCE_CUTOFF_HOUR).padStart(2, '0')}:00:00+08:00`)
+}
+
+/** Regular attendance opens 30 minutes before class; intensive attendance opens at class start. */
+export function teacherAttendanceOpenAt(input: {
+  lessonDate: string | Date
+  startTime: string
+  intensiveMode?: string | null
+}) {
+  const startsAt = lessonStartAt(input.lessonDate, input.startTime)
+  if (input.intensiveMode === 'INTENSIVE') return startsAt
+  return new Date(startsAt.getTime() - TEACHER_ATTENDANCE_EARLY_WINDOW_MINUTES * 60_000)
+}
+
+export function canSubmitTeacherAttendance(input: {
+  lessonDate: string | Date
+  startTime: string
+  intensiveMode?: string | null
+  now?: Date
+}) {
+  const now = input.now || new Date()
+  return now.getTime() >= teacherAttendanceOpenAt(input).getTime()
+    && now.getTime() < teacherAttendanceCutoffAt(input.lessonDate).getTime()
+}
+
+export type TeacherAttendanceSubmissionState = 'UPCOMING' | 'OPEN' | 'CLOSED' | 'INVALID'
+
+/**
+ * Teacher attendance is writable from the configured opening time through
+ * 18:00 China local time on the lesson date. Administrators use separate routes
+ * for later backfills and corrections.
+ */
+export function getTeacherAttendanceSubmissionState(input: {
+  lessonDate: string | Date
+  startTime: string
+  endTime: string
+  intensiveMode?: string | null
+  allowRejectedIntensiveResubmission?: boolean
+  now?: Date
+}): TeacherAttendanceSubmissionState {
+  let dateKey: string
+  try {
+    dateKey = typeof input.lessonDate === 'string'
+      ? input.lessonDate.slice(0, 10)
+      : localDateKey(input.lessonDate)
+  } catch {
+    return 'INVALID'
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)
+    || timeToMinutes(input.startTime) === null
+    || timeToMinutes(input.endTime) === null) return 'INVALID'
+
+  const startsAt = lessonStartAt(dateKey, input.startTime)
+  const endsAt = lessonStartAt(dateKey, input.endTime)
+  const cutoffAt = teacherAttendanceCutoffAt(dateKey)
+  const now = input.now || new Date()
+  if (!Number.isFinite(startsAt.getTime()) || !Number.isFinite(endsAt.getTime())
+    || endsAt.getTime() <= startsAt.getTime() || !Number.isFinite(cutoffAt.getTime())
+    || !Number.isFinite(now.getTime())) return 'INVALID'
+
+  if (now.getTime() >= cutoffAt.getTime()) return 'CLOSED'
+  if (input.allowRejectedIntensiveResubmission && input.intensiveMode === 'INTENSIVE') return 'OPEN'
+  if (now.getTime() < teacherAttendanceOpenAt(input).getTime()) return 'UPCOMING'
+  return 'OPEN'
+}
+
+/** Meal additions are available to a teacher only while teaching today's class. */
+export function canAppendTeacherMealAttendance(input: {
+  lessonDate: string | Date
+  startTime: string
+  endTime: string
+  now?: Date
+}) {
+  const now = input.now || new Date()
+  let dateKey: string
+  try {
+    dateKey = typeof input.lessonDate === 'string'
+      ? input.lessonDate.slice(0, 10)
+      : localDateKey(input.lessonDate)
+    if (dateKey !== localDateKey(now)) return false
+  } catch {
+    return false
+  }
+  if (timeToMinutes(input.startTime) === null || timeToMinutes(input.endTime) === null) return false
+  const startAt = lessonStartAt(dateKey, input.startTime).getTime()
+  const endAt = lessonStartAt(dateKey, input.endTime).getTime()
+  const nowAt = now.getTime()
+  return Number.isFinite(startAt)
+    && Number.isFinite(endAt)
+    && Number.isFinite(nowAt)
+    && endAt > startAt
+    && nowAt >= startAt
+    && nowAt < endAt
+}
+
 export function canTeacherEditIntensiveLesson(input: {
   lessonDate: string | Date
   startTime: string

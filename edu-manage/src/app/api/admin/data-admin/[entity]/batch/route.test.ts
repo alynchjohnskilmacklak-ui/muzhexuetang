@@ -7,12 +7,45 @@ vi.mock('@/lib/data-admin/mutations', () => ({ DATA_ADMIN_BATCH_ENTITIES: ['stud
 import { POST } from './route'
 
 describe('batch data administration', () => {
+  const notificationFindMany = vi.fn()
+  const notificationUpdateMany = vi.fn()
+  const activityLogCreate = vi.fn()
+  const linkedStudentFindMany = vi.fn()
+  const classroomFeedbackFindMany = vi.fn()
+  const receiptUpsert = vi.fn()
+  const transaction = vi.fn()
+  const tx = {
+    notification: { findMany: notificationFindMany, updateMany: notificationUpdateMany },
+    activityLog: { create: activityLogCreate },
+    student: { findMany: linkedStudentFindMany },
+    classroomFeedback: { findMany: classroomFeedbackFindMany },
+    feedbackParentReadReceipt: { upsert: receiptUpsert },
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.auth.mockResolvedValue({ user: { id: 'admin1', role: 'admin', division: 'JUNIOR' } })
-    mocks.prisma.mockResolvedValue({ student: { findUnique: mocks.find } })
+    mocks.prisma.mockResolvedValue({
+      student: { findUnique: mocks.find },
+      notification: { findMany: notificationFindMany, updateMany: notificationUpdateMany },
+      activityLog: { create: activityLogCreate },
+      $transaction: transaction,
+    })
     mocks.find.mockResolvedValue({ id: 's1' })
     mocks.mutate.mockResolvedValue({ id: 'trash1' })
+    notificationFindMany.mockResolvedValue([{
+      userId: 'parent-1',
+      type: 'CLASSROOM_FEEDBACK',
+      relatedType: 'CLASSROOM_FEEDBACK',
+      relatedId: 'feedback-1',
+      user: { role: 'parent' },
+    }])
+    notificationUpdateMany.mockResolvedValue({ count: 1 })
+    activityLogCreate.mockResolvedValue({})
+    linkedStudentFindMany.mockResolvedValue([{ id: 'student-1' }])
+    classroomFeedbackFindMany.mockResolvedValue([{ id: 'feedback-1' }])
+    receiptUpsert.mockResolvedValue({})
+    transaction.mockImplementation(async (callback: (client: typeof tx) => unknown) => callback(tx))
   })
   const request = (payload: unknown) => new NextRequest('http://localhost/api/admin/data-admin/students/batch', { method: 'POST', body: JSON.stringify(payload) })
   const params = { params: Promise.resolve({ entity: 'students' }) }
@@ -37,5 +70,23 @@ describe('batch data administration', () => {
   it('rejects null request bodies rather than failing with an unhandled exception', async () => {
     expect((await POST(request(null), params)).status).toBe(400)
     expect(mocks.mutate).not.toHaveBeenCalled()
+  })
+
+  it('syncs parent classroom-feedback receipts when an admin marks notification rows read', async () => {
+    const response = await POST(request({ action: 'markRead', ids: ['feedback-notification-1'] }), {
+      params: Promise.resolve({ entity: 'notifications' }),
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({ success: true, count: 1 })
+    expect(notificationFindMany.mock.calls[0][0]).toMatchObject({
+      where: { id: { in: ['feedback-notification-1'] }, deletedAt: null, student: { division: 'JUNIOR' } },
+      select: { user: { select: { role: true } }, relatedType: true, relatedId: true },
+    })
+    expect(receiptUpsert).toHaveBeenCalledWith({
+      where: { feedbackId_parentUserId: { feedbackId: 'feedback-1', parentUserId: 'parent-1' } },
+      create: expect.objectContaining({ readAt: expect.any(Date) }),
+      update: expect.objectContaining({ readAt: expect.any(Date) }),
+    })
   })
 })

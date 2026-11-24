@@ -1,10 +1,11 @@
 import { roundHours } from '@/lib/hours'
+import { formatHours } from '@/lib/format'
 
 export function isOneOnOne(courseType?: string | null) {
   return courseType === 'ONE_ON_ONE'
 }
 
-/** 每节对应多少课时(小时)：40分钟 -> 0.7，60分钟 -> 1 */
+/** 每节对应多少课时(小时)：40分钟按 40/60 折算，60分钟为 1 */
 export function hoursPerLesson(lessonMinutes: number) {
   return roundHours((lessonMinutes || 40) / 60)
 }
@@ -17,9 +18,9 @@ export function formatRemaining(
 ): { value: number; unit: string; text: string } {
   if (isOneOnOne(courseType)) {
     const value = roundHours(remainHours)
-    return { value, unit: '课时', text: `${value} 课时` }
+    return { value, unit: '课时', text: `${formatHours(value)} 课时` }
   }
-  const per = hoursPerLesson(lessonMinutes) || 0.7
+  const per = hoursPerLesson(lessonMinutes) || (40 / 60)
   const lessons = Math.round(remainHours / per)
   return { value: lessons, unit: '节', text: `${lessons} 节` }
 }
@@ -30,7 +31,7 @@ export function formatDeducted(
   courseType: string | null,
   lessonMinutes: number,
 ): string {
-  if (isOneOnOne(courseType)) return `${roundHours(deductedHours)} 课时`
-  const per = hoursPerLesson(lessonMinutes) || 0.7
+  if (isOneOnOne(courseType)) return `${formatHours(deductedHours)} 课时`
+  const per = hoursPerLesson(lessonMinutes) || (40 / 60)
   return `${Math.round(deductedHours / per)} 节`
 }

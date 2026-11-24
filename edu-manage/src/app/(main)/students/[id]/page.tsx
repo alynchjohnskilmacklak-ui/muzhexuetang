@@ -4,7 +4,7 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 import { useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Alert, Avatar, Button, Card, Checkbox, Col, DatePicker, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Skeleton, Space, Spin, Table, Tag, message } from 'antd'
+import { Alert, Button, Card, Checkbox, Col, DatePicker, Descriptions, Empty, Form, Input, InputNumber, Modal, Progress, Radio, Row, Segmented, Skeleton, Space, Spin, Table, Tag, Typography, message } from 'antd'
 import { ArrowLeftOutlined, BookOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DisconnectOutlined, DownloadOutlined, HeartOutlined, HistoryOutlined, LinkOutlined, MessageOutlined, PlusOutlined, ReadOutlined, TeamOutlined, UserAddOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { StudentAvatar } from '@/components/Common/StudentAvatar'
@@ -19,6 +19,7 @@ import type { StudentProfile } from '@/lib/student-profile'
 import type { AdminReportStudent, AdminReportStageSummary } from '@/lib/student-growth/admin-report'
 import { SubjectChangeModal } from '@/components/Enrollment/SubjectChangeModal'
 import { BrandModal } from '@/components/Common/BrandModal'
+import { StudentCommunicationTimeline } from '../_components/StudentCommunicationTimeline'
 
 const StudentLearningRecord = dynamic(
   () => import('../../student-archive/[id]/client').then((module) => module.StudentLearningRecord),
@@ -127,8 +128,19 @@ export default function StudentDetailPage() {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const { data: student, isLoading, error: studentError, mutate } = useSWR(params.id ? `/api/students/${params.id}` : null, fetcher)
+  const { data: academicTermsData } = useSWR('/api/admin/academic-terms', fetcher)
+  const [growthArchiveScope, setGrowthArchiveScope] = useState<'term' | 'all'>('term')
+  const selectedArchiveTermId = academicTermsData?.selectedTermId as string | null | undefined
+  const selectedArchiveTerm = (academicTermsData?.terms || []).find((term: { id: string }) => term.id === selectedArchiveTermId)
+  const growthArchiveKey = params.id
+    ? growthArchiveScope === 'all'
+      ? `/api/admin/students/${params.id}/growth-archive?scope=all`
+      : selectedArchiveTermId
+        ? `/api/admin/students/${params.id}/growth-archive?termId=${encodeURIComponent(selectedArchiveTermId)}`
+        : null
+    : null
   const { data: growthArchive, isLoading: growthLoading, error: growthError } = useSWR<StudentGrowthArchive>(
-    params.id ? `/api/admin/students/${params.id}/growth-archive` : null,
+    growthArchiveKey,
     fetcher,
   )
   const { data: parentAccountsData } = useSWR('/api/settings/parent-accounts', fetcher)
@@ -145,9 +157,30 @@ export default function StudentDetailPage() {
   const [feedbackImages, setFeedbackImages] = useState<string[]>([])
   const [exportingFeedback, setExportingFeedback] = useState(false)
   const [reportModalOpen, setReportModalOpen] = useState(false)
-  const [reportMonths, setReportMonths] = useState(6)
+  const [exportMode, setExportMode] = useState<'full' | 'incremental'>('incremental')
+  const [dateRangeType, setDateRangeType] = useState<'preset' | 'custom'>('preset')
+  const [reportMonths, setReportMonths] = useState(3)
+  const [customDateRange, setCustomDateRange] = useState<[Dayjs, Dayjs] | null>(null)
+  const [startPageNumber, setStartPageNumber] = useState(1)
+  const [lastExportedDate, setLastExportedDate] = useState<string | null>(null)
   const [exportingFullReport, setExportingFullReport] = useState(false)
   const [reportProgress, setReportProgress] = useState('')
+
+  const handleOpenReportModal = () => {
+    try {
+      const savedDate = window.localStorage.getItem(`muzhe_last_export_date_${student.id}`)
+      if (savedDate) {
+        setLastExportedDate(savedDate)
+        setCustomDateRange([dayjs(savedDate), dayjs()])
+        setDateRangeType('custom')
+      }
+      const savedPage = window.localStorage.getItem(`muzhe_last_export_page_${student.id}`)
+      if (savedPage && !Number.isNaN(Number(savedPage))) {
+        setStartPageNumber(Number(savedPage) + 1)
+      }
+    } catch {}
+    setReportModalOpen(true)
+  }
   const [parentForm] = Form.useForm()
   const parentAccounts = Array.isArray(parentAccountsData?.accounts) ? parentAccountsData.accounts : []
   const [enrollOpen, setEnrollOpen] = useState(false)
@@ -439,6 +472,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         const query = new URLSearchParams(params)
         query.set('page', String(page))
         query.set('pageSize', '100')
+        query.set('includeLinkedRecords', '1')
         const response = await fetch(
           `/api/admin/students/${student.id}/feedback-archive?${query}`,
         )
@@ -498,7 +532,16 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
     setExportingFullReport(true)
     setReportProgress('正在读取学情资料…')
     try {
-      const response = await fetch(`/api/admin/student-profile?studentId=${encodeURIComponent(student.id)}&months=${reportMonths}`)
+      let queryParams = ''
+      if (dateRangeType === 'custom' && customDateRange && customDateRange[0] && customDateRange[1]) {
+        const s = customDateRange[0].format('YYYY-MM-DD')
+        const e = customDateRange[1].format('YYYY-MM-DD')
+        queryParams = `studentId=${encodeURIComponent(student.id)}&startDate=${s}&endDate=${e}`
+      } else {
+        queryParams = `studentId=${encodeURIComponent(student.id)}&months=${reportMonths}`
+      }
+
+      const response = await fetch(`/api/admin/student-profile?${queryParams}`)
       const payload = await response.json().catch(() => ({})) as {
         student?: AdminReportStudent
         profile?: StudentProfile
@@ -509,9 +552,11 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
       if (!response.ok || !payload.student || !payload.profile || !payload.range || !payload.summaries) {
         throw new Error(payload.error || '学情资料加载失败，请重试')
       }
+      const rangeStart = dayjs(payload.range.from).format('YYYY-MM-DD')
+      const rangeEnd = dayjs(payload.range.to).format('YYYY-MM-DD')
       const filter = new URLSearchParams({
-        startDate: dayjs(payload.range.from).format('YYYY-MM-DD'),
-        endDate: dayjs(payload.range.to).format('YYYY-MM-DD'),
+        startDate: rangeStart,
+        endDate: rangeEnd,
       })
       setReportProgress('正在整理课堂反馈与照片…')
       const archive = await loadFeedbackArchive(filter)
@@ -519,21 +564,40 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         import('@/lib/student-growth/admin-report'),
         import('@/lib/classroom-feedback/parent-pdf'),
       ])
-      const learningReport = buildAdminLearningReport(
-        payload.student, payload.profile, payload.range, archive.summary, payload.summaries,
-      )
+      const isIncremental = exportMode === 'incremental'
+      const learningReport = isIncremental
+        ? undefined
+        : buildAdminLearningReport(
+            payload.student, payload.profile, payload.range, archive.summary, payload.summaries,
+          )
+      const startPage = Math.max(1, startPageNumber || 1)
       const { blob, embeddedImages, skippedImages } = await renderParentFeedbackPdf(archive, {
         learningReport,
+        skipCover: isIncremental,
+        startPageNumber: startPage,
+        reportSubtitle: `课堂学习反馈（阶段增量更新 · ${rangeStart} 至 ${rangeEnd}）`,
         onPageRendered: (_dataUrl, pageNumber) => setReportProgress(`正在生成 PDF 第 ${pageNumber} 页…`),
       })
-      if (skippedImages) {
-        throw new Error(`有 ${skippedImages} 张课堂照片无法读取，完整报告未导出。请在课堂反馈档案中核对照片后重试。`)
-      }
-      saveReportBlob(blob, `${student.name}_完整学情报告_近${reportMonths}个月.pdf`)
+
+      const filename = isIncremental
+        ? `${student.name}_学情增量补充页_${rangeStart}至${rangeEnd}_第${startPage}页起.pdf`
+        : `${student.name}_完整学情报告_A4_${rangeStart}至${rangeEnd}.pdf`
+      saveReportBlob(blob, filename)
+
+      // 记录本次导出的截止日期与续打页码参考
+      try {
+        window.localStorage.setItem(`muzhe_last_export_date_${student.id}`, rangeEnd)
+      } catch {}
+
       setReportModalOpen(false)
-      message.success(`完整学情报告已导出，包含 ${archive.summary.totalCount} 条课堂反馈和 ${embeddedImages} 张课堂照片`)
+      const successPrefix = isIncremental ? '学情增量补充页已导出' : '完整学情报告已导出'
+      if (skippedImages > 0) {
+        message.warning(`${successPrefix}（包含 ${archive.summary.totalCount} 条课堂反馈与 ${embeddedImages} 张照片，${skippedImages} 张失效照片已自动跳过）`)
+      } else {
+        message.success(`${successPrefix}，包含 ${archive.summary.totalCount} 条课堂反馈和 ${embeddedImages} 张课堂照片`)
+      }
     } catch (error) {
-      message.error({ content: error instanceof Error ? error.message : '完整学情报告生成失败，请重试', duration: 8 })
+      message.error({ content: error instanceof Error ? error.message : '学情报告生成失败，请重试', duration: 8 })
     } finally {
       setExportingFullReport(false)
       setReportProgress('')
@@ -550,21 +614,43 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
       title={student.name}
       subtitle={`${student.grade || '未设年级'} · ${student.school || '学校待补充'} · ${studentStatusLabel[student.status || ''] || student.status || '-'}`}
       actions={<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <Button type="primary" shape="round" icon={<DownloadOutlined />} onClick={() => setReportModalOpen(true)} style={{ background: '#0E5E4E', borderColor: '#0E5E4E', boxShadow: '0 3px 10px rgba(14,94,78,.25)' }}>导出学情报告</Button>
+        <Button type="primary" shape="round" icon={<DownloadOutlined />} onClick={handleOpenReportModal} style={{ background: '#0E5E4E', borderColor: '#0E5E4E', boxShadow: '0 3px 10px rgba(14,94,78,.25)' }}>导出学情报告</Button>
         <Button shape="round" icon={<HistoryOutlined />} onClick={() => router.push(`/students/${student.id}/feedback-archive`)}>课堂反馈档案</Button>
         <Button shape="round" icon={<HeartOutlined />} style={{ background: '#1D9E75', borderColor: '#1D9E75', color: '#ffffff' }} onClick={() => setQuickPraiseOpen(true)}>快速表扬</Button>
         <Button shape="round" icon={<MessageOutlined />} style={{ background: '#534AB7', borderColor: '#534AB7', color: '#ffffff' }} onClick={() => setGrowthFeedbackOpen(true)}>成长反馈</Button>
-        <Button shape="round" icon={<ArrowLeftOutlined />} onClick={() => router.push('/students')}>返回学员管理</Button>
+        <Button className="mobile-shell-back" shape="round" icon={<ArrowLeftOutlined />} onClick={() => router.push('/students')}>返回学员管理</Button>
       </div>}
     >
       <section id="learning" style={{ scrollMarginTop: 90 }}>
-        <StudentGrowthArchivePanel
-          archive={growthArchive}
-          loading={growthLoading}
-          error={growthError as Error | undefined}
-          isMobile={isMobile}
-          onViewAllFeedback={() => router.push(`/students/${student.id}/feedback-archive`)}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 10 }}>
+          <div>
+            <Typography.Text strong>学员成长档案</Typography.Text>
+            {growthArchiveScope === 'term' && selectedArchiveTerm && (
+              <Tag style={{ marginLeft: 8 }}>{selectedArchiveTerm.name}</Tag>
+            )}
+          </div>
+          <Segmented
+            value={growthArchiveScope}
+            onChange={(value) => setGrowthArchiveScope(value as 'term' | 'all')}
+            options={[
+              { label: '当前批次', value: 'term' },
+              { label: '全部历史', value: 'all' },
+            ]}
+          />
+        </div>
+        {growthArchiveScope === 'term' && !selectedArchiveTermId ? (
+          <Card bordered={false} style={{ marginBottom: 16, border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
+            <Empty description="当前没有可查看的运营批次" />
+          </Card>
+        ) : (
+          <StudentGrowthArchivePanel
+            archive={growthArchive}
+            loading={growthLoading}
+            error={growthError as Error | undefined}
+            isMobile={isMobile}
+            onViewAllFeedback={() => router.push(`/students/${student.id}/feedback-archive`)}
+          />
+        )}
         <StudentLearningRecord studentId={student.id} />
       </section>
 
@@ -608,6 +694,13 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
           <Progress percent={totalHours ? Math.round((prepaidUsedHours / totalHours) * 100) : 0} strokeColor={{ '0%': '#C9A45C', '100%': '#0E5E4E' }} />
         </div>
       </Card>
+
+      {/* 家校沟通与回访台账 Timeline */}
+      <StudentCommunicationTimeline
+        studentId={student.id}
+        studentName={student.name}
+        isMobile={isMobile}
+      />
 
       {/* 同父母孩子 · 家庭账号关联模块 */}
       <Card
@@ -659,8 +752,8 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
                 {
                   title: '班级', key: 'className', render: (_: unknown, record: FamilyChild) => record.enrollments?.[0]?.group?.name || '-',
                 },
-                { title: '累计课时', key: 'total', render: (_: unknown, record: FamilyChild) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Number(record.totalHours || 0).toFixed(1)}h</span> },
-                { title: '剩余课时', key: 'remain', render: (_: unknown, record: FamilyChild) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Number(record.remainHours || 0).toFixed(1)}h</span> },
+                { title: '累计课时', key: 'total', render: (_: unknown, record: FamilyChild) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Number(record.totalHours || 0).toFixed(2)}h</span> },
+                { title: '剩余课时', key: 'remain', render: (_: unknown, record: FamilyChild) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Number(record.remainHours || 0).toFixed(2)}h</span> },
               ]),
               {
                 title: '状态',
@@ -842,29 +935,143 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         open={reportModalOpen}
         onCancel={() => { if (!exportingFullReport && !exportingFeedback) setReportModalOpen(false) }}
         confirmLoading={exportingFullReport || exportingFeedback}
-        width={isMobile ? 'calc(100vw - 24px)' : 520}
+        width={isMobile ? 'calc(100vw - 24px)' : 560}
         footer={<Space wrap style={{ width: '100%', justifyContent: 'flex-end' }}>
           <Button onClick={() => setReportModalOpen(false)} disabled={exportingFullReport || exportingFeedback}>取消</Button>
           <Button loading={exportingFeedback} disabled={exportingFullReport} onClick={exportFeedbackArchive}>仅课堂反馈 PDF</Button>
-          <Button type="primary" icon={<DownloadOutlined />} loading={exportingFullReport} disabled={exportingFeedback} onClick={exportFullReport}>下载完整学情报告</Button>
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            loading={exportingFullReport}
+            disabled={exportingFeedback}
+            onClick={exportFullReport}
+            style={{ background: '#0E5E4E', borderColor: '#0E5E4E' }}
+          >
+            {exportMode === 'incremental' ? '下载增量续打 PDF' : '下载 A4 完整学情报告'}
+          </Button>
         </Space>}
       >
-        <p style={{ color: 'var(--color-ink-muted)', lineHeight: 1.7 }}>
-          完整报告包含学生信息、在读课程、成绩与知识点、考勤概况、学习目标、阶段小结，以及所选期间全部已发布的课堂反馈和可读取的课堂照片。
-        </p>
-        <div style={{ marginBottom: 8, color: 'var(--color-ink)', fontWeight: 600 }}>报告时间范围</div>
-        <AdaptiveSelect
-          value={reportMonths}
-          onChange={setReportMonths}
-          style={{ width: '100%' }}
-          options={[1, 3, 6, 12, 24].map((months) => ({ value: months, label: `近 ${months} 个月` }))}
-          getPopupContainer={(trigger) => trigger.parentElement || document.body}
-          virtual={false}
-        />
+        {/* 1. 导出模式选择 */}
+        <div style={{ marginBottom: 16, padding: '12px 14px', background: '#F8F6F1', borderRadius: 10, border: '1px solid #E8E2D6' }}>
+          <div style={{ marginBottom: 8, color: '#1A332B', fontWeight: 700, fontSize: 13 }}>导出模式</div>
+          <Radio.Group
+            value={exportMode}
+            onChange={(e) => setExportMode(e.target.value)}
+            style={{ width: '100%', display: 'flex', gap: 12 }}
+          >
+            <Radio
+              value="incremental"
+              style={{
+                flex: 1,
+                padding: '8px 10px',
+                background: exportMode === 'incremental' ? '#FAF4EA' : '#ffffff',
+                border: exportMode === 'incremental' ? '1.5px solid #C9A45C' : '1px solid #D9D9D9',
+                borderRadius: 8,
+                marginRight: 0,
+              }}
+            >
+              <div style={{ fontWeight: 600, color: '#17352F' }}>增量补充续打</div>
+              <div style={{ fontSize: 11, color: '#738079', marginTop: 2 }}>免封面，只打印新内容，页码顺延</div>
+            </Radio>
+            <Radio
+              value="full"
+              style={{
+                flex: 1,
+                padding: '8px 10px',
+                background: exportMode === 'full' ? '#FAF4EA' : '#ffffff',
+                border: exportMode === 'full' ? '1.5px solid #0E5E4E' : '1px solid #D9D9D9',
+                borderRadius: 8,
+                marginRight: 0,
+              }}
+            >
+              <div style={{ fontWeight: 600, color: '#17352F' }}>A4 完整报告</div>
+              <div style={{ fontSize: 11, color: '#738079', marginTop: 2 }}>含诊断封面、总览数据与全部明细</div>
+            </Radio>
+          </Radio.Group>
+        </div>
+
+        {/* 2. 时间范围选择 */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ color: 'var(--color-ink)', fontWeight: 600, fontSize: 13 }}>报告时间范围</span>
+            <Radio.Group
+              size="small"
+              value={dateRangeType}
+              onChange={(e) => setDateRangeType(e.target.value)}
+            >
+              <Radio.Button value="preset">按周期</Radio.Button>
+              <Radio.Button value="custom">自定义日期</Radio.Button>
+            </Radio.Group>
+          </div>
+
+          {dateRangeType === 'preset' ? (
+            <AdaptiveSelect
+              value={reportMonths}
+              onChange={setReportMonths}
+              style={{ width: '100%' }}
+              options={[1, 3, 6, 12, 24].map((months) => ({ value: months, label: `近 ${months} 个月` }))}
+              getPopupContainer={(trigger) => trigger.parentElement || document.body}
+              virtual={false}
+            />
+          ) : (
+            <DatePicker.RangePicker
+              value={customDateRange}
+              onChange={(dates) => setCustomDateRange(dates as [Dayjs, Dayjs] | null)}
+              style={{ width: '100%' }}
+              allowClear={false}
+              placeholder={['起始日期', '截止日期']}
+            />
+          )}
+
+          {lastExportedDate && (
+            <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(201,164,92,0.12)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
+              <span style={{ color: '#8A6B2F' }}>
+                💡 上次导出截止至：<strong>{lastExportedDate}</strong>
+              </span>
+              <Button
+                type="link"
+                size="small"
+                style={{ padding: 0, height: 'auto', fontSize: 12, color: '#0E5E4E', fontWeight: 600 }}
+                onClick={() => {
+                  setDateRangeType('custom')
+                  setCustomDateRange([dayjs(lastExportedDate), dayjs()])
+                  setExportMode('incremental')
+                }}
+              >
+                自上次导出至今
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* 3. 活页续打设置 */}
+        {exportMode === 'incremental' && (
+          <div style={{ marginBottom: 14, padding: '10px 12px', background: '#F9FAFB', borderRadius: 8, border: '1px solid #EAECF0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 13, color: '#344054' }}>起始页码编号</div>
+                <div style={{ fontSize: 11, color: '#667085', marginTop: 1 }}>顺接已打印档案的最后一页（如之前打到第5页，此处填6）</div>
+              </div>
+              <InputNumber
+                min={1}
+                max={999}
+                value={startPageNumber}
+                onChange={(val) => setStartPageNumber(val || 1)}
+                style={{ width: 100 }}
+                addonBefore="第"
+                addonAfter="页"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* 说明提示 */}
         <p style={{ marginTop: 10, color: 'var(--color-ink-subtle)', fontSize: 12, lineHeight: 1.6 }}>
-          导出前请核对学员和时间范围。完整报告只在所选期间的课堂照片全部读取成功时下载；若有照片失效，请先到课堂反馈档案核对。仅课堂反馈 PDF 为全部历史记录。
+          {exportMode === 'incremental'
+            ? '增量续打模式将跳过封面诊断大卡片，只输出选定时间段内的新增课堂反馈，页码按设定连续编号，便于活页夹装订。'
+            : '完整报告包含封面学情档案、考勤与课时概况、阶段诊断评定，以及所选期间全部已发布的课堂反馈。'}
         </p>
-        {reportProgress && <p role="status" aria-live="polite" style={{ color: 'var(--color-primary)', fontSize: 13 }}>{reportProgress}</p>}
+        {reportProgress && <p role="status" aria-live="polite" style={{ color: 'var(--color-primary)', fontSize: 13, fontWeight: 600 }}>{reportProgress}</p>}
       </BrandModal>
 
       <BrandModal
@@ -888,7 +1095,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
           <>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, padding: '12px 14px', borderRadius: 10, background: '#FFF4EE', marginBottom: 12 }}>
               <span style={{ color: '#667085', fontSize: 13 }}>该时间段上课时长</span>
-              <strong style={{ color: '#C2541F', fontSize: 24, fontVariantNumeric: 'tabular-nums' }}>{hoursQueryTotal.toFixed(1)} 小时</strong>
+              <strong style={{ color: '#C2541F', fontSize: 24, fontVariantNumeric: 'tabular-nums' }}>{hoursQueryTotal.toFixed(2)} 小时</strong>
               <span style={{ color: '#98A2B3', fontSize: 12 }}>共 {hoursQueryRows.length} 次考勤</span>
             </div>
             <Table
@@ -899,7 +1106,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
               columns={[
                 { title: '日期', dataIndex: 'createdAt', render: (value: string) => dayjs(value).format('YYYY-MM-DD') },
                 { title: '状态', dataIndex: 'status' },
-                { title: '上课时长', key: 'hours', render: (_: unknown, record: AttendanceDeductionRecord) => `${Math.abs(Number(record.hoursDeducted || 0)).toFixed(1)} 小时` },
+                { title: '上课时长', key: 'hours', render: (_: unknown, record: AttendanceDeductionRecord) => `${Math.abs(Number(record.hoursDeducted || 0)).toFixed(2)} 小时` },
               ]}
             />
           </>
@@ -978,7 +1185,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
                 <Input placeholder={`默认：${student.parentName || `${student.name}家长`}`} />
               </Form.Item>
               <Form.Item name="password" label="初始密码">
-                <Input placeholder="默认：邮箱前缀" />
+                <Input placeholder={`留空默认使用 ${student.name} 的姓名拼音`} />
               </Form.Item>
             </>
           )}
@@ -1027,7 +1234,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
                   <Tag>{candidate.grade || '未设年级'}</Tag>
                   <Tag color={candidate.status === 'ACTIVE' ? 'green' : 'default'}>{candidate.status}</Tag>
                   <span style={{ marginLeft: 'auto', color: '#98A2B3', fontSize: 12 }}>
-                    剩余 {Number(candidate.remainHours || 0).toFixed(1)}h
+                    剩余 {Number(candidate.remainHours || 0).toFixed(2)}h
                   </span>
                 </div>
               )

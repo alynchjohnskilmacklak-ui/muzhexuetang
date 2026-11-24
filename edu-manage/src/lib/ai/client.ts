@@ -92,6 +92,7 @@ export async function callDeepSeek(params: {
   maxTokens?: number
   temperature?: number
   jsonMode?: boolean
+  timeoutMs?: number
 }): Promise<string> {
   const baseUrl = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1'
   const apiKey = process.env.DEEPSEEK_API_KEY || ''
@@ -119,7 +120,7 @@ export async function callDeepSeek(params: {
         ...(params.jsonMode && !isKimiCompatible ? { response_format: { type: 'json_object' } } : {}),
       }),
     },
-    Number(process.env.AI_TIMEOUT_MS || 120_000),
+    params.timeoutMs ?? Number(process.env.AI_TIMEOUT_MS || 120_000),
   )
 
   if (!response.ok) {

@@ -1,0 +1,153 @@
+{
+  "queries": {
+    "P12_4_export_students_mismatch": {
+      "sql": "SELECT count(*)::int AS export_includes,\n            count(*) FILTER (WHERE ABS(s.\"remainHours\"::numeric - COALESCE(enr.remain,0)::numeric) > 0.05)::int AS remain_mismatch,\n            count(*) FILTER (WHERE s.\"deletedAt\" IS NOT NULL)::int AS soft_deleted,\n            count(*) FILTER (WHERE s.status='INACTIVE')::int AS inactive,\n            COALESCE(SUM(s.\"remainHours\") FILTER (WHERE s.\"deletedAt\" IS NOT NULL),0)::float AS soft_deleted_hours\n     FROM \"Student\" s\n     LEFT JOIN (SELECT \"studentId\", SUM(\"remainHours\") AS remain FROM \"Enrollment\"\n                 WHERE status='ACTIVE' AND \"deletedAt\" IS NULL GROUP BY 1) enr ON enr.\"studentId\"=s.id",
+      "rows": [
+        {
+          "export_includes": 194,
+          "remain_mismatch": 136,
+          "soft_deleted": 3,
+          "inactive": 34,
+          "soft_deleted_hours": 0
+        }
+      ]
+    },
+    "P12_5_invisible_sample": {
+      "sql": "SELECT s.name, s.status::text, s.\"deletedAt\"::text, s.\"remainHours\", s.\"totalHours\",\n            (SELECT count(*) FROM \"Enrollment\" e WHERE e.\"studentId\"=s.id AND e.status='ACTIVE' AND e.\"deletedAt\" IS NULL)::int AS active_enrollments\n     FROM \"Student\" s\n     WHERE s.\"deletedAt\" IS NOT NULL OR s.status='INACTIVE'\n     ORDER BY s.\"deletedAt\" NULLS LAST, s.status LIMIT 15",
+      "rows": [
+        {
+          "name": "李**",
+          "status": "INACTIVE",
+          "deletedAt": "2026-09-15 07:58:59.122",
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "冯**",
+          "status": "INACTIVE",
+          "deletedAt": "2026-09-15 07:59:03.178",
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "王**",
+          "status": "INACTIVE",
+          "deletedAt": "2026-10-02 06:02:30.575",
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "陶**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "刘**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "田**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "周**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "郑**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "严**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "安**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "张**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "刘**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "马**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "默**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        },
+        {
+          "name": "赵**",
+          "status": "INACTIVE",
+          "deletedAt": null,
+          "remainHours": 0,
+          "totalHours": 0,
+          "active_enrollments": 0
+        }
+      ]
+    },
+    "P12_6_fee_included_in_export": {
+      "sql": "SELECT count(*)::int AS fee_rows,\n            count(*) FILTER (WHERE f.status='paid')::int AS paid_rows,\n            count(*) FILTER (WHERE f.status='paid' AND f.\"deletedAt\" IS NOT NULL)::int AS paid_soft_deleted,\n            COALESCE(SUM(f.amount) FILTER (WHERE f.status='paid'),0)::float AS paid_sum_js_filter,\n            COALESCE(SUM(f.amount) FILTER (WHERE f.status='paid' AND f.\"deletedAt\" IS NULL),0)::float AS paid_sum_db_filter\n     FROM \"Fee\" f",
+      "rows": [
+        {
+          "fee_rows": 0,
+          "paid_rows": 0,
+          "paid_soft_deleted": 0,
+          "paid_sum_js_filter": 0,
+          "paid_sum_db_filter": 0
+        }
+      ]
+    }
+  }
+}

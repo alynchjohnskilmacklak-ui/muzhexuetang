@@ -22,6 +22,7 @@ type BrandModalBaseProps = Omit<
   | 'width'
   | 'styles'
   | 'bodyStyle'
+  | 'destroyOnClose'
 >
 
 export type BrandModalProps = BrandModalBaseProps & {
@@ -45,6 +46,8 @@ export type BrandModalProps = BrandModalBaseProps & {
   okButtonProps?: ButtonProps
   cancelButtonProps?: ButtonProps
   styles?: ModalProps['styles']
+  destroyOnClose?: boolean
+  destroyOnHidden?: boolean
 }
 
 function asCssSize(value: number | string): string {
@@ -69,7 +72,7 @@ export function BrandModal({
   width = 560,
   mobileHeight = '90dvh',
   mobileFullHeight = false,
-  maskClosable = true,
+  maskClosable = false,
   keyboard = true,
   closable = true,
   bodyStyle,
@@ -78,6 +81,8 @@ export function BrandModal({
   styles,
   className,
   rootClassName,
+  destroyOnClose,
+  destroyOnHidden,
   ...restProps
 }: BrandModalProps) {
   const isMobile = useIsMobile() ?? false
@@ -169,6 +174,7 @@ export function BrandModal({
   return (
     <Modal
       {...restProps}
+      destroyOnHidden={destroyOnHidden ?? destroyOnClose}
       className={modalClassName}
       rootClassName={rootClassName}
       title={title}

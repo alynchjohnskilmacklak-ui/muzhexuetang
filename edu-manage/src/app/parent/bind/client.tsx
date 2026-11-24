@@ -17,23 +17,23 @@ export function BindWxClient({ bound, userName, phone }: { bound: boolean; userN
             <WechatOutlined />
           </div>
           <Title level={4} style={{ margin: 0 }}>微信通知</Title>
-          <Text type="secondary" style={{ fontSize: 13 }}>课堂反馈、考勤与通知将推送到微信</Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>课堂反馈、考勤与通知可通过企业微信任务发送</Text>
         </div>
 
         {bound ? (
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
             <div style={{ marginBottom: 12 }}>
               <Tag color="success" style={{ padding: '4px 14px', borderRadius: 999, fontSize: 13 }}>
-                <CheckCircleFilled /> 已绑定微信通知
+                <CheckCircleFilled /> 已关联企微联系人
               </Tag>
             </div>
-            <Text style={{ display: 'block', fontSize: 14 }}>您的微信已开通牧哲学堂通知</Text>
+            <Text style={{ display: 'block', fontSize: 14 }}>您的家长账号已关联到企业微信联系人</Text>
             {phone && <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 4 }}>绑定手机号：{phone}</Text>}
             <div style={{ background: '#faf8f5', borderRadius: 10, padding: 14, marginTop: 16, textAlign: 'left' }}>
               <Text style={{ fontSize: 13, color: '#5a4e3a' }}>
-                · 老师提交课堂反馈后，您会第一时间在微信收到汇总卡片
-                <br />· 点击卡片可直接查看孩子当日考勤与学习动态
-                <br />· 通知如有遗漏，也可登录家长端查看全部记录
+                · 老师发布课堂反馈后，系统会为校区工作人员创建企微群发任务
+                <br />· 发送成员在企微群发助手确认后，您会收到含网站链接的消息
+                <br />· 确认前请登录家长端查看课堂反馈和通知
               </Text>
             </div>
           </div>
@@ -45,15 +45,15 @@ export function BindWxClient({ bound, userName, phone }: { bound: boolean; userN
                 <div>
                   <Text strong style={{ fontSize: 14 }}>如何开通微信通知</Text>
                   <Text style={{ fontSize: 13, color: '#5a4e3a', display: 'block', marginTop: 6, lineHeight: 1.8 }}>
-                    1. 校区工作人员会在企业微信中将您添加为「学员」（需要您本人的手机号）
-                    <br />2. 添加后请在微信中通过该申请，仅需操作一次
-                    <br />3. 通过后本页将自动变为「已绑定」，之后所有课堂反馈与通知都会推送到您的微信
+                    1. 校区工作人员会在企业微信中将您添加为联系人，请确认对方身份
+                    <br />2. 通过添加后，工作人员还需要在系统中核对并关联您的家长账号
+                    <br />3. 课堂反馈会生成企微群发任务；发送成员确认后才会进入您的微信
                   </Text>
                 </div>
               </div>
             </div>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', textAlign: 'center' }}>
-              如您已添加但状态未更新，请联系校区工作人员确认绑定手机号是否一致
+              如已通过添加申请，请联系校区工作人员完成账号关联；此页面不会自动绑定
             </Text>
           </div>
         )}

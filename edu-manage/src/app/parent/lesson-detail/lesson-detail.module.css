@@ -1,0 +1,416 @@
+/* 课程详情页面专属精致样式 */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* 顶部返回导航 */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.08));
+  color: var(--color-ink, #1a1201);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.backBtn:active {
+  transform: scale(0.96);
+  background: var(--color-surface-2, rgba(0, 0, 0, 0.04));
+}
+
+/* 课程头部 Hero 典雅卡片 */
+.heroCard {
+  background: linear-gradient(145deg, #14574d 0%, #0d3b34 100%);
+  border-radius: 20px;
+  padding: 20px 18px 18px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 24px -4px rgba(20, 87, 77, 0.28);
+  position: relative;
+  overflow: hidden;
+}
+
+.heroCard::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 164, 92, 0.25) 0%, rgba(201, 164, 92, 0) 70%);
+  pointer-events: none;
+}
+
+.heroTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.heroStatusPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #f6e9c8;
+}
+
+.heroDate {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.82);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.heroCourseTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 750;
+  color: #ffffff;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.heroPillsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.heroPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 11.5px;
+  color: #ffffff;
+}
+
+.heroTeacherTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #f6e9c8;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.heroTeacherDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c9a45c;
+}
+
+/* 通用精致白卡 */
+.sectionCard {
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.07));
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  padding-bottom: 10px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sectionTitleDot {
+  width: 3px;
+  height: 13px;
+  border-radius: 2px;
+  background: var(--color-primary, #14574d);
+}
+
+/* 教师名片 */
+.teacherGrid {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.teacherAvatarFrame {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid rgba(201, 164, 92, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.teacherMainInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.teacherNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.teacherName {
+  font-size: 17px;
+  font-weight: 750;
+  color: var(--color-ink, #1a1201);
+}
+
+.tierPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.teacherEduRow {
+  font-size: 12px;
+  color: var(--color-ink-muted, #73695b);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.subjectChipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.subjectChip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(20, 87, 77, 0.08);
+  color: #14574d;
+}
+
+/* 教师个人简介折叠区 */
+.bioContainer {
+  margin-top: 4px;
+  background: #faf7f2;
+  border: 1px solid rgba(201, 164, 92, 0.18);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bioLabel {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #8a6517;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bioText {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--color-ink, #2b2318);
+  white-space: pre-wrap;
+  transition: max-height 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bioTextClamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.expandBioBtn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: #8a6517;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.expandBioBtn:hover {
+  text-decoration: underline;
+}
+
+/* 课堂反馈展示区（消除撞车后的优雅一体化呈现） */
+.feedbackBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feedbackHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.feedbackTime {
+  font-size: 12px;
+  color: var(--color-ink-subtle, #9a8e7a);
+}
+
+.feedbackContent {
+  background: #f8faf8;
+  border: 1px solid rgba(20, 87, 77, 0.12);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--color-ink, #1a1201);
+  white-space: pre-wrap;
+}
+
+.fullFeedbackBtn {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  background: var(--color-primary, #14574d) !important;
+  border-color: var(--color-primary, #14574d) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #ffffff !important;
+}
+
+/* 状态空态卡：分为“课前备课说明”与“课后正在整理中” */
+.standbyCard {
+  background: #faf8f5;
+  border: 1px solid rgba(20, 87, 77, 0.1);
+  border-radius: 14px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+.standbyIconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.standbyIconUpcoming {
+  background: #eaf5f0;
+  color: #14574d;
+}
+
+.standbyIconOrganizing {
+  background: #fcf5ec;
+  color: #8a6517;
+}
+
+.standbyTitle {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+}
+
+.standbyDesc {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--color-ink-muted, #73695b);
+  max-width: 420px;
+}
+
+.standbyTip {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: #8a6517;
+  background: rgba(201, 164, 92, 0.12);
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 课堂照片网格 */
+.photoGallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.photoFrame {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}

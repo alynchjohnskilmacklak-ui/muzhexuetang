@@ -1,0 +1,1514 @@
+[
+  {
+    "word": "wonder",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 奇观；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "natural wonder; wonder about something",
+    "commonMistake": "wonder 作动词常接 wh- 从句或 about 短语；不要把它与 wonderful（精彩的）混为一谈。",
+    "example": {
+      "english": "The cave is a natural wonder that attracts many visitors.",
+      "chinese": "这个洞穴是一处吸引众多游客的自然奇观。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The cave is a natural wonder that attracts many visitors. In this sentence, what does “wonder” mean? A. 奇观  B. 使……冒风险",
+      "solution": "A。解析：句中 “wonder” 表示“奇观”，符合语境；另一项“使……冒风险”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wonder",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wonder"
+      }
+    ]
+  },
+  {
+    "word": "desert",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 沙漠。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "cross a desert; a dry desert",
+    "commonMistake": "desert 作“沙漠”时重音在首音节；注意不要与甜点 dessert（多一个 s）混淆。",
+    "example": {
+      "english": "Few plants can grow in this dry desert.",
+      "chinese": "很少有植物能在这片干旱的沙漠中生长。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Few plants can grow in this dry desert. In this sentence, what does “desert” mean? A. 潜水艇  B. 沙漠",
+      "solution": "B。解析：句中 “desert” 表示“沙漠”，符合语境；另一项“潜水艇”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: desert",
+        "url": "https://dictionary.cambridge.org/dictionary/english/desert"
+      }
+    ]
+  },
+  {
+    "word": "measurement",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 数量。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "take measurements; a measurement of length",
+    "commonMistake": "measurement 是 measure 的名词形式；询问尺寸可说 take a measurement / take measurements。",
+    "example": {
+      "english": "The measurement showed that the room was six metres wide.",
+      "chinese": "测量结果显示这个房间有六米宽。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The measurement showed that the room was six metres wide. In this sentence, what does “measurement” mean? A. 测量结果  B. 文明",
+      "solution": "A。解析：句中 “measurement” 表示“测量结果”，符合语境；另一项“文明”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: measurement",
+        "url": "https://dictionary.cambridge.org/dictionary/english/measurement"
+      }
+    ]
+  },
+  {
+    "word": "square kilometre",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 平方千米。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "per square kilometre; an area of one square kilometre",
+    "commonMistake": "square kilometre 是面积单位；表示多个单位时 kilometre 用复数，如 two square kilometres。",
+    "example": {
+      "english": "One square kilometre equals one million square metres.",
+      "chinese": "一平方千米等于一百万平方米。"
+    },
+    "application": {
+      "prompt": "Read this sentence: One square kilometre equals one million square metres. In this sentence, what does “square kilometre” mean? A. 英里  B. 平方千米",
+      "solution": "B。解析：句中 “square kilometre” 表示“平方千米”，符合语境；另一项“英里”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: kilometer (UK kilometre)",
+        "url": "https://dictionary.cambridge.org/dictionary/english/kilometer"
+      }
+    ]
+  },
+  {
+    "word": "below",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 在（……）下面。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "below sea level; well below the surface",
+    "commonMistake": "below 表示低于或在下方，通常不表示有接触；强调正下方且接触时常用 under。",
+    "example": {
+      "english": "The cave lies below the village.",
+      "chinese": "这个洞穴位于村庄下方。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The cave lies below the village. In this sentence, what does “below” mean? A. 在（……）下面  B. 成功地",
+      "solution": "A。解析：句中 “below” 表示“在（……）下面”，符合语境；另一项“成功地”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: below",
+        "url": "https://dictionary.cambridge.org/dictionary/english/below"
+      }
+    ]
+  },
+  {
+    "word": "level",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 高度。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "water level; a high level",
+    "commonMistake": "表示高度或程度时可数；表示海平面时 sea level 通常作固定表达。",
+    "example": {
+      "english": "The water level rose after the rain.",
+      "chinese": "雨后水位上升了。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The water level rose after the rain. In this sentence, what does “level” mean? A. 悬崖  B. 高度",
+      "solution": "B。解析：句中 “level” 表示“高度”，符合语境；另一项“悬崖”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: level",
+        "url": "https://dictionary.cambridge.org/dictionary/english/level"
+      }
+    ]
+  },
+  {
+    "word": "sea level",
+    "examTags": [
+      "词汇·短语",
+      "中考·词形与词性"
+    ],
+    "grammar": "phr. 海平面。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "above sea level; rise in sea level",
+    "commonMistake": "固定说 above/below sea level；表示海拔时不要误写成 above the sea。",
+    "example": {
+      "english": "The town is only a few metres above sea level.",
+      "chinese": "这座城镇海拔仅比海平面高几米。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The town is only a few metres above sea level. In this sentence, what does “sea level” mean? A. 海平面  B. 不惜任何代价",
+      "solution": "A。解析：句中 “sea level” 表示“海平面”，符合语境；另一项“不惜任何代价”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sea level",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sea-level"
+      }
+    ]
+  },
+  {
+    "word": "surface",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 表面。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "on the surface; the surface of the water",
+    "commonMistake": "表示物体表面常用 on the surface of...；不要把 surface 与 scenery（风景）混淆。",
+    "example": {
+      "english": "A thin layer of ice covered the lake's surface.",
+      "chinese": "一层薄冰覆盖了湖面。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A thin layer of ice covered the lake's surface. In this sentence, what does “surface” mean? A. 追求的目标  B. 表面",
+      "solution": "B。解析：句中 “surface” 表示“表面”，符合语境；另一项“追求的目标”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: surface",
+        "url": "https://dictionary.cambridge.org/dictionary/english/surface"
+      }
+    ]
+  },
+  {
+    "word": "depth",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 深（度）。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "at a depth of; the depth of the pool",
+    "commonMistake": "depth 是名词，deep 是形容词；可说 the depth of the water 或 a deep pool。",
+    "example": {
+      "english": "The depth of the pool is marked on the wall.",
+      "chinese": "池塘的深度标在墙上。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The depth of the pool is marked on the wall. In this sentence, what does “depth” mean? A. 深（度）  B. 旅行者",
+      "solution": "A。解析：句中 “depth” 表示“深（度）”，符合语境；另一项“旅行者”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: depth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/depth"
+      }
+    ]
+  },
+  {
+    "word": "dive",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 潜水；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "dive into the sea; go diving",
+    "commonMistake": "dive 可作名词或动词；表示潜水活动常用 go diving。",
+    "example": {
+      "english": "Divers dive into the sea to study coral.",
+      "chinese": "潜水员潜入海中研究珊瑚。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Divers dive into the sea to study coral. In this sentence, what does “dive” mean? A. 使……冒风险  B. 潜水",
+      "solution": "B。解析：句中 “dive” 表示“潜水”，符合语境；另一项“使……冒风险”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dive",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dive"
+      }
+    ]
+  },
+  {
+    "word": "submersible",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 潜水艇。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "underwater submersible; operate a submersible",
+    "commonMistake": "submersible 指能在水下活动的潜水器；描述具体设备时常作可数名词。",
+    "example": {
+      "english": "The submersible carried scientists deep under the sea.",
+      "chinese": "这艘潜水器载着科学家深入海底。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The submersible carried scientists deep under the sea. In this sentence, what does “submersible” mean? A. 潜水艇  B. 海龟",
+      "solution": "A。解析：句中 “submersible” 表示“潜水艇”，符合语境；另一项“海龟”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: submersible",
+        "url": "https://dictionary.cambridge.org/dictionary/english/submersible"
+      }
+    ]
+  },
+  {
+    "word": "unusual",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 特别的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "unusual weather; an unusual sight",
+    "commonMistake": "unusual 是形容词；副词 usually 表示“通常”，词形近但意义不同。",
+    "example": {
+      "english": "It is unusual to see snow here in May.",
+      "chinese": "五月在这里看到雪很不寻常。"
+    },
+    "application": {
+      "prompt": "Read this sentence: It is unusual to see snow here in May. In this sentence, what does “unusual” mean? A. 活着  B. 特别的",
+      "solution": "B。解析：句中 “unusual” 表示“特别的”，符合语境；另一项“活着”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: unusual",
+        "url": "https://dictionary.cambridge.org/dictionary/english/unusual"
+      }
+    ]
+  },
+  {
+    "word": "bottom",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 底部。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "at the bottom of; the bottom of the sea",
+    "commonMistake": "常用 at the bottom of... 表示“在……底部”；不要漏掉介词 at。",
+    "example": {
+      "english": "A small fish was swimming near the bottom of the tank.",
+      "chinese": "一条小鱼正在水箱底部附近游动。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A small fish was swimming near the bottom of the tank. In this sentence, what does “bottom” mean? A. 底部  B. 表面",
+      "solution": "A。解析：句中 “bottom” 表示“底部”，符合语境；另一项“表面”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bottom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bottom"
+      }
+    ]
+  },
+  {
+    "word": "waterfall",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 瀑布。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a high waterfall; a waterfall drops",
+    "commonMistake": "waterfall 是一个词；复数 waterfalls，注意不要拆写成 water fall。",
+    "example": {
+      "english": "We heard the waterfall before we saw it.",
+      "chinese": "我们还没看到瀑布就先听到了水声。"
+    },
+    "application": {
+      "prompt": "Read this sentence: We heard the waterfall before we saw it. In this sentence, what does “waterfall” mean? A. 底部  B. 瀑布",
+      "solution": "B。解析：句中 “waterfall” 表示“瀑布”，符合语境；另一项“底部”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: waterfall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/waterfall"
+      }
+    ]
+  },
+  {
+    "word": "civilization",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 文明。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "ancient civilization; the development of civilization",
+    "commonMistake": "英式拼写 civilization 与 civilisation 均可；按本词表拼写记忆。",
+    "example": {
+      "english": "The river helped an ancient civilization grow.",
+      "chinese": "这条河促进了一个古代文明的发展。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The river helped an ancient civilization grow. In this sentence, what does “civilization” mean? A. 文明  B. 立方米",
+      "solution": "A。解析：句中 “civilization” 表示“文明”，符合语境；另一项“立方米”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: civilization",
+        "url": "https://dictionary.cambridge.org/dictionary/english/civilization"
+      }
+    ]
+  },
+  {
+    "word": "at all costs",
+    "examTags": [
+      "词汇·短语",
+      "中考·词形与词性"
+    ],
+    "grammar": "phr. 不惜任何代价。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "protect something at all costs; avoid danger at all costs",
+    "commonMistake": "固定表达 at all costs，意为“不惜一切代价”，不要把 cost 写成复数。",
+    "example": {
+      "english": "The rescue team promised to protect the children at all costs.",
+      "chinese": "救援队承诺不惜一切代价保护孩子们。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The rescue team promised to protect the children at all costs. In this sentence, what does “at all costs” mean? A. 一点一点地  B. 不惜任何代价",
+      "solution": "B。解析：句中 “at all costs” 表示“不惜任何代价”，符合语境；另一项“一点一点地”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: at all costs",
+        "url": "https://dictionary.cambridge.org/dictionary/english/at-all-costs"
+      }
+    ]
+  },
+  {
+    "word": "development",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 发展。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "economic development; the development of a place",
+    "commonMistake": "development 是名词，可表示发展过程或新开发项目；动词形式是 develop。",
+    "example": {
+      "english": "The development of the island brought new roads.",
+      "chinese": "岛屿的发展带来了新的道路。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The development of the island brought new roads. In this sentence, what does “development” mean? A. 发展  B. 度",
+      "solution": "A。解析：句中 “development” 表示“发展”，符合语境；另一项“度”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: development",
+        "url": "https://dictionary.cambridge.org/dictionary/english/development"
+      }
+    ]
+  },
+  {
+    "word": "cubic",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 立方的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "cubic metre; cubic centimetre",
+    "commonMistake": "体积单位中 cubic 放在长度单位前，如 cubic metre。",
+    "example": {
+      "english": "The box has a volume of two cubic metres.",
+      "chinese": "这个箱子的体积是两立方米。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The box has a volume of two cubic metres. In this sentence, what does “cubic” mean? A. 南部的  B. 立方的",
+      "solution": "B。解析：句中 “cubic” 表示“立方的”，符合语境；另一项“南部的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cubic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cubic"
+      }
+    ]
+  },
+  {
+    "word": "cubic metre",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 立方米。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "one cubic metre of water; volume in cubic metres",
+    "commonMistake": "cubic metre 表示体积单位；面积用 square metre，注意 cubic 与 square 的区别。",
+    "example": {
+      "english": "The tank can hold one cubic metre of water.",
+      "chinese": "这个水箱能装一立方米的水。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The tank can hold one cubic metre of water. In this sentence, what does “cubic metre” mean? A. 立方米  B. 好奇心",
+      "solution": "A。解析：句中 “cubic metre” 表示“立方米”，符合语境；另一项“好奇心”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cubic metre",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cubic-metre"
+      }
+    ]
+  },
+  {
+    "word": "mile",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 英里。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "miles away; a mile long",
+    "commonMistake": "mile 是英制距离单位；表示若干英里时用 miles，距离后可接 away。",
+    "example": {
+      "english": "The nearest village is five miles away.",
+      "chinese": "最近的村庄在五英里之外。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The nearest village is five miles away. In this sentence, what does “mile” mean? A. 类型  B. 英里",
+      "solution": "B。解析：句中 “mile” 表示“英里”，符合语境；另一项“类型”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mile",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mile"
+      }
+    ]
+  },
+  {
+    "word": "pool",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 池塘。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a swimming pool; a pool of water",
+    "commonMistake": "pool 可指水池、泳池或一小片积水；结合 swimming pool / pool of water 判断具体含义。",
+    "example": {
+      "english": "Rainwater collected in a small pool among the rocks.",
+      "chinese": "雨水在岩石间汇成了一个小水池。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Rainwater collected in a small pool among the rocks. In this sentence, what does “pool” mean? A. 池塘  B. 海岸",
+      "solution": "A。解析：句中 “pool” 表示“池塘”，符合语境；另一项“海岸”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pool",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pool"
+      }
+    ]
+  },
+  {
+    "word": "climber",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 攀登者。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "mountain climber; experienced climber",
+    "commonMistake": "climber 是表示人的名词；climb 是动词，climbing 可作活动名称。",
+    "example": {
+      "english": "The climber checked her ropes before starting up the mountain.",
+      "chinese": "登山者开始爬山前检查了绳索。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The climber checked her ropes before starting up the mountain. In this sentence, what does “climber” mean? A. 结构（体）  B. 攀登者",
+      "solution": "B。解析：句中 “climber” 表示“攀登者”，符合语境；另一项“结构（体）”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: climber",
+        "url": "https://dictionary.cambridge.org/dictionary/english/climber"
+      }
+    ]
+  },
+  {
+    "word": "northern",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 北部的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "northern coast; the northern part",
+    "commonMistake": "northern 是方向形容词，通常小写；表示“北部地区”可说 the northern part。",
+    "example": {
+      "english": "The northern coast is colder than the south.",
+      "chinese": "北部海岸比南部更冷。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The northern coast is colder than the south. In this sentence, what does “northern” mean? A. 北部的  B. 好奇的",
+      "solution": "A。解析：句中 “northern” 表示“北部的”，符合语境；另一项“好奇的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: northern",
+        "url": "https://dictionary.cambridge.org/dictionary/english/northern"
+      }
+    ]
+  },
+  {
+    "word": "distance",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 距离。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "in the distance; a distance of five miles",
+    "commonMistake": "distance 是名词；询问距离常用 How far...? 或 What is the distance...?，不要把 far 当名词。",
+    "example": {
+      "english": "We could see the lighthouse in the distance.",
+      "chinese": "我们能看到远处的灯塔。"
+    },
+    "application": {
+      "prompt": "Read this sentence: We could see the lighthouse in the distance. In this sentence, what does “distance” mean? A. 高度  B. 距离",
+      "solution": "B。解析：句中 “distance” 表示“距离”，符合语境；另一项“高度”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: distance",
+        "url": "https://dictionary.cambridge.org/dictionary/english/distance"
+      }
+    ]
+  },
+  {
+    "word": "survive",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "v. 生存。作谓语时注意主谓一致和时态；survive–survived–survived",
+    "collocations": "survive a storm; survive on little food",
+    "commonMistake": "survive 后直接接宾语，如 survive a storm；通常不加 through。",
+    "example": {
+      "english": "Some animals survive the winter by storing food.",
+      "chinese": "有些动物靠储存食物熬过冬天。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Some animals survive the winter by storing food. In this sentence, what does “survive” mean? A. 生存  B. 成功地",
+      "solution": "A。解析：句中 “survive” 表示“生存”，符合语境；另一项“成功地”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: survive",
+        "url": "https://dictionary.cambridge.org/dictionary/english/survive"
+      }
+    ]
+  },
+  {
+    "word": "condition",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 环境。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "in good condition; weather conditions",
+    "commonMistake": "表示状态常用 in good condition；表示环境状况时常用复数 conditions。",
+    "example": {
+      "english": "The climbers stopped because of the dangerous conditions.",
+      "chinese": "由于环境危险，登山者停了下来。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The climbers stopped because of the dangerous conditions. In this sentence, what does “condition” mean? A. 文明  B. 环境",
+      "solution": "B。解析：句中 “condition” 表示“环境”，符合语境；另一项“文明”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: condition",
+        "url": "https://dictionary.cambridge.org/dictionary/english/condition"
+      }
+    ]
+  },
+  {
+    "word": "degree",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 度。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "degrees Celsius; a high degree of difficulty",
+    "commonMistake": "温度单位常说 degrees Celsius；具体数字大于一时 degree 通常用复数。",
+    "example": {
+      "english": "The temperature fell to zero degrees overnight.",
+      "chinese": "一夜之间气温降到了零度。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The temperature fell to zero degrees overnight. In this sentence, what does “degree” mean? A. 度  B. 英里",
+      "solution": "A。解析：句中 “degree” 表示“度”，符合语境；另一项“英里”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: degree",
+        "url": "https://dictionary.cambridge.org/dictionary/english/degree"
+      }
+    ]
+  },
+  {
+    "word": "cliff",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 悬崖。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a steep cliff; the edge of a cliff",
+    "commonMistake": "cliff 指陡峭的悬崖；描述边缘常用 the edge of the cliff。",
+    "example": {
+      "english": "A narrow path ran along the edge of the cliff.",
+      "chinese": "一条狭窄的小路沿着悬崖边延伸。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A narrow path ran along the edge of the cliff. In this sentence, what does “cliff” mean? A. 距离  B. 悬崖",
+      "solution": "B。解析：句中 “cliff” 表示“悬崖”，符合语境；另一项“距离”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cliff",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cliff"
+      }
+    ]
+  },
+  {
+    "word": "changeable",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 可能变化的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "changeable weather; changeable conditions",
+    "commonMistake": "changeable 是形容词，表示可能变化或易变；常用搭配为 changeable weather。",
+    "example": {
+      "english": "The mountain weather is changeable, so pack a raincoat.",
+      "chinese": "山里的天气多变，所以要带上雨衣。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The mountain weather is changeable, so pack a raincoat. In this sentence, what does “changeable” mean? A. 可能变化的  B. 北部的",
+      "solution": "A。解析：句中 “changeable” 表示“可能变化的”，符合语境；另一项“北部的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: changeable",
+        "url": "https://dictionary.cambridge.org/dictionary/english/changeable"
+      }
+    ]
+  },
+  {
+    "word": "death",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 死亡。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "cause of death; death rate",
+    "commonMistake": "death 是名词，die 是动词，dead 是形容词；按句法位置选择词形。",
+    "example": {
+      "english": "The report recorded the cause of the climber's death.",
+      "chinese": "报告记录了这名登山者的死因。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The report recorded the cause of the climber's death. In this sentence, what does “death” mean? A. 梯子  B. 死亡",
+      "solution": "B。解析：句中 “death” 表示“死亡”，符合语境；另一项“梯子”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: death",
+        "url": "https://dictionary.cambridge.org/dictionary/english/death"
+      }
+    ]
+  },
+  {
+    "word": "determined",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与词性"
+    ],
+    "grammar": "adj. 有决心的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "be determined to do something; a determined effort",
+    "commonMistake": "常用 be determined to do sth 表示“决心做某事”；to 后接动词原形。",
+    "example": {
+      "english": "She was determined to reach the summit.",
+      "chinese": "她决心到达山顶。"
+    },
+    "application": {
+      "prompt": "Read this sentence: She was determined to reach the summit. In this sentence, what does “determined” mean? A. 有决心的  B. 好奇的",
+      "solution": "A。解析：句中 “determined” 表示“有决心的”，符合语境；另一项“好奇的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: determined",
+        "url": "https://dictionary.cambridge.org/dictionary/english/determined"
+      }
+    ]
+  },
+  {
+    "word": "above",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 在（……）上方。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "above sea level; above the clouds",
+    "commonMistake": "above 表示在较高位置或高于某数值；描述紧贴覆盖时更常用 over。",
+    "example": {
+      "english": "The plane flew above the clouds.",
+      "chinese": "飞机在云层上方飞行。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The plane flew above the clouds. In this sentence, what does “above” mean? A. 包含  B. 在（……）上方",
+      "solution": "B。解析：句中 “above” 表示“在（……）上方”，符合语境；另一项“包含”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: above",
+        "url": "https://dictionary.cambridge.org/dictionary/english/above"
+      }
+    ]
+  },
+  {
+    "word": "teammate",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 同队队员。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "work with a teammate; help a teammate",
+    "commonMistake": "teammate 是合成名词，一个词写完；复数 teammates。",
+    "example": {
+      "english": "My teammate helped me carry the heavy bag.",
+      "chinese": "我的队友帮我提那个沉重的包。"
+    },
+    "application": {
+      "prompt": "Read this sentence: My teammate helped me carry the heavy bag. In this sentence, what does “teammate” mean? A. 同队队员  B. 沙子",
+      "solution": "A。解析：句中 “teammate” 表示“同队队员”，符合语境；另一项“沙子”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: teammate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/teammate"
+      }
+    ]
+  },
+  {
+    "word": "shoulder",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 肩膀。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "over one's shoulder; shoulder injury",
+    "commonMistake": "表示背在肩上可说 carry something on/over one's shoulder；注意 shoulder 作可数名词。",
+    "example": {
+      "english": "He carried the backpack over one shoulder.",
+      "chinese": "他把背包背在一侧肩膀上。"
+    },
+    "application": {
+      "prompt": "Read this sentence: He carried the backpack over one shoulder. In this sentence, what does “shoulder” mean? A. 一生  B. 肩膀",
+      "solution": "B。解析：句中 “shoulder” 表示“肩膀”，符合语境；另一项“一生”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shoulder",
+        "url": "https://dictionary.cambridge.org/dictionary/english/shoulder"
+      }
+    ]
+  },
+  {
+    "word": "bit by bit",
+    "examTags": [
+      "词汇·短语",
+      "中考·搭配与语境"
+    ],
+    "grammar": "phr. 一点一点地。整体记忆为固定表达；句中动词按主语和时态变化。",
+    "collocations": "improve bit by bit; build something bit by bit",
+    "commonMistake": "固定表达 bit by bit 表示“逐渐地”；不要把 bit 写成复数。",
+    "example": {
+      "english": "Bit by bit, the team made its way up the hill.",
+      "chinese": "队伍一点一点地向山上前进。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Bit by bit, the team made its way up the hill. In this sentence, what does “bit by bit” mean? A. 一点一点地  B. 海平面",
+      "solution": "A。解析：句中 “bit by bit” 表示“一点一点地”，符合语境；另一项“海平面”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bit by bit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bit-by-bit"
+      }
+    ]
+  },
+  {
+    "word": "ladder",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 梯子。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "climb a ladder; a step on the ladder",
+    "commonMistake": "ladder 是可移动的梯子；爬梯子常说 climb up a ladder，不要与 stairs 混淆。",
+    "example": {
+      "english": "The rescue worker climbed a ladder to reach the window.",
+      "chinese": "救援人员爬上梯子去够窗户。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The rescue worker climbed a ladder to reach the window. In this sentence, what does “ladder” mean? A. 深（度）  B. 梯子",
+      "solution": "B。解析：句中 “ladder” 表示“梯子”，符合语境；另一项“深（度）”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ladder",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ladder"
+      }
+    ]
+  },
+  {
+    "word": "measure",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n./v. 测量；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "measure the distance; measure the height",
+    "commonMistake": "measure 作动词表示测量；名词 measure 也可表示措施，结合句意判断。",
+    "example": {
+      "english": "Measure the table before you buy a cover.",
+      "chinese": "买桌布之前先量一下桌子。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Measure the table before you buy a cover. In this sentence, what does “measure” mean? A. 测量  B. 使……冒风险",
+      "solution": "A。解析：句中 “measure” 表示“测量”，符合语境；另一项“使……冒风险”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: measure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/measure"
+      }
+    ]
+  },
+  {
+    "word": "successfully",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 成功地。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "successfully complete; successfully reach the top",
+    "commonMistake": "successfully 是副词，修饰动词；名词 success 和形容词 successful 词性不同。",
+    "example": {
+      "english": "The climbers successfully reached the top before sunset.",
+      "chinese": "登山者在日落前成功登顶。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The climbers successfully reached the top before sunset. In this sentence, what does “successfully” mean? A. 包含  B. 成功地",
+      "solution": "B。解析：句中 “successfully” 表示“成功地”，符合语境；另一项“包含”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: successfully",
+        "url": "https://dictionary.cambridge.org/dictionary/english/successfully"
+      }
+    ]
+  },
+  {
+    "word": "risk",
+    "examTags": [
+      "词汇·名词与动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n./v. 使……冒风险；可依句法作名词或动词，动词形式随主语与时态变化。",
+    "collocations": "take a risk; risk doing something",
+    "commonMistake": "risk 后接名词或动名词，不接 to do；例如 risk climbing。",
+    "example": {
+      "english": "They did not want to risk climbing in a storm.",
+      "chinese": "他们不想冒着暴风雨攀登。"
+    },
+    "application": {
+      "prompt": "Read this sentence: They did not want to risk climbing in a storm. In this sentence, what does “risk” mean? A. 使……冒风险  B. 测量",
+      "solution": "A。解析：句中 “risk” 表示“使……冒风险”，符合语境；另一项“测量”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: risk",
+        "url": "https://dictionary.cambridge.org/dictionary/english/risk"
+      }
+    ]
+  },
+  {
+    "word": "curiosity",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 好奇心。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "out of curiosity; satisfy one's curiosity",
+    "commonMistake": "curiosity 是名词；常用 out of curiosity，形容词 curious 常接 about 或 to do。",
+    "example": {
+      "english": "Curiosity led the students to explore the cave.",
+      "chinese": "好奇心促使学生们去探索洞穴。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Curiosity led the students to explore the cave. In this sentence, what does “curiosity” mean? A. 度  B. 好奇心",
+      "solution": "B。解析：句中 “curiosity” 表示“好奇心”，符合语境；另一项“度”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: curiosity",
+        "url": "https://dictionary.cambridge.org/dictionary/english/curiosity"
+      }
+    ]
+  },
+  {
+    "word": "ambition",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 追求的目标。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "achieve one's ambition; have the ambition to do something",
+    "commonMistake": "ambition 是名词，ambitious 是形容词；常说 achieve one's ambition。",
+    "example": {
+      "english": "Her ambition is to become a scientist who studies oceans.",
+      "chinese": "她的抱负是成为一名研究海洋的科学家。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Her ambition is to become a scientist who studies oceans. In this sentence, what does “ambition” mean? A. 追求的目标  B. 同队队员",
+      "solution": "A。解析：句中 “ambition” 表示“追求的目标”，符合语境；另一项“同队队员”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ambition",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ambition"
+      }
+    ]
+  },
+  {
+    "word": "explorer",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 探险者。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a famous explorer; polar explorer",
+    "commonMistake": "explorer 指探险者；explore 是动词，注意不要把表示人的名词误放在谓语位置。",
+    "example": {
+      "english": "The explorer drew a map of the remote island.",
+      "chinese": "探险家绘制了一张偏远岛屿的地图。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The explorer drew a map of the remote island. In this sentence, what does “explorer” mean? A. 好奇心  B. 探险者",
+      "solution": "B。解析：句中 “explorer” 表示“探险者”，符合语境；另一项“好奇心”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: explorer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/explorer"
+      }
+    ]
+  },
+  {
+    "word": "simply",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "v. 仅仅。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "simply because; put simply",
+    "commonMistake": "simply 可表示“仅仅”或“简单地”，需按语境判断。",
+    "example": {
+      "english": "The task looked difficult, but it was simply a matter of time.",
+      "chinese": "这项任务看起来很难，但它只不过是时间问题。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The task looked difficult, but it was simply a matter of time. In this sentence, what does “simply” mean? A. 仅仅  B. 在（……）上方",
+      "solution": "A。解析：句中 “simply” 表示“仅仅”，符合语境；另一项“在（……）上方”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: simply",
+        "url": "https://dictionary.cambridge.org/dictionary/english/simply"
+      }
+    ]
+  },
+  {
+    "word": "risky",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 有危险（或风险）的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "a risky climb; it is risky to do something",
+    "commonMistake": "risky 是形容词，常见结构为 it is risky to do sth；名词 risk 可作动词或名词。",
+    "example": {
+      "english": "It is risky to walk near the cliff in strong winds.",
+      "chinese": "大风天在悬崖附近行走很危险。"
+    },
+    "application": {
+      "prompt": "Read this sentence: It is risky to walk near the cliff in strong winds. In this sentence, what does “risky” mean? A. 活着  B. 有危险（或风险）的",
+      "solution": "B。解析：句中 “risky” 表示“有危险（或风险）的”，符合语境；另一项“活着”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: risky",
+        "url": "https://dictionary.cambridge.org/dictionary/english/risky"
+      }
+    ]
+  },
+  {
+    "word": "southern",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 南部的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "southern coast; the southern part",
+    "commonMistake": "southern 是方向形容词，通常小写；名词 south 表示“南方”。",
+    "example": {
+      "english": "Many turtles lay eggs on the southern beach.",
+      "chinese": "许多海龟在南部海滩产卵。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Many turtles lay eggs on the southern beach. In this sentence, what does “southern” mean? A. 南部的  B. 北部的",
+      "solution": "A。解析：句中 “southern” 表示“南部的”，符合语境；另一项“北部的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: southern",
+        "url": "https://dictionary.cambridge.org/dictionary/english/southern"
+      }
+    ]
+  },
+  {
+    "word": "located",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与词性"
+    ],
+    "grammar": "adj. 位于。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "be located in; be located on the coast",
+    "commonMistake": "be located in/on 表示“位于”；不能遗漏 be 动词。",
+    "example": {
+      "english": "The research station is located on a small island.",
+      "chinese": "这座研究站位于一座小岛上。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The research station is located on a small island. In this sentence, what does “located” mean? A. 有危险（或风险）的  B. 位于",
+      "solution": "B。解析：句中 “located” 表示“位于”，符合语境；另一项“有危险（或风险）的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: located",
+        "url": "https://dictionary.cambridge.org/dictionary/english/located"
+      }
+    ]
+  },
+  {
+    "word": "freshwater",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 淡水的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "freshwater fish; a freshwater lake",
+    "commonMistake": "freshwater 作定语时通常合写，不要拆成 fresh water 来表示淡水鱼这一类名词前修饰语。",
+    "example": {
+      "english": "Freshwater fish cannot live in the salty ocean.",
+      "chinese": "淡水鱼无法生活在咸水海洋中。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Freshwater fish cannot live in the salty ocean. In this sentence, what does “freshwater” mean? A. 淡水的  B. 好奇的",
+      "solution": "A。解析：句中 “freshwater” 表示“淡水的”，符合语境；另一项“好奇的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: freshwater",
+        "url": "https://dictionary.cambridge.org/dictionary/english/freshwater"
+      }
+    ]
+  },
+  {
+    "word": "type",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 类型。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "this type of; different types of",
+    "commonMistake": "常说 this type of + 单数名词；different types of 后通常接复数名词。",
+    "example": {
+      "english": "What type of animal lives in this reef?",
+      "chinese": "哪种动物生活在这片珊瑚礁中？"
+    },
+    "application": {
+      "prompt": "Read this sentence: What type of animal lives in this reef? In this sentence, what does “type” mean? A. 底部  B. 类型",
+      "solution": "B。解析：句中 “type” 表示“类型”，符合语境；另一项“底部”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: type",
+        "url": "https://dictionary.cambridge.org/dictionary/english/type"
+      }
+    ]
+  },
+  {
+    "word": "attract",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "v. 吸引。作谓语时注意主谓一致和时态；attract–attracted–attracted",
+    "collocations": "attract attention; attract visitors",
+    "commonMistake": "attract 后直接接被吸引的人或事物；be attracted to 才用 to。",
+    "example": {
+      "english": "Bright flowers attract butterflies to the garden.",
+      "chinese": "鲜艳的花朵吸引蝴蝶飞到花园里。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Bright flowers attract butterflies to the garden. In this sentence, what does “attract” mean? A. 吸引  B. 在（……）上方",
+      "solution": "A。解析：句中 “attract” 表示“吸引”，符合语境；另一项“在（……）上方”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: attract",
+        "url": "https://dictionary.cambridge.org/dictionary/english/attract"
+      }
+    ]
+  },
+  {
+    "word": "curious",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 好奇的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "be curious about; be curious to know",
+    "commonMistake": "常说 be curious about sth 或 be curious to know...；不要误用 curious of。",
+    "example": {
+      "english": "The curious child asked how the cave was formed.",
+      "chinese": "那个好奇的孩子问洞穴是怎样形成的。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The curious child asked how the cave was formed. In this sentence, what does “curious” mean? A. 有危险（或风险）的  B. 好奇的",
+      "solution": "B。解析：句中 “curious” 表示“好奇的”，符合语境；另一项“有危险（或风险）的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: curious",
+        "url": "https://dictionary.cambridge.org/dictionary/english/curious"
+      }
+    ]
+  },
+  {
+    "word": "traveller",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 旅行者。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a traveller to a place; business traveller",
+    "commonMistake": "traveller 是英式拼写，travel 加 -er 时双写 l；美式也常写 traveler。",
+    "example": {
+      "english": "Every traveller should carry enough drinking water.",
+      "chinese": "每位旅行者都应该带足饮用水。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Every traveller should carry enough drinking water. In this sentence, what does “traveller” mean? A. 旅行者  B. 环境",
+      "solution": "A。解析：句中 “traveller” 表示“旅行者”，符合语境；另一项“环境”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: traveller",
+        "url": "https://dictionary.cambridge.org/dictionary/english/traveller"
+      }
+    ]
+  },
+  {
+    "word": "natural",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与词性"
+    ],
+    "grammar": "adj. 自然的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "natural beauty; natural resources",
+    "commonMistake": "natural 是形容词，nature 是名词；描述景色用 natural beauty。",
+    "example": {
+      "english": "The island is famous for its natural beauty.",
+      "chinese": "这座岛以其自然美景而闻名。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The island is famous for its natural beauty. In this sentence, what does “natural” mean? A. 活着  B. 自然的",
+      "solution": "B。解析：句中 “natural” 表示“自然的”，符合语境；另一项“活着”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: natural",
+        "url": "https://dictionary.cambridge.org/dictionary/english/natural"
+      }
+    ]
+  },
+  {
+    "word": "reef",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 礁。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "coral reef; protect a reef",
+    "commonMistake": "reef 常与 coral 连用构成 coral reef；指珊瑚礁时不要与普通 rock 混淆。",
+    "example": {
+      "english": "The boat sailed past a coral reef.",
+      "chinese": "船驶过了一片珊瑚礁。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The boat sailed past a coral reef. In this sentence, what does “reef” mean? A. 礁  B. 梯子",
+      "solution": "A。解析：句中 “reef” 表示“礁”，符合语境；另一项“梯子”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reef",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reef"
+      }
+    ]
+  },
+  {
+    "word": "underwater",
+    "examTags": [
+      "词汇·动词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "v. 水下的。作谓语时注意主谓一致和时态；可按规则变化，遇到不规则形式以词典为准。",
+    "collocations": "underwater camera; underwater world",
+    "commonMistake": "underwater 作形容词时放在名词前，如 underwater camera；通常合写。",
+    "example": {
+      "english": "We used an underwater camera to film the turtles.",
+      "chinese": "我们用水下相机拍摄海龟。"
+    },
+    "application": {
+      "prompt": "Read this sentence: We used an underwater camera to film the turtles. In this sentence, what does “underwater” mean? A. 成功地  B. 水下的",
+      "solution": "B。解析：句中 “underwater” 表示“水下的”，符合语境；另一项“成功地”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: underwater",
+        "url": "https://dictionary.cambridge.org/dictionary/english/underwater"
+      }
+    ]
+  },
+  {
+    "word": "northeastern",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与词性"
+    ],
+    "grammar": "adj. 东北的。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "northeastern coast; northeastern region",
+    "commonMistake": "northeastern 是合写的方向形容词，通常小写；名词方向为 northeast。",
+    "example": {
+      "english": "The northeastern coast receives strong winds in winter.",
+      "chinese": "东北部海岸冬天会受到强风吹袭。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The northeastern coast receives strong winds in winter. In this sentence, what does “northeastern” mean? A. 东北的  B. 淡水的",
+      "solution": "A。解析：句中 “northeastern” 表示“东北的”，符合语境；另一项“淡水的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: northeastern",
+        "url": "https://dictionary.cambridge.org/dictionary/english/northeastern"
+      }
+    ]
+  },
+  {
+    "word": "coast",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 海岸。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "on the coast; along the coast",
+    "commonMistake": "表示沿海或海岸边常用 on/along the coast；不要说 in the coast。",
+    "example": {
+      "english": "A small village lies along the coast.",
+      "chinese": "一个小村庄坐落在海岸边。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A small village lies along the coast. In this sentence, what does “coast” mean? A. 结构（体）  B. 海岸",
+      "solution": "B。解析：句中 “coast” 表示“海岸”，符合语境；另一项“结构（体）”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: coast",
+        "url": "https://dictionary.cambridge.org/dictionary/english/coast"
+      }
+    ]
+  },
+  {
+    "word": "coral",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 珊瑚。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "coral reef; coral grows",
+    "commonMistake": "coral 可指珊瑚或珊瑚材料；泛指珊瑚材料时通常不加不定冠词。",
+    "example": {
+      "english": "Coral grows slowly in warm, clear water.",
+      "chinese": "珊瑚在温暖清澈的水中缓慢生长。"
+    },
+    "application": {
+      "prompt": "Read this sentence: Coral grows slowly in warm, clear water. In this sentence, what does “coral” mean? A. 珊瑚  B. 沙漠",
+      "solution": "A。解析：句中 “coral” 表示“珊瑚”，符合语境；另一项“沙漠”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: coral",
+        "url": "https://dictionary.cambridge.org/dictionary/english/coral"
+      }
+    ]
+  },
+  {
+    "word": "include",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与词性"
+    ],
+    "grammar": "v. 包含。作谓语时注意主谓一致和时态；include–included–included",
+    "collocations": "include something in; include a trip",
+    "commonMistake": "include 后直接接包含的内容；不要加 of，如 include food and water。",
+    "example": {
+      "english": "The price includes a boat trip to the reef.",
+      "chinese": "价格包含乘船前往珊瑚礁的费用。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The price includes a boat trip to the reef. In this sentence, what does “include” mean? A. 吸引  B. 包含",
+      "solution": "B。解析：句中 “include” 表示“包含”，符合语境；另一项“吸引”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: include",
+        "url": "https://dictionary.cambridge.org/dictionary/english/include"
+      }
+    ]
+  },
+  {
+    "word": "sand",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 沙子。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "wet sand; a grain of sand",
+    "commonMistake": "sand 表示沙子时通常作不可数名词；表示一粒沙可说 a grain of sand。",
+    "example": {
+      "english": "The children built a castle with wet sand.",
+      "chinese": "孩子们用湿沙子堆了一座城堡。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The children built a castle with wet sand. In this sentence, what does “sand” mean? A. 沙子  B. 潜水艇",
+      "solution": "A。解析：句中 “sand” 表示“沙子”，符合语境；另一项“潜水艇”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sand",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sand"
+      }
+    ]
+  },
+  {
+    "word": "alive",
+    "examTags": [
+      "词汇·形容词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "adj. 活着。常作定语或表语；修饰名词时通常放在名词前。",
+    "collocations": "stay alive; be alive",
+    "commonMistake": "alive 通常作表语或后置定语；不要说 an alive animal。",
+    "example": {
+      "english": "The rescue team found the lost hiker alive.",
+      "chinese": "救援队发现那名迷路的徒步者还活着。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The rescue team found the lost hiker alive. In this sentence, what does “alive” mean? A. 东北的  B. 活着",
+      "solution": "B。解析：句中 “alive” 表示“活着”，符合语境；另一项“东北的”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: alive",
+        "url": "https://dictionary.cambridge.org/dictionary/english/alive"
+      }
+    ]
+  },
+  {
+    "word": "structure",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与词性"
+    ],
+    "grammar": "n. 结构（体）。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "a strong structure; the structure of something",
+    "commonMistake": "structure 是名词，structural 是形容词；不要把名词直接当形容词使用。",
+    "example": {
+      "english": "The bridge is a strong structure made of steel.",
+      "chinese": "这座桥是用钢材建成的坚固结构。"
+    },
+    "application": {
+      "prompt": "Read this sentence: The bridge is a strong structure made of steel. In this sentence, what does “structure” mean? A. 结构（体）  B. 英里",
+      "solution": "A。解析：句中 “structure” 表示“结构（体）”，符合语境；另一项“英里”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: structure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/structure"
+      }
+    ]
+  },
+  {
+    "word": "turtle",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 海龟。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "sea turtle; turtle eggs",
+    "commonMistake": "turtle 常指海龟或龟；描述陆生龟时也可能用 tortoise，按语境区分。",
+    "example": {
+      "english": "A sea turtle returned to the beach to lay eggs.",
+      "chinese": "一只海龟回到海滩产卵。"
+    },
+    "application": {
+      "prompt": "Read this sentence: A sea turtle returned to the beach to lay eggs. In this sentence, what does “turtle” mean? A. 距离  B. 海龟",
+      "solution": "B。解析：句中 “turtle” 表示“海龟”，符合语境；另一项“距离”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: turtle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/turtle"
+      }
+    ]
+  },
+  {
+    "word": "lifetime",
+    "examTags": [
+      "词汇·名词",
+      "中考·搭配与语境"
+    ],
+    "grammar": "n. 一生。注意结合语境判断可数性；名词可作主语、宾语或表语。",
+    "collocations": "in one's lifetime; a lifetime achievement",
+    "commonMistake": "in one's lifetime 表示“在某人的一生中”；不要误用 life time。",
+    "example": {
+      "english": "She has visited many countries in her lifetime.",
+      "chinese": "她一生中去过许多国家。"
+    },
+    "application": {
+      "prompt": "Read this sentence: She has visited many countries in her lifetime. In this sentence, what does “lifetime” mean? A. 一生  B. 悬崖",
+      "solution": "A。解析：句中 “lifetime” 表示“一生”，符合语境；另一项“悬崖”与句意不符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lifetime",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lifetime"
+      }
+    ]
+  }
+]

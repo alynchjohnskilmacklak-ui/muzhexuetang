@@ -1,3 +1,6 @@
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { localDateKey } from '@/lib/date/local-day'
+
 /**
  * Resolve the students who belong to one subject lesson.
  *
@@ -14,9 +17,9 @@ export function resolveLessonStudentIds(
   const snapshots = [...new Set(snapshotStudentIds.filter(Boolean))]
   if (snapshots.length > 0) return snapshots
 
-  const todayStart = new Date(now)
-  todayStart.setHours(0, 0, 0, 0)
-  if (lessonDate >= todayStart) return []
+  // Compare calendar days in the product timezone instead of relying on the
+  // host process timezone, which may be UTC in production.
+  if (localDateKey(lessonDate) >= localDateKey(now)) return []
 
   return [...new Set(activeEnrollmentStudentIds.filter(Boolean))]
 }
@@ -38,15 +41,20 @@ export function resolveSubjectLessonStudentIds(
   lessonDate: Date,
   now = new Date(),
 ) {
+  const snapshots = [...new Set(snapshotStudentIds.filter(Boolean))]
+  // A saved historical roster is an immutable record of who belonged to that
+  // subject lesson at the time. Later withdrawals or subject changes must not
+  // rewrite that historical attendance and feedback scope.
+  if (snapshots.length > 0 && localDateKey(lessonDate) < localDateKey(now)) return snapshots
+
   const eligibleEnrollmentIds = activeEnrollments
     .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, subject))
     .map((enrollment) => enrollment.studentId)
   const eligibleEnrollmentIdSet = new Set(eligibleEnrollmentIds)
   return resolveLessonStudentIds(
-    snapshotStudentIds.filter((studentId) => eligibleEnrollmentIdSet.has(studentId)),
+    snapshots.filter((studentId) => eligibleEnrollmentIdSet.has(studentId)),
     eligibleEnrollmentIds,
     lessonDate,
     now,
   )
 }
-import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'

@@ -5,7 +5,7 @@ $watchLog = Join-Path $project 'dev-watchdog.log'
 Set-Location $project
 while ($true) {
     try {
-        $r = Invoke-WebRequest -Uri 'http://127.0.0.1:3000/login' -UseBasicParsing -TimeoutSec 6
+        $r = Invoke-WebRequest -Uri 'http://localhost:3000/login' -UseBasicParsing -TimeoutSec 6
     } catch {
         $stamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
         Add-Content -Path $watchLog -Value "$stamp /login 不可用，交由安全启动器检查数据库和端口归属"

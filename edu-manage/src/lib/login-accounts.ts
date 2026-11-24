@@ -108,7 +108,56 @@ export async function resolveLoginIdentifier(
   division?: string,
   identifierType: LoginIdentifierType = 'email',
 ): Promise<{ ok: true; email: string; teacherId?: string } | Extract<ValidationResult, { ok: false }>> {
-  if (identifierType === 'email') return { ok: true, email: normalizeLoginEmail(identifierInput) }
+  if (identifierType === 'email') {
+    const raw = normalizeLoginEmail(identifierInput)
+    if (!raw) return { ok: false, error: '请输入账号或邮箱', code: 'BAD_USERNAME' }
+    if (raw.includes('@')) {
+      return { ok: true, email: raw }
+    }
+    const db = resolveLoginPrisma(division)
+    if (db) {
+      // 1. Direct match on user.email
+      const direct = await db.user.findUnique({
+        where: { email: raw },
+        select: { email: true, teacherId: true },
+      })
+      if (direct) return { ok: true, email: normalizeLoginEmail(direct.email), teacherId: direct.teacherId ?? undefined }
+
+      // 2. Parent email pattern: [pinyin]@st.com
+      const stUser = await db.user.findUnique({
+        where: { email: `${raw}@st.com` },
+        select: { email: true },
+      })
+      if (stUser) return { ok: true, email: normalizeLoginEmail(stUser.email) }
+
+      // 3. Teacher email pattern: [pinyin]@tea.com
+      const teaUser = await db.user.findUnique({
+        where: { email: `${raw}@tea.com` },
+        select: { email: true, teacherId: true },
+      })
+      if (teaUser) return { ok: true, email: normalizeLoginEmail(teaUser.email), teacherId: teaUser.teacherId ?? undefined }
+
+      // 4. Staff/admin or custom domain pattern
+      const staffUser = await db.user.findFirst({
+        where: {
+          OR: [
+            { email: `${raw}@nuc.com` },
+            { email: `${raw}@muzhe.com` },
+            { email: { startsWith: `${raw}@` } },
+          ],
+        },
+        select: { email: true, teacherId: true },
+      })
+      if (staffUser) return { ok: true, email: normalizeLoginEmail(staffUser.email), teacherId: staffUser.teacherId ?? undefined }
+
+      // 5. Legacy teacher pinyin lookup
+      const legacyTeacher = await findTeacherByLoginEmail(`${raw}@tea.com`, division)
+      if (legacyTeacher) {
+        return { ok: true, email: `${raw}@tea.com`, teacherId: legacyTeacher.id }
+      }
+    }
+    return { ok: true, email: raw }
+  }
 
   const phone = normalizeLoginPhone(identifierInput)
   if (!phone) {
@@ -121,47 +170,42 @@ export async function resolveLoginIdentifier(
   const db = resolveLoginPrisma(division)
   if (!db) return { ok: false, error: 'Missing division', code: 'BAD_DIVISION' }
 
-  if (loginRole === 'admin') {
+  async function resolveAdmin(p: string) {
+    if (!db) return null
     const admin = await db.user.findUnique({
-      where: { phone },
+      where: { phone: p },
       select: { email: true, role: true },
     })
     if (admin?.role === 'admin') {
-      return { ok: true, email: normalizeLoginEmail(admin.email) }
+      return { ok: true as const, email: normalizeLoginEmail(admin.email) }
     }
-
-    // Admins who also have a teacher profile can use the profile's phone.
-    // Match the profile first, then require one exact-name admin account.
-    const { teacher, ambiguous } = await findTeacherProfileByPhone(db, phone)
+    const { teacher, ambiguous } = await findTeacherProfileByPhone(db, p)
     if (ambiguous) {
-      return { ok: false, error: '该手机号关联多个教师档案，请联系管理员核对', code: 'AMBIGUOUS_PHONE' }
+      return { ok: false as const, error: '该手机号关联多个教师档案，请联系管理员核对', code: 'AMBIGUOUS_PHONE' as const }
     }
     if (teacher) {
       const adminByName = await findAdminForTeacherProfile(db, teacher)
       if (adminByName.ambiguous) {
-        return { ok: false, error: '该手机号关联多个管理账号，请联系管理员核对', code: 'AMBIGUOUS_PHONE' }
+        return { ok: false as const, error: '该手机号关联多个管理账号，请联系管理员核对', code: 'AMBIGUOUS_PHONE' as const }
       }
-      if (adminByName.email) return { ok: true, email: adminByName.email }
+      if (adminByName.email) return { ok: true as const, email: adminByName.email }
     }
-    return { ok: false, error: '该手机号未关联管理账号，请使用邮箱/账号登录或联系管理员绑定', code: 'BAD_USERNAME' }
+    return null
   }
 
-  if (loginRole === 'teacher') {
-    // Teacher profiles already have unique phone numbers. Resolve only after
-    // an exact normalized match so formatting differences remain harmless.
-    const { teacher, ambiguous } = await findTeacherProfileByPhone(db, phone)
+  async function resolveTeacher(p: string) {
+    if (!db) return null
+    const { teacher, ambiguous } = await findTeacherProfileByPhone(db, p)
     if (ambiguous) {
-      return { ok: false, error: '该手机号关联多个教师档案，请使用邮箱/账号登录并联系管理员核对', code: 'AMBIGUOUS_PHONE' }
+      return { ok: false as const, error: '该手机号关联多个教师档案，请使用邮箱/账号登录并联系管理员核对', code: 'AMBIGUOUS_PHONE' as const }
     }
-    if (!teacher) {
-      return { ok: false, error: '该手机号未关联教师档案，请使用邮箱/账号登录或联系管理员核对', code: 'BAD_USERNAME' }
-    }
+    if (!teacher) return null
 
     const directlyBound = await db.user.findFirst({
       where: { teacherId: teacher.id, role: 'teacher' },
       select: { email: true },
     })
-    if (directlyBound) return { ok: true, email: normalizeLoginEmail(directlyBound.email), teacherId: teacher.id }
+    if (directlyBound) return { ok: true as const, email: normalizeLoginEmail(directlyBound.email), teacherId: teacher.id }
 
     const legacyEmails = [...new Set([
       teacher.email?.trim().toLowerCase(),
@@ -175,61 +219,85 @@ export async function resolveLoginIdentifier(
     })
     const emails = [...new Set(legacyUsers.map((user) => normalizeLoginEmail(user.email)).filter(Boolean))]
     if (emails.length > 1) {
-      return { ok: false, error: '该手机号关联多个教师账号，请使用邮箱/账号登录并联系管理员核对', code: 'AMBIGUOUS_PHONE' }
+      return { ok: false as const, error: '该手机号关联多个教师账号，请使用邮箱/账号登录并联系管理员核对', code: 'AMBIGUOUS_PHONE' as const }
     }
     if (emails.length) {
-      return { ok: true, email: emails[0], teacherId: teacher.id }
+      return { ok: true as const, email: emails[0], teacherId: teacher.id }
     }
 
-    // Some people have an admin account and a teacher profile but no separate
-    // teacher User row. Allow the admin credentials to create a teacher-scoped
-    // session only when the profile phone and account name resolve uniquely.
     const adminByName = await findAdminForTeacherProfile(db, teacher)
     if (adminByName.ambiguous) {
-      return { ok: false, error: '该手机号关联多个管理账号，请使用邮箱/账号登录并联系管理员核对', code: 'AMBIGUOUS_PHONE' }
+      return { ok: false as const, error: '该手机号关联多个管理账号，请使用邮箱/账号登录并联系管理员核对', code: 'AMBIGUOUS_PHONE' as const }
     }
     if (adminByName.email) {
-      return { ok: true, email: adminByName.email, teacherId: teacher.id }
+      return { ok: true as const, email: adminByName.email, teacherId: teacher.id }
     }
-    return { ok: false, error: '该手机号未关联教师登录账号，请使用邮箱/账号登录或联系管理员', code: 'BAD_USERNAME' }
+    return null
   }
 
-  if (loginRole !== 'parent') {
-    return { ok: false, error: '登录身份无效，请重新选择', code: 'BAD_ROLE' }
+  async function resolveParent(p: string) {
+    if (!db) return null
+    const students = await db.student.findMany({
+      where: { parentPhone: { contains: p.slice(-4) }, deletedAt: null },
+      select: { parentPhone: true, parentUserId: true, parentId: true },
+    })
+    const parentIds = [...new Set(students
+      .filter((student) => normalizeLoginPhone(student.parentPhone || '') === p)
+      .flatMap((student) => [student.parentUserId, student.parentId])
+      .filter((id): id is string => Boolean(id)))]
+
+    if (!parentIds.length) return null
+
+    const parents = await db.user.findMany({
+      where: { id: { in: parentIds }, role: 'parent' },
+      select: { email: true },
+    })
+    const emails = [...new Set(parents.map((parent) => normalizeLoginEmail(parent.email)).filter(Boolean))]
+    if (emails.length > 1) {
+      return { ok: false as const, error: '该手机号关联多个家长账号，请使用邮箱登录并联系管理员核对绑定信息', code: 'AMBIGUOUS_PHONE' as const }
+    }
+    if (!emails.length) return null
+    return { ok: true as const, email: emails[0] }
   }
 
-  // Query by a short suffix to include stored values containing separators,
-  // then compare normalized digits exactly before resolving account IDs.
-  const students = await db.student.findMany({
-    where: { parentPhone: { contains: phone.slice(-4) }, deletedAt: null },
-    select: { parentPhone: true, parentUserId: true, parentId: true },
-  })
-  const parentIds = [...new Set(students
-    .filter((student) => normalizeLoginPhone(student.parentPhone || '') === phone)
-    .flatMap((student) => [student.parentUserId, student.parentId])
-    .filter((id): id is string => Boolean(id)))]
-
-  if (!parentIds.length) {
-    return { ok: false, error: '该手机号未关联家长账号，请使用邮箱登录或联系管理员核对绑定信息', code: 'BAD_USERNAME' }
+  // 1. Try resolving for the explicitly requested role first
+  let primaryResult: { ok: true; email: string; teacherId?: string } | { ok: false; error: string; code: 'AMBIGUOUS_PHONE' } | null = null
+  if (loginRole === 'admin') {
+    primaryResult = await resolveAdmin(phone)
+  } else if (loginRole === 'teacher') {
+    primaryResult = await resolveTeacher(phone)
+  } else if (loginRole === 'parent') {
+    primaryResult = await resolveParent(phone)
   }
 
-  const parents = await db.user.findMany({
-    where: { id: { in: parentIds }, role: 'parent' },
-    select: { email: true },
-  })
-  const emails = [...new Set(parents.map((parent) => normalizeLoginEmail(parent.email)).filter(Boolean))]
-  if (emails.length > 1) {
-    return { ok: false, error: '该手机号关联多个家长账号，请使用邮箱登录并联系管理员核对绑定信息', code: 'AMBIGUOUS_PHONE' }
+  if (primaryResult) {
+    if (!primaryResult.ok) return primaryResult
+    return primaryResult
   }
-  if (!emails.length) {
-    return { ok: false, error: '该手机号未关联家长账号，请使用邮箱登录或联系管理员核对绑定信息', code: 'BAD_USERNAME' }
+
+  // 2. In unified login, if the requested role didn't match, attempt other roles before failing
+  const candidateRoles: LoginRole[] = (['parent', 'teacher', 'admin'] as LoginRole[]).filter((r) => r !== loginRole)
+  for (const candidateRole of candidateRoles) {
+    let fallbackResult: { ok: true; email: string; teacherId?: string } | { ok: false; error: string; code: 'AMBIGUOUS_PHONE' } | null = null
+    if (candidateRole === 'parent') fallbackResult = await resolveParent(phone)
+    else if (candidateRole === 'teacher') fallbackResult = await resolveTeacher(phone)
+    else if (candidateRole === 'admin') fallbackResult = await resolveAdmin(phone)
+
+    if (fallbackResult) {
+      if (!fallbackResult.ok) return fallbackResult
+      return fallbackResult
+    }
   }
-  return { ok: true, email: emails[0] }
+
+  return { ok: false, error: '该手机号未关联账号，请使用邮箱/账号登录或联系管理员核对绑定信息', code: 'BAD_USERNAME' }
 }
 
-export async function getLoginStatus(emailInput: string, division?: string) {
+export async function getLoginStatus(emailInput: string, division: string | undefined, ip: string) {
   const email = normalizeLoginEmail(emailInput)
   if (!email) return { locked: false, failCount: 0, remaining: MAX_FAIL_ATTEMPTS }
+  // A missing trusted proxy address must not turn the shared "unknown" bucket
+  // into a way to lock an account for every visitor.
+  if (!ip || ip === 'unknown') return { locked: false, failCount: 0, remaining: MAX_FAIL_ATTEMPTS }
 
   const lockWindowStart = new Date(Date.now() - LOCK_WINDOW_MINUTES * 60 * 1000)
   const db = resolveLoginPrisma(division)
@@ -237,6 +305,7 @@ export async function getLoginStatus(emailInput: string, division?: string) {
   const failCount = await db.loginRecord.count({
     where: {
       email,
+      ip,
       success: false,
       failReason: { not: 'locked' },
       createdAt: { gte: lockWindowStart },
@@ -349,7 +418,25 @@ export async function detectLoginRole(emailInput: string, division?: string): Pr
   })
   if (user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'parent') return user.role
 
-  if (await findTeacherByLoginEmail(email, division)) return 'teacher'
+  if (!email.includes('@')) {
+    const candidate = await db.user.findFirst({
+      where: {
+        OR: [
+          { email: `${email}@st.com` },
+          { email: `${email}@tea.com` },
+          { email: `${email}@nuc.com` },
+          { email: `${email}@muzhe.com` },
+          { email: { startsWith: `${email}@` } },
+        ],
+      },
+      select: { role: true },
+    })
+    if (candidate?.role === 'admin' || candidate?.role === 'teacher' || candidate?.role === 'parent') {
+      return candidate.role as LoginRole
+    }
+  }
+
+  if (await findTeacherByLoginEmail(email.includes('@') ? email : `${email}@tea.com`, division)) return 'teacher'
   return null
 }
 
@@ -365,29 +452,18 @@ export async function detectLoginRoleForIdentifier(
     : [isLoginDivision(division) ? division : undefined]
   const matches: Array<{ role: LoginRole; division: 'JUNIOR' | 'SENIOR' | null }> = []
 
-  // Admin is never auto-selected. A phone matching a teacher profile defaults
-  // to teacher only for accounts that are not also admins, except for the
-  // explicit Hu Sitong preference. Admin access stays an explicit choice.
+  // If one phone belongs to both an administrator and a teacher, keep role detection neutral
   if (identifierType === 'phone') {
     if (!normalizeLoginPhone(identifierInput)) return { role: null, division: null }
     let hasAdminMatch = false
-    let preferredTeacherMatch = false
+    let hasTeacherMatch = false
     for (const candidateDivision of candidateDivisions) {
       const teacherMatch = await resolveLoginIdentifier(identifierInput, 'teacher', candidateDivision, 'phone')
       const adminMatch = await resolveLoginIdentifier(identifierInput, 'admin', candidateDivision, 'phone')
       hasAdminMatch ||= adminMatch.ok
+      hasTeacherMatch ||= teacherMatch.ok
 
-      let shouldDefaultToTeacher = teacherMatch.ok && !adminMatch.ok
-      if (teacherMatch.ok && adminMatch.ok && teacherMatch.teacherId) {
-        const db = resolveLoginPrisma(candidateDivision)
-        const teacher = db
-          ? await db.teacher.findUnique({ where: { id: teacherMatch.teacherId }, select: { name: true } })
-          : null
-        shouldDefaultToTeacher = teacher?.name.trim() === '胡思同'
-        preferredTeacherMatch ||= shouldDefaultToTeacher
-      }
-
-      if (shouldDefaultToTeacher) {
+      if (teacherMatch.ok && !adminMatch.ok) {
         matches.push({
           role: 'teacher',
           division: isDualDbEnabled()
@@ -406,17 +482,14 @@ export async function detectLoginRoleForIdentifier(
         })
       }
     }
-    if (hasAdminMatch && !preferredTeacherMatch) return { role: null, division: null }
-    if (preferredTeacherMatch) {
-      const selectedTeacherMatch = matches.find((match) => match.role === 'teacher' && match.division === division)
-        || matches.find((match) => match.role === 'teacher')
-      if (selectedTeacherMatch) return selectedTeacherMatch
+    if (hasAdminMatch && hasTeacherMatch) return { role: null, division: null }
+    if (hasAdminMatch && !hasTeacherMatch && matches.length === 0) {
+      return { role: 'admin', division: null }
     }
   } else {
     for (const candidateDivision of candidateDivisions) {
       const role = await detectLoginRole(identifierInput, candidateDivision)
-      if (role === 'admin') return { role: null, division: null }
-      if (role === 'teacher' || role === 'parent') {
+      if (role === 'admin' || role === 'teacher' || role === 'parent') {
         matches.push({
           role,
           division: isDualDbEnabled()
@@ -473,7 +546,7 @@ async function validateDatabaseUser(
   }
 
   let teacherRoleOverride: TeacherLoginAccount | null = null
-  if (user.role !== expectedRole && expectedRole === 'teacher' && user.role === 'admin' && resolvedTeacherId) {
+  if (expectedRole === 'teacher' && user.role === 'admin' && resolvedTeacherId) {
     const teacher = await db.teacher.findUnique({
       where: { id: resolvedTeacherId },
       select: { id: true, name: true, phone: true, status: true, division: true },
@@ -484,29 +557,34 @@ async function validateDatabaseUser(
     }
   }
 
-  if (user.role !== expectedRole && !teacherRoleOverride) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta, division)
-    return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
-  }
-
   if (isUserDisabled(user.status)) {
     if (options.recordAttempt) await recordLoginFailure(email, 'disabled', user.id, meta, division)
     return { ok: false, error: '账号已停用，请联系管理员', code: 'DISABLED' }
-  }
-
-  let resolvedTeacher: TeacherLoginAccount | null = null
-  if (expectedRole === 'teacher') {
-    resolvedTeacher = teacherRoleOverride || await resolveTeacherLoginAccount(user, email, division)
-    if (!resolvedTeacher) {
-      if (options.recordAttempt) await recordLoginFailure(email, 'uninitialized', user.id, meta, division)
-      return { ok: false, error: '教师档案未绑定，请联系管理员', code: 'BAD_USERNAME' }
-    }
   }
 
   const pwdOk = await verifyPassword(password, user.password)
   if (!pwdOk) {
     if (options.recordAttempt) await recordLoginFailure(email, 'wrong_password', user.id, meta, division)
     return { ok: false, error: '密码错误', code: 'BAD_PASSWORD' }
+  }
+
+  // Once password is confirmed valid, resolve user to their authentic role
+  const actualRole = (teacherRoleOverride ? 'teacher' : user.role) as LoginRole
+
+  // Credentials are only valid from the matching portal. Keep the linked-admin
+  // teacher override above so staff who have an explicitly linked teacher
+  // profile can still use the teacher entry.
+  if (actualRole !== expectedRole) {
+    return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
+  }
+
+  let resolvedTeacher: TeacherLoginAccount | null = null
+  if (actualRole === 'teacher') {
+    resolvedTeacher = teacherRoleOverride || await resolveTeacherLoginAccount(user, email, division)
+    if (!resolvedTeacher) {
+      if (options.recordAttempt) await recordLoginFailure(email, 'uninitialized', user.id, meta, division)
+      return { ok: false, error: '教师档案未绑定，请联系管理员', code: 'BAD_USERNAME' }
+    }
   }
 
   const loginUser = toLoginUser(teacherRoleOverride ? { ...user, role: 'teacher', teacherId: teacherRoleOverride.id } : user)
@@ -533,6 +611,10 @@ async function validateDatabaseUser(
   return { ok: true, user: scopedLoginUser }
 }
 
+export type ResolvedLoginIdentifier =
+  | { ok: true; email: string; teacherId?: string }
+  | Extract<ValidationResult, { ok: false }>
+
 export async function validateLoginAccount(
   emailInput: string,
   passwordInput: string,
@@ -541,8 +623,9 @@ export async function validateLoginAccount(
   meta?: RequestMeta,
   division?: string,
   identifierType: LoginIdentifierType = 'email',
+  preResolvedIdentifier?: ResolvedLoginIdentifier,
 ): Promise<ValidationResult> {
-  const resolvedIdentifier = await resolveLoginIdentifier(emailInput, loginRole, division, identifierType)
+  const resolvedIdentifier = preResolvedIdentifier ?? await resolveLoginIdentifier(emailInput, loginRole, division, identifierType)
   if (!resolvedIdentifier.ok) return resolvedIdentifier
   const email = resolvedIdentifier.email
   const password = passwordInput.trim()
@@ -552,7 +635,7 @@ export async function validateLoginAccount(
   }
 
   if (options.recordAttempt) {
-    const status = await getLoginStatus(email, division)
+    const status = await getLoginStatus(email, division, meta?.ip || 'unknown')
     if (status.locked) {
       await recordLoginFailure(email, 'locked', undefined, meta, division)
       return { ok: false, error: '密码连续错误次数过多，账号已临时锁定，请30分钟后重试', code: 'LOCKED' }
@@ -571,6 +654,7 @@ export async function precheckLoginAccount(
   loginRole: LoginRole,
   division?: string,
   identifierType: LoginIdentifierType = 'email',
+  ip = 'unknown',
 ): Promise<{ ok: true } | Extract<ValidationResult, { ok: false }>> {
   const resolvedIdentifier = await resolveLoginIdentifier(emailInput, loginRole, division, identifierType)
   if (!resolvedIdentifier.ok) return resolvedIdentifier
@@ -580,7 +664,7 @@ export async function precheckLoginAccount(
     return { ok: false, error: 'Missing division', code: 'BAD_DIVISION' }
   }
 
-  const status = await getLoginStatus(email, division)
+  const status = await getLoginStatus(email, division, ip)
   if (status.locked) {
     return { ok: false, error: '密码连续错误次数过多，账号已临时锁定，请30分钟后重试', code: 'LOCKED' }
   }

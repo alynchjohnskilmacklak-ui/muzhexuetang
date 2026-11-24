@@ -30,13 +30,23 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   }
   if (!existing) return NextResponse.json({ error: '记录不存在' }, { status: 404 })
 
-  const { amount, type, hours, campus, operator, notes, paidAt, courseId, studentId } = body
+  const { amount, type, hours, campus, operator, notes, paidAt, dueDate, courseId, studentId } = body
+  const status = body.status
 
   if (amount !== undefined && (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0)) {
     return NextResponse.json({ error: '金额必须 >= 0' }, { status: 400 })
   }
   if (hours !== undefined && hours !== null && (typeof hours !== 'number' || !Number.isFinite(hours) || hours < 0)) {
     return NextResponse.json({ error: '课时数必须 >= 0' }, { status: 400 })
+  }
+  if (status !== undefined && status !== 'paid' && status !== 'pending') {
+    return NextResponse.json({ error: '收费状态无效' }, { status: 400 })
+  }
+  if (dueDate !== undefined && dueDate !== null && Number.isNaN(new Date(dueDate).getTime())) {
+    return NextResponse.json({ error: '到期日格式无效' }, { status: 400 })
+  }
+  if (status === 'pending' && (dueDate === null || (dueDate === undefined && !existing.dueDate))) {
+    return NextResponse.json({ error: '待缴费用请填写有效到期日' }, { status: 400 })
   }
 
   const data: Record<string, unknown> = {}
@@ -47,6 +57,13 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   if (operator !== undefined) data.operator = operator
   if (notes !== undefined) data.notes = notes
   if (paidAt !== undefined) data.paidAt = paidAt ? new Date(paidAt) : null
+  if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null
+  if (status !== undefined) {
+    data.status = status
+    if (status === 'pending') data.paidAt = null
+    if (status === 'paid' && paidAt === undefined && existing.status !== 'paid') data.paidAt = new Date()
+  }
+  if (dueDate !== undefined || status !== undefined) data.overdueNotifiedAt = null
   if (courseId !== undefined) data.courseId = courseId
   if (studentId !== undefined) {
     const student = await db.student.findFirst({

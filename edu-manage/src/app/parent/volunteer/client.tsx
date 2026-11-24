@@ -110,6 +110,7 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
         <h1 style={{ margin: 0, color: '#1F2329', fontSize: isMobile ? 16 : 28 }}>{currentGuide.title}</h1>
         <div style={{ color: '#5a4e3a', marginTop: 8 }}>牧哲学堂整理 · {currentGuide.year}年版 · {currentGuide.subtitle}</div>
         <Space wrap style={{ marginTop: 18 }}>
+          <Button type="primary" href="/parent/volunteer/simulation">模拟填报</Button>
           <Button icon={<ReadOutlined />} href="/parent/volunteer/guide">填报指南</Button>
           <Button icon={<LinkOutlined />} href="http://www.sjzjyksxx.com.cn/" target="_blank">官网直达</Button>
           <Button icon={<DownloadOutlined />} onClick={() => document.getElementById('volunteer-docs')?.scrollIntoView({ behavior: 'smooth' })}>政策文件</Button>
@@ -118,19 +119,33 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
         </Space>
       </section>
 
-      <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+      <Card bordered={false} style={{ borderRadius: 16, background: '#ffffff', border: '1px solid rgba(20,87,77,0.08)', boxShadow: '0 2px 8px rgba(20,60,50,0.02)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : `repeat(${Math.max(steps.length, 1)}, minmax(84px, 1fr))`, gap: 8 }}>
           {steps.map((item, index) => (
-            <button key={item.id} onClick={() => selectStep(index)} style={{ border: `1px solid ${index === current ? 'var(--color-primary)' : index < current ? 'var(--color-success-action)' : '#EEE7E1'}`, background: index === current ? 'rgba(232,120,74,0.12)' : '#FCFBF9', color: '#1F2329', borderRadius: 8, padding: 10, cursor: 'pointer' }}>
+            <button
+              key={item.id}
+              onClick={() => selectStep(index)}
+              className="stagger-item"
+              style={{
+                animationDelay: `${Math.min(index, 8) * 40}ms`,
+                border: `1px solid ${index === current ? '#14574D' : index < current ? '#1D9E75' : 'rgba(60,80,72,0.14)'}`,
+                background: index === current ? 'rgba(20,87,77,0.08)' : '#FCFBF9',
+                color: index === current ? '#14574D' : '#1F2329',
+                borderRadius: 12,
+                padding: '10px 12px',
+                cursor: 'pointer',
+                transition: 'all .16s ease',
+              }}
+            >
               <div style={{ fontWeight: 700 }}>第{item.order}步</div>
-              <div style={{ fontSize: 12, color: '#98A2B3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
+              <div style={{ fontSize: 12, color: index === current ? '#14574D' : '#98A2B3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
             </button>
           ))}
         </div>
       </Card>
 
       {step && (
-        <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+        <Card bordered={false} style={{ borderRadius: 16, background: '#ffffff', border: '1px solid rgba(20,87,77,0.08)', boxShadow: '0 3px 12px rgba(20,60,50,0.03)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 480px', gap: 20 }}>
             <div>
               <Tag color="#E8784A">第{step.order}步</Tag>
@@ -168,10 +183,10 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
           <div style={{ textAlign: 'center', padding: '24px 0', color: '#98A2B3' }}>暂无分配生名额数据</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {quotaBySchool.map(group => {
+            {quotaBySchool.map((group, groupIndex) => {
               const isExpanded = expandedSchool === group.schoolName
               return (
-                <div key={group.schoolName} style={{ borderRadius: 10, border: `1px solid ${isExpanded ? '#E8784A50' : '#EEE7E1'}`, overflow: 'hidden' }}>
+                <div key={group.schoolName} className="stagger-item" style={{ animationDelay: `${Math.min(groupIndex, 8) * 40}ms`, borderRadius: 10, border: `1px solid ${isExpanded ? '#E8784A50' : '#EEE7E1'}`, overflow: 'hidden' }}>
                   <div
                     onClick={() => setExpandedSchool(isExpanded ? null : group.schoolName)}
                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', cursor: 'pointer', background: isExpanded ? '#FFF8F4' : '#FCFBF9' }}
@@ -219,8 +234,8 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
 
       <Card id="volunteer-docs" title="文件下载" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <Space direction="vertical" style={{ width: '100%' }}>
-          {(currentGuide.documents || []).map((doc) => (
-            <a key={doc.id} href={`/api/volunteer/documents/${doc.id}/download`} style={{ display: 'flex', justifyContent: 'space-between', padding: 12, borderRadius: 8, background: '#FCFBF9', color: '#1F2329' }}>
+          {(currentGuide.documents || []).map((doc, docIndex) => (
+            <a key={doc.id} href={`/api/volunteer/documents/${doc.id}/download`} className="stagger-item" style={{ animationDelay: `${Math.min(docIndex, 8) * 40}ms`, display: 'flex', justifyContent: 'space-between', padding: 12, borderRadius: 8, background: '#FCFBF9', color: '#1F2329' }}>
               <span>{doc.name}</span><DownloadOutlined />
             </a>
           ))}
@@ -229,7 +244,7 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
 
       <Card id="volunteer-consult" title="在线咨询" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <Space direction="vertical" style={{ width: '100%' }} size={12}>
-          {consultations.map((item: Record<string, unknown>) => <div key={item.id as string} style={{ padding: 12, borderRadius: 8, background: '#FCFBF9' }}><div style={{ color: '#1F2329' }}>问：{item.question as string}</div>{item.reply ? <div style={{ color: '#5a4e3a', marginTop: 8 }}>答：{item.reply as string}</div> : <Tag color="orange" style={{ marginTop: 8 }}>等待回复</Tag>}</div>)}
+          {consultations.map((item: Record<string, unknown>, consultIndex: number) => <div key={item.id as string} className="stagger-item" style={{ animationDelay: `${Math.min(consultIndex, 8) * 40}ms`, padding: 12, borderRadius: 8, background: '#FCFBF9' }}><div style={{ color: '#1F2329' }}>问：{item.question as string}</div>{item.reply ? <div style={{ color: '#5a4e3a', marginTop: 8 }}>答：{item.reply as string}</div> : <Tag color="orange" style={{ marginTop: 8 }}>等待回复</Tag>}</div>)}
           <Input.TextArea value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={500} showCount autoSize={{ minRows: 3, maxRows: 6 }} placeholder="把您的志愿填报问题写在这里..." />
           <Button type="primary" loading={submitting} disabled={submitting} onClick={submitQuestion}>提交我的问题</Button>
         </Space>

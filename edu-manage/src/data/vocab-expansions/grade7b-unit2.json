@@ -1,0 +1,1406 @@
+[
+  {
+    "word": "rule",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 规则；规章。可数名词，常说 a rule / school rules；规则通常用 must、have to 或祈使句表达。",
+    "collocations": "follow a rule; school rules; break the rules",
+    "commonMistake": "follow the rules 和 obey the rules 都表示“遵守规则”；obey 后不加 to。",
+    "example": {
+      "english": "Our school has a rule about keeping the hallway clean.",
+      "chinese": "我们学校有一条保持走廊整洁的规定。"
+    },
+    "application": {
+      "prompt": "A school instruction that students must follow is a ___. (rule / treat)",
+      "solution": "rule"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rule",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rule"
+      }
+    ]
+  },
+  {
+    "word": "order",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 秩序；命令；v. 点菜；命令。作名词可说 keep order；作动词可说 order food 或 order sb to do sth。",
+    "collocations": "keep order; order a meal; order sb to wait",
+    "commonMistake": "表示“点菜”时 order 后直接接食物；表示“命令某人做某事”用 order sb to do sth。",
+    "example": {
+      "english": "Please keep order while the teacher is speaking.",
+      "chinese": "老师讲话时请保持秩序。"
+    },
+    "application": {
+      "prompt": "At the school canteen, I ask for a sandwich. I ___ a sandwich. (order / lend)",
+      "solution": "order"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: order",
+        "url": "https://dictionary.cambridge.org/dictionary/english/order"
+      }
+    ]
+  },
+  {
+    "word": "follow",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 遵循；跟随。规则变化 follow—followed—followed；follow 后直接接宾语。",
+    "collocations": "follow the rules; follow instructions; follow a person",
+    "commonMistake": "follow 后直接接名词，不加介词 to：follow the rule，不说 follow to the rule。",
+    "example": {
+      "english": "Please follow the teacher’s instructions.",
+      "chinese": "请遵循老师的指示。"
+    },
+    "application": {
+      "prompt": "Everyone must ___ the safety rules. (follow / follows)",
+      "solution": "follow"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: follow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/follow"
+      }
+    ]
+  },
+  {
+    "word": "late for",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，表示“迟到”；常用 be late for + 课程、活动或交通工具。late 是形容词。",
+    "collocations": "be late for school; be late for class; be late for the bus",
+    "commonMistake": "late for 后接迟到的活动或场合；说“准时”用 on time，late 是“迟到”。",
+    "example": {
+      "english": "Don’t be late for class again.",
+      "chinese": "不要再上课迟到了。"
+    },
+    "application": {
+      "prompt": "The bell has rung, but Kai has not reached class yet. He is ___ class. (late for / on time)",
+      "solution": "late for"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: late for",
+        "url": "https://dictionary.cambridge.org/dictionary/english/late"
+      }
+    ]
+  },
+  {
+    "word": "arrive",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 到达。arrive at 常接较小地点，arrive in 常接城市或国家；过去式 arrived。",
+    "collocations": "arrive at school; arrive in Beijing; arrive on time",
+    "commonMistake": "arrive 后通常用 at/in 表示到达地点，不说 arrive to school；但 arrive home 可直接接 home。",
+    "example": {
+      "english": "We arrive at school before eight.",
+      "chinese": "我们八点前到校。"
+    },
+    "application": {
+      "prompt": "The train will ___ at the station at nine. (arrive / arrive to)",
+      "solution": "arrive"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: arrive",
+        "url": "https://dictionary.cambridge.org/dictionary/english/arrive"
+      }
+    ]
+  },
+  {
+    "word": "on time",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，表示“准时”，即在约定或预定的时间；作时间状语。",
+    "collocations": "arrive on time; be on time for class; start on time",
+    "commonMistake": "on time 表示准时；in time 表示及时、来得及，两者含义不同。",
+    "example": {
+      "english": "The school bus arrived on time this morning.",
+      "chinese": "校车今天早上准时到了。"
+    },
+    "application": {
+      "prompt": "The lesson starts at 8:00, and Ben gets there at 8:00. He is ___. (on time / late for)",
+      "solution": "on time"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: on time",
+        "url": "https://dictionary.cambridge.org/dictionary/english/time"
+      }
+    ]
+  },
+  {
+    "word": "hallway",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 走廊；可数名词，复数 hallways。美式英语常用 hallway，英式英语常用 corridor。",
+    "collocations": "in the hallway; walk down the hallway; hallway rules",
+    "commonMistake": "hallway 指楼内供人通行的走廊；不要与 hall（大厅）混淆。",
+    "example": {
+      "english": "Please walk quietly in the hallway.",
+      "chinese": "请在走廊里轻声行走。"
+    },
+    "application": {
+      "prompt": "Students walk between classrooms along the ___. (hallway / uniform)",
+      "solution": "hallway"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hallway",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hallway"
+      }
+    ]
+  },
+  {
+    "word": "uniform",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 校服；制服。可数名词，复数 uniforms；常与 wear 搭配。",
+    "collocations": "wear a uniform; school uniform; a police uniform",
+    "commonMistake": "uniform 是可数名词，单数前通常需要 a/the 或物主限定词，如 wear a uniform。",
+    "example": {
+      "english": "We wear our school uniforms on Mondays.",
+      "chinese": "我们星期一穿校服。"
+    },
+    "application": {
+      "prompt": "Students wear a school ___ to show which school they attend. (uniform / hallway)",
+      "solution": "uniform"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: uniform",
+        "url": "https://dictionary.cambridge.org/dictionary/english/uniform"
+      }
+    ]
+  },
+  {
+    "word": "litter",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 乱扔；n. 垃圾。作动词可说 litter a place；作名词通常指散落在公共场所的垃圾。",
+    "collocations": "drop litter; pick up litter; litter the floor",
+    "commonMistake": "litter 作名词泛指垃圾时通常不可数；作动词表示乱扔垃圾，后可接地点。",
+    "example": {
+      "english": "Don’t litter in the school yard.",
+      "chinese": "不要在校园里乱扔垃圾。"
+    },
+    "application": {
+      "prompt": "Put the wrapper in the bin; do not ___ on the floor. (litter / arrive)",
+      "solution": "litter"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: litter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/litter"
+      }
+    ]
+  },
+  {
+    "word": "polite",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adj. 有礼貌的。可作表语或定语；副词为 politely，常见结构 It is polite to do sth。",
+    "collocations": "be polite to sb; a polite request; speak politely",
+    "commonMistake": "polite 是形容词；修饰动词 speak 要用副词 politely。",
+    "example": {
+      "english": "It is polite to say “please” when asking for help.",
+      "chinese": "请求帮助时说“请”是有礼貌的。"
+    },
+    "application": {
+      "prompt": "A kind request with “please” sounds ___. (polite / politely)",
+      "solution": "polite"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: polite",
+        "url": "https://dictionary.cambridge.org/dictionary/english/polite"
+      },
+      {
+        "label": "Cambridge Grammar: polite imperatives",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/imperative-clauses-be-quiet"
+      }
+    ]
+  },
+  {
+    "word": "treat",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 对待；招待；治疗；n. 款待、令人愉快的东西。过去式 treated；常用 treat sb kindly / treat sb for an illness。",
+    "collocations": "treat people kindly; treat a patient; a special treat",
+    "commonMistake": "treat 作“对待某人”时直接接宾语；作“治疗”也可接病人或疾病，如 treat a patient for a cold。",
+    "example": {
+      "english": "We should treat every new student kindly.",
+      "chinese": "我们应该友善地对待每一位新同学。"
+    },
+    "application": {
+      "prompt": "The school nurse will ___ the cut on Ben’s hand. (treat / follow)",
+      "solution": "treat"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: treat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/treat"
+      }
+    ]
+  },
+  {
+    "word": "respect",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. & v. 尊敬。作动词直接接人或规则；作名词常用 show respect for sb/sth。",
+    "collocations": "respect the rules; respect other people; show respect for teachers",
+    "commonMistake": "作动词时说 respect someone，不在宾语前加 for；作名词时可说 respect for someone。",
+    "example": {
+      "english": "Students should respect one another and the school rules.",
+      "chinese": "学生应该互相尊重并尊重校规。"
+    },
+    "application": {
+      "prompt": "We must ___ the classroom rules. (respect / respectful)",
+      "solution": "respect"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: respect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/respect"
+      }
+    ]
+  },
+  {
+    "word": "if",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "conj. 如果。引导条件从句；谈将来的真实条件时，if 从句通常用一般现在时，主句可用 will + 动词原形。",
+    "collocations": "if it rains; if you need help; if possible",
+    "commonMistake": "表示将来的条件时，通常说 If it rains tomorrow, we will stay inside；不在 if 从句中用 will 表将来。",
+    "example": {
+      "english": "If you do not understand a rule, ask your teacher.",
+      "chinese": "如果你不理解某条规定，就问老师。"
+    },
+    "application": {
+      "prompt": "The plan is for tomorrow: If it rains, we ___ inside. (will stay / stayed)",
+      "solution": "will stay"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: if",
+        "url": "https://dictionary.cambridge.org/dictionary/english/if"
+      },
+      {
+        "label": "Cambridge Grammar: if and conditions",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/conditions"
+      }
+    ]
+  },
+  {
+    "word": "jacket",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 夹克衫；短上衣。可数名词，复数 jackets；常与 wear、put on 搭配。",
+    "collocations": "wear a jacket; put on your jacket; a warm jacket",
+    "commonMistake": "put on 强调穿上的动作，wear 表示穿着的状态；jacket 是可数名词。",
+    "example": {
+      "english": "Hang your jacket by the classroom door.",
+      "chinese": "把你的夹克挂在教室门边。"
+    },
+    "application": {
+      "prompt": "It is cold outside, so take a warm ___. (jacket / uniform)",
+      "solution": "jacket"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: jacket",
+        "url": "https://dictionary.cambridge.org/dictionary/english/jacket"
+      }
+    ]
+  },
+  {
+    "word": "have to",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，表示因规则或情况“不得不、必须”。have to 随主语变化为 has to；过去式 had to；否定 don’t have to 表示“不必”，mustn’t 才表示“禁止”。",
+    "collocations": "have to follow the rules; have to wear a uniform; don’t have to come",
+    "commonMistake": "don’t have to 是“没有必要”，不等于 mustn’t“禁止”；第三人称单数用 has to。",
+    "example": {
+      "english": "We have to arrive at school before the first lesson.",
+      "chinese": "我们必须在第一节课前到校。"
+    },
+    "application": {
+      "prompt": "Our class rules say we ___ keep the hallway clean. (have to / don’t have to)",
+      "solution": "have to"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: have to",
+        "url": "https://dictionary.cambridge.org/dictionary/english/have-to"
+      },
+      {
+        "label": "Cambridge Grammar: must and have to",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/must"
+      }
+    ]
+  },
+  {
+    "word": "everything",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "pron. 每件事；一切。作单数看待，后接单数谓语；形容词通常放在它后面。",
+    "collocations": "everything is ready; everything in the bag; do everything",
+    "commonMistake": "everything 虽表示多件事，语法上仍作单数：Everything is ready，不说 Everything are ready。",
+    "example": {
+      "english": "Everything is ready for the class meeting.",
+      "chinese": "班会要用的东西都准备好了。"
+    },
+    "application": {
+      "prompt": "The books, maps, and pens are ready. ___ is ready for class. (Everything / Everyone)",
+      "solution": "Everything"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: everything",
+        "url": "https://dictionary.cambridge.org/dictionary/english/everything"
+      }
+    ]
+  },
+  {
+    "word": "lend",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 借给；借出。lend—lent—lent；结构为 lend sb sth 或 lend sth to sb。",
+    "collocations": "lend me a pencil; lend a book to a friend; lend a hand",
+    "commonMistake": "lend 是把东西借给别人；borrow 是向别人借。过去式和过去分词都是 lent。",
+    "example": {
+      "english": "Could you lend me your ruler for a minute?",
+      "chinese": "你能把尺子借给我用一会儿吗？"
+    },
+    "application": {
+      "prompt": "I need a pencil. Can you ___ me one? (lend / borrow)",
+      "solution": "lend"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lend"
+      }
+    ]
+  },
+  {
+    "word": "sweet",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 糖果；adj. 甜的。作名词时英式英语常指一颗糖果，复数 sweets；作形容词可描述食物味道。",
+    "collocations": "a sweet; a bag of sweets; sweet tea",
+    "commonMistake": "sweet 作形容词时说 The tea is sweet；表示一颗糖果时可说 a sweet，复数 sweets。",
+    "example": {
+      "english": "The shop sells sweets and sweet fruit juice.",
+      "chinese": "这家店卖糖果和甜果汁。"
+    },
+    "application": {
+      "prompt": "Lemonade with sugar tastes ___. (sweet / sweets)",
+      "solution": "sweet"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sweet",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sweet"
+      }
+    ]
+  },
+  {
+    "word": "snack",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 点心；小吃。可数名词，复数 snacks；常指两餐之间少量吃的食物。",
+    "collocations": "have a snack; a healthy snack; a snack after school",
+    "commonMistake": "snack 是可数名词，表示一份小吃时要说 a snack；泛指多份时用 snacks。",
+    "example": {
+      "english": "I have a small snack after school.",
+      "chinese": "我放学后吃一点小吃。"
+    },
+    "application": {
+      "prompt": "At four o’clock, I eat a small ___ before dinner. (snack / uniform)",
+      "solution": "snack"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: snack",
+        "url": "https://dictionary.cambridge.org/dictionary/english/snack"
+      }
+    ]
+  },
+  {
+    "word": "of course",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，表示“当然”；常用于肯定回答或补充说明。语气取决于上下文和语调。",
+    "collocations": "Of course.; of course not; of course you can",
+    "commonMistake": "of course 是固定短语，通常不要拆开；友好回答请求时可说 Of course.。",
+    "example": {
+      "english": "“May I borrow your pen?” “Of course.”",
+      "chinese": "“我可以借你的笔吗？”“当然可以。”"
+    },
+    "application": {
+      "prompt": "“Can I sit here?” “___.” (Of course / Of course not) Use a friendly yes.",
+      "solution": "Of course"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: of course",
+        "url": "https://dictionary.cambridge.org/dictionary/english/of-course"
+      }
+    ]
+  },
+  {
+    "word": "mobile",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adj. 可移动的；能移动的。常作定语修饰名词；mobile phone 中 mobile 表示便携、可移动的。",
+    "collocations": "mobile chair; mobile phone; mobile equipment",
+    "commonMistake": "mobile 作形容词表示可移动的；mobile phone 才是“手机”，不要把 mobile 单独当作 phone 的完整表达。",
+    "example": {
+      "english": "The table has wheels, so it is easy to move and very mobile.",
+      "chinese": "这张桌子有轮子，所以很容易移动。"
+    },
+    "application": {
+      "prompt": "This chair has wheels and can be moved easily. It is ___. (mobile / unhappy)",
+      "solution": "mobile"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mobile",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mobile"
+      }
+    ]
+  },
+  {
+    "word": "mobile phone",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 手机。可数名词，复数 mobile phones；英式英语常用 mobile phone，美式英语常说 cell phone。",
+    "collocations": "use a mobile phone; mobile phone number; turn off your mobile phone",
+    "commonMistake": "mobile phone 是完整名词短语；mobile 单独作形容词时表示“可移动的”。",
+    "example": {
+      "english": "Please turn off your mobile phone during the exam.",
+      "chinese": "考试期间请关掉手机。"
+    },
+    "application": {
+      "prompt": "Complete the textbook term for a handheld telephone: mobile ___. (phone / hallway)",
+      "solution": "phone"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mobile phone",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mobile-phone"
+      }
+    ]
+  },
+  {
+    "word": "turn off",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语动词，关掉（水、电或煤气等）。可分开使用；宾语是代词时放在 turn 和 off 之间，如 turn it off。",
+    "collocations": "turn off the lights; turn off the tap; turn it off",
+    "commonMistake": "代词宾语放在中间：turn it off；不说 turn off it。",
+    "example": {
+      "english": "Turn off the lights before you leave the classroom.",
+      "chinese": "离开教室前关灯。"
+    },
+    "application": {
+      "prompt": "The computer is still on. Please ___ it ___.",
+      "solution": "turn it off"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: turn off",
+        "url": "https://dictionary.cambridge.org/dictionary/english/turn"
+      }
+    ]
+  },
+  {
+    "word": "queue",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 队；队列。可数名词，常指等候服务的人或车辆；英式英语常用 queue，美式英语常说 line。",
+    "collocations": "wait in a queue; join the queue; a queue of people",
+    "commonMistake": "常说 wait in a queue 或 queue for a bus；不要与 cue（提示、暗示）混淆。",
+    "example": {
+      "english": "We waited in a queue to buy lunch.",
+      "chinese": "我们排队买午餐。"
+    },
+    "application": {
+      "prompt": "People are waiting one behind another to buy tickets. They are in a ___. (queue / hallway)",
+      "solution": "queue"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: queue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/queue"
+      }
+    ]
+  },
+  {
+    "word": "jump the queue",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，插队；指越过正在等候的人，抢到队伍前面。常用于英式英语；美式英语常说 jump the line。",
+    "collocations": "don’t jump the queue; try to jump the queue; jump the queue at the shop",
+    "commonMistake": "queue 是英式英语中“队伍”；jump the queue 表示插到队伍前面，不是正常排队。",
+    "example": {
+      "english": "Please don’t jump the queue; everyone has been waiting.",
+      "chinese": "请不要插队，大家都等了一会儿了。"
+    },
+    "application": {
+      "prompt": "A student moves in front of everyone already waiting. The student tries to ___. (jump the queue / wait in the queue)",
+      "solution": "jump the queue"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: jump the queue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/jump-the-queue"
+      }
+    ]
+  },
+  {
+    "word": "feed",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 喂养；饲养。feed—fed—fed；可用 feed sb/sth 或 feed sth to sb/sth。",
+    "collocations": "feed the class pet; feed a baby; feed the birds",
+    "commonMistake": "feed 的过去式和过去分词是 fed，不是 feeded；注意 feed the cat 与 feed food to the cat 两种结构。",
+    "example": {
+      "english": "I feed our class rabbit before the first lesson.",
+      "chinese": "第一节课前我会喂班里的兔子。"
+    },
+    "application": {
+      "prompt": "Give food to the rabbit every morning: ___ the rabbit. (feed / follow)",
+      "solution": "feed"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: feed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/feed"
+      }
+    ]
+  },
+  {
+    "word": "leave",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 离开；留下。leave—left—left；leave a place 表示离开某地，leave sth somewhere 表示把某物留在某处。",
+    "collocations": "leave school; leave a message; leave a bag at home",
+    "commonMistake": "leave school 可表示离开学校；leave a book at home 表示把书落在家里。过去式是 left。",
+    "example": {
+      "english": "We leave school at four thirty on Fridays.",
+      "chinese": "我们星期五四点半离校。"
+    },
+    "application": {
+      "prompt": "The last lesson ends at 4:30, and we ___ school then. (leave / leaves)",
+      "solution": "leave"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: leave",
+        "url": "https://dictionary.cambridge.org/dictionary/english/leave"
+      }
+    ]
+  },
+  {
+    "word": "absent",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adj. 缺席的；不在的。常作表语，常见结构 be absent from + 活动或地点。",
+    "collocations": "be absent today; be absent from school; absent from class",
+    "commonMistake": "absent 是形容词，通常与 be 连用；说“缺席某活动”用 absent from。",
+    "example": {
+      "english": "Mia was absent yesterday because she was ill.",
+      "chinese": "米娅昨天因病缺席。"
+    },
+    "application": {
+      "prompt": "Kai is at home sick and is not at school today. He is ___. (absent / present)",
+      "solution": "absent"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: absent",
+        "url": "https://dictionary.cambridge.org/dictionary/english/absent"
+      }
+    ]
+  },
+  {
+    "word": "absent from",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，表示“缺席；不在”；结构为 be absent from + 学校、课程、会议等。",
+    "collocations": "absent from school; absent from class; absent from a meeting",
+    "commonMistake": "absent from 中 from 后接缺席的场合；absent 是形容词，不要漏掉 be 动词。",
+    "example": {
+      "english": "Ben is absent from school today.",
+      "chinese": "本今天没有到校。"
+    },
+    "application": {
+      "prompt": "Rita missed the whole lesson because she was ill. She was ___ class. (absent from / late for)",
+      "solution": "absent from"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: absent from",
+        "url": "https://dictionary.cambridge.org/dictionary/english/absent"
+      }
+    ]
+  },
+  {
+    "word": "shh",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "interj. 嘘；用来提醒别人安静。常用于句首，可单独作感叹语。",
+    "collocations": "Shh!; say “shh”; shh, be quiet",
+    "commonMistake": "shh 是表示安静的感叹语，不是动词；句首通常大写为 Shh!。",
+    "example": {
+      "english": "Shh! The class is taking a test.",
+      "chinese": "嘘！班里正在考试。"
+    },
+    "application": {
+      "prompt": "A baby is asleep. Ask people to be quiet: “___!” (Shh / Hello)",
+      "solution": "Shh"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: shh",
+        "url": "https://dictionary.cambridge.org/us/dictionary/english/shh"
+      }
+    ]
+  },
+  {
+    "word": "quietly",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adv. 轻声地；安静地。修饰动词；形容词形式是 quiet。",
+    "collocations": "speak quietly; walk quietly; sit quietly",
+    "commonMistake": "quiet 是形容词，quietly 是副词；修饰 speak 或 walk 时用 quietly。",
+    "example": {
+      "english": "Please speak quietly in the hallway.",
+      "chinese": "请在走廊里轻声说话。"
+    },
+    "application": {
+      "prompt": "The baby is sleeping, so please walk ___. (quiet / quietly)",
+      "solution": "quietly"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: quietly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/quietly"
+      }
+    ]
+  },
+  {
+    "word": "belt",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 安全带；腰带；皮带。可数名词，复数 belts；seat belt 指汽车安全带。",
+    "collocations": "fasten a seat belt; wear a belt; a leather belt",
+    "commonMistake": "seat belt 是安全带；腰间束衣服的 belt 是腰带。单数可数名词前要有 a/the 等限定词。",
+    "example": {
+      "english": "Please fasten your seat belt before the car moves.",
+      "chinese": "汽车开动前请系好安全带。"
+    },
+    "application": {
+      "prompt": "Before the car starts, fasten your seat ___.",
+      "solution": "belt"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: belt",
+        "url": "https://dictionary.cambridge.org/dictionary/english/belt"
+      }
+    ]
+  },
+  {
+    "word": "noise",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 声音；噪声。泛指噪声时通常不可数；指某一个具体声响时可数，如 a strange noise。",
+    "collocations": "make a noise; loud noise; noise in the hallway",
+    "commonMistake": "noise 是名词，noisy 是形容词；说“很吵的教室”用 a noisy classroom。",
+    "example": {
+      "english": "The noise in the hallway was too loud for a quiet study room.",
+      "chinese": "走廊里的声音太大，不适合在安静的自习室里学习。"
+    },
+    "application": {
+      "prompt": "A loud ___ from the machine kept us awake. (noise / noisy)",
+      "solution": "noise"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: noise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/noise"
+      }
+    ]
+  },
+  {
+    "word": "unhappy",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adj. 不快乐的。由否定前缀 un- + happy 构成；可作定语或表语。",
+    "collocations": "feel unhappy; look unhappy; an unhappy student",
+    "commonMistake": "unhappy 是形容词；作系动词 feel/look 后的表语，不要加副词形式。happy 的反义词可用 unhappy。",
+    "example": {
+      "english": "Leo felt unhappy when he lost his notebook.",
+      "chinese": "利奥丢了笔记本后感到不开心。"
+    },
+    "application": {
+      "prompt": "The opposite of happy, using the prefix un-, is ___. (unhappy / untidy)",
+      "solution": "unhappy"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: unhappy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/unhappy"
+      }
+    ]
+  },
+  {
+    "word": "Mary",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "专有名词，人名“玛丽”。专有名词首字母大写，通常不加冠词。",
+    "collocations": "Mary is; Mary’s book; talk to Mary",
+    "commonMistake": "人名 Mary 首字母必须大写；表示“玛丽的”时写 Mary’s。",
+    "example": {
+      "english": "Mary follows the classroom rules every day.",
+      "chinese": "玛丽每天都遵守课堂规则。"
+    },
+    "application": {
+      "prompt": "Correct the capitalization of this first name: mary.",
+      "solution": "Mary"
+    },
+    "sources": [
+      {
+        "label": "Behind the Name: Mary",
+        "url": "https://www.behindthename.com/name/mary"
+      }
+    ]
+  },
+  {
+    "word": "Tony",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "专有名词，人名“托尼”。专有名词首字母大写，通常不加冠词。",
+    "collocations": "Tony is; Tony’s bag; ask Tony",
+    "commonMistake": "人名 Tony 首字母大写；所有格写 Tony’s，不写 tonys。",
+    "example": {
+      "english": "Tony waits in the queue for lunch.",
+      "chinese": "托尼排队买午餐。"
+    },
+    "application": {
+      "prompt": "Correct the capitalization of this first name: tony.",
+      "solution": "Tony"
+    },
+    "sources": [
+      {
+        "label": "Behind the Name: Tony",
+        "url": "https://www.behindthename.com/name/tony"
+      }
+    ]
+  },
+  {
+    "word": "Anne",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "专有名词，人名“安妮”。专有名词首字母大写，通常不加冠词。",
+    "collocations": "Anne is; Anne’s class; write to Anne",
+    "commonMistake": "Anne 的首字母大写；注意拼写中有两个 n，不要写成 Ane。",
+    "example": {
+      "english": "Anne lends her ruler to a classmate.",
+      "chinese": "安妮把尺子借给一位同学。"
+    },
+    "application": {
+      "prompt": "Correct the capitalization and spelling of this first name: anne.",
+      "solution": "Anne"
+    },
+    "sources": [
+      {
+        "label": "Behind the Name: Anne",
+        "url": "https://www.behindthename.com/name/anne"
+      }
+    ]
+  },
+  {
+    "word": "Eric",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "专有名词，人名“埃里克”。专有名词首字母大写，通常不加冠词。",
+    "collocations": "Eric is; Eric’s uniform; help Eric",
+    "commonMistake": "Eric 是人名，首字母大写；所有格写 Eric’s。",
+    "example": {
+      "english": "Eric is on time for the first lesson.",
+      "chinese": "埃里克准时上了第一节课。"
+    },
+    "application": {
+      "prompt": "Correct the capitalization of this first name: eric.",
+      "solution": "Eric"
+    },
+    "sources": [
+      {
+        "label": "Behind the Name: Eric",
+        "url": "https://www.behindthename.com/name/eric"
+      }
+    ]
+  },
+  {
+    "word": "Dr",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. doctor 的缩写，表示“博士；医生”，通常放在人名或姓氏前作称呼，如 Dr Lee。英式写法常不加句点，美式也常写 Dr.。",
+    "collocations": "Dr Lee; Dr Brown; ask Dr Green",
+    "commonMistake": "Dr 放在人名或姓氏前并首字母大写；本词表写作 Dr，美式英语中也可写 Dr.。",
+    "example": {
+      "english": "Dr Lee visited our school to talk about health.",
+      "chinese": "李医生来我们学校讲解健康知识。"
+    },
+    "application": {
+      "prompt": "Use the title before the surname: ___ Brown. (Dr / dr)",
+      "solution": "Dr"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: Dr",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dr"
+      }
+    ]
+  },
+  {
+    "word": "make sb’s/the bed",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，整理床铺；铺床。make—made—made；sb’s 可换成 my、your、his、her、our、their 等所有格。",
+    "collocations": "make my bed; make the bed; make your bed every morning",
+    "commonMistake": "表示整理床铺说 make the bed，不说 do the bed；使用具体人物时用所有格，如 make her bed。",
+    "example": {
+      "english": "I make my bed before breakfast.",
+      "chinese": "我在早餐前整理床铺。"
+    },
+    "application": {
+      "prompt": "Before breakfast, I ___ to keep my room tidy. (Use the phrase with “my”.)",
+      "solution": "make my bed"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: make sb’s/the bed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/make-the-bed"
+      }
+    ]
+  },
+  {
+    "word": "either",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adv. 也（用于否定词组后）。常放在否定句末；与 too 通常用于肯定句不同。",
+    "collocations": "not ... either; I don’t either; neither ... nor",
+    "commonMistake": "either 表示“也”用于否定句末，如 I don’t know either；肯定句通常用 too 或 also。",
+    "example": {
+      "english": "I don’t use my phone in class either.",
+      "chinese": "我上课时也不用手机。"
+    },
+    "application": {
+      "prompt": "My brother isn’t late, and I am not late ___.",
+      "solution": "either"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: either",
+        "url": "https://dictionary.cambridge.org/dictionary/english/either"
+      }
+    ]
+  },
+  {
+    "word": "practise",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 训练；练习。英式英语中 practise 是动词，practise—practised—practised；后接名词或动词-ing。",
+    "collocations": "practise English; practise speaking; practise for a test",
+    "commonMistake": "按本词表的英式拼写，动词写 practise，名词写 practice；美式英语中 practice 可作动词和名词。",
+    "example": {
+      "english": "We practise speaking English after class.",
+      "chinese": "我们课后练习说英语。"
+    },
+    "application": {
+      "prompt": "Use the British spelling shown in this book: We ___ the dialogue every day. (practise / practice)",
+      "solution": "practise"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: practise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/practise"
+      }
+    ]
+  },
+  {
+    "word": "hang",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 悬挂。表示把物品挂起时，过去式和过去分词通常为 hung；现在分词 hanging。",
+    "collocations": "hang a jacket on a hook; hang a picture; hang up your coat",
+    "commonMistake": "hang 表示悬挂时用 hung 作过去式和过去分词；hanged 主要用于“绞死”，初中常用义记 hung。",
+    "example": {
+      "english": "Hang your jacket on the hook, please.",
+      "chinese": "请把夹克挂在挂钩上。"
+    },
+    "application": {
+      "prompt": "Please ___ your coat on the hook. (hang / hangs)",
+      "solution": "hang"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hang",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hang"
+      }
+    ]
+  },
+  {
+    "word": "hang out",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语动词，闲逛；常去某处。常用 hang out with sb 或 hang out at/in a place；过去式 hung out。",
+    "collocations": "hang out with friends; hang out at the park; hang out after school",
+    "commonMistake": "hang out 表示和朋友一起消磨时间；作过去式时说 hung out，不说 hanged out。",
+    "example": {
+      "english": "My friends and I hang out in the yard after school.",
+      "chinese": "放学后我和朋友们在院子里闲逛。"
+    },
+    "application": {
+      "prompt": "After homework, we spend time together at the park. We ___ there. (hang out / hang up)",
+      "solution": "hang out"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hang out",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hang-out"
+      }
+    ]
+  },
+  {
+    "word": "weekday",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 工作日，星期一至星期五中的任何一天。可数名词，复数 weekdays；与 weekend 相对。",
+    "collocations": "on weekdays; a weekday morning; weekday routine",
+    "commonMistake": "weekday 指周一至周五的某一天，不包括 Saturday 和 Sunday；weekend 指周末。",
+    "example": {
+      "english": "I get up early on weekdays.",
+      "chinese": "我工作日早起。"
+    },
+    "application": {
+      "prompt": "Monday is a ___, but Saturday is part of the weekend.",
+      "solution": "weekday"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: weekday",
+        "url": "https://dictionary.cambridge.org/dictionary/english/weekday"
+      }
+    ]
+  },
+  {
+    "word": "awful",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adj. 糟糕的；讨厌的。可作定语或表语；非正式语境中表示非常差。",
+    "collocations": "awful weather; feel awful; an awful noise",
+    "commonMistake": "awful 是形容词；修饰名词或放在 be/feel 等系动词后，不要误写为副词。",
+    "example": {
+      "english": "The weather was awful, so we stayed inside.",
+      "chinese": "天气很糟糕，所以我们待在室内。"
+    },
+    "application": {
+      "prompt": "The trip was not enjoyable at all; the weather was ___. (awful / polite)",
+      "solution": "awful"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: awful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/awful"
+      }
+    ]
+  },
+  {
+    "word": "become",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 变成；成为。become—became—become；后接名词或形容词作表语。",
+    "collocations": "become a teacher; become quiet; become better",
+    "commonMistake": "become 的过去式是 became，过去分词是 become；become 后可直接接形容词，如 become quiet。",
+    "example": {
+      "english": "The hallway became quiet after the bell rang.",
+      "chinese": "铃响后走廊安静了下来。"
+    },
+    "application": {
+      "prompt": "Yesterday, the hallway ___ quiet after the bell. (became / become)",
+      "solution": "became"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: become",
+        "url": "https://dictionary.cambridge.org/dictionary/english/become"
+      }
+    ]
+  },
+  {
+    "word": "better",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adj. & adv. 较好的；较好地。是 good 和 well 的比较级；常用于 than 结构。",
+    "collocations": "a better idea; feel better; do better than before",
+    "commonMistake": "better 是 good/well 的不规则比较级，不说 gooder；作形容词修饰名词，作副词修饰动作。",
+    "example": {
+      "english": "This rule helps us work better together.",
+      "chinese": "这条规则有助于我们更好地合作。"
+    },
+    "application": {
+      "prompt": "This plan is good, but the second plan is ___. (better / gooder)",
+      "solution": "better"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: better",
+        "url": "https://dictionary.cambridge.org/dictionary/english/better"
+      }
+    ]
+  },
+  {
+    "word": "person",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 人。可数名词，复数通常为 people；persons 也可用于正式或法律语境。",
+    "collocations": "one person; two people; a person in the hallway",
+    "commonMistake": "person 的常见复数是 people，不是 persons；one person 表示一个人。",
+    "example": {
+      "english": "Every person in our class follows the rules.",
+      "chinese": "我们班的每个人都遵守规则。"
+    },
+    "application": {
+      "prompt": "One human being is one ___. (person / people)",
+      "solution": "person"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: person",
+        "url": "https://dictionary.cambridge.org/dictionary/english/person"
+      }
+    ]
+  },
+  {
+    "word": "focus",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 集中（注意力、精力等）；聚焦。常用 focus on + 名词或动词-ing；第三人称单数 focuses。",
+    "collocations": "focus on the task; focus your attention; focus carefully",
+    "commonMistake": "表示“集中注意力于……”要用 focus on；主语是 he/she/it 时动词写 focuses。",
+    "example": {
+      "english": "Please focus on the teacher’s instructions.",
+      "chinese": "请把注意力集中在老师的指示上。"
+    },
+    "application": {
+      "prompt": "During the test, we must ___ on our work. (focus / focuses)",
+      "solution": "focus"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: focus",
+        "url": "https://dictionary.cambridge.org/dictionary/english/focus"
+      }
+    ]
+  },
+  {
+    "word": "focus on",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，集中（注意力、精力等）于。on 是介词，后接名词、代词或动词-ing。",
+    "collocations": "focus on a task; focus on studying; focus on the main idea",
+    "commonMistake": "focus on 后接名词或动词-ing；不能说 focus on to do sth。",
+    "example": {
+      "english": "I focus on one task at a time.",
+      "chinese": "我一次专注于一项任务。"
+    },
+    "application": {
+      "prompt": "Listen carefully and pay attention to the instructions: ___ the instructions. (focus on / turn off)",
+      "solution": "focus on"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: focus on",
+        "url": "https://dictionary.cambridge.org/dictionary/english/focus-on"
+      }
+    ]
+  },
+  {
+    "word": "build",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 创建；建造。build—built—built；既可指建造建筑，也可指逐步形成习惯或关系。",
+    "collocations": "build a house; build good habits; build a team",
+    "commonMistake": "build 的过去式和过去分词都是 built，不是 builded。",
+    "example": {
+      "english": "Following a routine can help us build good habits.",
+      "chinese": "遵循日常安排能帮助我们养成好习惯。"
+    },
+    "application": {
+      "prompt": "The workers will ___ a new classroom next year. (build / built)",
+      "solution": "build"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: build",
+        "url": "https://dictionary.cambridge.org/dictionary/english/build"
+      }
+    ]
+  },
+  {
+    "word": "spirit",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 精神；情绪。可数或不可数，具体含义看搭配；team spirit 指团队精神，in high spirits 指情绪高涨。",
+    "collocations": "team spirit; school spirit; in high spirits",
+    "commonMistake": "team spirit 通常不加冠词表示团队精神；表示某种情绪或精神时依搭配判断可数性。",
+    "example": {
+      "english": "Team spirit helps our class work together.",
+      "chinese": "团队精神帮助我们班团结合作。"
+    },
+    "application": {
+      "prompt": "The team supports one another and works together. It has strong team ___. (spirit / advice)",
+      "solution": "spirit"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spirit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spirit"
+      }
+    ]
+  },
+  {
+    "word": "think about",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "短语，思考；考虑。think—thought—thought；about 是介词，后接名词、代词或动词-ing。",
+    "collocations": "think about a question; think about the result; think about doing sth",
+    "commonMistake": "think about 后接名词或动词-ing；think about doing sth 表示考虑做某事。",
+    "example": {
+      "english": "Think about the rule before you act.",
+      "chinese": "行动前先想一想这条规则。"
+    },
+    "application": {
+      "prompt": "Before making a choice, you should ___ the results. (think about / turn off)",
+      "solution": "think about"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: think about",
+        "url": "https://dictionary.cambridge.org/dictionary/english/think-about"
+      }
+    ]
+  },
+  {
+    "word": "relax",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 放松；休息。规则变化 relax—relaxed—relaxed；可用 relax after sth 或 relax by doing sth。",
+    "collocations": "relax after school; relax at home; relax by listening to music",
+    "commonMistake": "relax 是动词，描述“放松的”可用 relaxed；描述令人放松的事物可用 relaxing。",
+    "example": {
+      "english": "I listen to music to relax after school.",
+      "chinese": "我放学后听音乐放松。"
+    },
+    "application": {
+      "prompt": "Take a deep breath and ___ before the test. (relax / relaxed)",
+      "solution": "relax"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: relax",
+        "url": "https://dictionary.cambridge.org/dictionary/english/relax"
+      }
+    ]
+  },
+  {
+    "word": "advice",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "n. 建议；意见。不可数名词；可说 some advice 或 a piece of advice。",
+    "collocations": "ask for advice; give advice; a piece of advice",
+    "commonMistake": "advice 不可数，不说 an advice 或 advices；表示一条建议用 a piece of advice。",
+    "example": {
+      "english": "My teacher gave me useful advice about studying.",
+      "chinese": "老师给了我一些关于学习的有用建议。"
+    },
+    "application": {
+      "prompt": "Can I ask you for some ___ about my project? (advice / advices)",
+      "solution": "advice"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: advice",
+        "url": "https://dictionary.cambridge.org/dictionary/english/advice"
+      }
+    ]
+  },
+  {
+    "word": "understand",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "v. 理解；领会。understand—understood—understood；可直接接名词或从句。",
+    "collocations": "understand a rule; understand the question; understand what to do",
+    "commonMistake": "understand 的过去式和过去分词都是 understood；不说 understanded。",
+    "example": {
+      "english": "I understand the rule now.",
+      "chinese": "我现在理解这条规定了。"
+    },
+    "application": {
+      "prompt": "The directions are clear, so I can ___ them. (understand / understood)",
+      "solution": "understand"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: understand",
+        "url": "https://dictionary.cambridge.org/dictionary/english/understand"
+      }
+    ]
+  },
+  {
+    "word": "untidy",
+    "examTags": [
+      "词汇·词义与搭配",
+      "语法·规则表达与情境运用"
+    ],
+    "grammar": "adj. 不整洁的。由 un- + tidy 构成；可作定语或表语。",
+    "collocations": "an untidy desk; an untidy room; look untidy",
+    "commonMistake": "untidy 是形容词，表示“不整洁的”；反义词是 tidy。",
+    "example": {
+      "english": "His desk is untidy, with books on the floor.",
+      "chinese": "他的书桌不整洁，书都放在地板上。"
+    },
+    "application": {
+      "prompt": "Choose the adjective meaning “not tidy”: ___. (untidy / polite)",
+      "solution": "untidy"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: untidy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/untidy"
+      }
+    ]
+  }
+]

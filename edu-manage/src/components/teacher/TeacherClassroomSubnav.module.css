@@ -1,0 +1,143 @@
+/* ==========================================================================
+   Teacher Classroom Subnav - High Craft Capsule Navigation Bar
+   Smooth sliding pills for Schedule, Attendance, Interaction, Feedback, Previews
+   ========================================================================== */
+
+.subnavWrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+  z-index: 10;
+}
+
+.subnavContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(20, 87, 77, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(26, 18, 1, 0.04), 0 1px 3px rgba(20, 87, 77, 0.04);
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.subnavContainer::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.subnavPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* 未激活态 */
+.subnavPillInactive {
+  background: #faf8f5;
+  color: #5a4e3a;
+  border-color: rgba(20, 87, 77, 0.06);
+}
+
+.subnavPillInactive:hover {
+  background: #f3efe8;
+  color: #14574d;
+  border-color: rgba(20, 87, 77, 0.15);
+  transform: translateY(-1px);
+}
+
+.subnavPillInactive:active {
+  transform: scale(0.97);
+}
+
+/* 激活态：深林墨玉高亮 */
+.subnavPillActive {
+  background: linear-gradient(135deg, #10483f 0%, #165b4f 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  border-color: rgba(20, 87, 77, 0.2);
+  box-shadow: 0 4px 14px rgba(16, 72, 63, 0.28);
+  transform: translateY(-1px);
+}
+
+.subnavPillActive .pillIcon {
+  color: #fae6a2 !important; /* 暖金高亮图标 */
+}
+
+.pillIcon {
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.15s ease;
+}
+
+.subnavPill:hover .pillIcon {
+  transform: scale(1.1);
+}
+
+.pillBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 未激活态下的红点/暖金徽标 */
+.subnavPillInactive .pillBadgeAlert {
+  background: #ff4d4f;
+  color: #ffffff;
+}
+
+.subnavPillInactive .pillBadgeGold {
+  background: #d6b45b;
+  color: #4a3809;
+}
+
+/* 激活态下的明亮徽标 */
+.subnavPillActive .pillBadgeAlert {
+  background: #ffffff;
+  color: #cf1322;
+}
+
+.subnavPillActive .pillBadgeGold {
+  background: #fae6a2;
+  color: #14574d;
+}
+
+@media (max-width: 640px) {
+  .subnavContainer {
+    padding: 5px 6px;
+    gap: 6px;
+    border-radius: 14px;
+  }
+
+  .subnavPill {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 12.5px;
+  }
+}

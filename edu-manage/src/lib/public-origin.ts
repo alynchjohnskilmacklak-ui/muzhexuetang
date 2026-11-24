@@ -1,6 +1,26 @@
 import type { NextRequest } from 'next/server'
 
-const LOCAL_HOST_PATTERN = /^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i
+const LOCAL_HOST_PATTERN = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?$/i
+
+/**
+ * Resolve a configured origin for links that leave the application, such as
+ * WeCom cards. Request-local hosts are never suitable for those links.
+ */
+export function getConfiguredPublicOrigin(): string {
+  for (const candidate of [process.env.PUBLIC_APP_URL, process.env.NEXTAUTH_URL, process.env.AUTH_URL]) {
+    if (!candidate) continue
+    try {
+      const url = new URL(candidate)
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') continue
+      if (LOCAL_HOST_PATTERN.test(url.host) || /\.(localhost|local)$/i.test(url.hostname)) continue
+      if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') continue
+      return url.origin
+    } catch {
+      // Ignore malformed values and try the next configured origin.
+    }
+  }
+  return 'https://muzhexuetang.xyz'
+}
 
 function normalizeConfiguredOrigin(value: string | undefined): string | null {
   if (!value) return null

@@ -18,7 +18,7 @@ const ACTION_LABELS: Record<string, string> = {
 
 export function ActivityLogCard({ data }: { data: ActivityLog[] }) {
   return (
-    <Card bordered={false} style={{ borderRadius: 16, height: '100%' }}>
+      <Card variant="borderless" style={{ borderRadius: 16, height: '100%' }}>
       <Title level={5} style={{ marginBottom: 16 }}>最近操作日志</Title>
       <Timeline
         items={data.map((item) => ({

@@ -10,6 +10,8 @@ import type { PrismaClient } from '@prisma/client'
 import { isUserActive } from '@/lib/user-status'
 import { resolveTeacherForUser } from '@/lib/teacher-account-binding'
 import { hasCurrentParentStudent, PARENT_TERM_EXPIRED_MESSAGE } from '@/lib/parent-account-validity'
+import { parentLinkedStudentWhere, visibleClassLessonWhere } from '@/lib/business-visibility'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 // ---- type helpers ----
 
@@ -120,7 +122,7 @@ export async function requireParentUser(): Promise<SessionUser & { prisma: Prism
 /** 返回当前登录家长绑定的学生 ID 列表 */
 export async function getParentStudentIds(ctx: SessionUser, prisma: PrismaClient): Promise<string[]> {
   const students = await prisma.student.findMany({
-    where: { parentUserId: ctx.id, status: { not: 'ARCHIVED' } },
+    where: parentLinkedStudentWhere(ctx.id),
     select: { id: true },
   })
   return students.map(s => s.id)
@@ -169,7 +171,7 @@ export async function assertCanAccessStudent(
 
   if (ctx.role === 'parent') {
     const student = await prisma.student.findFirst({
-      where: { id: studentId, parentUserId: ctx.id, status: { not: 'ARCHIVED' } },
+      where: { id: studentId, ...parentLinkedStudentWhere(ctx.id) },
       select: { id: true },
     })
     if (!student) throw new AuthError('无权访问该学生数据')
@@ -212,22 +214,44 @@ export async function assertCanAccessClassLesson(
   }
 
   if (ctx.role === 'parent') {
+    const parentStudentIds = await getParentStudentIds(ctx, prisma)
+    if (parentStudentIds.length === 0) throw new AuthError('无权访问该课次数据')
+
     const l = await prisma.classLesson.findFirst({
       where: {
         id: classLessonId,
-        status: { not: 'CANCELLED' },
+        ...visibleClassLessonWhere,
+      },
+      include: {
+        lessonStudents: { select: { studentId: true } },
         group: {
-          enrollments: {
-            some: {
-              student: { parentUserId: ctx.id },
-              status: 'ACTIVE',
+          include: {
+            course: { select: { subject: true } },
+            teacherAssignments: { select: { teacherId: true, subject: true } },
+            enrollments: {
+              where: { studentId: { in: parentStudentIds }, status: 'ACTIVE', deletedAt: null },
+              select: { studentId: true, subjects: true },
             },
           },
         },
       },
-      select: { id: true },
     })
-    if (!l) throw new AuthError('无权访问该课次数据')
+    const lessonSubject = l
+      ? l.subject
+        || l.group.teacherAssignments.find((assignment) => assignment.teacherId === l.teacherId || assignment.teacherId === l.group.teacherId)?.subject
+        || l.group.course?.subject
+      : null
+    const eligibleStudentIds = l
+      ? resolveSubjectLessonStudentIds(
+          l.lessonStudents.map((item) => item.studentId),
+          l.group.enrollments,
+          lessonSubject,
+          l.lessonDate,
+        )
+      : []
+    if (!l || !eligibleStudentIds.some((id) => parentStudentIds.includes(id))) {
+      throw new AuthError('无权访问该课次数据')
+    }
     return
   }
 

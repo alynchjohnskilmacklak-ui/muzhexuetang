@@ -1,0 +1,962 @@
+[
+  {
+    "word": "beyond",
+    "examTags": [
+      "词汇·常见词性",
+      "中考·词形与搭配"
+    ],
+    "grammar": "prep. & adv. 超出；在较远的一边；在更远处",
+    "collocations": "beyond the city limits; beyond repair; far beyond the Moon",
+    "commonMistake": "beyond 可接名词表示“超出范围”，也可作副词表示“在更远处”；比较数量时不要写 beyond than。",
+    "example": {
+      "english": "The small village lies beyond the mountains.",
+      "chinese": "那个小村庄在山脉的另一边。"
+    },
+    "application": {
+      "prompt": "The signal was too weak to reach the station ___ the hills. A. between B. beyond",
+      "solution": "B。解析：beyond the hills 表示“在山丘另一边”；between 需要说明两者之间。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: beyond",
+        "url": "https://dictionary.cambridge.org/dictionary/english/beyond"
+      }
+    ]
+  },
+  {
+    "word": "mission",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 任务；使命",
+    "collocations": "a space mission; mission to explore Mars; complete a mission",
+    "commonMistake": "mission 是可数名词，常用 a mission to do sth 表示“执行某项任务去做某事”；missionary 是传教士，不是任务。",
+    "example": {
+      "english": "The crew began its mission to collect samples from the Moon.",
+      "chinese": "机组人员开始执行从月球采集样本的任务。"
+    },
+    "application": {
+      "prompt": "The scientists' main ___ is to search for signs of water on Mars. A. missionary B. mission",
+      "solution": "B。解析：search for water 是科学家的 mission（任务）；missionary 指传教士。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mission",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mission"
+      }
+    ]
+  },
+  {
+    "word": "telescope",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 望远镜",
+    "collocations": "look through a telescope; a powerful telescope; telescope lens",
+    "commonMistake": "telescope 前常用 look through，表示透过望远镜观察；look at a telescope 只表示看着望远镜本身。",
+    "example": {
+      "english": "We looked through a telescope and saw the rings of Saturn.",
+      "chinese": "我们通过望远镜看到了土星环。"
+    },
+    "application": {
+      "prompt": "To observe the distant moon, the students took turns looking ___ a telescope. A. across B. through",
+      "solution": "B。解析：look through a telescope 是“通过望远镜观察”；across 表示横穿或在对面。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: telescope",
+        "url": "https://dictionary.cambridge.org/dictionary/english/telescope"
+      }
+    ]
+  },
+  {
+    "word": "rover",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 探测车；漫游者",
+    "collocations": "a Mars rover; rover mission; robotic rover",
+    "commonMistake": "rover 在航天语境中指能在行星表面移动的探测车；它不在轨道上绕行，那是 satellite 的工作。",
+    "example": {
+      "english": "The rover sent photographs from the rocky surface of Mars.",
+      "chinese": "探测车从火星岩石表面传回了照片。"
+    },
+    "application": {
+      "prompt": "The robot moved over the planet's surface and collected soil. It was a ___. A. rover B. telescope",
+      "solution": "A。解析：在行星表面移动并采集土壤的是 rover（探测车）；telescope 用来观测远处天体。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rover",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rover"
+      }
+    ]
+  },
+  {
+    "word": "manned",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 载人的；需人操作的",
+    "collocations": "a manned spacecraft; a manned mission; manned by a trained crew",
+    "commonMistake": "manned 是形容词，表示有人员乘坐或操作；其反义词是 unmanned，写作时注意不是名词 man 的复数。",
+    "example": {
+      "english": "The country hopes to send a manned spacecraft to the Moon.",
+      "chinese": "这个国家希望向月球发射一艘载人航天器。"
+    },
+    "application": {
+      "prompt": "The flight will carry astronauts, so it is a ___ mission. A. man B. manned",
+      "solution": "B。解析：载有宇航员的任务是 manned mission（载人任务）；man 是“男人”或“人”的名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: manned",
+        "url": "https://dictionary.cambridge.org/dictionary/english/manned"
+      }
+    ]
+  },
+  {
+    "word": "launch",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 发射；发起；n. 发射；上市",
+    "collocations": "launch a rocket; launch a campaign; the launch of a satellite",
+    "commonMistake": "launch 可作动词或名词；名词前用 the launch of，不能说 the launch a satellite。",
+    "example": {
+      "english": "The space agency will launch a weather satellite next month.",
+      "chinese": "航天机构下个月将发射一颗气象卫星。"
+    },
+    "application": {
+      "prompt": "The rocket ___ at dawn after the final safety check. A. launched B. launch",
+      "solution": "A。解析：主语 rocket 叙述过去的发射，需用过去式 launched；launch 是原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: launch",
+        "url": "https://dictionary.cambridge.org/dictionary/english/launch"
+      }
+    ]
+  },
+  {
+    "word": "weightless",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 失重的；无重量感的",
+    "collocations": "feel weightless; a weightless environment; weightless in space",
+    "commonMistake": "weightless 是形容词，由 weight 加 -less 构成；名词为 weightlessness，表示失重状态。",
+    "example": {
+      "english": "Astronauts float because they feel weightless in orbit.",
+      "chinese": "宇航员在轨道上会漂浮，因为他们感到失重。"
+    },
+    "application": {
+      "prompt": "The astronauts experienced ___ as they floated around the cabin. A. weight B. weightlessness",
+      "solution": "B。解析：experience 后接名词 weightlessness 表示“失重状态”；weight 是重量。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: weightless",
+        "url": "https://dictionary.cambridge.org/dictionary/english/weightless"
+      }
+    ]
+  },
+  {
+    "word": "movement",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 活动；运动；动作",
+    "collocations": "body movement; movement of the planets; a movement for peace",
+    "commonMistake": "movement 是名词，动词是 move；它既可指身体动作，也可指社会运动，不能在名词前误用 moving。",
+    "example": {
+      "english": "The camera recorded every movement of the tiny robot.",
+      "chinese": "摄像机记录了这个小机器人的每一个动作。"
+    },
+    "application": {
+      "prompt": "The sensor detects any ___ inside the empty laboratory. A. movement B. move",
+      "solution": "A。解析：any 后需要名词 movement，表示“任何动作”；move 是动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: movement",
+        "url": "https://dictionary.cambridge.org/dictionary/english/movement"
+      }
+    ]
+  },
+  {
+    "word": "asleep",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 睡着的",
+    "collocations": "be fast asleep; fall asleep; sound asleep",
+    "commonMistake": "asleep 通常作表语，不能直接放在名词前；可说 a sleeping child，但不能说 an asleep child。",
+    "example": {
+      "english": "The baby was asleep before the train left the station.",
+      "chinese": "火车离站前，宝宝已经睡着了。"
+    },
+    "application": {
+      "prompt": "The lights were still on, but nobody answered the alarm because everyone in the cabin was ___. A. sleepy B. asleep",
+      "solution": "B。解析：be asleep 表示“睡着了”；sleepy 表示“困倦的”，不一定已经入睡。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: asleep",
+        "url": "https://dictionary.cambridge.org/dictionary/english/asleep"
+      }
+    ]
+  },
+  {
+    "word": "fall asleep",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 入睡",
+    "collocations": "fall asleep quickly; fall asleep in class; help sb fall asleep",
+    "commonMistake": "fall asleep 表示从清醒变为睡着，过去式是 fell asleep；不要说 fall to asleep。",
+    "example": {
+      "english": "I fell asleep while listening to the quiet rain.",
+      "chinese": "听着安静的雨声，我睡着了。"
+    },
+    "application": {
+      "prompt": "The astronaut was tired after training and ___ soon after dinner. A. fell asleep B. fell to asleep",
+      "solution": "A。解析：fell asleep 是 fall asleep 的过去式，表示“入睡”；该短语中不加 to。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: asleep",
+        "url": "https://dictionary.cambridge.org/dictionary/english/asleep"
+      }
+    ]
+  },
+  {
+    "word": "tie",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 系上；束紧；n. 领带；平局",
+    "collocations": "tie a rope around sth; tie A to B; a tie in the final",
+    "commonMistake": "tie 作动词表示系紧，过去式和过去分词是 tied；表示比赛平局也是名词 tie。",
+    "example": {
+      "english": "Tie the safety line to the rail before you climb.",
+      "chinese": "攀爬前先把安全绳系在栏杆上。"
+    },
+    "application": {
+      "prompt": "The climber ___ the rope securely to a strong metal ring. A. tie B. tied",
+      "solution": "B。解析：句子叙述已完成的动作，需用 tie 的过去式 tied；tie 是原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tie",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tie"
+      }
+    ]
+  },
+  {
+    "word": "geology",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 地质；地质学",
+    "collocations": "study geology; geology of Mars; geological survey",
+    "commonMistake": "geology 研究地球或其他行星的组成和结构；geography 研究地表与人类活动，二者学科不同。",
+    "example": {
+      "english": "Her geology class studied rocks collected from the desert.",
+      "chinese": "她的地质课研究了从沙漠采集的岩石。"
+    },
+    "application": {
+      "prompt": "The study of a planet's rocks and internal structure is called ___. A. geology B. geologist",
+      "solution": "A。解析：geology 是研究行星岩石与内部结构的“地质学”；geologist 指地质学家。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: geology",
+        "url": "https://dictionary.cambridge.org/dictionary/english/geology"
+      }
+    ]
+  },
+  {
+    "word": "satellite",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 人造卫星；卫星",
+    "collocations": "launch a satellite; a weather satellite; satellite image",
+    "commonMistake": "satellite 可指人造卫星，也可指围绕行星运行的天然卫星；月球是地球的 natural satellite。",
+    "example": {
+      "english": "The satellite sends weather data back to Earth every hour.",
+      "chinese": "这颗卫星每小时向地球发送气象数据。"
+    },
+    "application": {
+      "prompt": "A ___ in orbit can send storm images to weather stations. A. satellite B. submarine",
+      "solution": "A。解析：在轨道上发送风暴图像的是 satellite（卫星）；submarine 是潜水艇。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: satellite",
+        "url": "https://dictionary.cambridge.org/dictionary/english/satellite"
+      }
+    ]
+  },
+  {
+    "word": "crazy",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 疯狂的；不理智的；着迷的",
+    "collocations": "be crazy about space; a crazy idea; drive sb crazy",
+    "commonMistake": "be crazy about sth 表示“非常喜欢某物”；crazy 是形容词，副词是 crazily，不能用 crazy 修饰动词。",
+    "example": {
+      "english": "My sister is crazy about documentaries on space travel.",
+      "chinese": "我妹妹特别喜欢太空旅行纪录片。"
+    },
+    "application": {
+      "prompt": "Ravi is ___ about astronomy and reads about planets every night. A. crazily B. crazy",
+      "solution": "B。解析：be crazy about 是“对……着迷”；be 后用形容词 crazy。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: crazy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/crazy"
+      }
+    ]
+  },
+  {
+    "word": "human being",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 人；人类",
+    "collocations": "a human being; human beings need water; protect human life",
+    "commonMistake": "human being 是可数短语，复数为 human beings；human 可单独作形容词或名词，泛指人类时也可说 humans。",
+    "example": {
+      "english": "Every human being needs clean air and safe water.",
+      "chinese": "每个人都需要干净的空气和安全的饮用水。"
+    },
+    "application": {
+      "prompt": "The new planet may have conditions that could support a ___ one day. A. human being B. humanity",
+      "solution": "A。解析：support a human being 指“支持一个人类个体生存”；humanity 是抽象的“人类/人性”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: human",
+        "url": "https://dictionary.cambridge.org/dictionary/english/human"
+      }
+    ]
+  },
+  {
+    "word": "require",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 要求；需要",
+    "collocations": "require a passport; require sb to do sth; require further study",
+    "commonMistake": "require 可接名词或 sb to do sth；名词形式是 requirement，不能说 require to someone。",
+    "example": {
+      "english": "The research station requires visitors to wear protective glasses.",
+      "chinese": "研究站要求访客佩戴防护眼镜。"
+    },
+    "application": {
+      "prompt": "The safety rule ___ all crew members to fasten their belts. A. requirement B. requires",
+      "solution": "B。解析：主语 rule 为单数，谓语用 requires；requirement 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: require",
+        "url": "https://dictionary.cambridge.org/dictionary/english/require"
+      }
+    ]
+  },
+  {
+    "word": "cancel",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 取消；终止",
+    "collocations": "cancel a meeting; cancel a flight; cancel the order",
+    "commonMistake": "cancel 的过去式美式常写 canceled，英式常写 cancelled；名词 cancellation 双写 l。",
+    "example": {
+      "english": "The launch team cancelled the test because of strong winds.",
+      "chinese": "由于风力太强，发射团队取消了测试。"
+    },
+    "application": {
+      "prompt": "The airline had to ___ the flight when the storm closed the airport. A. cancel B. cancellation",
+      "solution": "A。解析：had to 后接动词原形 cancel；cancellation 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cancel",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cancel"
+      }
+    ]
+  },
+  {
+    "word": "publish",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 出版；发表；刊登",
+    "collocations": "publish an article; publish a book; publish results",
+    "commonMistake": "publish 是动词，名词 publication 指出版或出版物，publisher 指出版商；不要把 publish 与 public 混淆。",
+    "example": {
+      "english": "The scientist published her findings in a space research journal.",
+      "chinese": "这位科学家在太空研究期刊上发表了她的发现。"
+    },
+    "application": {
+      "prompt": "The magazine will ___ an interview with the astronaut next week. A. publication B. publish",
+      "solution": "B。解析：will 后接动词原形 publish，表示“刊登”；publication 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: publish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/publish"
+      }
+    ]
+  },
+  {
+    "word": "rocket",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 火箭",
+    "collocations": "a space rocket; launch a rocket; rocket engine",
+    "commonMistake": "rocket 是可数名词；作动词时表示“飞速上升”，常说 prices rocket，注意与 spacecraft（航天器）区别。",
+    "example": {
+      "english": "The rocket carried a small research satellite into orbit.",
+      "chinese": "火箭把一颗小型研究卫星送入轨道。"
+    },
+    "application": {
+      "prompt": "The ___ blasted off from the launch site carrying the research capsule. A. rocket B. rover",
+      "solution": "A。解析：从发射场升空并携带舱体的是 rocket（火箭）；rover 是在地面移动的探测车。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rocket",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rocket"
+      }
+    ]
+  },
+  {
+    "word": "exoplanet",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 系外行星",
+    "collocations": "discover an exoplanet; an exoplanet orbiting a distant star; exoplanet research",
+    "commonMistake": "exoplanet 指太阳系以外、围绕其他恒星运行的行星；它不是漂浮在恒星之间的普通太空岩石。",
+    "example": {
+      "english": "Astronomers found an exoplanet orbiting a star far from our solar system.",
+      "chinese": "天文学家发现一颗围绕远离太阳系的恒星运行的系外行星。"
+    },
+    "application": {
+      "prompt": "A planet orbiting a star other than the Sun is called an ___. A. exoplanet B. asteroid",
+      "solution": "A。解析：围绕太阳系外恒星运行的行星是 exoplanet（系外行星）；asteroid 是小行星。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: exoplanet",
+        "url": "https://dictionary.cambridge.org/dictionary/english/exoplanet"
+      }
+    ]
+  },
+  {
+    "word": "solar",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 太阳的；太阳能的",
+    "collocations": "solar energy; solar panels; the solar system",
+    "commonMistake": "solar 是形容词，常修饰 energy、panel 或 system；sunny 表示天气晴朗，不用来指能源来源。",
+    "example": {
+      "english": "The school installed solar panels on the roof to save electricity.",
+      "chinese": "学校在屋顶安装了太阳能板以节省电力。"
+    },
+    "application": {
+      "prompt": "The village uses ___ power to run its water pumps. A. sunny B. solar",
+      "solution": "B。解析：solar power 表示“太阳能”；sunny 描述天气阳光充足。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: solar",
+        "url": "https://dictionary.cambridge.org/dictionary/english/solar"
+      }
+    ]
+  },
+  {
+    "word": "god",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 神；神明",
+    "collocations": "a Greek god; ancient gods; the god of the sea",
+    "commonMistake": "god 泛指神明时通常小写，特定宗教中的神名可按名称大写为 God；大写需依据具体语境。",
+    "example": {
+      "english": "In the story, the sailors prayed to a Greek god for safe travel.",
+      "chinese": "故事里，水手们向一位希腊神明祈求航行平安。"
+    },
+    "application": {
+      "prompt": "The museum displayed a statue of an ancient Roman ___. A. god B. God",
+      "solution": "A。解析：a 后的小写 god 表示古罗马的一位神明；句子不是专有神名。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: god",
+        "url": "https://dictionary.cambridge.org/dictionary/english/god"
+      }
+    ]
+  },
+  {
+    "word": "mysterious",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 神秘的；难以解释的",
+    "collocations": "a mysterious signal; mysterious lights; remain mysterious",
+    "commonMistake": "mysterious 是形容词，名词是 mystery，副词是 mysteriously；不能用 mystery 直接修饰 signal。",
+    "example": {
+      "english": "A mysterious light appeared above the desert and disappeared quickly.",
+      "chinese": "一束神秘的光出现在沙漠上空，很快又消失了。"
+    },
+    "application": {
+      "prompt": "Scientists are investigating a ___ signal that repeats every hour. A. mystery B. mysterious",
+      "solution": "B。解析：signal 前需要形容词 mysterious；mystery 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mysterious",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mysterious"
+      }
+    ]
+  },
+  {
+    "word": "spacecraft",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 宇宙飞船；航天器",
+    "collocations": "a spacecraft in orbit; launch a spacecraft; unmanned spacecraft",
+    "commonMistake": "spacecraft 单复数同形，one spacecraft 与 several spacecraft 都不加 s；它是更广义的航天器，spaceship 常指载人飞船。",
+    "example": {
+      "english": "The spacecraft sent its first image of the distant planet.",
+      "chinese": "航天器发回了那颗遥远行星的第一张图像。"
+    },
+    "application": {
+      "prompt": "Two ___ entered orbit around the planet to collect data. A. spacecraft B. spacecrafts",
+      "solution": "A。解析：spacecraft 的复数仍是 spacecraft；该词不加 s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spacecraft",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spacecraft"
+      }
+    ]
+  },
+  {
+    "word": "in case",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 以防万一；如果",
+    "collocations": "take a map in case we get lost; in case of rain; just in case",
+    "commonMistake": "in case 后可接完整从句，in case of 后接名词；它表示预防，不等同于 if（如果）。",
+    "example": {
+      "english": "Take a flashlight in case the path is dark after sunset.",
+      "chinese": "带上手电筒，以防日落后小路太暗。"
+    },
+    "application": {
+      "prompt": "The astronauts packed extra water ___ the supply system stopped working. A. because B. in case",
+      "solution": "B。解析：in case 引出需要预先防备的情况“供水系统停止工作”；because 表示已经发生的原因。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: case",
+        "url": "https://dictionary.cambridge.org/dictionary/english/case"
+      }
+    ]
+  },
+  {
+    "word": "board",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 板；牌子；木板",
+    "collocations": "a wooden board; notice board; write on the board",
+    "commonMistake": "board 可指木板、公告板或董事会；登机用 board 作动词，短语为 board a plane，不说 board on a plane。",
+    "example": {
+      "english": "The teacher wrote the launch times on the board.",
+      "chinese": "老师把发射时间写在了板上。"
+    },
+    "application": {
+      "prompt": "The crew checked the flight plan displayed on the ___ beside the cabin door. A. board B. aboard",
+      "solution": "A。解析：显示计划的牌板是 board（公告板）；aboard 是副词或介词“在交通工具上”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: board",
+        "url": "https://dictionary.cambridge.org/dictionary/english/board"
+      }
+    ]
+  },
+  {
+    "word": "on board",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 在船、火车或飞机上",
+    "collocations": "passengers on board; welcome on board; an instrument on board",
+    "commonMistake": "on board 表示已经在交通工具上；board 作为动词可直接接交通工具，如 board the plane，不在 board 后再加 on。",
+    "example": {
+      "english": "There were twelve astronauts on board the research spacecraft.",
+      "chinese": "研究航天器上有十二名宇航员。"
+    },
+    "application": {
+      "prompt": "The captain welcomed all passengers ___ before the aircraft left the gate. A. on aboard B. on board",
+      "solution": "B。解析：on board 表示“在飞机上”；on aboard 把两种表达混在一起，是错误搭配。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: board",
+        "url": "https://dictionary.cambridge.org/dictionary/english/board"
+      }
+    ]
+  },
+  {
+    "word": "billion",
+    "examTags": [
+      "词汇·常见词性",
+      "中考·词形与搭配"
+    ],
+    "grammar": "num. 十亿",
+    "collocations": "one billion stars; billions of years; a billion-dollar mission",
+    "commonMistake": "确切数字前 billion 不加 s、不接 of；表示不确切的大量时用 billions of。",
+    "example": {
+      "english": "The galaxy contains billions of stars.",
+      "chinese": "这个星系包含数十亿颗恒星。"
+    },
+    "application": {
+      "prompt": "The telescope cost three ___ dollars to build. A. billion B. billions of",
+      "solution": "A。解析：确切数字 three 后用 billion，不加复数 s，也不加 of。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: billion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/billion"
+      }
+    ]
+  },
+  {
+    "word": "trillion",
+    "examTags": [
+      "词汇·常见词性",
+      "中考·词形与搭配"
+    ],
+    "grammar": "num. 万亿；兆",
+    "collocations": "one trillion; trillions of particles; a trillion-dollar economy",
+    "commonMistake": "确切数字前 trillion 不加 s；表示数量极大但不精确时用 trillions of。",
+    "example": {
+      "english": "A trillion is one thousand times a billion.",
+      "chinese": "一万亿是一千个十亿。"
+    },
+    "application": {
+      "prompt": "The data centre stored more than one ___ bits of information. A. trillions B. trillion",
+      "solution": "B。解析：one 后用单数数词 trillion；不能写 one trillions。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: trillion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/trillion"
+      }
+    ]
+  },
+  {
+    "word": "cooperate",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 合作；协作",
+    "collocations": "cooperate closely; cooperate on a project; international cooperation",
+    "commonMistake": "cooperate 的名词是 cooperation；英式拼法 co-operate 也可见，注意动词拼写中有两个 o。",
+    "example": {
+      "english": "The two research teams cooperated to study the planet's atmosphere.",
+      "chinese": "两个研究团队合作研究了这颗行星的大气层。"
+    },
+    "application": {
+      "prompt": "The scientists agreed to ___ on the next stage of the experiment. A. cooperate B. cooperation",
+      "solution": "A。解析：to 后接动词原形 cooperate；cooperation 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cooperate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cooperate"
+      }
+    ]
+  },
+  {
+    "word": "cooperate with",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 与……合作",
+    "collocations": "cooperate with scientists; cooperate with another team; cooperate with sb on sth",
+    "commonMistake": "cooperate with 后接人、团队或机构；不能说 cooperate to someone。",
+    "example": {
+      "english": "Our school will cooperate with the local observatory on a stargazing event.",
+      "chinese": "我们学校将与当地天文台合作举办观星活动。"
+    },
+    "application": {
+      "prompt": "The engineers will ___ the university to test the new antenna. A. cooperate to B. cooperate with",
+      "solution": "B。解析：cooperate with the university 表示“与大学合作”；with 引出合作对象。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cooperate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cooperate"
+      }
+    ]
+  },
+  {
+    "word": "galaxy",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 星系；银河系",
+    "collocations": "a distant galaxy; the Milky Way Galaxy; galaxy cluster",
+    "commonMistake": "galaxy 指由恒星、气体和尘埃组成的星系；宇宙包含许多 galaxies，不能把 galaxy 与 universe 当作同义词。",
+    "example": {
+      "english": "The telescope captured a bright galaxy billions of light-years away.",
+      "chinese": "望远镜拍到一个距离数十亿光年的明亮星系。"
+    },
+    "application": {
+      "prompt": "The Milky Way is the ___ that contains our Solar System. A. galaxy B. universe",
+      "solution": "A。解析：银河系是包含太阳系的 galaxy（星系）；universe 指包含所有星系的整个宇宙。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: galaxy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/galaxy"
+      }
+    ]
+  },
+  {
+    "word": "set foot on",
+    "examTags": [
+      "短语·固定搭配",
+      "中考·短语辨析"
+    ],
+    "grammar": "短语 踏上；到访",
+    "collocations": "set foot on the Moon; never set foot on the island; the first person to set foot on Mars",
+    "commonMistake": "固定短语用 set foot on + 地点；set 的过去式仍是 set，不变形。",
+    "example": {
+      "english": "No human being has set foot on Mars yet.",
+      "chinese": "还没有人类踏上过火星。"
+    },
+    "application": {
+      "prompt": "The explorer was the first member of the team to ___ the icy island. A. set feet on B. set foot on",
+      "solution": "B。解析：固定说法是 set foot on，foot 用单数；set feet on 不符合该短语结构。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: foot",
+        "url": "https://dictionary.cambridge.org/dictionary/english/foot"
+      }
+    ]
+  },
+  {
+    "word": "imagination",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 想象；想象力",
+    "collocations": "use your imagination; a vivid imagination; beyond imagination",
+    "commonMistake": "imagination 是不可数名词，动词是 imagine，形容词是 imaginative；通常不说 an imagination 表示一般想象力。",
+    "example": {
+      "english": "The writer used her imagination to create a world under the ocean.",
+      "chinese": "作家发挥想象力，创造了一个海底世界。"
+    },
+    "application": {
+      "prompt": "The children's model of a space station showed great ___. A. imagination B. imagine",
+      "solution": "A。解析：great 后需要名词 imagination，表示“丰富的想象力”；imagine 是动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: imagination",
+        "url": "https://dictionary.cambridge.org/dictionary/english/imagination"
+      }
+    ]
+  },
+  {
+    "word": "expectation",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 期望；预期",
+    "collocations": "meet expectations; high expectations; expectation of success",
+    "commonMistake": "expectation 是名词，动词是 expect；常用复数 expectations 表示“期望”，不要把 expectation 与 experience 混淆。",
+    "example": {
+      "english": "The mission took longer than our original expectation.",
+      "chinese": "这次任务耗时比我们原先预期的更久。"
+    },
+    "application": {
+      "prompt": "The team had no ___ of finding water so soon, so the result surprised them. A. expect B. expectation",
+      "solution": "B。解析：no 后需要名词 expectation，表示“没有预料到”；expect 是动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: expectation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/expectation"
+      }
+    ]
+  },
+  {
+    "word": "craft",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 技艺；工艺；船；飞行器",
+    "collocations": "traditional craft; a small craft; craft a plan",
+    "commonMistake": "craft 可指手工艺、船或飞行器；作“手工艺”时常用 crafts，作航天器等集合义时复数可仍为 craft。",
+    "example": {
+      "english": "The museum displayed a small craft used to carry supplies across the lake.",
+      "chinese": "博物馆展出了一艘用于横渡湖面运送物资的小船。"
+    },
+    "application": {
+      "prompt": "A rescue ___ approached the island to bring food to the villagers. A. crafty B. craft",
+      "solution": "B。解析：能运送物资的小船是 craft；crafty 意为“狡猾的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: craft",
+        "url": "https://dictionary.cambridge.org/dictionary/english/craft"
+      }
+    ]
+  },
+  {
+    "word": "spaceship",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. （航天）飞船",
+    "collocations": "a spaceship crew; travel in a spaceship; design a spaceship",
+    "commonMistake": "spaceship 通常指在太空航行的飞船；spacecraft 是范围更广的航天器，也可包括无人探测器。",
+    "example": {
+      "english": "The children built a model spaceship for the science fair.",
+      "chinese": "孩子们为科学展制作了一艘飞船模型。"
+    },
+    "application": {
+      "prompt": "In the story, the astronauts live and work aboard a large ___. A. spaceship B. space stationer",
+      "solution": "A。解析：宇航员乘坐并生活其中的飞行器是 spaceship；space station 是空间站，space stationer 不是该词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spaceship",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spaceship"
+      }
+    ]
+  },
+  {
+    "word": "survey",
+    "examTags": [
+      "词汇·名词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "n. 调查；测绘；v. 调查；测量",
+    "collocations": "conduct a survey; survey the land; survey results",
+    "commonMistake": "survey 可作名词或动词；做问卷调查常用 conduct a survey，不能说 make a survey results。",
+    "example": {
+      "english": "The team surveyed the valley before choosing a landing site.",
+      "chinese": "团队先测绘了山谷，再选择着陆地点。"
+    },
+    "application": {
+      "prompt": "Researchers ___ the area to map its rocks and slopes. A. survey B. surveyor",
+      "solution": "A。解析：句中需要动词 survey（测绘）；surveyor 是测量员。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: survey",
+        "url": "https://dictionary.cambridge.org/dictionary/english/survey"
+      }
+    ]
+  },
+  {
+    "word": "crowded",
+    "examTags": [
+      "词汇·形容词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "adj. 拥挤的；人太多的",
+    "collocations": "be crowded with people; a crowded train; crowded streets",
+    "commonMistake": "crowded 是形容词，常用 be crowded with；crowd 作名词指人群，crowded 不等于 busy（繁忙的）。",
+    "example": {
+      "english": "The observation deck was crowded with visitors at sunset.",
+      "chinese": "日落时，观景台上挤满了游客。"
+    },
+    "application": {
+      "prompt": "The launch hall was so ___ that we could hardly find a seat. A. crowd B. crowded",
+      "solution": "B。解析：was 后需要形容词 crowded，说明大厅里人很多；crowd 是名词或动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: crowded",
+        "url": "https://dictionary.cambridge.org/dictionary/english/crowded"
+      }
+    ]
+  },
+  {
+    "word": "operate",
+    "examTags": [
+      "词汇·动词",
+      "中考·词形与搭配"
+    ],
+    "grammar": "v. 操作；运行；做手术",
+    "collocations": "operate a machine; the system operates automatically; operate on a patient",
+    "commonMistake": "operate a machine 表示操作设备，operate on sb 表示给某人做手术；名词 operation，operator 指操作员。",
+    "example": {
+      "english": "The ground team operated the camera from a control room.",
+      "chinese": "地面团队在控制室里操作摄像机。"
+    },
+    "application": {
+      "prompt": "Only trained staff may ___ the telescope's moving platform. A. operate B. operation",
+      "solution": "A。解析：may 后接动词原形 operate，表示“操作”；operation 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: operate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/operate"
+      }
+    ]
+  }
+]

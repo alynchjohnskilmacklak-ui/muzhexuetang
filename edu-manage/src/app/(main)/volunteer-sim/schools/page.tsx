@@ -4,13 +4,23 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Card, Table, Button, Form, Input, InputNumber,
-  Select, Switch, Typography, Tag, message, Space, DatePicker,
+  Radio, Select, Switch, Typography, Tag, message, Space, DatePicker,
+  Col, Row, Segmented,
 } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
 import type { ColumnsType } from 'antd/es/table'
-import { EditOutlined, ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons'
-import { useRouter } from 'next/navigation'
+import {
+  EditOutlined, SearchOutlined, BankOutlined, CheckCircleOutlined,
+  ExclamationCircleOutlined, ReloadOutlined,
+} from '@ant-design/icons'
 import dayjs from 'dayjs'
+import { PageLayout } from '@/components/Layout/PageLayout'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import {
+  getSchoolAdmissionHistory,
+  type SchoolAdmissionLine,
+  type SchoolAdmissionYearRecord,
+} from '@/lib/school-admission-history'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -45,6 +55,7 @@ interface SchoolInfo {
   sourceNote: string | null
   infoVerifiedAt: string | null
   infoConfidence: string | null
+  admissionHistory?: SchoolAdmissionYearRecord[] | null
 }
 
 type MissingFilter =
@@ -135,14 +146,23 @@ const BASE_LOCATIONS = [
 ]
 
 export default function SchoolsManagePage() {
-  const router = useRouter()
+  const isMobile = useIsMobile() ?? false
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [editModal, setEditModal] = useState<{ open: boolean; school: SchoolInfo | null }>({ open: false, school: null })
   const [form] = Form.useForm()
+  const [admissionHistory, setAdmissionHistory] = useState<SchoolAdmissionYearRecord[]>([])
   const [saving, setSaving] = useState(false)
   const [searchText, setSearchText] = useState('')
   const [missingFilter, setMissingFilter] = useState<MissingFilter>('all')
+
+  const stats = useMemo(() => {
+    const total = schools.length
+    const complete = schools.filter((s) => calcCompleteness(s) === 100).length
+    const missing = schools.filter((s) => calcCompleteness(s) < 100).length
+    const unverified = schools.filter((s) => !s.infoVerifiedAt || s.infoConfidence === 'unverified').length
+    return { total, complete, missing, unverified }
+  }, [schools])
 
   const fetchSchools = useCallback(async () => {
     setLoading(true)
@@ -203,15 +223,69 @@ export default function SchoolsManagePage() {
           : undefined,
       infoVerifiedAt: school.infoVerifiedAt ? dayjs(school.infoVerifiedAt) : null,
     })
+    setAdmissionHistory(getSchoolAdmissionHistory(school))
     setEditModal({ open: true, school })
+  }
+
+  const updateAdmissionYear = (index: number, patch: Partial<SchoolAdmissionYearRecord>) => {
+    setAdmissionHistory((current) => current.map((record, recordIndex) => {
+      if (recordIndex !== index) return record
+      const next = { ...record, ...patch }
+      if (patch.year === 2024) next.fullScore = 670
+      if (patch.year === 2025 || patch.year === 2026) next.fullScore = 800
+      if (patch.year && ![2024, 2025, 2026].includes(patch.year) && [2024, 2025, 2026].includes(record.year)) {
+        next.fullScore = 800
+        next.sourceNote = '请根据该年度官方考试科目文件核实中考满分，再录入学校录取线。'
+      }
+      return next
+    }))
+  }
+
+  const updateAdmissionLine = (recordIndex: number, lineIndex: number, patch: Partial<SchoolAdmissionLine>) => {
+    setAdmissionHistory((current) => current.map((record, index) => index !== recordIndex ? record : {
+      ...record,
+      lines: record.lines.map((line, index) => {
+        if (index !== lineIndex) return line
+        return {
+          ...line,
+          ...patch,
+          ...(patch.scope !== undefined && patch.scope !== line.scope
+            ? { sourceScope: patch.scope, comparisonScope: patch.scope || null }
+            : {}),
+          ...(patch.score !== undefined ? { reviewRequired: false } : {}),
+        }
+      }),
+    }))
   }
 
   const handleSave = async () => {
     const values = await form.validateFields()
     if (!editModal.school) return
+    const incompleteLine = admissionHistory.some((record) => record.lines.some((line) => {
+      const hasAnyValue = Boolean(line.label.trim() || line.scope.trim() || line.score)
+      return hasAnyValue && (!line.label.trim() || !line.scope.trim() || !Number.isInteger(line.score) || line.score <= 0 || line.score > record.fullScore)
+    }))
+    const duplicateYear = new Set(admissionHistory.map((record) => record.year)).size !== admissionHistory.length
+    const invalidHistory = admissionHistory.some((record) => !Number.isInteger(record.year) || record.year < 2000 || record.year > 2100 || !Number.isInteger(record.fullScore) || record.fullScore < 1 || record.fullScore > 1000 || (record.sourceUrl && !/^https?:\/\//i.test(record.sourceUrl)))
+    if (duplicateYear) {
+      message.error('同一所学校的录取年份不能重复。')
+      return
+    }
+    if (invalidHistory) {
+      message.error('请检查历年记录的年份、当年满分和来源链接格式。')
+      return
+    }
+    if (incompleteLine) {
+      message.error('请补完整每条分数的名称、适用范围和有效分值；分值不能超过当年满分。')
+      return
+    }
     setSaving(true)
 
     const payload: Record<string, unknown> = { ...values }
+    payload.admissionHistory = admissionHistory.map((record) => ({
+      ...record,
+      lines: record.lines.filter((line) => line.label.trim() && line.scope.trim() && Number.isInteger(line.score) && line.score > 0),
+    }))
     payload.xinleAccessibleOverride = payload.xinleAccessibleOverride === 1
       ? true
       : payload.xinleAccessibleOverride === 0
@@ -221,18 +295,25 @@ export default function SchoolsManagePage() {
       payload.infoVerifiedAt = (payload.infoVerifiedAt as dayjs.Dayjs).toISOString()
     }
 
-    const res = await fetch(`/api/schools/${editModal.school.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    setSaving(false)
-    if (res.ok) {
-      message.success('保存成功')
-      setEditModal({ open: false, school: null })
-      fetchSchools()
-    } else {
-      message.error('保存失败')
+    try {
+      const res = await fetch(`/api/schools/${editModal.school.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const result = await res.json().catch(() => null) as { error?: string } | null
+      if (res.ok) {
+        message.success('保存成功')
+        setEditModal({ open: false, school: null })
+        fetchSchools()
+      } else {
+        message.error(result?.error || '保存失败，请稍后重试。')
+      }
+    } catch (error) {
+      console.error('保存学校资料失败', error)
+      message.error('网络暂不可用，学校资料尚未保存，请检查网络后重试。')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -329,56 +410,187 @@ export default function SchoolsManagePage() {
   ]
 
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => router.back()} />
-        <div>
-          <Title level={4} style={{ margin: 0, fontSize: 18 }}>高中学校信息管理</Title>
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            本模块为初中部中考志愿模拟模块 · 编辑后家长端和志愿模拟页面同步更新
-          </Text>
-        </div>
-      </div>
+    <PageLayout
+      title="高中学校库"
+      subtitle="初中部中考升学数据源 · 维护石家庄及新乐各高中录取线、名额政策与办学信息"
+      actions={
+        <Button icon={<ReloadOutlined />} onClick={fetchSchools} loading={loading}>
+          刷新
+        </Button>
+      }
+    >
+      {/* 3 KPI overview cards */}
+      <Row gutter={[10, 10]} style={{ marginBottom: 14 }}>
+        <Col xs={8} sm={8}>
+          <Card
+            bordered={false}
+            style={{
+              borderRadius: 12,
+              border: missingFilter === 'all' ? '2px solid #14574D' : '1px solid #EEE7E1',
+              background: '#FAF8F5',
+              cursor: 'pointer',
+              textAlign: 'center',
+            }}
+            styles={{ body: { padding: isMobile ? '10px 4px' : '12px 14px' } }}
+            onClick={() => setMissingFilter('all')}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, color: '#8D806F' }}>
+              <BankOutlined style={{ color: '#14574D' }} />
+              <span>学校总数</span>
+            </div>
+            <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: '#14574D', marginTop: 2 }}>
+              {stats.total} <span style={{ fontSize: 12, fontWeight: 400 }}>所</span>
+            </div>
+          </Card>
+        </Col>
 
-      {/* Search + Filter toolbar */}
-      <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-        <Input
-          placeholder="搜索学校名称..."
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 220 }}
-          allowClear
-        />
-        <Space wrap size={[4, 4]}>
-          {MISSING_FILTERS.map((f) => (
-            <Tag
-              key={f.key}
-              style={{
-                cursor: 'pointer', fontSize: 12, padding: '2px 10px',
-                borderColor: missingFilter === f.key ? '#E8784A' : undefined,
-                color: missingFilter === f.key ? '#E8784A' : undefined,
-              }}
-              color={missingFilter === f.key ? undefined : undefined}
-              onClick={() => setMissingFilter(f.key)}
-            >
-              {f.label}
-            </Tag>
-          ))}
+        <Col xs={8} sm={8}>
+          <Card
+            bordered={false}
+            style={{
+              borderRadius: 12,
+              border: missingFilter === 'complete' ? '2px solid #27A644' : '1px solid #EEE7E1',
+              background: '#F0FDF4',
+              cursor: 'pointer',
+              textAlign: 'center',
+            }}
+            styles={{ body: { padding: isMobile ? '10px 4px' : '12px 14px' } }}
+            onClick={() => setMissingFilter('complete')}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, color: '#8D806F' }}>
+              <CheckCircleOutlined style={{ color: '#27A644' }} />
+              <span>信息完整</span>
+            </div>
+            <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: '#27A644', marginTop: 2 }}>
+              {stats.complete} <span style={{ fontSize: 12, fontWeight: 400 }}>所</span>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={8} sm={8}>
+          <Card
+            bordered={false}
+            style={{
+              borderRadius: 12,
+              border: missingFilter === 'any-missing' ? '2px solid #E8784A' : '1px solid #EEE7E1',
+              background: '#FFF9F5',
+              cursor: 'pointer',
+              textAlign: 'center',
+            }}
+            styles={{ body: { padding: isMobile ? '10px 4px' : '12px 14px' } }}
+            onClick={() => setMissingFilter('any-missing')}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, color: '#8D806F' }}>
+              <ExclamationCircleOutlined style={{ color: '#E8784A' }} />
+              <span>信息缺失</span>
+            </div>
+            <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: '#E8784A', marginTop: 2 }}>
+              {stats.missing} <span style={{ fontSize: 12, fontWeight: 400 }}>所</span>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Filter toolbar */}
+      <Card
+        bordered={false}
+        style={{ borderRadius: 12, border: '1px solid #EEE7E1', marginBottom: 14 }}
+        styles={{ body: { padding: 12 } }}
+      >
+        <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Space wrap>
+            <Segmented
+              size="middle"
+              value={['all', 'complete', 'any-missing', 'unverified'].includes(missingFilter) ? missingFilter : 'specific'}
+              onChange={(val) => setMissingFilter(val as MissingFilter)}
+              options={[
+                { label: `全部 (${stats.total})`, value: 'all' },
+                { label: `完整 (${stats.complete})`, value: 'complete' },
+                { label: `缺失 (${stats.missing})`, value: 'any-missing' },
+                { label: '待核实', value: 'unverified' },
+              ]}
+            />
+            <Select
+              allowClear
+              placeholder="按具体缺失项筛选..."
+              value={['all', 'complete', 'any-missing', 'unverified'].includes(missingFilter) ? undefined : missingFilter}
+              onChange={(val) => setMissingFilter(val || 'all')}
+              style={{ width: isMobile ? '100%' : 160 }}
+              options={MISSING_FILTERS.filter((f) => !['all', 'complete', 'any-missing', 'unverified'].includes(f.key)).map((f) => ({
+                label: f.label,
+                value: f.key,
+              }))}
+            />
+          </Space>
+          <Input
+            placeholder="搜索学校名称或代码..."
+            prefix={<SearchOutlined />}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{ width: isMobile ? '100%' : 220, borderRadius: 8 }}
+            allowClear
+          />
         </Space>
-      </div>
-
-      <Card style={{ borderRadius: 12 }}>
-        <Table
-          columns={columns}
-          dataSource={filteredSchools}
-          loading={loading}
-          rowKey="id"
-          pagination={false}
-          scroll={{ x: 1100 }}
-          size="middle"
-        />
       </Card>
+
+      {/* Table or Mobile Cards */}
+      {isMobile ? (
+        <div style={{ display: 'grid', gap: 12 }}>
+          {filteredSchools.map((row) => {
+            const pct = calcCompleteness(row)
+            const missing = getMissingFields(row)
+            const color = pct === 100 ? '#1D9E75' : pct >= 70 ? '#C77F00' : '#E24B4A'
+            return (
+              <Card key={row.id} style={{ borderRadius: 14, border: '1px solid #EEE7E1' }} styles={{ body: { padding: 14 } }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 16, color: '#1F2329' }}>{row.name}</div>
+                    <Space size={4} wrap style={{ marginTop: 4 }}>
+                      <Tag color={TYPE_COLORS[row.type]} style={{ margin: 0, fontSize: 11 }}>{row.type}</Tag>
+                      <Tag style={{ margin: 0, fontSize: 11 }}>{row.location}</Tag>
+                      <Tag color={row.boardingAvail ? 'success' : 'default'} style={{ margin: 0, fontSize: 11 }}>{row.boardingAvail ? '可寄宿' : '走读'}</Tag>
+                    </Space>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color }}>{pct}%</div>
+                    <div style={{ fontSize: 10, color }}>{pct === 100 ? '完整' : pct >= 70 ? '部分缺失' : '严重缺失'}</div>
+                  </div>
+                </div>
+                <div style={{ background: '#FAF8F5', borderRadius: 8, padding: '8px 10px', fontSize: 12, marginBottom: 10 }}>
+                  <div>统招线：<strong style={{ color: '#1F2329' }}>{row.tongZhao}分</strong> {row.yiTong ? ` · 一统：${row.yiTong}分` : ''} {row.allocationLine ? ` · 分配生：${row.allocationLine}分` : ''}</div>
+                  {row.tuitionFee && <div style={{ color: '#8D806F', marginTop: 2 }}>学费：{row.tuitionFee}</div>}
+                </div>
+                {missing.length > 0 && (
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+                    {missing.map((f) => (
+                      <Tag key={f} color="error" style={{ fontSize: 10, margin: 0, borderRadius: 4 }}>
+                        缺{f === 'address' ? '地址' : f === 'phone' ? '电话' : f === 'website' ? '官网' : f === 'tuitionFee' ? '学费' : f === 'boardingFee' ? '住宿费' : f === 'keyFeature' ? '特色' : f === 'gaokaoRate' ? '升学率' : f === 'intro' ? '简介' : f === 'tips' ? '建议' : f === 'sourceUrl' ? '来源' : f}
+                      </Tag>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => openEdit(row)} style={{ borderRadius: 6, background: 'var(--color-primary, #14574D)' }}>
+                    编辑资料
+                  </Button>
+                </div>
+              </Card>
+            )
+          })}
+        </div>
+      ) : (
+        <Card style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+          <Table
+            columns={columns}
+            dataSource={filteredSchools}
+            loading={loading}
+            rowKey="id"
+            pagination={{ pageSize: 20, showTotal: (t) => `共 ${t} 所学校` }}
+            scroll={{ x: 1100 }}
+            size="middle"
+          />
+        </Card>
+      )}
 
       <BrandModal
         title={`编辑 — ${editModal.school?.name}`}
@@ -425,6 +637,135 @@ export default function SchoolsManagePage() {
             </Form.Item>
           </div>
 
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 18, marginBottom: 8, flexWrap: 'wrap' }}>
+            <div>
+              <Title level={5} style={{ fontSize: 14, margin: 0 }}>历年录取分数与满分</Title>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                每年分别维护适用范围、分数线、满分和来源；校线来源未核验时请保留“待核验”。
+              </Text>
+            </div>
+            <Button
+              size="small"
+              onClick={() => setAdmissionHistory((current) => {
+                let year = new Date().getFullYear()
+                while (current.some((record) => record.year === year)) year -= 1
+                return [{
+                  year,
+                  fullScore: year === 2024 ? 670 : 800,
+                  lines: [],
+                  sourceName: null,
+                  sourceUrl: null,
+                  sourceNote: year >= 2024 ? null : '请先根据该年度官方考试科目文件核实中考满分，再录入学校录取线。',
+                  confidence: 'unverified',
+                  verifiedAt: null,
+                }, ...current]
+              })}
+            >新增年份</Button>
+          </div>
+
+          {admissionHistory.length === 0 && (
+            <div style={{ padding: 14, marginBottom: 12, borderRadius: 10, background: 'var(--color-surface-2)', color: 'var(--color-ink-muted)', fontSize: 12 }}>
+              暂无年度分数记录。添加后，家长端会按年份显示校线、当年满分和来源。
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gap: 12 }}>
+            {admissionHistory.map((record, recordIndex) => (
+              <section key={`${record.year}-${recordIndex}`} style={{ padding: 12, border: '1px solid var(--color-hairline)', borderRadius: 12, background: 'var(--color-surface-1)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
+                  <label style={{ flex: '1 1 110px', fontSize: 12, color: 'var(--color-ink-muted)' }}>
+                    录取年份
+                    <InputNumber
+                      min={2000}
+                      max={2100}
+                      value={record.year}
+                      onChange={(value) => updateAdmissionYear(recordIndex, { year: Number(value) || 2026 })}
+                      style={{ display: 'block', width: '100%', marginTop: 4 }}
+                    />
+                  </label>
+                  <label style={{ flex: '1 1 110px', fontSize: 12, color: 'var(--color-ink-muted)' }}>
+                    当年中考满分
+                    <InputNumber
+                      min={1}
+                      max={1000}
+                      value={record.fullScore}
+                      onChange={(value) => updateAdmissionYear(recordIndex, { fullScore: Number(value) || 1 })}
+                      style={{ display: 'block', width: '100%', marginTop: 4 }}
+                      addonAfter="分"
+                    />
+                  </label>
+                  <Button danger type="link" onClick={() => setAdmissionHistory((current) => current.filter((_, index) => index !== recordIndex))}>
+                    删除年份
+                  </Button>
+                </div>
+
+                <div style={{ marginTop: 12, fontSize: 12, fontWeight: 600 }}>学校录取线</div>
+                {record.lines.map((line, lineIndex) => (
+                  <div key={`${lineIndex}-${line.label}`} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                    <label style={{ flex: '1 1 120px', fontSize: 11, color: 'var(--color-ink-muted)' }}>
+                      分数线名称
+                      <Input value={line.label} onChange={(event) => updateAdmissionLine(recordIndex, lineIndex, { label: event.target.value })} placeholder="如：统招线" style={{ display: 'block', marginTop: 4 }} />
+                    </label>
+                    <label style={{ flex: '1 1 130px', fontSize: 11, color: 'var(--color-ink-muted)' }}>
+                      招生范围 / 类型
+                      <Input value={line.scope} onChange={(event) => updateAdmissionLine(recordIndex, lineIndex, { scope: event.target.value })} placeholder="如：新乐、主城区、分配生" style={{ display: 'block', marginTop: 4 }} />
+                    </label>
+                    <label style={{ flex: '0 1 100px', minWidth: 90, fontSize: 11, color: 'var(--color-ink-muted)' }}>
+                      录取分数
+                      <InputNumber min={1} max={record.fullScore} value={line.score || null} onChange={(value) => updateAdmissionLine(recordIndex, lineIndex, { score: Number(value) || 0 })} style={{ display: 'block', width: '100%', marginTop: 4 }} />
+                    </label>
+                    <Button danger type="text" size="small" onClick={() => updateAdmissionYear(recordIndex, { lines: record.lines.filter((_, index) => index !== lineIndex) })}>
+                      删除
+                    </Button>
+                    {line.reviewRequired && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexBasis: '100%', color: 'var(--color-warning-text)', fontSize: 12 }}>
+                        <span>与 2025 同范围线相差至少 100 分，建议核对两年原表。</span>
+                        <Button type="link" size="small" onClick={() => updateAdmissionLine(recordIndex, lineIndex, { reviewRequired: false })}>已人工核对</Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  type="dashed"
+                  size="small"
+                  block
+                  style={{ marginTop: 9 }}
+                  onClick={() => updateAdmissionYear(recordIndex, { lines: [...record.lines, { label: '', scope: '', score: 0 }] })}
+                >
+                  添加分数线
+                </Button>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: '0 10px', marginTop: 10 }}>
+                  <label style={{ fontSize: 11, color: 'var(--color-ink-muted)' }}>
+                    官方 / 学校资料来源名称
+                    <Input value={record.sourceName ?? ''} onChange={(event) => updateAdmissionYear(recordIndex, { sourceName: event.target.value || null })} placeholder="如：石家庄市教育考试院录取线公告" style={{ display: 'block', marginTop: 4 }} />
+                  </label>
+                  <label style={{ fontSize: 11, color: 'var(--color-ink-muted)' }}>
+                    来源链接
+                    <Input type="url" value={record.sourceUrl ?? ''} onChange={(event) => updateAdmissionYear(recordIndex, { sourceUrl: event.target.value || null })} placeholder="https://..." style={{ display: 'block', marginTop: 4 }} />
+                  </label>
+                  <label style={{ fontSize: 11, color: 'var(--color-ink-muted)' }}>
+                    数据可信度
+                    <Select
+                      value={record.confidence || 'unverified'}
+                      onChange={(value) => updateAdmissionYear(recordIndex, { confidence: value })}
+                      options={CONFIDENCE_OPTIONS}
+                      style={{ display: 'block', width: '100%', marginTop: 4 }}
+                    />
+                  </label>
+                  <label style={{ fontSize: 11, color: 'var(--color-ink-muted)' }}>
+                    核验日期
+                    <Input type="date" value={record.verifiedAt?.slice(0, 10) ?? ''} onChange={(event) => updateAdmissionYear(recordIndex, { verifiedAt: event.target.value || null })} style={{ display: 'block', marginTop: 4 }} />
+                  </label>
+                </div>
+                <label style={{ display: 'block', marginTop: 8, fontSize: 11, color: 'var(--color-ink-muted)' }}>
+                  口径说明
+                  <Input value={record.sourceNote ?? ''} onChange={(event) => updateAdmissionYear(recordIndex, { sourceNote: event.target.value || null })} placeholder="说明适用地区、批次或核验情况" style={{ display: 'block', marginTop: 4 }} />
+                </label>
+              </section>
+            ))}
+          </div>
+
           {/* 可报性 */}
           <Title level={5} style={{ fontSize: 14, marginBottom: 8, marginTop: 16 }}>新乐可报性设置</Title>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
@@ -434,10 +775,14 @@ export default function SchoolsManagePage() {
             <Form.Item name="xinleAccessible" label="新乐可报" valuePropName="checked">
               <Switch checkedChildren="可报" unCheckedChildren="不可报" />
             </Form.Item>
-            <Form.Item name="xinleAccessibleOverride" label="手动覆盖推导">
-              <AdaptiveSelect
-                allowClear
-                placeholder="留空=自动推导"
+            <Form.Item
+              name="xinleAccessibleOverride"
+              label="手动覆盖推导"
+              extra={<Button type="link" size="small" onClick={() => form.setFieldValue('xinleAccessibleOverride', undefined)}>恢复自动推导</Button>}
+            >
+              <Radio.Group
+                optionType="button"
+                buttonStyle="solid"
                 options={[
                   { label: '强制可报', value: 1 },
                   { label: '强制不可报', value: 0 },
@@ -508,6 +853,6 @@ export default function SchoolsManagePage() {
           </div>
         </Form>
       </BrandModal>
-    </div>
+    </PageLayout>
   )
 }

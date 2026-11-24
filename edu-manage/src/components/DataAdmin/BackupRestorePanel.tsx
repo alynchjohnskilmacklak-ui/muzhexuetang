@@ -1,5 +1,6 @@
 'use client'
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
+import { HorizontalScrollTable } from '@/components/Layout/HorizontalScrollTable'
 
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
@@ -13,10 +14,8 @@ import {
   DatePicker,
   Empty,
   Input,
-  Select,
   Space,
   Spin,
-  Table,
   Tag,
   Typography,
 } from 'antd'
@@ -326,7 +325,7 @@ export default function BackupRestorePanel({ backupOnly = false, isSuperAdmin = 
           {historyLoading ? (
             <Spin />
           ) : history.length > 0 ? (
-            <Table
+            <HorizontalScrollTable
               dataSource={history}
               columns={historyCols}
               rowKey="name"

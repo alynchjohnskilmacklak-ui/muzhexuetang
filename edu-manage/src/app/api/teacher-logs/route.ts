@@ -34,7 +34,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     })
 
     const teacherIds = teachers.map((teacher) => teacher.id)
-    const [allLogs, allLessons, allDraftPapers, allAlerts] = await Promise.all([
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000)
+    const [allLogs, allLessons, allDraftPapers, allAlerts, allMonthlyLogs, allTotalLogs] = await Promise.all([
       prisma.activityLog.findMany({
         where: {
           teacherId: { in: teacherIds },
@@ -76,6 +77,16 @@ export const GET = apiHandler(async (req: NextRequest) => {
         where: { teacherId: { in: teacherIds }, isResolved: false },
         _count: { id: true },
       }),
+      prisma.activityLog.groupBy({
+        by: ['teacherId'],
+        where: { teacherId: { in: teacherIds }, createdAt: { gte: thirtyDaysAgo } },
+        _count: { id: true },
+      }),
+      prisma.activityLog.groupBy({
+        by: ['teacherId'],
+        where: { teacherId: { in: teacherIds } },
+        _count: { id: true },
+      }),
     ])
 
     const logsByTeacher = groupBy(allLogs.filter((log) => log.teacherId), (log) => log.teacherId!)
@@ -99,6 +110,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }
     const draftPaperMap = new Map(allDraftPapers.filter((row) => row.teacherId).map((row) => [row.teacherId!, row._count.id]))
     const alertMap = new Map(allAlerts.filter((row) => row.teacherId).map((row) => [row.teacherId!, row._count.id]))
+    const monthlyLogMap = new Map(allMonthlyLogs.filter((row) => row.teacherId).map((row) => [row.teacherId!, row._count.id]))
+    const totalLogMap = new Map(allTotalLogs.filter((row) => row.teacherId).map((row) => [row.teacherId!, row._count.id]))
 
     const rows = teachers.map((teacher) => {
       const todayLogs = logsByTeacher.get(teacher.id) || []
@@ -122,10 +135,16 @@ export const GET = apiHandler(async (req: NextRequest) => {
           ? 'PARTIAL'
           : 'ACTIVE'
 
+      const monthlyActionsCount = monthlyLogMap.get(teacher.id) || 0
+      const totalActionsCount = totalLogMap.get(teacher.id) || 0
+      const todayActionsCount = todayLogs.length
+      const usageFrequency = monthlyActionsCount * 3 + todayActionsCount * 5 + (todayLessons.length > 0 ? 2 : 0)
+
       return {
         teacherId: teacher.id,
         teacherName: teacher.name,
         avatar: teacher.avatar,
+        gender: teacher.gender,
         subjects: teacher.subjects,
         attendanceStatus: `${submittedCount}/${todayLessons.length}`,
         todayLessons: todayLessons.length,
@@ -134,11 +153,22 @@ export const GET = apiHandler(async (req: NextRequest) => {
         papersToday,
         postsToday,
         commentRepliesToday,
+        todayActionsCount,
+        monthlyActionsCount,
+        totalActionsCount,
+        usageFrequency,
         lastAction: lastAction?.action || null,
         lastActionTime: lastAction?.createdAt?.toISOString() || null,
         status,
         alertCount: alerts,
       }
+    })
+
+    rows.sort((a, b) => {
+      if (b.usageFrequency !== a.usageFrequency) return b.usageFrequency - a.usageFrequency
+      if (b.todayActionsCount !== a.todayActionsCount) return b.todayActionsCount - a.todayActionsCount
+      if (b.monthlyActionsCount !== a.monthlyActionsCount) return b.monthlyActionsCount - a.monthlyActionsCount
+      return a.teacherName.localeCompare(b.teacherName, 'zh-Hans-CN')
     })
 
     const [totalDraftPapers, weeklyPublishedPapers, weeklyPosts, activeStudents, alertCount] = await Promise.all([

@@ -5,6 +5,8 @@ import { visibleStudentWhere } from '@/lib/business-visibility'
 import { minutesToHours, roundHours } from '@/lib/hours'
 import { buildLatestFeedbackDateByStudent } from '@/lib/teacher-feedback-freshness'
 import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { loadLessonFeedbackBlockReasons, resolvePendingFeedbackStudentIds } from '@/lib/classroom-feedback/lesson-eligibility'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
 import { localDateColumnValue, localDateKey } from '@/lib/date/local-day'
 import { attendanceKey, isoWeekday } from '@/lib/study-hall/domain'
@@ -81,7 +83,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
             course: true,
             room: true,
             enrollments: {
-              where: { status: 'ACTIVE', student: visibleStudentWhere },
+              where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere },
               include: { student: { select: { id: true, name: true, grade: true, school: true, membershipLevel: true } } },
             },
           },
@@ -217,7 +219,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
               course: true,
               room: true,
               enrollments: {
-                where: { status: 'ACTIVE', student: visibleStudentWhere },
+                where: { status: 'ACTIVE', deletedAt: null, student: visibleStudentWhere },
                 include: { student: { select: { id: true, name: true, grade: true, school: true, membershipLevel: true } } },
               },
             },
@@ -271,10 +273,43 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     return covered
   }
 
+  const lessonRosterStudentIds = (lesson: typeof todayLessons[number]) => resolveSubjectLessonStudentIds(
+    lesson.lessonStudents.map((student) => student.studentId),
+    lesson.group.enrollments.map((enrollment) => ({
+      studentId: enrollment.student.id,
+      subjects: enrollment.subjects,
+    })),
+    lesson.subject || lesson.group.course.subject,
+    lesson.lessonDate,
+    now,
+  )
+
+  const attendanceSubmittedFor = (lesson: typeof todayLessons[number]) => hasSubmittedLessonAttendance({
+    attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+    status: lesson.status,
+    attendances: lesson.attendances,
+    expectedStudentIds: lessonRosterStudentIds(lesson),
+  })
+
+  const feedbackBlockReasons = await loadLessonFeedbackBlockReasons(
+    prisma,
+    todayLessons
+      .filter(attendanceSubmittedFor)
+      .map((lesson) => ({
+        id: lesson.id,
+        lessonDate: lesson.lessonDate,
+        studentIds: lessonRosterStudentIds(lesson),
+      })),
+  )
+
+  const pendingFeedbackStudentIdsFor = (lesson: typeof todayLessons[number]) => resolvePendingFeedbackStudentIds(
+    lessonRosterStudentIds(lesson),
+    [...coveredStudentIdsFor(lesson)],
+    feedbackBlockReasons.get(lesson.id) || {},
+  )
+
   const decorateLesson = (lesson: typeof todayLessons[number]) => {
-    const expectedStudentIds = lesson.group.intensiveMode === 'INTENSIVE'
-      ? lesson.lessonStudents.map((student) => student.studentId)
-      : lesson.group.enrollments.map((enrollment) => enrollment.student.id)
+    const expectedStudentIds = lessonRosterStudentIds(lesson)
     const attendanceSubmitted = hasSubmittedLessonAttendance({
       attendanceSubmittedAt: lesson.attendanceSubmittedAt,
       status: lesson.status,
@@ -282,7 +317,6 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       expectedStudentIds,
     })
     const status = lessonStatusLabel(lesson, attendanceSubmitted, now)
-    const covered = coveredStudentIdsFor(lesson)
     return {
       id: lesson.id,
       time: `${lesson.startTime}-${lesson.endTime}`,
@@ -291,16 +325,16 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       courseName: lesson.group.course.name,
       groupName: lesson.group.name,
       room: lesson.group.room?.name || '-',
-      studentCount: lesson.group.enrollments.length,
-      students: lesson.group.enrollments.map((enrollment) => enrollment.student),
+      studentCount: expectedStudentIds.length,
+      students: lesson.group.enrollments
+        .filter((enrollment) => expectedStudentIds.includes(enrollment.student.id))
+        .map((enrollment) => enrollment.student),
       status: lesson.status,
       statusLabel: status.label,
       statusTone: status.tone,
       attendanceSubmittedAt: lesson.attendanceSubmittedAt || (attendanceSubmitted ? lesson.attendances[0]?.createdAt : null),
       lessonId: lesson.id,
-      hasFeedback: expectedStudentIds.length > 0
-        ? expectedStudentIds.every((studentId) => covered.has(studentId))
-        : lesson.classroomFeedbacks.length > 0,
+      hasFeedback: pendingFeedbackStudentIdsFor(lesson).length === 0,
       feedbackId: lesson.classroomFeedbacks[0]?.id || null,
     }
   }
@@ -308,24 +342,10 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
   const decoratedNextLessons = nextDayLessons.map(decorateLesson)
 
   const endedTodayLessons = todayLessons.filter((lesson) => atTime(lesson.lessonDate, lesson.endTime) < now)
-  const attendanceSubmittedFor = (lesson: typeof todayLessons[number]) => {
-    const expectedStudentIds = lesson.group.intensiveMode === 'INTENSIVE'
-      ? lesson.lessonStudents.map((student) => student.studentId)
-      : lesson.group.enrollments.map((enrollment) => enrollment.student.id)
-    return hasSubmittedLessonAttendance({
-      attendanceSubmittedAt: lesson.attendanceSubmittedAt,
-      status: lesson.status,
-      attendances: lesson.attendances,
-      expectedStudentIds,
-    })
-  }
   const pendingAttendanceLessons = endedTodayLessons.filter((lesson) => !attendanceSubmittedFor(lesson))
   const pendingFeedbackLessons = todayLessons.filter((lesson) => {
     if (!attendanceSubmittedFor(lesson)) return false
-    const expectedStudentIds = lesson.group.enrollments.map((enrollment) => enrollment.student.id)
-    if (expectedStudentIds.length === 0) return false
-    const covered = coveredStudentIdsFor(lesson)
-    return expectedStudentIds.some((studentId) => !covered.has(studentId))
+    return pendingFeedbackStudentIdsFor(lesson).length > 0
   })
   const unreadParentComments = unreadPaperComments + unreadPostComments
 
@@ -510,13 +530,13 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       })
       .slice(0, 4)
       .map((student) => ({
-        id: `feedback-${student.id}`,
-        type: '课堂反馈',
+        id: `student-follow-up-${student.id}`,
+        type: '学员跟进',
         title: student.name,
         description: '最近 7 天还没有课堂反馈',
         tone: 'orange',
-        actionLabel: '发布课堂反馈',
-        href: '/teacher/feedback',
+        actionLabel: '查看学员档案',
+        href: `/teacher/students/${student.id}`,
       })),
   ].slice(0, 8)
 
@@ -593,7 +613,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     label: trendLabels[index],
     weeks: Array.from({ length: 4 }, (_, w) => ({
       label: '第' + (w + 1) + '周',
-      hours: Number((hourBuckets.get(`${key}-${w}`) || 0).toFixed(1)),
+      hours: Number((hourBuckets.get(`${key}-${w}`) || 0).toFixed(2)),
       pay: Math.round(payBuckets.get(`${key}-${w}`) || 0),
     })),
   }))
@@ -644,7 +664,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     },
     quickActions: [
       { label: '提交今日考勤', desc: '完成课后考勤与课时结算', href: '/teacher/attendance', tone: 'orange' },
-      { label: '我的课表', desc: '查看本周课表与上课安排', href: '/teacher/teaching-schedule', tone: 'green' },
+      { label: '我的课表', desc: '查看本周课表与上课安排', href: '/teacher/schedule', tone: 'green' },
       { label: '薪酬福利', desc: '查看薪资流水与福利明细', href: '/teacher/compensation', tone: 'brown' },
       { label: '仿真教学', desc: 'AI 仿真课堂辅助教学', href: '/teacher/ai', tone: 'green' },
       { label: '发布课堂反馈', desc: '记录课堂内容与作业建议', href: '/teacher/feedback', tone: 'purple' },

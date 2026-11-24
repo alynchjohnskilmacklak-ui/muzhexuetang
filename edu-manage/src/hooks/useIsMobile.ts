@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 
-export function useIsMobile(breakpoint = 768, includeCompactLandscape = false): boolean | null {
+// Page content switches to a compact touch layout through tablet widths.
+// App shells pass 768 explicitly where the desktop/tablet navigation should remain visible.
+export function useIsMobile(breakpoint = 1025, includeCompactLandscape = false): boolean | null {
   const [isMobile, setIsMobile] = useState<boolean | null>(null)
 
   useEffect(() => {

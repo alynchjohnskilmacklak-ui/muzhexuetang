@@ -1,0 +1,775 @@
+/* 教师端我的课表 - 牧哲精品工艺样式 */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 顶部导航与操作栏 */
+.headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--color-ink-muted, #5a4e3a);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 周选择导航 */
+.weekNav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.08));
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.weekNavBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-ink, #1a1201);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  user-select: none;
+}
+
+.weekNavBtn:hover {
+  background: var(--color-surface-2, rgba(20, 87, 77, 0.06));
+  color: var(--color-primary, #14574d);
+}
+
+.weekNavBtn:active {
+  transform: scale(0.96);
+}
+
+.weekNavCurrent {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(20, 87, 77, 0.08);
+  color: var(--color-primary, #14574d);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(20, 87, 77, 0.15);
+  cursor: pointer;
+}
+
+/* 课程大类分段切换 */
+.categoryTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  background: var(--color-surface-3, #f5f2ee);
+  border-radius: 14px;
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.06));
+}
+
+.tabBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--color-ink-muted, #5a4e3a);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.tabBtn:hover {
+  color: var(--color-ink, #1a1201);
+}
+
+.tabBtnActive {
+  background: var(--color-surface-1, #ffffff);
+  color: var(--color-primary, #14574d);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* 统计卡片条 */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.06));
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-ink, #1a1201);
+  font-variant-numeric: tabular-nums;
+}
+
+.statValueSuccess {
+  color: var(--color-success, #1D9E75);
+}
+
+.statValueOrange {
+  color: var(--color-brand-orange, #E8784A);
+}
+
+/* 7天横向周选择条 (Week Ribbon) */
+.weekRibbonCard {
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.07));
+  border-radius: 16px;
+  padding: 10px 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.weekRibbonHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 8px;
+  border-bottom: 1px dashed var(--color-hairline, rgba(0, 0, 0, 0.06));
+  margin-bottom: 8px;
+}
+
+.weekRibbonTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink, #1a1201);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.allWeekToggleBtn {
+  font-size: 12px;
+  color: var(--color-primary, #14574d);
+  background: rgba(20, 87, 77, 0.08);
+  border: 1px solid rgba(20, 87, 77, 0.18);
+  border-radius: 999px;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.allWeekToggleBtn:active {
+  transform: scale(0.96);
+}
+
+.weekRibbonGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.dayCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 2px 7px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.dayCell:hover {
+  background: rgba(20, 87, 77, 0.04);
+}
+
+.dayCellToday {
+  border-color: rgba(201, 164, 92, 0.45);
+}
+
+.dayCellSelected {
+  background: var(--color-primary, #14574d) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(20, 87, 77, 0.25);
+}
+
+.weekdayLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-ink-muted, #73695b);
+}
+
+.dayCellSelected .weekdayLabel {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dayNumber {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dayCellSelected .dayNumber {
+  color: #ffffff;
+}
+
+/* 课程节数小徽标 */
+.lessonCountBadge {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: #FFF3EB;
+  color: var(--color-brand-orange, #E8784A);
+  border: 1px solid rgba(232, 120, 74, 0.3);
+  margin-top: 1px;
+}
+
+.dayCellSelected .lessonCountBadge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.dayDotEmpty {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-hairline, rgba(0, 0, 0, 0.12));
+  margin-top: 5px;
+}
+
+.dayCellSelected .dayDotEmpty {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* 筛选状态提示条 */
+.filterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #fbf9f6;
+  border: 1px solid rgba(20, 87, 77, 0.12);
+  border-radius: 12px;
+}
+
+.filterBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink, #1a1201);
+}
+
+.filterBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--color-primary-bg, #EAF4F1);
+  color: var(--color-primary, #14574d);
+}
+
+/* 课程卡片列表流 (Lesson Stream) */
+.lessonStream {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dayGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-left: 2px;
+}
+
+.dayGroupTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+}
+
+.dayGroupCount {
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+/* 单节课程卡片 */
+.lessonCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.08));
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.lessonCard:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.lessonCardAccent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-primary, #14574d);
+}
+
+.lessonCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.timeBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timeText {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.durationTag {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--color-surface-3, #f5f2ee);
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+.lessonTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-ink, #1a1201);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+  margin-bottom: 12px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.studentsPill {
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+  background: #fbf9f6;
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.06));
+  border-radius: 8px;
+  padding: 4px 8px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.studentsList {
+  font-weight: 600;
+  color: var(--color-ink, #1a1201);
+}
+
+/* 底部快捷操作连通坞 (Action Dock) */
+.actionDock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.06));
+}
+
+.actionBtnPrimary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--color-primary, #14574d);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 140ms ease;
+  box-shadow: 0 2px 6px rgba(20, 87, 77, 0.2);
+}
+
+.actionBtnPrimary:active {
+  transform: scale(0.97);
+}
+
+.actionBtnSecondary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--color-primary, #14574d);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(20, 87, 77, 0.3);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 140ms ease;
+}
+
+.actionBtnSecondary:hover {
+  background: var(--color-primary-bg, #EAF4F1);
+}
+
+.actionBtnSecondary:active {
+  transform: scale(0.97);
+}
+
+.actionBtnOutline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-ink-muted, #5a4e3a);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.12));
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 140ms ease;
+}
+
+.actionBtnOutline:hover {
+  background: var(--color-surface-2, rgba(0, 0, 0, 0.03));
+  color: var(--color-ink, #1a1201);
+}
+
+/* 空状态卡片 */
+.dayEmptyCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 36px 20px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid var(--color-hairline, rgba(0, 0, 0, 0.06));
+  border-radius: 16px;
+  text-align: center;
+}
+
+.dayEmptyText {
+  font-size: 14px;
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+.dayEmptyActionBtn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary, #14574d);
+  background: var(--color-primary-bg, #EAF4F1);
+  border: 1px solid rgba(20, 87, 77, 0.2);
+  border-radius: 999px;
+  padding: 4px 14px;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.dayEmptyActionBtn:active {
+  transform: scale(0.96);
+}
+
+/* --------------------------------------------------------------------------
+   统计卡片细节与全达成勋章 (Stats Metric & All-Done Ceremony)
+   -------------------------------------------------------------------------- */
+.statCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.statTipIcon {
+  font-size: 11px;
+  color: #8a6517;
+  cursor: help;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
+}
+
+.statTipIcon:hover {
+  opacity: 1;
+}
+
+.statValueWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.statUnit {
+  font-size: 11.5px;
+  color: var(--color-ink-muted, #756a58);
+  font-weight: 500;
+}
+
+.statDivider {
+  margin: 0 2px;
+  font-size: 14px;
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.statTotal {
+  font-size: 14px;
+  color: var(--color-ink-muted, #756a58);
+  font-weight: 600;
+}
+
+.statCardAllDone {
+  background: linear-gradient(135deg, #ffffff 0%, #f4fbf7 100%) !important;
+  border-color: rgba(20, 87, 77, 0.28) !important;
+  box-shadow: 0 4px 14px rgba(20, 87, 77, 0.08) !important;
+}
+
+.allDoneBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(20, 87, 77, 0.12);
+  color: #14574d;
+  margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   课程卡片状态徽标与通栏条 (Lesson Card Status & Unified Bar)
+   -------------------------------------------------------------------------- */
+.badgeGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tierHonorTag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+  color: #854d0e;
+  border: 1px solid #fde047;
+}
+
+.lessonStatusBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.statusBadgeClosed {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.statusBadgeFeedback {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.statusBadgeAttendance {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.statusBadgeUpcoming {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* 一体化温润通栏信息条 */
+.unifiedMetaBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border: 1px solid rgba(20, 87, 77, 0.08);
+  border-radius: 8px;
+  font-size: 11.5px;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+.subjectPill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.metaDivider {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+.metaField {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metaField strong {
+  color: #0f172a;
+}
+
+/* 暖金行动按钮 (针对待发反馈) */
+.actionBtnGold {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.25) !important;
+}
+
+/* 教师等级特权与排课横幅 */
+.teacherTierBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--color-surface-1, #ffffff);
+  border: 1px solid rgba(20, 87, 77, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.tierBannerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tierBadge {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tierTagline {
+  font-size: 12px;
+  color: var(--color-ink-muted, #5a4e3a);
+}
+
+.tierHintText {
+  font-size: 11.5px;
+  color: var(--color-primary, #14574d);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+}

@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 import { roundHours } from '../src/lib/hours'
+import { getNormalizationMode } from '../src/lib/normalization-mode'
 
 const prisma = new PrismaClient()
-const dryRun = process.argv.includes('--dry-run')
+const dryRun = getNormalizationMode(process.argv.slice(2)) === 'dry-run'
 
 function changed(value: number | null | undefined) {
   const current = Number(value ?? 0)
@@ -71,7 +72,7 @@ async function main() {
   }
 
   if (dryRun) {
-    console.log('dry-run 模式未写入数据库')
+    console.log('dry-run 模式未写入数据库；确认预览结果并备份后，使用 --apply 才会写入')
     return
   }
 

@@ -7,6 +7,7 @@ import {
   requireTeacherUser,
 } from '@/lib/auth/guards'
 import { visibleClassGroupWhere, visibleClassLessonWhere, visibleStudentWhere } from '@/lib/business-visibility'
+import { getLocalDayRange, getLocalWeekRange, localDateKey } from '@/lib/date/local-day'
 export { TEACHER_LOG_ACTIONS, type TeacherLogAction } from '@/lib/teacher-log-actions'
 
 export const TEACHER_LOG_LABELS: Record<string, string> = {
@@ -87,19 +88,11 @@ export async function assertTeacherOwnsStudent(
 }
 
 export function todayRange(now = new Date()) {
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const end = new Date(start.getTime() + 86400000)
-  return { start, end }
+  return getLocalDayRange(localDateKey(now))
 }
 
 export function weekRange(now = new Date()) {
-  const start = new Date(now)
-  const day = start.getDay()
-  const offset = day === 0 ? 6 : day - 1
-  start.setDate(start.getDate() - offset)
-  start.setHours(0, 0, 0, 0)
-  const end = new Date(start.getTime() + 7 * 86400000)
-  return { start, end }
+  return getLocalWeekRange(now)
 }
 
 export function teacherLessonWhere(teacherId: string, termId?: string): Prisma.ClassLessonWhereInput {

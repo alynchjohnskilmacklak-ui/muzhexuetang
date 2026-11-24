@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { resolveTeacherForUser } from '@/lib/performance'
-import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
+import { parentStudentHistoryWhere, parentVisibleExamPaperWhere } from '@/lib/business-visibility'
+import { findParentChild, getParentChildren } from '@/lib/parent-children'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
@@ -30,7 +31,15 @@ export const GET = apiHandler(async (req: NextRequest) => {
     // Parent visibility is an authorization boundary, not an optional list mode.
     // Client-supplied status/student filters may only narrow this scope.
     Object.assign(where, parentVisibleExamPaperWhere(user.id))
-    if (studentId) where.studentId = studentId
+    if (studentId) {
+      const children = await getParentChildren(prisma, user.id)
+      const selectedChild = findParentChild(children, studentId)
+      const linkedIds = selectedChild?.recordIds || []
+      where.studentId = { in: linkedIds }
+      // Historical term records can have no active enrollment. Keep the same
+      // parent ownership boundary while allowing the archive to read those rows.
+      where.student = { id: { in: linkedIds }, ...parentStudentHistoryWhere(user.id) }
+    }
   } else if (user.role === 'admin') {
     if (studentId) where.studentId = studentId
     if (teacherId) where.teacherId = teacherId

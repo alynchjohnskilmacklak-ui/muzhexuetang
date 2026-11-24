@@ -1,0 +1,422 @@
+[
+  {
+    "word": "first",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第一。序数词表示次序，可作限定词（the first day、my first day），也可单独表示名次。缩写为 1st；数字以 11、12、13 结尾时用 th，其余末位 1、2、3 分别用 st、nd、rd，其他用 th。",
+    "collocations": "the first day; first place; first prize; first of all",
+    "commonMistake": "first 是不规则拼写，不说 oneth；日期缩写为 1st。注意 11th 是例外，不能只看末位 1 写成 11st。",
+    "example": {"english": "This is the first book I borrowed from the library.", "chinese": "这是我从图书馆借的第一本书。"},
+    "application": {"prompt": "A calendar marks day number 1 in May. Write the ordinal word: the ___ day of May.", "solution": "first"},
+    "sources": [
+      {"label": "Cambridge Dictionary: first", "url": "https://dictionary.cambridge.org/dictionary/english/first"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "second",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第二。序数词可放在名词前表示顺序，也可单独表示名次；日期写作 2nd。缩写中末位 2 通常用 nd，但 12th 属于 11、12、13 的特殊情况。",
+    "collocations": "the second day; second place; the second floor; a second chance",
+    "commonMistake": "second 是不规则拼写；2nd 写作 nd，但 12 的缩写是 12th，不是 12nd。",
+    "example": {"english": "Our classroom is on the second floor.", "chinese": "我们的教室在二楼。"},
+    "application": {"prompt": "A runner finishes after one other runner. Write the ordinal word for this position: ___ place.", "solution": "second"},
+    "sources": [
+      {"label": "Cambridge Dictionary: second", "url": "https://dictionary.cambridge.org/dictionary/english/second"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "third",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第三。序数词常放在限定词后、名词前，如 the third question；也可单独表示名次。数字缩写为 3rd；13th 是特殊形式。",
+    "collocations": "the third day; third place; the third question; the third of May",
+    "commonMistake": "third 是不规则拼写；3rd 用 rd，但 13th 以 th 结尾，不能写成 13rd。",
+    "example": {"english": "Leo finished third in the school race.", "chinese": "利奥在校运会中获得第三名。"},
+    "application": {"prompt": "On a list, the position after first and second is the ___. Write the ordinal word.", "solution": "third"},
+    "sources": [
+      {"label": "Cambridge Dictionary: third", "url": "https://dictionary.cambridge.org/dictionary/english/third"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "fourth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第四。通常作限定词修饰名词，也可单独表示顺序；数字缩写为 4th。日期中可写 May 4th，也可写 4th May。",
+    "collocations": "the fourth day; the fourth question; fourth place; the fourth of July",
+    "commonMistake": "fourth 以 th 结尾，缩写是 4th，不是 4rd；不要把基数词 four 直接当作序数词。",
+    "example": {"english": "The fourth question asks us to read a calendar.", "chinese": "第四题要求我们看日历。"},
+    "application": {"prompt": "A building map marks a room on level 4. Write the ordinal word: the ___ floor.", "solution": "fourth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: fourth", "url": "https://dictionary.cambridge.org/dictionary/english/fourth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "fifth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第五。作定语时说 the fifth page、my fifth day；日期缩写为 5th。",
+    "collocations": "the fifth day; fifth place; the fifth page; the fifth of June",
+    "commonMistake": "five 变 fifth 时，ve 改为 f 再加 th；写作 fifth，不是 fiveth，日期缩写是 5th。",
+    "example": {"english": "She is reading her fifth book this month.", "chinese": "她这个月正在读她的第五本书。"},
+    "application": {"prompt": "This is day 5 of the school trip. Write the ordinal word: the ___ day.", "solution": "fifth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: fifth", "url": "https://dictionary.cambridge.org/dictionary/english/fifth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "sixth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第六。常作限定词，如 the sixth student；数字缩写为 6th。",
+    "collocations": "the sixth day; the sixth student; sixth place; the sixth of August",
+    "commonMistake": "sixth 的拼写为 six + th，不说 sixeth；日期缩写写 6th。",
+    "example": {"english": "The sixth student on the list is Amy.", "chinese": "名单上的第六位学生是艾米。"},
+    "application": {"prompt": "A student is number 6 on the class list. Write the ordinal word: the ___ student.", "solution": "sixth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: sixth", "url": "https://dictionary.cambridge.org/dictionary/english/sixth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "seventh",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第七。可修饰名词表示顺序，如 the seventh meeting；数字缩写为 7th。",
+    "collocations": "the seventh day; the seventh meeting; seventh place; the seventh of September",
+    "commonMistake": "seventh 是 seven 加 th，拼写中保留 seven 的 n；不要写成 seveneth，缩写是 7th。",
+    "example": {"english": "Our club's seventh meeting is on Friday.", "chinese": "我们社团的第七次活动在星期五。"},
+    "application": {"prompt": "The schedule labels this as meeting number 7. Write the ordinal word: the ___ meeting.", "solution": "seventh"},
+    "sources": [
+      {"label": "Cambridge Dictionary: seventh", "url": "https://dictionary.cambridge.org/dictionary/english/seventh"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "eighth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第八。用作限定词时放在名词前，如 the eighth page；数字缩写为 8th。",
+    "collocations": "the eighth day; the eighth page; eighth place; the eighth of October",
+    "commonMistake": "eighth 的正确拼写只有一个 t，不是 eightth；缩写为 8th。",
+    "example": {"english": "The eighth page has a picture of a map.", "chinese": "第八页上有一幅地图。"},
+    "application": {"prompt": "A book's page number is 8. Write the ordinal word: the ___ page.", "solution": "eighth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: eighth", "url": "https://dictionary.cambridge.org/dictionary/english/eighth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "ninth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第九。可修饰名词，如 the ninth question；日期缩写为 9th。",
+    "collocations": "the ninth day; the ninth question; ninth place; the ninth of November",
+    "commonMistake": "nine 变 ninth 时去掉词尾 e 再加 th；写作 ninth，不是 nineth，缩写为 9th。",
+    "example": {"english": "Our team finished ninth in the quiz competition.", "chinese": "我们队在知识竞赛中获得第九名。"},
+    "application": {"prompt": "A quiz result shows position number 9. Write the ordinal word: ___ place.", "solution": "ninth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: ninth", "url": "https://dictionary.cambridge.org/dictionary/english/ninth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "tenth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十。作限定词时放在名词前，如 the tenth stop；数字缩写为 10th。",
+    "collocations": "the tenth day; the tenth stop; tenth place; the tenth of December",
+    "commonMistake": "ten 的序数词为 tenth，缩写 10th；末位数字是 0 时用 th。",
+    "example": {"english": "The tenth stop is near the library.", "chinese": "第十站在图书馆附近。"},
+    "application": {"prompt": "A bus route has ten stops. Write the ordinal word for stop number 10: the ___ stop.", "solution": "tenth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: tenth", "url": "https://dictionary.cambridge.org/dictionary/english/tenth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "eleventh",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十一。常修饰名词，如 the eleventh day；数字缩写为 11th。11、12、13 的末两位是特殊情况，均用 th。",
+    "collocations": "the eleventh day; the eleventh room; eleventh place; the eleventh of April",
+    "commonMistake": "虽然 11 的末位是 1，日期缩写仍是 11th，不是 11st；eleventh 按词形记忆。",
+    "example": {"english": "The eleventh day of our trip is our last day in Beijing.", "chinese": "旅行的第十一天是我们在北京的最后一天。"},
+    "application": {"prompt": "Write the ordinal abbreviation for day 11 in a date: April ___.", "solution": "11th"},
+    "sources": [
+      {"label": "Cambridge Dictionary: eleventh", "url": "https://dictionary.cambridge.org/dictionary/english/eleventh"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "twelfth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十二。可说 the twelfth month；日期缩写为 12th。12 与 11、13 一样，数字末两位为特殊形式，缩写用 th。",
+    "collocations": "the twelfth month; the twelfth day; the twelfth question; the twelfth of May",
+    "commonMistake": "twelve 变 twelfth 时 ve 改为 f；12 的日期缩写是 12th，不是 12nd。",
+    "example": {"english": "December is the twelfth month of the year.", "chinese": "十二月是一年中的第十二个月。"},
+    "application": {"prompt": "Write the ordinal abbreviation for day 12 in a date: June ___.", "solution": "12th"},
+    "sources": [
+      {"label": "Cambridge Dictionary: twelfth", "url": "https://dictionary.cambridge.org/dictionary/english/twelfth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "thirteenth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十三。可作限定词修饰名词，如 the thirteenth question；日期缩写为 13th，13 与 11、12 一样用 th。",
+    "collocations": "the thirteenth day; the thirteenth question; thirteenth place; the thirteenth of June",
+    "commonMistake": "thirteen 加 th 写作 thirteenth；13 的缩写是 13th，不能按末位 3 写成 13rd。",
+    "example": {"english": "The thirteenth question is at the bottom of the page.", "chinese": "第十三题在这一页的底部。"},
+    "application": {"prompt": "Write the ordinal abbreviation for day 13 in a date: July ___.", "solution": "13th"},
+    "sources": [
+      {"label": "Cambridge Dictionary: thirteenth", "url": "https://dictionary.cambridge.org/dictionary/english/thirteenth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "fourteenth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十四。常放在名词前，如 the fourteenth day；日期缩写为 14th。",
+    "collocations": "the fourteenth day; the fourteenth page; fourteenth place; the fourteenth of May",
+    "commonMistake": "fourteenth 由 fourteen 加 th 构成；14 的末位是 4，因此缩写为 14th。",
+    "example": {"english": "They will arrive on the fourteenth of May.", "chinese": "他们将在五月十四日到达。"},
+    "application": {"prompt": "Write the ordinal abbreviation for day 14 in a date: May ___.", "solution": "14th"},
+    "sources": [
+      {"label": "Cambridge Dictionary: fourteenth", "url": "https://dictionary.cambridge.org/dictionary/english/fourteenth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "fifteenth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十五。可修饰名词，如 the fifteenth page；数字缩写为 15th。",
+    "collocations": "the fifteenth day; the fifteenth page; fifteenth place; the fifteenth of July",
+    "commonMistake": "fifteen 的序数词是 fifteenth，不是 fiveteenth；15 的缩写为 15th。",
+    "example": {"english": "This is the fifteenth page of the story.", "chinese": "这是这个故事的第十五页。"},
+    "application": {"prompt": "The schedule marks day 15 of the trip. Write the ordinal word: the ___ day.", "solution": "fifteenth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: fifteenth", "url": "https://dictionary.cambridge.org/dictionary/english/fifteenth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "sixteenth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十六。作限定词时放在名词前，如 the sixteenth student；日期缩写为 16th。",
+    "collocations": "the sixteenth day; the sixteenth student; sixteenth place; the sixteenth of August",
+    "commonMistake": "sixteen 加 th 写作 sixteenth；16 末位是 6，缩写用 th，写作 16th。",
+    "example": {"english": "The sixteenth player is waiting by the door.", "chinese": "第十六位队员正在门边等候。"},
+    "application": {"prompt": "A team list shows player number 16. Write the ordinal word: the ___ player.", "solution": "sixteenth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: sixteenth", "url": "https://dictionary.cambridge.org/dictionary/english/sixteenth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "seventeenth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十七。序数词作限定词时放在名词前，如 the seventeenth meeting；数字缩写为 17th。",
+    "collocations": "the seventeenth day; the seventeenth meeting; seventeenth place; the seventeenth of September",
+    "commonMistake": "seventeen 加 th 写作 seventeenth；17 的末位是 7，缩写用 th，写作 17th。",
+    "example": {"english": "Her seventeenth birthday is in July.", "chinese": "她的十七岁生日在七月。"},
+    "application": {"prompt": "A diary entry is dated day 17 of September. Write the ordinal word: the ___ day.", "solution": "seventeenth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: seventeenth", "url": "https://dictionary.cambridge.org/dictionary/english/seventeenth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "eighteenth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十八。可修饰名词，如 the eighteenth guest；数字缩写为 18th。",
+    "collocations": "the eighteenth day; the eighteenth guest; eighteenth place; the eighteenth of October",
+    "commonMistake": "eighteen 加 th 写作 eighteenth；不要把 eighth 和 eighteenth 混淆，18 的缩写是 18th。",
+    "example": {"english": "The eighteenth guest arrived before dinner.", "chinese": "第十八位客人在晚饭前到了。"},
+    "application": {"prompt": "A guest list has 18 names. Write the ordinal word for guest number 18: the ___ guest.", "solution": "eighteenth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: eighteenth", "url": "https://dictionary.cambridge.org/dictionary/english/eighteenth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "nineteenth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第十九。常修饰名词，如 the nineteenth chapter；日期缩写为 19th。",
+    "collocations": "the nineteenth day; the nineteenth chapter; nineteenth place; the nineteenth of November",
+    "commonMistake": "nineteen 加 th 写作 nineteenth；19 的末位是 9，缩写为 19th。",
+    "example": {"english": "The nineteenth chapter ends with a surprise.", "chinese": "第十九章以一个惊喜结尾。"},
+    "application": {"prompt": "In a 20-chapter book, chapter 19 is the ___. Write the ordinal word.", "solution": "nineteenth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: nineteenth", "url": "https://dictionary.cambridge.org/dictionary/english/nineteenth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "twentieth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第二十。可修饰名词，如 the twentieth meeting；日期缩写为 20th。",
+    "collocations": "the twentieth day; the twentieth meeting; twentieth place; the twentieth of December",
+    "commonMistake": "twenty 变 twentieth 时，y 改为 i 再加 eth；写作 twentieth，不是 twentyth，缩写为 20th。",
+    "example": {"english": "Our twentieth meeting will be on Monday.", "chinese": "我们的第二十次会议将在星期一举行。"},
+    "application": {"prompt": "A club has held 19 meetings; the next is meeting 20. Write the ordinal word: the ___ meeting.", "solution": "twentieth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: twentieth", "url": "https://dictionary.cambridge.org/dictionary/english/twentieth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "thirtieth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第三十。序数词可作定语，如 the thirtieth anniversary；日期缩写为 30th。",
+    "collocations": "the thirtieth day; the thirtieth anniversary; thirtieth place; the thirtieth of March",
+    "commonMistake": "thirty 变 thirtieth 时，y 改为 i 再加 eth；写作 thirtieth，不是 thirtyth，缩写 30th。",
+    "example": {"english": "The school will celebrate its thirtieth anniversary this year.", "chinese": "学校今年将庆祝建校三十周年。"},
+    "application": {"prompt": "A school opened 30 years ago. This year is its ___ anniversary. Write the ordinal word.", "solution": "thirtieth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: thirtieth", "url": "https://dictionary.cambridge.org/dictionary/english/thirtieth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "fortieth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第四十。常修饰名词，如 the fortieth page；数字缩写为 40th。",
+    "collocations": "the fortieth day; the fortieth page; the fortieth visitor; fortieth place",
+    "commonMistake": "forty 的拼写没有 u；变序数词时 y 改为 i，再加 eth：fortieth，缩写 40th。",
+    "example": {"english": "She finished fortieth in the city race.", "chinese": "她在市级比赛中获得第四十名。"},
+    "application": {"prompt": "A book has 40 pages. Page 40 is the ___. Write the ordinal word.", "solution": "fortieth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: fortieth", "url": "https://dictionary.cambridge.org/dictionary/english/fortieth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "fiftieth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第五十。序数词常修饰名词，如 the fiftieth birthday；数字缩写为 50th。",
+    "collocations": "the fiftieth day; the fiftieth birthday; the fiftieth member; fiftieth place",
+    "commonMistake": "fifty 变 fiftieth 时，y 改为 i 再加 eth；不是 fiftyeth，缩写为 50th。",
+    "example": {"english": "The club welcomed its fiftieth member today.", "chinese": "俱乐部今天迎来了它的第五十位成员。"},
+    "application": {"prompt": "A club already has 49 members. The next person is its ___ member. Write the ordinal word.", "solution": "fiftieth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: fiftieth", "url": "https://dictionary.cambridge.org/dictionary/english/fiftieth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "sixtieth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第六十。可修饰名词，如 the sixtieth birthday；日期缩写为 60th。",
+    "collocations": "the sixtieth day; the sixtieth birthday; the sixtieth page; sixtieth place",
+    "commonMistake": "sixty 变 sixtieth 时，y 改为 i 再加 eth；写作 sixtieth，数字缩写为 60th。",
+    "example": {"english": "His sixtieth birthday is next month.", "chinese": "他的六十岁生日在下个月。"},
+    "application": {"prompt": "A book's page number is 60. Write the ordinal word: the ___ page.", "solution": "sixtieth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: sixtieth", "url": "https://dictionary.cambridge.org/dictionary/english/sixtieth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "seventieth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第七十。可修饰名词，如 the seventieth anniversary；数字缩写为 70th。",
+    "collocations": "the seventieth day; the seventieth anniversary; the seventieth visitor; seventieth place",
+    "commonMistake": "seventy 变 seventieth 时，y 改为 i 再加 eth；缩写是 70th，不是 70st。",
+    "example": {"english": "The library is holding a celebration for its seventieth anniversary.", "chinese": "图书馆正在举办活动庆祝建馆七十周年。"},
+    "application": {"prompt": "An organization has existed for 70 years. It is celebrating its ___ anniversary. Write the ordinal word.", "solution": "seventieth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: seventieth", "url": "https://dictionary.cambridge.org/dictionary/english/seventieth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "eightieth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第八十。常用作限定词，如 the eightieth visitor；数字缩写为 80th。",
+    "collocations": "the eightieth day; the eightieth visitor; the eightieth birthday; eightieth place",
+    "commonMistake": "eighty 变 eightieth 时，y 改为 i 再加 eth；写作 eightieth，缩写 80th。",
+    "example": {"english": "The eightieth visitor received a bookmark.", "chinese": "第八十位访客收到了一枚书签。"},
+    "application": {"prompt": "A museum counts visitors in order. The visitor numbered 80 is the ___. Write the ordinal word.", "solution": "eightieth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: eightieth", "url": "https://dictionary.cambridge.org/dictionary/english/eightieth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "ninetieth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·日期、楼层与顺序表达"],
+    "grammar": "num. 第九十。可修饰名词，如 the ninetieth runner；日期缩写为 90th。",
+    "collocations": "the ninetieth day; the ninetieth runner; the ninetieth page; ninetieth place",
+    "commonMistake": "ninety 变 ninetieth 时，y 改为 i 再加 eth；写作 ninetieth，缩写为 90th。",
+    "example": {"english": "The ninetieth runner crossed the finish line.", "chinese": "第九十位跑步者冲过了终点线。"},
+    "application": {"prompt": "A race result lists a runner in position 90. Write the ordinal word: ___ place.", "solution": "ninetieth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: ninetieth", "url": "https://dictionary.cambridge.org/dictionary/english/ninetieth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "hundredth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·大数顺序表达"],
+    "grammar": "num. 第一百。表示顺序位置，如 the hundredth visitor；数字缩写为 100th。",
+    "collocations": "the hundredth day; the hundredth visitor; the hundredth page; hundredth place",
+    "commonMistake": "表示第 100 个位置用 hundredth（100th）；one hundred 表示数量“一百”，不是“第一百”。",
+    "example": {"english": "The hundredth visitor received a small gift.", "chinese": "第一百位访客收到了一份小礼物。"},
+    "application": {"prompt": "A visitor is number 100 in the line. Write the ordinal word: the ___ visitor.", "solution": "hundredth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: hundredth", "url": "https://dictionary.cambridge.org/dictionary/english/hundredth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "thousandth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·大数顺序表达"],
+    "grammar": "num. 第一千。表示排在 1,000 位的次序，如 the thousandth customer；数字缩写为 1,000th。",
+    "collocations": "the thousandth customer; the thousandth visitor; the thousandth day; thousandth place",
+    "commonMistake": "表示第 1,000 个位置用 thousandth（1,000th）；one thousand 表示数量“一千”。",
+    "example": {"english": "The museum welcomed its thousandth visitor this morning.", "chinese": "博物馆今天上午迎来了第一千位访客。"},
+    "application": {"prompt": "A shop welcomes customer number 1,000. Write the ordinal word: the ___ customer.", "solution": "thousandth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: thousandth", "url": "https://dictionary.cambridge.org/dictionary/english/thousandth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  },
+  {
+    "word": "millionth",
+    "examTags": ["词汇·序数词词义与拼写", "语言运用·大数顺序表达"],
+    "grammar": "num. 第一百万。表示排在 1,000,000 位的次序，如 the millionth visitor；数字缩写为 1,000,000th。",
+    "collocations": "the millionth visitor; the millionth copy; the millionth customer; millionth place",
+    "commonMistake": "表示第 1,000,000 个位置用 millionth；one million 表示数量“一百万”，不表示顺序。",
+    "example": {"english": "The website recorded its millionth visit this year.", "chinese": "这个网站今年记录了第一百万次访问。"},
+    "application": {"prompt": "A website records visit number 1,000,000. Write the ordinal word: the ___ visit.", "solution": "millionth"},
+    "sources": [
+      {"label": "Cambridge Dictionary: millionth", "url": "https://dictionary.cambridge.org/dictionary/english/millionth"},
+      {"label": "Cambridge Grammar: ordinal numbers", "url": "https://dictionary.cambridge.org/grammar/british-grammar/number"},
+      {"label": "Cambridge Grammar: writing dates", "url": "https://dictionary.cambridge.org/grammar/british-grammar/writing-the-date"}
+    ]
+  }
+]

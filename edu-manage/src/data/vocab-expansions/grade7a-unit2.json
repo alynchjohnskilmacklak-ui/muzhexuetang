@@ -1,0 +1,1766 @@
+[
+  {
+    "word": "mean",
+    "examTags": [
+      "词汇·熟词多义",
+      "语法·助动词后的动词原形"
+    ],
+    "grammar": "v. 意思是；打算。mean—meant—meant。What does ... mean? 用于询问词义；mean to do 表示“打算做”。",
+    "collocations": "What does ... mean?; mean a lot; mean to do sth.。",
+    "commonMistake": "does 后接动词原形：What does it mean? 不说 What does it means?",
+    "example": {
+      "english": "What does “together” mean?",
+      "chinese": "“together”是什么意思？"
+    },
+    "application": {
+      "prompt": "What does the word “hike” ___? A. mean B. means",
+      "solution": "A。解析：does 后接动词原形 mean。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mean",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mean"
+      }
+    ]
+  },
+  {
+    "word": "husband",
+    "examTags": [
+      "词汇·家庭成员",
+      "阅读·人物关系理解"
+    ],
+    "grammar": "n. 丈夫；可数，复数 husbands。通常与 wife（妻子）对应。",
+    "collocations": "her husband; husband and wife; a loving husband。",
+    "commonMistake": "husband 是可数名词，单数前通常需要限定词，如 her husband 或 a husband。",
+    "example": {
+      "english": "My aunt and her husband live near us.",
+      "chinese": "我姑姑和她丈夫住在我们附近。"
+    },
+    "application": {
+      "prompt": "A woman is married to Dan. Dan is her ___. A. husband B. sister",
+      "solution": "A。解析：女性的男性配偶是 husband（丈夫）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: husband",
+        "url": "https://dictionary.cambridge.org/dictionary/english/husband"
+      }
+    ]
+  },
+  {
+    "word": "bat",
+    "examTags": [
+      "词汇·一词多义与语境",
+      "阅读·根据用途识别物品"
+    ],
+    "grammar": "n. 球棒；可数，复数 bats。也可指蝙蝠，需结合语境判断；棒球球棒可说 baseball bat。",
+    "collocations": "a baseball bat; hit the ball with a bat; a bat and a ball。",
+    "commonMistake": "bat 既可指球棒，也可指蝙蝠；看上下文中的 ball、game 或 fly、animal 等词来判断。",
+    "example": {
+      "english": "He uses a bat to hit the ball.",
+      "chinese": "他用球棒击球。"
+    },
+    "application": {
+      "prompt": "In a baseball game, a player hits the ball with a ___. A. bat B. violin",
+      "solution": "A。解析：棒球运动员用 bat（球棒）击球。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bat"
+      }
+    ]
+  },
+  {
+    "word": "together",
+    "examTags": [
+      "词汇·副词与常用语块",
+      "阅读·理解人物共同活动"
+    ],
+    "grammar": "adv. 在一起；共同。常与动词连用，如 live/work/play together；也可用 together with 表示“和……一起”。",
+    "collocations": "play together; work together; live together; together with。",
+    "commonMistake": "together 是副词，不说 togetherly；常放在动词或宾语之后，如 play tennis together。",
+    "example": {
+      "english": "The whole family eats dinner together on Sunday.",
+      "chinese": "全家人周日一起吃晚饭。"
+    },
+    "application": {
+      "prompt": "Mia and her brother do their homework at the same time. They study ___. A. together B. alone",
+      "solution": "A。解析：两个人一起学习用 together；alone 表示独自。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: together",
+        "url": "https://dictionary.cambridge.org/dictionary/english/together"
+      }
+    ]
+  },
+  {
+    "word": "spend",
+    "examTags": [
+      "词汇·动词搭配",
+      "语法·动词后接动名词"
+    ],
+    "grammar": "v. 花费（时间或钱）。spend—spent—spent。常用 spend time/money on sth. 或 spend time/money (in) doing sth.。",
+    "collocations": "spend time with family; spend money on books; spend an hour reading。",
+    "commonMistake": "表示“花时间做某事”用 spend time doing，不说 spend time to do；过去式为 spent。",
+    "example": {
+      "english": "I spend an hour reading with my sister every evening.",
+      "chinese": "我每天晚上花一个小时和妹妹一起读书。"
+    },
+    "application": {
+      "prompt": "We spend Saturday afternoon ___ chess. A. playing B. to play",
+      "solution": "A。解析：spend time doing sth. 表示“花时间做某事”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spend"
+      }
+    ]
+  },
+  {
+    "word": "really",
+    "examTags": [
+      "词汇·副词修饰与语境义",
+      "阅读·识别强调语气"
+    ],
+    "grammar": "adv. 非常；确实；真正地。可放在形容词前表示程度，也可放在实义动词前表示“确实”。",
+    "collocations": "really funny; really like; really good; Really?。",
+    "commonMistake": "really 是副词，常修饰形容词或动词；real 是形容词，如 a real friend。",
+    "example": {
+      "english": "My little brother is really funny.",
+      "chinese": "我弟弟真的很有趣。"
+    },
+    "application": {
+      "prompt": "I ___ enjoy playing chess with my grandpa. A. really B. real",
+      "solution": "A。解析：此处修饰动词 enjoy，要用副词 really。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: really",
+        "url": "https://dictionary.cambridge.org/dictionary/english/really"
+      }
+    ]
+  },
+  {
+    "word": "member",
+    "examTags": [
+      "词汇·可数名词与单复数",
+      "阅读·群体关系理解"
+    ],
+    "grammar": "n. 成员；会员。可数，复数 members。表示所属常用 a member of ...。",
+    "collocations": "a family member; a member of the chess club; club members。",
+    "commonMistake": "常说 a member of the family/club；member 是可数名词，单数前需要限定词。",
+    "example": {
+      "english": "My sister is a member of the school music club.",
+      "chinese": "我姐姐是学校音乐社团的一名成员。"
+    },
+    "application": {
+      "prompt": "Ben joined the chess club. He is now a ___ of the club. A. member B. knee",
+      "solution": "A。解析：加入社团的人是该社团的 member（成员）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: member",
+        "url": "https://dictionary.cambridge.org/dictionary/english/member"
+      }
+    ]
+  },
+  {
+    "word": "activity",
+    "examTags": [
+      "词汇·名词词形变化",
+      "阅读·校园活动信息"
+    ],
+    "grammar": "n. 活动；可数，复数 activities：辅音字母 + y 结尾时，变 y 为 i 再加 -es。",
+    "collocations": "family activities; outdoor activities; after-school activity。",
+    "commonMistake": "activity 的复数是 activities，不是 activitys；many 后用 activities。",
+    "example": {
+      "english": "Our family enjoys outdoor activities in summer.",
+      "chinese": "我们一家喜欢在夏天参加户外活动。"
+    },
+    "application": {
+      "prompt": "The school has many fun ___. A. activity B. activities",
+      "solution": "B。解析：many 后接可数名词复数，activity 变为 activities。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: activity",
+        "url": "https://dictionary.cambridge.org/dictionary/english/activity"
+      }
+    ]
+  },
+  {
+    "word": "chess",
+    "examTags": [
+      "词汇·棋类活动",
+      "语法·零冠词搭配"
+    ],
+    "grammar": "n. 国际象棋；通常作不可数名词，表示下棋时说 play chess，不加 a 或 the。",
+    "collocations": "play chess; a chess game; a chess player。",
+    "commonMistake": "表示下国际象棋用 play chess，不说 play a chess；chess 通常不加复数 -es。",
+    "example": {
+      "english": "My grandpa teaches me to play chess.",
+      "chinese": "爷爷教我下国际象棋。"
+    },
+    "application": {
+      "prompt": "On rainy days, we play ___ at home. A. chess B. a chess",
+      "solution": "A。解析：chess 作棋类活动名称时通常不加冠词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chess",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chess"
+      }
+    ]
+  },
+  {
+    "word": "funny",
+    "examTags": [
+      "词汇·形容词语境义",
+      "阅读·理解人物或事件特点"
+    ],
+    "grammar": "adj. 好笑的；有趣的；也可表示奇怪的。比较级 funnier，最高级 funniest。",
+    "collocations": "a funny story; a funny face; sound funny。",
+    "commonMistake": "funny 常表示“令人发笑的”，fun 常表示“有趣的、令人愉快的”；描述名词用 funny story。",
+    "example": {
+      "english": "Uncle Ben tells funny stories at dinner.",
+      "chinese": "Ben 叔叔晚饭时讲好笑的故事。"
+    },
+    "application": {
+      "prompt": "Everyone laughs at the joke. The joke is ___. A. funny B. quiet",
+      "solution": "A。解析：能让大家发笑的笑话是 funny（好笑的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: funny",
+        "url": "https://dictionary.cambridge.org/dictionary/english/funny"
+      }
+    ]
+  },
+  {
+    "word": "laugh",
+    "examTags": [
+      "词汇·动词与名词",
+      "语言运用·表达反应"
+    ],
+    "grammar": "v. 笑；n. 笑声。作动词时 laugh—laughed—laughed；laugh at sb./sth. 表示“因……而笑”。",
+    "collocations": "laugh at a joke; laugh with a friend; a loud laugh。",
+    "commonMistake": "表示“嘲笑某人”或“因某事发笑”常用 laugh at；区别 smile（微笑），laugh 通常有笑声。",
+    "example": {
+      "english": "We all laugh when Grandpa tells that story.",
+      "chinese": "爷爷讲那个故事时，我们都笑了。"
+    },
+    "application": {
+      "prompt": "The joke is so funny that we all ___. A. laugh B. laugh at",
+      "solution": "A。解析：句子中 laugh 后没有宾语；laugh at 后通常要接笑的对象或事情。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: laugh",
+        "url": "https://dictionary.cambridge.org/dictionary/english/laugh"
+      }
+    ]
+  },
+  {
+    "word": "different",
+    "examTags": [
+      "词汇·形容词与介词搭配",
+      "阅读·比较人物或事物"
+    ],
+    "grammar": "adj. 不同的。常用 be different from；different 后可接名词，如 different hobbies。",
+    "collocations": "be different from; different people; many different activities。",
+    "commonMistake": "常见搭配是 different from；different 是形容词，be 后可作表语。",
+    "example": {
+      "english": "My brother and I have different hobbies.",
+      "chinese": "我和哥哥有不同的爱好。"
+    },
+    "application": {
+      "prompt": "Our two bags are not the same colour. They are ___. A. different B. together",
+      "solution": "A。解析：颜色不相同，说明这两个包是 different（不同的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: different",
+        "url": "https://dictionary.cambridge.org/dictionary/english/different"
+      }
+    ]
+  },
+  {
+    "word": "violin",
+    "examTags": [
+      "词汇·可数名词与冠词",
+      "语言运用·音乐爱好表达"
+    ],
+    "grammar": "n. 小提琴；可数，复数 violins。表示演奏乐器时常说 play the violin。",
+    "collocations": "play the violin; a violin lesson; a violin player。",
+    "commonMistake": "表示演奏小提琴常说 play the violin；表示“一个小提琴”则用 a violin。",
+    "example": {
+      "english": "Her daughter plays the violin in the school band.",
+      "chinese": "她的女儿在学校乐队里拉小提琴。"
+    },
+    "application": {
+      "prompt": "Nora has music lessons and practises ___ violin. A. the B. an",
+      "solution": "A。解析：表示演奏乐器时通常用 play/practise the violin。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: violin",
+        "url": "https://dictionary.cambridge.org/dictionary/english/violin"
+      }
+    ]
+  },
+  {
+    "word": "pink",
+    "examTags": [
+      "词汇·颜色词与词性",
+      "阅读·根据颜色识别物品"
+    ],
+    "grammar": "adj. 粉红色的；n. 粉红色。作形容词修饰名词时不随名词变复数。",
+    "collocations": "a pink hat; pink flowers; the colour pink。",
+    "commonMistake": "作颜色形容词时不加复数 -s：pink hats；也可用 in pink 描述穿粉色衣服。",
+    "example": {
+      "english": "My sister wears a pink hat in spring.",
+      "chinese": "我妹妹春天戴一顶粉色帽子。"
+    },
+    "application": {
+      "prompt": "The flower is not red or white; it is ___. A. pink B. chess",
+      "solution": "A。解析：pink 是一种颜色，表示粉红色。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pink",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pink"
+      }
+    ]
+  },
+  {
+    "word": "hat",
+    "examTags": [
+      "词汇·可数名词与单复数",
+      "语境·衣物与外貌描述"
+    ],
+    "grammar": "n. 帽子；可数，复数 hats。单数前需有限定词，如 a hat、my hat。",
+    "collocations": "wear a hat; take off your hat; a sun hat。",
+    "commonMistake": "hat 是可数名词，单数前不能漏掉 a/the/物主限定词；复数是 hats。",
+    "example": {
+      "english": "Please take off your hat when you come inside.",
+      "chinese": "请进屋时摘下帽子。"
+    },
+    "application": {
+      "prompt": "It is sunny. Dad puts ___ on his head. A. a hat B. a knee",
+      "solution": "A。解析：晴天戴在头上的物品是帽子 hat。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hat"
+      }
+    ]
+  },
+  {
+    "word": "handsome",
+    "examTags": [
+      "词汇·形容词描述人物",
+      "阅读·人物外貌信息"
+    ],
+    "grammar": "adj. 英俊的；通常用于描述男性，也可形容外观漂亮、气派的事物。初中写作比较级、最高级可用 more handsome / most handsome。",
+    "collocations": "a handsome man; a handsome young son; a handsome building。",
+    "commonMistake": "handsome 是形容词，常用来描述男性外貌；作表语时说 He is handsome。",
+    "example": {
+      "english": "My grandma says my father was a handsome young man.",
+      "chinese": "奶奶说我爸爸年轻时是个英俊的小伙子。"
+    },
+    "application": {
+      "prompt": "The family photo shows a good-looking young man. He is ___. A. handsome B. noisy",
+      "solution": "A。解析：handsome 常用来形容英俊的男性。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: handsome",
+        "url": "https://dictionary.cambridge.org/dictionary/english/handsome"
+      }
+    ]
+  },
+  {
+    "word": "knee",
+    "examTags": [
+      "词汇·身体部位",
+      "学习策略·拼写与发音"
+    ],
+    "grammar": "n. 膝盖；可数，复数 knees。单词开头的 k 不发音，读音以 /n/ 开始。",
+    "collocations": "bend your knees; hurt your knee; on your knees。",
+    "commonMistake": "knee 开头的 k 不发音；拼写时保留 k，复数加 -s：knees。",
+    "example": {
+      "english": "He fell and hurt his knee during the hike.",
+      "chinese": "徒步时他摔倒并伤到了膝盖。"
+    },
+    "application": {
+      "prompt": "You bend this part of your leg when you sit. It is your ___. A. knee B. hat",
+      "solution": "A。解析：腿部坐下时弯曲的关节是 knee（膝盖）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: knee",
+        "url": "https://dictionary.cambridge.org/dictionary/english/knee"
+      }
+    ]
+  },
+  {
+    "word": "grandchild",
+    "examTags": [
+      "词汇·家庭关系与不规则复数",
+      "阅读·人物关系推断"
+    ],
+    "grammar": "n. 孙辈；可数。复数 grandchild 的拼写变为 grandchildren，和 child—children 一样是不规则变化。",
+    "collocations": "a grandchild; grandchildren; a grandchild of theirs。",
+    "commonMistake": "复数是 grandchildren，不是 grandchilds；grandchild 可指孙子或孙女。",
+    "example": {
+      "english": "Their first grandchild is a little boy.",
+      "chinese": "他们的第一个孙辈是个小男孩。"
+    },
+    "application": {
+      "prompt": "Ella is the daughter of my son. Ella is my ___. A. grandchild B. husband",
+      "solution": "A。解析：儿子或女儿的孩子是自己的 grandchild（孙辈）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grandchild",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grandchild"
+      }
+    ]
+  },
+  {
+    "word": "son",
+    "examTags": [
+      "词汇·家庭成员与名词复数",
+      "阅读·家庭关系理解"
+    ],
+    "grammar": "n. 儿子；可数，复数 sons。可用 one's son、a son of mine 等表达所属关系。",
+    "collocations": "their son; a son and a daughter; an only son。",
+    "commonMistake": "son 的复数是 sons；不要与 sun（太阳）混淆，两个词发音相同但拼写和意思不同。",
+    "example": {
+      "english": "Their son helps his mother in the garden.",
+      "chinese": "他们的儿子在花园里帮助妈妈。"
+    },
+    "application": {
+      "prompt": "Mr and Mrs Lee have one boy. He is their ___. A. son B. mother",
+      "solution": "A。解析：父母的男孩孩子是 son（儿子）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: son",
+        "url": "https://dictionary.cambridge.org/dictionary/english/son"
+      }
+    ]
+  },
+  {
+    "word": "hike",
+    "examTags": [
+      "词汇·动词与名词用法",
+      "语言运用·休闲活动表达"
+    ],
+    "grammar": "v. 徒步旅行；n. 徒步旅行。作动词时 hike—hiked—hiked—hiking；常用 go hiking 或 go for a hike。",
+    "collocations": "go hiking; go for a hike; hike in the hills。",
+    "commonMistake": "表示“去徒步”常说 go hiking；也可说 hike in the mountains，hike 可作动词直接使用。",
+    "example": {
+      "english": "We go hiking with our cousins in autumn.",
+      "chinese": "秋天我们和表兄妹一起去徒步。"
+    },
+    "application": {
+      "prompt": "Every Sunday, we ___ in the hills near our town. A. hike B. hikes",
+      "solution": "A。解析：主语 we 是复数，一般现在时用动词原形 hike。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hike",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hike"
+      }
+    ]
+  },
+  {
+    "word": "or",
+    "examTags": [
+      "语法·并列连词",
+      "语言运用·选择与否定表达"
+    ],
+    "grammar": "conj. 或者；用于连接选择项。在否定句中可连接并列成分，表示“也不/也没有”。",
+    "collocations": "tea or coffee; two or three; not ... or ...。",
+    "commonMistake": "选择疑问常用 A or B；否定句中可说 I don't have a brother or a sister，表示两者都没有。",
+    "example": {
+      "english": "Would you like to hike or play chess this weekend?",
+      "chinese": "这个周末你想去徒步还是下国际象棋？"
+    },
+    "application": {
+      "prompt": "Would you like tea ___ milk? Choose one drink. A. or B. because",
+      "solution": "A。解析：提出两种选择时用 or（或者）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: or",
+        "url": "https://dictionary.cambridge.org/dictionary/english/or"
+      }
+    ]
+  },
+  {
+    "word": "mother",
+    "examTags": [
+      "词汇·家庭成员",
+      "阅读·人物关系理解"
+    ],
+    "grammar": "n. 母亲；可数，复数 mothers。称呼家人时也可用 Mum（英式）或 Mom（美式）。",
+    "collocations": "my mother; mother and child; a mother of two。",
+    "commonMistake": "mother 是可数名词；说“我的母亲”用 my mother，不在 my 前再加 a。",
+    "example": {
+      "english": "My mother teaches me how to cook.",
+      "chinese": "妈妈教我做饭。"
+    },
+    "application": {
+      "prompt": "My father's wife is my ___. A. mother B. sister",
+      "solution": "A。解析：父亲的妻子通常是自己的 mother（母亲）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mother",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mother"
+      }
+    ]
+  },
+  {
+    "word": "child",
+    "examTags": [
+      "词汇·不规则名词复数",
+      "阅读·人物数量信息"
+    ],
+    "grammar": "n. 儿童；小孩。单数 child，复数 children，是不规则变化。",
+    "collocations": "a small child; children at school; a child of six。",
+    "commonMistake": "child 的复数是 children，不是 childs；many 后用 children。",
+    "example": {
+      "english": "The children are playing with their grandmother.",
+      "chinese": "孩子们正在和奶奶一起玩。"
+    },
+    "application": {
+      "prompt": "There are three ___ in the family photo. A. children B. childs",
+      "solution": "A。解析：child 的不规则复数是 children。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: child",
+        "url": "https://dictionary.cambridge.org/dictionary/english/child"
+      }
+    ]
+  },
+  {
+    "word": "sister",
+    "examTags": [
+      "词汇·家庭成员与名词复数",
+      "阅读·家庭关系理解"
+    ],
+    "grammar": "n. 姐妹；姐姐或妹妹。可数，复数 sisters；需要区分年龄时可说 older sister 或 younger sister。",
+    "collocations": "my sister; an older sister; sisters and brothers。",
+    "commonMistake": "sister 本身不说明年长或年幼；要表达姐姐/妹妹，可分别用 older sister/younger sister。",
+    "example": {
+      "english": "My younger sister is learning to play the violin.",
+      "chinese": "我妹妹正在学拉小提琴。"
+    },
+    "application": {
+      "prompt": "Lily and I have the same parents. Lily is my ___. A. sister B. son",
+      "solution": "A。解析：有共同父母的女孩兄弟姐妹是 sister（姐妹）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sister",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sister"
+      }
+    ]
+  },
+  {
+    "word": "brother",
+    "examTags": [
+      "语法·可数名词与复数",
+      "阅读·家庭关系"
+    ],
+    "grammar": "可数名词，表示兄或弟；复数为 brothers。表示年龄较大的兄弟可说 older brother。",
+    "collocations": "older brother；younger brother；brothers and sisters",
+    "commonMistake": "brother 可表示兄或弟，不单独说明年龄；需要区分时加 older 或 younger。",
+    "example": {
+      "english": "My brother Ben is two years older than me.",
+      "chinese": "我哥哥本比我大两岁。"
+    },
+    "application": {
+      "prompt": "Tom and Ben are boys in the same family. Ben is Tom's ___.",
+      "solution": "brother"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: brother",
+        "url": "https://dictionary.cambridge.org/dictionary/english/brother"
+      }
+    ]
+  },
+  {
+    "word": "cousin",
+    "examTags": [
+      "语法·可数名词与复数",
+      "阅读·家庭关系"
+    ],
+    "grammar": "可数名词，表示堂/表兄弟姐妹，不区分性别；复数为 cousins。",
+    "collocations": "my cousin；a cousin of mine；cousins from Canada",
+    "commonMistake": "cousin 本身不说明性别；不要根据 cousin 一词推断是男孩还是女孩。",
+    "example": {
+      "english": "My cousin Eva is in Grade 7, too.",
+      "chinese": "我的表姐伊娃也上七年级。"
+    },
+    "application": {
+      "prompt": "My aunt's son is my ___.",
+      "solution": "cousin"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cousin",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cousin"
+      }
+    ]
+  },
+  {
+    "word": "aunt",
+    "examTags": [
+      "语法·可数名词",
+      "阅读·家庭关系"
+    ],
+    "grammar": "可数名词，表示姑、姨、伯母、婶婶或舅母；复数为 aunts。",
+    "collocations": "Aunt May；my aunt and uncle；aunt's family",
+    "commonMistake": "aunt 可指父母的姐妹，也可指叔伯舅姨的妻子；具体关系需看上下文。",
+    "example": {
+      "english": "My aunt May brings fruit when she visits us.",
+      "chinese": "梅姨来探望我们时会带水果。"
+    },
+    "application": {
+      "prompt": "My mother's sister is my ___.",
+      "solution": "aunt"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: aunt",
+        "url": "https://dictionary.cambridge.org/dictionary/english/aunt"
+      }
+    ]
+  },
+  {
+    "word": "grandmother",
+    "examTags": [
+      "语法·可数名词",
+      "词法·家庭称谓"
+    ],
+    "grammar": "可数名词，表示祖母或外祖母；复数为 grandmothers；口语中也常说 grandma。",
+    "collocations": "my grandmother；maternal grandmother；visit your grandmother",
+    "commonMistake": "grandmother 可指父亲的母亲或母亲的母亲；需要区分时可补充 paternal/maternal。",
+    "example": {
+      "english": "My grandmother tells us stories after dinner.",
+      "chinese": "晚饭后，我的奶奶/外婆给我们讲故事。"
+    },
+    "application": {
+      "prompt": "My mother's mother is my ___.",
+      "solution": "grandmother"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: grandmother",
+        "url": "https://dictionary.cambridge.org/dictionary/english/grandmother"
+      }
+    ]
+  },
+  {
+    "word": "come",
+    "examTags": [
+      "语法·动词形式",
+      "语言运用·方向与邀请"
+    ],
+    "grammar": "不规则动词，come—came—come；第三人称单数为 comes。常用 come to a place、come from；come home 中 home 前通常不加 to。",
+    "collocations": "come to school；come home；come from；come and see",
+    "commonMistake": "come 的过去式是 came；表示“回家/来家里”时可说 come home，不说 come to home。",
+    "example": {
+      "english": "Please come to our classroom after lunch.",
+      "chinese": "请在午饭后到我们教室来。"
+    },
+    "application": {
+      "prompt": "Mia will ___ to our house after school. (come)",
+      "solution": "come"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: come",
+        "url": "https://dictionary.cambridge.org/dictionary/english/come"
+      },
+      {
+        "label": "Cambridge Grammar: come",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/come"
+      }
+    ]
+  },
+  {
+    "word": "ping-pong",
+    "examTags": [
+      "词汇辨析·运动名称",
+      "语言运用·校园活动"
+    ],
+    "grammar": "名词，表示乒乓球运动，通常作不可数名词；也称 table tennis。",
+    "collocations": "play ping-pong；a ping-pong table；a ping-pong game",
+    "commonMistake": "表示进行这项运动常用 play ping-pong，不在运动名称前加 a。",
+    "example": {
+      "english": "We play ping-pong in the school gym on Fridays.",
+      "chinese": "我们每周五在学校体育馆打乒乓球。"
+    },
+    "application": {
+      "prompt": "The table sport played with small bats and a light ball is called ___.",
+      "solution": "ping-pong"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ping-pong",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ping-pong"
+      }
+    ]
+  },
+  {
+    "word": "whose",
+    "examTags": [
+      "语法·疑问限定词与代词",
+      "阅读·判断所属关系"
+    ],
+    "grammar": "疑问词，询问“谁的”；可放在名词前，如 Whose bag...?，也可单独使用，如 Whose is this?。",
+    "collocations": "whose book；whose turn；Whose is this?",
+    "commonMistake": "whose 表示“谁的”；who's 是 who is 或 who has 的缩写，两者读音相同但用法不同。",
+    "example": {
+      "english": "Whose backpack is beside the classroom door?",
+      "chinese": "教室门旁边的背包是谁的？"
+    },
+    "application": {
+      "prompt": "Ask about ownership: ___ notebook is this?",
+      "solution": "Whose"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: whose",
+        "url": "https://dictionary.cambridge.org/dictionary/english/whose"
+      },
+      {
+        "label": "Cambridge Grammar: whose",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/whose"
+      }
+    ]
+  },
+  {
+    "word": "well",
+    "examTags": [
+      "语法·副词与形容词",
+      "交际·话语衔接"
+    ],
+    "grammar": "可作副词，表示“好地”；作形容词时常表示“健康的”；也可作感叹词或话语标记，表示“嗯/好吧”。",
+    "collocations": "play well；do well；be well；Well, let's begin.",
+    "commonMistake": "修饰动作时常用副词 well，如 read well；good 通常是形容词。",
+    "example": {
+      "english": "Well, let's read the family story together.",
+      "chinese": "嗯，我们一起读这个家庭故事吧。"
+    },
+    "application": {
+      "prompt": "After practising every day, Leo plays the piano ___. (well / good)",
+      "solution": "well"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: well",
+        "url": "https://dictionary.cambridge.org/dictionary/english/well"
+      }
+    ]
+  },
+  {
+    "word": "every",
+    "examTags": [
+      "语法·限定词与主谓一致",
+      "语言运用·频率表达"
+    ],
+    "grammar": "限定词，表示“每一个”，后接单数可数名词；作主语中心词时，谓语动词通常用单数。",
+    "collocations": "every day；every week；every student；every member",
+    "commonMistake": "every 后接单数名词，如 every student；不能说 every students。",
+    "example": {
+      "english": "Every student brings a book to class.",
+      "chinese": "每位学生都带一本书来上课。"
+    },
+    "application": {
+      "prompt": "___ member of the family has a place at the table. (Every / All)",
+      "solution": "Every"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: every",
+        "url": "https://dictionary.cambridge.org/dictionary/english/every"
+      }
+    ]
+  },
+  {
+    "word": "day",
+    "examTags": [
+      "语法·可数名词与复数",
+      "语言运用·时间表达"
+    ],
+    "grammar": "可数名词，表示一天或白天；复数为 days。every day 是“每天”，everyday 作形容词时表示“日常的”。",
+    "collocations": "every day；all day；day and night；a school day",
+    "commonMistake": "every day 是“每天”的时间短语；everyday 是形容词，如 everyday life。",
+    "example": {
+      "english": "We read together for ten minutes every day.",
+      "chinese": "我们每天一起阅读十分钟。"
+    },
+    "application": {
+      "prompt": "A week has seven ___. (day)",
+      "solution": "days"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: day",
+        "url": "https://dictionary.cambridge.org/dictionary/english/day"
+      }
+    ]
+  },
+  {
+    "word": "week",
+    "examTags": [
+      "语法·可数名词与复数",
+      "语言运用·时间表达"
+    ],
+    "grammar": "可数名词，表示周；复数为 weeks。一周通常有七天。",
+    "collocations": "this week；next week；last week；once a week",
+    "commonMistake": "表示“每周一次”说 once a week；表示多周时 week 要用复数 weeks。",
+    "example": {
+      "english": "Our family has dinner together once a week.",
+      "chinese": "我们一家每周一起吃一次晚饭。"
+    },
+    "application": {
+      "prompt": "There are seven days in a ___.",
+      "solution": "week"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: week",
+        "url": "https://dictionary.cambridge.org/dictionary/english/week"
+      }
+    ]
+  },
+  {
+    "word": "fish",
+    "examTags": [
+      "语法·动词与名词",
+      "语法·名词单复数"
+    ],
+    "grammar": "可作动词，表示钓鱼，第三人称单数为 fishes；也可作名词表示鱼或鱼肉，复数常为 fish，表示不同种类时也可用 fishes。",
+    "collocations": "fish in a lake；go fishing；catch fish；fresh fish",
+    "commonMistake": "fish 作动词时 he/she/it 后用 fishes；作动物名词时复数常仍是 fish。",
+    "example": {
+      "english": "We fish by the lake on warm weekends.",
+      "chinese": "天气暖和的周末，我们会在湖边钓鱼。"
+    },
+    "application": {
+      "prompt": "My grandfather ___ by the river every Sunday. (fish)",
+      "solution": "fishes"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fish"
+      }
+    ]
+  },
+  {
+    "word": "father",
+    "examTags": [
+      "语法·可数名词",
+      "阅读·家庭关系"
+    ],
+    "grammar": "可数名词，表示父亲；复数为 fathers。称呼自己的父亲时也常说 Dad。",
+    "collocations": "my father；father and mother；father's name",
+    "commonMistake": "father 是名词；表示“我的父亲”用 my father，不在 my 后再加 a。",
+    "example": {
+      "english": "My father reads the news after breakfast.",
+      "chinese": "我爸爸早饭后读新闻。"
+    },
+    "application": {
+      "prompt": "My mother's husband is my ___.",
+      "solution": "father"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: father",
+        "url": "https://dictionary.cambridge.org/dictionary/english/father"
+      }
+    ]
+  },
+  {
+    "word": "piano",
+    "examTags": [
+      "语法·可数名词与冠词",
+      "语言运用·音乐与爱好"
+    ],
+    "grammar": "可数名词，表示钢琴；复数为 pianos。谈演奏乐器时，play 后通常加 the。",
+    "collocations": "play the piano；a piano lesson；piano music",
+    "commonMistake": "表示“弹钢琴”常说 play the piano；乐器前通常保留 the。",
+    "example": {
+      "english": "My sister practises the piano after school.",
+      "chinese": "我姐姐放学后练钢琴。"
+    },
+    "application": {
+      "prompt": "Sara plays an instrument with black and white keys. She is learning the ___.",
+      "solution": "piano"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: piano",
+        "url": "https://dictionary.cambridge.org/dictionary/english/piano"
+      }
+    ]
+  },
+  {
+    "word": "basketball",
+    "examTags": [
+      "语法·运动名称",
+      "语言运用·校园活动"
+    ],
+    "grammar": "可作不可数名词，表示篮球运动；也可作可数名词，表示篮球。",
+    "collocations": "play basketball；a basketball game；a basketball team",
+    "commonMistake": "表示做篮球运动时说 play basketball，通常不说 play a basketball。",
+    "example": {
+      "english": "Our class plays basketball after school on Tuesdays.",
+      "chinese": "我们班每周二放学后打篮球。"
+    },
+    "application": {
+      "prompt": "In this sport, players try to throw a ball through a high hoop. They play ___.",
+      "solution": "basketball"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: basketball",
+        "url": "https://dictionary.cambridge.org/dictionary/english/basketball"
+      }
+    ]
+  },
+  {
+    "word": "read",
+    "examTags": [
+      "语法·动词形式",
+      "语言运用·阅读习惯"
+    ],
+    "grammar": "动词，表示读或阅读；现在式 read /riːd/，过去式和过去分词拼写仍为 read，但读音为 /red/；第三人称单数为 reads。",
+    "collocations": "read a book；read a story；read about animals",
+    "commonMistake": "read 的现在式与过去式拼写相同，但过去式读作 /red/；需结合句中时间判断。",
+    "example": {
+      "english": "I read a short story with my brother every night.",
+      "chinese": "我每天晚上和哥哥/弟弟读一个短故事。"
+    },
+    "application": {
+      "prompt": "Tom ___ a story to his little sister every night. (read)",
+      "solution": "reads"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: read",
+        "url": "https://dictionary.cambridge.org/dictionary/english/read"
+      }
+    ]
+  },
+  {
+    "word": "garden",
+    "examTags": [
+      "语法·名词与动词",
+      "语言运用·家庭与植物"
+    ],
+    "grammar": "可作可数名词，表示种花或种菜的园子；也可作动词，表示做园艺。动词形式为 garden—gardened—gardened。",
+    "collocations": "in the garden；a flower garden；garden together；garden tools",
+    "commonMistake": "garden 作名词指园子，作动词表示照料园子、做园艺；gardened 是其过去式。",
+    "example": {
+      "english": "There are roses and tomatoes in my grandmother's garden.",
+      "chinese": "我奶奶/外婆的园子里有玫瑰和西红柿。"
+    },
+    "application": {
+      "prompt": "Every weekend, my grandparents ___ in the back garden. (garden)",
+      "solution": "garden"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: garden",
+        "url": "https://dictionary.cambridge.org/dictionary/english/garden"
+      }
+    ]
+  },
+  {
+    "word": "classroom",
+    "examTags": [
+      "语法·可数名词与复数",
+      "语言运用·校园场景"
+    ],
+    "grammar": "可数名词，由 class + room 构成，表示教室；复数为 classrooms。",
+    "collocations": "in the classroom；classroom door；classroom rules",
+    "commonMistake": "classroom 是“教室”，class 是“班级/课”；不要把两个词的意思混为一谈。",
+    "example": {
+      "english": "Our classroom has a large window and a reading corner.",
+      "chinese": "我们的教室有一扇大窗户和一个阅读角。"
+    },
+    "application": {
+      "prompt": "We learn with our teacher and classmates in the ___.",
+      "solution": "classroom"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: classroom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/classroom"
+      }
+    ]
+  },
+  {
+    "word": "their",
+    "examTags": [
+      "语法·物主限定词",
+      "阅读·代词指代"
+    ],
+    "grammar": "形容词性物主代词/物主限定词，表示“他们/她们/它们的”，后接名词；单独使用时用 theirs。",
+    "collocations": "their family；their classroom；their books",
+    "commonMistake": "their 后接名词；there 表示“那里”，they're 是 they are 的缩写。",
+    "example": {
+      "english": "The twins keep their books on one shelf.",
+      "chinese": "这对双胞胎把他们的书放在同一个书架上。"
+    },
+    "application": {
+      "prompt": "Sam and Ella have two cats. ___ cats are both grey. (Their / Theirs)",
+      "solution": "Their"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: their",
+        "url": "https://dictionary.cambridge.org/dictionary/english/their"
+      },
+      {
+        "label": "Cambridge Grammar: possessive determiners and pronouns",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/pronouns-possessive-my-mine-your-yours-etc"
+      }
+    ]
+  },
+  {
+    "word": "clean",
+    "examTags": [
+      "语法·形容词与动词",
+      "语言运用·校园与家庭任务"
+    ],
+    "grammar": "可作形容词，表示干净的；也可作动词，表示打扫或清洁。动词过去式和过去分词为 cleaned。",
+    "collocations": "clean the room；keep clean；clean clothes；clean up",
+    "commonMistake": "clean 可作动词也可作形容词；如 clean the desk 是“打扫桌子”，a clean desk 是“干净的桌子”。",
+    "example": {
+      "english": "Please clean the table after lunch.",
+      "chinese": "请在午饭后把桌子擦干净。"
+    },
+    "application": {
+      "prompt": "Let's ___ the classroom after art class. (clean)",
+      "solution": "clean"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: clean",
+        "url": "https://dictionary.cambridge.org/dictionary/english/clean"
+      }
+    ]
+  },
+  {
+    "word": "little",
+    "examTags": [
+      "语法·形容词作定语",
+      "语言运用·描述大小与年龄"
+    ],
+    "grammar": "形容词，可表示小的或年幼的；可放在名词前作定语，也可作表语。",
+    "collocations": "a little cat；a little brother；a little girl",
+    "commonMistake": "little 可描述体积小或年龄小；表示数量少时 a little 还可修饰不可数名词，需看语境。",
+    "example": {
+      "english": "The little puppy follows its mother around the garden.",
+      "chinese": "那只小狗跟着妈妈在园子里转。"
+    },
+    "application": {
+      "prompt": "The kitten is very small. It is a ___ cat. (little / big)",
+      "solution": "little"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: little",
+        "url": "https://dictionary.cambridge.org/dictionary/english/little"
+      }
+    ]
+  },
+  {
+    "word": "ball",
+    "examTags": [
+      "语法·可数名词与复数",
+      "语言运用·运动用品"
+    ],
+    "grammar": "可数名词，表示球；复数为 balls。",
+    "collocations": "a basketball；a ball game；kick/throw a ball",
+    "commonMistake": "ball 是“球”这一物品；basketball 还可表示篮球运动。",
+    "example": {
+      "english": "The red ball rolls across the playground.",
+      "chinese": "红球滚过了操场。"
+    },
+    "application": {
+      "prompt": "A round object used in basketball is a ___.",
+      "solution": "ball"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ball",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ball"
+      }
+    ]
+  },
+  {
+    "word": "playground",
+    "examTags": [
+      "语法·可数名词",
+      "阅读·校园场景"
+    ],
+    "grammar": "可数名词，由 play + ground 构成，指供儿童玩耍或学生活动的场地；复数为 playgrounds。",
+    "collocations": "school playground；on the playground；playground equipment",
+    "commonMistake": "playground 指操场或游乐场等活动场地；playground 不等同于 classroom。",
+    "example": {
+      "english": "The children play ball games on the playground at break time.",
+      "chinese": "课间时，孩子们在操场上玩球类游戏。"
+    },
+    "application": {
+      "prompt": "Students run and play outside during break in the school ___.",
+      "solution": "playground"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: playground",
+        "url": "https://dictionary.cambridge.org/dictionary/english/playground"
+      }
+    ]
+  },
+  {
+    "word": "wear",
+    "examTags": [
+      "语法·动词形式",
+      "词汇辨析·穿戴表达"
+    ],
+    "grammar": "动词，表示穿着或戴着；不规则变化为 wear—wore—worn，第三人称单数为 wears。",
+    "collocations": "wear a coat；wear glasses；wear a uniform",
+    "commonMistake": "wear 表示穿戴的状态；put on 表示穿上、戴上的动作。",
+    "example": {
+      "english": "My father wears a blue shirt to work.",
+      "chinese": "我爸爸上班时穿一件蓝色衬衫。"
+    },
+    "application": {
+      "prompt": "My brother ___ a warm coat to school every winter. (wear)",
+      "solution": "wears"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wear",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wear"
+      }
+    ]
+  },
+  {
+    "word": "talk",
+    "examTags": [
+      "口语·交流对象与内容",
+      "语法·动词介词搭配"
+    ],
+    "grammar": "talk 可作动词“说话、交谈”，也可作名词“谈话”。作动词时常用 talk to/with sb、talk about sth；名词常见 have a talk。",
+    "collocations": "talk to/with a friend; talk about family; have a talk with sb",
+    "commonMistake": "表示“和某人交谈”通常说 talk to/with sb；表示谈论某事说 talk about sth，不要漏掉相应介词。",
+    "example": {
+      "english": "I often talk with my sister about our school day.",
+      "chinese": "我常和姐姐谈论我们在学校的一天。"
+    },
+    "application": {
+      "prompt": "选词填空：We talk ___ our grandparents on the phone every Sunday. A. to  B. at",
+      "solution": "A. to。talk to sb 表示“和某人交谈”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: talk",
+        "url": "https://dictionary.cambridge.org/dictionary/english/talk"
+      }
+    ]
+  },
+  {
+    "word": "tall",
+    "examTags": [
+      "词汇·人物外貌描述",
+      "语法·形容词比较级"
+    ],
+    "grammar": "tall 是形容词，表示人或物“高的”；比较级 taller，最高级 tallest。询问身高常用 How tall...?。",
+    "collocations": "a tall boy; a tall tree; be 1.6 metres tall; taller than",
+    "commonMistake": "描述人的身高通常用 tall；描述离地面高的位置或高度时常用 high。",
+    "example": {
+      "english": "My cousin is taller than me now.",
+      "chinese": "我表哥现在比我高。"
+    },
+    "application": {
+      "prompt": "选词填空：Ben is 1.75 metres ___. A. tall  B. long",
+      "solution": "A. tall。描述人的身高用 tall。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tall",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tall"
+      }
+    ]
+  },
+  {
+    "word": "short",
+    "examTags": [
+      "词汇·长度与身高语境",
+      "阅读·人物特征判断"
+    ],
+    "grammar": "short 是形容词，可表示长度“短的”、身高“矮的”或时间“短暂的”；比较级 shorter，最高级 shortest。",
+    "collocations": "short hair; a short story; a short boy; be short for",
+    "commonMistake": "short 修饰人的身高时是“矮的”，修饰物品或时间时通常是“短的”；不要和表示“短暂地”的副词 briefly 混淆。",
+    "example": {
+      "english": "Mia has short hair and a bright smile.",
+      "chinese": "米娅留着短发，笑容灿烂。"
+    },
+    "application": {
+      "prompt": "选词填空：The opposite of “long” in “a long story” is ___. A. short  B. tall",
+      "solution": "A. short。谈故事长度时，long 的反义词是 short。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: short",
+        "url": "https://dictionary.cambridge.org/dictionary/english/short"
+      }
+    ]
+  },
+  {
+    "word": "hair",
+    "examTags": [
+      "词法·可数与不可数名词",
+      "写作·外貌描述"
+    ],
+    "grammar": "hair 表示头发的整体时通常作不可数名词；指一根头发时可数，复数为 hairs。描述头发常用形容词 + hair。",
+    "collocations": "long/short hair; black hair; brush your hair; a grey hair",
+    "commonMistake": "泛指一个人的头发时说 She has long hair，不加 -s；只有强调一根或几根头发时才用 a hair/hairs。",
+    "example": {
+      "english": "My dad has short black hair.",
+      "chinese": "我爸爸留着黑色短发。"
+    },
+    "application": {
+      "prompt": "选词填空：Lily has long ___. A. hair  B. hairs",
+      "solution": "A. hair。此处泛指头发整体，hair 通常作不可数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hair",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hair"
+      }
+    ]
+  },
+  {
+    "word": "long",
+    "examTags": [
+      "词汇·长度与时间语境",
+      "语法·How long 提问"
+    ],
+    "grammar": "long 是形容词，表示长度或时间“长的”；How long...? 可询问长度或持续时间。",
+    "collocations": "long hair; a long story; a long time; How long is...?",
+    "commonMistake": "询问长度或持续时间用 How long；long 描述物体的长度，描述人或建筑的高度通常用 tall。",
+    "example": {
+      "english": "How long is the table in your dining room?",
+      "chinese": "你家餐厅的桌子有多长？"
+    },
+    "application": {
+      "prompt": "选词填空：The river is 20 kilometres ___. A. long  B. tall",
+      "solution": "A. long。河流的长度用 long 描述。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: long",
+        "url": "https://dictionary.cambridge.org/dictionary/english/long"
+      },
+      {
+        "label": "Cambridge Grammar: Long",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/long"
+      }
+    ]
+  },
+  {
+    "word": "quiet",
+    "examTags": [
+      "词汇·形容词语境",
+      "语言运用·课堂指令"
+    ],
+    "grammar": "quiet 是形容词，表示“安静的”；可作定语，也可放在 be、feel 等系动词后作表语。",
+    "collocations": "be quiet; keep quiet; a quiet room; a quiet voice",
+    "commonMistake": "quiet 是形容词，quite 是副词，拼写和含义不同；说“请安静”可用 Please be quiet.。",
+    "example": {
+      "english": "Our family is quiet during the reading time.",
+      "chinese": "阅读时间我们家很安静。"
+    },
+    "application": {
+      "prompt": "选词填空：Please be ___ while your sister is reading. A. quiet  B. quietly",
+      "solution": "A. quiet。be 后接形容词作表语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: quiet",
+        "url": "https://dictionary.cambridge.org/dictionary/english/quiet"
+      },
+      {
+        "label": "Cambridge Grammar: Quiet or quite?",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/quiet-or-quite"
+      }
+    ]
+  },
+  {
+    "word": "girl",
+    "examTags": [
+      "词法·可数名词单复数",
+      "阅读·家庭人物信息"
+    ],
+    "grammar": "girl 是可数名词，表示“女孩”；复数为 girls，直接加 -s。",
+    "collocations": "a little girl; two girls; a girl in my class",
+    "commonMistake": "girl 是可数名词，单数前通常要有 a、the 或物主限定词；复数形式是 girls。",
+    "example": {
+      "english": "The girl in the family photo is my cousin.",
+      "chinese": "家庭照片里的女孩是我的表妹。"
+    },
+    "application": {
+      "prompt": "选词填空：There are two ___ in the family picture. A. girl  B. girls",
+      "solution": "B. girls。two 后接可数名词复数，girl 加 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: girl",
+        "url": "https://dictionary.cambridge.org/dictionary/english/girl"
+      }
+    ]
+  },
+  {
+    "word": "but",
+    "examTags": [
+      "语法·并列连词",
+      "阅读·转折关系识别"
+    ],
+    "grammar": "but 是并列连词，连接词、短语或分句，表示转折“但是”；连接分句时两边通常是对比或相反的信息。",
+    "collocations": "small but strong; not this but that; ..., but ...",
+    "commonMistake": "but 表示转折，不表示原因；because 已经引导原因时，不要再在同一个分句前加 so 表示结果。",
+    "example": {
+      "english": "My brother is quiet, but he is very funny at home.",
+      "chinese": "我哥哥很安静，但他在家里很有趣。"
+    },
+    "application": {
+      "prompt": "选词填空：The story is short, ___ it is full of fun. A. but  B. because",
+      "solution": "A. but。前后是“短”和“有趣”的转折关系，用 but。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: But",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/but"
+      }
+    ]
+  },
+  {
+    "word": "any",
+    "examTags": [
+      "语法·some/any 用法",
+      "语境·疑问与否定"
+    ],
+    "grammar": "any 可作限定词或代词；常在疑问句和否定句中表示“一些/任何”。在肯定句中也可表示“任一、任何一个”。",
+    "collocations": "any photos; any questions; any of them; not ... any",
+    "commonMistake": "any 本身不表示否定，常与 not 等否定词连用；否定句通常说 not ... any。",
+    "example": {
+      "english": "Do you have any photos of your grandparents?",
+      "chinese": "你有祖父母的照片吗？"
+    },
+    "application": {
+      "prompt": "选词填空：I don't have ___ photos of that trip. A. any  B. a",
+      "solution": "A. any。否定句中可用 any；photos 是复数，不能用 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: any",
+        "url": "https://dictionary.cambridge.org/dictionary/english/any"
+      },
+      {
+        "label": "Cambridge Grammar: Any",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/any"
+      }
+    ]
+  },
+  {
+    "word": "photo",
+    "examTags": [
+      "词法·可数名词复数",
+      "写作·家庭照片描述"
+    ],
+    "grammar": "photo 是可数名词，表示“照片”；复数为 photos，直接加 -s。",
+    "collocations": "take a photo; family photo; a photo of my parents; look at photos",
+    "commonMistake": "photo 的复数是 photos，不是 photoes；表示“某人的照片”可说 a photo of sb。",
+    "example": {
+      "english": "We take a family photo every New Year.",
+      "chinese": "我们每年新年都会拍一张全家福。"
+    },
+    "application": {
+      "prompt": "选词填空：There are three ___ of our family on the wall. A. photo  B. photos",
+      "solution": "B. photos。three 后接可数名词复数，photo 加 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: photo",
+        "url": "https://dictionary.cambridge.org/dictionary/english/photo"
+      }
+    ]
+  },
+  {
+    "word": "left",
+    "examTags": [
+      "词汇·方位表达",
+      "听读·路线信息获取"
+    ],
+    "grammar": "left 可作名词或副词表示“左边、向左”；常见表达有 on the left 和 turn left。",
+    "collocations": "on the left; to the left of; turn left; left hand",
+    "commonMistake": "表示“在左边”常说 on the left；表示“向左转”说 turn left，不在 left 前加 to。",
+    "example": {
+      "english": "My grandfather sits on the left in this photo.",
+      "chinese": "这张照片里我爷爷坐在左边。"
+    },
+    "application": {
+      "prompt": "选词填空：The library is on the ___ side of the road opposite the right side. A. left  B. right",
+      "solution": "A. left。句中明确说与 right side 相对，因此是 left side。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: left",
+        "url": "https://dictionary.cambridge.org/dictionary/english/left"
+      }
+    ]
+  },
+  {
+    "word": "right",
+    "examTags": [
+      "词汇·方位与语境义",
+      "阅读·辨析多义词"
+    ],
+    "grammar": "right 可作形容词表示“正确的、右边的”，也可作名词或副词表示“右边、向右”；需结合上下文判断词义。",
+    "collocations": "the right answer; the right hand; on the right; turn right",
+    "commonMistake": "right 表示“正确的”时常作形容词，如 the right answer；表示方向时常用 on the right 或 turn right。",
+    "example": {
+      "english": "You are right: this is our family photo.",
+      "chinese": "你说得对：这就是我们的全家福。"
+    },
+    "application": {
+      "prompt": "选词填空：You chose the correct answer, so your answer is ___. A. right  B. left",
+      "solution": "A. right。题干说明答案正确，right 表示“正确的”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: right",
+        "url": "https://dictionary.cambridge.org/dictionary/english/right"
+      }
+    ]
+  },
+  {
+    "word": "always",
+    "examTags": [
+      "语法·频率副词位置",
+      "写作·家庭日常习惯"
+    ],
+    "grammar": "always 是频度副词，表示“总是”；通常放在实义动词前、be 动词后，也可放在第一个助动词或情态动词后。",
+    "collocations": "always help; always be kind; always remember; as always",
+    "commonMistake": "一般现在时中，always 通常放在实义动词前、be 动词后；主语是第三人称单数时，谓语仍需加 -s/-es。",
+    "example": {
+      "english": "Grandma always tells us a story before bed.",
+      "chinese": "奶奶睡前总会给我们讲一个故事。"
+    },
+    "application": {
+      "prompt": "选择语序正确的句子：A. My brother always helps me.  B. My brother helps always me.",
+      "solution": "A。always 通常放在实义动词 helps 前。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: Always",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/always"
+      }
+    ]
+  },
+  {
+    "word": "story",
+    "examTags": [
+      "词法·名词复数变化",
+      "阅读·故事内容理解"
+    ],
+    "grammar": "story 是可数名词，表示“故事”；复数为 stories，辅音字母 + y 结尾时变 y 为 i 再加 -es。",
+    "collocations": "tell a story; read a story; a family story; short stories",
+    "commonMistake": "story 的复数是 stories，不是 storys；辅音字母 + y 结尾的可数名词复数通常变 y 为 i 加 -es。",
+    "example": {
+      "english": "My aunt tells funny stories about her childhood.",
+      "chinese": "姑姑会讲一些她童年时的有趣故事。"
+    },
+    "application": {
+      "prompt": "选词填空：Dad reads two short ___ to us every night. A. storys  B. stories",
+      "solution": "B. stories。story 以辅音字母 + y 结尾，复数变 y 为 i 再加 -es。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: story",
+        "url": "https://dictionary.cambridge.org/dictionary/english/story"
+      }
+    ]
+  },
+  {
+    "word": "night",
+    "examTags": [
+      "词汇·时间表达",
+      "语法·时间介词短语"
+    ],
+    "grammar": "night 是可数名词，也可作不可数用法；泛指夜间常用 at night，特指某一晚可说 at night 或 that night，需看语境。",
+    "collocations": "at night; last night; every night; spend the night",
+    "commonMistake": "表示一般的“在夜间”常说 at night；last night 前不加 at。",
+    "example": {
+      "english": "Our family often looks at the stars at night.",
+      "chinese": "我们一家常在夜晚看星星。"
+    },
+    "application": {
+      "prompt": "选词填空：The moon is easy to see ___ night. A. at  B. on",
+      "solution": "A. at。表示一般的“在夜间”用固定表达 at night。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: night",
+        "url": "https://dictionary.cambridge.org/dictionary/english/night"
+      }
+    ]
+  },
+  {
+    "word": "middle",
+    "examTags": [
+      "词汇·位置表达",
+      "语法·介词搭配"
+    ],
+    "grammar": "middle 可作名词“中间、中央”或形容词“中间的”；常用 in the middle of 表示“在……中间”。",
+    "collocations": "in the middle; in the middle of the room; the middle child; the middle name",
+    "commonMistake": "表示“在……中间”常用 in the middle of；middle 作名词时常与 the 连用。",
+    "example": {
+      "english": "My mother is standing in the middle of the family photo.",
+      "chinese": "我妈妈站在全家福的中间。"
+    },
+    "application": {
+      "prompt": "选词填空：The table is in the ___ of the room, with chairs around it. A. middle  B. corner",
+      "solution": "A. middle。桌子四周都有椅子，说明桌子在房间中间。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: middle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/middle"
+      }
+    ]
+  },
+  {
+    "word": "think",
+    "examTags": [
+      "动词·不规则过去式",
+      "语法·think 的常见搭配"
+    ],
+    "grammar": "think 是动词，过去式和过去分词均为 thought；可用 think about/of sth 表示“思考/想到某事”，也可接 that 从句表达看法。",
+    "collocations": "think about a question; think of an idea; think that; think carefully",
+    "commonMistake": "think 的过去式是 thought，不是 thinked；表示“考虑某事”常用 think about/of sth。",
+    "example": {
+      "english": "I think my sister is very clever.",
+      "chinese": "我觉得我妹妹很聪明。"
+    },
+    "application": {
+      "prompt": "选词填空：Yesterday, I ___ about a good gift for Dad. A. thought  B. think",
+      "solution": "A. thought。Yesterday 表示过去，think 的过去式是 thought。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: think",
+        "url": "https://dictionary.cambridge.org/dictionary/english/think"
+      },
+      {
+        "label": "Cambridge Grammar: Think",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/think"
+      }
+    ]
+  },
+  {
+    "word": "football",
+    "examTags": [
+      "词汇·运动场景",
+      "语法·球类运动搭配"
+    ],
+    "grammar": "football 表示“足球运动”时通常作不可数名词，play football 前不加冠词；表示球时是可数名词，可说 a football。",
+    "collocations": "play football; a football team; a football match; football player",
+    "commonMistake": "表示进行足球运动时说 play football，不说 play the football；a football 可指一个足球。",
+    "example": {
+      "english": "My brother plays football with our cousins after school.",
+      "chinese": "我哥哥放学后和堂兄弟们踢足球。"
+    },
+    "application": {
+      "prompt": "选词填空：We play ___ together in the park. A. football  B. the football",
+      "solution": "A. football。football 表示球类运动时，play 后通常不加冠词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: football",
+        "url": "https://dictionary.cambridge.org/dictionary/english/football"
+      }
+    ]
+  },
+  {
+    "word": "happy",
+    "examTags": [
+      "词汇·情绪形容词",
+      "语法·系动词后接形容词"
+    ],
+    "grammar": "happy 是形容词，表示“快乐的”；常作表语，放在 be、feel 等系动词后，也可作定语修饰名词。比较级 happier，最高级 happiest。",
+    "collocations": "be happy; feel happy; happy family; happy with/about",
+    "commonMistake": "系动词 be/feel 后用形容词 happy，不用副词 happily；happy 的比较级为 happier。",
+    "example": {
+      "english": "I feel happy when the whole family has dinner together.",
+      "chinese": "全家一起吃饭时，我感到很快乐。"
+    },
+    "application": {
+      "prompt": "选词填空：The children feel ___ when Grandpa tells them stories. A. happy  B. happily",
+      "solution": "A. happy。feel 在此是系动词，后接形容词作表语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: happy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/happy"
+      }
+    ]
+  },
+  {
+    "word": "eye",
+    "examTags": [
+      "词法·名词单复数",
+      "阅读·人物外貌信息"
+    ],
+    "grammar": "eye 是可数名词，表示“眼睛”；复数为 eyes，直接加 -s。",
+    "collocations": "brown eyes; blue eyes; close your eyes; look someone in the eye",
+    "commonMistake": "表示两只眼睛时用复数 eyes；注意 eyes 的拼写是 eye + s。",
+    "example": {
+      "english": "My little brother has big brown eyes.",
+      "chinese": "我弟弟有一双大大的棕色眼睛。"
+    },
+    "application": {
+      "prompt": "选词填空：The baby has two bright ___. A. eye  B. eyes",
+      "solution": "B. eyes。two 后接名词复数，eye 的复数是 eyes。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eye",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eye"
+      }
+    ]
+  },
+  {
+    "word": "clever",
+    "examTags": [
+      "词汇·人物品质描述",
+      "语法·形容词作表语与定语"
+    ],
+    "grammar": "clever 是形容词，表示“聪明的”；可作定语或放在 be 后作表语。常见搭配 clever at sth。",
+    "collocations": "a clever child; be clever at maths; a clever idea; clever with your hands",
+    "commonMistake": "clever 是形容词，修饰名词或作表语；cleverly 才是副词，表示“聪明地”。",
+    "example": {
+      "english": "My clever sister can remember everyone's birthday.",
+      "chinese": "我聪明的姐姐能记住每个人的生日。"
+    },
+    "application": {
+      "prompt": "选词填空：Tom is ___ at solving number puzzles. A. clever  B. cleverly",
+      "solution": "A. clever。be clever at 是“擅长/善于……”的表达，be 后用形容词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: clever",
+        "url": "https://dictionary.cambridge.org/dictionary/english/clever"
+      }
+    ]
+  },
+  {
+    "word": "next",
+    "examTags": [
+      "语法·时间表达",
+      "词汇·顺序与位置语境"
+    ],
+    "grammar": "next 可作形容词、副词或代词，表示“下一个、接下来”；next to 表示“紧挨着”。表示将来的 next week/day 前通常不加 on 或 the。",
+    "collocations": "next week; next time; the next person; next to my dad",
+    "commonMistake": "表示“下周/明天”通常直接说 next week/tomorrow，不说 on next week 或 the next week（表示未来一周时）。",
+    "example": {
+      "english": "We are visiting our grandparents next Sunday.",
+      "chinese": "我们下周日去看望祖父母。"
+    },
+    "application": {
+      "prompt": "选词填空：Our family picnic is ___ Sunday. A. next  B. on next",
+      "solution": "A. next。表示将来的“下周日”用 next Sunday，前面不加介词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: Next",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/next"
+      }
+    ]
+  },
+  {
+    "word": "him",
+    "examTags": [
+      "语法·人称代词宾格",
+      "语言运用·动词与介词宾语"
+    ],
+    "grammar": "him 是人称代词 he 的宾格，指男性；常放在动词或介词后作宾语。",
+    "collocations": "help him; talk to him; sit next to him; give him a photo",
+    "commonMistake": "主语位置用 he，动词或介词后作宾语用 him；不要说 I sit next to he。",
+    "example": {
+      "english": "I often talk to him about our family.",
+      "chinese": "我常和他谈论我们的家庭。"
+    },
+    "application": {
+      "prompt": "选词填空：My cousin is kind, and I often play football with ___. A. him  B. he",
+      "solution": "A. him。介词 with 后用宾格 him。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: him",
+        "url": "https://dictionary.cambridge.org/dictionary/english/him"
+      },
+      {
+        "label": "Cambridge Grammar: Personal pronouns",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc"
+      }
+    ]
+  },
+  {
+    "word": "help",
+    "examTags": [
+      "语法·help 的动词搭配",
+      "语言运用·提供帮助"
+    ],
+    "grammar": "help 可作动词“帮助”或名词“帮助”。动词常用 help sb (to) do sth、help sb with sth；名词 help 通常不可数。",
+    "collocations": "help my parents; help sb (to) do sth; help with housework; ask for help",
+    "commonMistake": "help sb 后接动词原形或 to do 均可，不接 doing；表示“帮助某人做某事”也可说 help sb with sth。",
+    "example": {
+      "english": "I help my parents set the table before dinner.",
+      "chinese": "晚饭前我帮父母摆餐具。"
+    },
+    "application": {
+      "prompt": "选词填空：My sister helps me ___ my homework after dinner. A. with  B. at",
+      "solution": "A. with。help sb with sth 表示“在某方面帮助某人”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: help",
+        "url": "https://dictionary.cambridge.org/dictionary/english/help"
+      },
+      {
+        "label": "Cambridge Grammar: Help somebody (to) do",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/help-somebody-to-do"
+      }
+    ]
+  }
+]

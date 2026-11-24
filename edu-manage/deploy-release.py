@@ -20,9 +20,14 @@ import shutil
 import shlex
 import subprocess
 import sys
+import tarfile
 import time
 
 import paramiko
+
+# Build/deploy logs may include symbols not representable in the Windows code page.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RELEASE_DIR = os.path.join(ROOT, "release")
@@ -32,11 +37,22 @@ PWD = os.environ.get("EDU_DEPLOY_SSH_PASSWORD")
 COMPOSE_DIR = "/opt/edu-manage-docker/source"
 BUILDER = os.environ.get("MZT_BUILDER", "mzt-release")
 USE_BUILDX = True
-NPM_REGISTRY = "https://registry.npmmirror.com"
+NPM_REGISTRY = "https://registry.npmjs.org"
 APP_IMAGE = "edu-manage-app"
 MIGRATOR_IMAGE = "edu-manage-migrator"
 APP_TARGET = "runner"
 MIGRATOR_TARGET = "migrator"
+RELEASE_TAG_PATTERN = re.compile(r"\d{8}(?:[-_.][A-Za-z0-9][A-Za-z0-9._-]*)?")
+LOGIN_BUSINESS_POSTERS = (
+    "seasonal-bootcamp/1.png",
+    "one-to-one/1.png",
+    "evening-study/1.png",
+    "weekend-pioneer/1.png",
+    "zhongkao-planning/1.png",
+    "gaokao-consulting/1.png",
+    "single-enrollment/1.png",
+    "postgraduate-public-courses/1.png",
+)
 
 
 def log(msg):
@@ -83,6 +99,32 @@ def sha256_file(path):
     return h.hexdigest()
 
 
+def upload_file(cli, local_path, remote_path, timeout=3600):
+    """Prefer OpenSSH's streaming SCP when key auth is available; keep SFTP fallback."""
+    scp = shutil.which("scp.exe") or shutil.which("scp")
+    if scp and not PWD:
+        command = [
+            scp,
+            "-O",
+            "-o", "BatchMode=yes",
+            "-o", "ConnectTimeout=30",
+            "-o", "ServerAliveInterval=30",
+            "-o", "ServerAliveCountMax=5",
+            local_path,
+            "%s@%s:%s" % (USER, HOST, remote_path),
+        ]
+        result = subprocess.run(command, timeout=timeout)
+        if result.returncode != 0:
+            raise RuntimeError("SCP 上传失败: %s" % os.path.basename(local_path))
+        return
+
+    sftp = cli.open_sftp()
+    try:
+        sftp.put(local_path, remote_path)
+    finally:
+        sftp.close()
+
+
 def schema_migration_fingerprint():
     schema_path = os.path.join(ROOT, "prisma", "schema.prisma")
     migrations_root = os.path.join(ROOT, "prisma", "migrations")
@@ -102,6 +144,144 @@ def checked_remote(cli, cmd, label, timeout=600):
     if code != 0:
         raise RuntimeError("%s失败: %s" % (label, (err or out)[-500:]))
     return out.strip()
+
+
+def sync_public_home(cli, tag):
+    """Update the production shared homepage that bind-mounts over image public/home.html."""
+    local_path = os.path.join(ROOT, "public", "home.html")
+    if not os.path.isfile(local_path):
+        raise RuntimeError("本地首页文件不存在: %s" % local_path)
+
+    remote_dir = "/srv/edu-manage/shared/public"
+    remote_target = remote_dir + "/home.html"
+    mount_check = (
+        "grep -Fq "
+        + shlex.quote(remote_target + ":/app/public/home.html")
+        + " "
+        + shlex.quote(COMPOSE_DIR + "/compose.production.yaml")
+    )
+    checked_remote(cli, mount_check, "确认生产首页静态文件挂载")
+    suffix = "%s-%s-%s" % (tag, time.strftime("%Y%m%d-%H%M%S"), os.getpid())
+    remote_tmp = remote_target + ".upload-" + suffix
+    remote_backup = remote_target + ".pre-" + suffix
+    expected_digest = hashlib.sha256(Path(local_path).read_bytes()).hexdigest()
+
+    sftp = cli.open_sftp()
+    try:
+        sftp.put(local_path, remote_tmp)
+        remote_size = sftp.stat(remote_tmp).st_size
+    finally:
+        sftp.close()
+
+    local_size = os.path.getsize(local_path)
+    if remote_size != local_size:
+        ssh_run(cli, "rm -f %s" % shlex.quote(remote_tmp), timeout=30)
+        raise RuntimeError("线上首页上传大小不一致，本地=%s 线上=%s" % (local_size, remote_size))
+
+    command = (
+        "set -e; test -d {directory}; test -f {target}; "
+        "cp -p {target} {backup}; "
+        "chown --reference={target} {temporary}; "
+        "chmod --reference={target} {temporary}; "
+        "mv -f {temporary} {target}; "
+        "sha256sum {target} | awk '{{print $1}}'"
+    ).format(
+        directory=shlex.quote(remote_dir),
+        target=shlex.quote(remote_target),
+        backup=shlex.quote(remote_backup),
+        temporary=shlex.quote(remote_tmp),
+    )
+    actual_digest = checked_remote(cli, command, "原子更新生产首页静态文件", timeout=60)
+    if actual_digest.lower() != expected_digest.lower():
+        raise RuntimeError("生产首页 sha256 校验失败: %s" % actual_digest)
+    log("  生产首页已同步并校验（%s bytes），旧文件备份：%s" % (local_size, remote_backup))
+
+
+def sync_login_business_posters(cli, tag):
+    """Sync login carousel posters into the persistent public/services mount."""
+    remote_root = "/srv/edu-manage/shared/public/services"
+    mount_check = (
+        "grep -Fq "
+        + shlex.quote(remote_root + ":/app/public/services")
+        + " "
+        + shlex.quote(COMPOSE_DIR + "/compose.production.yaml")
+    )
+
+    assets = []
+    for relative_path in LOGIN_BUSINESS_POSTERS:
+        local_path = os.path.join(ROOT, "public", "services", *relative_path.split("/"))
+        if not os.path.isfile(local_path):
+            raise RuntimeError("本地业务总览海报不存在: %s" % local_path)
+        assets.append((relative_path, local_path, sha256_file(local_path)))
+
+    checked_remote(cli, mount_check, "确认业务海报共享目录挂载")
+    remote_dirs = sorted({remote_root + "/" + relative.rsplit("/", 1)[0] for relative, _, _ in assets})
+    checked_remote(
+        cli,
+        "mkdir -p " + " ".join(shlex.quote(path) for path in remote_dirs),
+        "准备业务海报共享目录",
+        timeout=60,
+    )
+
+    suffix = "%s-%s-%s" % (tag, time.strftime("%Y%m%d-%H%M%S"), os.getpid())
+    updated = 0
+    unchanged = 0
+    for relative_path, local_path, expected_digest in assets:
+        remote_target = remote_root + "/" + relative_path
+        code, remote_digest, _ = ssh_run(
+            cli,
+            "if test -f {target}; then sha256sum {target} | awk '{{print $1}}'; else exit 44; fi".format(
+                target=shlex.quote(remote_target),
+            ),
+            timeout=30,
+        )
+        if code == 0 and remote_digest.strip().lower() == expected_digest.lower():
+            unchanged += 1
+            continue
+
+        remote_tmp = remote_target + ".upload-" + suffix
+        remote_backup = remote_target + ".pre-" + suffix
+        local_size = os.path.getsize(local_path)
+        try:
+            sftp = cli.open_sftp()
+            try:
+                sftp.put(local_path, remote_tmp)
+                remote_size = sftp.stat(remote_tmp).st_size
+            finally:
+                sftp.close()
+
+            if remote_size != local_size:
+                raise RuntimeError("线上业务海报上传大小不一致: %s（本地=%s，线上=%s）" % (
+                    relative_path, local_size, remote_size,
+                ))
+
+            command = (
+                "set -e; actual=$(sha256sum {temporary} | awk '{{print $1}}'); "
+                "test \"$actual\" = {digest}; "
+                "if test -f {target}; then cp -p {target} {backup}; "
+                "chown --reference={target} {temporary}; chmod --reference={target} {temporary}; "
+                "else chown 1000:1000 {temporary}; chmod 644 {temporary}; fi; "
+                "mv -f {temporary} {target}; sha256sum {target} | awk '{{print $1}}'"
+            ).format(
+                temporary=shlex.quote(remote_tmp),
+                digest=shlex.quote(expected_digest),
+                target=shlex.quote(remote_target),
+                backup=shlex.quote(remote_backup),
+            )
+            actual_digest = checked_remote(cli, command, "原子更新业务总览海报", timeout=60)
+            if actual_digest.lower() != expected_digest.lower():
+                restore = (
+                    "if test -f {backup}; then mv -f {backup} {target}; "
+                    "else rm -f {target}; fi"
+                ).format(backup=shlex.quote(remote_backup), target=shlex.quote(remote_target))
+                ssh_run(cli, restore, timeout=30)
+                raise RuntimeError("线上业务海报 sha256 校验失败: %s" % relative_path)
+            updated += 1
+        except Exception:
+            ssh_run(cli, "rm -f %s" % shlex.quote(remote_tmp), timeout=30)
+            raise
+
+    log("  业务总览海报已核对：更新 %s 张，校验相同跳过 %s 张" % (updated, unchanged))
 
 
 def compose_command(args):
@@ -138,8 +318,10 @@ def wait_for_app(cli, expected_image_id, timeout=240, interval=5):
     raise RuntimeError("健康检查超时: " + last_status)
 
 
-def prune_old_backups(cli, image, img_type, timeout=300):
-    """清理该镜像上除最新一个之外的全部 pre-* 备份，只保留最近一次回滚点，避免旧镜像在磁盘上堆积。"""
+def prune_old_backups(cli, image, img_type, keep_tag, timeout=300):
+    """Keep the backup created for this release and remove older backup tags."""
+    if not keep_tag:
+        return
     code, out, _ = ssh_run(cli, "docker images %s --format '{{.Tag}}'" % image, timeout=timeout)
     if code != 0:
         return
@@ -148,12 +330,115 @@ def prune_old_backups(cli, image, img_type, timeout=300):
         for t in out.splitlines()
         if t.strip().startswith("pre-") and t.strip().endswith("-backup-%s" % img_type)
     )
-    for old in tags[:-1]:
+    for old in tags:
+        if old == keep_tag:
+            continue
         try:
             checked_remote(cli, "docker rmi %s:%s" % (image, old), "清理旧备份 %s" % old, timeout=timeout)
             log("  已清理旧备份 %s:%s" % (image, old))
         except RuntimeError:
             log("  清理旧备份 %s:%s 失败（仍被引用，留待下次部署）" % (image, old))
+
+
+def prune_remote_release_images(cli, image, img_type, current_tag, backup_tag=None, timeout=300):
+    """Keep latest/current plus one rollback image; leave BuildKit cache untouched."""
+    if backup_tag:
+        prune_old_backups(cli, image, img_type, backup_tag, timeout=timeout)
+    code, out, _ = ssh_run(cli, "docker images %s --format '{{.Tag}}'" % image, timeout=timeout)
+    if code == 0:
+        keep = {"latest", current_tag}
+        if backup_tag:
+            keep.add(backup_tag)
+        for old in sorted({line.strip() for line in out.splitlines()}):
+            if old in keep or not RELEASE_TAG_PATTERN.fullmatch(old):
+                continue
+            try:
+                checked_remote(cli, "docker rmi %s:%s" % (image, old), "清理旧发布镜像标签", timeout=timeout)
+                log("  已清理旧发布标签 %s:%s" % (image, old))
+            except RuntimeError:
+                log("  旧发布标签 %s:%s 仍被容器引用，保留" % (image, old))
+    else:
+        log("  无法读取 %s 镜像标签，跳过旧发布标签清理" % image)
+    try:
+        checked_remote(cli, "docker image prune -f", "清理未引用的悬空镜像", timeout=timeout)
+    except RuntimeError:
+        log("  悬空镜像清理失败；应用已通过健康检查，保留现有镜像")
+
+
+def prune_local_release_images(image, current_tag=None):
+    """Retain the active local image and BuildKit cache; remove stale release tags."""
+    try:
+        if current_tag:
+            tagged = subprocess.run(
+                ["docker", "image", "tag", "%s:%s" % (image, current_tag), "%s:latest" % image],
+                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30,
+            )
+            if tagged.returncode != 0:
+                log("  本地 %s:%s 不存在，跳过 latest 对齐和镜像清理" % (image, current_tag))
+                return
+
+        listed = subprocess.run(
+            ["docker", "image", "ls", image, "--format", "{{.Tag}}"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30,
+        )
+        if listed.returncode != 0:
+            log("  无法读取本地 %s 镜像标签，跳过清理" % image)
+            return
+
+        tags = {line.strip() for line in listed.stdout.splitlines() if line.strip()}
+        keep = {"latest"}
+        if current_tag:
+            keep.add(current_tag)
+        elif "latest" not in tags:
+            version_tags = sorted(tag for tag in tags if RELEASE_TAG_PATTERN.fullmatch(tag))
+            if version_tags:
+                keep.add(version_tags[-1])
+
+        for old in sorted(tags):
+            if old in keep or not RELEASE_TAG_PATTERN.fullmatch(old):
+                continue
+            removed = subprocess.run(
+                ["docker", "image", "rm", "%s:%s" % (image, old)],
+                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60,
+            )
+            if removed.returncode == 0:
+                log("  已清理本地旧发布标签 %s:%s" % (image, old))
+            else:
+                log("  本地旧发布标签 %s:%s 仍被容器引用，保留" % (image, old))
+
+        pruned = subprocess.run(
+            ["docker", "image", "prune", "-f"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
+        )
+        if pruned.returncode == 0 and pruned.stdout.strip():
+            log("  本地悬空镜像清理完成：" + pruned.stdout.strip()[-240:])
+        elif pruned.returncode != 0:
+            log("  本地悬空镜像清理失败；BuildKit 构建缓存未清理")
+    except (OSError, subprocess.TimeoutExpired) as error:
+        log("  本地镜像清理未完成（%s）；不影响已部署版本" % error)
+
+
+def prune_local_release_archives(image, keep_tag=None):
+    """Keep one reusable release archive per image type after a successful deploy."""
+    release_dir = Path(RELEASE_DIR)
+    candidates = []
+    for archive in release_dir.glob("%s-*.tar" % image):
+        tag = archive.name[len(image) + 1:-4]
+        if RELEASE_TAG_PATTERN.fullmatch(tag):
+            candidates.append((tag, archive))
+    if not candidates:
+        return
+    if keep_tag is None:
+        keep_tag = max(tag for tag, _ in candidates)
+    for tag, archive in candidates:
+        if tag == keep_tag:
+            continue
+        try:
+            archive.unlink(missing_ok=True)
+            Path(str(archive) + ".sha256").unlink(missing_ok=True)
+            log("  已清理本地旧发布包 %s" % archive.name)
+        except OSError as error:
+            log("  本地旧发布包 %s 清理失败（%s）" % (archive.name, error))
 
 
 def ensure_builder(dry_run):
@@ -207,6 +492,24 @@ def export_tar(image, tag, dry_run):
     return tar, digest
 
 
+def export_migration_bundle(tag, dry_run):
+    """Package only Prisma schema/migrations for the existing remote migrator image."""
+    archive = os.path.join(RELEASE_DIR, "edu-manage-migrations-%s.tar.gz" % tag)
+    if dry_run:
+        log("  [dry-run] package prisma/schema.prisma, prisma/migrations, scripts/migrate-all.sh -> %s" % archive)
+        return archive, "0" * 64
+
+    os.makedirs(RELEASE_DIR, exist_ok=True)
+    with tarfile.open(archive, "w:gz", compresslevel=6) as bundle:
+        bundle.add(os.path.join(ROOT, "prisma", "schema.prisma"), arcname="prisma/schema.prisma")
+        bundle.add(os.path.join(ROOT, "prisma", "migrations"), arcname="prisma/migrations")
+        bundle.add(os.path.join(ROOT, "scripts", "migrate-all.sh"), arcname="scripts/migrate-all.sh")
+    digest = sha256_file(archive)
+    Path(archive + ".sha256").write_text(digest + "\n", encoding="ascii")
+    log("  迁移文件包 %.1fKB（sha256=%s…%s）" % (os.path.getsize(archive) / 1024, digest[:16], digest[-6:]))
+    return archive, digest
+
+
 def local_image_id(image, tag):
     """返回本地镜像 ID（不含 sha256: 前缀），不存在返回 None。"""
     code, out, _ = run_local_capture(
@@ -231,7 +534,7 @@ def run_local_capture(cmd, timeout=120):
     return p.returncode, p.stdout, p.stderr
 
 
-def deploy_remote(tars, tag, dry_run, skip_upload=False):
+def deploy_remote(tars, tag, dry_run, skip_upload=False, migration_bundle=None):
     """上传两个 tar + sha256，校验，load，备份，切 latest，compose 重建，健康检查。"""
     log(" 连接服务器 %s..." % HOST)
     cli = paramiko.SSHClient()
@@ -253,6 +556,55 @@ def deploy_remote(tars, tag, dry_run, skip_upload=False):
     migration_attempted = False
     has_migrator = any(os.path.basename(path).startswith(MIGRATOR_IMAGE + "-") for path, _ in tars)
     try:
+        try:
+            checked_remote(cli, "docker image prune -f", "发布前清理未引用的悬空镜像", timeout=300)
+        except RuntimeError:
+            log("  发布前悬空镜像清理失败，继续由镜像加载检查磁盘空间")
+
+        if migration_bundle:
+            bundle_path, bundle_digest = migration_bundle
+            bundle_name = os.path.basename(bundle_path)
+            remote_bundle = "/tmp/" + bundle_name
+            bundle_dir = "/tmp/edu-manage-migrations-" + tag
+
+            code, out, _ = ssh_run(cli, "sha256sum %s 2>/dev/null" % shlex.quote(remote_bundle))
+            existing = out.strip().split() if out.strip() else []
+            if not existing or existing[0].lower() != bundle_digest.lower():
+                log(" 上传迁移文件包（%.1f KB）..." % (os.path.getsize(bundle_path) / 1024))
+                upload_file(cli, bundle_path, remote_bundle, timeout=300)
+            code, out, _ = ssh_run(cli, "sha256sum %s" % shlex.quote(remote_bundle))
+            actual = out.strip().split() if out.strip() else [""]
+            if code != 0 or actual[0].lower() != bundle_digest.lower():
+                raise RuntimeError("服务器迁移文件包 sha256 校验失败")
+
+            extract = "mkdir -p {directory} && tar -xzf {archive} -C {directory} && test -f {schema} && test -f {script}".format(
+                directory=shlex.quote(bundle_dir),
+                archive=shlex.quote(remote_bundle),
+                schema=shlex.quote(bundle_dir + "/prisma/schema.prisma"),
+                script=shlex.quote(bundle_dir + "/scripts/migrate-all.sh"),
+            )
+            checked_remote(cli, extract, "解包并校验 Prisma 迁移文件", timeout=60)
+
+            t0 = time.time()
+            checked_remote(cli, compose_command("up -d --wait --wait-timeout 120 db redis"), "等待数据库", timeout=180)
+            checked_remote(cli, compose_command("exec -T app bash scripts/backup-db.sh"), "迁移前数据库备份", timeout=900)
+            mounted_migrate = (
+                "--profile tools run --rm --no-deps "
+                "-v {prisma}:/app/prisma:ro -v {script}:/app/scripts/migrate-all.sh:ro migrate"
+            ).format(
+                prisma=shlex.quote(bundle_dir + "/prisma"),
+                script=shlex.quote(bundle_dir + "/scripts/migrate-all.sh"),
+            )
+            migration_attempted = True
+            checked_remote(cli, compose_command(mounted_migrate), "双库迁移与 schema 校验", timeout=1800)
+            steps["MIGRATE_AND_VERIFY"] = round(time.time() - t0, 1)
+            checked_remote(
+                cli,
+                "rm -rf %s && rm -f %s" % (shlex.quote(bundle_dir), shlex.quote(remote_bundle)),
+                "清理临时迁移文件包",
+                timeout=30,
+            )
+
         for tar, digest in tars:
             remote = "/tmp/" + os.path.basename(tar)
             base = os.path.basename(tar)
@@ -288,9 +640,8 @@ def deploy_remote(tars, tag, dry_run, skip_upload=False):
             if existing and existing[0].lower() == digest.lower():
                 log(" %s 已存在且校验匹配，跳过上传" % os.path.basename(tar))
             else:
-                sftp = cli.open_sftp()
-                sftp.put(tar, remote)
-                sftp.close()
+                log(" 上传 %s（%.1f MB）..." % (os.path.basename(tar), os.path.getsize(tar) / 1048576))
+                upload_file(cli, tar, remote)
             steps["UPLOAD_" + os.path.basename(tar)[:16]] = round(time.time() - t0, 1)
 
             # sha256 校验
@@ -327,7 +678,7 @@ def deploy_remote(tars, tag, dry_run, skip_upload=False):
                     timeout=30,
                 )
 
-        if not has_migrator:
+        if not has_migrator and not migration_bundle:
             local_fingerprint = schema_migration_fingerprint()
             command = (
                 "cd /app && schema=$(sha256sum prisma/schema.prisma | awk '{print $1}') && "
@@ -348,6 +699,8 @@ def deploy_remote(tars, tag, dry_run, skip_upload=False):
                     "请使用 --migrator 先备份并迁移，再发布 app。"
                 )
             log("  本地 schema/迁移与生产 migrator 一致，允许 app-only 发布")
+        elif migration_bundle:
+            log("  已由现有 migrator 挂载本次 schema/迁移并完成双库一致性校验")
 
         # 备份 + 切 latest（app + 可选 migrator）
         t0 = time.time()
@@ -359,7 +712,6 @@ def deploy_remote(tars, tag, dry_run, skip_upload=False):
                 img = MIGRATOR_IMAGE
             else:
                 continue
-            prune_old_backups(cli, img, img.replace("edu-manage-", ""))
             backup = "pre-%s-backup-%s" % (tag, img.replace("edu-manage-", ""))
             code, existing_backup_id, _ = ssh_run(cli, "docker image inspect %s:%s --format '{{.Id}}'" % (img, backup))
             if code == 0 and existing_backup_id.strip():
@@ -384,6 +736,9 @@ def deploy_remote(tars, tag, dry_run, skip_upload=False):
             checked_remote(cli, compose_command("--profile tools run --rm --no-deps migrate"), "双库迁移", timeout=1800)
             steps["MIGRATE"] = round(time.time() - t0, 1)
 
+        sync_public_home(cli, tag)
+        sync_login_business_posters(cli, tag)
+
         # compose 重建 app
         t0 = time.time()
         app_replaced = True
@@ -394,6 +749,24 @@ def deploy_remote(tars, tag, dry_run, skip_upload=False):
         t0 = time.time()
         wait_for_app(cli, expected_image_id)
         steps["HEALTH"] = round(time.time() - t0, 1)
+
+        for tar_path, _ in tars:
+            base = os.path.basename(tar_path)
+            if base.startswith(APP_IMAGE + "-"):
+                image = APP_IMAGE
+                img_type = "app"
+            elif base.startswith(MIGRATOR_IMAGE + "-"):
+                image = MIGRATOR_IMAGE
+                img_type = "migrator"
+            else:
+                continue
+            prune_remote_release_images(
+                cli,
+                image,
+                img_type,
+                tag,
+                backup_tag=backups.get(image),
+            )
 
         # 清理远端 tar
         for tar_path, _ in tars:
@@ -441,6 +814,11 @@ def deploy_migrator_only(tars, tag, skip_upload=False):
     backup = None
     migration_attempted = False
     try:
+        try:
+            checked_remote(cli, "docker image prune -f", "发布前清理未引用的悬空镜像", timeout=300)
+        except RuntimeError:
+            log("  发布前悬空镜像清理失败，继续由镜像加载检查磁盘空间")
+
         for tar, digest in tars:
             base = os.path.basename(tar)
             if not base.startswith(MIGRATOR_IMAGE + "-"):
@@ -496,7 +874,6 @@ def deploy_migrator_only(tars, tag, skip_upload=False):
                 checked_remote(cli, "rm -f " + remote, "清理已加载的远端发布 tar", timeout=30)
 
         t0 = time.time()
-        prune_old_backups(cli, MIGRATOR_IMAGE, "migrator")
         backup = "pre-%s-backup-migrator" % tag
         code, existing_backup_id, _ = ssh_run(
             cli, "docker image inspect %s:%s --format '{{.Id}}'" % (MIGRATOR_IMAGE, backup)
@@ -518,6 +895,14 @@ def deploy_migrator_only(tars, tag, skip_upload=False):
         migration_attempted = True
         checked_remote(cli, compose_command("--profile tools run --rm --no-deps migrate"), "双库迁移与 schema 校验", timeout=1800)
         steps["MIGRATE_AND_VERIFY"] = round(time.time() - t0, 1)
+
+        prune_remote_release_images(
+            cli,
+            MIGRATOR_IMAGE,
+            "migrator",
+            tag,
+            backup_tag=backup,
+        )
 
         for tar, _ in tars:
             ssh_run(cli, "rm -f /tmp/" + os.path.basename(tar))
@@ -541,6 +926,7 @@ def main():
     ap.add_argument("--tag", default=time.strftime("%Y%m%d-%H%M"))
     ap.add_argument("--migrator", action="store_true", help="同时构建并部署 migrator 镜像")
     ap.add_argument("--migrator-only", action="store_true", help="仅构建、部署并运行 migrator，不重建 app")
+    ap.add_argument("--migration-bundle", action="store_true", help="复用服务器 migrator，只上传 schema/迁移文件包并校验双库后发布 app")
     ap.add_argument("--skip-build", action="store_true", help="复用 release/ 已有 tar，跳过本地构建")
     ap.add_argument("--skip-upload", action="store_true", help="仅在目标机已有同 tag 镜像时跳过上传/load；会先比较本地和服务器镜像 ID")
     ap.add_argument("--no-cache", action="store_true", help="强制全量重建（不推荐，默认走构建缓存）")
@@ -590,6 +976,8 @@ def main():
         ap.error("--skip-upload 需要同时指定 --skip-build")
     if args.migrator_only and args.migrator:
         ap.error("--migrator-only 与 --migrator 不能同时指定")
+    if args.migration_bundle and (args.migrator or args.migrator_only):
+        ap.error("--migration-bundle 与 --migrator/--migrator-only 不能同时指定")
     tag = args.tag
     if not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}", tag):
         raise SystemExit("非法镜像 tag")
@@ -599,6 +987,7 @@ def main():
         ensure_builder(args.dry_run)
 
     tars = []
+    migration_bundle = None
     if args.migrator_only:
         if not args.skip_build:
             build_image(MIGRATOR_TARGET, MIGRATOR_IMAGE, tag, args.dry_run, no_cache=args.no_cache)
@@ -644,13 +1033,24 @@ def main():
                 digest2 = open(tar2 + ".sha256").read().strip()
                 tars.append((tar2, digest2))
 
+    if args.migration_bundle:
+        migration_bundle = export_migration_bundle(tag, args.dry_run)
+
     if args.dry_run:
         log("  [dry-run] 部署 tars: " + ", ".join(t for t, _ in tars))
+        if migration_bundle:
+            log("  [dry-run] 使用迁移文件包: " + migration_bundle[0])
         return
     if args.migrator_only:
         deploy_migrator_only(tars, tag, skip_upload=args.skip_upload)
+        prune_local_release_images(MIGRATOR_IMAGE, tag)
+        prune_local_release_archives(MIGRATOR_IMAGE, tag)
     else:
-        deploy_remote(tars, tag, args.dry_run, skip_upload=args.skip_upload)
+        deploy_remote(tars, tag, args.dry_run, skip_upload=args.skip_upload, migration_bundle=migration_bundle)
+        prune_local_release_images(APP_IMAGE, tag)
+        prune_local_release_images(MIGRATOR_IMAGE, tag if args.migrator else None)
+        prune_local_release_archives(APP_IMAGE, tag)
+        prune_local_release_archives(MIGRATOR_IMAGE, tag if args.migrator else None)
     log("=== 发布完成 ===")
 
 

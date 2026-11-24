@@ -7,7 +7,6 @@ import { chineseToPinyin } from '@/lib/pinyin'
 import bcrypt from 'bcryptjs'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
-import { generateTemporaryPassword } from '@/lib/temporary-password'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
 import { resolveTier, TIER_RANK } from '@/constants/teacher-tier'
@@ -181,6 +180,8 @@ export async function POST(req: NextRequest) {
     if (!rawPhone) return NextResponse.json({ error: '手机号不能为空', field: 'phone' }, { status: 400 })
     if (!phone) return NextResponse.json({ error: '请输入正确的11位中国大陆手机号', field: 'phone' }, { status: 400 })
     if (!subjects) return NextResponse.json({ error: '至少选择一个授课科目', field: 'subjects' }, { status: 400 })
+    const pinyinName = chineseToPinyin(name)
+    if (!pinyinName) return NextResponse.json({ error: '教师姓名无法生成拼音初始密码，请检查姓名后重试' }, { status: 400 })
     if (typeof body.bio === 'string' && body.bio.length > 500) {
       return NextResponse.json({ error: '个人介绍最多填写500字', field: 'bio' }, { status: 400 })
     }
@@ -224,7 +225,6 @@ export async function POST(req: NextRequest) {
     const userId = (session.user as { id?: string }).id
     if (!userId) return NextResponse.json({ error: '登录状态无效，请重新登录' }, { status: 401 })
 
-    const initialPassword = generateTemporaryPassword()
     const result = await prisma.$transaction(async (tx) => {
       const teacher = existingTeacher
         ? await tx.teacher.update({
@@ -233,7 +233,8 @@ export async function POST(req: NextRequest) {
           })
         : await tx.teacher.create({ data: teacherData })
 
-      const teacherEmail = `${chineseToPinyin(teacher.name)}@tea.com`
+      const teacherEmail = `${pinyinName}@tea.com`
+      const initialPassword = pinyinName
       const existingAccount = await tx.user.findUnique({ where: { email: teacherEmail } })
       const account = existingAccount
         ? await tx.user.update({

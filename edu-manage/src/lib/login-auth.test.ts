@@ -184,4 +184,22 @@ describe('login authentication chain', () => {
     expect(result.ok).toBe(true)
     expect(mocks.compare).toHaveBeenCalledTimes(1)
   })
+
+  it('authenticates a parent user even if expectedRole was admin in unified login', async () => {
+    mocks.userFindUnique.mockResolvedValue(parentUser)
+
+    const result = await validateLoginAccount(
+      parentUser.email,
+      'secret',
+      'admin',
+      { recordAttempt: true },
+      undefined,
+      'JUNIOR',
+    )
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) throw new Error('expected parent login to succeed')
+    expect(result.user.role).toBe('parent')
+    expect(mocks.compare).toHaveBeenCalledTimes(1)
+  })
 })

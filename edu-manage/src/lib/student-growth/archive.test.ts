@@ -49,12 +49,14 @@ function createPrisma(options: {
   division?: string
   withGrades?: boolean
   attendance?: Array<{ status: string; count: number }>
+  linkedRecordIds?: string[]
 } = {}) {
   const studentExists = options.studentExists !== false
   return {
     student: {
-      findUnique: vi.fn(async () => studentExists ? {
+      findFirst: vi.fn(async () => studentExists ? {
         id: 'student-a',
+        identityId: 'identity-a',
         name: '学生A',
         grade: '初二',
         division: options.division || 'JUNIOR',
@@ -63,6 +65,22 @@ function createPrisma(options: {
           { totalHours: 20, usedHours: 20, remainHours: 0, status: 'COMPLETED', enrolledAt: new Date(), group: { name: '历史班', status: 'ARCHIVED' } },
         ],
       } : null),
+      findMany: vi.fn(async ({ where }: { where: Record<string, unknown> }) => {
+        if (!('identityId' in where)) return []
+        const ids = options.linkedRecordIds || ['student-a']
+        const requestedIds = where.id && typeof where.id === 'object' && 'in' in where.id
+          ? (where.id as { in: string[] }).in
+          : ids
+        return ids.filter((id) => requestedIds.includes(id)).map((id) => ({
+          id,
+          enrollments: id === 'student-a'
+            ? [
+              { totalHours: 40, usedHours: 12.5, remainHours: 27.5, status: 'ACTIVE', enrolledAt: new Date(), group: { name: '初二一班', status: 'ACTIVE', intensiveMode: null } },
+              { totalHours: 20, usedHours: 20, remainHours: 0, status: 'COMPLETED', enrolledAt: new Date(), group: { name: '历史班', status: 'ARCHIVED', intensiveMode: null } },
+            ]
+            : [{ totalHours: 10, usedHours: 3, remainHours: 7, status: 'COMPLETED', enrolledAt: new Date(), group: { name: '第一期历史班', status: 'ARCHIVED', intensiveMode: null } }],
+        }))
+      }),
     },
     attendance: {
       groupBy: vi.fn(async () => (options.attendance || [
@@ -168,5 +186,57 @@ describe('student growth archive', () => {
     const result = await getStudentGrowthArchive(createPrisma(), admin, 'student-a')
     expect(result.attendance.summary).toEqual({ total: 10, present: 7, makeup: 1, leave: 1, absent: 1, rate: 80 })
     expect(result.overview.attendanceRate).toBe(80)
+  })
+
+  it('limits every admin archive section to one selected operational term', async () => {
+    const prisma = createPrisma()
+    await getStudentGrowthArchive(prisma, admin, 'student-a', { termId: 'term-current' })
+
+    expect(prisma.student.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ termMemberships: { some: { termId: 'term-current' } } }),
+      select: expect.objectContaining({
+        enrollments: expect.objectContaining({ where: { group: { termId: 'term-current' } } }),
+      }),
+    }))
+    expect(prisma.student.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ termMemberships: { some: { termId: 'term-current' } } }),
+      select: expect.objectContaining({
+        enrollments: expect.objectContaining({ where: { group: { termId: 'term-current' } } }),
+      }),
+    }))
+    expect(prisma.attendance.groupBy).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ lesson: { group: { termId: 'term-current' } } }),
+    }))
+    expect(prisma.hourTransaction.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ enrollment: { group: { termId: 'term-current' } } }),
+    }))
+    expect(prisma.gradeRecord.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ assessment: { group: { termId: 'term-current' } } }),
+    }))
+    expect(feedbackMock).toHaveBeenCalledWith(expect.anything(), admin, expect.objectContaining({ termId: 'term-current' }))
+  })
+
+  it('aggregates linked term records for parent growth reports without including another child', async () => {
+    const prisma = createPrisma({ linkedRecordIds: ['student-a', 'student-a-old'] })
+    const parent = { id: 'parent-a', role: 'parent' as const, division: 'JUNIOR' }
+    parentStudentIdsMock.mockResolvedValue(['student-a', 'student-a-old', 'sibling'])
+
+    const result = await getStudentGrowthArchive(prisma, parent, 'student-a')
+    const historyIds = ['student-a', 'student-a-old']
+
+    expect(result.hours).toMatchObject({ totalHours: 70, usedHours: 35.5, remainingHours: 34.5 })
+    expect(feedbackMock).toHaveBeenCalledWith(expect.anything(), parent, expect.objectContaining({
+      studentId: 'student-a',
+      includeLinkedRecords: true,
+    }))
+    expect(prisma.attendance.groupBy).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ studentId: { in: historyIds } }),
+    }))
+    expect(prisma.hourTransaction.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ studentId: { in: historyIds } }),
+    }))
+    expect(prisma.gradeRecord.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ studentId: { in: historyIds } }),
+    }))
   })
 })

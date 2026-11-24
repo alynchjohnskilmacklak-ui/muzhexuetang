@@ -39,11 +39,22 @@ describe('admin learning report', () => {
     ])
     expect(report.student.courses).toEqual(['初二数学'])
     expect(report.overview.feedbackCount).toBe(72)
-    expect(report.grades[0]).toMatchObject({ subject: '数学', assessment: '月考', score: 102, fullScore: 120, percentage: 85 })
+    expect(report.indicators.attendanceRate).toBe(90)
+    expect(report.indicators.totalHours).toBe(30)
+    expect(report.indicators.homeworkDoneRate).toBe(75)
+    expect(report.grades[0]).toMatchObject({
+      subject: '数学', assessment: '月考', score: 102, fullScore: 120, percentage: 85, level: '优秀',
+    })
     expect(report.teacherSummaries).toHaveLength(2)
-    expect(getAdminLearningReportSections(report).at(-1)?.lines).toContain('第一次小结')
-    expect(getAdminLearningReportSections(report).map((section) => section.title)).toEqual([
-      '学生信息与课程', '本期学习概况', '本期成绩记录', '当前学习目标与薄弱点', '本期教师阶段小结',
+    expect(report.executiveSummary).toContain('小明同学')
+    expect(report.homeGuidance).toHaveLength(4)
+    expect(report.nextStageRoadmap).toHaveLength(3)
+
+    const sections = getAdminLearningReportSections(report)
+    const teacherSection = sections.find((s) => s.title === '本期教师阶段小结')
+    expect(teacherSection?.lines).toContain('第一次小结')
+    expect(sections.map((section) => section.title)).toEqual([
+      '学生信息与课程', '本期学习概况', '本期成绩记录', '当前学习目标与薄弱点', '本期教师阶段小结', '下一阶段提分规划与家校协同方案',
     ])
   })
 
@@ -54,6 +65,8 @@ describe('admin learning report', () => {
       { summary: '上期小结', suggestions: null, periodStart: '2026-09-01', periodEnd: '2026-09-30', teacher: null },
     ])
     expect(report.teacherSummaries).toEqual([])
-    expect(getAdminLearningReportSections(report).at(-1)?.lines).toEqual(['本期暂无已发布的阶段小结'])
+    const sections = getAdminLearningReportSections(report)
+    const teacherSection = sections.find((s) => s.title === '本期教师阶段小结')
+    expect(teacherSection?.lines).toEqual(['本期暂无已发布的阶段小结'])
   })
 })

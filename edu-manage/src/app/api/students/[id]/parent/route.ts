@@ -4,7 +4,6 @@ import { auth } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 import { apiHandler } from '@/lib/api-handler'
 import { chineseToPinyin } from '@/lib/pinyin'
-import { generateTemporaryPassword } from '@/lib/temporary-password'
 import { getPasswordPolicyError } from '@/lib/password-policy'
 
 export const POST = apiHandler(async (
@@ -34,10 +33,12 @@ export const POST = apiHandler(async (
     return NextResponse.json({ error: '该账号已被其他角色使用' }, { status: 409 })
   }
 
+  const defaultPassword = chineseToPinyin(student.name)
   const issuedPassword = existing && !customPassword
     ? null
-    : (customPassword || generateTemporaryPassword())
-  if (issuedPassword) {
+    : (customPassword || defaultPassword)
+  if (!existing && !issuedPassword) return NextResponse.json({ error: '学员姓名无法生成拼音初始密码，请检查姓名后重试' }, { status: 400 })
+  if (customPassword && issuedPassword) {
     const passwordError = getPasswordPolicyError(issuedPassword, {
       identifiers: [email, student.name, student.parentName || ''],
     })

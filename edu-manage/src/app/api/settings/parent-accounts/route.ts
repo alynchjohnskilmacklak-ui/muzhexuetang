@@ -26,12 +26,34 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const ids = accounts.map((account) => account.id)
     const students = ids.length ? await prisma.student.findMany({
       where: { deletedAt: null, OR: [{ parentId: { in: ids } }, { parentUserId: { in: ids } }] },
-      select: { id: true, name: true, grade: true, birthYear: true, parentId: true, parentUserId: true },
+      select: {
+        id: true,
+        name: true,
+        grade: true,
+        birthYear: true,
+        parentPhone: true,
+        parentId: true,
+        parentUserId: true,
+        termMemberships: {
+          orderBy: { joinedAt: 'desc' },
+          take: 3,
+          select: { status: true, term: { select: { name: true } } },
+        },
+      },
     }) : []
+    const studentsByParent = new Map<string, typeof students>()
+    for (const student of students) {
+      const parentIds = new Set([student.parentId, student.parentUserId].filter((id): id is string => Boolean(id)))
+      for (const parentId of parentIds) {
+        const parentStudents = studentsByParent.get(parentId) || []
+        parentStudents.push(student)
+        studentsByParent.set(parentId, parentStudents)
+      }
+    }
     return NextResponse.json({ accounts: accounts.map((account) => ({
       ...account,
-      students: students.filter((student) => student.parentId === account.id || student.parentUserId === account.id)
-        .map(({ id, name, grade, birthYear }) => ({ id, name, grade, birthYear })),
+      students: (studentsByParent.get(account.id) || [])
+        .map(({ id, name, grade, birthYear, parentPhone, termMemberships }) => ({ id, name, grade, birthYear, parentPhone, termMemberships })),
     })) })
   }
   const accounts = await prisma.user.findMany({

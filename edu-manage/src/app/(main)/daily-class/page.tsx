@@ -29,6 +29,18 @@ type TeacherItem = {
 
 type DashboardData = {
   teacherCompliance?: TeacherItem[]
+  weekendNextLessons?: Array<{
+    id: string
+    groupId: string
+    groupName: string
+    subject: string
+    teacher: string
+    room: string
+    studentCount: number
+    date: string
+    startTime: string
+    endTime: string
+  }>
 }
 
 export default function DailyClassPage() {
@@ -37,6 +49,7 @@ export default function DailyClassPage() {
   const { data, isLoading } = useSWR<DashboardData>('/api/dashboard', fetcher)
 
   const teachers = data?.teacherCompliance ?? []
+  const upcoming = data?.weekendNextLessons ?? []
   const totalLessons = teachers.reduce((sum, teacher) => sum + teacher.todayLessons, 0)
   const pendingAttendance = teachers.reduce((sum, teacher) => sum + teacher.pendingAttendance, 0)
   const pendingFeedback = teachers.reduce((sum, teacher) => sum + teacher.pendingFeedback, 0)
@@ -62,6 +75,34 @@ export default function DailyClassPage() {
           ))}
         </section>
 
+        {upcoming.length > 0 && (
+          <section className={styles.upcomingSection} aria-labelledby="weekend-next-lessons">
+            <div className={styles.sectionHeading}>
+              <h2 id="weekend-next-lessons">周末班下一次上课安排</h2>
+              <span>{upcoming[0].date}</span>
+            </div>
+            <div className={styles.upcomingList}>
+              {upcoming.map((lesson) => (
+                <button
+                  className={styles.upcomingRow}
+                  key={lesson.id}
+                  type="button"
+                  onClick={() => router.push(`/courses/${encodeURIComponent(lesson.groupId)}`)}
+                  aria-label={`查看${lesson.groupName}下一次课程安排`}
+                >
+                  <span className={styles.upcomingTime}>{lesson.startTime}–{lesson.endTime}</span>
+                  <span className={styles.upcomingInfo}>
+                    <strong>{lesson.groupName} · {lesson.subject}</strong>
+                    <small>{lesson.teacher} · {lesson.room} · {lesson.studentCount} 名学员</small>
+                  </span>
+                  <RightOutlined aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+            <span className={styles.upcomingNote}>这是未来课表预览，不计入今日课次、考勤或反馈统计。</span>
+          </section>
+        )}
+
         <section className={styles.teacherSection} aria-labelledby="today-class-teachers">
           <div className={styles.sectionHeading}>
             <h2 id="today-class-teachers">教师进度</h2>
@@ -69,11 +110,11 @@ export default function DailyClassPage() {
           </div>
 
           {isLoading ? (
-            <Card className={styles.loadingCard} bordered={false}>
+            <Card className={styles.loadingCard} variant="borderless">
               <Skeleton active paragraph={{ rows: 4 }} />
             </Card>
           ) : teachers.length === 0 ? (
-            <Card className={styles.emptyCard} bordered={false}>
+            <Card className={styles.emptyCard} variant="borderless">
               <CalendarOutlined className={styles.emptyIcon} />
               <strong>今日暂未排课</strong>
               <span>有课程安排后，教师考勤与课堂反馈会显示在这里。</span>

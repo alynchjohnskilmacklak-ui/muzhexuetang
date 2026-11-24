@@ -8,6 +8,7 @@ import { getParentFeedbackStudentIds } from '@/lib/classroom-feedback/access'
 import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
 
 export interface StudentGrowthArchiveOptions {
+  termId?: string
   startDate?: Date
   endDate?: Date
 }
@@ -126,21 +127,36 @@ export async function getStudentGrowthArchive(
     throw new StudentGrowthAccessError('无权查看学生成长档案')
   }
 
+  const parentStudentIds = actor.role === 'parent'
+    ? await getParentFeedbackStudentIds(prisma, actor.id)
+    : []
   if (actor.role === 'parent') {
-    const linkedStudentIds = await getParentFeedbackStudentIds(prisma, actor.id)
-    if (!linkedStudentIds.includes(studentId)) {
+    if (!parentStudentIds.includes(studentId)) {
       throw new StudentGrowthAccessError('无权查看该学生成长档案')
     }
   }
 
-  const student = await prisma.student.findUnique({
-    where: { id: studentId },
+  const student = await prisma.student.findFirst({
+    where: {
+      id: studentId,
+      deletedAt: null,
+      ...(options.termId ? { termMemberships: { some: { termId: options.termId } } } : {}),
+    },
     select: {
       id: true,
+      identityId: true,
       name: true,
       grade: true,
       division: true,
+      ...(options.termId ? {
+        termMemberships: {
+          where: { termId: options.termId },
+          select: { grade: true },
+          take: 1,
+        },
+      } : {}),
       enrollments: {
+        where: options.termId ? { group: { termId: options.termId } } : undefined,
         select: {
           totalHours: true,
           usedHours: true,
@@ -158,11 +174,43 @@ export async function getStudentGrowthArchive(
     throw new StudentGrowthAccessError('无权查看其他学部学生')
   }
 
+  const identityRecords = await prisma.student.findMany({
+    where: actor.role === 'admin'
+      ? {
+          identityId: student.identityId,
+          division: student.division,
+          deletedAt: null,
+          ...(options.termId ? { termMemberships: { some: { termId: options.termId } } } : {}),
+        }
+      : { identityId: student.identityId, id: { in: parentStudentIds }, deletedAt: null },
+    select: {
+      id: true,
+      enrollments: {
+        where: options.termId ? { group: { termId: options.termId } } : undefined,
+        select: {
+          totalHours: true,
+          usedHours: true,
+          remainHours: true,
+          status: true,
+          enrolledAt: true,
+          group: { select: { name: true, status: true, intensiveMode: true } },
+        },
+        orderBy: { enrolledAt: 'desc' },
+      },
+    },
+  })
+  const recordIds = [...new Set([studentId, ...identityRecords.map((record) => record.id)])]
+  const identityEnrollments = identityRecords.some((record) => record.id === studentId)
+    ? identityRecords.flatMap((record) => record.enrollments)
+    : [...student.enrollments, ...identityRecords.flatMap((record) => record.enrollments)]
+
   const createdAt = rangeWhere(options)
   const assessmentDate = rangeWhere(options)
   const [feedbackArchive, attendanceGroups, recentAttendance, hourTransactions, gradeRecords, approvedIntensiveAttendances] = await Promise.all([
     getFeedbackArchive(prisma, actor, {
       studentId,
+      includeLinkedRecords: true,
+      termId: options.termId,
       startDate: options.startDate,
       endDate: options.endDate,
       page: 1,
@@ -171,11 +219,24 @@ export async function getStudentGrowthArchive(
     }),
     prisma.attendance.groupBy({
       by: ['status'],
-      where: { studentId, ...(createdAt ? { createdAt } : {}) },
+      where: {
+        studentId: { in: recordIds },
+        ...(createdAt ? { createdAt } : {}),
+        ...(options.termId ? { lesson: { group: { termId: options.termId } } } : {}),
+      },
       _count: { _all: true },
     }),
     prisma.attendance.findMany({
-      where: { studentId, ...(createdAt ? { createdAt } : {}) },
+      where: {
+        studentId: { in: recordIds },
+        ...(createdAt ? { createdAt } : {}),
+        ...(options.termId ? {
+          OR: [
+            { lesson: { group: { termId: options.termId } } },
+            { enrollment: { group: { termId: options.termId } } },
+          ],
+        } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       take: 20,
       select: {
@@ -193,7 +254,13 @@ export async function getStudentGrowthArchive(
       },
     }),
     prisma.hourTransaction.findMany({
-      where: { studentId, ...(createdAt ? { createdAt } : {}) },
+      where: {
+        studentId: { in: recordIds },
+        ...(createdAt ? { createdAt } : {}),
+        ...(options.termId ? {
+          enrollment: { group: { termId: options.termId } },
+        } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       take: 20,
       select: {
@@ -209,8 +276,13 @@ export async function getStudentGrowthArchive(
     }),
     prisma.gradeRecord.findMany({
       where: {
-        studentId,
-        ...(assessmentDate ? { assessment: { assessDate: assessmentDate } } : {}),
+        studentId: { in: recordIds },
+        ...(assessmentDate || options.termId ? {
+          assessment: {
+            ...(assessmentDate ? { assessDate: assessmentDate } : {}),
+            ...(options.termId ? { group: { termId: options.termId } } : {}),
+          },
+        } : {}),
       },
       orderBy: { assessment: { assessDate: 'desc' } },
       take: 50,
@@ -230,11 +302,14 @@ export async function getStudentGrowthArchive(
     }),
     prisma.attendance.findMany({
       where: {
-        studentId,
+        studentId: { in: recordIds },
         ...(createdAt ? { createdAt } : {}),
         lesson: {
           intensiveReviewStatus: 'APPROVED',
-          group: { intensiveMode: 'INTENSIVE' },
+          group: {
+            intensiveMode: 'INTENSIVE',
+            ...(options.termId ? { termId: options.termId } : {}),
+          },
         },
       },
       select: {
@@ -253,7 +328,7 @@ export async function getStudentGrowthArchive(
   const attendanceTotal = present + makeup + leave + absent
   const attendanceRate = attendanceTotal ? Math.round(((present + makeup) / attendanceTotal) * 100) : null
 
-  const prepaidEnrollments = student.enrollments.filter((enrollment) => enrollment.group.intensiveMode !== 'INTENSIVE')
+  const prepaidEnrollments = identityEnrollments.filter((enrollment) => enrollment.group.intensiveMode !== 'INTENSIVE')
   const totalHours = roundHours(prepaidEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.totalHours || 0), 0))
   const usedHours = roundHours(prepaidEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.usedHours || 0), 0))
   const remainingHours = roundHours(prepaidEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0))
@@ -263,7 +338,7 @@ export async function getStudentGrowthArchive(
       Number(attendance.actualMinutes || attendance.lesson?.actualMinutes || 0),
     )
   ), 0))
-  const classNames = [...new Set(student.enrollments
+  const classNames = [...new Set(identityEnrollments
     .filter((enrollment) => enrollment.status === 'ACTIVE' && enrollment.group.status !== 'ARCHIVED')
     .map((enrollment) => enrollment.group.name)
     .filter(Boolean))]
@@ -287,7 +362,7 @@ export async function getStudentGrowthArchive(
     student: {
       id: student.id,
       name: student.name,
-      grade: student.grade,
+      grade: options.termId ? student.termMemberships?.[0]?.grade ?? student.grade : student.grade,
       className: classNames.length ? classNames.join('、') : null,
     },
     overview: {

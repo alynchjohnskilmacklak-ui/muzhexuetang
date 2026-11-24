@@ -13,7 +13,18 @@ vi.mock('@/lib/auth/guards', () => ({
 
 function makePrisma() {
   return {
-    classLesson: { count: vi.fn().mockResolvedValue(4) },
+    classLesson: {
+      count: vi.fn().mockResolvedValue(4),
+      findMany: vi.fn().mockResolvedValue([{
+        id: 'lesson-1',
+        subject: '数学',
+        startTime: '09:00',
+        endTime: '10:00',
+        groupId: 'group-1',
+        status: 'SCHEDULED',
+      }]),
+    },
+    classGroup: { findMany: vi.fn().mockResolvedValue([{ id: 'group-1', name: '周末班' }]) },
     notification: { count: vi.fn().mockResolvedValue(0) },
   } as unknown as PrismaClient
 }
@@ -42,6 +53,12 @@ describe('teacher AI lesson summary scope', () => {
       { teacherId: null, group: { teacherId: 'teacher-42' } },
       { teacherId: null, group: { teacherAssignments: { some: { teacherId: 'teacher-42' } } } },
     ]))
+    expect(prisma.classLesson.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining(where),
+      orderBy: { startTime: 'asc' },
+      take: 8,
+    }))
+    expect(digest.lines).toContain('09:00-10:00 数学 周末班（待上课）')
   })
 
   it('does not count unscoped lessons when a teacher identity is unresolved', async () => {

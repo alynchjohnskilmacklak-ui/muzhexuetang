@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button, Card, Empty, message, Skeleton } from 'antd'
+import { Button, Card, Empty, Input, message, Skeleton } from 'antd'
 import { BrandModal } from '@/components/Common/BrandModal'
 import {
   ArrowLeftOutlined, CalendarOutlined, CheckCircleOutlined,
@@ -30,10 +30,10 @@ const STATUS_OPTIONS: Array<{
   tone: 'present' | 'leave' | 'absent' | 'makeup'
   desc: string
 }> = [
-  { value: 'PRESENT', label: '出勤', tone: 'present', desc: '正常到课，按规则扣课时' },
-  { value: 'LEAVE', label: '请假', tone: 'leave', desc: '提前请假；一对一/突击班仍计课时' },
-  { value: 'ABSENT', label: '缺勤', tone: 'absent', desc: '未到课；已扣课时将全额退还' },
-  { value: 'MAKEUP', label: '补课', tone: 'makeup', desc: '随本节补课时到课' },
+  { value: 'PRESENT', label: '出勤', tone: 'present', desc: '正常到课，按所属批次和时长扣课时' },
+  { value: 'LEAVE', label: '请假', tone: 'leave', desc: '寒暑假批次计课时；周末课不扣' },
+  { value: 'ABSENT', label: '缺勤', tone: 'absent', desc: '寒暑假批次按现行规则计课时；周末课不扣' },
+  { value: 'MAKEUP', label: '补课', tone: 'makeup', desc: '补课不重复扣本节课时' },
 ]
 
 type LessonStudent = {
@@ -110,22 +110,33 @@ export default function TeacherCompliancePage() {
     hoursDeducted: number
   } | null>(null)
   const [adjusting, setAdjusting] = useState(false)
+  const [adjustReason, setAdjustReason] = useState('')
   const [revokeTarget, setRevokeTarget] = useState<{ lessonName: string; feedbackId: string } | null>(null)
   const [revoking, setRevoking] = useState(false)
 
-  const handleAdjust = async (nextStatus: NonNullable<AttStatusRaw>) => {
+  const handleAdjust = async (nextStatus: NonNullable<AttStatusRaw>, reason: string) => {
     if (!adjustTarget) return
+    if (!reason.trim()) {
+      message.warning('请先填写考勤更正原因')
+      return
+    }
     setAdjusting(true)
     try {
       const res = await fetch('/api/admin/attendance/adjust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lessonId: adjustTarget.lessonId, studentId: adjustTarget.studentId, newStatus: nextStatus }),
+        body: JSON.stringify({
+          lessonId: adjustTarget.lessonId,
+          studentId: adjustTarget.studentId,
+          newStatus: nextStatus,
+          reason: reason.trim(),
+        }),
       })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '考勤更正失败')
       message.success(payload.message || '考勤已更正')
       setAdjustTarget(null)
+      setAdjustReason('')
       await mutate()
     } catch (error) {
       message.error(error instanceof Error ? error.message : '考勤更正失败')
@@ -180,7 +191,7 @@ export default function TeacherCompliancePage() {
     >
       <main className={`${styles.detailPage} ${isMobile ? styles.detailPageMobile : ''}`}>
         <div className={styles.detailToolbar}>
-          <Button className={styles.backButton} size="small" icon={<ArrowLeftOutlined />} onClick={() => router.push('/daily-class')}>
+          <Button className={`${styles.backButton} mobile-shell-back`} size="small" icon={<ArrowLeftOutlined />} onClick={() => router.push('/daily-class')}>
             返回今日课堂
           </Button>
         </div>
@@ -318,13 +329,17 @@ export default function TeacherCompliancePage() {
                                         data-status={tone}
                                         type="button"
                                         disabled={!student.attendanceId}
-                                        onClick={() => student.attendanceId && setAdjustTarget({
-                                          lessonId: lesson.id,
-                                          studentId: student.id,
-                                          name: student.name,
-                                          current: student.attendanceStatusRaw,
-                                          hoursDeducted: student.hoursDeducted,
-                                        })}
+                                        onClick={() => {
+                                          if (!student.attendanceId) return
+                                          setAdjustReason('')
+                                          setAdjustTarget({
+                                            lessonId: lesson.id,
+                                            studentId: student.id,
+                                            name: student.name,
+                                            current: student.attendanceStatusRaw,
+                                            hoursDeducted: student.hoursDeducted,
+                                          })
+                                        }}
                                         title={student.attendanceId ? '点击更正考勤' : '教师尚未提交考勤'}
                                       >
                                         {student.attendanceStatus === null ? '未录' : student.attendanceStatus}
@@ -350,7 +365,10 @@ export default function TeacherCompliancePage() {
           open={!!adjustTarget}
           title={null}
           footer={null}
-          onCancel={() => setAdjustTarget(null)}
+          onCancel={() => {
+            setAdjustTarget(null)
+            setAdjustReason('')
+          }}
           width={isMobile ? 'calc(100vw - 24px)' : 420}
           styles={{ content: { borderRadius: 16, padding: '20px 20px 16px' } }}
         >
@@ -361,6 +379,19 @@ export default function TeacherCompliancePage() {
                 当前为「{STATUS_OPTIONS.find((option) => option.value === adjustTarget.current)?.label ?? '—'}」
                 {adjustTarget.hoursDeducted > 0 && `，已扣 ${adjustTarget.hoursDeducted} 课时`}。默认以教师提交为准，仅管理可更正。
               </p>
+              <label htmlFor="attendance-adjust-reason">更正原因（必填，最多500字）</label>
+              <Input.TextArea
+                id="attendance-adjust-reason"
+                aria-label="考勤更正原因"
+                value={adjustReason}
+                onChange={(event) => setAdjustReason(event.target.value)}
+                placeholder="例如：家长补充证明，核实后将缺勤更正为请假"
+                maxLength={500}
+                showCount
+                autoSize={{ minRows: 3, maxRows: 5 }}
+                disabled={adjusting}
+              />
+              <p>填写原因后，再选择更正状态或按批次规则核对课时。</p>
               <div className={styles.statusOptions}>
                 {STATUS_OPTIONS.map((option) => {
                   const active = adjustTarget.current === option.value
@@ -371,16 +402,16 @@ export default function TeacherCompliancePage() {
                       data-active={active}
                       key={option.value}
                       type="button"
-                      disabled={adjusting || active}
-                      onClick={() => handleAdjust(option.value)}
+                      disabled={adjusting || !adjustReason.trim()}
+                      onClick={() => handleAdjust(option.value, adjustReason)}
                     >
-                      <strong>{option.label}{active ? ' · 当前' : ''}</strong>
-                      <span>{option.desc}</span>
+                      <strong>{active ? '按批次规则核对课时' : option.label}{active ? ' · 当前状态' : ''}</strong>
+                      <span>{active ? '保持考勤状态，只核对并修正本节课时' : option.desc}</span>
                     </button>
                   )
                 })}
               </div>
-              <p className={styles.attendanceWarning}>改为“缺勤”时，该生本节课已扣课时将全额退回其剩余课时。</p>
+              <p className={styles.attendanceWarning}>系统按所属批次核算：周末班请假或缺勤不扣课时；寒暑假及常规批次请假或缺勤按现行规则计课时。更正时同步调整课时账。</p>
             </div>
           )}
         </BrandModal>

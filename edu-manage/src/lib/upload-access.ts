@@ -142,7 +142,8 @@ export async function assertCanAccessStoredFileAsset(actor: UploadActor, value: 
   if (!file) throw new AuthError('文件不存在或无权访问', 404)
   // Feedback assets use the stricter per-student feedback relationship check,
   // including unpublished drafts and the study-hall compatibility path.
-  if (file.ownerType.toLowerCase() === 'feedback' || file.feedbackId) {
+  const ownerType = String(file.ownerType || '').toLowerCase()
+  if (ownerType === 'feedback' || (file.feedbackId && ownerType !== 'admin_practice_reply')) {
     throw new AuthError('无权访问该文件')
   }
   await assertCanAccessFileAsset(actor, file)

@@ -161,10 +161,10 @@ export function HoursLeaderboard({ studentName = '我的孩子', mineHours, clas
         markLine: {
           silent: true,
           symbol: 'none' as const,
-          data: [{ xAxis: Number(avg.toFixed(1)) }],
+          data: [{ xAxis: Number(avg.toFixed(2)) }],
           lineStyle: { color: '#123C35', type: 'dashed' as const, width: 1 },
           label: {
-            formatter: `班级平均 ${avg.toFixed(1)}h`,
+            formatter: `班级平均 ${avg.toFixed(2)}h`,
             color: '#123C35',
             fontSize: 10,
             position: 'insideEndTop' as const,
@@ -224,10 +224,10 @@ export function HoursLeaderboard({ studentName = '我的孩子', mineHours, clas
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? 8 : 12, marginBottom: 10 }}>
         {[
           { label: '我的课时', value: `${mineHours}`, unit: '小时', highlight: false },
-          { label: '班级平均', value: `${avg.toFixed(1)}`, unit: '小时', highlight: false },
+          { label: '班级平均', value: `${avg.toFixed(2)}`, unit: '小时', highlight: false },
           {
             label: diff >= 0 ? '高于平均' : '低于平均',
-            value: `${diff >= 0 ? '+' : ''}${diff.toFixed(1)}`,
+            value: `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}`,
             unit: '小时',
             highlight: true,
           },

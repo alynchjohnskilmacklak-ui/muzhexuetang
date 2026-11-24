@@ -3,9 +3,20 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { findParentChild, getParentChildren } from '@/lib/parent-children'
-import { isParentStudentInLesson } from '@/lib/parent-lesson-visibility'
 import { visibleClassLessonWhere } from '@/lib/business-visibility'
 import { createManyNotifications } from '@/lib/notifications'
+import { getLocalDayRange, isValidDateKey, localDateKey } from '@/lib/date/local-day'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+
+function parseLeaveDateKey(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  if (isValidDateKey(value)) return value
+
+  const match = /^(\d{4}-\d{2}-\d{2})T/.exec(value)
+  if (!match || !isValidDateKey(match[1]) || !/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)) return null
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? null : localDateKey(parsed)
+}
 
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
@@ -13,17 +24,29 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const prisma = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
 
-  const { studentId: requestedStudentId, lessonId, reason: rawReason, leaveDate } = await req.json() as {
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: '请求内容不是有效 JSON' }, { status: 400 })
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: '请求内容格式无效' }, { status: 400 })
+  }
+  const { studentId: requestedStudentId, lessonId, reason: rawReason, leaveDate: rawLeaveDate } = body as {
     studentId: string
     lessonId?: string
     reason: string
     leaveDate: string
   }
   const reason = typeof rawReason === 'string' ? rawReason.trim() : ''
+  const leaveDateKey = parseLeaveDateKey(rawLeaveDate)
 
-  if (typeof requestedStudentId !== 'string' || !reason || reason.length > 1000 || !leaveDate || Number.isNaN(new Date(leaveDate).getTime())) {
-    return NextResponse.json({ error: '参数缺失' }, { status: 400 })
+  if (typeof requestedStudentId !== 'string' || !reason || reason.length > 1000 || !leaveDateKey) {
+    return NextResponse.json({ error: '请检查学员、请假日期和原因' }, { status: 400 })
   }
+  const leaveDateRange = getLocalDayRange(leaveDateKey)
+  const normalizedLeaveDate = leaveDateRange.start
 
   const child = findParentChild(await getParentChildren(prisma, userId), requestedStudentId)
   if (!child) {
@@ -39,13 +62,35 @@ export const POST = apiHandler(async (req: NextRequest) => {
         },
         include: {
           lessonStudents: { select: { studentId: true } },
-          group: { include: { course: { select: { subject: true } }, enrollments: { where: { studentId: { in: child.recordIds }, status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } } } },
+          group: {
+            include: {
+              course: { select: { subject: true } },
+              teacherAssignments: { select: { teacherId: true, subject: true } },
+              enrollments: { where: { studentId: { in: child.recordIds }, status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } },
+            },
+          },
         },
       })
     : null
-  const lessonStudentId = lesson ? child.recordIds.find((id) => isParentStudentInLesson(lesson, id)) : undefined
+  const lessonSubject = lesson
+    ? lesson.subject
+      || lesson.group.teacherAssignments.find((assignment) => assignment.teacherId === lesson.teacherId || assignment.teacherId === lesson.group.teacherId)?.subject
+      || lesson.group.course?.subject
+    : null
+  const eligibleLessonStudentIds = lesson
+    ? resolveSubjectLessonStudentIds(
+        lesson.lessonStudents.map((item) => item.studentId),
+        lesson.group.enrollments,
+        lessonSubject,
+        lesson.lessonDate,
+      )
+    : []
+  const lessonStudentId = child.recordIds.find((id) => eligibleLessonStudentIds.includes(id))
   if (lessonId && (!lesson || !lessonStudentId)) {
-    return NextResponse.json({ error: '所选课次不存在或不属于该学员' }, { status: 400 })
+    return NextResponse.json({ error: '所选课次不属于该学员或学员未报名此科目' }, { status: 400 })
+  }
+  if (lesson && localDateKey(lesson.lessonDate) !== leaveDateKey) {
+    return NextResponse.json({ error: '请假日期与所选课次日期不一致，请重新选择' }, { status: 400 })
   }
 
   const studentId = lessonStudentId || child.id
@@ -60,10 +105,17 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const result = await prisma.$transaction(async (tx) => {
     // The semantic request key survives reloads and retries. Serialize matching
     // requests across all server processes without adding a production column.
-    const key = JSON.stringify(['parent-leave', userId, studentId, lesson?.id || null, new Date(leaveDate).toISOString(), reason])
+    const key = JSON.stringify(['parent-leave', userId, studentId, lesson?.id || null, leaveDateKey, reason])
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`
     const existing = await tx.leaveRequest.findFirst({
-      where: { studentId, lessonId: lesson?.id || null, leaveDate: new Date(leaveDate), reason, status: { in: ['pending', 'approved'] }, deletedAt: null },
+      where: {
+        studentId,
+        lessonId: lesson?.id || null,
+        leaveDate: { gte: leaveDateRange.start, lt: leaveDateRange.end },
+        reason,
+        status: { in: ['pending', 'approved'] },
+        deletedAt: null,
+      },
       include: { student: { select: { name: true } }, lesson: { include: { group: { include: { course: { select: { name: true } } } } } } },
     })
     if (existing) return { leaveRequest: existing, reused: true, teacherNotified: false }
@@ -72,7 +124,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       studentId,
       lessonId: lesson?.id || null,
       reason,
-      leaveDate: new Date(leaveDate),
+      leaveDate: normalizedLeaveDate,
       status: 'pending',
       replyNote: '已提交，等待老师审批',
     },
@@ -87,7 +139,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     select: { id: true },
   })
   const notificationTitle = `请假通知：${student.name}`
-  const notificationContent = `${student.name} 于 ${new Date(leaveDate).toLocaleDateString('zh-CN')} 请假，原因：${reason}`
+  const notificationContent = `${student.name} 于 ${leaveDateKey} 请假，原因：${reason}`
 
   if (admins.length > 0) {
     await createManyNotifications(tx, admins.map((admin) => ({

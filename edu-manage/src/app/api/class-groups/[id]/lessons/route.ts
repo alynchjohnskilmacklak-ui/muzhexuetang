@@ -5,7 +5,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
-import { chinaClock } from '@/lib/enrollment-subject-change'
+import { chinaClock, resolveLessonSubjectForEnrollment } from '@/lib/enrollment-subject-change'
 import { getLocalDayRange, localDateColumnValue, localDateKey } from '@/lib/date/local-day'
 import { hasTimeOverlap } from '@/lib/schedule-conflict'
 import { recordCourseChangeEvent } from '@/lib/course-change-events'
@@ -88,20 +88,34 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         id: true, groupId: true, teacherId: true, subject: true, startTime: true, endTime: true,
         group: { select: {
           name: true, roomId: true, teacherId: true,
-          enrollments: { where: { status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } },
+          course: { select: { subject: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true } },
+          enrollments: {
+            where: { status: 'ACTIVE', deletedAt: null, student: { deletedAt: null, status: { not: 'INACTIVE' } } },
+            select: { studentId: true, subjects: true },
+          },
         } },
         lessonStudents: { select: { studentId: true } },
       },
     })
     for (const lesson of existing) {
       if (!hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) continue
-      const teacherConflict = (lesson.teacherId || lesson.group.teacherId) === teacherId
+      const lessonSubject = resolveLessonSubjectForEnrollment(lesson, {
+        teacherId: lesson.group.teacherId,
+        courseSubject: lesson.group.course.subject,
+        teacherAssignments: lesson.group.teacherAssignments,
+      })
+      const assignedTeacherId = lesson.group.teacherAssignments.find((assignment) => assignment.subject === lessonSubject)?.teacherId
+      const lessonTeacherId = lesson.teacherId || assignedTeacherId || lesson.group.teacherId
+      const teacherConflict = lessonTeacherId === teacherId
       const roomConflict = Boolean(group.roomId && lesson.group.roomId === group.roomId)
-      const existingStudents = lesson.lessonStudents.length
-        ? lesson.lessonStudents.map((row) => row.studentId)
-        : lesson.group.enrollments
-          .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject))
-          .map((enrollment) => enrollment.studentId)
+      const eligibleStudentIds = new Set(lesson.group.enrollments
+        .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lessonSubject))
+        .map((enrollment) => enrollment.studentId))
+      const snapshotStudentIds = lesson.lessonStudents.map((row) => row.studentId)
+      const existingStudents = snapshotStudentIds.length
+        ? snapshotStudentIds.filter((studentId) => eligibleStudentIds.has(studentId))
+        : [...eligibleStudentIds]
       const studentConflict = existingStudents.some((studentId) => studentIdSet.has(studentId))
       if (lesson.groupId === id || teacherConflict || roomConflict || studentConflict) {
         const reasons = [lesson.groupId === id ? '同班级' : '', teacherConflict ? '教师' : '', roomConflict ? '教室' : '', studentConflict ? '学员' : ''].filter(Boolean).join('、')

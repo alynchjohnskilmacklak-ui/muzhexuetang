@@ -51,11 +51,11 @@ export const GET = apiHandler(async (request: NextRequest) => {
     const teacherCredentials: Array<{ email: string; initialPassword: string }> = []
     for (const teacher of teachers) {
       const email = `${chineseToPinyin(teacher.name)}@tea.com`
-      const initialPassword = generateTemporaryPassword()
+      const initialPassword = chineseToPinyin(teacher.name)
       const hash = await bcrypt.hash(initialPassword, 12)
       await prisma.user.upsert({
         where: { email },
-        update: { name: teacher.name, role: 'teacher', teacherId: teacher.id },
+        update: { name: teacher.name, role: 'teacher', teacherId: teacher.id, password: hash },
         create: {
           email,
           password: hash,

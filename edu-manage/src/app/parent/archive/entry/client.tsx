@@ -1,13 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Image, Spin, Tag, Typography } from 'antd'
-import { ArrowLeftOutlined, BookOutlined, CheckCircleOutlined, FileTextOutlined, MessageOutlined, TrophyOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, BookOutlined, CheckCircleOutlined, FileTextOutlined, HeartFilled, MessageOutlined, TrophyOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { toast } from 'sonner'
 import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
 import { formatFriendlyTime } from '@/lib/date/relative'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
+import { getArchiveEntryTransitionName, getHeartReactionState, runDocumentViewTransition } from '@/lib/ui-motion'
 
 const { Text, Paragraph } = Typography
 
@@ -34,7 +37,7 @@ type EntryItem = {
   detail?: EntryDetail
 }
 
-type StoredEntry = { item: EntryItem; studentId?: string | null }
+type StoredEntry = { item: EntryItem; studentId?: string | null; transitionName?: string }
 
 const STORAGE_KEY = 'muzhe-archive-entry'
 
@@ -114,8 +117,15 @@ function FeedbackDetail({ detail }: { detail?: EntryDetail }) {
 
 export function ArchiveEntryClient() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [entry, setEntry] = useState<StoredEntry | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [heartState, setHeartState] = useState({ count: 0, liked: false })
+  const [reactionLoading, setReactionLoading] = useState(false)
+  const [reactionSaving, setReactionSaving] = useState(false)
+  const [heartBurst, setHeartBurst] = useState(false)
+  const heartBurstTimer = useRef<number | null>(null)
+  const parentUserId = (session?.user as { id?: string } | undefined)?.id
 
   useEffect(() => {
     try {
@@ -128,6 +138,70 @@ export function ArchiveEntryClient() {
   }, [])
 
   const item = entry?.item
+  const transitionName = item
+    ? entry?.transitionName || getArchiveEntryTransitionName(item.refType, item.refId, item.title, item.date)
+    : undefined
+
+  const returnToArchive = () => {
+    let navigationStarted = false
+    const transitioned = runDocumentViewTransition(async () => {
+      navigationStarted = true
+      router.back()
+      let frames = 0
+      while (frames < 108) {
+        if (transitionName && document.querySelector(`[data-archive-entry-source="${transitionName}"]`)) return
+        frames += 1
+        await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
+      }
+    })
+    if (!transitioned && !navigationStarted) router.back()
+  }
+  useEffect(() => {
+    if (item?.refType !== 'post' || !item.refId || !parentUserId) return
+    const controller = new AbortController()
+    setReactionLoading(true)
+    fetch(`/api/performance/${encodeURIComponent(item.refId)}`, { cache: 'no-store', signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('reaction state unavailable')
+        return response.json() as Promise<{ reactions?: Array<{ type?: string; userId?: string }> }>
+      })
+      .then((post) => setHeartState(getHeartReactionState(post.reactions ?? [], parentUserId)))
+      .catch((error: unknown) => {
+        if (error instanceof Error && error.name !== 'AbortError') toast.error('点赞状态暂时无法读取')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setReactionLoading(false)
+      })
+    return () => controller.abort()
+  }, [item?.refType, item?.refId, parentUserId])
+
+  useEffect(() => () => {
+    if (heartBurstTimer.current !== null) window.clearTimeout(heartBurstTimer.current)
+  }, [])
+
+  const toggleHeart = async () => {
+    if (!item?.refId || item.refType !== 'post' || !parentUserId || reactionSaving || reactionLoading) return
+    const nextLiked = !heartState.liked
+    setReactionSaving(true)
+    try {
+      const response = await fetch(`/api/performance/${encodeURIComponent(item.refId)}/react${nextLiked ? '' : '?type=HEART'}`, {
+        method: nextLiked ? 'POST' : 'DELETE',
+        ...(nextLiked ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'HEART' }) } : {}),
+      })
+      if (!response.ok) throw new Error('reaction update failed')
+      setHeartState((current) => ({ count: Math.max(0, current.count + (nextLiked ? 1 : -1)), liked: nextLiked }))
+      if (nextLiked) {
+        setHeartBurst(true)
+        if (heartBurstTimer.current !== null) window.clearTimeout(heartBurstTimer.current)
+        heartBurstTimer.current = window.setTimeout(() => setHeartBurst(false), 320)
+      }
+    } catch {
+      toast.error('点赞暂时未完成，请稍后重试')
+    } finally {
+      setReactionSaving(false)
+    }
+  }
+
   const images: ReturnType<typeof normalizeTimelineImage>[] = Array.isArray(item?.images)
     ? (item.images as TimelineImage[]).map(normalizeTimelineImage)
     : []
@@ -136,8 +210,8 @@ export function ArchiveEntryClient() {
 
   if (notFound) {
     return (
-      <div style={{ padding: '24px 16px', maxWidth: 640, margin: '0 auto' }}>
-        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => router.push('/parent/archive')} style={{ marginBottom: 16, padding: 0 }}>
+      <div className="parent-archive-entry-page" style={{ padding: '24px 16px', maxWidth: 640, margin: '0 auto' }}>
+        <Button type="text" className="mobile-shell-back" icon={<ArrowLeftOutlined />} onClick={() => router.push('/parent/archive')} style={{ marginBottom: 16, padding: 0 }}>
           返回成长档案
         </Button>
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9A8E7A', fontSize: 14 }}>
@@ -156,19 +230,20 @@ export function ArchiveEntryClient() {
   }
 
   return (
-    <div style={{ padding: '16px 14px 32px', maxWidth: 640, margin: '0 auto' }}>
-      <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => router.back()} style={{ marginBottom: 16, padding: 0, color: '#5a4e3a' }}>
+    <div className="parent-archive-entry-page" style={{ padding: '16px 14px 32px', maxWidth: 640, margin: '0 auto' }}>
+      <Button type="text" className="mobile-shell-back" icon={<ArrowLeftOutlined />} onClick={returnToArchive} style={{ marginBottom: 16, padding: 0, color: '#5a4e3a' }}>
         返回成长档案
       </Button>
 
       {/* 记录标题卡 */}
-      <div style={{
+      <div className="parent-archive-entry-hero" style={{
         borderRadius: 16, padding: 16, marginBottom: 14,
         background: 'linear-gradient(150deg,#17352F 0%,#0E5E4E 62%,#0B4B40 100%)',
         border: '1px solid rgba(201,164,92,.55)',
         color: '#F5F1E8',
         boxShadow: '0 8px 20px rgba(18,60,53,.18)',
-      }}>
+        viewTransitionName: transitionName || 'none',
+      } as React.CSSProperties} data-archive-entry-transition-ready={transitionName}>
         <div style={{ fontSize: 11, letterSpacing: 1, color: 'rgba(242,227,182,.8)', marginBottom: 6 }}>
           {item.refType === 'paper' ? '试卷记录' : item.refType === 'feedback' ? '课堂反馈' : item.refType === 'post' ? '成长反馈' : item.refType === 'badge' ? '徽章' : item.refType === 'grade' ? '成绩' : '成长记录'}
         </div>
@@ -178,7 +253,7 @@ export function ArchiveEntryClient() {
       </div>
 
       {images.length > 0 && (
-        <div style={{ background: '#FFFDF8', border: '1px solid rgba(201,164,92,.3)', borderRadius: 14, padding: 14, marginBottom: 12 }}>
+        <div className="parent-entry-stagger" style={{ '--entry-stagger-index': 1, background: '#FFFDF8', border: '1px solid rgba(201,164,92,.3)', borderRadius: 14, padding: 14, marginBottom: 12 } as React.CSSProperties}>
           <Text strong style={{ display: 'block', marginBottom: 10 }}>照片记录</Text>
           <Image.PreviewGroup>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
@@ -197,9 +272,31 @@ export function ArchiveEntryClient() {
         </div>
       )}
 
-      <div style={{ background: '#fff', border: '1px solid rgba(201,164,92,.3)', borderRadius: 14, padding: 16, boxShadow: '0 2px 10px rgba(58,50,39,.05)' }}>
+      <div className="parent-archive-entry-content parent-entry-stagger" style={{ '--entry-stagger-index': 2, background: '#fff', border: '1px solid rgba(201,164,92,.3)', borderRadius: 14, padding: 16, boxShadow: '0 2px 10px rgba(58,50,39,.05)' } as React.CSSProperties}>
         <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 0 }}>{item.sub || item.title}</Paragraph>
         <FeedbackDetail detail={item.detail} />
+        {item.refType === 'post' && item.refId && (
+          <div className="parent-feedback-reaction-row">
+            <button
+              type="button"
+              className={`parent-feedback-like${heartState.liked ? ' is-liked' : ''}${heartBurst ? ' is-burst' : ''}`}
+              aria-label={heartState.liked ? `取消点赞，${heartState.count} 个赞` : `点赞，${heartState.count} 个赞`}
+              aria-pressed={heartState.liked}
+              disabled={!parentUserId || reactionLoading || reactionSaving}
+              onClick={() => void toggleHeart()}
+            >
+              <HeartFilled aria-hidden="true" />
+              <span>{heartState.liked ? '已点赞' : '点赞'}</span>
+              <span className="parent-feedback-like__count">{heartState.count}</span>
+              {heartBurst && (
+                <span className="parent-heart-burst" aria-hidden="true">
+                  {Array.from({ length: 6 }, (_, index) => <i key={index} style={{ '--spark-angle': `${index * 60}deg` } as React.CSSProperties} />)}
+                </span>
+              )}
+            </button>
+            <span className="parent-feedback-reaction-caption">给这条成长记录一个回应</span>
+          </div>
+        )}
         {item.refType === 'paper' && item.refId && (
           <Button
             type="primary"

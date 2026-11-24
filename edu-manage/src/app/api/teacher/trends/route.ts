@@ -76,7 +76,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   }
   const salaryTrend = trendMonthKeys.map((key, index) => ({
     label: trendLabels[index],
-    hours: Number((hoursByMonth.get(key) || 0).toFixed(1)),
+    hours: Number((hoursByMonth.get(key) || 0).toFixed(2)),
     pay: Math.round(payByMonth.get(key) || 0),
   }))
 

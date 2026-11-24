@@ -155,6 +155,31 @@ export async function domToCanvas(
   const { domToPng } = await import('modern-screenshot')
   const clone = el.cloneNode(true) as HTMLElement
   opts?.onclone?.(clone)
+  // Cloning a canvas copies its element but not its bitmap. Preserve chart canvases
+  // as images so exported reports do not show large blank chart areas.
+  const sourceCanvases = Array.from(el.querySelectorAll('canvas'))
+  const clonedCanvases = Array.from(clone.querySelectorAll('canvas'))
+  sourceCanvases.forEach((source, index) => {
+    const target = clonedCanvases[index]
+    if (!target || source.width <= 0 || source.height <= 0) return
+    try {
+      const image = document.createElement('img')
+      image.src = source.toDataURL('image/png')
+      image.width = source.width
+      image.height = source.height
+      image.alt = source.getAttribute('aria-label') || ''
+      image.className = target.className
+      image.style.cssText = target.style.cssText
+      const style = getComputedStyle(source)
+      for (const property of ['display', 'width', 'height', 'max-width', 'max-height', 'margin', 'object-fit', 'object-position', 'vertical-align']) {
+        const value = style.getPropertyValue(property)
+        if (value) image.style.setProperty(property, value)
+      }
+      target.replaceWith(image)
+    } catch {
+      // A tainted or unsupported canvas should not block the rest of the report.
+    }
+  })
   // 克隆节点脱离 DOM 时 getBoundingClientRect() 返回 0×0，modern-screenshot 会
   // 生成 0×0 画布 → toDataURL 返回 `data:,` 空图 → 解码报
   // “The source image cannot be decoded.”。因此把克隆节点挂到隐藏容器中渲染。

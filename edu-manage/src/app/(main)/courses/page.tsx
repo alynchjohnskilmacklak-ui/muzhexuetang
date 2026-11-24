@@ -1,22 +1,22 @@
-﻿'use client'
+'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import useSWR from 'swr'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Alert,
   Button,
   Card,
   Col,
-  DatePicker,
   Drawer,
   Dropdown,
   Input,
   InputNumber,
   Modal,
-  Progress,
+  Pagination,
   Row,
+  Segmented,
   Select,
   Space,
   Spin,
@@ -34,16 +34,18 @@ import {
   CopyOutlined,
   CrownOutlined,
   AlertOutlined,
+  CheckCircleOutlined,
   DeleteOutlined,
   EnvironmentOutlined,
+  FileDoneOutlined,
   MoreOutlined,
   PlusOutlined,
   ReloadOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
+import styles from './courses.module.css'
 import { addDays, format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import dayjs from 'dayjs'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { MobileSelect } from '@/components/MobileSelect'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -153,6 +155,7 @@ function buildScheduleTemplate(type: CourseType, periods: SchedulePeriod[] = CLA
 
 export default function CoursesPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { division } = useDivision()
   const { data: groups, mutate: mutateGroups, isLoading, error: groupsError } = useSWR(`/api/class-groups?division=${division}`, fetcher)
   const { data: courses, mutate: mutateCourses } = useSWR(`/api/courses?division=${division}`, fetcher)
@@ -163,10 +166,25 @@ export default function CoursesPage() {
   const { periods } = useSchedulePeriods(division)
   const classPeriods = useMemo(() => periods.filter(period => period.type === 'CLASS'), [periods])
 
-  const [courseTab, setCourseTab] = useState<CourseTab>('GROUP')
-  const [filterType, setFilterType] = useState('')
-  const [filterGrade, setFilterGrade] = useState('')
-  const [filterStatus, setFilterStatus] = useState('')
+  const initialTab = (searchParams.get('tab') as CourseTab) || 'GROUP'
+  const initialType = searchParams.get('type') || ''
+  const initialGrade = searchParams.get('grade') || ''
+  const initialStatus = searchParams.get('status') || ''
+
+  const [courseTab, setCourseTab] = useState<CourseTab>(initialTab)
+  const [filterType, setFilterType] = useState(initialType)
+  const [filterGrade, setFilterGrade] = useState(initialGrade)
+  const [filterStatus, setFilterStatus] = useState(initialStatus)
+
+  const updateQueryFilter = useCallback((updates: Partial<{ tab: string; type: string; grade: string; status: string }>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    Object.entries(updates).forEach(([k, v]) => {
+      if (!v) params.delete(k)
+      else params.set(k, v)
+    })
+    const q = params.toString()
+    router.replace(q ? `/courses?${q}` : '/courses', { scroll: false })
+  }, [router, searchParams])
   const [createOpen, setCreateOpen] = useState(false)
   const [createStep, setCreateStep] = useState(0)
   const [createLoading, setCreateLoading] = useState(false)
@@ -180,6 +198,7 @@ export default function CoursesPage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerGroupId, setDrawerGroupId] = useState('')
   const [postponeOpen, setPostponeOpen] = useState(false)
+  const [postponing, setPostponing] = useState(false)
   const [postponeLessonId, setPostponeLessonId] = useState('')
   const [postponeDays, setPostponeDays] = useState(7)
   const [startingGroupId, setStartingGroupId] = useState('')
@@ -188,9 +207,6 @@ export default function CoursesPage() {
   const [deleteTarget, setDeleteTarget] = useState<{id:string;name:string}|null>(null)
   const [deleteImpact, setDeleteImpact] = useState<{ lessons?: number; enrollments?: number; attendances?: number; feedbacks?: number; papers?: number; summary?: string } | null>(null)
   const [deletePreviewLoading, setDeletePreviewLoading] = useState(false)
-  const [addDayOpen, setAddDayOpen] = useState(false)
-  const [addDayDate, setAddDayDate] = useState('')
-  const [addingDay, setAddingDay] = useState(false)
   const isMobile = useIsMobile() ?? false
 
   useEffect(() => {
@@ -206,11 +222,34 @@ export default function CoursesPage() {
   const selectCourseTab = (tab: CourseTab) => {
     setCourseTab(tab)
     setFilterType('')
+    updateQueryFilter({ tab, type: '' })
     try {
       window.localStorage.setItem(COURSE_TAB_STORAGE_KEY, tab)
     } catch {
       // Keep tab switching functional even when browser storage is disabled.
     }
+  }
+
+  const handleFilterTypeChange = (v: string) => {
+    setFilterType(v)
+    updateQueryFilter({ type: v })
+  }
+
+  const handleFilterGradeChange = (v: string) => {
+    setFilterGrade(v)
+    updateQueryFilter({ grade: v })
+  }
+
+  const handleFilterStatusChange = (v: string) => {
+    setFilterStatus(v)
+    updateQueryFilter({ status: v })
+  }
+
+  const handleClearFilters = () => {
+    setFilterType('')
+    setFilterGrade('')
+    setFilterStatus('')
+    updateQueryFilter({ type: '', grade: '', status: '' })
   }
 
   const groupList = useMemo(() => Array.isArray(groups) ? groups : [], [groups])
@@ -263,6 +302,18 @@ export default function CoursesPage() {
     if (filterStatus && group.status !== filterStatus) return false
     return true
   }), [groupList, courseTab, filterType, filterGrade, filterStatus])
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = isMobile ? 8 : 12
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [courseTab, filterType, filterGrade, filterStatus])
+
+  const pagedGroups = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return filteredGroups.slice(start, start + pageSize)
+  }, [filteredGroups, currentPage, pageSize])
 
   const grades = useMemo(() => {
     const set = new Set<string>()
@@ -727,17 +778,24 @@ export default function CoursesPage() {
   }
 
   const handlePostpone = async () => {
-    const res = await fetch('/api/class-lessons/postpone-all', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lessonId: postponeLessonId, offsetDays: postponeDays }),
-    })
-    if (!res.ok) {
-      toast.error('后移失败')
-      return
+    if (postponing) return
+    setPostponing(true)
+    try {
+      const res = await fetch('/api/class-lessons/postpone-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonId: postponeLessonId, offsetDays: postponeDays }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(payload.error || '后移失败，请刷新后重试')
+      toast.success(`已后移 ${postponeDays} 天`)
+      setPostponeOpen(false)
+      mutateGroups()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '后移失败，请稍后重试')
+    } finally {
+      setPostponing(false)
     }
-    toast.success(`已后移 ${postponeDays} 天`)
-    setPostponeOpen(false)
   }
 
   const handleStartGroup = async (groupId: string) => {
@@ -772,44 +830,6 @@ export default function CoursesPage() {
     }
   }
 
-  const handleAddDay = async () => {
-    if (!addDayDate) {
-      toast.error('请选择日期')
-      return
-    }
-    setAddingDay(true)
-    try {
-      const res = await fetch('/api/class-lessons/add-day', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: addDayDate, keepPlannedTotal: true }),
-      })
-      const payload = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(payload.error || '新增上课日失败')
-      let msg = `已完成计划内调课：${payload.affectedGroups} 个班补入 ${payload.createdLessons} 节，替换未来 ${payload.replacedLessons} 节，总课次不增加`
-      if (payload.skipped > 0) msg += `，其中 ${payload.skipped} 个班当天已有课，已跳过`
-      if (payload.skippedNoTemplate > 0) msg += `，${payload.skippedNoTemplate} 个班无样板可复制`
-      if (payload.skippedNoReplacement > 0) msg += `，${payload.skippedNoReplacement} 个班找不到可安全替换的未来教学日`
-      if (payload.alreadyBalanced > 0) msg += `，${payload.alreadyBalanced} 个班计划课次已经平衡`
-      if (Array.isArray(payload.failedGroups) && payload.failedGroups.length) {
-        const failureDetails = payload.failedGroups.slice(0, 3)
-          .map((item: { groupName?: string; message?: string }) => `${item.groupName || '班级'}：${item.message || '处理失败'}`)
-          .join('；')
-        const remaining = payload.failedGroups.length > 3 ? `；另有 ${payload.failedGroups.length - 3} 个班级失败` : ''
-        toast.warning(`${msg}。部分班级未完成：${failureDetails}${remaining}`)
-      } else {
-        toast.success(msg)
-      }
-      setAddDayOpen(false)
-      mutateGroups()
-      mutateDashboard()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : '新增上课日失败')
-    } finally {
-      setAddingDay(false)
-    }
-  }
-
   const handleRegenerateLessons = async (groupId: string) => {
     setRegeneratingGroupId(groupId)
     try {
@@ -835,10 +855,29 @@ export default function CoursesPage() {
       title="课程管理"
       subtitle="课程设置、班级创建、课表生成和课次调整"
       actions={
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, auto)', gap: 8, width: isMobile ? '100%' : 'auto' }}>
-          <Button block={isMobile} disabled={isHistoricalTerm} icon={<CalendarOutlined />} onClick={() => { setAddDayDate(dayjs().format('YYYY-MM-DD')); setAddDayOpen(true) }}>调整上课日</Button>
-          <Button block={isMobile} disabled={isHistoricalTerm} icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>批量复制</Button>
-          <Button block={isMobile} disabled={isHistoricalTerm} type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: 'var(--color-primary)', gridColumn: isMobile ? '1 / -1' : undefined }}>
+        <div style={{ display: 'flex', gap: 6, width: isMobile ? '100%' : 'auto', flexWrap: isMobile ? 'nowrap' : 'wrap' }}>
+          <Button
+            style={{ flex: isMobile ? 1 : 'none', minWidth: 0, padding: isMobile ? '0 8px' : undefined }}
+            icon={<FileDoneOutlined />}
+            onClick={() => router.push('/homework')}
+          >
+            作业监管
+          </Button>
+          <Button
+            style={{ flex: isMobile ? 1 : 'none', minWidth: 0, padding: isMobile ? '0 8px' : undefined }}
+            disabled={isHistoricalTerm}
+            icon={<CopyOutlined />}
+            onClick={() => setCopyOpen(true)}
+          >
+            批量复制
+          </Button>
+          <Button
+            style={{ flex: isMobile ? 1.2 : 'none', minWidth: 0, padding: isMobile ? '0 8px' : undefined, background: 'var(--color-primary)' }}
+            disabled={isHistoricalTerm}
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={openCreate}
+          >
             新建班级
           </Button>
         </div>
@@ -889,149 +928,113 @@ export default function CoursesPage() {
         </span>
       </div>
 
-      {/* 个性化排课驾驶舱（深墨绿鎏金 · 贵宾服务） */}
-      {courseTab === 'SMALL' && (
-        <div style={{
-          borderRadius: 18, overflow: 'hidden', marginBottom: 14,
-          border: '1px solid #C9A45C',
-          boxShadow: '0 10px 26px rgba(18,60,53,.25)',
-          background: 'linear-gradient(150deg,#17352F 0%,#0E5E4E 55%,#0B4B40 100%)',
-          padding: 16, color: '#F5F1E8',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              fontSize: 11, fontWeight: 700, letterSpacing: 1,
-              color: '#F2E3B6',
-              background: 'rgba(201,164,92,.16)',
-              border: '1px solid rgba(201,164,92,.5)',
-              padding: '3px 10px', borderRadius: 999, whiteSpace: 'nowrap',
-            }}>
-              <CrownOutlined /> 尊享个性化 · 贵宾服务
-            </span>
-            <span style={{ fontSize: 10.5, color: 'rgba(242,227,182,.7)', whiteSpace: 'nowrap' }}>{selectedAcademicTerm?.name || '当前运营批次'}</span>
-          </div>
-          <div style={{ marginTop: 12, fontSize: 16, fontWeight: 800, color: '#F5F1E8', lineHeight: 1.4 }}>
-            每一位个性化学员，都是牧哲学堂的贵宾
-          </div>
-          <div style={{ marginTop: 4, fontSize: 11.5, color: 'rgba(245,241,232,.72)', lineHeight: 1.6 }}>
-            一对一专属排课 · 资深教师优先匹配 · 课时进度透明可见
-          </div>
-          <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
-            {[
-              { label: '在读学员', value: smallStats.vipStudents, unit: '位' },
-              { label: '本周约课', value: smallStats.weekAppointments, unit: '节' },
-              { label: '待上课', value: smallStats.pendingLessons, unit: '节', highlight: true },
-              { label: '本月课耗', value: smallStats.monthHours, unit: '节' },
-            ].map((it) => (
-              <div key={it.label} style={{
-                textAlign: 'center', padding: '9px 2px', borderRadius: 12,
-                background: it.highlight ? 'linear-gradient(135deg,#F2E3B6,#D8BC7C)' : 'rgba(255,255,255,.08)',
-                border: it.highlight ? '1px solid rgba(242,227,182,.7)' : '1px solid rgba(242,227,182,.18)',
-              }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: it.highlight ? '#123C35' : '#F5F1E8', fontVariantNumeric: 'tabular-nums' }}>
-                  {it.value}<span style={{ fontSize: 10.5, fontWeight: 600 }}> {it.unit}</span>
-                </div>
-                <div style={{ marginTop: 2, fontSize: 10, color: it.highlight ? 'rgba(18,60,53,.7)' : 'rgba(245,241,232,.6)' }}>{it.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+      {/* 运营与学情 KPI 大盘 */}
+      <div className={styles.kpiGrid} style={{ marginBottom: 16 }}>
         {(courseTab === 'SMALL' ? [
-          { label: '在读学员', value: smallStats.vipStudents, color: '#F2E3B6', desc: '一对一/小课在读', icon: <CrownOutlined />, grad: 'linear-gradient(145deg,#C9A45C,#8A6B2F)' },
-          { label: '本周约课', value: smallStats.weekAppointments, color: '#F2E3B6', desc: '本周有效课次', icon: <CalendarOutlined />, grad: 'linear-gradient(145deg,#0E5E4E,#17352F)' },
-          { label: '待上课', value: smallStats.pendingLessons, color: '#FFD58A', desc: '已确认待上课', icon: <ClockCircleOutlined />, grad: 'linear-gradient(145deg,#FFB84D,#E8784A)' },
-          { label: '本月课耗', value: smallStats.monthHours, color: '#F2E3B6', desc: '已消耗课次', icon: <CheckOutlined />, grad: 'linear-gradient(145deg,#27a644,#1D9E75)' },
+          { label: '在读学员', value: smallStats.vipStudents, unit: '位', desc: '一对一/突击班在读', icon: <CrownOutlined />, color: '#F2E3B6', iconBg: 'rgba(201,164,92,.2)' },
+          { label: '本周约课', value: smallStats.weekAppointments, unit: '节', desc: '本周有效排课', icon: <CalendarOutlined />, color: '#F2E3B6', iconBg: 'rgba(201,164,92,.2)' },
+          { label: '待上课', value: smallStats.pendingLessons, unit: '节', desc: '已确认待上课', icon: <ClockCircleOutlined />, color: '#FFD58A', iconBg: 'rgba(255,184,77,.25)', highlight: true },
+          { label: '本月课耗', value: smallStats.monthHours, unit: '节', desc: '已消耗课次', icon: <CheckOutlined />, color: '#F2E3B6', iconBg: 'rgba(39,166,68,.25)' },
         ] : [
-          { label: '进行中', value: stats.activeGroups, color: '#1D9E75', desc: '当前运营批次', icon: <TeamOutlined />, grad: 'linear-gradient(145deg,#27a644,#15804F)' },
-          { label: '待开班', value: stats.waitingGroups, color: '#E8784A', desc: '已排课未开班', icon: <ClockCircleOutlined />, grad: 'linear-gradient(145deg,#FFB84D,#E8784A)' },
-          { label: '本月课耗', value: stats.monthlyHours, color: '#2f6fdb', desc: '本月已扣课时', icon: <BookOutlined />, grad: 'linear-gradient(145deg,#4C8DFF,#2f6fdb)' },
-          { label: '续报预警', value: stats.renewalWarnings, color: '#e03e2d', desc: '剩余课次不足', icon: <AlertOutlined />, grad: 'linear-gradient(145deg,#F6654F,#e03e2d)' },
+          { label: '进行中班级', value: stats.activeGroups, unit: '个', desc: '当前运营批次', icon: <TeamOutlined />, color: '#14574D', iconBg: '#E8F2F0' },
+          { label: '待开班班级', value: stats.waitingGroups, unit: '个', desc: '已排课未开班', icon: <ClockCircleOutlined />, color: '#E8784A', iconBg: '#FFF1EB' },
+          { label: '本月课耗', value: stats.monthlyHours, unit: '节', desc: '本月已扣课时', icon: <BookOutlined />, color: '#2F80ED', iconBg: '#EBF3FE' },
+          { label: '续报预警', value: stats.renewalWarnings, unit: '个', desc: '剩余课次不足', icon: <AlertOutlined />, color: '#E03E2D', iconBg: '#FEECEC' },
         ]).map((item) => (
-          <Col xs={12} lg={6} key={item.label}>
-            <Card bordered={false} style={{
-              borderRadius: 16, background: courseTab === 'SMALL' ? 'linear-gradient(150deg,#123C35,#0E5E4E)' : '#ffffff',
-              border: courseTab === 'SMALL' ? '1px solid rgba(201,164,92,.45)' : '1px solid #F0E9DF',
-              boxShadow: courseTab === 'SMALL' ? '0 6px 16px rgba(18,60,53,.16)' : '0 4px 14px rgba(58,50,39,.05)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 42, height: 42, borderRadius: 13, flexShrink: 0,
-                  background: courseTab === 'SMALL' ? 'rgba(201,164,92,.16)' : item.grad,
-                  border: courseTab === 'SMALL' ? '1px solid rgba(201,164,92,.5)' : 'none',
-                  color: courseTab === 'SMALL' ? '#F2E3B6' : '#fff',
-                  display: 'grid', placeItems: 'center', fontSize: 17,
-                  boxShadow: courseTab === 'SMALL' ? 'none' : '0 4px 10px rgba(58,50,39,.12)',
-                }}>{item.icon}</div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                    <span style={{ color: item.color, fontSize: 24, fontWeight: 800, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{item.value}</span>
-                    <span style={{ color: courseTab === 'SMALL' ? 'rgba(245,241,232,.68)' : '#98A2B3', fontSize: 12 }}>{item.label}</span>
-                  </div>
-                  <div style={{ color: courseTab === 'SMALL' ? 'rgba(242,227,182,.6)' : '#B8B0A2', fontSize: 11, marginTop: 2 }}>{item.desc}</div>
-                </div>
+          <div
+            key={item.label}
+            className={`${styles.kpiCard} ${courseTab === 'SMALL' ? styles.kpiCardSmallMode : ''}`}
+          >
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div className={courseTab === 'SMALL' ? styles.kpiLabelLight : styles.kpiLabel}>
+                {item.label}
               </div>
-            </Card>
-          </Col>
+              <div className={styles.kpiValue} style={{ color: item.color }}>
+                {item.value} <span style={{ fontSize: 13, fontWeight: 400 }}>{item.unit}</span>
+              </div>
+              <div className={courseTab === 'SMALL' ? styles.kpiSubLight : styles.kpiSub}>
+                {item.desc}
+              </div>
+            </div>
+            <div
+              className={styles.kpiIconWrapper}
+              style={{
+                background: item.iconBg,
+                color: item.color,
+                border: courseTab === 'SMALL' ? '1px solid rgba(201,164,92,.4)' : 'none',
+              }}
+            >
+              {item.icon}
+            </div>
+          </div>
         ))}
-      </Row>
-
-      {/* Type tabs */}
-      <div style={{ display: 'flex', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 12, overflow: 'hidden', width: isMobile ? '100%' : 'fit-content', marginBottom: 12, boxShadow: '0 2px 8px rgba(58,50,39,.05)' }}>
-        <button onClick={() => selectCourseTab('GROUP')} style={{
-                padding: '8px 18px', background: courseTab === 'GROUP' ? 'var(--color-primary)' : 'transparent',
-          color: courseTab === 'GROUP' ? '#fff' : 'var(--color-text-secondary, #666)',
-          border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'GROUP' ? 600 : 400,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, flex: isMobile ? 1 : undefined, minWidth: 0,
-        }}><TeamOutlined /> 精品班课（{courseTabCounts.GROUP}）</button>
-        <button onClick={() => selectCourseTab('SMALL')} style={{
-          padding: '8px 18px', background: courseTab === 'SMALL' ? 'linear-gradient(135deg,#123C35,#0E5E4E)' : 'transparent',
-          color: courseTab === 'SMALL' ? '#F2E3B6' : 'var(--color-text-secondary, #666)',
-          border: courseTab === 'SMALL' ? '1px solid rgba(201,164,92,.55)' : 'none',
-          cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'SMALL' ? 600 : 400,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, flex: isMobile ? 1 : undefined, minWidth: 0,
-        }}><CrownOutlined /> {isMobile ? `个性化课程（${courseTabCounts.SMALL}）` : `突击全能班（1对1/2/3，共 ${courseTabCounts.SMALL} 个）`}</button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '128px 128px 128px auto', gap: 8, marginBottom: 16, width: '100%' }}>
-        <Select
-          placeholder="课程类型"
-          allowClear
-          style={{ width: '100%', minWidth: 0 }}
-          value={filterType || undefined}
-          onChange={(value) => setFilterType(value || '')}
-          options={courseTab === 'GROUP'
-            ? [{ label: '班课', value: 'GROUP' }]
-            : [
-                { label: '1对1', value: 'ONE_ON_ONE' },
-                { label: '小组课', value: 'SMALL_GROUP' },
-              ]
-          }
-        />
-        <Select
-          placeholder="年级"
-          allowClear
-          style={{ width: '100%', minWidth: 0 }}
-          value={filterGrade || undefined}
-          onChange={(value) => setFilterGrade(value || '')}
-          options={grades.map((grade) => ({ label: grade, value: grade }))}
-        />
-        <Select
-          placeholder="状态"
-          allowClear
-          style={{ width: '100%', minWidth: 0 }}
-          value={filterStatus || undefined}
-          onChange={(value) => setFilterStatus(value || '')}
-          options={[
-            { label: '待开班', value: 'WAITING' },
-            { label: '进行中', value: 'ACTIVE' },
-            { label: '已结束', value: 'COMPLETED' },
-          ]}
-        />
-        <Button block={isMobile} icon={<ReloadOutlined />} onClick={() => mutateGroups()}>刷新</Button>
+      {/* 班型分类 Tabs 与智能筛选工具栏 */}
+      <div className={styles.toolbarCard} style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          {/* 左侧业务分类 Pill */}
+          <div className={styles.tabPillContainer}>
+            <button
+              type="button"
+              onClick={() => selectCourseTab('GROUP')}
+              className={`${styles.tabPill} ${courseTab === 'GROUP' ? styles.tabPillActive : ''}`}
+            >
+              <TeamOutlined /> 精品班课 ({courseTabCounts.GROUP})
+            </button>
+            <button
+              type="button"
+              onClick={() => selectCourseTab('SMALL')}
+              className={`${styles.tabPill} ${courseTab === 'SMALL' ? styles.tabPillSmallActive : ''}`}
+            >
+              <CrownOutlined /> 突击全能班 ({courseTabCounts.SMALL})
+            </button>
+          </div>
+
+          {/* 右侧筛选器 */}
+          <Space wrap size={10}>
+            {courseTab === 'SMALL' && (
+              <Segmented
+                value={filterType || ''}
+                onChange={(value) => handleFilterTypeChange(String(value))}
+                options={[
+                  { label: '全部班型', value: '' },
+                  { label: '1对1', value: 'ONE_ON_ONE' },
+                  { label: '小组课', value: 'SMALL_GROUP' },
+                ]}
+              />
+            )}
+            <Select
+              placeholder="年级"
+              allowClear
+              style={{ width: 120 }}
+              value={filterGrade || undefined}
+              onChange={(value) => handleFilterGradeChange(value || '')}
+              options={grades.map((grade) => ({ label: grade, value: grade }))}
+            />
+            <Segmented
+              value={filterStatus || ''}
+              onChange={(value) => handleFilterStatusChange(String(value))}
+              options={[
+                { label: '全部状态', value: '' },
+                { label: '待开班', value: 'WAITING' },
+                { label: '进行中', value: 'ACTIVE' },
+                { label: '已结束', value: 'COMPLETED' },
+              ]}
+            />
+            <Button icon={<ReloadOutlined />} onClick={() => mutateGroups()}>刷新</Button>
+            {(filterType || filterGrade || filterStatus) && (
+              <Button
+                type="link"
+                size="small"
+                onClick={handleClearFilters}
+                style={{ color: '#E8784A', padding: '0 4px' }}
+              >
+                清空筛选
+              </Button>
+            )}
+          </Space>
+        </div>
       </div>
 
       {isLoading ? (
@@ -1079,10 +1082,10 @@ export default function CoursesPage() {
             />
           </Card>
       ) : (
-        <Row gutter={[16, 16]}>
-          {filteredGroups.map((group: Record<string, unknown>) => {
+        <>
+          <Row gutter={[16, 16]}>
+          {pagedGroups.map((group: Record<string, unknown>) => {
             const course = group.course as Record<string, unknown> | undefined
-            const teacher = group.teacher as Record<string, unknown> | undefined
             const teacherAssignments = Array.isArray(group.teacherAssignments) ? group.teacherAssignments : []
             const teacherTeam = teacherAssignments.map((item: Record<string, unknown>) => {
               const name = (item.teacher as Record<string, unknown>)?.name
@@ -1216,14 +1219,57 @@ export default function CoursesPage() {
                     </div>
                   </div>
 
-                  {/* 操作区 */}
-                  <div style={{ display: 'flex', gap: 8, padding: '10px 16px 14px', borderTop: '1px solid #F5F0E8', background: '#FCFAF7' }}>
-                    <Button size="small" icon={<CalendarOutlined />} onClick={(e) => { e.stopPropagation(); setDrawerGroupId(group.id as string); setDrawerOpen(true) }}>课表</Button>
-                    {group.status === 'WAITING' && (
-                      <Button size="small" icon={<ReloadOutlined />} loading={regeneratingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleRegenerateLessons(group.id as string) }}>重新生成</Button>
+                  {/* 操作区与快捷链路 */}
+                  <div className={styles.actionDock}>
+                    <Button size="small" icon={<CalendarOutlined />} onClick={(e) => { e.stopPropagation(); setDrawerGroupId(group.id as string); setDrawerOpen(true) }}>
+                      课表
+                    </Button>
+                    {isIntensive ? (
+                      <Button
+                        size="small"
+                        icon={<CalendarOutlined />}
+                        style={{ color: '#8A6517', borderColor: '#E5C37A', background: '#FEF8E8' }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/schedule/intensive?groupId=${group.id}`)
+                        }}
+                      >
+                        约课排期
+                      </Button>
+                    ) : (
+                      <Button
+                        size="small"
+                        icon={<CalendarOutlined />}
+                        style={{ color: '#14574D', borderColor: 'rgba(20,87,77,0.3)', background: '#E8F2F0' }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/schedule/workbench?groupId=${group.id}`)
+                        }}
+                      >
+                        排课工作台
+                      </Button>
                     )}
-                    <Button size="small" type="primary" icon={<TeamOutlined />} onClick={(e) => { e.stopPropagation(); router.push(`/courses/${group.id}`) }} style={{ background: '#0E5E4E', borderColor: '#0E5E4E' }}>管理班级</Button>
-                    <Button size="small" danger disabled={isHistoricalTerm} loading={deletingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id as string, group.name as string) }}>删除</Button>
+                    <Button
+                      size="small"
+                      icon={<CheckCircleOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        router.push('/attendance')
+                      }}
+                    >
+                      考勤
+                    </Button>
+                    {group.status === 'WAITING' && (
+                      <Button size="small" icon={<ReloadOutlined />} loading={regeneratingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleRegenerateLessons(group.id as string) }}>
+                        重新生成
+                      </Button>
+                    )}
+                    <Button size="small" type="primary" icon={<TeamOutlined />} onClick={(e) => { e.stopPropagation(); router.push(`/courses/${group.id}`) }} style={{ background: '#14574D', borderColor: '#14574D' }}>
+                      管理班级
+                    </Button>
+                    <Button size="small" danger disabled={isHistoricalTerm} loading={deletingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id as string, group.name as string) }}>
+                      删除
+                    </Button>
                   </div>
 
                   {group.status === 'WAITING' && (
@@ -1243,7 +1289,23 @@ export default function CoursesPage() {
             )
           })}
         </Row>
-      )}
+        {filteredGroups.length > pageSize && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24, marginBottom: 12, width: '100%' }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={filteredGroups.length}
+              onChange={(page) => {
+                setCurrentPage(page)
+                window.scrollTo({ top: 160, behavior: 'smooth' })
+              }}
+              showSizeChanger={false}
+              size={isMobile ? 'small' : 'default'}
+            />
+          </div>
+        )}
+      </>
+    )}
 
       <SafeFormModal
         title="新建班级"
@@ -1490,13 +1552,31 @@ export default function CoursesPage() {
                           onChange={(value) => setCreateData((prev) => {
                             const rows = [...((prev.teacherAssignments as Record<string, unknown>[]) || [])]
                             while (rows.length <= index) rows.push({ teacherId: '', subject: '' })
-                            rows[index] = { ...rows[index], teacherId: value }
+                            const selectedTeacher = teacherList.find((t: Record<string, unknown>) => t.id === value)
+                            const teacherSubs = (typeof selectedTeacher?.subjects === 'string'
+                              ? selectedTeacher.subjects.split(/[,，、]/)
+                              : Array.isArray(selectedTeacher?.subjects)
+                                ? selectedTeacher.subjects
+                                : []
+                            ).map((s: string) => s.trim()).filter(Boolean)
+                            const currentSubject = rows[index]?.subject as string
+                            const autoSubject = (!currentSubject || (teacherSubs.length > 0 && !teacherSubs.includes(currentSubject))) && teacherSubs.length > 0
+                              ? teacherSubs[0]
+                              : currentSubject
+                            rows[index] = { ...rows[index], teacherId: value, subject: autoSubject || '' }
                             return { ...prev, teacherAssignments: rows }
                           })}
-                          options={teacherList.map((teacher: Record<string, unknown>) => ({
-                            label: String(teacher.name || ''),
-                            value: teacher.id as string,
-                          }))}
+                          options={teacherList.map((teacher: Record<string, unknown>) => {
+                            const teacherSub = typeof teacher.subjects === 'string'
+                              ? teacher.subjects
+                              : Array.isArray(teacher.subjects)
+                                ? teacher.subjects.join('/')
+                                : ''
+                            return {
+                              label: teacherSub ? `${teacher.name} (${teacherSub})` : String(teacher.name || ''),
+                              value: teacher.id as string,
+                            }
+                          })}
                         />
                       </Col>
                       <Col xs={11} sm={10}>
@@ -1926,7 +2006,7 @@ export default function CoursesPage() {
         ) : <Spin />}
       </Drawer>
 
-      <BrandModal title="一键后移课次" open={postponeOpen} onCancel={() => setPostponeOpen(false)} onOk={handlePostpone} okText="确认后移">
+      <BrandModal title="一键后移课次" open={postponeOpen} onCancel={() => setPostponeOpen(false)} onOk={handlePostpone} okText="确认后移" confirmLoading={postponing}>
         <Space>
           <span>后移</span>
           <InputNumber min={1} max={90} value={postponeDays} onChange={(value) => setPostponeDays(value || 7)} />
@@ -1973,31 +2053,6 @@ export default function CoursesPage() {
         </Space>
       </BrandModal>
 
-      <BrandModal
-        title="计划内调整上课日"
-        open={addDayOpen}
-        onCancel={() => setAddDayOpen(false)}
-        onOk={handleAddDay}
-        confirmLoading={addingDay}
-        okText="确认调课"
-        cancelText="取消"
-        okButtonProps={{ style: { background: '#e8784a', borderColor: '#e8784a' } }}
-      >
-        <Space direction="vertical" style={{ width: '100%' }} size={14}>
-          <DatePicker
-            placeholder="选择上课日期"
-            value={addDayDate ? dayjs(addDayDate) : null}
-            onChange={(_, dateString) => setAddDayDate(Array.isArray(dateString) ? dateString[0] || '' : dateString)}
-            style={{ width: '100%' }}
-          />
-          <div style={{ fontSize: 12, color: '#8d806f', padding: '10px 12px', borderRadius: 8, background: '#FFF8F4', border: '1px solid #F0EBE5', lineHeight: 1.7 }}>
-            新日期会按各班平时课表补入，同时自动取消一个尚未开始、节次数相同的最晚教学日，总上课天数和总课次保持不变。已完成课次不会删除；被替换的未来课次会保留为“已取消”，方便审计。
-          </div>
-          <div style={{ fontSize: 12, color: '#5a4e3a', lineHeight: 1.7 }}>
-            如果此前已经用“新增上课日”加入过该日期，可再次选择同一天执行一次，系统会校准多出的未来课次，不会重复创建。
-          </div>
-        </Space>
-      </BrandModal>
     </PageLayout>
   )
 }

@@ -1,0 +1,1418 @@
+[
+  {
+    "word": "a good read",
+    "examTags": [
+      "词汇·名词短语",
+      "阅读·书评表达"
+    ],
+    "grammar": "n. 好读物；引人入胜的书或文章。",
+    "collocations": "a good read; a funny read; a quick read",
+    "commonMistake": "read 作名词表示读物时可数；a good read 不能写成 a reading good。",
+    "example": {
+      "english": "This adventure story is a good read for young readers.",
+      "chinese": "这部冒险故事很适合年轻读者阅读。"
+    },
+    "application": {
+      "prompt": "This adventure story is ___; I finished it in one day. A. a good read B. a reading good",
+      "solution": "A。解析：读起来有趣、让人很快读完的书可称为 a good read。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: a good read",
+        "url": "https://dictionary.cambridge.org/dictionary/english/read"
+      }
+    ]
+  },
+  {
+    "word": "adventure",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·故事类型"
+    ],
+    "grammar": "n. 冒险；冒险经历。常作可数名词。",
+    "collocations": "an adventure; go on an adventure; an adventure story",
+    "commonMistake": "表示一次冒险通常用 an adventure；不要漏掉元音音素前的 an。",
+    "example": {
+      "english": "The children went on an adventure in the forest.",
+      "chinese": "孩子们在森林里经历了一次冒险。"
+    },
+    "application": {
+      "prompt": "The story is full of danger and excitement. What an ___! A. advertisement B. adventure",
+      "solution": "B。解析：充满危险与刺激的经历是 adventure（冒险）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: adventure",
+        "url": "https://dictionary.cambridge.org/dictionary/english/adventure"
+      }
+    ]
+  },
+  {
+    "word": "fantasy",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·故事类型"
+    ],
+    "grammar": "n. 幻想；奇幻作品。表示一种作品时可数。",
+    "collocations": "a fantasy novel; fantasy films; a world of fantasy",
+    "commonMistake": "fantasy 指想象出来的世界或作品；不要与事实类的 history 混淆。",
+    "example": {
+      "english": "My sister enjoys reading fantasy novels about magic.",
+      "chinese": "我姐姐喜欢读关于魔法的奇幻小说。"
+    },
+    "application": {
+      "prompt": "A story about dragons and magic is a kind of ___. A. history B. fantasy",
+      "solution": "B。解析：龙和魔法属于想象内容，因此是 fantasy（奇幻作品）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fantasy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fantasy"
+      }
+    ]
+  },
+  {
+    "word": "mystery",
+    "examTags": [
+      "词汇·名词",
+      "阅读·故事类型"
+    ],
+    "grammar": "n. 悬疑故事；神秘的事物；奥秘。",
+    "collocations": "a mystery story; solve a mystery; remain a mystery",
+    "commonMistake": "表示“解开谜团”用 solve a mystery；不说 answer a mystery。",
+    "example": {
+      "english": "The twins tried to solve the mystery of the missing key.",
+      "chinese": "这对双胞胎试图解开钥匙失踪之谜。"
+    },
+    "application": {
+      "prompt": "No one knows who took the painting. It is still a ___. A. schedule B. mystery",
+      "solution": "B。解析：原因尚不清楚的事情是 mystery（谜团）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mystery",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mystery"
+      }
+    ]
+  },
+  {
+    "word": "fiction",
+    "examTags": [
+      "词汇·名词",
+      "阅读·文学类别"
+    ],
+    "grammar": "n. 小说；虚构作品。通常作不可数名词。",
+    "collocations": "science fiction; a work of fiction; fiction and non-fiction",
+    "commonMistake": "fiction 通常不加复数 -s；具体一部作品可说 a work/story of fiction。",
+    "example": {
+      "english": "The library has a large collection of science fiction.",
+      "chinese": "这家图书馆收藏了大量科幻小说。"
+    },
+    "application": {
+      "prompt": "A story invented by an author is a work of ___. A. fiction B. furniture",
+      "solution": "A。解析：作者虚构的故事属于 fiction（小说、虚构作品）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fiction",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fiction"
+      }
+    ]
+  },
+  {
+    "word": "detective",
+    "examTags": [
+      "词汇·名词",
+      "阅读·人物与职业"
+    ],
+    "grammar": "n. 侦探；警探。作定语时可修饰 story/novel。",
+    "collocations": "a detective story; a police detective; detective fiction",
+    "commonMistake": "detective 可指侦探，也可作定语；detective story 是“侦探故事”。",
+    "example": {
+      "english": "The detective found a clue beside the window.",
+      "chinese": "侦探在窗边找到了一条线索。"
+    },
+    "application": {
+      "prompt": "The police officer searched for clues to solve the crime. He was a ___. A. novelist B. detective",
+      "solution": "B。解析：调查案件并寻找线索的人是 detective（侦探）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: detective",
+        "url": "https://dictionary.cambridge.org/dictionary/english/detective"
+      }
+    ]
+  },
+  {
+    "word": "alien",
+    "examTags": [
+      "词汇·名词",
+      "阅读·科幻语境"
+    ],
+    "grammar": "n. 外星人；外国人。常见中考用法为“外星人”。",
+    "collocations": "an alien; alien life; an alien visitor",
+    "commonMistake": "alien 作“外星人”时是名词；不要因词尾 -n 把它误作形容词。",
+    "example": {
+      "english": "The film tells the story of an alien who visits Earth.",
+      "chinese": "这部电影讲述了一位外星人造访地球的故事。"
+    },
+    "application": {
+      "prompt": "In the film, a creature from another planet visits Earth. It is an ___. A. alien B. engine",
+      "solution": "A。解析：来自其他星球的生物是 alien（外星人）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: alien",
+        "url": "https://dictionary.cambridge.org/dictionary/english/alien"
+      }
+    ]
+  },
+  {
+    "word": "attack",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·动词搭配"
+    ],
+    "grammar": "n. 攻击；v. 攻击。作动词时可直接接宾语。",
+    "collocations": "attack a person; launch an attack; an attack on the town",
+    "commonMistake": "attack 作动词是及物动词，后面直接接对象；不说 attack to sb。",
+    "example": {
+      "english": "The dog barked but did not attack the visitors.",
+      "chinese": "那只狗吠叫了，但没有攻击来访者。"
+    },
+    "application": {
+      "prompt": "The soldiers began to ___ the empty fort at dawn. A. arrive B. attack",
+      "solution": "B。解析：士兵对堡垒发起进攻，用 attack。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: attack",
+        "url": "https://dictionary.cambridge.org/dictionary/english/attack"
+      }
+    ]
+  },
+  {
+    "word": "hear of",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·hear 的用法"
+    ],
+    "grammar": "phr. 听说；得知。常用于询问是否知道某人或某事。",
+    "collocations": "hear of a writer; have you ever heard of...?; never hear of",
+    "commonMistake": "hear of 表示“听说过、知道”；hear from 表示“收到某人的来信或消息”。",
+    "example": {
+      "english": "Have you ever heard of the writer Mark Twain?",
+      "chinese": "你听说过作家马克·吐温吗？"
+    },
+    "application": {
+      "prompt": "I know the name, but I have never ___ that book. A. heard of B. heard from",
+      "solution": "A。解析：询问是否听说过某本书，用 hear of；hear from 后通常接人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hear of",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hear-of"
+      }
+    ]
+  },
+  {
+    "word": "kingdom",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·历史与故事"
+    ],
+    "grammar": "n. 王国；领域。复数为 kingdoms。",
+    "collocations": "a kingdom; the animal kingdom; rule a kingdom",
+    "commonMistake": "表示“王国”时是可数名词；谈一个王国要用 a/the kingdom。",
+    "example": {
+      "english": "The young queen ruled the kingdom for many years.",
+      "chinese": "年轻的女王统治这个王国多年。"
+    },
+    "application": {
+      "prompt": "The king ruled a large ___. A. kitchen B. kingdom",
+      "solution": "B。解析：国王统治的地方是 kingdom（王国）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: kingdom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/kingdom"
+      }
+    ]
+  },
+  {
+    "word": "historical",
+    "examTags": [
+      "词汇·形容词",
+      "语法·形容词词形"
+    ],
+    "grammar": "adj. 历史的；与历史有关的。",
+    "collocations": "historical facts; a historical novel; a historical building",
+    "commonMistake": "historical 修饰名词；history 是名词，historically 是副词。",
+    "example": {
+      "english": "We visited several historical buildings in the old town.",
+      "chinese": "我们参观了老城区的几座历史建筑。"
+    },
+    "application": {
+      "prompt": "The museum displays objects from the past in a __ exhibition. A. history B. historical",
+      "solution": "B。解析：名词 exhibition 前需用形容词 historical（历史的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: historical",
+        "url": "https://dictionary.cambridge.org/dictionary/english/historical"
+      }
+    ]
+  },
+  {
+    "word": "force",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·force sb to do"
+    ],
+    "grammar": "n. 力；武力；v. 强迫；迫使。",
+    "collocations": "physical force; force sb to do sth; force open a door",
+    "commonMistake": "force sb to do sth 中不定式带 to；不要写 force sb do sth。",
+    "example": {
+      "english": "The heavy wind forced us to stay indoors.",
+      "chinese": "大风迫使我们待在室内。"
+    },
+    "application": {
+      "prompt": "The strong storm ___ us to stay indoors yesterday. A. force B. forced",
+      "solution": "B。解析：yesterday 表示过去时间，force 的过去式是 forced；force sb to do sth 表示迫使某人做某事。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: force",
+        "url": "https://dictionary.cambridge.org/dictionary/english/force"
+      }
+    ]
+  },
+  {
+    "word": "steal",
+    "examTags": [
+      "词汇·不规则动词",
+      "语法·动词词形"
+    ],
+    "grammar": "v. 偷；窃取。steal—stole—stolen。",
+    "collocations": "steal a bike; steal sth from sb; have sth stolen",
+    "commonMistake": "steal 表示“偷走某物”，句型为 steal sth from sb/place；过去分词是 stolen。",
+    "example": {
+      "english": "Someone stole my phone from the desk yesterday.",
+      "chinese": "昨天有人从桌上偷走了我的手机。"
+    },
+    "application": {
+      "prompt": "A stranger took my phone without asking while I was asleep. Someone ___ it from my bag. A. borrowed B. stole",
+      "solution": "B。解析：未经允许拿走手机是偷窃，steal 的过去式是 stole。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: steal",
+        "url": "https://dictionary.cambridge.org/dictionary/english/steal"
+      }
+    ]
+  },
+  {
+    "word": "punish",
+    "examTags": [
+      "词汇·动词",
+      "语法·punish sb for"
+    ],
+    "grammar": "v. 惩罚；处罚。",
+    "collocations": "punish sb for sth; punish a student; be punished",
+    "commonMistake": "表示因某事惩罚某人用 punish sb for sth；不要误用介词 of。",
+    "example": {
+      "english": "The coach punished the player for arriving late.",
+      "chinese": "教练因那名队员迟到而惩罚了他。"
+    },
+    "application": {
+      "prompt": "The boy was ___ for breaking the classroom window. A. punished B. praised",
+      "solution": "A。解析：打破窗户后受到惩罚，应用 punish 的过去分词 punished。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: punish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/punish"
+      }
+    ]
+  },
+  {
+    "word": "idiom",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·语言表达"
+    ],
+    "grammar": "n. 习语；成语。复数 idioms。",
+    "collocations": "a common idiom; an English idiom; use an idiom",
+    "commonMistake": "idiom 是可数名词；谈一个习语时用 an idiom。",
+    "example": {
+      "english": "“A piece of cake” is an English idiom meaning something easy.",
+      "chinese": "“小菜一碟”是一个表示事情容易的英语习语。"
+    },
+    "application": {
+      "prompt": "“Break the ice” is an English ___. A. idiom B. insect",
+      "solution": "A。解析：固定的习惯表达叫 idiom（习语）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: idiom",
+        "url": "https://dictionary.cambridge.org/dictionary/english/idiom"
+      }
+    ]
+  },
+  {
+    "word": "recently",
+    "examTags": [
+      "词汇·副词",
+      "语法·现在完成时提示词"
+    ],
+    "grammar": "adv. 最近；不久前。常与现在完成时或一般过去时连用。",
+    "collocations": "recently published; have recently moved; until recently",
+    "commonMistake": "recently 可与现在完成时连用；不要把它当形容词修饰名词，形容词是 recent。",
+    "example": {
+      "english": "I have recently joined the school reading club.",
+      "chinese": "我最近加入了学校读书俱乐部。"
+    },
+    "application": {
+      "prompt": "They have ___ moved to a new house. A. recent B. recently",
+      "solution": "B。解析：修饰 moved 的副词应为 recently。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: recently",
+        "url": "https://dictionary.cambridge.org/dictionary/english/recently"
+      }
+    ]
+  },
+  {
+    "word": "lost",
+    "examTags": [
+      "词汇·形容词与过去分词",
+      "语法·be/get lost"
+    ],
+    "grammar": "adj. 迷路的；丢失的；失去的；也是 lose 的过去式和过去分词。",
+    "collocations": "get lost; feel lost; a lost key",
+    "commonMistake": "lost 可表示“迷路的”或“丢失的”；lose 是动词原形，不能放在 be 后作表语。",
+    "example": {
+      "english": "We got lost in the old streets but found the station later.",
+      "chinese": "我们在老街里迷了路，但后来找到了车站。"
+    },
+    "application": {
+      "prompt": "Without a map, the tourists soon got ___. A. losing B. lost",
+      "solution": "B。解析：get lost 表示“迷路”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lost",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lost"
+      }
+    ]
+  },
+  {
+    "word": "get lost",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·get + 形容词"
+    ],
+    "grammar": "phr. 迷路；走失。常用 get lost 表示进入迷路状态。",
+    "collocations": "get lost in the city; get lost on the way; help sb who is lost",
+    "commonMistake": "get lost 中 lost 是形容词；描述迷路状态用 get/be lost，不说 get lose。",
+    "example": {
+      "english": "We got lost because we took the wrong road.",
+      "chinese": "我们因为走错路而迷路了。"
+    },
+    "application": {
+      "prompt": "They took the wrong turn and ___ in the forest. A. got lost B. got losing",
+      "solution": "A。解析：表示“迷路了”用 get lost。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: get lost",
+        "url": "https://dictionary.cambridge.org/dictionary/english/get-lost"
+      }
+    ]
+  },
+  {
+    "word": "recommend",
+    "examTags": [
+      "词汇·动词",
+      "语法·recommend 的宾语结构"
+    ],
+    "grammar": "v. 推荐；建议。可接名词，也可接 doing。",
+    "collocations": "recommend a book; recommend sth to sb; recommend doing sth",
+    "commonMistake": "recommend 后接动名词作宾语，如 recommend reading；不说 recommend to do。",
+    "example": {
+      "english": "My teacher recommended this novel to me.",
+      "chinese": "老师向我推荐了这本小说。"
+    },
+    "application": {
+      "prompt": "Our teacher ___ visiting the science museum. A. recommended B. refused",
+      "solution": "A。解析：recommend doing sth 表示“建议做某事”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: recommend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/recommend"
+      }
+    ]
+  },
+  {
+    "word": "society",
+    "examTags": [
+      "词汇·名词",
+      "词形·名词与形容词"
+    ],
+    "grammar": "n. 社会；社团。通常 society 表示“社会”时不可数。",
+    "collocations": "modern society; a reading society; society as a whole",
+    "commonMistake": "表示“现代社会”时 society 前一般不加冠词；形容词形式是 social。",
+    "example": {
+      "english": "Reading can help us understand society better.",
+      "chinese": "阅读能帮助我们更好地了解社会。"
+    },
+    "application": {
+      "prompt": "Schools play an important role in modern ___. A. social B. society",
+      "solution": "B。解析：介词 in 后需要名词 society（社会）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: society",
+        "url": "https://dictionary.cambridge.org/dictionary/english/society"
+      }
+    ]
+  },
+  {
+    "word": "literary",
+    "examTags": [
+      "词汇·形容词",
+      "词形·literature 派生词"
+    ],
+    "grammar": "adj. 文学的；文学上的。",
+    "collocations": "literary works; a literary magazine; literary history",
+    "commonMistake": "literary 是形容词，literature 是名词；不要把 literary 与 literal（字面的）混淆。",
+    "example": {
+      "english": "The magazine publishes literary works by young writers.",
+      "chinese": "这本杂志刊登年轻作家的文学作品。"
+    },
+    "application": {
+      "prompt": "The library holds a ___ event for local writers. A. literary B. literature",
+      "solution": "A。解析：修饰 event 要用形容词 literary。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: literary",
+        "url": "https://dictionary.cambridge.org/dictionary/english/literary"
+      }
+    ]
+  },
+  {
+    "word": "base",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·base 与 based"
+    ],
+    "grammar": "n. 基础；基地；v. 以……为基础；设立总部。",
+    "collocations": "the base of a tower; a military base; be based in London",
+    "commonMistake": "base sth on sth 表示“以……为依据”；be based in 表示“以……为基地”。",
+    "example": {
+      "english": "The company is based in Shanghai.",
+      "chinese": "这家公司总部设在上海。"
+    },
+    "application": {
+      "prompt": "The story is ___ a real event. A. basing on B. based on",
+      "solution": "B。解析：be based on 表示“以……为基础”。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: base",
+        "url": "https://dictionary.cambridge.org/dictionary/english/base"
+      }
+    ]
+  },
+  {
+    "word": "base sth on sth",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·被动结构 be based on"
+    ],
+    "grammar": "phr. 以某事为根据；把某事建立在……基础上。",
+    "collocations": "base an opinion on facts; base a story on real life; be based on",
+    "commonMistake": "主动句用 base A on B；被动句用 A be based on B，介词 on 不可省略。",
+    "example": {
+      "english": "The film is based on a story from a local newspaper.",
+      "chinese": "这部电影改编自当地报纸上的一个故事。"
+    },
+    "application": {
+      "prompt": "The writer ___ the character on her childhood friend. A. based B. depended",
+      "solution": "A。解析：base sth on sth 表示“以某事为基础”；base 后的宾语是 character。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: base sth on sth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/base-on"
+      }
+    ]
+  },
+  {
+    "word": "summary",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·summarize"
+    ],
+    "grammar": "n. 总结；概要。复数 summaries。",
+    "collocations": "write a summary; a short summary; in summary",
+    "commonMistake": "summary 的复数是 summaries（y 变 i 加 -es）；动词是 summarize。",
+    "example": {
+      "english": "Please write a short summary of the chapter.",
+      "chinese": "请写一段本章的简短概要。"
+    },
+    "application": {
+      "prompt": "At the end of the report, she added a brief ___. A. summary B. summarize",
+      "solution": "A。解析：形容词 brief 后需名词 summary。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: summary",
+        "url": "https://dictionary.cambridge.org/dictionary/english/summary"
+      }
+    ]
+  },
+  {
+    "word": "spoiled",
+    "examTags": [
+      "词汇·形容词与过去分词",
+      "语法·spoil 的过去式"
+    ],
+    "grammar": "adj. 被宠坏的；娇惯坏的。也可作 spoil 的过去式或过去分词。",
+    "collocations": "a spoiled child; spoiled food; be spoiled by sb",
+    "commonMistake": "spoiled 可作形容词；spoil 的过去式和过去分词也可写作 spoilt，注意 spoiled food 意为变质的食物。",
+    "example": {
+      "english": "The spoiled child expected everyone to do what he wanted.",
+      "chinese": "这个被宠坏的孩子希望每个人都照他的意思做。"
+    },
+    "application": {
+      "prompt": "The child is rude because he has been too ___. A. spoil B. spoiled",
+      "solution": "B。解析：完成时被动结构 has been 后接过去分词 spoiled。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: spoiled",
+        "url": "https://dictionary.cambridge.org/dictionary/english/spoiled"
+      }
+    ]
+  },
+  {
+    "word": "selfish",
+    "examTags": [
+      "词汇·形容词",
+      "词形·selfishness"
+    ],
+    "grammar": "adj. 自私的。名词形式 selfishness。",
+    "collocations": "a selfish act; selfish behaviour; be selfish",
+    "commonMistake": "selfish 描述人或行为；不要与 selfless（无私的）混淆。",
+    "example": {
+      "english": "It was selfish of him to keep all the food for himself.",
+      "chinese": "他把所有食物都留给自己，真自私。"
+    },
+    "application": {
+      "prompt": "Sharing the prize with nobody was a ___ choice. A. selfish B. helpful",
+      "solution": "A。解析：只顾自己、不与人分享是 selfish（自私的）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: selfish",
+        "url": "https://dictionary.cambridge.org/dictionary/english/selfish"
+      }
+    ]
+  },
+  {
+    "word": "painful",
+    "examTags": [
+      "词汇·形容词",
+      "词形·pain 与 painful"
+    ],
+    "grammar": "adj. 令人痛苦的；（身体部位）疼痛的。",
+    "collocations": "a painful injury; a painful memory; feel painful",
+    "commonMistake": "painful 是形容词，pain 是名词；描述某人感到疼通常说 be in pain 或 have a painful arm。",
+    "example": {
+      "english": "The fall left him with a painful knee.",
+      "chinese": "那次摔倒让他的膝盖很疼。"
+    },
+    "application": {
+      "prompt": "The cut was so ___ that he went to see a doctor. A. pain B. painful",
+      "solution": "B。解析：be 动词后作表语要用形容词 painful。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: painful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/painful"
+      }
+    ]
+  },
+  {
+    "word": "lock",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·lock the door"
+    ],
+    "grammar": "n. 锁；v. 锁上。",
+    "collocations": "lock the door; a door lock; lock sth with a key",
+    "commonMistake": "lock 作动词时直接接门或物品作宾语；表示“把某人锁在外面”用 lock sb out。",
+    "example": {
+      "english": "Remember to lock the door before you leave.",
+      "chinese": "离开前记得锁门。"
+    },
+    "application": {
+      "prompt": "Please ___ the gate after the dog goes inside. A. lock B. open",
+      "solution": "A。解析：狗进去后要把门锁上，用 lock。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lock",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lock"
+      }
+    ]
+  },
+  {
+    "word": "lock up",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·动词短语搭配"
+    ],
+    "grammar": "phr. 锁好（建筑物的）门；把……锁起来。",
+    "collocations": "lock up the shop; lock the house up; lock up a bicycle",
+    "commonMistake": "lock up 可分开使用：lock the shop up；代词宾语放中间：lock it up。",
+    "example": {
+      "english": "The shop owner locks up at nine every evening.",
+      "chinese": "店主每晚九点锁店。"
+    },
+    "application": {
+      "prompt": "Before leaving the office, Mina checked every door and ___ the building. A. locked up B. looked up",
+      "solution": "A。解析：检查门后把建筑锁好，用 lock up。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lock up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lock-up"
+      }
+    ]
+  },
+  {
+    "word": "unlock",
+    "examTags": [
+      "词汇·动词",
+      "词形·un- 表示相反"
+    ],
+    "grammar": "v. 开锁；解锁；揭开。",
+    "collocations": "unlock a door; unlock a phone; unlock a secret",
+    "commonMistake": "unlock 是 lock 的反义动词，表示“开锁”；不要把 un- 后的词误当形容词。",
+    "example": {
+      "english": "He used a code to unlock his phone.",
+      "chinese": "他用密码解锁了手机。"
+    },
+    "application": {
+      "prompt": "I cannot get into the room until you ___ the door. A. lock B. unlock",
+      "solution": "B。解析：要进入房间，需要把门 unlock（开锁）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: unlock",
+        "url": "https://dictionary.cambridge.org/dictionary/english/unlock"
+      }
+    ]
+  },
+  {
+    "word": "hidden",
+    "examTags": [
+      "词汇·形容词与过去分词",
+      "语法·hide 的不规则变化"
+    ],
+    "grammar": "adj. 隐藏的；秘密的；也是 hide 的过去分词。hide—hid—hidden。",
+    "collocations": "a hidden door; hidden treasure; keep sth hidden",
+    "commonMistake": "hide 的过去分词是 hidden；描述被藏起来的东西可用 hidden，不能写 hided。",
+    "example": {
+      "english": "They found a hidden room behind the bookshelf.",
+      "chinese": "他们在书架后面发现了一间隐藏的房间。"
+    },
+    "application": {
+      "prompt": "The key was ___ under a flowerpot. A. hid B. hidden",
+      "solution": "B。解析：was 后的被动结构要用过去分词 hidden。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hidden",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hidden"
+      }
+    ]
+  },
+  {
+    "word": "nobody",
+    "examTags": [
+      "词汇·不定代词",
+      "语法·主谓一致"
+    ],
+    "grammar": "pron. 没有人；谁也不。作主语时谓语通常用单数。",
+    "collocations": "nobody knows; nobody was there; nobody else",
+    "commonMistake": "nobody 表示否定意义，谓语用单数；句中不再与 not 连用。",
+    "example": {
+      "english": "Nobody knew where the old map came from.",
+      "chinese": "没有人知道这张旧地图是从哪里来的。"
+    },
+    "application": {
+      "prompt": "___ was at home when I called. A. Nobody B. Nobody were",
+      "solution": "A。解析：nobody 作主语，谓语用单数 was。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nobody",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nobody"
+      }
+    ]
+  },
+  {
+    "word": "therefore",
+    "examTags": [
+      "词汇·副词",
+      "语法·连接副词标点"
+    ],
+    "grammar": "adv. 因此；所以。用于说明结果。",
+    "collocations": "therefore, we decided; and therefore; it was raining; therefore, ...",
+    "commonMistake": "therefore 是连接副词；连接两个独立分句时通常用句号或分号，不能只用逗号连接。",
+    "example": {
+      "english": "The road was closed; therefore, we took a different route.",
+      "chinese": "道路封闭了，因此我们走了另一条路线。"
+    },
+    "application": {
+      "prompt": "The train was delayed; ___, we arrived late. A. however B. therefore",
+      "solution": "B。解析：前句说明火车晚点，后句是其结果，因此用 therefore。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: therefore",
+        "url": "https://dictionary.cambridge.org/dictionary/english/therefore"
+      }
+    ]
+  },
+  {
+    "word": "state",
+    "examTags": [
+      "词汇·名词与动词",
+      "熟词多义·状态与陈述"
+    ],
+    "grammar": "n. 状态；州；国家；v. 陈述；说明。",
+    "collocations": "a state of mind; state a reason; the United States",
+    "commonMistake": "state 作动词表示正式说明；state of mind 表示“精神状态”。",
+    "example": {
+      "english": "Please state your name and class on the form.",
+      "chinese": "请在表格上写明你的姓名和班级。"
+    },
+    "application": {
+      "prompt": "The report clearly ___ why the plan failed. A. states B. stays",
+      "solution": "A。解析：说明失败原因用 state；主语 report 为单数，故用 states。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: state",
+        "url": "https://dictionary.cambridge.org/dictionary/english/state"
+      }
+    ]
+  },
+  {
+    "word": "weak",
+    "examTags": [
+      "词汇·形容词",
+      "词形·weak 与 weakness"
+    ],
+    "grammar": "adj. 虚弱的；（能力等）弱的。名词 weakness。",
+    "collocations": "feel weak; weak eyesight; weak in maths",
+    "commonMistake": "weak 是形容词；描述某方面薄弱可用 be weak in sth，不要误用 weak at 作固定搭配。",
+    "example": {
+      "english": "I felt weak after being ill for several days.",
+      "chinese": "生病几天后我感到很虚弱。"
+    },
+    "application": {
+      "prompt": "After the long walk, the tired dog looked ___. A. weak B. weakness",
+      "solution": "A。解析：look 后作表语需要形容词 weak。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: weak",
+        "url": "https://dictionary.cambridge.org/dictionary/english/weak"
+      }
+    ]
+  },
+  {
+    "word": "since",
+    "examTags": [
+      "词汇·介词、副词与连词",
+      "语法·since 与 for"
+    ],
+    "grammar": "prep./conj./adv. 自……以来；既然；由于。表示起点时常与现在完成时连用。",
+    "collocations": "since Monday; since I was young; have known sb since 2020",
+    "commonMistake": "表示一段时间用 for，表示起点用 since；since 引导原因状语从句时意为“既然”。",
+    "example": {
+      "english": "She has lived here since she was five.",
+      "chinese": "她从五岁起就住在这里。"
+    },
+    "application": {
+      "prompt": "We have been friends ___ primary school. A. for B. since",
+      "solution": "B。解析：primary school 是时间起点，搭配 since。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: since",
+        "url": "https://dictionary.cambridge.org/dictionary/english/since"
+      }
+    ]
+  },
+  {
+    "word": "secretly",
+    "examTags": [
+      "词汇·副词",
+      "词形·secret 与 secretly"
+    ],
+    "grammar": "adv. 秘密地；暗中地。",
+    "collocations": "secretly take a photo; work secretly; secretly hope",
+    "commonMistake": "secretly 修饰动词；secret 是形容词或名词，不能直接作副词。",
+    "example": {
+      "english": "The children secretly prepared a card for their teacher.",
+      "chinese": "孩子们偷偷为老师准备了一张卡片。"
+    },
+    "application": {
+      "prompt": "They ___ left a gift on the teacher’s desk. A. secret B. secretly",
+      "solution": "B。解析：修饰动词 left 需用副词 secretly。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: secretly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/secretly"
+      }
+    ]
+  },
+  {
+    "word": "prove",
+    "examTags": [
+      "词汇·动词",
+      "语法·prove 的词形与结构"
+    ],
+    "grammar": "v. 证明；证实；结果是。过去式、过去分词常用 proved，过去分词也可用 proven。",
+    "collocations": "prove a fact; prove that...; prove to be useful",
+    "commonMistake": "prove sth to sb 表示“向某人证明某事”；prove 后接宾语时不加介词 to。",
+    "example": {
+      "english": "The experiment proved that the water was clean.",
+      "chinese": "实验证明水是干净的。"
+    },
+    "application": {
+      "prompt": "The test results ___ that the medicine was safe. A. proved B. proof",
+      "solution": "A。解析：句子需要谓语动词过去式 proved；proof 是名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: prove",
+        "url": "https://dictionary.cambridge.org/dictionary/english/prove"
+      }
+    ]
+  },
+  {
+    "word": "get to one’s feet",
+    "examTags": [
+      "词汇·动词短语",
+      "语法·物主代词与 feet"
+    ],
+    "grammar": "phr. 站起身来。feet 是 foot 的复数形式。",
+    "collocations": "get to one’s feet; rise to one’s feet; help sb to their feet",
+    "commonMistake": "固定表达用 feet（foot 的复数）；one’s 要随主语改为 my/your/his/her/their。",
+    "example": {
+      "english": "The old man slowly got to his feet and waved goodbye.",
+      "chinese": "老人慢慢站起身来，挥手告别。"
+    },
+    "application": {
+      "prompt": "After the speech, everyone ___ and clapped. A. got to their foot B. got to their feet",
+      "solution": "B。解析：固定短语为 get to one’s feet；foot 的复数是 feet。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: get to one’s feet",
+        "url": "https://dictionary.cambridge.org/dictionary/english/get-rise-to-feet"
+      }
+    ]
+  },
+  {
+    "word": "day by day",
+    "examTags": [
+      "词汇·时间短语",
+      "阅读·变化过程"
+    ],
+    "grammar": "phr. 一天天；逐日；日渐。可表示变化逐渐发生。",
+    "collocations": "improve day by day; grow stronger day by day; day by day changes",
+    "commonMistake": "day by day 表示逐渐变化；every day 仅表示“每天”，不一定强调变化。",
+    "example": {
+      "english": "Her English improved day by day.",
+      "chinese": "她的英语一天天进步。"
+    },
+    "application": {
+      "prompt": "The patient grew stronger ___ after the operation. A. day by day B. one day",
+      "solution": "A。解析：强调每天逐渐好转，用 day by day。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: day by day",
+        "url": "https://dictionary.cambridge.org/dictionary/english/day-by-day"
+      }
+    ]
+  },
+  {
+    "word": "build-up",
+    "examTags": [
+      "词汇·名词",
+      "阅读·故事结构"
+    ],
+    "grammar": "n. 准备期；逐步发展；铺垫。",
+    "collocations": "a build-up to the climax; a gradual build-up; story build-up",
+    "commonMistake": "build-up 作名词通常带连字符；build up 作动词短语时不带连字符。",
+    "example": {
+      "english": "The slow build-up made the ending more exciting.",
+      "chinese": "缓慢的铺垫让结尾更令人兴奋。"
+    },
+    "application": {
+      "prompt": "The events before the exciting ending form the story’s ___. A. build-up B. building up",
+      "solution": "A。解析：名词 build-up 表示高潮前逐步形成的铺垫。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: build-up",
+        "url": "https://dictionary.cambridge.org/dictionary/english/build-up"
+      }
+    ]
+  },
+  {
+    "word": "climax",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·故事结构"
+    ],
+    "grammar": "n. （故事、事件等的）高潮；顶点。",
+    "collocations": "the climax of a story; reach a climax; build up to the climax",
+    "commonMistake": "climax 表示情节高潮；不要与 climate（气候）混淆。",
+    "example": {
+      "english": "The rescue scene is the climax of the novel.",
+      "chinese": "营救场面是这部小说的高潮。"
+    },
+    "application": {
+      "prompt": "The most exciting part of the play is its ___. A. climate B. climax",
+      "solution": "B。解析：戏剧中最激动人心的部分是 climax（高潮）。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: climax",
+        "url": "https://dictionary.cambridge.org/dictionary/english/climax"
+      }
+    ]
+  },
+  {
+    "word": "effect",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·effect 与 affect"
+    ],
+    "grammar": "n. 影响；结果；效果。",
+    "collocations": "have an effect on; side effect; cause and effect",
+    "commonMistake": "effect 通常作名词；affect 常作动词，注意拼写和词性。",
+    "example": {
+      "english": "The new rule had a positive effect on the whole team.",
+      "chinese": "新规定对整个团队产生了积极影响。"
+    },
+    "application": {
+      "prompt": "Regular reading can have a good ___ on your vocabulary. A. effect B. affect",
+      "solution": "A。解析：形容词 good 后需要名词 effect；affect 通常作动词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: effect",
+        "url": "https://dictionary.cambridge.org/dictionary/english/effect"
+      }
+    ]
+  },
+  {
+    "word": "in time",
+    "examTags": [
+      "词汇·介词短语",
+      "语法·in time 与 on time"
+    ],
+    "grammar": "phr. 及时；来得及。",
+    "collocations": "arrive in time; save sb in time; just in time",
+    "commonMistake": "in time 表示“及时、赶得上”；on time 表示“准时、按计划时间”。",
+    "example": {
+      "english": "The doctor arrived in time to help the injured man.",
+      "chinese": "医生及时赶到，帮助了那名伤者。"
+    },
+    "application": {
+      "prompt": "The train left early, but we reached the station just ___ to catch it. A. on time B. in time",
+      "solution": "B。解析：火车提前开出时仍赶上了，表示“来得及”用 in time。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in time",
+        "url": "https://dictionary.cambridge.org/dictionary/english/in-time"
+      }
+    ]
+  },
+  {
+    "word": "reader",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·read 与 reader"
+    ],
+    "grammar": "n. 读者；简易读物。",
+    "collocations": "a regular reader; young readers; a reader of the newspaper",
+    "commonMistake": "reader 指“读者”或分级读物；read 是动词，reading 可作阅读活动。",
+    "example": {
+      "english": "The author answered questions from her young readers.",
+      "chinese": "作者回答了年轻读者们的问题。"
+    },
+    "application": {
+      "prompt": "The book is written for young English ___. A. readers B. reading",
+      "solution": "A。解析：介词 for 后表示“英语读者”，用名词 readers。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reader",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reader"
+      }
+    ]
+  },
+  {
+    "word": "librarian",
+    "examTags": [
+      "词汇·职业名词",
+      "词形·library 与 librarian"
+    ],
+    "grammar": "n. 图书管理员；图书馆馆长。",
+    "collocations": "ask the librarian; school librarian; work as a librarian",
+    "commonMistake": "librarian 是人，library 是地点；不要混淆两者的词尾。",
+    "example": {
+      "english": "The librarian helped me find a book about space.",
+      "chinese": "图书管理员帮我找了一本关于太空的书。"
+    },
+    "application": {
+      "prompt": "The person who helps visitors find books is the ___. A. library B. librarian",
+      "solution": "B。解析：帮助读者找书的人是 librarian；library 是图书馆。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: librarian",
+        "url": "https://dictionary.cambridge.org/dictionary/english/librarian"
+      }
+    ]
+  },
+  {
+    "word": "consider",
+    "examTags": [
+      "词汇·动词",
+      "语法·consider doing"
+    ],
+    "grammar": "v. 认为；仔细考虑。",
+    "collocations": "consider doing sth; consider sb/sth (to be); consider a question",
+    "commonMistake": "consider 后接动名词作宾语，不接不定式；表示“认为……”可用 consider sb/sth (to be)...。",
+    "example": {
+      "english": "We are considering visiting the city museum this weekend.",
+      "chinese": "我们正在考虑这周末去参观市立博物馆。"
+    },
+    "application": {
+      "prompt": "We are ___ joining the book club next term. A. considering B. deciding to",
+      "solution": "A。解析：consider 后接动名词 joining。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: consider",
+        "url": "https://dictionary.cambridge.org/dictionary/english/consider"
+      }
+    ]
+  },
+  {
+    "word": "enemy",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·复数变化"
+    ],
+    "grammar": "n. 敌人；敌军。复数 enemies。",
+    "collocations": "an enemy of the country; make an enemy; fight an enemy",
+    "commonMistake": "enemy 的复数为 enemies（辅音字母加 y 结尾变 ies）。",
+    "example": {
+      "english": "The hero refused to treat his enemy cruelly.",
+      "chinese": "主人公拒绝残忍地对待他的敌人。"
+    },
+    "application": {
+      "prompt": "The two countries were once ___. A. enemys B. enemies",
+      "solution": "B。解析：enemy 的正确复数形式是 enemies。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: enemy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/enemy"
+      }
+    ]
+  },
+  {
+    "word": "naughty",
+    "examTags": [
+      "词汇·形容词",
+      "阅读·人物性格"
+    ],
+    "grammar": "adj. 淘气的；顽皮的。",
+    "collocations": "a naughty child; be naughty; a naughty joke",
+    "commonMistake": "naughty 常形容孩子或行为淘气；表示“不听话”也可用 badly behaved。",
+    "example": {
+      "english": "The naughty puppy chewed one of my shoes.",
+      "chinese": "那只淘气的小狗咬坏了我的一只鞋。"
+    },
+    "application": {
+      "prompt": "The ___ boy hid his sister’s book as a joke. A. naughty B. nervous",
+      "solution": "A。解析：故意藏起妹妹的书来开玩笑，体现淘气，用 naughty。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: naughty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/naughty"
+      }
+    ]
+  },
+  {
+    "word": "gentle",
+    "examTags": [
+      "词汇·形容词",
+      "词形·gently"
+    ],
+    "grammar": "adj. 温柔的；温和的；轻柔的。副词 gently。",
+    "collocations": "a gentle voice; be gentle with; a gentle breeze",
+    "commonMistake": "gentle 是形容词，修饰动词需用 gently；gentle with sb/sth 表示对……温柔。",
+    "example": {
+      "english": "Please be gentle with the young kitten.",
+      "chinese": "请温柔地对待这只小猫。"
+    },
+    "application": {
+      "prompt": "The nurse spoke in a ___ voice to calm the child. A. gently B. gentle",
+      "solution": "B。解析：名词 voice 前用形容词 gentle 作定语。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: gentle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/gentle"
+      }
+    ]
+  },
+  {
+    "word": "defeat",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·defeat 与 beat"
+    ],
+    "grammar": "n. 失败；v. 击败；战胜。",
+    "collocations": "defeat an opponent; suffer a defeat; defeat the team",
+    "commonMistake": "defeat 作动词直接接对手；beat 也可表示击败，defeat 不能作“打节拍”。",
+    "example": {
+      "english": "Our school team defeated the visitors by two goals.",
+      "chinese": "我们校队以两球优势击败了客队。"
+    },
+    "application": {
+      "prompt": "The home team ___ its strongest rivals in the final. A. defeated B. lost",
+      "solution": "A。解析：主队战胜对手，用 defeat；过去式拼写不变加 ed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: defeat",
+        "url": "https://dictionary.cambridge.org/dictionary/english/defeat"
+      }
+    ]
+  },
+  {
+    "word": "basic",
+    "examTags": [
+      "词汇·形容词",
+      "词形·basis 与 basically"
+    ],
+    "grammar": "adj. 基本的；初步的。",
+    "collocations": "basic skills; basic information; the basic idea",
+    "commonMistake": "basic 是形容词；名词“基础”常用 basis，副词“基本上”用 basically。",
+    "example": {
+      "english": "All students need basic computer skills.",
+      "chinese": "所有学生都需要基本的计算机技能。"
+    },
+    "application": {
+      "prompt": "The course teaches ___ first-aid skills. A. basically B. basic",
+      "solution": "B。解析：名词 skills 前需要形容词 basic。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: basic",
+        "url": "https://dictionary.cambridge.org/dictionary/english/basic"
+      }
+    ]
+  },
+  {
+    "word": "recommendation",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·recommend 派生词"
+    ],
+    "grammar": "n. 推荐；建议。复数 recommendations。",
+    "collocations": "a book recommendation; make a recommendation; follow sb’s recommendation",
+    "commonMistake": "recommendation 是名词；动词是 recommend。注意拼写中有双 m。",
+    "example": {
+      "english": "My friend gave me a useful recommendation for a new novel.",
+      "chinese": "朋友给我推荐了一本值得读的新小说。"
+    },
+    "application": {
+      "prompt": "The teacher made a ___ about which book to read. A. recommendation B. recommend",
+      "solution": "A。解析：冠词 a 后需名词 recommendation。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: recommendation",
+        "url": "https://dictionary.cambridge.org/dictionary/english/recommendation"
+      }
+    ]
+  },
+  {
+    "word": "American",
+    "examTags": [
+      "词汇·形容词与名词",
+      "词形·国籍与语言"
+    ],
+    "grammar": "adj. 美国的；美洲的；n. 美国人；美洲人。",
+    "collocations": "American English; an American writer; American culture",
+    "commonMistake": "American 可指美国的或美洲的；英语通常说 American English，不要把 American 当语言名。",
+    "example": {
+      "english": "The novel was written by an American author.",
+      "chinese": "这部小说由一位美国作家创作。"
+    },
+    "application": {
+      "prompt": "Mark Twain was a famous ___ writer. A. America B. American",
+      "solution": "B。解析：修饰 writer 要用形容词 American。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: American",
+        "url": "https://dictionary.cambridge.org/dictionary/english/american"
+      }
+    ]
+  },
+  {
+    "word": "bone",
+    "examTags": [
+      "词汇·可数名词",
+      "阅读·身体与健康"
+    ],
+    "grammar": "n. 骨头；骨骼。复数 bones。",
+    "collocations": "break a bone; bone structure; a fish bone",
+    "commonMistake": "bone 是可数名词；表示一根骨头需用 a bone。",
+    "example": {
+      "english": "The doctor said that no bone was broken.",
+      "chinese": "医生说没有骨头骨折。"
+    },
+    "application": {
+      "prompt": "The X-ray showed a small ___ in his arm was broken. A. bone B. blood",
+      "solution": "A。解析：X 光显示手臂的一块骨头骨折，应用 bone。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bone",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bone"
+      }
+    ]
+  },
+  {
+    "word": "doubt",
+    "examTags": [
+      "词汇·名词与动词",
+      "语法·doubt 的从句"
+    ],
+    "grammar": "n. 怀疑；疑惑；v. 怀疑；不确定。",
+    "collocations": "without doubt; have no doubt that; doubt whether",
+    "commonMistake": "名词短语 without doubt 表示“毫无疑问”；动词 doubt 后可接 whether 引导的从句。",
+    "example": {
+      "english": "I have no doubt that she will do well in the exam.",
+      "chinese": "我确信她会在考试中取得好成绩。"
+    },
+    "application": {
+      "prompt": "I am not sure the old bridge is safe after the storm, so I ___ it is safe to cross. A. doubt B. decide",
+      "solution": "A。解析：不确定桥是否安全时可说 doubt it is safe；decide 表示作出决定。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: doubt",
+        "url": "https://dictionary.cambridge.org/dictionary/english/doubt"
+      }
+    ]
+  },
+  {
+    "word": "inspire",
+    "examTags": [
+      "词汇·动词",
+      "词形·inspiration 与 inspired"
+    ],
+    "grammar": "v. 激励；鼓舞；赋予灵感。",
+    "collocations": "inspire sb to do sth; inspire hope; be inspired by",
+    "commonMistake": "inspire sb to do sth 表示“鼓舞某人做某事”；不要误写为 inspire sb do sth。",
+    "example": {
+      "english": "Her grandmother inspired her to become a doctor.",
+      "chinese": "她的祖母激励她成为一名医生。"
+    },
+    "application": {
+      "prompt": "The coach’s words ___ us to keep trying. A. inspiration B. inspired",
+      "solution": "B。解析：句子需要谓语动词；inspire 的过去式为 inspired。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: inspire",
+        "url": "https://dictionary.cambridge.org/dictionary/english/inspire"
+      }
+    ]
+  },
+  {
+    "word": "destroy",
+    "examTags": [
+      "词汇·动词",
+      "语法·destroy 的及物用法"
+    ],
+    "grammar": "v. 破坏；摧毁。",
+    "collocations": "destroy a building; destroy evidence; be destroyed by fire",
+    "commonMistake": "destroy 是及物动词，后面直接接被破坏的对象，不需加 to。",
+    "example": {
+      "english": "The fire destroyed several houses near the river.",
+      "chinese": "大火烧毁了河边的几栋房屋。"
+    },
+    "application": {
+      "prompt": "The storm may ___ the old wooden bridge. A. destroy B. damage to",
+      "solution": "A。解析：destroy 后直接接宾语 bridge；damage 也可及物，但 damage to 不符合此处句式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: destroy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/destroy"
+      }
+    ]
+  },
+  {
+    "word": "introduction",
+    "examTags": [
+      "词汇·可数名词",
+      "词形·introduce 派生词"
+    ],
+    "grammar": "n. 介绍；序言；引言。",
+    "collocations": "an introduction to a book; make an introduction; write an introduction",
+    "commonMistake": "introduction 是名词，动词为 introduce；谈一本书的引言用 an introduction。",
+    "example": {
+      "english": "The introduction explains why the author wrote the book.",
+      "chinese": "序言解释了作者写这本书的原因。"
+    },
+    "application": {
+      "prompt": "The first chapter gives readers an ___ to the main characters. A. introduce B. introduction",
+      "solution": "B。解析：冠词 an 后需要名词 introduction。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: introduction",
+        "url": "https://dictionary.cambridge.org/dictionary/english/introduction"
+      }
+    ]
+  }
+]

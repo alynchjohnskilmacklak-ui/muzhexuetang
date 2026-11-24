@@ -419,8 +419,8 @@ export default function TeacherIntensivePage() {
           <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
             {[
               { label: '个性化课程', value: groups.length, suffix: '门', icon: <TeamOutlined />, highlight: groups.length > 0 },
-              { label: '已审核授课', value: approvedHours.toFixed(1), suffix: '小时', icon: <CheckCircleOutlined />, highlight: false },
-              { label: '待审核授课', value: pendingReviewHours.toFixed(1), suffix: '小时', icon: <ClockCircleOutlined />, highlight: pendingReviewHours > 0 },
+              { label: '已审核授课', value: approvedHours.toFixed(2), suffix: '小时', icon: <CheckCircleOutlined />, highlight: false },
+              { label: '待审核授课', value: pendingReviewHours.toFixed(2), suffix: '小时', icon: <ClockCircleOutlined />, highlight: pendingReviewHours > 0 },
             ].map((item) => (
               <div key={item.label} style={{
                 textAlign: 'center', padding: '10px 2px', borderRadius: 12,
@@ -609,11 +609,11 @@ export default function TeacherIntensivePage() {
                     }}>
                       <div>
                         <Text style={{ display: 'block', color: 'var(--color-ink-subtle)', fontSize: 12 }}>已审核授课</Text>
-                        <Text strong style={{ color: 'var(--color-success)' }}>{group.approvedHours.toFixed(1)}小时</Text>
+                        <Text strong style={{ color: 'var(--color-success)' }}>{group.approvedHours.toFixed(2)}小时</Text>
                       </div>
                       <div>
                         <Text style={{ display: 'block', color: 'var(--color-ink-subtle)', fontSize: 12 }}>待管理员审核</Text>
-                        <Text strong style={{ color: 'var(--color-warning-text)' }}>{group.pendingHours.toFixed(1)}小时</Text>
+                        <Text strong style={{ color: 'var(--color-warning-text)' }}>{group.pendingHours.toFixed(2)}小时</Text>
                       </div>
                     </div>
                     {group.students.map((student) => (
@@ -624,11 +624,11 @@ export default function TeacherIntensivePage() {
                         </div>
                         <div style={{ textAlign: 'right', flexShrink: 0 }}>
                           <Text style={{ display: 'block', color: 'var(--color-success)', fontWeight: 700 }}>
-                            已上 {student.approvedHours.toFixed(1)}小时
+                            已上 {student.approvedHours.toFixed(2)}小时
                           </Text>
                           {student.pendingHours > 0 && (
                             <Text style={{ display: 'block', color: 'var(--color-warning-text)', fontSize: 12 }}>
-                              待审 {student.pendingHours.toFixed(1)}小时
+                              待审 {student.pendingHours.toFixed(2)}小时
                             </Text>
                           )}
                         </div>
@@ -852,7 +852,7 @@ export default function TeacherIntensivePage() {
               maxCount={selectedGroup ? expectedStudents(selectedGroup.teachingType) : 1}
               onChange={(studentIds) => setDraft((current) => ({ ...current, studentIds }))}
               options={(selectedGroup?.students || []).map((student) => ({
-                label: `${student.name}（已审核${student.approvedHours.toFixed(1)}小时）`,
+                label: `${student.name}（已审核${student.approvedHours.toFixed(2)}小时）`,
                 value: student.id,
               }))}
               virtual={false}

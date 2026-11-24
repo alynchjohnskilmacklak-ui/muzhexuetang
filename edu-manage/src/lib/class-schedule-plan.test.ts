@@ -16,7 +16,7 @@ describe('class schedule plan', () => {
 
     const selected = selectReplacementTeachingDay(lessons, 8)
 
-    expect(selected?.date).toEqual(new Date('2026-08-08T00:00:00+08:00'))
+    expect(selected?.date).toEqual(new Date('2026-08-08T00:00:00.000Z'))
     expect(selected?.lessonIds).toHaveLength(8)
   })
 

@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRequestPrisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { checkTeacherConflict } from '@/lib/teacher-conflict'
+import { requireAdminUser } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
 
 interface Item { key: string; teacherId: string; date: string; startTime: string; endTime: string }
 
 export const POST = apiHandler(async (req: NextRequest) => {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
-  const prisma = await getRequestPrisma()
+  const { prisma } = await requireAdminUser()
 
   const body = await req.json()
   const items: Item[] = (Array.isArray(body.items) ? body.items : [])

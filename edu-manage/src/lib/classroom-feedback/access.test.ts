@@ -4,6 +4,7 @@ import {
   canAccessFeedbackImage,
   canCreateFeedback,
   canViewFeedback,
+  getParentFeedbackStudentIds,
   hasRequiredLessonContent,
   hasMeaningfulFeedbackContent,
   feedbackStudentLimitError,
@@ -20,6 +21,19 @@ const sharedFeedback = {
 }
 
 describe('classroom feedback P0 access rules', () => {
+  it('includes parent-owned historical records but excludes soft-deleted records', async () => {
+    const findMany = vi.fn(async () => [{ id: 'student-active' }])
+    const prisma = { student: { findMany } } as unknown as PrismaClient
+
+    await expect(getParentFeedbackStudentIds(prisma, 'parent-a')).resolves.toEqual(['student-active'])
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        OR: [{ parentId: 'parent-a' }, { parentUserId: 'parent-a' }],
+        deletedAt: null,
+      }),
+    }))
+  })
+
   it('uses the same five-student maximum for every teacher feedback entry point', () => {
     expect(MAX_STUDENTS_PER_FEEDBACK).toBe(5)
     expect(feedbackStudentLimitError('teacher', 5)).toBeNull()
@@ -63,9 +77,41 @@ describe('classroom feedback P0 access rules', () => {
 
     await expect(resolveTeacherFeedbackCreationScope(prisma, {
       teacherId: 'teacher-a',
+      feedbackGroupId: 'group-a',
+      requestedStudentIds: ['student-a'],
+      requireLesson: true,
+      submittedCourseType: 'GROUP',
+    })).resolves.toMatchObject({ allowed: false, reason: 'lesson-required' })
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
       requestedStudentIds: ['student-b'],
       submittedCourseType: 'GROUP',
     })).resolves.toMatchObject({ allowed: false, reason: 'student' })
+  })
+
+  it('does not resolve feedback scope for deleted, cancelled, or postponed lessons', async () => {
+    const findFirst = vi.fn(async () => null)
+    const prisma = {
+      classLesson: { findFirst },
+      classGroup: { findFirst: vi.fn() },
+      student: { findMany: vi.fn() },
+    } as unknown as PrismaClient
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      classLessonId: 'lesson-cancelled',
+      requestedStudentIds: ['student-a'],
+      requireLesson: true,
+      submittedCourseType: 'GROUP',
+    })).resolves.toMatchObject({ allowed: false, reason: 'lesson' })
+
+    expect(findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        deletedAt: null,
+        status: { notIn: ['CANCELLED', 'POSTPONED'] },
+      }),
+    }))
   })
 
   it('limits a multi-subject class to the explicitly selected subject', async () => {
@@ -142,6 +188,154 @@ describe('classroom feedback P0 access rules', () => {
     })).resolves.toMatchObject({ allowed: false, reason: 'lesson', students: [] })
   })
 
+  it('rejects lesson feedback for leave/absent students and allows attended students', async () => {
+    const classLesson = {
+      id: 'lesson-a',
+      teacherId: 'teacher-a',
+      subject: '数学',
+      lessonDate: new Date('2026-10-28T16:00:00.000Z'),
+      groupId: 'group-a',
+      termId: 'term-a',
+      status: 'SCHEDULED',
+      attendanceSubmittedAt: null,
+      attendances: [],
+      intensiveMode: 'NORMAL',
+      group: {
+        id: 'group-a',
+        teacherId: 'teacher-a',
+        termId: 'term-a',
+        intensiveMode: 'NORMAL',
+        course: { type: 'GROUP', subject: '数学' },
+        teacherAssignments: [{ subject: '数学' }],
+        enrollments: [
+          { studentId: 'student-leave', subjects: ['数学'], student: { id: 'student-leave', name: '请假学员', parentId: null, parentUserId: null } },
+          { studentId: 'student-present', subjects: ['数学'], student: { id: 'student-present', name: '到课学员', parentId: null, parentUserId: null } },
+        ],
+      },
+      lessonStudents: [
+        { student: { id: 'student-leave', name: '请假学员', parentId: null, parentUserId: null } },
+        { student: { id: 'student-present', name: '到课学员', parentId: null, parentUserId: null } },
+      ],
+    }
+    const prisma = {
+      classLesson: { findFirst: vi.fn(async () => classLesson) },
+      classGroup: { findFirst: vi.fn() },
+      student: { findMany: vi.fn() },
+      attendance: {
+        findMany: vi.fn()
+          .mockResolvedValueOnce([{ lessonId: 'lesson-a', studentId: 'student-leave', status: 'LEAVE' }])
+          .mockResolvedValueOnce([{ lessonId: 'lesson-a', studentId: 'student-present', status: 'PRESENT' }]),
+      },
+      leaveRequest: { findMany: vi.fn(async () => []) },
+    } as unknown as PrismaClient
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      classLessonId: 'lesson-a',
+      requestedStudentIds: ['student-present'],
+      requireLesson: true,
+      requireAttendanceSubmitted: true,
+    })).resolves.toMatchObject({ allowed: false, reason: 'attendance-required' })
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      classLessonId: 'lesson-a',
+      requestedSubject: '数学',
+      requestedStudentIds: ['student-leave'],
+    })).resolves.toMatchObject({ allowed: false, reason: 'blocked', students: [] })
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      classLessonId: 'lesson-a',
+      requestedSubject: '数学',
+      requestedStudentIds: ['student-present'],
+    })).resolves.toMatchObject({ allowed: true, students: [{ id: 'student-present' }] })
+  })
+
+  it('allows backfill feedback for a historical lesson after its attendance is submitted', async () => {
+    const lesson = {
+      id: 'lesson-past',
+      teacherId: 'teacher-a',
+      subject: '数学',
+      lessonDate: new Date(Date.now() - 36 * 60 * 60 * 1000),
+      groupId: 'group-a',
+      status: 'COMPLETED',
+      attendanceSubmittedAt: new Date(Date.now() - 36 * 60 * 60 * 1000),
+      attendances: [{ studentId: 'student-a' }],
+      lessonStudents: [{ student: { id: 'student-a', name: '学员甲', parentId: null, parentUserId: null } }],
+      group: {
+        id: 'group-a',
+        teacherId: 'teacher-a',
+        termId: 'term-a',
+        intensiveMode: 'NORMAL',
+        course: { type: 'GROUP', subject: '数学' },
+        teacherAssignments: [{ subject: '数学' }],
+        enrollments: [{
+          studentId: 'student-a',
+          subjects: ['数学'],
+          student: { id: 'student-a', name: '学员甲', parentId: null, parentUserId: null },
+        }],
+      },
+    }
+    const prisma = {
+      classLesson: { findFirst: vi.fn(async () => lesson) },
+      attendance: { findMany: vi.fn(async () => []) },
+      leaveRequest: { findMany: vi.fn(async () => []) },
+    } as unknown as PrismaClient
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      classLessonId: lesson.id,
+      requestedStudentIds: ['student-a'],
+      requireLesson: true,
+      requireAttendanceSubmitted: true,
+    })).resolves.toMatchObject({ allowed: true, feedbackGroupId: 'group-a', termId: 'term-a', students: [{ id: 'student-a' }] })
+  })
+
+  it('accepts legacy completed attendance and uses the teacher assignment subject fallback', async () => {
+    const classLesson = {
+      id: 'legacy-lesson',
+      teacherId: null,
+      subject: null,
+      lessonDate: new Date('2026-10-28T16:00:00.000Z'),
+      groupId: 'group-a',
+      termId: 'term-a',
+      status: 'COMPLETED',
+      attendanceSubmittedAt: null,
+      attendances: [{ studentId: 'student-a' }],
+      group: {
+        id: 'group-a',
+        teacherId: 'teacher-a',
+        termId: 'term-a',
+        intensiveMode: 'NORMAL',
+        course: { type: 'GROUP', subject: '语文' },
+        teacherAssignments: [{ subject: '数学' }],
+        enrollments: [{
+          studentId: 'student-a',
+          subjects: ['数学'],
+          student: { id: 'student-a', name: '学员甲', parentId: null, parentUserId: null },
+        }],
+      },
+      lessonStudents: [{ student: { id: 'student-a', name: '学员甲', parentId: null, parentUserId: null } }],
+    }
+    const prisma = {
+      classLesson: { findFirst: vi.fn(async () => classLesson) },
+      classGroup: { findFirst: vi.fn() },
+      student: { findMany: vi.fn() },
+      attendance: { findMany: vi.fn(async () => []) },
+      leaveRequest: { findMany: vi.fn(async () => []) },
+    } as unknown as PrismaClient
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      classLessonId: 'legacy-lesson',
+      requestedStudentIds: ['student-a'],
+      requestedSubject: '数学',
+      requireLesson: true,
+      requireAttendanceSubmitted: true,
+    })).resolves.toMatchObject({ allowed: true, students: [{ id: 'student-a' }] })
+  })
+
   it('requires student-only feedback to match both the teacher assignment and enrollment subject', async () => {
     const prisma = {
       classLesson: { findFirst: vi.fn() },
@@ -175,6 +369,35 @@ describe('classroom feedback P0 access rules', () => {
       requestedStudentIds: ['student-a'],
       requestedSubject: '英语',
     })).resolves.toMatchObject({ allowed: true, students: [{ id: 'student-a' }] })
+  })
+
+  it('当课次学科不属于教师任教学科时拒绝创建课次反馈', async () => {
+    const prisma = {
+      teacher: {
+        findUnique: vi.fn().mockResolvedValue({ id: 'teacher-bio', subjects: '生物' }),
+      },
+      classLesson: {
+        findFirst: vi.fn().mockResolvedValue({
+          id: 'lesson-chem',
+          subject: '化学',
+          teacherId: 'teacher-bio',
+          lessonStudents: [{ student: { id: 'student-a', name: 'A' } }],
+          attendances: [],
+          group: {
+            course: { type: 'GROUP', subject: '化学' },
+            enrollments: [{ studentId: 'student-a', subjects: ['化学'], student: { id: 'student-a', name: 'A' } }],
+            teacherAssignments: [{ teacherId: 'teacher-bio', subject: '化学' }],
+          },
+        }),
+      },
+    } as unknown as PrismaClient
+
+    const res = await resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-bio',
+      classLessonId: 'lesson-chem',
+      requestedStudentIds: ['student-a'],
+    })
+    expect(res.allowed).toBe(false)
   })
 
   it('redacts every other student and rating from a parent DTO', () => {
@@ -233,7 +456,7 @@ describe('classroom feedback optional images', () => {
 })
 
 describe('classroom feedback image access', () => {
-  function imagePrisma() {
+  function imagePrisma(feedbackOverrides: Record<string, unknown> = {}) {
     return {
       fileAsset: {
         findMany: vi.fn(async () => [{
@@ -252,10 +475,15 @@ describe('classroom feedback image access', () => {
           id: 'feedback-1',
           teacherId: 'teacher-a',
           status: 'PUBLISHED',
+          deletedAt: null,
           studentIds: ['student-a'],
           imageUrls: ['feedback-1.jpg'],
           classLesson: { teacherId: 'teacher-a' },
+          ...feedbackOverrides,
         }]),
+      },
+      feedbackParentReadReceipt: {
+        findMany: vi.fn(async () => []),
       },
       studyHallHomeworkEntry: {
         findMany: vi.fn(async () => []),
@@ -297,6 +525,32 @@ describe('classroom feedback image access', () => {
       ['feedback-1.jpg'],
     )
     expect(otherTeacherAccess.get('feedback-1.jpg')?.allowed).toBe(false)
+  })
+
+  it('denies teacher and parent access after feedback is archived, revoked, or soft-deleted', async () => {
+    for (const status of ['ARCHIVED', 'REVOKED']) {
+      const archivedAccess = await canAccessFeedbackImage(
+        imagePrisma({ status }),
+        { id: 'teacher-user-a', role: 'teacher', teacherId: 'teacher-a' },
+        ['feedback-1.jpg'],
+      )
+      expect(archivedAccess.get('feedback-1.jpg')?.allowed).toBe(false)
+    }
+
+    const deletedFeedback = imagePrisma({ deletedAt: new Date('2026-11-08T00:00:00.000Z') })
+    const teacherAccess = await canAccessFeedbackImage(
+      deletedFeedback,
+      { id: 'teacher-user-a', role: 'teacher', teacherId: 'teacher-a' },
+      ['feedback-1.jpg'],
+    )
+    const parentAccess = await canAccessFeedbackImage(
+      deletedFeedback,
+      { id: 'parent-a', role: 'parent' },
+      ['feedback-1.jpg'],
+    )
+
+    expect(teacherAccess.get('feedback-1.jpg')?.allowed).toBe(false)
+    expect(parentAccess.get('feedback-1.jpg')?.allowed).toBe(false)
   })
 
   it('allows a linked parent and assigned teacher to open study-hall homework photos', async () => {
@@ -377,6 +631,9 @@ describe('classroom feedback image access', () => {
           imageUrls: ['admin-private/report.pdf'],
           classLesson: { teacherId: 'teacher-a' },
         }]),
+      },
+      feedbackParentReadReceipt: {
+        findMany: vi.fn(async () => []),
       },
       studyHallHomeworkEntry: { findMany: vi.fn(async () => []) },
       student: { findMany: vi.fn(async () => [{ id: 'student-a' }]) },

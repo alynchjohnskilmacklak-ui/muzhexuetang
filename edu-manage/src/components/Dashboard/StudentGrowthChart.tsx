@@ -73,7 +73,7 @@ export function StudentGrowthChart({ data }: { data: StudentGrowthData }) {
   }
 
   return (
-    <Card bordered={false} style={{ borderRadius: 16, height: '100%' }}>
+      <Card variant="borderless" style={{ borderRadius: 16, height: '100%' }}>
       <Title level={5} style={{ marginBottom: 4 }}>学员增长与课时趋势</Title>
       <Text type="secondary" style={{ fontSize: 12 }}>近 6 个月学员规模与课程安排变化</Text>
       <ReactECharts option={option} style={{ height: isMobile ? 260 : 320, marginTop: 8 }} />

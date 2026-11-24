@@ -1,0 +1,432 @@
+[
+  {
+    "word": "shrimp",
+    "examTags": ["词汇·可数名词与复数", "阅读·食物与饮食"],
+    "grammar": "n. 虾。可说 a shrimp；复数常用 shrimp，也可用 shrimps。菜单中 shrimp 常泛指虾肉。",
+    "collocations": "fresh shrimp; peel shrimp; shrimp soup; a shrimp dish",
+    "commonMistake": "shrimp 的复数可以仍写 shrimp；若强调一只只虾，也可写 shrimps。不要把它误写成动词过去式。",
+    "example": {"english": "We bought fresh shrimp at the market and made soup for lunch.", "chinese": "我们在市场买了新鲜的虾，中午做了汤。"},
+    "application": {"prompt": "The seafood restaurant serves fresh ___ with rice. A. shrimp B. lamb", "solution": "A。解析：和米饭搭配供应的海鲜是 shrimp（虾）；lamb 指羊肉。"},
+    "sources": [{"label": "Cambridge Dictionary: shrimp", "url": "https://dictionary.cambridge.org/dictionary/english/shrimp"}]
+  },
+  {
+    "word": "burst",
+    "examTags": ["语法·不规则动词", "词汇·动词与名词"],
+    "grammar": "v. 爆裂；突然迸发；n. 爆发；一阵。过去式和过去分词都为 burst；常接 into tears/laughter。",
+    "collocations": "a burst of laughter; burst into tears; burst out laughing; burst a balloon",
+    "commonMistake": "burst 是不规则变化，三种形式都写 burst；不要按规则动词写成 bursted。",
+    "example": {"english": "The balloon burst when the little boy touched it with a pin.", "chinese": "小男孩用针碰了一下气球，气球就爆了。"},
+    "application": {"prompt": "The balloon ___ as soon as it touched the sharp branch. A. shook B. burst", "solution": "B。解析：气球碰到尖树枝后“爆裂”，过去式仍是 burst。"},
+    "sources": [{"label": "Cambridge Dictionary: burst", "url": "https://dictionary.cambridge.org/dictionary/english/burst"}]
+  },
+  {
+    "word": "brushstroke",
+    "examTags": ["词汇·复合名词", "阅读·绘画与艺术"],
+    "grammar": "n. 一笔；一画。可数名词，复数 brushstrokes；由 brush + stroke 构成。",
+    "collocations": "a careful brushstroke; broad brushstrokes; a brushstroke of colour",
+    "commonMistake": "brushstroke 指画笔留下的一笔，写复数时只在词尾加 -s；不要把它当成画笔 brush 本身。",
+    "example": {"english": "Each brushstroke in the painting adds movement to the river.", "chinese": "这幅画里的每一笔都让河水显得更有动感。"},
+    "application": {"prompt": "The artist added one final ___ to the sky with a thin brush. A. brushstroke B. brush", "solution": "A。解析：画家用细画笔在天空部分添上最后“一笔”，应填 brushstroke。"},
+    "sources": [{"label": "Cambridge Dictionary: brushstroke", "url": "https://dictionary.cambridge.org/dictionary/english/brushstroke"}]
+  },
+  {
+    "word": "lifelike",
+    "examTags": ["词汇·形容词", "阅读·人物与艺术描写"],
+    "grammar": "adj. 生动逼真的。常作定语，也可作表语；由 life 与 like 构成，比较级可用 more lifelike。",
+    "collocations": "a lifelike painting; lifelike details; look lifelike",
+    "commonMistake": "lifelike 形容外观“像真的”，不是说对象真的活着；描述雕像时用 lifelike statue，而非 living statue。",
+    "example": {"english": "The lifelike wax figure looked just like the famous singer.", "chinese": "这尊栩栩如生的蜡像看起来和那位著名歌手一模一样。"},
+    "application": {"prompt": "The artist added ___ details that made the face look real. A. live B. lifelike", "solution": "B。解析：能让面孔看起来像真人的细节是 lifelike（逼真的）；live 表示活着的或现场的。"},
+    "sources": [{"label": "Cambridge Dictionary: lifelike", "url": "https://dictionary.cambridge.org/dictionary/english/lifelike"}]
+  },
+  {
+    "word": "combine",
+    "examTags": ["词汇·动词搭配", "语法·不定式结构"],
+    "grammar": "v.（使）结合、组合。可作及物或不及物动词；combine A and B / combine A with B；combine to do sth。",
+    "collocations": "combine two ideas; combine A with B; combine to form; combine work and study",
+    "commonMistake": "表达“把 A 与 B 结合”时用 combine A with B 或 combine A and B；不要在 combine 后直接接 with A and B。",
+    "example": {"english": "The recipe combines fresh fruit with plain yogurt.", "chinese": "这份食谱把新鲜水果和原味酸奶搭配在一起。"},
+    "application": {"prompt": "To make the cake, ___ the flour, milk, and eggs in one bowl. A. combine B. compare", "solution": "A。解析：把几种原料放在一起是 combine（混合）；compare 是比较。"},
+    "sources": [{"label": "Cambridge Dictionary: combine", "url": "https://dictionary.cambridge.org/dictionary/english/combine"}]
+  },
+  {
+    "word": "combine ... with ...",
+    "examTags": ["词汇·动词短语", "语法·介词搭配"],
+    "grammar": "短语：combine A with B，把 A 与 B 结合起来。A、B 通常是名词、代词或动名词。",
+    "collocations": "combine study with exercise; combine tradition with modern design; combine A with B",
+    "commonMistake": "此结构中 combine 后先放 A，再用 with 引出 B；不能写成 combine with A with B。",
+    "example": {"english": "The designer combined traditional patterns with modern colours.", "chinese": "设计师把传统图案和现代色彩结合起来。"},
+    "application": {"prompt": "She wants to ___ Chinese ink painting ___ modern design. A. separate; from B. combine; with", "solution": "B。解析：句意是“把中国水墨画与现代设计结合”；固定结构为 combine A with B。"},
+    "sources": [{"label": "Cambridge Dictionary: combine", "url": "https://dictionary.cambridge.org/dictionary/english/combine"}]
+  },
+  {
+    "word": "opposite",
+    "examTags": ["词汇·形容词与名词", "语法·介词搭配"],
+    "grammar": "adj. 截然相反的；在对面的；n. 对立面。常用 the opposite of；表示“在……对面”可说 opposite the bank。",
+    "collocations": "the opposite direction; opposite opinions; the opposite of; sit opposite someone",
+    "commonMistake": "opposite 作介词表示“在……对面”时，后面通常直接接名词：opposite the station；不要机械加 to。",
+    "example": {"english": "Their opinions were opposite, so they chose different plans.", "chinese": "他们的意见截然相反，因此选择了不同的方案。"},
+    "application": {"prompt": "Their answers are ___: one says yes, while the other says no. A. opposite B. polite", "solution": "A。解析：一个答“是”、另一个答“否”，两人的答案正好相反，即 opposite。"},
+    "sources": [{"label": "Cambridge Dictionary: opposite", "url": "https://dictionary.cambridge.org/dictionary/english/opposite"}]
+  },
+  {
+    "word": "scene",
+    "examTags": ["词汇·可数名词", "阅读·故事与戏剧"],
+    "grammar": "n. 场景；情景；（戏剧中的）一场。可数，复数 scenes；scenery 通常作不可数名词，表示自然风景。",
+    "collocations": "the final scene; a scene from a film; a street scene; scene of an accident",
+    "commonMistake": "scene 是某个具体场景，可数；scenery 指总体风景，通常不可数。不要说 a scenery。",
+    "example": {"english": "The final scene of the play takes place in a quiet garden.", "chinese": "这部戏的最后一幕发生在一个安静的花园里。"},
+    "application": {"prompt": "The last ___ of the play takes place in a hospital. A. scenery B. scene", "solution": "B。解析：戏剧中可数的一幕是 a scene；scenery 通常指自然风景且不可数。"},
+    "sources": [{"label": "Cambridge Dictionary: scene", "url": "https://dictionary.cambridge.org/dictionary/english/scene"}]
+  },
+  {
+    "word": "empty",
+    "examTags": ["词汇·形容词与动词", "语法·祈使句"],
+    "grammar": "adj. 空的；v. 倒空。作动词时可接容器或物品作宾语：empty the box；过去式 emptied。",
+    "collocations": "an empty room; an empty bottle; empty the bin; empty out a drawer",
+    "commonMistake": "empty 作动词时表示“把……倒空”，宾语是被倒空的容器；过去式去 y 加 -ied：emptied。",
+    "example": {"english": "Please empty the box before you fold it flat.", "chinese": "请先把盒子倒空，再把它压平。"},
+    "application": {"prompt": "The bin is full, so please ___ it before adding more paper. A. empty B. fill", "solution": "A。解析：垃圾箱已经满了，添纸前应先把它倒空，故用 empty。"},
+    "sources": [{"label": "Cambridge Dictionary: empty", "url": "https://dictionary.cambridge.org/dictionary/english/empty"}]
+  },
+  {
+    "word": "cover ... in",
+    "examTags": ["词汇·动词短语", "语法·被动语态"],
+    "grammar": "短语：cover sth in sth，用某物覆盖某物；也可说 cover sth with sth。被动形式为 be covered in/with。",
+    "collocations": "cover the furniture in plastic; cover a table with a cloth; be covered in snow",
+    "commonMistake": "cover 后直接接被覆盖的对象，再用 in 引出覆盖物；被动句需写 be covered in，不能漏掉 be。",
+    "example": {"english": "They covered the old chairs in clear plastic before painting the room.", "chinese": "粉刷房间前，他们用透明塑料把旧椅子包了起来。"},
+    "application": {"prompt": "Before painting, we covered the furniture ___ plastic sheets. A. on B. in", "solution": "B。解析：家具被塑料覆盖，用 cover the furniture in plastic sheets；on 不符合该搭配。"},
+    "sources": [{"label": "Cambridge Dictionary: cover", "url": "https://dictionary.cambridge.org/dictionary/english/cover"}]
+  },
+  {
+    "word": "perfectly",
+    "examTags": ["词汇·副词派生", "语法·副词修饰动词"],
+    "grammar": "adv. 完美地；完全地。由形容词 perfect 加 -ly 构成，常修饰动词或形容词。",
+    "collocations": "work perfectly; fit perfectly; perfectly clear; perfectly safe",
+    "commonMistake": "动词 fit、work 等需要副词修饰时用 perfectly；perfect 是形容词，不能直接说 fits perfect。",
+    "example": {"english": "The key fits perfectly, so the lock opens without force.", "chinese": "这把钥匙完全合适，因此不用费力就能打开锁。"},
+    "application": {"prompt": "The key fits ___ into the lock, and the door opens at once. A. perfectly B. perfect", "solution": "A。解析：修饰动词 fits 要用副词 perfectly，表示“完全合适地”。"},
+    "sources": [{"label": "Cambridge Dictionary: perfectly", "url": "https://dictionary.cambridge.org/dictionary/english/perfectly"}]
+  },
+  {
+    "word": "beauty",
+    "examTags": ["词汇·名词派生", "阅读·外貌与景物描写"],
+    "grammar": "n. 美丽；美人；优点。常用 the beauty of；形容词为 beautiful，副词为 beautifully。",
+    "collocations": "natural beauty; the beauty of nature; a beauty spot; beauty products",
+    "commonMistake": "beauty 是名词，beautiful 才能直接修饰名词；可说 the beauty of the lake 或 a beautiful lake。",
+    "example": {"english": "The beauty of the old bridge becomes clear at sunset.", "chinese": "夕阳下，这座古桥的美展现得格外明显。"},
+    "application": {"prompt": "The old bridge has a quiet ___ of its own. A. beautiful B. beauty", "solution": "B。解析：a 后需要名词；beauty 表示“美”，beautiful 是形容词。"},
+    "sources": [{"label": "Cambridge Dictionary: beauty", "url": "https://dictionary.cambridge.org/dictionary/english/beauty"}]
+  },
+  {
+    "word": "sculptor",
+    "examTags": ["词汇·职业名词", "阅读·艺术创作"],
+    "grammar": "n. 雕塑家。指创作雕塑的人；作品是 sculpture（雕塑），可数时也可说 a sculpture。",
+    "collocations": "a famous sculptor; a stone sculptor; sculptor and painter; work as a sculptor",
+    "commonMistake": "sculptor 指创作者，sculpture 指作品或雕塑艺术；描述“雕塑家制作作品”时不要把两者互换。",
+    "example": {"english": "The sculptor shaped the stone with a small hammer and chisel.", "chinese": "这位雕塑家用小锤子和凿子雕刻石头。"},
+    "application": {"prompt": "The ___ used a hammer and chisel to shape the stone. A. sculptor B. sculpture", "solution": "A。解析：使用工具创作的人是 sculptor（雕塑家）；sculpture 是作品或雕塑艺术。"},
+    "sources": [{"label": "Cambridge Dictionary: sculptor", "url": "https://dictionary.cambridge.org/dictionary/english/sculptor"}]
+  },
+  {
+    "word": "skin",
+    "examTags": ["词汇·名词", "语法·动词搭配"],
+    "grammar": "n. 皮肤；外皮。多作不可数名词；表示动物皮或特定的一层皮时也可数。动词 skin 表示剥皮。",
+    "collocations": "dry skin; protect your skin; skin a potato; skin colour",
+    "commonMistake": "谈人的皮肤通常用不可数 skin；表示某人的皮肤时说 his skin，不在前面加 a。",
+    "example": {"english": "Wear a hat to protect your skin from the strong sun.", "chinese": "戴上帽子，保护皮肤免受强烈阳光照射。"},
+    "application": {"prompt": "Use sunscreen to protect your ___ from strong sunlight. A. skinned B. skin", "solution": "B。解析：protect your 后需接名词，skin 指皮肤；skinned 是形容词或动词过去分词。"},
+    "sources": [{"label": "Cambridge Dictionary: skin", "url": "https://dictionary.cambridge.org/dictionary/english/skin"}]
+  },
+  {
+    "word": "lab",
+    "examTags": ["词汇·名词缩写", "阅读·校园与科学"],
+    "grammar": "n. 实验室，是 laboratory 的常用缩写。可数名词，复数 labs；常见于口语和校园语境。",
+    "collocations": "a science lab; a computer lab; work in the lab; lab equipment",
+    "commonMistake": "lab 是 laboratory 的缩写，适合日常语境；正式说明文中可首次写 laboratory，后文再用 lab。",
+    "example": {"english": "The samples were kept in the school lab overnight.", "chinese": "这些样本在学校实验室里存放了一夜。"},
+    "application": {"prompt": "The samples were kept in the science ___ overnight. A. lab B. library", "solution": "A。解析：存放实验样本的科学场所是 lab（实验室），不是 library（图书馆）。"},
+    "sources": [{"label": "Cambridge Dictionary: lab", "url": "https://dictionary.cambridge.org/dictionary/english/lab"}]
+  },
+  {
+    "word": "diet",
+    "examTags": ["词汇·名词与动词", "阅读·健康生活"],
+    "grammar": "n. 日常饮食；规定饮食；v. 节食。表示饮食结构常用 a healthy/balanced diet；diet 作节食动词时过去式 dieted。",
+    "collocations": "a balanced diet; a healthy diet; diet and exercise; go on a diet",
+    "commonMistake": "diet 不只表示为减重而节食，也可指日常饮食；说“均衡饮食”用 a balanced diet，而非 balance diet。",
+    "example": {"english": "A balanced diet gives teenagers energy for study and sport.", "chinese": "均衡的饮食能为青少年的学习和运动提供能量。"},
+    "application": {"prompt": "A balanced ___ includes vegetables, fruit, and enough protein. A. dieted B. diet", "solution": "B。解析：balanced 后需用名词 diet，指均衡饮食；dieted 是动词过去式。"},
+    "sources": [{"label": "Cambridge Dictionary: diet", "url": "https://dictionary.cambridge.org/dictionary/english/diet"}]
+  },
+  {
+    "word": "on a diet",
+    "examTags": ["词汇·固定搭配", "语法·介词辨析"],
+    "grammar": "短语：be on a diet，正在节食或遵循特定饮食；go on a diet 表示开始节食。",
+    "collocations": "be on a diet; go on a diet; put someone on a diet; a low-salt diet",
+    "commonMistake": "固定搭配用 on a diet，不用 in a diet；开始节食说 go on a diet。",
+    "example": {"english": "Nina is on a diet, so she chose fruit instead of cake.", "chinese": "妮娜正在节食，所以她选了水果而不是蛋糕。"},
+    "application": {"prompt": "Since the race is next month, Leo is ___ and choosing smaller portions. A. on a diet B. in a diet", "solution": "A。解析：表示“正在节食”用 be on a diet；in a diet 不是这个固定搭配。"},
+    "sources": [{"label": "Cambridge Dictionary: on a diet", "url": "https://dictionary.cambridge.org/dictionary/english/on-a-diet"}]
+  },
+  {
+    "word": "knock",
+    "examTags": ["词汇·动词与名词", "语法·介词搭配"],
+    "grammar": "v. 敲；撞；n. 敲击声。敲门常说 knock on/at the door；knock 的过去式和过去分词为 knocked。",
+    "collocations": "knock on the door; knock at the window; knock over a cup; a loud knock",
+    "commonMistake": "表示敲门可用 knock on 或 knock at；表示“把东西撞倒”则用 knock over，不能省掉 over。",
+    "example": {"english": "Please knock on the door before you enter the office.", "chinese": "进办公室前请先敲门。"},
+    "application": {"prompt": "Please ___ on the door before you enter the office. A. smile B. knock", "solution": "B。解析：进入办公室前要“敲门”，搭配为 knock on the door。"},
+    "sources": [{"label": "Cambridge Dictionary: knock", "url": "https://dictionary.cambridge.org/dictionary/english/knock"}]
+  },
+  {
+    "word": "model",
+    "examTags": ["词汇·名词与动词", "阅读·科学与设计"],
+    "grammar": "n. 模型；模特；v. 示范；以……为原型。作动词时过去式 modeled/modelled；model A on B 表示以 B 为 A 的原型。",
+    "collocations": "a model plane; a role model; a fashion model; model a design on nature",
+    "commonMistake": "model 作“模特”或“模型”时是名词；作动词表示示范或仿照，注意 model on 的介词 on。",
+    "example": {"english": "Our class built a model of the solar system from coloured balls.", "chinese": "我们班用彩色球制作了一个太阳系模型。"},
+    "application": {"prompt": "In science class, we built a ___ of the solar system with balls and wire. A. model B. mode", "solution": "A。解析：用球和金属丝制作的太阳系“模型”是 a model；mode 指方式或模式。"},
+    "sources": [{"label": "Cambridge Dictionary: model", "url": "https://dictionary.cambridge.org/dictionary/english/model"}]
+  },
+  {
+    "word": "porcelain",
+    "examTags": ["词汇·材料名词", "阅读·艺术与器物"],
+    "grammar": "n. 瓷；瓷器，通常作不可数名词。具体器物可说 a piece of porcelain 或 a porcelain cup；porcelain 也可作定语。",
+    "collocations": "blue-and-white porcelain; porcelain vase; porcelain figures; a piece of porcelain",
+    "commonMistake": "porcelain 表示材料或瓷器时通常不可数；可说 a porcelain bowl，不说 a porcelain 来表示一件瓷器。",
+    "example": {"english": "The museum displays porcelain made during the Ming dynasty.", "chinese": "博物馆展出了明代制作的瓷器。"},
+    "application": {"prompt": "This cup is made of ___, so handle it carefully. A. plastic B. porcelain", "solution": "B。解析：需要小心拿放的精致瓷杯由 porcelain（瓷）制成。"},
+    "sources": [{"label": "Cambridge Dictionary: porcelain", "url": "https://dictionary.cambridge.org/dictionary/english/porcelain"}]
+  },
+  {
+    "word": "rare",
+    "examTags": ["词汇·形容词与副词派生", "阅读·频率与珍稀事物"],
+    "grammar": "adj. 稀有的；罕见的。副词 rarely 表示“很少”；a rare bird 中 rare 修饰名词。",
+    "collocations": "a rare species; a rare chance; rare books; it is rare for someone to do sth",
+    "commonMistake": "rare 描述某事物罕见，rarely 才修饰动词表示“很少”；不要说 I rare go there。",
+    "example": {"english": "It is rare to see snow here in July.", "chinese": "这里七月下雪很罕见。"},
+    "application": {"prompt": "It is ___ to see snow here in July; it happens only once in many years. A. rare B. regular", "solution": "A。解析：多年才发生一次说明七月下雪很“罕见”，应用 rare。"},
+    "sources": [{"label": "Cambridge Dictionary: rare", "url": "https://dictionary.cambridge.org/dictionary/english/rare"}]
+  },
+  {
+    "word": "commonly",
+    "examTags": ["词汇·副词派生", "语法·副词位置"],
+    "grammar": "adv. 通常；一般地；普遍地。由 common + -ly 构成，常置于实义动词前或 be 动词后。",
+    "collocations": "commonly used; commonly known as; commonly found; commonly seen",
+    "commonMistake": "be commonly found 中 commonly 是副词，修饰 found；若放在名词前修饰名词，应改用 common。",
+    "example": {"english": "This kind of shell is commonly found along the coast.", "chinese": "这种贝壳在沿海地区很常见。"},
+    "application": {"prompt": "This plant is ___ found near rivers, not in dry deserts. A. common B. commonly", "solution": "B。解析：修饰 found 这一动作要用副词 commonly，表示“通常能发现”。"},
+    "sources": [{"label": "Cambridge Dictionary: commonly", "url": "https://dictionary.cambridge.org/dictionary/english/commonly"}]
+  },
+  {
+    "word": "china",
+    "examTags": ["词汇·专有名词与普通名词", "阅读·材料与文化"],
+    "grammar": "n. 瓷；瓷器，常作不可数名词。小写 china 指瓷器；大写 China 指中国。",
+    "collocations": "blue-and-white china; china plates; a china cup; fine china",
+    "commonMistake": "国家名 China 首字母必须大写；表示瓷器的 china 用小写，且通常不可数。",
+    "example": {"english": "The shop window was filled with blue-and-white china.", "chinese": "商店橱窗里摆满了青花瓷器。"},
+    "application": {"prompt": "The delicate bowl in this case is a piece of blue-and-white ___. A. iron B. china", "solution": "B。解析：精致的青花瓷碗由 china（瓷器）制成；iron（铁）不符合器物材料。"},
+    "sources": [{"label": "Cambridge Dictionary: china", "url": "https://dictionary.cambridge.org/dictionary/english/china"}]
+  },
+  {
+    "word": "artistic",
+    "examTags": ["词汇·形容词派生", "阅读·艺术评价"],
+    "grammar": "adj. 美术的；艺术的；有艺术天赋的。名词 artist 指艺术家，artistry 指艺术技巧。",
+    "collocations": "artistic talent; artistic style; artistic design; an artistic person",
+    "commonMistake": "artistic 是形容词，可修饰 style、talent 等名词；artist 是“艺术家”，不能直接说 an artist design。",
+    "example": {"english": "The poster's artistic design won first prize at the school show.", "chinese": "这张海报的艺术设计在学校展览中获得了一等奖。"},
+    "application": {"prompt": "The poster's ___ design won first prize. A. artist B. artistic", "solution": "B。解析：修饰名词 design 需要形容词 artistic；artist 是指人的名词。"},
+    "sources": [{"label": "Cambridge Dictionary: artistic", "url": "https://dictionary.cambridge.org/dictionary/english/artistic"}]
+  },
+  {
+    "word": "on show",
+    "examTags": ["词汇·固定搭配", "阅读·展览与公共场所"],
+    "grammar": "短语：on show，在展出、供公众观看。be on show 常与作品、展品作主语；也可说 on display。",
+    "collocations": "be on show; put something on show; an exhibition on show; paintings on show",
+    "commonMistake": "表示展品正在展出用 on show；不要按中文“在展览中”直译为 in show。",
+    "example": {"english": "The students' paintings will be on show in the hall next week.", "chinese": "学生们的画作下周将在大厅展出。"},
+    "application": {"prompt": "The students' paintings will be ___ in the hall next week. A. on show B. in show", "solution": "A。解析：作品“在展出”用 be on show；in show 不是该固定搭配。"},
+    "sources": [{"label": "Cambridge Dictionary: on show", "url": "https://dictionary.cambridge.org/dictionary/english/on-show"}]
+  },
+  {
+    "word": "calligrapher",
+    "examTags": ["词汇·职业名词派生", "阅读·书法与传统艺术"],
+    "grammar": "n. 书法家。calligraphy 是书法艺术或字迹，calligraphic 是形容词；复数 calligraphers。",
+    "collocations": "a skilled calligrapher; Chinese calligrapher; calligrapher's brush; study calligraphy",
+    "commonMistake": "calligrapher 指写书法的人，calligraphy 指书法本身；句中需要“某人”作主语时不能用 calligraphy。",
+    "example": {"english": "The calligrapher wrote each character with a soft brush.", "chinese": "这位书法家用一支柔软的毛笔写下每个字。"},
+    "application": {"prompt": "The ___ wrote each character with a brush. A. calligraphy B. calligrapher", "solution": "B。解析：拿笔书写的是 calligrapher（书法家）；calligraphy 是书法艺术或字迹。"},
+    "sources": [{"label": "Cambridge Dictionary: calligrapher", "url": "https://dictionary.cambridge.org/dictionary/english/calligrapher"}]
+  },
+  {
+    "word": "recreate",
+    "examTags": ["词汇·动词派生", "阅读·历史重现与艺术"],
+    "grammar": "v. 使再现；重现。recreate—recreated—recreated；注意该义读作 /ˌriːkriˈeɪt/，重音在后半部分。",
+    "collocations": "recreate a scene; recreate the past; recreate an experience; recreate a historical village",
+    "commonMistake": "recreate（重现）重音在 -ate；不要和名词 recreation 或美式动词 recreate（休闲娱乐，重音不同）混作一个意思。",
+    "example": {"english": "The museum used old tools to recreate life in the village a century ago.", "chinese": "博物馆用旧工具重现了一百年前村庄里的生活。"},
+    "application": {"prompt": "The team used old photos to ___ the village as it looked a century ago. A. recreate B. recognize", "solution": "A。解析：依据旧照片“重现”过去的村庄应说 recreate；recognize 是认出。"},
+    "sources": [{"label": "Cambridge Dictionary: recreate", "url": "https://dictionary.cambridge.org/dictionary/english/recreate"}]
+  },
+  {
+    "word": "pity",
+    "examTags": ["词汇·名词与动词", "语法·感叹表达"],
+    "grammar": "n. 遗憾；同情；v. 同情。常用 What a pity! 和 It's a pity that...；pity 作动词时可接人作宾语。",
+    "collocations": "What a pity!; it's a pity that; feel pity for someone; take pity on someone",
+    "commonMistake": "感叹“真遗憾”用 What a pity!；what 后接名词短语，不能误写成 How a pity。",
+    "example": {"english": "What a pity that the outdoor concert was cancelled by the rain!", "chinese": "户外音乐会被雨取消了，真遗憾！"},
+    "application": {"prompt": "___ that the outdoor concert was cancelled by rain! A. What pity B. What a pity", "solution": "B。解析：户外音乐会因雨取消令人遗憾，感叹句要说 What a pity!，pity 前需要 a。"},
+    "sources": [{"label": "Cambridge Dictionary: pity", "url": "https://dictionary.cambridge.org/dictionary/english/pity"}]
+  },
+  {
+    "word": "original",
+    "examTags": ["词汇·形容词与名词", "阅读·作品与版本"],
+    "grammar": "adj. 原来的；最初的；独创的；n. 原作。副词 originally；名词 originality。",
+    "collocations": "the original painting; original idea; original version; originally created",
+    "commonMistake": "original painting 指原作，originally 是副词“起初”；描述名词 painting 时不能用 originally。",
+    "example": {"english": "The original painting is kept in a museum, while copies are sold in the shop.", "chinese": "原画收藏在博物馆里，而复制品在商店出售。"},
+    "application": {"prompt": "The artist signed the ___ painting, not the printed copy. A. original B. origin", "solution": "A。解析：被签名的是“原作”绘画，用形容词 original 修饰 painting；origin 是起源。"},
+    "sources": [{"label": "Cambridge Dictionary: original", "url": "https://dictionary.cambridge.org/dictionary/english/original"}]
+  },
+  {
+    "word": "version",
+    "examTags": ["词汇·可数名词", "阅读·文本与作品"],
+    "grammar": "n. 版本；说法；译本。可数，常用 a version of sth；动词形式为 vary，含义不同。",
+    "collocations": "a new version of; the latest version; an English version; a shorter version",
+    "commonMistake": "version 是“版本”的名词；不要与动词 vary（变化）混淆，也不要漏掉 version 前的冠词。",
+    "example": {"english": "I saved a new version of the file after correcting the spelling.", "chinese": "改正拼写后，我保存了这个文件的新版本。"},
+    "application": {"prompt": "I saved a new ___ of the file after correcting the spelling. A. vary B. version", "solution": "B。解析：文件修改后保存的是一个新“版本”，需要名词 version；vary 是动词“变化”。"},
+    "sources": [{"label": "Cambridge Dictionary: version", "url": "https://dictionary.cambridge.org/dictionary/english/version"}]
+  },
+  {
+    "word": "copy",
+    "examTags": ["词汇·名词与动词", "语法·动词形式"],
+    "grammar": "v. 复制；抄写；n. 复制件；一份。copy—copies（第三人称单数/复数名词）—copied—copied。",
+    "collocations": "copy a document; copy down the address; a copy of a book; make a copy",
+    "commonMistake": "copy 变过去式要去 y 加 -ied：copied；第三人称单数写 copies，不能写 copys。",
+    "example": {"english": "Please copy the address carefully before you send the letter.", "chinese": "寄信前请仔细抄下地址。"},
+    "application": {"prompt": "Please ___ the address carefully before you send the letter. A. copy B. copies", "solution": "A。解析：Please 后用动词原形，故用 copy；copies 是第三人称单数或名词复数。"},
+    "sources": [{"label": "Cambridge Dictionary: copy", "url": "https://dictionary.cambridge.org/dictionary/english/copy"}]
+  },
+  {
+    "word": "apart",
+    "examTags": ["词汇·副词", "语法·距离表达"],
+    "grammar": "adv. 分开；相隔。表示距离时常用 be ... metres apart；take apart 表示拆开。",
+    "collocations": "five metres apart; grow apart; fall apart; take a machine apart",
+    "commonMistake": "表示两者相隔多远时把距离放在 apart 前：The houses are 20 metres apart；不要说 apart 20 metres。",
+    "example": {"english": "The two houses stand only a few metres apart.", "chinese": "这两栋房子只相隔几米。"},
+    "application": {"prompt": "The two villages lie five kilometres ___. A. parts B. apart", "solution": "B。解析：表示两个地点“相隔五公里”用 five kilometres apart。"},
+    "sources": [{"label": "Cambridge Dictionary: apart", "url": "https://dictionary.cambridge.org/dictionary/english/apart"}]
+  },
+  {
+    "word": "apart from",
+    "examTags": ["词汇·介词短语", "阅读·补充与排除信息"],
+    "grammar": "短语：apart from 可表示“除……之外”（排除），也可表示“除……之外还”（补充），需结合上下文判断。",
+    "collocations": "apart from the cost; apart from one mistake; apart from that; quite apart from",
+    "commonMistake": "apart from 有时表示排除、有时表示补充；做阅读题要看前后语义，不能一律只译成“除了……不算”。",
+    "example": {"english": "Apart from the cost, the trip was enjoyable from beginning to end.", "chinese": "除了费用这一点，这趟旅行从头到尾都很愉快。"},
+    "application": {"prompt": "___ the cost, the trip was very enjoyable from beginning to end. A. Apart from B. In spite", "solution": "A。解析：此处意为“除了费用之外”，用 apart from；in spite 后还必须接 of。"},
+    "sources": [{"label": "Cambridge Dictionary: apart from", "url": "https://dictionary.cambridge.org/dictionary/english/apart-from"}]
+  },
+  {
+    "word": "postman",
+    "examTags": ["词汇·职业名词", "语法·不规则复数"],
+    "grammar": "n. 邮递员。复数 postmen，属于 man 结尾的复合名词不规则变化；女性可称 postwoman。",
+    "collocations": "the postman delivered; a local postman; postman and postwoman; postman's bag",
+    "commonMistake": "postman 的复数是 postmen，不是 postmans；性别不明或泛指职业时也可用 postal worker。",
+    "example": {"english": "Our postman rang the bell and handed my father a letter.", "chinese": "邮递员按响门铃，把一封信交给了我父亲。"},
+    "application": {"prompt": "Several ___ delivered letters to the houses on our street. A. postmans B. postmen", "solution": "B。解析：several 后用复数；postman 的不规则复数是 postmen。"},
+    "sources": [{"label": "Cambridge Dictionary: postman", "url": "https://dictionary.cambridge.org/dictionary/english/postman"}]
+  },
+  {
+    "word": "packet",
+    "examTags": ["词汇·可数名词", "阅读·包装与购物"],
+    "grammar": "n. 小包；小袋；一小包的量。可数，常用 a packet of；英式英语常用 packet，美式语境常见 package。",
+    "collocations": "a packet of biscuits; a packet of seeds; open a packet; packet lunch",
+    "commonMistake": "packet 是可数名词，表示“一包”时要有 a/an 或数词；a packet of 后接内容物。",
+    "example": {"english": "Mum opened a packet of biscuits and shared them with us.", "chinese": "妈妈打开一包饼干，和我们一起分享。"},
+    "application": {"prompt": "Mum opened a ___ of biscuits and shared them with us. A. packet B. slice", "solution": "A。解析：饼干通常装在一包里，a packet of biscuits 表示“一包饼干”。"},
+    "sources": [{"label": "Cambridge Dictionary: packet", "url": "https://dictionary.cambridge.org/dictionary/english/packet"}]
+  },
+  {
+    "word": "chalk",
+    "examTags": ["词汇·物质名词", "阅读·课堂用具"],
+    "grammar": "n. 粉笔；白垩，通常作不可数名词。单根粉笔说 a piece of chalk；也可作动词表示用粉笔写。",
+    "collocations": "a piece of chalk; chalk dust; write in chalk; a chalk drawing",
+    "commonMistake": "chalk 通常不可数，表示一根粉笔用 a piece of chalk；不说 a chalk。",
+    "example": {"english": "The teacher wrote the answer on the board with a piece of chalk.", "chinese": "老师用一支粉笔在黑板上写下了答案。"},
+    "application": {"prompt": "The teacher wrote on the board with a piece of ___. A. chalky B. chalk", "solution": "B。解析：piece of 后接物质名词 chalk（粉笔）；chalky 是形容词“含粉笔的”。"},
+    "sources": [{"label": "Cambridge Dictionary: chalk", "url": "https://dictionary.cambridge.org/dictionary/english/chalk"}]
+  },
+  {
+    "word": "boss",
+    "examTags": ["词汇·职业与关系名词", "语法·所有格"],
+    "grammar": "n. 老板；上司。可数，复数 bosses；所有格 boss's，如 my boss's office。",
+    "collocations": "the boss of a company; my new boss; boss's office; work for a boss",
+    "commonMistake": "boss 以 -s 结尾，复数需加 -es 写 bosses；单数所有格通常加 's：the boss's decision。",
+    "example": {"english": "Our boss asked the team to finish the report before lunch.", "chinese": "我们的老板让团队在午饭前完成报告。"},
+    "application": {"prompt": "Everyone in the office reports to Ms Lee; she is our ___. A. boss B. customer", "solution": "A。解析：员工向她汇报工作，说明 Ms Lee 是他们的 boss（上司），不是顾客。"},
+    "sources": [{"label": "Cambridge Dictionary: boss", "url": "https://dictionary.cambridge.org/dictionary/english/boss"}]
+  },
+  {
+    "word": "within",
+    "examTags": ["词汇·介词", "阅读·时间与范围"],
+    "grammar": "prep. 在……之内；不超过。可接一段时间、范围或边界：within two hours / within the city limits。",
+    "collocations": "within an hour; within walking distance; within the city; within reach",
+    "commonMistake": "within two hours 表示“在两小时之内”，不表示“两个小时之后”；若表示之后需用 in two hours。",
+    "example": {"english": "Please return the library book within two weeks.", "chinese": "请在两周内归还图书馆的书。"},
+    "application": {"prompt": "Please return the library book ___ two weeks. A. between B. within", "solution": "B。解析：归还期限为“两周内”，用 within two weeks；between 通常需说明两端界限。"},
+    "sources": [{"label": "Cambridge Dictionary: within", "url": "https://dictionary.cambridge.org/dictionary/english/within"}]
+  },
+  {
+    "word": "noisy",
+    "examTags": ["词汇·形容词派生", "语法·词性辨析"],
+    "grammar": "adj. 嘈杂的；吵闹的。名词 noise；副词 noisily；比较级 noisier，最高级 noisiest。",
+    "collocations": "a noisy classroom; noisy neighbours; noisy traffic; noisy children",
+    "commonMistake": "noisy 是形容词，用来描述地方或人；noise 是名词，可说 make a lot of noise。",
+    "example": {"english": "The classroom became noisy when the students returned from lunch.", "chinese": "学生们午饭后回到教室时，教室变得很吵。"},
+    "application": {"prompt": "The classroom became so ___ that the teacher paused the lesson. A. noisy B. noise", "solution": "A。解析：became 后作表语需要形容词 noisy；noise 是名词。"},
+    "sources": [{"label": "Cambridge Dictionary: noisy", "url": "https://dictionary.cambridge.org/dictionary/english/noisy"}]
+  },
+  {
+    "word": "pond",
+    "examTags": ["词汇·可数名词", "阅读·自然与动物"],
+    "grammar": "n. 池塘。可数名词，复数 ponds；通常比 lake 小，也可指公园或庭院中的人工水池。",
+    "collocations": "a garden pond; a small pond; pond water; frogs in a pond",
+    "commonMistake": "pond 指池塘，拼写中是 d；不要和 pound（英镑或磅）混淆，后者多一个字母 u。",
+    "example": {"english": "Frogs were croaking beside the small pond in the garden.", "chinese": "花园的小池塘旁有青蛙在呱呱叫。"},
+    "application": {"prompt": "Frogs were croaking beside the small ___ in the garden. A. pound B. pond", "solution": "B。解析：花园里有青蛙的水域是 pond（池塘）；pound 表示“磅/英镑”。"},
+    "sources": [{"label": "Cambridge Dictionary: pond", "url": "https://dictionary.cambridge.org/dictionary/english/pond"}]
+  },
+  {
+    "word": "sunflower",
+    "examTags": ["词汇·复合名词", "阅读·植物与自然"],
+    "grammar": "n. 向日葵。可数名词，复数 sunflowers；常作定语构成 sunflower seeds（葵花籽）。",
+    "collocations": "a field of sunflowers; sunflower seeds; a sunflower head; grow sunflowers",
+    "commonMistake": "sunflower 是一个词，不要拆写成 sun flower；表示葵花籽用复数 seeds。",
+    "example": {"english": "A tall sunflower stood beside the garden gate.", "chinese": "花园门旁长着一株高高的向日葵。"},
+    "application": {"prompt": "The ___ turned its head toward the afternoon sun. A. sunflower B. snowflake", "solution": "A。解析：会朝向阳光生长的是 sunflower（向日葵），不是雪花 snowflake。"},
+    "sources": [{"label": "Cambridge Dictionary: sunflower", "url": "https://dictionary.cambridge.org/dictionary/english/sunflower"}]
+  },
+  {
+    "word": "starry",
+    "examTags": ["词汇·形容词派生", "阅读·夜空描写"],
+    "grammar": "adj. 布满星星的。由 star + -y 构成，常修饰 sky、night 等名词；比较级可用 more starry。",
+    "collocations": "a starry sky; a starry night; a starry evening; look up at the starry sky",
+    "commonMistake": "starry 是形容词，表示“星光点点的”；star 是名词，不能直接说 a star sky。",
+    "example": {"english": "We lay on the grass and watched the starry sky.", "chinese": "我们躺在草地上看满天繁星。"},
+    "application": {"prompt": "We lay on the grass and watched the ___ sky. A. starred B. starry", "solution": "B。解析：修饰 sky 且表示“布满星星的”用形容词 starry。"},
+    "sources": [{"label": "Cambridge Dictionary: starry", "url": "https://dictionary.cambridge.org/dictionary/english/starry"}]
+  },
+  {
+    "word": "passion",
+    "examTags": ["词汇·名词派生", "阅读·兴趣与情感"],
+    "grammar": "n. 激情；热爱；强烈情感。常用 passion for sth；形容词 passionate，常见 be passionate about sth。",
+    "collocations": "a passion for art; have a passion for music; speak with passion; passionate about nature",
+    "commonMistake": "名词 passion 后常接 for：a passion for painting；形容词 passionate 后常接 about：passionate about painting。",
+    "example": {"english": "Maya speaks about wildlife with such passion that everyone listens.", "chinese": "玛雅谈起野生动物时充满热情，大家都会认真听。"},
+    "application": {"prompt": "Maya speaks about wildlife with such ___ that everyone listens. A. passion B. passionate", "solution": "A。解析：such 后此处需要名词 passion；passionate 是形容词，不能直接放在 such 后。"},
+    "sources": [{"label": "Cambridge Dictionary: passion", "url": "https://dictionary.cambridge.org/dictionary/english/passion"}]
+  }
+]

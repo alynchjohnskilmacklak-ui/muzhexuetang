@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client'
 
-type AutomaticMealSyncInput = {
+export type AutomaticMealSyncInput = {
   eligibleStudentIds: string[]
   eatingStudentIds: string[]
   mealDate: Date
@@ -12,6 +12,16 @@ type AutomaticMealSyncInput = {
   teacherId: string
   teacherName: string
   notes?: string
+}
+
+export function resolveEatingMealStudentIds(
+  records: Array<{ studentId: string; status: string }>,
+  selectedStudentIds: string[],
+) {
+  const presentStudentIds = new Set(records
+    .filter((record) => record.status === 'PRESENT')
+    .map((record) => record.studentId))
+  return [...new Set(selectedStudentIds)].filter((studentId) => presentStudentIds.has(studentId))
 }
 
 /**

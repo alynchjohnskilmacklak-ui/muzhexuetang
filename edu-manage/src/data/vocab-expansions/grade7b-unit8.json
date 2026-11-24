@@ -1,0 +1,1586 @@
+[
+  {
+    "word": "upon",
+    "examTags": [
+      "词汇·故事阅读",
+      "语法·介词用法"
+    ],
+    "grammar": "介词，表示“在……上”；用法较正式，常见于故事或书面语。",
+    "collocations": "upon the table；once upon a time",
+    "commonMistake": "日常表达“在……上”更常用 on；upon 常见于固定或较正式的表达。",
+    "example": {
+      "english": "The bird landed upon a low branch.",
+      "chinese": "那只鸟落在一根低矮的树枝上。"
+    },
+    "application": {
+      "prompt": "The king put the book on top of the table, not below it. The book is ___ the table. (upon / under)",
+      "solution": "upon。解析：upon 表示“在……上”，与句意相符。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: upon",
+        "url": "https://dictionary.cambridge.org/dictionary/english/upon"
+      }
+    ]
+  },
+  {
+    "word": "once upon a time",
+    "examTags": [
+      "词汇·故事开头",
+      "语用·固定表达"
+    ],
+    "grammar": "固定表达，常用于童话或故事开头，表示“从前、很久以前”。",
+    "collocations": "Once upon a time, ...；a story begins with once upon a time",
+    "commonMistake": "这是完整的固定表达，不能漏掉 once 或 upon。",
+    "example": {
+      "english": "Once upon a time, a little duckling lived by a lake.",
+      "chinese": "从前，有一只小鸭子住在湖边。"
+    },
+    "application": {
+      "prompt": "Choose the usual opening for a fairy tale: (Once upon a time / In the end)",
+      "solution": "Once upon a time。解析：童话故事常以 Once upon a time 开头。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: once upon a time",
+        "url": "https://dictionary.cambridge.org/dictionary/english/once-upon-a-time"
+      }
+    ]
+  },
+  {
+    "word": "bite",
+    "examTags": [
+      "词汇·不规则动词",
+      "语法·动词过去式"
+    ],
+    "grammar": "动词，表示咬、咬伤；过去式 bit，过去分词 bitten。",
+    "collocations": "bite an apple；bite someone；a dog bite",
+    "commonMistake": "bite 的过去式是 bit，过去分词是 bitten；不要把它们混淆。",
+    "example": {
+      "english": "The dog bit the stick and carried it away.",
+      "chinese": "狗咬住木棍，把它叼走了。"
+    },
+    "application": {
+      "prompt": "Yesterday the dog ___ the toy. (bit / bited)",
+      "solution": "bit。解析：bite 的过去式是 bit。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bite",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bite"
+      }
+    ]
+  },
+  {
+    "word": "bite through",
+    "examTags": [
+      "词汇·短语动词",
+      "语法·动词搭配"
+    ],
+    "grammar": "短语动词，表示“咬穿”；through 后接被咬穿的物体。",
+    "collocations": "bite through a rope；bite through the bag",
+    "commonMistake": "bite through 后直接接被咬穿的物体，不加 at。",
+    "example": {
+      "english": "A mouse bit through the paper bag.",
+      "chinese": "一只老鼠咬穿了纸袋。"
+    },
+    "application": {
+      "prompt": "The mouse made a hole in the bag with its teeth. It ___ the bag. (bit through / bit at)",
+      "solution": "bit through。解析：咬穿某物用 bite through。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bite",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bite"
+      }
+    ]
+  },
+  {
+    "word": "net",
+    "examTags": [
+      "词汇·故事物品",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "可数名词，表示网或网状物；复数为 nets。",
+    "collocations": "a fishing net；a net for catching fish；mend a net",
+    "commonMistake": "net 是可数名词，单数前通常需要 a、the 等限定词。",
+    "example": {
+      "english": "The fisherman repaired his net beside the lake.",
+      "chinese": "渔夫在湖边修补他的网。"
+    },
+    "application": {
+      "prompt": "The fisherman uses a ___ to catch fish. (net / feather)",
+      "solution": "net。解析：用来捕鱼的网是 net。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: net",
+        "url": "https://dictionary.cambridge.org/dictionary/english/net"
+      }
+    ]
+  },
+  {
+    "word": "hunter",
+    "examTags": [
+      "词汇·人物与职业",
+      "语法·名词构词"
+    ],
+    "grammar": "可数名词，表示猎人、搜寻者；由 hunt 加后缀 -er 构成。",
+    "collocations": "a hunter in the forest；a skilled hunter",
+    "commonMistake": "hunter 指猎人或搜寻者；表示“打猎”这一动作应使用 hunt。",
+    "example": {
+      "english": "The hunter walked quietly through the forest.",
+      "chinese": "猎人悄悄地穿过森林。"
+    },
+    "application": {
+      "prompt": "A person who hunts animals is a ___. (hunter / duckling)",
+      "solution": "hunter。解析：猎人是 hunter。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hunter",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hunter"
+      }
+    ]
+  },
+  {
+    "word": "promise",
+    "examTags": [
+      "词汇·承诺表达",
+      "语法·动词与名词"
+    ],
+    "grammar": "可作动词或名词，表示承诺、诺言；常用 promise to do sth 或 make a promise。",
+    "collocations": "promise to help；keep a promise；make a promise",
+    "commonMistake": "promise 作动词后可接 to do；名词 promise 常与 make、keep、break 搭配。",
+    "example": {
+      "english": "The girl promised to bring the net back.",
+      "chinese": "女孩答应把网拿回来。"
+    },
+    "application": {
+      "prompt": "He said he would help and made a ___. (promise / war)",
+      "solution": "promise。解析：make a promise 表示许下承诺。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: promise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/promise"
+      }
+    ]
+  },
+  {
+    "word": "long ago",
+    "examTags": [
+      "词汇·过去时间表达",
+      "语法·时间状语"
+    ],
+    "grammar": "副词短语，表示“很久以前”；常用于叙述过去的故事。",
+    "collocations": "a long time ago；long ago",
+    "commonMistake": "long ago 指过去很久以前；表达具体的“……以前”常说 three years ago。",
+    "example": {
+      "english": "Long ago, a wise king lived near the sea.",
+      "chinese": "很久以前，一位明智的国王住在海边。"
+    },
+    "application": {
+      "prompt": "A story begins with “A very long time ___, ...” (ago / later)",
+      "solution": "ago。解析：表示“很久以前”用 long ago。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: long ago",
+        "url": "https://dictionary.cambridge.org/dictionary/english/long-ago"
+      }
+    ]
+  },
+  {
+    "word": "war",
+    "examTags": [
+      "词汇·历史与故事",
+      "语法·可数名词与不可数名词"
+    ],
+    "grammar": "名词，表示战争；泛指战争时常作不可数名词，具体的一场战争可作可数名词。",
+    "collocations": "be at war；a long war；during the war",
+    "commonMistake": "表示战争状态常用 at war；谈论某一场战争时可说 a war 或 the war。",
+    "example": {
+      "english": "The story takes place during a war.",
+      "chinese": "这个故事发生在一场战争期间。"
+    },
+    "application": {
+      "prompt": "The two countries were fighting for years. They were at ___. (war / peace)",
+      "solution": "war。解析：处于战争状态可说 be at war。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: war",
+        "url": "https://dictionary.cambridge.org/dictionary/english/war"
+      }
+    ]
+  },
+  {
+    "word": "neighbour",
+    "examTags": [
+      "词汇·人物与关系",
+      "词汇·英美拼写"
+    ],
+    "grammar": "可数名词，表示邻居；英式拼写 neighbour，美式拼写 neighbor。",
+    "collocations": "next-door neighbour；a friendly neighbour；talk to a neighbour",
+    "commonMistake": "neighbour 是英式拼写；neighbor 是美式拼写，含义相同。",
+    "example": {
+      "english": "Our neighbour brought us a basket of apples.",
+      "chinese": "我们的邻居给我们送来一篮苹果。"
+    },
+    "application": {
+      "prompt": "Choose the British spelling from the word list: (neighbour / neighbor)",
+      "solution": "neighbour。解析：本词条采用英式拼写 neighbour。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: neighbour",
+        "url": "https://dictionary.cambridge.org/dictionary/english/neighbour"
+      }
+    ]
+  },
+  {
+    "word": "wise",
+    "examTags": [
+      "词汇·人物品质",
+      "语法·形容词用法"
+    ],
+    "grammar": "形容词，表示明智的、高明的；常放在名词前或 be 动词后。",
+    "collocations": "a wise king；a wise choice；be wise to do sth",
+    "commonMistake": "wise 是形容词；修饰动词时需用 wisely。",
+    "example": {
+      "english": "The wise king listened to both sides of the story.",
+      "chinese": "明智的国王听取了故事双方的说法。"
+    },
+    "application": {
+      "prompt": "A person who makes good choices is ___. (wise / truth)",
+      "solution": "wise。解析：形容词 wise 表示明智的。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wise"
+      }
+    ]
+  },
+  {
+    "word": "emperor",
+    "examTags": [
+      "词汇·人物与历史",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "可数名词，表示皇帝；复数为 emperors。",
+    "collocations": "the emperor；an ancient emperor；the emperor's palace",
+    "commonMistake": "emperor 是可数名词；表示特指的皇帝时常用 the emperor。",
+    "example": {
+      "english": "The emperor asked the official to tell the truth.",
+      "chinese": "皇帝让官员说出真相。"
+    },
+    "application": {
+      "prompt": "The ruler of an empire is an ___. (emperor / artist)",
+      "solution": "emperor。解析：帝国的统治者是 emperor。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: emperor",
+        "url": "https://dictionary.cambridge.org/dictionary/english/emperor"
+      }
+    ]
+  },
+  {
+    "word": "lie",
+    "examTags": [
+      "词汇·易混不规则动词",
+      "语法·过去式辨析"
+    ],
+    "grammar": "按课本义作动词表示撒谎，过去式和过去分词为 lied；作名词表示谎言。",
+    "collocations": "tell a lie；lie to someone；tell the truth",
+    "commonMistake": "表示“撒谎”时 lie 的过去式是 lied；不要与表示“躺”的 lie（lay, lain）混淆。",
+    "example": {
+      "english": "The boy lied to the king about the broken net.",
+      "chinese": "男孩对国王撒谎，说网没有破。"
+    },
+    "application": {
+      "prompt": "He said something untrue to the king. He ___ to the king. (lied / lay)",
+      "solution": "lied。解析：lie 表示“撒谎”时过去式为 lied。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lie",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lie"
+      }
+    ]
+  },
+  {
+    "word": "pretend",
+    "examTags": [
+      "词汇·故事表达",
+      "语法·动词句型"
+    ],
+    "grammar": "动词，表示假装；常用 pretend to do sth 或 pretend (that) 从句。",
+    "collocations": "pretend to be asleep；pretend to know；pretend that ...",
+    "commonMistake": "pretend 后可接 to do；不要用 pretend someone to do 的结构。",
+    "example": {
+      "english": "The duckling pretended to be asleep.",
+      "chinese": "小鸭子假装睡着了。"
+    },
+    "application": {
+      "prompt": "The child acted as if he were asleep. He ___ to be asleep. (pretended / praised)",
+      "solution": "pretended。解析：假装做某事可用 pretend to do。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pretend",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pretend"
+      }
+    ]
+  },
+  {
+    "word": "official",
+    "examTags": [
+      "词汇·人物与社会",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "按课本义作可数名词，表示官员、高级职员；复数为 officials。",
+    "collocations": "a government official；a school official；an official",
+    "commonMistake": "official 作名词表示官员；作形容词时可表示官方的，注意词性随语境变化。",
+    "example": {
+      "english": "An official read the new rule to the villagers.",
+      "chinese": "一位官员向村民宣读了新规定。"
+    },
+    "application": {
+      "prompt": "A person who works in an official position is an ___. (official / hunter)",
+      "solution": "official。解析：官员是 official。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: official",
+        "url": "https://dictionary.cambridge.org/dictionary/english/official"
+      }
+    ]
+  },
+  {
+    "word": "silly",
+    "examTags": [
+      "词汇·人物品质",
+      "语法·形容词用法"
+    ],
+    "grammar": "形容词，表示愚蠢的、傻的；可作定语或表语。",
+    "collocations": "a silly mistake；a silly idea；That was silly.",
+    "commonMistake": "silly 是形容词；不要与副词 silly 混用，副词形式为 foolishly 等。",
+    "example": {
+      "english": "It was silly to hide the truth from your friends.",
+      "chinese": "对朋友隐瞒真相是不明智的。"
+    },
+    "application": {
+      "prompt": "A careless and foolish idea can be called ___. (silly / suddenly)",
+      "solution": "silly。解析：silly 表示愚蠢的、傻的。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: silly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/silly"
+      }
+    ]
+  },
+  {
+    "word": "decide",
+    "examTags": [
+      "词汇·决定与计划",
+      "语法·动词不定式"
+    ],
+    "grammar": "动词，表示决定；常用 decide to do sth。",
+    "collocations": "decide to go；decide what to do；decide on a plan",
+    "commonMistake": "decide 后表示“决定做某事”常接 to do，不说 decide do。",
+    "example": {
+      "english": "They decided to search the forest together.",
+      "chinese": "他们决定一起搜寻森林。"
+    },
+    "application": {
+      "prompt": "The children made a choice to go home. They decided ___ home. (to go / go)",
+      "solution": "to go。解析：decide 后接动词不定式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: decide",
+        "url": "https://dictionary.cambridge.org/dictionary/english/decide"
+      }
+    ]
+  },
+  {
+    "word": "praise",
+    "examTags": [
+      "词汇·评价与鼓励",
+      "语法·动词与名词"
+    ],
+    "grammar": "可作动词或名词，表示赞美、表扬；常用 praise sb for sth。",
+    "collocations": "praise someone for；receive praise；words of praise",
+    "commonMistake": "表达因某事表扬某人用 praise sb for sth；不要漏掉 for。",
+    "example": {
+      "english": "The king praised the child for telling the truth.",
+      "chinese": "国王表扬了那个说出真相的孩子。"
+    },
+    "application": {
+      "prompt": "The teacher said Mia did well and praised her ___ her honesty. (for / at)",
+      "solution": "for。解析：praise sb for sth 表示因某事表扬某人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: praise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/praise"
+      }
+    ]
+  },
+  {
+    "word": "afraid",
+    "examTags": [
+      "词汇·情绪表达",
+      "语法·形容词搭配"
+    ],
+    "grammar": "形容词，表示害怕的、担心的；常用 be afraid of sth 或 be afraid to do sth。",
+    "collocations": "be afraid of the dark；be afraid to ask；I'm afraid ...",
+    "commonMistake": "afraid 常与 be 连用；说害怕某物用 afraid of，不说 afraid from。",
+    "example": {
+      "english": "The duckling was afraid of the loud noise.",
+      "chinese": "小鸭子害怕那声巨响。"
+    },
+    "application": {
+      "prompt": "The child fears the dark. He is afraid ___ it. (of / to)",
+      "solution": "of。解析：害怕某物用 be afraid of sth。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: afraid",
+        "url": "https://dictionary.cambridge.org/dictionary/english/afraid"
+      }
+    ]
+  },
+  {
+    "word": "suddenly",
+    "examTags": [
+      "词汇·副词构词",
+      "语法·副词修饰句子"
+    ],
+    "grammar": "副词，表示突然地、出乎意料地；可放在句首或动词前。",
+    "collocations": "suddenly appear；suddenly stop；Suddenly, ...",
+    "commonMistake": "suddenly 是副词；对应形容词 sudden，修饰名词时用 sudden。",
+    "example": {
+      "english": "Suddenly, the door opened and a swan walked in.",
+      "chinese": "突然，门开了，一只天鹅走了进来。"
+    },
+    "application": {
+      "prompt": "The lights went out without warning. ___, the room became dark. (Suddenly / Sillily)",
+      "solution": "Suddenly。解析：表示事情突然发生用 suddenly。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: suddenly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/suddenly"
+      }
+    ]
+  },
+  {
+    "word": "at first",
+    "examTags": [
+      "词汇·故事顺序",
+      "语法·时间短语"
+    ],
+    "grammar": "副词短语，表示“起初、最初”；常与 later、but 等词形成前后变化。",
+    "collocations": "at first；at first ... but later ...",
+    "commonMistake": "at first 表示起初；at the beginning 常指某事物的开头或起点。",
+    "example": {
+      "english": "At first, the duckling felt lonely, but later it made friends.",
+      "chinese": "起初，小鸭子感到孤独，但后来它交到了朋友。"
+    },
+    "application": {
+      "prompt": "The story was confusing in the beginning, but I understood it later. ___, I did not understand it. (At first / In the end)",
+      "solution": "At first。解析：起初不明白，后来理解，对应 at first。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: at first",
+        "url": "https://dictionary.cambridge.org/dictionary/english/at-first"
+      }
+    ]
+  },
+  {
+    "word": "truth",
+    "examTags": [
+      "词汇·事实与表达",
+      "语法·不可数名词"
+    ],
+    "grammar": "不可数名词，表示真相、事实；常用 the truth，表示“真相”时一般不加 a。",
+    "collocations": "tell the truth；know the truth；the truth about sth",
+    "commonMistake": "truth 通常是不可数名词；说“一个真相”时不要直接用 a truth 表达课本义。",
+    "example": {
+      "english": "The truth about the missing net surprised everyone.",
+      "chinese": "网不见的真相让所有人都很惊讶。"
+    },
+    "application": {
+      "prompt": "Choose the natural expression: “Please tell me ___.” (the truth / a truth)",
+      "solution": "the truth。解析：固定表达为 tell the truth。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: truth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/truth"
+      }
+    ]
+  },
+  {
+    "word": "tell the truth",
+    "examTags": [
+      "词汇·诚实表达",
+      "语法·固定搭配"
+    ],
+    "grammar": "固定动词短语，表示“说实话”；tell 的过去式和过去分词为 told。",
+    "collocations": "tell the truth；to tell the truth；tell someone the truth",
+    "commonMistake": "固定搭配用 tell the truth，不说 say the truth；tell 的过去式是 told。",
+    "example": {
+      "english": "The boy told the truth about the broken basket.",
+      "chinese": "男孩说出了篮子被弄坏的真相。"
+    },
+    "application": {
+      "prompt": "Choose the correct verb: “Please ___ the truth.” (tell / say)",
+      "solution": "tell。解析：固定搭配是 tell the truth。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: truth",
+        "url": "https://dictionary.cambridge.org/dictionary/english/truth"
+      }
+    ]
+  },
+  {
+    "word": "make money",
+    "examTags": [
+      "词汇·生活与劳动",
+      "语法·动词短语"
+    ],
+    "grammar": "动词短语，表示赚钱；money 通常作不可数名词。",
+    "collocations": "make money；make money by doing sth；make enough money",
+    "commonMistake": "表达“赚钱”用 make money；money 前通常不加 a。",
+    "example": {
+      "english": "The farmer sells apples to make money.",
+      "chinese": "农民卖苹果赚钱。"
+    },
+    "application": {
+      "prompt": "The farmer sells fruit to earn money. He sells fruit to ___. (make money / make a money)",
+      "solution": "make money。解析：money 通常不可数，短语为 make money。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: make money",
+        "url": "https://dictionary.cambridge.org/dictionary/english/make-money"
+      }
+    ]
+  },
+  {
+    "word": "true",
+    "examTags": [
+      "词汇·事实与辨析",
+      "语法·形容词与名词"
+    ],
+    "grammar": "形容词，表示符合事实的、真正的；名词形式 truth，副词形式 truly。",
+    "collocations": "a true story；be true；true to life",
+    "commonMistake": "true 是形容词，修饰名词；truth 是名词，不要混用。",
+    "example": {
+      "english": "The old king learned that the story was true.",
+      "chinese": "老国王得知这个故事是真的。"
+    },
+    "application": {
+      "prompt": "Choose the adjective: “Is the story ___?” (true / truth)",
+      "solution": "true。解析：be 动词后作表语要用形容词 true。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: true",
+        "url": "https://dictionary.cambridge.org/dictionary/english/true"
+      }
+    ]
+  },
+  {
+    "word": "hate",
+    "examTags": [
+      "词汇·情感表达",
+      "语法·动词后接形式"
+    ],
+    "grammar": "动词，表示不喜欢、厌恶；后可接名词、动词 -ing 或 to do。hate doing 与 hate to do 都可用。",
+    "collocations": "hate doing sth；hate a noise；hate to wait",
+    "commonMistake": "hate 后可接动名词或不定式；不要直接接动词原形，如 hate wait。",
+    "example": {
+      "english": "The duckling hated being alone.",
+      "chinese": "小鸭子不喜欢独自待着。"
+    },
+    "application": {
+      "prompt": "Complete the sentence: “I hate ___ for a long time.” (waiting / wait)",
+      "solution": "waiting。解析：hate 后可接动词 -ing 形式。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hate",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hate"
+      }
+    ]
+  },
+  {
+    "word": "get out",
+    "examTags": [
+      "词汇·短语动词",
+      "语法·动词与介词搭配"
+    ],
+    "grammar": "短语动词，可表示“离开、逃脱”；常用 get out of a place。",
+    "collocations": "get out of the room；get out safely；get out of the car",
+    "commonMistake": "get out 单独使用可表示离开；指出离开某个空间时常说 get out of it/the room。",
+    "example": {
+      "english": "The duckling got out of the net and ran to the lake.",
+      "chinese": "小鸭子从网里逃了出来，跑向湖边。"
+    },
+    "application": {
+      "prompt": "The bird escaped from the cage. It managed to ___. (get out / go away at)",
+      "solution": "get out。解析：逃出某处可说 get out。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: get out",
+        "url": "https://dictionary.cambridge.org/dictionary/english/get-out"
+      }
+    ]
+  },
+  {
+    "word": "king",
+    "examTags": [
+      "词汇·人物与故事",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "可数名词，表示国王；复数为 kings；特指故事中的国王时常用 the king。",
+    "collocations": "a wise king；the king's palace；king and queen",
+    "commonMistake": "表示泛指的一位国王用 a king；特指故事中已提到的人物用 the king。",
+    "example": {
+      "english": "The king listened carefully to the young hunter.",
+      "chinese": "国王认真地听年轻猎人讲述。"
+    },
+    "application": {
+      "prompt": "The ruler of a kingdom is a ___. (king / artist)",
+      "solution": "king。解析：王国的统治者是 king。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: king",
+        "url": "https://dictionary.cambridge.org/dictionary/english/king"
+      }
+    ]
+  },
+  {
+    "word": "artist",
+    "examTags": [
+      "词汇·职业与人物",
+      "语法·名词构词"
+    ],
+    "grammar": "可数名词，表示美术家、艺术家；复数为 artists。",
+    "collocations": "a famous artist；an artist paints；artist's work",
+    "commonMistake": "artist 指艺术家；art 是艺术，artistic 是形容词“艺术的”。",
+    "example": {
+      "english": "The artist painted a picture of the white swan.",
+      "chinese": "这位艺术家画了一幅白天鹅的画。"
+    },
+    "application": {
+      "prompt": "A person who makes paintings is an ___. (artist / emperor)",
+      "solution": "artist。解析：画家、艺术家是 artist。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: artist",
+        "url": "https://dictionary.cambridge.org/dictionary/english/artist"
+      }
+    ]
+  },
+  {
+    "word": "quickly",
+    "examTags": [
+      "词汇·副词构词",
+      "语法·副词修饰动词"
+    ],
+    "grammar": "副词，表示快速地；由形容词 quick 加 -ly 构成，常修饰动作。",
+    "collocations": "run quickly；answer quickly；move quickly",
+    "commonMistake": "quickly 是副词；修饰名词用形容词 quick。",
+    "example": {
+      "english": "The hunter quickly closed the gate.",
+      "chinese": "猎人迅速地关上了大门。"
+    },
+    "application": {
+      "prompt": "The boy ran ___ to catch the bus. (quickly / quick)",
+      "solution": "quickly。解析：修饰动词 ran 要用副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: quickly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/quickly"
+      }
+    ]
+  },
+  {
+    "word": "smile",
+    "examTags": [
+      "词汇·情绪与表情",
+      "语法·动词与名词"
+    ],
+    "grammar": "可作动词或名词，表示微笑；常用 smile at sb。",
+    "collocations": "smile at someone；give a smile；a warm smile",
+    "commonMistake": "smile 通常不直接接人作宾语；说对某人微笑用 smile at sb。",
+    "example": {
+      "english": "The duckling smiled at the farmer.",
+      "chinese": "小鸭子对农夫微笑。"
+    },
+    "application": {
+      "prompt": "She saw her friend and smiled ___ him. (at / to)",
+      "solution": "at。解析：对某人微笑用 smile at sb。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: smile",
+        "url": "https://dictionary.cambridge.org/dictionary/english/smile"
+      }
+    ]
+  },
+  {
+    "word": "all over",
+    "examTags": [
+      "词汇·范围表达",
+      "语法·副词短语"
+    ],
+    "grammar": "副词短语，表示“到处、遍及”；常与地点名词搭配，如 all over the world。",
+    "collocations": "all over the village；all over the world；search all over",
+    "commonMistake": "all over 表示遍及某范围；地点名词前通常保留 the，如 all over the village。",
+    "example": {
+      "english": "The news spread all over the village.",
+      "chinese": "消息传遍了整个村庄。"
+    },
+    "application": {
+      "prompt": "The story became known everywhere in the village. It spread ___. (all over the village / at first)",
+      "solution": "all over the village。解析：表示遍及整个村庄用 all over the village。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: all over",
+        "url": "https://dictionary.cambridge.org/dictionary/english/all-over"
+      }
+    ]
+  },
+  {
+    "word": "ugly",
+    "examTags": [
+      "词汇·形容词辨析",
+      "语法·形容词位置"
+    ],
+    "grammar": "形容词，表示丑陋的、难看的；可作定语或表语。",
+    "collocations": "an ugly duckling；an ugly building；look ugly",
+    "commonMistake": "ugly 是形容词；以辅音音素开头，单数名词前用 an。",
+    "example": {
+      "english": "The little duckling thought it was ugly.",
+      "chinese": "小鸭子觉得自己很难看。"
+    },
+    "application": {
+      "prompt": "Choose the correct article: “___ ugly duckling” (a / an)",
+      "solution": "an。解析：ugly 以元音音素开头，前用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ugly",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ugly"
+      }
+    ]
+  },
+  {
+    "word": "duckling",
+    "examTags": [
+      "词汇·动物名称",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "可数名词，表示小鸭子；复数为 ducklings。",
+    "collocations": "a little duckling；a mother duck and her ducklings",
+    "commonMistake": "duckling 表示小鸭子；表示一只时用 a duckling。",
+    "example": {
+      "english": "The duckling followed its mother across the grass.",
+      "chinese": "小鸭子跟着妈妈穿过草地。"
+    },
+    "application": {
+      "prompt": "A young duck is a ___. (duckling / swan)",
+      "solution": "duckling。解析：小鸭子是 duckling。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: duckling",
+        "url": "https://dictionary.cambridge.org/dictionary/english/duckling"
+      }
+    ]
+  },
+  {
+    "word": "real",
+    "examTags": [
+      "词汇·形容词辨析",
+      "语法·形容词与副词"
+    ],
+    "grammar": "形容词，表示真的、真正的；副词形式为 really。",
+    "collocations": "a real story；a real friend；real life",
+    "commonMistake": "real 是形容词，修饰名词；really 是副词，可修饰形容词或动词。",
+    "example": {
+      "english": "The farmer found a real feather beside the lake.",
+      "chinese": "农夫在湖边找到了一根真的羽毛。"
+    },
+    "application": {
+      "prompt": "Choose the adjective: “This is a ___ swan.” (real / really)",
+      "solution": "real。解析：修饰名词 swan 要用形容词 real。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: real",
+        "url": "https://dictionary.cambridge.org/dictionary/english/real"
+      }
+    ]
+  },
+  {
+    "word": "laugh at",
+    "examTags": [
+      "词汇·情绪与交往",
+      "语法·动词短语"
+    ],
+    "grammar": "动词短语，表示嘲笑；at 后接被嘲笑的人或事。",
+    "collocations": "laugh at a mistake；laugh at someone；Don't laugh at ...",
+    "commonMistake": "laugh at someone 表示嘲笑某人；注意 laugh 是笑，laugh at 带有取笑的意思。",
+    "example": {
+      "english": "Good friends do not laugh at one another's mistakes.",
+      "chinese": "好朋友不会嘲笑彼此的错误。"
+    },
+    "application": {
+      "prompt": "Don't ___ classmates for their mistakes. (laugh at / look after)",
+      "solution": "laugh at。解析：题干要求“嘲笑”，对应 laugh at。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: laugh at",
+        "url": "https://dictionary.cambridge.org/dictionary/english/laugh-at"
+      }
+    ]
+  },
+  {
+    "word": "go away",
+    "examTags": [
+      "词汇·短语动词",
+      "语法·动词过去式"
+    ],
+    "grammar": "短语动词，表示走开、离开；一般过去式为 went away。",
+    "collocations": "go away；go away from the door；ask someone to go away",
+    "commonMistake": "go away 的过去式是 went away；表示离开某地也可说 go away from ...。",
+    "example": {
+      "english": "The hunter went away before the swan returned.",
+      "chinese": "猎人离开后，天鹅才回来。"
+    },
+    "application": {
+      "prompt": "Yesterday the visitor left. He ___ before dinner. (went away / go away)",
+      "solution": "went away。解析：过去时间 yesterday 对应 went away。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: go away",
+        "url": "https://dictionary.cambridge.org/dictionary/english/go-away"
+      }
+    ]
+  },
+  {
+    "word": "search",
+    "examTags": [
+      "词汇·寻找与搜寻",
+      "语法·动词搭配辨析"
+    ],
+    "grammar": "动词，表示搜寻；可直接接被搜查的地点或对象，如 search the room。",
+    "collocations": "search a room；search someone's bag；search the forest",
+    "commonMistake": "search a place 表示搜查该地点；search for sth 表示寻找某物，注意搭配不同。",
+    "example": {
+      "english": "The children searched the garden for the missing feather.",
+      "chinese": "孩子们在花园里搜寻那根丢失的羽毛。"
+    },
+    "application": {
+      "prompt": "They checked every part of the room. They ___ the room. (searched / searched for)",
+      "solution": "searched。解析：直接搜查某个地点用 search + 地点。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: search",
+        "url": "https://dictionary.cambridge.org/dictionary/english/search"
+      }
+    ]
+  },
+  {
+    "word": "search for",
+    "examTags": [
+      "词汇·寻找与搜寻",
+      "语法·介词搭配"
+    ],
+    "grammar": "动词短语，表示寻找某人或某物；for 后接寻找的目标。",
+    "collocations": "search for a key；search for the duckling；search for information",
+    "commonMistake": "search for sth 表示寻找目标；若宾语是被搜查的地点，可用 search + 地点。",
+    "example": {
+      "english": "The farmer searched for the duckling near the lake.",
+      "chinese": "农夫在湖边寻找小鸭子。"
+    },
+    "application": {
+      "prompt": "The farmer is trying to find his lost net. He is searching ___ it. (for / at)",
+      "solution": "for。解析：search for sth 表示寻找某物。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: search for",
+        "url": "https://dictionary.cambridge.org/dictionary/english/search-for"
+      }
+    ]
+  },
+  {
+    "word": "hen",
+    "examTags": [
+      "词汇·动物名称",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "可数名词，表示母鸡；复数为 hens。",
+    "collocations": "a hen and her chicks；a hen lays eggs",
+    "commonMistake": "hen 指母鸡；泛指鸡这种动物可用 chicken。",
+    "example": {
+      "english": "A hen laid an egg in the straw.",
+      "chinese": "一只母鸡在稻草里下了一个蛋。"
+    },
+    "application": {
+      "prompt": "A female chicken is a ___. (hen / rooster)",
+      "solution": "hen。解析：母鸡是 hen。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hen",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hen"
+      }
+    ]
+  },
+  {
+    "word": "hopefully",
+    "examTags": [
+      "词汇·副词构词",
+      "语法·副词用法"
+    ],
+    "grammar": "副词，表示有希望地、满怀希望地；由 hopeful 加 -ly 构成。",
+    "collocations": "wait hopefully；look hopefully；Hopefully, ...",
+    "commonMistake": "hopefully 是副词；hopeful 是形容词，常用 be hopeful。",
+    "example": {
+      "english": "Hopefully, the lost duckling will come home soon.",
+      "chinese": "希望那只走失的小鸭子很快就会回家。"
+    },
+    "application": {
+      "prompt": "The family hopes for good news. They wait ___. (hopefully / hopeful)",
+      "solution": "hopefully。解析：修饰 wait 的动作需要副词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: hopefully",
+        "url": "https://dictionary.cambridge.org/dictionary/english/hopefully"
+      }
+    ]
+  },
+  {
+    "word": "purr",
+    "examTags": [
+      "词汇·动物声音",
+      "语法·动词与名词"
+    ],
+    "grammar": "可作动词或名词，表示猫愉快时发出的呜呜声；动词第三人称单数为 purrs。",
+    "collocations": "a cat purrs；purr softly；hear a purr",
+    "commonMistake": "purr 常指猫发出的满足声；不要与狗叫 bark 混淆。",
+    "example": {
+      "english": "The cat purred softly beside the warm fire.",
+      "chinese": "猫在温暖的炉火旁轻轻地发出呜呜声。"
+    },
+    "application": {
+      "prompt": "A happy cat makes a low, soft sound. It may ___. (purr / shout)",
+      "solution": "purr。解析：猫满足时发出的呜呜声是 purr。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: purr",
+        "url": "https://dictionary.cambridge.org/dictionary/english/purr"
+      }
+    ]
+  },
+  {
+    "word": "lay",
+    "examTags": [
+      "词汇·不规则动词",
+      "语法·过去式与过去分词"
+    ],
+    "grammar": "动词，表示下蛋、放置；过去式和过去分词均为 laid。",
+    "collocations": "lay an egg；lay a book on the desk；laid an egg",
+    "commonMistake": "lay 的过去式是 laid；lie 表示“撒谎”时过去式是 lied，注意区别。",
+    "example": {
+      "english": "The hen laid an egg before sunrise.",
+      "chinese": "母鸡在日出前下了一个蛋。"
+    },
+    "application": {
+      "prompt": "Yesterday the hen ___ an egg. (laid / layed)",
+      "solution": "laid。解析：lay 的过去式为 laid。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: lay",
+        "url": "https://dictionary.cambridge.org/dictionary/english/lay"
+      }
+    ]
+  },
+  {
+    "word": "swan",
+    "examTags": [
+      "词汇·动物名称",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "可数名词，表示天鹅；复数为 swans。",
+    "collocations": "a white swan；a swan on the lake；swans swim",
+    "commonMistake": "swan 是可数名词；单数前加 a/an，复数形式直接加 -s。",
+    "example": {
+      "english": "A white swan swam across the lake.",
+      "chinese": "一只白天鹅游过了湖面。"
+    },
+    "application": {
+      "prompt": "A large white water bird is a ___. (swan / hen)",
+      "solution": "swan。解析：天鹅是 swan。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: swan",
+        "url": "https://dictionary.cambridge.org/dictionary/english/swan"
+      }
+    ]
+  },
+  {
+    "word": "feather",
+    "examTags": [
+      "词汇·动物与自然",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "可数名词，表示羽毛；复数为 feathers。",
+    "collocations": "a soft feather；bird feathers；a feather from a swan",
+    "commonMistake": "feather 是可数名词；表示一根羽毛时用 a feather。",
+    "example": {
+      "english": "The girl picked up a grey feather by the path.",
+      "chinese": "女孩在小路边捡起一根灰色的羽毛。"
+    },
+    "application": {
+      "prompt": "One piece of a bird's covering is a ___. (feather / net)",
+      "solution": "feather。解析：鸟的羽毛是 feather。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: feather",
+        "url": "https://dictionary.cambridge.org/dictionary/english/feather"
+      }
+    ]
+  },
+  {
+    "word": "to sb’s surprise",
+    "examTags": [
+      "词汇·情绪与反应",
+      "语法·固定介词短语"
+    ],
+    "grammar": "固定表达，意为“令某人惊讶的是”；sb’s 位置要换成具体的所有格形式，如 to our surprise。",
+    "collocations": "to my surprise；to everyone's surprise；much to her surprise",
+    "commonMistake": "实际使用时把 sb’s 换成 my、his、our 等所有格形式；不要把 sb 当成句子里的单词。",
+    "example": {
+      "english": "To our surprise, the small duckling grew into a beautiful swan.",
+      "chinese": "令我们惊讶的是，那只小鸭子长成了一只美丽的天鹅。"
+    },
+    "application": {
+      "prompt": "Choose the phrase meaning 令我们惊讶的是: ___. (To our surprise / At first)",
+      "solution": "To our surprise。解析：表示“令我们惊讶的是”用 to our surprise。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: surprise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/surprise"
+      }
+    ]
+  },
+  {
+    "word": "size",
+    "examTags": [
+      "词汇·描述与测量",
+      "语法·名词疑问句"
+    ],
+    "grammar": "可数名词，表示大小、尺寸；常用 What size ...? 询问尺寸。",
+    "collocations": "What size is it?；a different size；the size of a room",
+    "commonMistake": "询问尺寸用 What size ...?；不要说 How size ...?。",
+    "example": {
+      "english": "What size is your new jacket?",
+      "chinese": "你的新夹克是什么尺码？"
+    },
+    "application": {
+      "prompt": "Ask about the size of a jacket: “___ is your jacket?”",
+      "solution": "What size。解析：询问尺寸用 What size ...?。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: size",
+        "url": "https://dictionary.cambridge.org/dictionary/english/size"
+      }
+    ]
+  },
+  {
+    "word": "believe",
+    "examTags": [
+      "词汇·观点与相信",
+      "语法·动词句型"
+    ],
+    "grammar": "动词，表示相信、认为；可接名词、that 从句或 believe in。",
+    "collocations": "believe a story；believe someone；believe in yourself",
+    "commonMistake": "believe sb 表示相信某人说的话；believe in sb 表示信任、相信某人的能力或价值。",
+    "example": {
+      "english": "I believe the fisherman because he told the truth.",
+      "chinese": "我相信渔夫，因为他说了实话。"
+    },
+    "application": {
+      "prompt": "You trust that your friend is telling the truth. You ___ your friend. (believe / praise)",
+      "solution": "believe。解析：相信某人说的话用 believe sb。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: believe",
+        "url": "https://dictionary.cambridge.org/dictionary/english/believe"
+      }
+    ]
+  },
+  {
+    "word": "only if",
+    "examTags": [
+      "词汇·条件表达",
+      "语法·条件连词"
+    ],
+    "grammar": "连词短语，表示“只有在……条件下”；if 引导条件内容。",
+    "collocations": "only if you agree；only if it is safe；only if ...",
+    "commonMistake": "only if 表示必要条件；不要与 even if（即使）混淆。",
+    "example": {
+      "english": "You may feed the swans only if an adult is with you.",
+      "chinese": "只有在有成年人陪同的情况下，你才可以喂天鹅。"
+    },
+    "application": {
+      "prompt": "Visitors may enter only when the guide agrees; if the guide does not agree, they must stay outside. Visitors may enter ___ the guide agrees. (only if / even if)",
+      "solution": "only if。解析：进入的必要条件是导游同意，应用 only if。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: only if",
+        "url": "https://dictionary.cambridge.org/dictionary/english/only-if"
+      }
+    ]
+  },
+  {
+    "word": "fisherman",
+    "examTags": [
+      "词汇·人物与职业",
+      "语法·不规则复数"
+    ],
+    "grammar": "可数名词，表示渔夫；复数为 fishermen。",
+    "collocations": "a fisherman；fishermen at work；a fisherman's net",
+    "commonMistake": "fisherman 的复数是 fishermen，man 变为 men。",
+    "example": {
+      "english": "The fisherman pulled his net out of the water.",
+      "chinese": "渔夫把网从水里拉了出来。"
+    },
+    "application": {
+      "prompt": "One fisherman, two ___. (fishermen / fishermans)",
+      "solution": "fishermen。解析：fisherman 的复数形式为 fishermen。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fisherman",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fisherman"
+      }
+    ]
+  },
+  {
+    "word": "fishing",
+    "examTags": [
+      "词汇·活动与爱好",
+      "语法·动名词用法"
+    ],
+    "grammar": "名词，表示钓鱼、捕鱼；常用 go fishing 表示去钓鱼。",
+    "collocations": "go fishing；enjoy fishing；fishing boat",
+    "commonMistake": "表示去钓鱼用 go fishing，不说 go to fishing。",
+    "example": {
+      "english": "My uncle enjoys fishing by the lake on Sundays.",
+      "chinese": "我叔叔喜欢星期天在湖边钓鱼。"
+    },
+    "application": {
+      "prompt": "They are going to catch fish for fun. They are going ___. (fishing / to fishing)",
+      "solution": "fishing。解析：表示去钓鱼用 go fishing。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: fishing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/fishing"
+      }
+    ]
+  },
+  {
+    "word": "come out",
+    "examTags": [
+      "词汇·短语动词",
+      "语法·不规则动词"
+    ],
+    "grammar": "短语动词，可表示出现、显现；come 的过去式是 came，过去分词是 come。",
+    "collocations": "the sun comes out；flowers come out；come out of the room",
+    "commonMistake": "come out 的过去式是 came out；come out of 表示从……出来。",
+    "example": {
+      "english": "The moon came out after the clouds moved away.",
+      "chinese": "云散开后，月亮出来了。"
+    },
+    "application": {
+      "prompt": "The stars appeared last night. The stars ___ after dark. (came out / come out)",
+      "solution": "came out。解析：last night 表示过去，come 的过去式是 came。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: come out",
+        "url": "https://dictionary.cambridge.org/dictionary/english/come-out"
+      }
+    ]
+  },
+  {
+    "word": "genie",
+    "examTags": [
+      "词汇·童话人物",
+      "语法·可数名词与复数"
+    ],
+    "grammar": "可数名词，表示妖怪、精灵；复数为 genies。",
+    "collocations": "a genie in a lamp；a magic genie；genies",
+    "commonMistake": "genie 是童话中的精灵，不等同于一般的 ghost（鬼魂）。",
+    "example": {
+      "english": "A genie came out of the old lamp.",
+      "chinese": "一个精灵从旧灯里出现了。"
+    },
+    "application": {
+      "prompt": "In the story, a magical being comes from a lamp. It is a ___. (genie / official)",
+      "solution": "genie。解析：灯中出现的魔法精灵是 genie。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: genie",
+        "url": "https://dictionary.cambridge.org/dictionary/english/genie"
+      }
+    ]
+  },
+  {
+    "word": "die",
+    "examTags": [
+      "词汇·不规则动词",
+      "语法·词形辨析"
+    ],
+    "grammar": "动词，表示死亡、消失；过去式和过去分词为 died；形容词为 dead，名词为 death。",
+    "collocations": "die of an illness；die in a fire；plants die",
+    "commonMistake": "die 是动词，dead 是形容词，death 是名词；不要混用词性。",
+    "example": {
+      "english": "The small plant died because it had no water.",
+      "chinese": "小植物因为没有水而枯死了。"
+    },
+    "application": {
+      "prompt": "The plant is no longer alive; it is ___. (dead / die)",
+      "solution": "dead。解析：be 动词后作表语用形容词 dead。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: die",
+        "url": "https://dictionary.cambridge.org/dictionary/english/die"
+      }
+    ]
+  },
+  {
+    "word": "make a promise",
+    "examTags": [
+      "词汇·承诺表达",
+      "语法·固定搭配"
+    ],
+    "grammar": "动词短语，表示“许下承诺”；常用 make a promise to sb 或 make a promise to do sth。",
+    "collocations": "make a promise；keep a promise；break a promise",
+    "commonMistake": "许诺说 make a promise；遵守承诺用 keep a promise，违背承诺用 break a promise。",
+    "example": {
+      "english": "The prince made a promise to return the feather.",
+      "chinese": "王子答应把羽毛送回来。"
+    },
+    "application": {
+      "prompt": "She said she would help and ___ to her friend. (made a promise / told a truth)",
+      "solution": "made a promise。解析：许下承诺用 make a promise。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: promise",
+        "url": "https://dictionary.cambridge.org/dictionary/english/promise"
+      }
+    ]
+  },
+  {
+    "word": "someone",
+    "examTags": [
+      "词汇·不定代词",
+      "语法·主谓一致"
+    ],
+    "grammar": "不定代词，表示某人、有人；通常作单数看待，后接单数谓语。",
+    "collocations": "someone is；someone's name；someone else",
+    "commonMistake": "someone 作主语时谓语通常用单数，如 Someone is here.。",
+    "example": {
+      "english": "Someone left a feather beside the gate.",
+      "chinese": "有人把一根羽毛落在了大门旁边。"
+    },
+    "application": {
+      "prompt": "___ is waiting outside the classroom. (Someone / Some people)",
+      "solution": "Someone。解析：谓语 is 对应单数不定代词 someone。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: someone",
+        "url": "https://dictionary.cambridge.org/dictionary/english/someone"
+      }
+    ]
+  },
+  {
+    "word": "set",
+    "examTags": [
+      "词汇·动词多义",
+      "语法·不规则动词"
+    ],
+    "grammar": "动词，按课本义可表示“使处于某种状况；使开始”；现在式、过去式和过去分词均为 set。",
+    "collocations": "set something moving；set a plan in motion；set ... free",
+    "commonMistake": "set 的过去式和过去分词仍是 set；注意按语境辨认其多种含义。",
+    "example": {
+      "english": "The loud noise set the birds flying.",
+      "chinese": "巨大的响声惊得鸟儿飞了起来。"
+    },
+    "application": {
+      "prompt": "Yesterday the noise ___ the birds flying. (set / setted)",
+      "solution": "set。解析：set 的过去式仍为 set。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: set",
+        "url": "https://dictionary.cambridge.org/dictionary/english/set"
+      }
+    ]
+  },
+  {
+    "word": "set ... free",
+    "examTags": [
+      "词汇·短语动词",
+      "语法·宾语位置"
+    ],
+    "grammar": "动词短语，表示释放；常用 set + 宾语 + free。",
+    "collocations": "set a bird free；set someone free；set the swan free",
+    "commonMistake": "最常见语序是 set the bird free；宾语放在 set 与 free 之间。",
+    "example": {
+      "english": "The children set the trapped swan free.",
+      "chinese": "孩子们放走了被困的天鹅。"
+    },
+    "application": {
+      "prompt": "They released the bird. They ___ the bird ___. (set, free / put, free)",
+      "solution": "set, free。解析：释放某人或动物可说 set sb/sth free。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: set",
+        "url": "https://dictionary.cambridge.org/dictionary/english/set"
+      }
+    ]
+  },
+  {
+    "word": "rich",
+    "examTags": [
+      "词汇·人物与生活",
+      "语法·形容词搭配"
+    ],
+    "grammar": "形容词，表示富有的；也可表示“富含……的”，常用 rich in。",
+    "collocations": "a rich king；be rich in history；rich in vitamins",
+    "commonMistake": "rich 是形容词；表示富含某物常用 rich in，不说 rich of。",
+    "example": {
+      "english": "The rich king gave food to the hungry villagers.",
+      "chinese": "富有的国王把食物分给了饥饿的村民。"
+    },
+    "application": {
+      "prompt": "This food has a lot of vitamins. It is rich ___ vitamins. (in / at)",
+      "solution": "in。解析：表示富含某物用 rich in。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rich",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rich"
+      }
+    ]
+  },
+  {
+    "word": "powerful",
+    "examTags": [
+      "词汇·形容词构词",
+      "语法·形容词用法"
+    ],
+    "grammar": "形容词，表示强大的、有影响力的；由 power 加后缀 -ful 构成。",
+    "collocations": "a powerful king；a powerful voice；a powerful storm",
+    "commonMistake": "powerful 是形容词；名词为 power，副词为 powerfully。",
+    "example": {
+      "english": "A powerful wind blew the leaves across the road.",
+      "chinese": "一阵强风把树叶吹过了马路。"
+    },
+    "application": {
+      "prompt": "A storm with great strength is a ___ storm. (powerful / power)",
+      "solution": "powerful。解析：修饰名词 storm 需要形容词 powerful。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: powerful",
+        "url": "https://dictionary.cambridge.org/dictionary/english/powerful"
+      }
+    ]
+  },
+  {
+    "word": "anyone",
+    "examTags": [
+      "词汇·不定代词",
+      "语法·疑问句与主谓一致"
+    ],
+    "grammar": "不定代词，表示任何人、某个人；常见于疑问句和否定句，通常作单数看待。",
+    "collocations": "Does anyone know?；anyone else；not anyone",
+    "commonMistake": "anyone 作主语时通常搭配单数谓语；肯定句中表示“有人”常用 someone。",
+    "example": {
+      "english": "Did anyone see the swan near the lake?",
+      "chinese": "有人看见湖边的天鹅了吗？"
+    },
+    "application": {
+      "prompt": "___ is welcome to join the story club. (Anyone / Any people)",
+      "solution": "Anyone。解析：anyone 是单数不定代词，表示任何人。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: anyone",
+        "url": "https://dictionary.cambridge.org/dictionary/english/anyone"
+      }
+    ]
+  },
+  {
+    "word": "instead of",
+    "examTags": [
+      "词汇·替代选择",
+      "语法·介词后接动名词"
+    ],
+    "grammar": "介词短语，表示“而不是、代替”；of 后接名词、代词或动词 -ing 形式。",
+    "collocations": "instead of tea；instead of walking；instead of him",
+    "commonMistake": "instead of 中 of 是介词，后接名词或动名词；不要说 instead of to walk。",
+    "example": {
+      "english": "The boy read a story instead of watching television.",
+      "chinese": "男孩读了故事，而不是看电视。"
+    },
+    "application": {
+      "prompt": "Choose the correct form: “She went by bus instead of ___.” (walking / walk)",
+      "solution": "walking。解析：介词 of 后接动名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: instead of",
+        "url": "https://dictionary.cambridge.org/dictionary/english/instead-of"
+      }
+    ]
+  },
+  {
+    "word": "succeed in doing sth",
+    "examTags": [
+      "词汇·成功表达",
+      "语法·介词后接动名词"
+    ],
+    "grammar": "固定结构，表示“成功做成某事”；in 是介词，后接动词 -ing 形式。",
+    "collocations": "succeed in finding sth；succeed in doing sth；success",
+    "commonMistake": "succeed in 后接动名词，不说 succeed to do；名词 success 与动词 succeed 注意词形。",
+    "example": {
+      "english": "The fisherman succeeded in finding his lost net.",
+      "chinese": "渔夫成功找到了丢失的网。"
+    },
+    "application": {
+      "prompt": "Choose the correct form: “They succeeded in ___ the swan.” (saving / save)",
+      "solution": "saving。解析：succeed in 中 in 是介词，后接动名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: succeed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/succeed"
+      }
+    ]
+  },
+  {
+    "word": "himself",
+    "examTags": [
+      "词汇·反身代词",
+      "语法·代词辨析"
+    ],
+    "grammar": "反身代词，表示“他自己”；可作宾语或用于强调，指代男性单数主语。",
+    "collocations": "by himself；help himself；the king himself",
+    "commonMistake": "himself 是反身代词；一般作宾语用 him，不能把 himself 用来替代所有 him。",
+    "example": {
+      "english": "The king himself opened the gate.",
+      "chinese": "国王亲自打开了大门。"
+    },
+    "application": {
+      "prompt": "The king did it, not another person. The king did it ___. (himself / him)",
+      "solution": "himself。解析：强调国王亲自做，用反身代词 himself。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: himself",
+        "url": "https://dictionary.cambridge.org/dictionary/english/himself"
+      }
+    ]
+  },
+  {
+    "word": "in the end",
+    "examTags": [
+      "词汇·故事顺序",
+      "语法·时间短语辨析"
+    ],
+    "grammar": "副词短语，表示“最后、终究”，常指经历一段时间或过程后的结果。",
+    "collocations": "in the end；win in the end；in the end, ...",
+    "commonMistake": "in the end 表示最终结果；at the end (of sth) 指某事物的末尾或终点。",
+    "example": {
+      "english": "They searched all day and found the duckling in the end.",
+      "chinese": "他们搜寻了一整天，最终找到了小鸭子。"
+    },
+    "application": {
+      "prompt": "After a long search, they finally found the key. ___, they opened the gate. (In the end / At first)",
+      "solution": "In the end。解析：经过过程后得到最终结果用 in the end。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in the end",
+        "url": "https://dictionary.cambridge.org/dictionary/english/in-the-end"
+      }
+    ]
+  },
+  {
+    "word": "Hans Christian Andersen",
+    "examTags": [
+      "词汇·作家与文化",
+      "书写·专有名词大写"
+    ],
+    "grammar": "丹麦作家汉斯·克里斯蒂安·安徒生的英文姓名；各部分首字母大写。",
+    "collocations": "Hans Christian Andersen；Andersen's fairy tales；a story by Andersen",
+    "commonMistake": "人名各部分首字母大写；Andersen 是姓氏，不要将姓名词序颠倒。",
+    "example": {
+      "english": "Hans Christian Andersen wrote many well-known fairy tales.",
+      "chinese": "汉斯·克里斯蒂安·安徒生创作了许多著名童话。"
+    },
+    "application": {
+      "prompt": "Choose the correctly written author's name: (Hans Christian Andersen / hans christian andersen)",
+      "solution": "Hans Christian Andersen。解析：专有姓名各部分首字母大写。"
+    },
+    "sources": [
+      {
+        "label": "Encyclopaedia Britannica: Hans Christian Andersen",
+        "url": "https://www.britannica.com/biography/Hans-Christian-Andersen"
+      }
+    ]
+  }
+]

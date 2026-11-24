@@ -1366,7 +1366,7 @@
   .sheetFooter { bottom: 0; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .setCard {
     display: block;
   }
@@ -1420,6 +1420,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .progressFill, .subjectTab, .option, .answerDot, .draftPanel { transition: none; }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .sheet { padding-bottom: 96px; }
+  .sheetFooter { bottom: 0; }
+  .draftPanel { bottom: calc(68px + env(safe-area-inset-bottom)); }
 }
 
 .recordsError,

@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Prisma } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 import { recordCourseChangeEvent } from '@/lib/course-change-events'
+import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
+import { findTeacherReplacementConflicts } from '@/lib/teacher-replacement-conflicts'
+import { findTeacherAssignmentForSubject } from '@/lib/teacher-assignment-subject'
 
 export const dynamic = 'force-dynamic'
+
+function lessonStartAt(lessonDate: Date, startTime: string) {
+  return new Date(`${localDateKey(lessonDate)}T${startTime}:00+08:00`)
+}
 
 export const POST = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
@@ -15,7 +21,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   const prisma = await getRequestPrisma()
   const { id } = await params
-  if (!await isClassGroupInActiveTerm(prisma, id)) {
+  if (!await isClassGroupInActiveTerm(prisma, id, user.division)) {
     return NextResponse.json({ error: '历史批次只允许查看，不能更换教师' }, { status: 409 })
   }
   const body = await req.json().catch(() => ({}))
@@ -40,54 +46,162 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
           status: true,
           teacherId: true,
           teacher: { select: { id: true, name: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true } },
+          course: { select: { subject: true } },
         },
       })
       if (!group) throw Object.assign(new Error('班级不存在'), { status: 404 })
 
       const newTeacher = await tx.teacher.findFirst({
         where: { id: newTeacherId, status: 'ACTIVE' },
-        select: { id: true, name: true },
+        select: { id: true, name: true, subjects: true },
       })
       if (!newTeacher) throw Object.assign(new Error('新老师不存在或未在职'), { status: 400 })
 
-      // a. 更新未完成课次：按 teacherId + subject 过滤
-      const lessonWhere: Prisma.ClassLessonWhereInput = {
-        groupId: id,
-        teacherId: oldTeacherId,
-        status: { notIn: ['COMPLETED', 'CANCELLED'] },
-        ...(subject !== null ? { subject } : {}),
-      }
-      const affectedLessonRows = await tx.classLesson.findMany({ where: lessonWhere, select: { id: true } })
-      const affectedLessons = await tx.classLesson.updateMany({
-        where: lessonWhere,
-        data: { teacherId: newTeacherId },
-      })
+      const newTeacherSubs = (newTeacher.subjects || '')
+        .split(/[,，、]/)
+        .map((s) => s.trim())
+        .filter(Boolean)
 
+      // Resolve the effective teacher for older lessons with a null teacherId too.
+      const groupLessons = await tx.classLesson.findMany({
+        where: {
+          groupId: id,
+          deletedAt: null,
+          status: { notIn: ['COMPLETED', 'CANCELLED', 'POSTPONED'] },
+        },
+        select: { id: true, teacherId: true, subject: true, lessonDate: true, startTime: true, endTime: true },
+      })
+      const replacedAt = new Date()
+      const affectedLessonRows = groupLessons.filter((lesson) => {
+        // The workbench promises a forward-looking replacement. Leave a
+        // past scheduled lesson attached to its original teacher for audit.
+        if (lessonStartAt(lesson.lessonDate, lesson.startTime).getTime() <= replacedAt.getTime()) return false
+        const lessonSubject = lesson.subject ?? group.course.subject
+        const assignedTeacher = findTeacherAssignmentForSubject(
+          group.teacherAssignments,
+          lessonSubject,
+          group.course.subject,
+          group.teacherId,
+        )?.teacherId
+        const effectiveTeacherId = lesson.teacherId || assignedTeacher || group.teacherId
+        return effectiveTeacherId === oldTeacherId && (!subject || lessonSubject === subject)
+      })
+      const affectedLessonIds = affectedLessonRows.map((lesson) => lesson.id)
+
+      if (affectedLessonRows.length) {
+        if (newTeacherSubs.length > 0) {
+          const distinctLessonSubjects = [...new Set(affectedLessonRows.map((l) => l.subject ?? group.course.subject).filter(Boolean))] as string[]
+          const unqualified = distinctLessonSubjects.filter((s) => !newTeacherSubs.includes(s))
+          if (unqualified.length > 0) {
+            throw Object.assign(new Error(`新老师（${newTeacher.name}）档案中未登记任教 ${unqualified.join('、')}，不能接替该学科排课`), { status: 400 })
+          }
+        }
+        const dayRanges = [...new Set(affectedLessonRows.map((lesson) => localDateKey(lesson.lessonDate)))].map((date) => getLocalDayRange(date))
+        const rangeStart = new Date(Math.min(...dayRanges.map((range) => range.start.getTime())))
+        const rangeEnd = new Date(Math.max(...dayRanges.map((range) => range.end.getTime())))
+        const otherLessons = await tx.classLesson.findMany({
+          where: {
+            id: { notIn: affectedLessonIds },
+            deletedAt: null,
+            status: { notIn: ['COMPLETED', 'CANCELLED', 'POSTPONED'] },
+            lessonDate: { gte: rangeStart, lt: rangeEnd },
+            OR: [
+              { teacherId: newTeacherId },
+              { group: { teacherId: newTeacherId } },
+              { group: { teacherAssignments: { some: { teacherId: newTeacherId } } } },
+            ],
+            group: { deletedAt: null },
+          },
+          select: {
+            id: true,
+            teacherId: true,
+            subject: true,
+            lessonDate: true,
+            startTime: true,
+            endTime: true,
+            group: {
+              select: {
+                name: true,
+                teacherId: true,
+                teacherAssignments: { select: { teacherId: true, subject: true } },
+                course: { select: { subject: true } },
+              },
+            },
+          },
+        })
+        const targetSlots = affectedLessonRows.map((lesson) => ({
+          id: lesson.id,
+          date: localDateKey(lesson.lessonDate),
+          startTime: lesson.startTime,
+          endTime: lesson.endTime,
+          groupName: group.name,
+        }))
+        const candidateSlots = otherLessons.flatMap((lesson) => {
+          const lessonSubject = lesson.subject ?? lesson.group.course.subject
+          const assignedTeacher = findTeacherAssignmentForSubject(
+            lesson.group.teacherAssignments,
+            lessonSubject,
+            lesson.group.course.subject,
+            lesson.group.teacherId,
+          )?.teacherId
+          const effectiveTeacherId = lesson.teacherId || assignedTeacher || lesson.group.teacherId
+          return effectiveTeacherId === newTeacherId ? [{
+            id: lesson.id,
+            date: localDateKey(lesson.lessonDate),
+            startTime: lesson.startTime,
+            endTime: lesson.endTime,
+            groupName: lesson.group.name,
+            teacherId: effectiveTeacherId,
+          }] : []
+        })
+        const replacementConflicts = findTeacherReplacementConflicts(targetSlots, candidateSlots)
+        if (replacementConflicts.length) {
+          const conflictSummary = replacementConflicts.slice(0, 4).map((conflict) =>
+            `${conflict.date} ${conflict.startTime}-${conflict.endTime} 与 ${conflict.otherGroupName} ${conflict.otherStartTime}-${conflict.otherEndTime} 冲突`,
+          ).join('；')
+          throw Object.assign(new Error(`新老师时间冲突：${conflictSummary}`), { status: 409, conflicts: replacementConflicts })
+        }
+      }
+
+      // a. 更新未完成课次：按解析后的老师归属和学科过滤
+      const affectedLessons = affectedLessonIds.length ? await tx.classLesson.updateMany({
+        where: {
+          id: { in: affectedLessonIds },
+          deletedAt: null,
+          status: { notIn: ['COMPLETED', 'CANCELLED', 'POSTPONED'] },
+        },
+        data: { teacherId: newTeacherId },
+      }) : { count: 0 }
       const oldTeacher = await tx.teacher.findUnique({
         where: { id: oldTeacherId },
         select: { name: true },
       })
 
       // b. 自愈 classGroupTeacher：update 或 create
-      const existingAssignment = await tx.classGroupTeacher.findFirst({
-        where: {
-          groupId: id,
-          teacherId: oldTeacherId,
-          ...(subject !== null ? { subject } : {}),
-        },
-        select: { id: true, subject: true },
+      const oldAssignments = await tx.classGroupTeacher.findMany({
+        where: { groupId: id, teacherId: oldTeacherId },
+        select: { id: true, teacherId: true, subject: true },
       })
+      const existingAssignment = findTeacherAssignmentForSubject(
+        oldAssignments,
+        subject,
+        group.course.subject,
+        oldTeacherId,
+      )
 
       if (existingAssignment) {
         // 检查 newTeacher 同科目是否已存在（唯一约束冲突检测）
-        const duplicate = await tx.classGroupTeacher.findFirst({
-          where: {
-            groupId: id,
-            teacherId: newTeacherId,
-            subject: existingAssignment.subject,
-          },
-          select: { id: true },
+        const newTeacherAssignments = await tx.classGroupTeacher.findMany({
+          where: { groupId: id, teacherId: newTeacherId },
+          select: { id: true, teacherId: true, subject: true },
         })
+        const duplicate = findTeacherAssignmentForSubject(
+          newTeacherAssignments,
+          existingAssignment.subject,
+          group.course.subject,
+          newTeacherId,
+        )
         if (duplicate) {
           // 新老师已有同科目记录，删除旧记录即可
           await tx.classGroupTeacher.delete({ where: { id: existingAssignment.id } })
@@ -99,14 +213,16 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         }
       } else {
         // 对应表被塌缩过，尝试 create 一条
-        const dupCheck = await tx.classGroupTeacher.findFirst({
-          where: {
-            groupId: id,
-            teacherId: newTeacherId,
-            subject: subject || null,
-          },
-          select: { id: true },
+        const newTeacherAssignments = await tx.classGroupTeacher.findMany({
+          where: { groupId: id, teacherId: newTeacherId },
+          select: { id: true, teacherId: true, subject: true },
         })
+        const dupCheck = findTeacherAssignmentForSubject(
+          newTeacherAssignments,
+          subject,
+          group.course.subject,
+          newTeacherId,
+        )
         if (!dupCheck) {
           await tx.classGroupTeacher.create({
             data: {
@@ -137,9 +253,12 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
           student: { select: { mainTeacherId: true } },
         },
       })
+      const oldTeacherStillAssignedInGroup = await tx.classGroupTeacher.count({ where: { groupId: id, teacherId: oldTeacherId } })
 
       for (const enrollment of activeEnrollments) {
         if (enrollment.student.mainTeacherId !== oldTeacherId) continue
+        if (subject && !enrollmentIncludesSubject(enrollment.subjects, subject)) continue
+        if (oldTeacherStillAssignedInGroup > 0) continue
         const oldTeacherGroupCount = await tx.enrollment.count({
           where: {
             studentId: enrollment.studentId,
@@ -173,9 +292,9 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         },
       })
 
-      const rosterRows = affectedLessonRows.length
+      const rosterRows = affectedLessonIds.length
         ? await tx.classLessonStudent.findMany({
-            where: { lessonId: { in: affectedLessonRows.map((lesson) => lesson.id) } },
+            where: { lessonId: { in: affectedLessonIds } },
             select: { studentId: true },
           })
         : []
@@ -191,7 +310,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
           eventType: 'TEACHER_REPLACED',
           actorUserId: user.id,
           groupId: id,
-          lessonIds: affectedLessonRows.map((lesson) => lesson.id),
+          lessonIds: affectedLessonIds,
           studentIds: affectedStudentIds,
           title: '课程任课教师已调整',
           summary: `${group.name}的${subjectLabel}教师已由${oldTeacher?.name || oldTeacherId}调整为${newTeacher.name}，请查看最新课表。`,
@@ -208,6 +327,9 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     const status = typeof (error as { status?: unknown }).status === 'number'
       ? (error as { status: number }).status
       : 500
-    return NextResponse.json({ error: error instanceof Error ? error.message : '更换老师失败' }, { status })
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : '更换老师失败',
+      conflicts: Array.isArray((error as { conflicts?: unknown }).conflicts) ? (error as { conflicts: unknown[] }).conflicts : undefined,
+    }, { status })
   }
 })

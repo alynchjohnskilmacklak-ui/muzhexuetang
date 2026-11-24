@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>牧哲学堂 · 名师团队与教学系统展示（B5 规格宣传页）</title>
+  <style>
+    /* B5 国际标准纸张尺寸：176mm x 250mm */
+    @page {
+      size: 176mm 250mm;
+      margin: 0;
+    }
+
+    :root {
+      --primary: #14574d;       /* 牧哲墨绿 */
+      --primary-light: #eaf4f1; /* 浅翠底色 */
+      --primary-dark: #0c3b34;
+      --accent: #e8784a;        /* 活力橙 */
+      --accent-soft: #fdf2ec;
+      --gold: #8a6517;          /* 质感暗金 */
+      --gold-bg: #fbf5e6;
+      --ink: #1a1201;           /* 墨黑正文 */
+      --ink-muted: #5a4e3a;     /* 辅助文字 */
+      --ink-light: #887d6e;     /* 浅灰注释 */
+      --bg-cream: #faf7f2;      /* 暖米白背景 */
+      --white: #ffffff;
+      --border-soft: rgba(20, 87, 77, 0.12);
+      --border-card: rgba(138, 101, 23, 0.15);
+      --font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 100%;
+      background: #e5e5e5;
+      font-family: var(--font-family);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    /* 模拟 B5 纸张容器 */
+    .b5-sheet {
+      width: 176mm;
+      height: 250mm;
+      max-width: 176mm;
+      max-height: 250mm;
+      background: var(--bg-cream);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+      padding: 11mm 12mm 10mm 12mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* 打印与导出 PDF 时的精确重置 */
+    @media print {
+      body {
+        background: transparent;
+        padding: 0;
+      }
+      .b5-sheet {
+        box-shadow: none;
+        width: 176mm;
+        height: 250mm;
+        page-break-after: always;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* 页面顶部背景光晕与装饰纹样 */
+    .bg-deco-top {
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232, 120, 74, 0.15) 0%, rgba(232, 120, 74, 0) 70%);
+      pointer-events: none;
+    }
+    .bg-deco-left {
+      position: absolute;
+      bottom: 60px;
+      left: -60px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(20, 87, 77, 0.08) 0%, rgba(20, 87, 77, 0) 70%);
+      pointer-events: none;
+    }
+
+    /* ================= 1. 页头 Header ================= */
+    .header {
+      position: relative;
+      z-index: 2;
+      border-bottom: 1.5px solid var(--border-soft);
+      padding-bottom: 7px;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      background: var(--primary);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .brand-name {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+    .brand-en {
+      font-size: 9px;
+      color: var(--gold);
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    .header-since {
+      font-size: 10px;
+      color: var(--ink-muted);
+      background: var(--gold-bg);
+      border: 1px solid var(--border-card);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .header-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .main-slogan {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .main-slogan::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 13px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .sub-slogan {
+      font-size: 10px;
+      color: var(--ink-muted);
+      font-style: italic;
+    }
+
+    /* ================= 2. 教师双人展示区 ================= */
+    .teacher-section {
+      position: relative;
+      z-index: 2;
+      margin: 8px 0;
+    }
+    .section-eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+    }
+    .section-eyebrow-title {
+      font-size: 11px;
+      font-weight: 750;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .section-eyebrow-tip {
+      font-size: 9.5px;
+      color: var(--accent);
+      font-weight: 600;
+      background: var(--accent-soft);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 0.5px solid rgba(232, 120, 74, 0.25);
+    }
+
+    .teachers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .teacher-card {
+      background: var(--white);
+      border: 1px solid var(--border-soft);
+      border-radius: 9px;
+      padding: 9px;
+      box-shadow: 0 4px 14px rgba(20, 87, 77, 0.05);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .teacher-top {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+    .teacher-img-wrap {
+      width: 62px;
+      height: 82px;
+      flex-shrink: 0;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1.5px solid rgba(20, 87, 77, 0.15);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+      background: #f0f0f0;
+      position: relative;
+    }
+    .teacher-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+    .teacher-verified-badge {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(20, 87, 77, 0.9);
+      color: #fff;
+      font-size: 7.5px;
+      text-align: center;
+      padding: 1.5px 0;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .teacher-meta {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .teacher-role-tag {
+      font-size: 8.5px;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 2px;
+      letter-spacing: 0.3px;
+    }
+    .teacher-name-row {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      margin-bottom: 3px;
+    }
+    .teacher-name-zh {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .teacher-name-en {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink-light);
+    }
+    .teacher-uni {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .subject-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+    .chip {
+      font-size: 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .teacher-highlights {
+      background: #fbfbfa;
+      border-left: 2.5px solid var(--primary);
+      padding: 4px 6px;
+      margin-bottom: 5px;
+      border-radius: 0 4px 4px 0;
+    }
+    .highlight-item {
+      font-size: 8.8px;
+      color: var(--ink-muted);
+      line-height: 1.45;
+    }
+    .highlight-item strong {
+      color: var(--ink);
+    }
+
+    .teacher-system-quote {
+      font-size: 8.5px;
+      color: var(--ink-muted);
+      line-height: 1.4;
+      background: var(--gold-bg);
+      border: 0.5px dashed var(--gold);
+      padding: 4px 6px;
+      border-radius: 4px;
+      position: relative;
+    }
+    .teacher-system-quote::before {
+      content: "“教师理念”：";
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* ================= 3. 数字化系统与家校联动模块 ================= */
+    .system-section {
+      background: linear-gradient(135deg, #14574d 0%, #0d3e37 100%);
+      color: #fff;
+      border-radius: 9px;
+      padding: 8px 10px;
+      position: relative;
+      box-shadow: 0 5px 16px rgba(20, 87, 77, 0.22);
+      z-index: 2;
+    }
+    .system-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding-bottom: 5px;
+      margin-bottom: 6px;
+    }
+    .system-title-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sys-pill {
+      background: var(--accent);
+      color: #fff;
+      font-size: 8px;
+      font-weight: 800;
+      padding: 1.5px 5px;
+      border-radius: 3px;
+    }
+    .sys-title {
+      font-size: 11.5px;
+      font-weight: 750;
+      letter-spacing: 0.5px;
+    }
+    .sys-entry {
+      font-size: 8.5px;
+      color: rgba(255, 255, 255, 0.85);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sys-entry-badge {
+      background: rgba(255, 255, 255, 0.18);
+      padding: 1.5px 6px;
+      border-radius: 10px;
+    }
+
+    .system-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .sys-feature-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 5px 6px;
+    }
+    .sys-feature-head {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      color: #ffd8a8;
+      margin-bottom: 2px;
+    }
+    .sys-feature-desc {
+      font-size: 8px;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.82);
+    }
+    .sys-feature-foot {
+      margin-top: 3px;
+      font-size: 7.5px;
+      color: rgba(255, 255, 255, 0.6);
+      border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+      padding-top: 2px;
+    }
+
+    /* ================= 4. 官网首页与线上线下协同 ================= */
+    .portal-banner {
+      background: var(--white);
+      border: 1px solid var(--border-card);
+      border-radius: 7px;
+      padding: 6px 9px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+    .portal-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .portal-icon {
+      width: 26px;
+      height: 26px;
+      background: var(--gold-bg);
+      border: 1px solid var(--border-card);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+    .portal-text h4 {
+      font-size: 9.5px;
+      font-weight: 750;
+      color: var(--ink);
+    }
+    .portal-text p {
+      font-size: 8px;
+      color: var(--ink-muted);
+    }
+    .portal-status {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 2.5px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* ================= 5. 页脚 Footer 咨询与二维码 ================= */
+    .footer {
+      border-top: 1.5px solid var(--border-soft);
+      padding-top: 7px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+    .footer-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5px;
+    }
+    .footer-brand {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .footer-line {
+      font-size: 8.5px;
+      color: var(--ink-muted);
+      line-height: 1.35;
+    }
+    .footer-line strong {
+      color: var(--ink);
+    }
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .qr-frame {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      background: var(--white);
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-placeholder {
+      width: 100%;
+      height: 100%;
+      background: #f3f3f3;
+      border: 1px dashed #bbb;
+      display: grid;
+      place-items: center;
+      font-size: 7px;
+      color: #666;
+      text-align: center;
+      line-height: 1.1;
+    }
+    .qr-caption {
+      font-size: 7.5px;
+      color: var(--ink-light);
+      font-weight: 600;
+    }
+
+    /* 控制栏工具条（打印按钮） */
+    .toolbar-bar {
+      margin-bottom: 12px;
+      display: flex;
+      gap: 10px;
+    }
+    .print-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(20, 87, 77, 0.2);
+    }
+    .print-btn:hover {
+      background: var(--primary-dark);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 网页预览时的控制栏，打印时自动隐藏 -->
+  <div class="toolbar-bar no-print">
+    <button class="print-btn" onclick="window.print()">🖨️ 打印 / 另存为 PDF (标准 B5 尺寸)</button>
+  </div>
+
+  <!-- B5 页面主体 (176mm x 250mm) -->
+  <div class="b5-sheet">
+    <div class="bg-deco-top"></div>
+    <div class="bg-deco-left"></div>
+
+    <!-- 1. 顶部 Header -->
+    <header class="header">
+      <div class="header-top">
+        <div class="brand-box">
+          <span class="brand-badge">专注教学</span>
+          <span class="brand-name">新乐牧哲学堂</span>
+          <span class="brand-en">MOREJOY EDUCATION</span>
+        </div>
+        <div class="header-since">2016 创立 · 扎根河北新乐</div>
+      </div>
+      <div class="header-title-row">
+        <div class="main-slogan">认识每一位用心的老师 · 每一课都有据可查</div>
+        <div class="sub-slogan">“把每一个孩子都当成自己的孩子来教”</div>
+      </div>
+    </header>
+
+    <!-- 2. 教师双人展示区 -->
+    <section class="teacher-section">
+      <div class="section-eyebrow">
+        <div class="section-eyebrow-title">
+          <span>● 一线在岗骨干师资展示</span>
+        </div>
+        <div class="section-eyebrow-tip">
+          ★ 官方教学系统实名认证 · 真实在岗
+        </div>
+      </div>
+
+      <div class="teachers-grid">
+        <!-- 教师 1: 胡思彤老师 (Sitong Hu) -->
+        <div class="teacher-card">
+          <div class="teacher-top">
+            <div class="teacher-img-wrap">
+              <img src="./images/teachers/hu-sitong.png" alt="胡思彤老师">
+              <div class="teacher-verified-badge">系统认证在岗</div>
+            </div>
+            <div class="teacher-meta">
+              <div class="teacher-role-tag">骨干名师 · 严谨逻辑</div>
+              <div class="teacher-name-row">
+                <span class="teacher-name-zh">胡思彤老师</span>
+                <span class="teacher-name-en">Sitong Hu</span>
+              </div>
+              <div class="teacher-uni">石家庄铁道大学</div>
+              <div class="subject-chips">
+                <span class="chip">数学思维</span>
+                <span class="chip">物理模型</span>
+                <span class="chip">考点切片</span>
+              </div>
+            </div>
+          </div>
+          <div class="teacher-highlights">
+            <div class="highlight-item"><strong>教学特色：</strong>工科思维建构知识脉络，擅长将抽象复杂的考点模型化、具象化，注重解题逻辑与验算自查习惯。</div>
+            <div class="highlight-item"><strong>系统沉淀：</strong>在牧哲学堂系统累计形成超百份精准学情切片，针对不同基础学生定制提分阶梯。</div>
+          </div>
+          <div class="teacher-system-quote">
+            “先找核心约束，再定解题路径。让每个孩子不仅会做这道题，更能看透这类题。”
+          </div>
+        </div>
+
+        <!-- 教师 2: 陈晓丽老师 (Xiaoli Chen) -->
+        <div class="teacher-card">
+          <div class="teacher-top">
+            <div class="teacher-img-wrap">
+              <img src="./images/teachers/chen-xiaoli.png" alt="陈晓丽老师">
+              <div class="teacher-verified-badge">系统认证在岗</div>
+            </div>
+            <div class="teacher-meta">
+              <div class="teacher-role-tag">师范精英 · 深研考情</div>
+              <div class="teacher-name-row">
+                <span class="teacher-name-zh">陈晓丽老师</span>
+                <span class="teacher-name-en">Xiaoli Chen</span>
+              </div>
+              <div class="teacher-uni">河北师范大学</div>
+              <div class="subject-chips">
+                <span class="chip">学科方法</span>
+                <span class="chip">答题规范</span>
+                <span class="chip">启发教学</span>
+              </div>
+            </div>
+          </div>
+          <div class="teacher-highlights">
+            <div class="highlight-item"><strong>教学特色：</strong>重点师范专业背景，精研河北本土考卷命题趋势。亲和力强，擅长循序诱导与点拨，严抓课堂落实。</div>
+            <div class="highlight-item"><strong>系统沉淀：</strong>每堂课即时撰写精细化课堂反馈，精准捕捉学生课堂走神、畏难与知识盲区并闭环解决。</div>
+          </div>
+          <div class="teacher-system-quote">
+            “教育是点燃火光的过程。多一点耐心的启发与鼓励，孩子就会迸发出惊人的潜能。”
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 数字化教务与家校系统联动模块 -->
+    <section class="system-section">
+      <div class="system-header">
+        <div class="system-title-box">
+          <span class="sys-pill">核心优势</span>
+          <span class="sys-title">牧哲学堂一体化教务与家校系统（可查两位老师）</span>
+        </div>
+        <div class="sys-entry">
+          <span>电脑/手机扫码即登</span>
+          <span class="sys-entry-badge">muzhexuetang.xyz/login</span>
+        </div>
+      </div>
+
+      <div class="system-cards">
+        <div class="sys-feature-card">
+          <div class="sys-feature-head">
+            <span>①</span> 教师档案公开查验
+          </div>
+          <div class="sys-feature-desc">
+            胡老师、陈老师真实在岗，学历、主授科目及教学经历系统公示，拒绝虚假包装。
+          </div>
+          <div class="sys-feature-foot">
+            ✔ 教师资格与执教履历透明可溯
+          </div>
+        </div>
+
+        <div class="sys-feature-card">
+          <div class="sys-feature-head">
+            <span>②</span> 每堂课真实学情反馈
+          </div>
+          <div class="sys-feature-desc">
+            每课下课后老师推送本堂掌握情况、重难点切片与复习建议，家长手机端直接看。
+          </div>
+          <div class="sys-feature-foot">
+            ✔ 每一课掌握到哪一步，清清楚楚
+          </div>
+        </div>
+
+        <div class="sys-feature-card">
+          <div class="sys-feature-head">
+            <span>③</span> 课表与考勤精准记录
+          </div>
+          <div class="sys-feature-desc">
+            一对一与精品班排课日程全同步，到课打卡、消课明细清晰无争议，家校互信。
+          </div>
+          <div class="sys-feature-foot">
+            ✔ 告别手工记账糊涂账
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 官网首页与线上线下协同入口 -->
+    <div class="portal-banner">
+      <div class="portal-left">
+        <div class="portal-icon">🌐</div>
+        <div class="portal-text">
+          <h4>牧哲学堂官方网站首页【教师团队 · 认识每一位用心的老师】同步上线</h4>
+          <p>随时访问官网 <b>muzhexuetang.xyz#teachers</b>，在线浏览教师团队详细履历与风采档案</p>
+        </div>
+      </div>
+      <div class="portal-status">线上线下 · 双向查验</div>
+    </div>
+
+    <!-- 5. 页脚 Footer：联系方式与校区地址 -->
+    <footer class="footer">
+      <div class="footer-info">
+        <div class="footer-brand">新乐牧哲学堂 · MOREJOY EDUCATION</div>
+        <div class="footer-line">
+          <strong>校区地址：</strong>河北省石家庄市新乐市市区（支持预约到访与试听）
+        </div>
+        <div class="footer-line">
+          <strong>咨询电话：</strong>15930114500（同微信） ｜ <strong>服务热线：</strong>18031264903
+        </div>
+        <div class="footer-line" style="font-size:7.5px; color:var(--ink-light); margin-top:1px;">
+          服务范围：寒暑假冲刺 / 一对一冲刺 / 晚间辅导 / 周末先锋营 / 升学规划 / 志愿咨询 ｜ 备案号：冀ICP备2026028285号-1
+        </div>
+      </div>
+
+      <div class="footer-right">
+        <div class="qr-box">
+          <div class="qr-frame">
+            <div class="qr-placeholder">
+              扫码访问<br>官网首页
+            </div>
+          </div>
+          <span class="qr-caption">官网与师资</span>
+        </div>
+        <div class="qr-box">
+          <div class="qr-frame">
+            <div class="qr-placeholder">
+              扫码登录<br>教学系统
+            </div>
+          </div>
+          <span class="qr-caption">家校查反馈</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,1658 @@
+[
+  {
+    "word": "communication",
+    "examTags": [
+      "词汇·名词与派生词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 表达；交流，通常不可数。动词为 communicate；也可指通信、交流的方式。",
+    "collocations": "communication skills; communication with sb; a means of communication",
+    "commonMistake": "communication 是名词，communicate 是动词；泛指交流时通常不加 a。",
+    "example": {
+      "english": "Good communication helps friends understand each other.",
+      "chinese": "良好的沟通有助于朋友相互理解。"
+    },
+    "application": {
+      "solution": "A。解析：good 后需要名词 communication；communicate 是动词。",
+      "prompt": "Listening is an important part of good ___. A. communication B. communicate"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: communication",
+        "url": "https://dictionary.cambridge.org/dictionary/english/communication"
+      }
+    ]
+  },
+  {
+    "word": "face to face",
+    "examTags": [
+      "词汇·短语辨析",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adv. 面对面地，通常作状语；可用 face to face with sb 表示与某人面对面。",
+    "collocations": "talk face to face; meet face to face; face to face with a problem",
+    "commonMistake": "作副词短语时通常不加连字符；作定语时用 face-to-face。",
+    "example": {
+      "english": "The two students talked face to face after class.",
+      "chinese": "两名学生课后面对面交谈。"
+    },
+    "application": {
+      "solution": "A。解析：这里修饰动词 discuss，作状语用不带连字符的 face to face。",
+      "prompt": "They chose to discuss the problem ___ instead of texting. A. face to face B. face-to-face"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: face",
+        "url": "https://dictionary.cambridge.org/dictionary/english/face"
+      }
+    ]
+  },
+  {
+    "word": "text message",
+    "examTags": [
+      "词汇·名词与可数性",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. （手机）短信；短信，可数。",
+    "collocations": "send a text message; receive a text message; text message sb",
+    "commonMistake": "text message 是可数名词，单数前用 a/an；text 也可作动词表示给某人发短信。",
+    "example": {
+      "english": "I sent my friend a text message about the meeting.",
+      "chinese": "我给朋友发了一条关于会议的短信。"
+    },
+    "application": {
+      "solution": "B。解析：手机上发出的文字信息是 text message。",
+      "prompt": "I sent a short ___ to tell her I was late. A. speech B. text message"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: text",
+        "url": "https://dictionary.cambridge.org/dictionary/english/text"
+      }
+    ]
+  },
+  {
+    "word": "sign",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 手势；迹象；标志；v. 签（名）；签字。",
+    "collocations": "a road sign; a sign of change; sign a form",
+    "commonMistake": "sign 作名词可指标志或迹象，作动词表示签署；“签一份表格”直接说 sign a form。",
+    "example": {
+      "english": "Please sign your name at the bottom of the form.",
+      "chinese": "请在表格底部签上你的名字。"
+    },
+    "application": {
+      "solution": "B。解析：在文件上签字用动词 sign；signal 通常表示发信号。",
+      "prompt": "Please ___ the form before you leave. A. signal B. sign"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sign",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sign"
+      }
+    ]
+  },
+  {
+    "word": "speaker",
+    "examTags": [
+      "词汇·名词熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 说话者；发言者，可数；也可指扬声器。",
+    "collocations": "a guest speaker; a public speaker; listen to the speaker",
+    "commonMistake": "speaker 指说话或发言的人；扬声器也可称 speaker，需根据语境判断。",
+    "example": {
+      "english": "The speaker answered questions from the students.",
+      "chinese": "发言者回答了学生们的问题。"
+    },
+    "application": {
+      "solution": "B。解析：讲话的人是 speaker，听众是 listener。",
+      "prompt": "The person giving a talk to the audience is the ___. A. listener B. speaker"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: speaker",
+        "url": "https://dictionary.cambridge.org/dictionary/english/speaker"
+      }
+    ]
+  },
+  {
+    "word": "rehearsal",
+    "examTags": [
+      "词汇·名词与派生词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 排演；排练，可数。动词为 rehearse。",
+    "collocations": "have a rehearsal; a dress rehearsal; rehearse for a play",
+    "commonMistake": "rehearsal 是名词，rehearse 是动词；“进行排练”可说 have a rehearsal。",
+    "example": {
+      "english": "The actors had a rehearsal before the school play.",
+      "chinese": "演员们在学校话剧演出前进行了排练。"
+    },
+    "application": {
+      "solution": "B。解析：正式演出前的排演是 rehearsal。",
+      "prompt": "The actors practised the play together at a ___. A. reunion B. rehearsal"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: rehearsal",
+        "url": "https://dictionary.cambridge.org/dictionary/english/rehearsal"
+      }
+    ]
+  },
+  {
+    "word": "show sb around",
+    "examTags": [
+      "词汇·动词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 领某人参观；带某人四处看看。结构为 show + 人 + around + 地点。",
+    "collocations": "show a visitor around; show us around the school; show sb around town",
+    "commonMistake": "人称代词放在 show 和 around 之间：show us around；地点通常放在 around 后。",
+    "example": {
+      "english": "Our guide showed us around the new library.",
+      "chinese": "导游带我们参观了新图书馆。"
+    },
+    "application": {
+      "solution": "B。解析：带访客参观某地用 show sb around。",
+      "prompt": "When the visitors arrive, I will ___ the school. A. find them out B. show them around"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: show",
+        "url": "https://dictionary.cambridge.org/dictionary/english/show"
+      }
+    ]
+  },
+  {
+    "word": "local",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 当地的；地方的；n. 当地人，本地人。",
+    "collocations": "local people; a local newspaper; local shops",
+    "commonMistake": "local 作名词指当地人时常用复数 locals；不要与 location（地点）混淆。",
+    "example": {
+      "english": "We asked a local for directions to the station.",
+      "chinese": "我们向一位当地人问去车站的路。"
+    },
+    "application": {
+      "solution": "B。解析：当地居民可称 a local。",
+      "prompt": "A person who lives in the area is a ___. A. professor B. local"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: local",
+        "url": "https://dictionary.cambridge.org/dictionary/english/local"
+      }
+    ]
+  },
+  {
+    "word": "face-to-face",
+    "examTags": [
+      "词汇·复合形容词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 面对面的，作定语修饰名词，常带连字符。",
+    "collocations": "face-to-face communication; a face-to-face meeting; face-to-face contact",
+    "commonMistake": "作名词前定语时写 face-to-face；作状语时通常写 face to face。",
+    "example": {
+      "english": "Face-to-face communication lets us notice people's expressions.",
+      "chinese": "面对面的交流能让我们注意到人们的表情。"
+    },
+    "application": {
+      "solution": "B。解析：修饰名词 meeting 作定语时用带连字符的 face-to-face。",
+      "prompt": "They arranged a ___ meeting with the professor. A. face to face B. face-to-face"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: face-to-face",
+        "url": "https://dictionary.cambridge.org/dictionary/english/face-to-face"
+      }
+    ]
+  },
+  {
+    "word": "professor",
+    "examTags": [
+      "词汇·名词与称谓",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 教授，可数。",
+    "collocations": "a professor of history; university professor; Professor Lee",
+    "commonMistake": "普通名词 professor 前常用 a；作称谓置于姓名前时首字母大写。",
+    "example": {
+      "english": "The professor gave a speech about communication.",
+      "chinese": "教授发表了一场关于交流的演讲。"
+    },
+    "application": {
+      "solution": "B。解析：表示职业身份“教授”用 a professor。",
+      "prompt": "Dr. Lin is ___ at the university. A. a speech B. a professor"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: professor",
+        "url": "https://dictionary.cambridge.org/dictionary/english/professor"
+      }
+    ]
+  },
+  {
+    "word": "speech",
+    "examTags": [
+      "词汇·名词与搭配",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 演说；发言，可数；也可泛指说话能力（不可数）。",
+    "collocations": "give a speech; make a speech; a speech about communication",
+    "commonMistake": "表示一场演讲时是可数名词，常说 give/make a speech；不要误用 speak 作名词。",
+    "example": {
+      "english": "Our class monitor gave a short speech at the meeting.",
+      "chinese": "班长在会上作了简短发言。"
+    },
+    "application": {
+      "solution": "B。解析：准备的内容是一场演讲，用 speech；speaker 是发言者。",
+      "prompt": "Lily prepared a ___ about being a good listener. A. speaker B. speech"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: speech",
+        "url": "https://dictionary.cambridge.org/dictionary/english/speech"
+      }
+    ]
+  },
+  {
+    "word": "argue",
+    "examTags": [
+      "词汇·动词与派生词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "v. 争论；争吵；提出理由。过去式/过去分词 argued；名词 argument。",
+    "collocations": "argue with sb; argue about/over sth; argue that ...",
+    "commonMistake": "argue with sb 表示与某人争论，argue about sth 表示争论某事；不要用 argue someone。",
+    "example": {
+      "english": "They argued about which topic to choose for the speech.",
+      "chinese": "他们为演讲选哪个话题而争论。"
+    },
+    "application": {
+      "solution": "A。解析：begin to 后接动词原形 argue；argument 是名词。",
+      "prompt": "The two friends began to ___ about the plan. A. argue B. argument"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: argue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/argue"
+      }
+    ]
+  },
+  {
+    "word": "make up (with sb)",
+    "examTags": [
+      "词汇·动词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 与某人言归于好；和解。过去式 made up。",
+    "collocations": "make up with a friend; make up after an argument; make up with sb",
+    "commonMistake": "这里 make up with 表示和好；makeup（一个词）常指化妆品，不要混淆词义和拼写。",
+    "example": {
+      "english": "After their disagreement, the two friends made up with each other.",
+      "chinese": "意见不合后，这两个朋友和好了。"
+    },
+    "application": {
+      "solution": "A。解析：与朋友和好用 make up with sb。",
+      "prompt": "After the argument, Jo called her friend to ___. A. make up with her B. take place with her"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: make",
+        "url": "https://dictionary.cambridge.org/dictionary/english/make"
+      }
+    ]
+  },
+  {
+    "word": "in person",
+    "examTags": [
+      "词汇·介词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adv. 亲自；亲身。常与 meet, speak, visit 等动词搭配。",
+    "collocations": "meet in person; speak to sb in person; apply in person",
+    "commonMistake": "in person 是固定副词短语，person 前不加冠词；不要写成 in the person。",
+    "example": {
+      "english": "I would like to meet the new coach in person.",
+      "chinese": "我想亲自见见新教练。"
+    },
+    "application": {
+      "solution": "A。解析：亲自询问用 in person。",
+      "prompt": "You can ask the professor questions ___ after the talk. A. in person B. by a person"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in",
+        "url": "https://dictionary.cambridge.org/dictionary/english/in"
+      }
+    ]
+  },
+  {
+    "word": "prefer",
+    "examTags": [
+      "词汇·动词搭配与词形",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "v. 较喜欢；更愿意。过去式 preferred；常用 prefer A to B、prefer to do 或 prefer doing。",
+    "collocations": "prefer tea to coffee; prefer to walk; prefer doing A to doing B",
+    "commonMistake": "prefer A to B 中用 to 而非 than；prefer 的过去式双写 r：preferred。",
+    "example": {
+      "english": "I prefer talking face to face to sending long messages.",
+      "chinese": "比起发长短信，我更喜欢面对面交谈。"
+    },
+    "application": {
+      "solution": "B。解析：主语 Nina 是第三人称单数，谓语用 prefers；结构为 prefer A to B。",
+      "prompt": "Nina ___ meeting people in person to texting them. A. prefer B. prefers"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: prefer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/prefer"
+      }
+    ]
+  },
+  {
+    "word": "calm",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 镇静的；沉着的；v. 使平静；使镇静。",
+    "collocations": "stay calm; calm down; calm sb down",
+    "commonMistake": "calm 可作形容词或动词；calm down 表示平静下来，不能把 calm 与 quiet（安静的）简单等同。",
+    "example": {
+      "english": "Take a deep breath and try to stay calm before the speech.",
+      "chinese": "演讲前深呼吸，尽量保持冷静。"
+    },
+    "application": {
+      "solution": "B。解析：安抚紧张的学生用动词 calm。",
+      "prompt": "The teacher spoke gently to ___ the nervous student. A. worry B. calm"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: calm",
+        "url": "https://dictionary.cambridge.org/dictionary/english/calm"
+      }
+    ]
+  },
+  {
+    "word": "worry about",
+    "examTags": [
+      "词汇·介词搭配",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 为……担心。可接名词、代词或动名词；be worried about 为形容词结构。",
+    "collocations": "worry about an exam; worry about sb; be worried about the result",
+    "commonMistake": "worry about 后接名词或动名词；不要说 worry for sth 表示“担心某事”。",
+    "example": {
+      "english": "Mia worries about speaking in front of the class.",
+      "chinese": "米娅担心在全班面前讲话。"
+    },
+    "application": {
+      "solution": "B。解析：为犯小错误而担心用 worry about。",
+      "prompt": "Don't ___ making a small mistake; you can try again. A. take place B. worry about"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: worry",
+        "url": "https://dictionary.cambridge.org/dictionary/english/worry"
+      }
+    ]
+  },
+  {
+    "word": "expression",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 表达方式；表达；表情，可数。动词为 express。",
+    "collocations": "an expression of thanks; facial expression; expression of an idea",
+    "commonMistake": "expression 可指语言表达或面部表情；动词“表达”是 express，注意词性。",
+    "example": {
+      "english": "A smile is a friendly expression.",
+      "chinese": "微笑是一种友好的表情。"
+    },
+    "application": {
+      "solution": "A。解析：面部所表现出的情感或神态是 expression。",
+      "prompt": "A look on someone's face that shows a feeling is an ___. A. expression B. communication"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: expression",
+        "url": "https://dictionary.cambridge.org/dictionary/english/expression"
+      }
+    ]
+  },
+  {
+    "word": "chance",
+    "examTags": [
+      "词汇·名词与常考结构",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 机会；可能性；adj. 意外的、偶然的。",
+    "collocations": "a chance to do sth; have a chance of doing sth; by chance",
+    "commonMistake": "chance 后可接 to do 或 of doing；不要把 chance of 后的动词写成原形。",
+    "example": {
+      "english": "I had a chance to speak with the professor after class.",
+      "chinese": "课后我有机会和教授交谈。"
+    },
+    "application": {
+      "solution": "A。解析：做某事的机会是 a chance to do sth。",
+      "prompt": "The students had a ___ to practise their speeches. A. chance B. detail"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chance",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chance"
+      }
+    ]
+  },
+  {
+    "word": "meeting",
+    "examTags": [
+      "词汇·名词与派生词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 会面；会议，可数。动词为 meet。",
+    "collocations": "have a meeting; attend a meeting; a meeting with sb",
+    "commonMistake": "meeting 是 meet 的名词形式；表示参加会议用 attend a meeting，不说 attend to a meeting。",
+    "example": {
+      "english": "The school will hold a meeting about the new project.",
+      "chinese": "学校将召开一次关于新项目的会议。"
+    },
+    "application": {
+      "solution": "B。解析：团队成员一起讨论事务的活动是 meeting。",
+      "prompt": "All team members will attend a ___ on Friday. A. line B. meeting"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: meeting",
+        "url": "https://dictionary.cambridge.org/dictionary/english/meeting"
+      }
+    ]
+  },
+  {
+    "word": "difficulty",
+    "examTags": [
+      "词汇·名词与常考结构",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 困难；难题，可数或不可数。常用 have difficulty (in) doing sth。",
+    "collocations": "have difficulty doing sth; a difficulty with pronunciation; face difficulties",
+    "commonMistake": "have difficulty 后接动名词 doing；不要接 to do。",
+    "example": {
+      "english": "He had difficulty understanding the speaker's accent.",
+      "chinese": "他听懂发言者的口音有困难。"
+    },
+    "application": {
+      "solution": "A。解析：some 后用名词 difficulty；have difficulty doing 表示做某事有困难。",
+      "prompt": "I had some ___ finding the meeting room. A. difficulty B. difficult"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: difficulty",
+        "url": "https://dictionary.cambridge.org/dictionary/english/difficulty"
+      }
+    ]
+  },
+  {
+    "word": "right away",
+    "examTags": [
+      "词汇·副词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adv. 立即；马上。常置于句末或动词短语后。",
+    "collocations": "answer right away; call sb right away; do it right away",
+    "commonMistake": "right away 是副词短语，表示“马上”；right 在此不是“正确的”。",
+    "example": {
+      "english": "Please reply to the message right away.",
+      "chinese": "请马上回复这条信息。"
+    },
+    "application": {
+      "solution": "A。解析：时间紧，需要立即离开，用 right away。",
+      "prompt": "The meeting starts in five minutes, so we must leave ___. A. right away B. one by one"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: right",
+        "url": "https://dictionary.cambridge.org/dictionary/english/right"
+      }
+    ]
+  },
+  {
+    "word": "line",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 字行；便条；线；电话线路，可数。",
+    "collocations": "a line of text; wait in line; a phone line",
+    "commonMistake": "line 意义较多，结合语境辨义；表示“排队”常说 wait in line。",
+    "example": {
+      "english": "She wrote one line of thanks in the card.",
+      "chinese": "她在卡片上写了一行感谢的话。"
+    },
+    "application": {
+      "solution": "B。解析：一行文字用 line。",
+      "prompt": "The short message has only one ___. A. clause B. line"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: line",
+        "url": "https://dictionary.cambridge.org/dictionary/english/line"
+      }
+    ]
+  },
+  {
+    "word": "drop sb a line",
+    "examTags": [
+      "词汇·动词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 给某人写信；给某人留言。sb 可用 me/us/them 等宾格代词。",
+    "collocations": "drop me a line; drop sb a line soon; drop a line to a friend",
+    "commonMistake": "结构是 drop + 人 + a line；人称代词用宾格，如 drop me a line。",
+    "example": {
+      "english": "Drop me a line when you get to the city.",
+      "chinese": "你到这座城市后给我写信。"
+    },
+    "application": {
+      "solution": "B。解析：请给我写信或留言用 drop me a line。",
+      "prompt": "If you have time, please ___ and tell me how the visit went. A. pay attention B. drop me a line"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: drop",
+        "url": "https://dictionary.cambridge.org/dictionary/english/drop"
+      }
+    ]
+  },
+  {
+    "word": "detail",
+    "examTags": [
+      "词汇·名词与搭配",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 细节；详情，可数。常用 in detail，details about/of。",
+    "collocations": "in detail; attention to detail; details of the plan",
+    "commonMistake": "detail 是可数名词，具体细节常用复数 details；“详细地”说 in detail。",
+    "example": {
+      "english": "The speaker explained the plan in detail.",
+      "chinese": "发言者详细解释了计划。"
+    },
+    "application": {
+      "solution": "A。解析：具体的时间和地点信息可称 details；detailly 不是常用英语表达。",
+      "prompt": "Please tell us the ___ of the meeting place and time. A. details B. detailly"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: detail",
+        "url": "https://dictionary.cambridge.org/dictionary/english/detail"
+      }
+    ]
+  },
+  {
+    "word": "reunion",
+    "examTags": [
+      "词汇·名词与派生词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 团聚；重逢；聚会，可数。动词为 reunite。",
+    "collocations": "a family reunion; a class reunion; hold a reunion",
+    "commonMistake": "reunion 是名词，reunite 是动词；不要把 reunion 和 meeting 完全等同，前者强调重聚。",
+    "example": {
+      "english": "Our class reunion brought old friends together again.",
+      "chinese": "我们的同学聚会让老朋友们再次相聚。"
+    },
+    "application": {
+      "solution": "B。解析：老同学重聚的聚会是 reunion。",
+      "prompt": "Former classmates met again at a school ___. A. rehearsal B. reunion"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reunion",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reunion"
+      }
+    ]
+  },
+  {
+    "word": "seriously",
+    "examTags": [
+      "词汇·形副转换",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adv. 严肃地；认真地。形容词 serious；常用 take sth seriously。",
+    "collocations": "take advice seriously; think seriously about; speak seriously",
+    "commonMistake": "seriously 是副词，修饰动词；be 后作表语用 serious。",
+    "example": {
+      "english": "We should take the speaker's advice seriously.",
+      "chinese": "我们应该认真对待发言者的建议。"
+    },
+    "application": {
+      "solution": "B。解析：修饰动词 listened 用副词 seriously。",
+      "prompt": "The students listened ___ to the instructions. A. serious B. seriously"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: seriously",
+        "url": "https://dictionary.cambridge.org/dictionary/english/seriously"
+      }
+    ]
+  },
+  {
+    "word": "training",
+    "examTags": [
+      "词汇·不可数名词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 训练；培训，通常不可数。动词 train。",
+    "collocations": "receive training; a training course; training in first aid",
+    "commonMistake": "training 泛指训练或培训时通常不可数；不能说 a training，具体课程可说 a training course。",
+    "example": {
+      "english": "The volunteers received training in communication skills.",
+      "chinese": "志愿者接受了沟通技巧培训。"
+    },
+    "application": {
+      "solution": "A。解析：泛指培训时 training 通常不可数。",
+      "prompt": "The new staff need more ___ before they begin the work. A. training B. trainings"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: training",
+        "url": "https://dictionary.cambridge.org/dictionary/english/training"
+      }
+    ]
+  },
+  {
+    "word": "nervous",
+    "examTags": [
+      "词汇·形名辨析",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 担忧的；焦虑的；胆怯的。",
+    "collocations": "feel nervous; be nervous about sth; nervous before a speech",
+    "commonMistake": "nervous 描述人的紧张感；令别人紧张的事物可用 nerve-racking 等，不用 nervous。",
+    "example": {
+      "english": "I feel nervous before speaking to a large audience.",
+      "chinese": "在面对很多听众讲话前，我会感到紧张。"
+    },
+    "application": {
+      "solution": "A。解析：felt 后作表语需用形容词 nervous；nervousness 是名词。",
+      "prompt": "Ella felt ___ before giving her first speech. A. nervous B. nervousness"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nervous",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nervous"
+      }
+    ]
+  },
+  {
+    "word": "stranger",
+    "examTags": [
+      "词汇·形名辨析",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 陌生人，可数。形容词 strange。",
+    "collocations": "a stranger to the town; talk to a stranger; a complete stranger",
+    "commonMistake": "stranger 是“陌生人”名词；strange 是“陌生的、奇怪的”形容词，注意词性。",
+    "example": {
+      "english": "A stranger asked me for directions outside the station.",
+      "chinese": "一个陌生人在车站外向我问路。"
+    },
+    "application": {
+      "solution": "A。解析：不认识的人是 stranger；listener 只是听者，不一定陌生。",
+      "prompt": "Do not share personal information with a ___. A. stranger B. listener"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: stranger",
+        "url": "https://dictionary.cambridge.org/dictionary/english/stranger"
+      }
+    ]
+  },
+  {
+    "word": "tip",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 实用提示；指点；尖端；v. （使）倾斜；倒出；给小费。",
+    "collocations": "a useful tip; the tip of a finger; tip a waiter",
+    "commonMistake": "tip 可作名词或动词，意义依语境变化；不要只按“提示”理解所有用法。",
+    "example": {
+      "english": "One useful tip is to look at the audience while speaking.",
+      "chinese": "一个实用建议是讲话时看着听众。"
+    },
+    "application": {
+      "solution": "A。解析：物体最末端的尖端可称 tip。",
+      "prompt": "The sharp ___ of the pencil broke. A. tip B. line"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tip",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tip"
+      }
+    ]
+  },
+  {
+    "word": "carefully",
+    "examTags": [
+      "词汇·形副转换",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adv. 认真地；仔细地；小心地。形容词 careful。",
+    "collocations": "listen carefully; read carefully; drive carefully",
+    "commonMistake": "carefully 是副词，修饰动作；修饰名词用 careful，不要漏掉 -ly。",
+    "example": {
+      "english": "Listen carefully when your partner is speaking.",
+      "chinese": "搭档讲话时要认真听。"
+    },
+    "application": {
+      "solution": "B。解析：修饰动词 read 要用副词 carefully。",
+      "prompt": "Read the instructions ___ before you sign the form. A. careful B. carefully"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: carefully",
+        "url": "https://dictionary.cambridge.org/dictionary/english/carefully"
+      }
+    ]
+  },
+  {
+    "word": "show interest in sth",
+    "examTags": [
+      "词汇·介词搭配",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 对……表现出兴趣。in 为介词，后接名词、代词或动名词。",
+    "collocations": "show interest in music; show interest in learning; take an interest in sth",
+    "commonMistake": "interest in 后接名词或动名词；不要说 show interest to sth。",
+    "example": {
+      "english": "The visitors showed interest in the students' robot project.",
+      "chinese": "参观者对学生们的机器人项目表现出兴趣。"
+    },
+    "application": {
+      "solution": "A。解析：对学习表达出兴趣用 show interest in。",
+      "prompt": "The child ___ learning how to communicate clearly. A. showed interest in B. took place in"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: show",
+        "url": "https://dictionary.cambridge.org/dictionary/english/show"
+      }
+    ]
+  },
+  {
+    "word": "listener",
+    "examTags": [
+      "词汇·名词与派生词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 听者，可数。动词 listen；常用 listen to。",
+    "collocations": "a good listener; active listener; listen to the speaker",
+    "commonMistake": "listener 指听的人；动词 listen 后接宾语时要加 to，如 listen to sb。",
+    "example": {
+      "english": "A good listener gives others time to finish speaking.",
+      "chinese": "好的倾听者会给别人时间把话说完。"
+    },
+    "application": {
+      "solution": "A。解析：认真听的人是 listener；speaker 是讲话的人。",
+      "prompt": "A person who pays attention while someone speaks is a ___. A. listener B. speaker"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: listener",
+        "url": "https://dictionary.cambridge.org/dictionary/english/listener"
+      }
+    ]
+  },
+  {
+    "word": "point",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 观点；重点；要点；v. 指向；瞄准。",
+    "collocations": "make a point; point to a place; point at sth",
+    "commonMistake": "point to 常表示指向某地或事物；point out 表示指出、说明某点。",
+    "example": {
+      "english": "She pointed to the line on the map.",
+      "chinese": "她指着地图上的那条线。"
+    },
+    "application": {
+      "solution": "B。解析：用手指向某处用 point to。",
+      "prompt": "The guide used her hand to ___ the meeting room. A. pay for B. point to"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: point",
+        "url": "https://dictionary.cambridge.org/dictionary/english/point"
+      }
+    ]
+  },
+  {
+    "word": "surely",
+    "examTags": [
+      "词汇·形副辨析",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adv. 想必；必定；无疑地。形容词为 sure。",
+    "collocations": "surely know; surely understand; surely be able to",
+    "commonMistake": "surely 是副词；be 后作表语用 sure，不要说 I am surely。",
+    "example": {
+      "english": "Surely we can find a better way to solve this problem.",
+      "chinese": "我们肯定能找到更好的办法解决这个问题。"
+    },
+    "application": {
+      "solution": "B。解析：修饰动词 knows 需要副词 surely；sure 是形容词。",
+      "prompt": "She ___ knows the answer. A. sure B. surely"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: surely",
+        "url": "https://dictionary.cambridge.org/dictionary/english/surely"
+      }
+    ]
+  },
+  {
+    "word": "continue",
+    "examTags": [
+      "词汇·动词结构",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "v. 持续；继续做。常用 continue to do/doing sth，也可 continue with sth。",
+    "collocations": "continue working; continue to study; continue with the discussion",
+    "commonMistake": "continue 后可接 to do 或 doing；不要漏掉后面的 to 或 -ing。",
+    "example": {
+      "english": "The speaker continued answering questions after the talk.",
+      "chinese": "演讲结束后，发言者继续回答问题。"
+    },
+    "application": {
+      "solution": "A。解析：表示继续某项活动可用 continue with sth。",
+      "prompt": "After a short break, the students continued ___ their rehearsal. A. with B. at"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: continue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/continue"
+      }
+    ]
+  },
+  {
+    "word": "impolite",
+    "examTags": [
+      "词汇·形名转换",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 不礼貌的；粗鲁的。由 polite 加否定前缀 im- 构成。",
+    "collocations": "impolite to interrupt; impolite behaviour; seem impolite",
+    "commonMistake": "常用 It is impolite to do sth；impolite 的反义词是 polite，拼写有前缀 im-。",
+    "example": {
+      "english": "It is impolite to look at your phone while someone is talking.",
+      "chinese": "别人讲话时看手机是不礼貌的。"
+    },
+    "application": {
+      "solution": "A。解析：It is 后需形容词 impolite；impoliteness 是名词。",
+      "prompt": "It is ___ to interrupt a speaker before they finish. A. impolite B. impoliteness"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: impolite",
+        "url": "https://dictionary.cambridge.org/dictionary/english/impolite"
+      }
+    ]
+  },
+  {
+    "word": "personal",
+    "examTags": [
+      "词汇·形名辨析",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 个人的；私人的。名词 person；副词 personally。",
+    "collocations": "personal information; personal experience; personal space",
+    "commonMistake": "personal 是形容词；“个人地、亲自”可用 personally，不要和 personnel（全体员工）混淆。",
+    "example": {
+      "english": "Never share personal information with strangers online.",
+      "chinese": "不要在网上向陌生人分享个人信息。"
+    },
+    "application": {
+      "solution": "B。解析：修饰名词 information 用形容词 personal。",
+      "prompt": "Your name and phone number are ___ information. A. person B. personal"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: personal",
+        "url": "https://dictionary.cambridge.org/dictionary/english/personal"
+      }
+    ]
+  },
+  {
+    "word": "argue with sb",
+    "examTags": [
+      "词汇·动词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 与某人争论；争吵。常与 about/over sth 连用。",
+    "collocations": "argue with a friend; argue with sb about sth; argue over a plan",
+    "commonMistake": "argue with 后接争论对象；争论的话题可用 about/over 引出。",
+    "example": {
+      "english": "I don't want to argue with my partner about the topic.",
+      "chinese": "我不想和搭档为这个话题争论。"
+    },
+    "application": {
+      "solution": "B。解析：与某人争论用 argue with sb。",
+      "prompt": "Try to discuss the problem calmly instead of ___ your classmate. A. meeting with B. arguing with"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: argue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/argue"
+      }
+    ]
+  },
+  {
+    "word": "move on (to sth)",
+    "examTags": [
+      "词汇·动词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 换话题；开始做（别的事）；继续前进。",
+    "collocations": "move on to a new topic; move on from a mistake; move on to the next task",
+    "commonMistake": "表示转到下一话题常用 move on to；不要漏掉介词 to。",
+    "example": {
+      "english": "After discussing the first question, the class moved on to the next topic.",
+      "chinese": "讨论完第一个问题后，全班转向了下一个话题。"
+    },
+    "application": {
+      "solution": "B。解析：转到下一题用 move on to。",
+      "prompt": "We have finished this question. Let's ___ the next one. A. drop a line to B. move on to"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: move",
+        "url": "https://dictionary.cambridge.org/dictionary/english/move"
+      }
+    ]
+  },
+  {
+    "word": "sincere",
+    "examTags": [
+      "词汇·形副转换",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 真诚的；诚实的。副词 sincerely。",
+    "collocations": "a sincere apology; sincere thanks; be sincere with sb",
+    "commonMistake": "sincere 是形容词，sincerely 是副词；表达诚挚感谢可说 sincere thanks。",
+    "example": {
+      "english": "He gave a sincere apology after the misunderstanding.",
+      "chinese": "误会之后，他真诚地道了歉。"
+    },
+    "application": {
+      "solution": "A。解析：be 动词后作表语应用形容词 sincere。",
+      "prompt": "Her apology sounded honest and ___. A. sincere B. sincerely"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sincere",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sincere"
+      }
+    ]
+  },
+  {
+    "word": "find out",
+    "examTags": [
+      "词汇·动词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 查明；弄清（情况）；发现信息。过去式 found out。",
+    "collocations": "find out the truth; find out about a course; find it out",
+    "commonMistake": "find out 强调查明信息；代词作宾语放在中间：find it out。",
+    "example": {
+      "english": "We need to find out when the meeting will begin.",
+      "chinese": "我们需要弄清会议什么时候开始。"
+    },
+    "application": {
+      "solution": "A。解析：查明某人的身份用 find out。",
+      "prompt": "Can you ___ who sent this message? A. find out B. find on"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: find",
+        "url": "https://dictionary.cambridge.org/dictionary/english/find"
+      }
+    ]
+  },
+  {
+    "word": "pay",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "v. 付费；交纳；偿还；n. 工资、薪水（常不可数）。过去式/过去分词 paid。",
+    "collocations": "pay for a ticket; pay sb; pay a bill",
+    "commonMistake": "pay for sth 表示为某物付费；pay sb sth 表示付给某人钱；过去式是不规则变化 paid。",
+    "example": {
+      "english": "I paid for the tickets online yesterday.",
+      "chinese": "我昨天在网上付了票钱。"
+    },
+    "application": {
+      "solution": "A。解析：人付钱用 pay；cost 常表示某物花费某人多少钱。",
+      "prompt": "The verb meaning “give money for something” is ___. A. pay B. cost"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pay",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pay"
+      }
+    ]
+  },
+  {
+    "word": "attention",
+    "examTags": [
+      "词汇·不可数名词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 注意；专心；关注，通常不可数。",
+    "collocations": "pay attention to; draw attention to; give sb your attention",
+    "commonMistake": "attention 通常不可数；固定搭配 pay attention to 中 to 是介词。",
+    "example": {
+      "english": "Please give your full attention to the speaker.",
+      "chinese": "请专心听发言者讲话。"
+    },
+    "application": {
+      "solution": "A。解析：pay attention to 是固定表达，attention 通常不可数。",
+      "prompt": "The teacher asked everyone to pay ___ to the instructions. A. attention B. attentions"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: attention",
+        "url": "https://dictionary.cambridge.org/dictionary/english/attention"
+      }
+    ]
+  },
+  {
+    "word": "pay attention (to ...)",
+    "examTags": [
+      "词汇·介词结构",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 注意；关注。to 为介词，后接名词、代词或动名词。",
+    "collocations": "pay attention to details; pay attention to sb; pay attention to doing sth",
+    "commonMistake": "短语中的 to 是介词，后接 doing 或名词；不要用动词原形。",
+    "example": {
+      "english": "Pay attention to what your partner is saying.",
+      "chinese": "注意听搭档正在说什么。"
+    },
+    "application": {
+      "solution": "B。解析：pay attention to 后接名词；traffic 表示道路交通时用 the traffic 或泛指 traffic，此处 the 合适。",
+      "prompt": "When you cross the road, pay attention to ___ traffic. A. a B. the"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pay",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pay"
+      }
+    ]
+  },
+  {
+    "word": "be yourself",
+    "examTags": [
+      "词汇·代词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 行为自然；不做作；做你自己。",
+    "collocations": "just be yourself; feel free to be yourself; be yourself around friends",
+    "commonMistake": "be yourself 表示自然做自己；yourself 需随主语变化，如 be myself、be themselves。",
+    "example": {
+      "english": "You don't need to act differently; just be yourself.",
+      "chinese": "你不必表现得不一样，只要做你自己。"
+    },
+    "application": {
+      "solution": "A。解析：自然地表现自己用 be yourself。",
+      "prompt": "Before the interview, remember to ___ and speak honestly. A. be yourself B. be a stranger"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: be",
+        "url": "https://dictionary.cambridge.org/dictionary/english/be"
+      }
+    ]
+  },
+  {
+    "word": "offer",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "v. 提供；主动提出；提议；出价；n. 主动提议；出价。",
+    "collocations": "offer help; offer to do sth; make an offer",
+    "commonMistake": "offer sb sth 或 offer sth to sb 表示提供；offer to do 表示主动提出做某事。",
+    "example": {
+      "english": "The student offered to help the visitor find the library.",
+      "chinese": "这名学生主动提出帮访客找图书馆。"
+    },
+    "application": {
+      "solution": "A。解析：主动提出做某事用 offer to do。",
+      "prompt": "When she saw the heavy boxes, she ___ carry one. A. offered to B. replied to"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: offer",
+        "url": "https://dictionary.cambridge.org/dictionary/english/offer"
+      }
+    ]
+  },
+  {
+    "word": "reasonable",
+    "examTags": [
+      "词汇·形名转换",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 公平的；合理的。副词 reasonably。",
+    "collocations": "a reasonable price; a reasonable decision; it is reasonable to do sth",
+    "commonMistake": "reasonable 是形容词，reason 是名词；不要把 reasonable 拼成 reasonible。",
+    "example": {
+      "english": "It is reasonable to ask questions when you do not understand.",
+      "chinese": "不明白时提问是合理的。"
+    },
+    "application": {
+      "solution": "B。解析：修饰名词 explanation 要用形容词 reasonable。",
+      "prompt": "The teacher gave a ___ explanation for the change. A. reason B. reasonable"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reasonable",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reasonable"
+      }
+    ]
+  },
+  {
+    "word": "social",
+    "examTags": [
+      "词汇·形名辨析",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 社会的；社交的；n. 联谊会、联欢会（尤见美式英语）。",
+    "collocations": "social life; social skills; social event",
+    "commonMistake": "social 表示“社会的、社交的”；sociable 更强调一个人善于交际，不要混为一谈。",
+    "example": {
+      "english": "Face-to-face talks can help build social skills.",
+      "chinese": "面对面交谈有助于培养社交技能。"
+    },
+    "application": {
+      "solution": "B。解析：修饰 relationships 需要形容词 social。",
+      "prompt": "Learning to listen is important for good ___ relationships. A. society B. social"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: social",
+        "url": "https://dictionary.cambridge.org/dictionary/english/social"
+      }
+    ]
+  },
+  {
+    "word": "medium",
+    "examTags": [
+      "词汇·名词单复数",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 媒介；手段；adj. 中等的；适中的。表示传播媒介时复数常用 media；mediums 也可用于其他语义。",
+    "collocations": "a medium of communication; social media; a medium-sized room",
+    "commonMistake": "medium 表示传播媒介时复数常用 media；表示“中等的”时是形容词，不能用 media 修饰名词。",
+    "example": {
+      "english": "Email is one medium people use to communicate.",
+      "chinese": "电子邮件是人们用来交流的一种媒介。"
+    },
+    "application": {
+      "solution": "A。解析：a 后用单数 medium；media 是 medium 表示传播媒介时常见的复数形式。",
+      "prompt": "TV can be a useful ___ for sharing information. A. medium B. media"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: medium",
+        "url": "https://dictionary.cambridge.org/dictionary/english/medium"
+      }
+    ]
+  },
+  {
+    "word": "social media",
+    "examTags": [
+      "词汇·名词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 社交媒体，通常作集合性表达。",
+    "collocations": "on social media; social media platform; use social media",
+    "commonMistake": "表示在社交媒体平台上通常用 on social media；不要用 in social media。",
+    "example": {
+      "english": "Many students share school news on social media.",
+      "chinese": "许多学生在社交媒体上分享学校消息。"
+    },
+    "application": {
+      "solution": "A。解析：表示在社交媒体平台上通常用介词 on。",
+      "prompt": "The club posted its announcement ___ last night. A. on social media B. in social media"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: social",
+        "url": "https://dictionary.cambridge.org/dictionary/english/social"
+      }
+    ]
+  },
+  {
+    "word": "trust",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 信任；v. 信任、相信。过去式/过去分词 trusted。",
+    "collocations": "trust a friend; trust sb to do sth; build trust",
+    "commonMistake": "trust 作动词时直接接宾语，不说 trust to sb；名词常用 build/gain trust。",
+    "example": {
+      "english": "Good friends listen carefully and trust each other.",
+      "chinese": "好朋友会认真倾听并彼此信任。"
+    },
+    "application": {
+      "solution": "A。解析：信任某人会做某事用 trust sb to do sth。",
+      "prompt": "I ___ my partner to keep the information private. A. trust B. attention"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: trust",
+        "url": "https://dictionary.cambridge.org/dictionary/english/trust"
+      }
+    ]
+  },
+  {
+    "word": "keep (...) away from ...",
+    "examTags": [
+      "词汇·动词结构",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. （使）远离；避免……靠近。结构可为 keep sb/sth away from sth。",
+    "collocations": "keep children away from danger; keep away from a hot pan; keep pets away from food",
+    "commonMistake": "keep ... away from 中 from 后接名词或动名词；不要遗漏 from。",
+    "example": {
+      "english": "Please keep your phone away from the water.",
+      "chinese": "请让手机远离水。"
+    },
+    "application": {
+      "solution": "B。解析：使某物远离某物用 keep sth away from sth。",
+      "prompt": "The sign says we should ___ the equipment ___ water. A. make / up with B. keep / away from"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: keep",
+        "url": "https://dictionary.cambridge.org/dictionary/english/keep"
+      }
+    ]
+  },
+  {
+    "word": "misunderstanding",
+    "examTags": [
+      "词汇·名词与派生词",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 误解；误会，可数。动词为 misunderstand，过去式 misunderstood。",
+    "collocations": "a misunderstanding between friends; clear up a misunderstanding; avoid misunderstanding",
+    "commonMistake": "misunderstanding 是名词；动词过去式为 misunderstood，不是 misunderstanded。",
+    "example": {
+      "english": "They cleared up the misunderstanding by talking face to face.",
+      "chinese": "他们通过面对面交谈消除了误会。"
+    },
+    "application": {
+      "solution": "A。解析：导致朋友不再交谈的误会是 misunderstanding。",
+      "prompt": "A small ___ caused the two friends to stop talking. A. misunderstanding B. communication"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: misunderstanding",
+        "url": "https://dictionary.cambridge.org/dictionary/english/misunderstanding"
+      }
+    ]
+  },
+  {
+    "word": "event",
+    "examTags": [
+      "词汇·名词与可数性",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 公开活动；重要事情，可数。",
+    "collocations": "a school event; attend an event; a major event",
+    "commonMistake": "event 是可数名词；表示一场活动时单数前常用 a/an。",
+    "example": {
+      "english": "The school will hold a communication event for families.",
+      "chinese": "学校将为家庭举办一场交流活动。"
+    },
+    "application": {
+      "solution": "A。解析：学校举办的重要活动是 event。",
+      "prompt": "The open day is an important school ___. A. event B. attention"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: event",
+        "url": "https://dictionary.cambridge.org/dictionary/english/event"
+      }
+    ]
+  },
+  {
+    "word": "take place",
+    "examTags": [
+      "词汇·动词短语",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 发生；举行；进行。常用于活动、会议或事件；无被动语态。",
+    "collocations": "the meeting takes place; take place in June; take place at school",
+    "commonMistake": "take place 表示“发生、举行”，没有被动语态；不能说 was taken place。",
+    "example": {
+      "english": "The class reunion will take place next Saturday.",
+      "chinese": "班级聚会将于下周六举行。"
+    },
+    "application": {
+      "solution": "B。解析：活动“举行”用 take place，不能用被动语态。",
+      "prompt": "The speech contest will ___ in the school hall. A. be taken place B. take place"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: take",
+        "url": "https://dictionary.cambridge.org/dictionary/english/take"
+      }
+    ]
+  },
+  {
+    "word": "cost",
+    "examTags": [
+      "词汇·熟词多义与不规则变化",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 费用；价钱；代价；v. 价钱为；使损失、使付出努力。过去式/过去分词 cost。",
+    "collocations": "the cost of a ticket; cost a lot; cost sb time",
+    "commonMistake": "cost 作动词时常用“物 + cost + 人 + 金钱/时间”；过去式仍为 cost，不加 -ed。",
+    "example": {
+      "english": "The trip cost us less than we expected.",
+      "chinese": "这趟旅行花的钱比我们预想的少。"
+    },
+    "application": {
+      "solution": "A。解析：叙述过去，cost 的过去式仍为 cost。",
+      "prompt": "The tickets ___ twenty dollars last year. A. cost B. costs"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cost",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cost"
+      }
+    ]
+  },
+  {
+    "word": "opportunity",
+    "examTags": [
+      "词汇·名词与常考结构",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 机会；时机，可数。",
+    "collocations": "an opportunity to do sth; a good opportunity; have the opportunity of doing sth",
+    "commonMistake": "opportunity 后常接 to do；不可说 opportunity for do。",
+    "example": {
+      "english": "The visit gave us an opportunity to practise speaking English.",
+      "chinese": "这次参观给了我们练习说英语的机会。"
+    },
+    "application": {
+      "solution": "B。解析：见教授的好机会是 opportunity。",
+      "prompt": "This is a good ___ to meet the professor. A. misunderstanding B. opportunity"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: opportunity",
+        "url": "https://dictionary.cambridge.org/dictionary/english/opportunity"
+      }
+    ]
+  },
+  {
+    "word": "benefit",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "v. 对……有用；使受益；n. 益处；成效。",
+    "collocations": "benefit from exercise; benefit sb; be of benefit to sb",
+    "commonMistake": "benefit from sth 表示从某事中受益；benefit sb 表示使某人受益，不加 from。",
+    "example": {
+      "english": "Students benefit from practising conversations regularly.",
+      "chinese": "学生通过定期练习对话而受益。"
+    },
+    "application": {
+      "solution": "A。解析：从练习中受益用 benefit from。",
+      "prompt": "People can ___ regular practice. A. benefit from B. reply to"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: benefit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/benefit"
+      }
+    ]
+  },
+  {
+    "word": "benefit ... from ...",
+    "examTags": [
+      "词汇·介词结构",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "phr. 从……获益；结构为 benefit from + 名词/代词/动名词。",
+    "collocations": "benefit from a course; benefit from experience; benefit from doing sth",
+    "commonMistake": "from 是介词，后接名词或动名词；不要说 benefit from do sth。",
+    "example": {
+      "english": "She benefited from joining the speaking club.",
+      "chinese": "她从参加演讲社团中受益。"
+    },
+    "application": {
+      "solution": "B。解析：从某事中获益用 benefit from，from 后接动名词 working。",
+      "prompt": "He hopes to ___ working with an experienced speaker. A. pay for B. benefit from"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: benefit",
+        "url": "https://dictionary.cambridge.org/dictionary/english/benefit"
+      }
+    ]
+  },
+  {
+    "word": "reply",
+    "examTags": [
+      "词汇·动词搭配",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 答复；v. 回答；回复。过去式/过去分词 replied。常用 reply to。",
+    "collocations": "reply to a message; a quick reply; reply that ...",
+    "commonMistake": "reply 作动词时通常要接 to 再接对象；answer 可直接接名词宾语。",
+    "example": {
+      "english": "Please reply to my message when you have time.",
+      "chinese": "有空时请回复我的信息。"
+    },
+    "application": {
+      "solution": "B。解析：reply 常用 reply to；answer 作动词时可直接接 it。",
+      "prompt": "I sent her a question, but she did not ___ to it. A. answer to B. reply"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: reply",
+        "url": "https://dictionary.cambridge.org/dictionary/english/reply"
+      }
+    ]
+  },
+  {
+    "word": "honour",
+    "examTags": [
+      "词汇·英美拼写",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 荣幸；尊敬；v. 尊敬；给予荣誉、表彰。美式拼写为 honor。",
+    "collocations": "it is an honour to; honour sb for sth; in honour of",
+    "commonMistake": "honour 是英式拼写，首字母后有 u；“荣幸地做某事”可说 It is an honour to ...。",
+    "example": {
+      "english": "It was an honour to meet the visiting professor.",
+      "chinese": "见到来访的教授是一种荣幸。"
+    },
+    "application": {
+      "solution": "A。解析：honour 以元音音素开头，前用 an。",
+      "prompt": "It was ___ to speak at the school event. A. an honour B. a honour"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: honour",
+        "url": "https://dictionary.cambridge.org/dictionary/english/honour"
+      }
+    ]
+  },
+  {
+    "word": "sincerely",
+    "examTags": [
+      "词汇·形副转换",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adv. 真诚地；诚实地。形容词 sincere；也用于正式信件结尾 Yours sincerely。",
+    "collocations": "sincerely hope; speak sincerely; Yours sincerely",
+    "commonMistake": "sincerely 是副词；放在正式信件结尾时可写 Yours sincerely，注意首字母大写。",
+    "example": {
+      "english": "I sincerely hope we can solve the misunderstanding.",
+      "chinese": "我真诚地希望我们能解决这个误会。"
+    },
+    "application": {
+      "solution": "B。解析：修饰动词 thanked 用副词 sincerely。",
+      "prompt": "She thanked the volunteers ___ for their help. A. sincere B. sincerely"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sincerely",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sincerely"
+      }
+    ]
+  },
+  {
+    "word": "opening",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 开篇的；开始的；n. 开始；开口、孔洞；也可指职位空缺。",
+    "collocations": "opening speech; opening remarks; an opening in the wall",
+    "commonMistake": "opening 可作形容词或名词；opening speech 表示开场发言，open 是动词或形容词。",
+    "example": {
+      "english": "The opening speech welcomed all the guests.",
+      "chinese": "开场发言欢迎了所有来宾。"
+    },
+    "application": {
+      "solution": "B。解析：活动开头的发言是 opening speech。",
+      "prompt": "The first speech at the event is the ___ speech. A. closing B. opening"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: opening",
+        "url": "https://dictionary.cambridge.org/dictionary/english/opening"
+      }
+    ]
+  },
+  {
+    "word": "closing",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "adj. 结尾的；结束的；n. 结束、关闭；停业。",
+    "collocations": "closing speech; closing remarks; closing time",
+    "commonMistake": "closing 可作形容词或名词；表示“关闭的”状态通常用 closed，不要混淆 closing 与 closed。",
+    "example": {
+      "english": "Her closing remarks thanked everyone for listening.",
+      "chinese": "她的结束语感谢了所有听众。"
+    },
+    "application": {
+      "solution": "A。解析：演讲末尾的发言是 closing remarks。",
+      "prompt": "The final words of a speech are its ___ remarks. A. closing B. local"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: closing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/closing"
+      }
+    ]
+  },
+  {
+    "word": "sentence",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 句子；判决；v. 判决、宣判。",
+    "collocations": "write a sentence; a complete sentence; sentence sb to ...",
+    "commonMistake": "sentence 作“句子”时是可数名词；作动词表示判刑，注意与动词 sentencing 的语境差别。",
+    "example": {
+      "english": "Write one clear sentence to express your opinion.",
+      "chinese": "写一个清晰的句子来表达你的观点。"
+    },
+    "application": {
+      "solution": "A。解析：完整的书面表达单位是 sentence（句子）；speaker 指发言者。",
+      "prompt": "In writing, end each complete thought with a ___. A. sentence B. speaker"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sentence",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sentence"
+      }
+    ]
+  },
+  {
+    "word": "date",
+    "examTags": [
+      "词汇·熟词多义",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 日期；日子；约会；v. 确定年代；注明日期；与某人约会。",
+    "collocations": "the date of the meeting; date back to; write the date",
+    "commonMistake": "date 可作名词或动词；“某事的日期”用 the date of ...；不要把 date 和 day 混为一谈。",
+    "example": {
+      "english": "Please write the date at the top of your letter.",
+      "chinese": "请在信的顶部写上日期。"
+    },
+    "application": {
+      "solution": "B。解析：询问聚会在哪一天举行时问 date；detail 指细节。",
+      "prompt": "What is the ___ of the school reunion? A. detail B. date"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: date",
+        "url": "https://dictionary.cambridge.org/dictionary/english/date"
+      }
+    ]
+  },
+  {
+    "word": "clause",
+    "examTags": [
+      "语法·句子结构",
+      "交际·沟通与人际表达"
+    ],
+    "grammar": "n. 从句；分句，语法术语。",
+    "collocations": "a main clause; a subordinate clause; a clause in a sentence",
+    "commonMistake": "clause 指句子的一部分，phrase 指短语；从句不一定能独立成句。",
+    "example": {
+      "english": "The sentence has a main clause and a time clause.",
+      "chinese": "这个句子有一个主句和一个时间从句。"
+    },
+    "application": {
+      "solution": "A。解析：含主语和谓语、构成句子一部分的结构是 clause。",
+      "prompt": "A group of words with a subject and a verb in a sentence can be a ___. A. clause B. line"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: clause",
+        "url": "https://dictionary.cambridge.org/dictionary/english/clause"
+      }
+    ]
+  }
+]

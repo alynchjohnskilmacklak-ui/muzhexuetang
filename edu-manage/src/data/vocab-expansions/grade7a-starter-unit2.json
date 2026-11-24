@@ -1,0 +1,1423 @@
+[
+  {
+    "word": "bottle",
+    "examTags": [
+      "词汇·可数名词与单复数",
+      "听读·获取物品信息"
+    ],
+    "grammar": "n. 瓶子；可数，复数 bottles。单数前通常要有 a、the 或物主限定词。",
+    "collocations": "a bottle of water; a water bottle; an empty bottle。",
+    "commonMistake": "表示一瓶水常用 a bottle of water；bottle 是可数名词，单数前不要漏掉限定词。",
+    "example": {
+      "english": "There is a bottle of water in my schoolbag.",
+      "chinese": "我的书包里有一瓶水。"
+    },
+    "application": {
+      "prompt": "I am thirsty. I need a bottle of ___. A. water B. ruler",
+      "solution": "A。解析：bottle of water 表示“一瓶水”；ruler 是尺子，不符合语境。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bottle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bottle"
+      }
+    ]
+  },
+  {
+    "word": "eraser",
+    "examTags": [
+      "词汇·可数名词与单复数",
+      "语境·学习用品"
+    ],
+    "grammar": "n. 橡皮；可数，复数 erasers。英式英语也常用 rubber 表示橡皮。",
+    "collocations": "an eraser; an eraser for your pencil; use an eraser。",
+    "commonMistake": "eraser 以元音音素开头，单数前用 an；不要只根据字母 e 外的拼写判断冠词。",
+    "example": {
+      "english": "I use an eraser to correct a spelling mistake.",
+      "chinese": "我用橡皮改正一个拼写错误。"
+    },
+    "application": {
+      "prompt": "I wrote the wrong word. Can I use ___ eraser? A. a B. an",
+      "solution": "B。解析：eraser 以元音音素开头，用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: eraser",
+        "url": "https://dictionary.cambridge.org/dictionary/english/eraser"
+      }
+    ]
+  },
+  {
+    "word": "key",
+    "examTags": [
+      "词汇·熟词多义",
+      "阅读·根据上下文判断词义"
+    ],
+    "grammar": "n. 钥匙；也可表示“关键”。可数名词，复数 keys；key 的复数变 y 为 i 再加 -es。",
+    "collocations": "a key to the door; the key to success; find your keys。",
+    "commonMistake": "key 的复数是 keys，不是 keies；a key to ... 中常用介词 to。",
+    "example": {
+      "english": "The key to my locker is in my pencil case.",
+      "chinese": "我储物柜的钥匙在我的笔袋里。"
+    },
+    "application": {
+      "prompt": "I cannot open the door. I need a ___. A. key B. colour",
+      "solution": "A。解析：开门需要钥匙，key 符合语境。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: key",
+        "url": "https://dictionary.cambridge.org/dictionary/english/key"
+      }
+    ]
+  },
+  {
+    "word": "thing",
+    "examTags": [
+      "词汇·名词单复数",
+      "阅读·指代与语境理解"
+    ],
+    "grammar": "n. 东西；事情。可数，复数 things；常用 this/that/these/those 等限定词。",
+    "collocations": "one thing; many things; the first thing; something important。",
+    "commonMistake": "thing 的复数是 things；something、anything、nothing 本身已包含 -thing，后面通常不再接 thing。",
+    "example": {
+      "english": "One thing in my schoolbag is new: my ruler.",
+      "chinese": "我书包里有一样新东西：我的尺子。"
+    },
+    "application": {
+      "prompt": "There are many __ on the desk. A. thing B. things",
+      "solution": "B。解析：many 后接可数名词复数，thing 的复数为 things。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: thing",
+        "url": "https://dictionary.cambridge.org/dictionary/english/thing"
+      }
+    ]
+  },
+  {
+    "word": "need",
+    "examTags": [
+      "词汇·动词与名词用法",
+      "语法·动词搭配和主谓一致"
+    ],
+    "grammar": "v. 需要；一般现在时第三人称单数 needs，过去式 needed。可接名词或 to do；也可作 n.，表示需要。",
+    "collocations": "need a pencil; need to study; meet a need; in need of help。",
+    "commonMistake": "need 作实义动词时，后接动词通常用 to do：need to read；he/she/it 作主语时用 needs。",
+    "example": {
+      "english": "I need a ruler to draw this line.",
+      "chinese": "我需要一把尺子来画这条线。"
+    },
+    "application": {
+      "prompt": "Mia ___ an eraser for her homework. A. need B. needs",
+      "solution": "B。解析：Mia 是第三人称单数，一般现在时动词 need 加 -s。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: need",
+        "url": "https://dictionary.cambridge.org/dictionary/english/need"
+      }
+    ]
+  },
+  {
+    "word": "keep",
+    "examTags": [
+      "词汇·熟词生义",
+      "语法·动词词形与搭配"
+    ],
+    "grammar": "v. keep—kept—kept—keeping。可表示“保持、保留”；keep + 形容词表示“保持……状态”。",
+    "collocations": "keep tidy; keep a diary; keep the book; keep doing sth.（继续做某事）。",
+    "commonMistake": "过去式和过去分词都是 kept；表示“保持整洁”说 keep sth. tidy。",
+    "example": {
+      "english": "Please keep your desk tidy.",
+      "chinese": "请保持你的书桌整洁。"
+    },
+    "application": {
+      "prompt": "We should keep our classroom ___. A. tidy B. tidily",
+      "solution": "A。解析：keep + 名词 + 形容词，说明教室保持的状态。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: keep",
+        "url": "https://dictionary.cambridge.org/dictionary/english/keep"
+      }
+    ]
+  },
+  {
+    "word": "tidy",
+    "examTags": [
+      "词汇·形容词与动词辨析",
+      "语言运用·描述物品状态"
+    ],
+    "grammar": "adj. 整洁的；比较级 tidier，最高级 tidiest。也可作 v.，tidy—tidied—tidied—tidying。",
+    "collocations": "keep the room tidy; a tidy desk; tidy up your books。",
+    "commonMistake": "描述状态时说 be/keep tidy；tidily 是副词，不能直接放在 be 后作表语。",
+    "example": {
+      "english": "My schoolbag is tidy now.",
+      "chinese": "我的书包现在很整洁。"
+    },
+    "application": {
+      "prompt": "After class, please keep your desk ___. A. tidy B. tidily",
+      "solution": "A。解析：keep + 名词 + 形容词，tidy 表示书桌的状态。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: tidy",
+        "url": "https://dictionary.cambridge.org/dictionary/english/tidy"
+      }
+    ]
+  },
+  {
+    "word": "in",
+    "examTags": [
+      "语法·介词与方位",
+      "听读·定位物品信息"
+    ],
+    "grammar": "prep. 常表示“在……里”；后接名词或代词，如 in the bag、in it。也可表示使用某种语言或颜色等，如 in English、in red。",
+    "collocations": "in my schoolbag; in the classroom; in English; a girl in red。",
+    "commonMistake": "表示物品在书包里面用 in the schoolbag；it 作介词宾语时说 in it，不说 in its。",
+    "example": {
+      "english": "My ruler is in the schoolbag.",
+      "chinese": "我的尺子在书包里。"
+    },
+    "application": {
+      "prompt": "The pencil is ___ my pencil case. A. in B. on",
+      "solution": "A。解析：题意是铅笔在笔袋里面，用 in。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: in",
+        "url": "https://dictionary.cambridge.org/dictionary/english/in"
+      }
+    ]
+  },
+  {
+    "word": "schoolbag",
+    "examTags": [
+      "词汇·可数名词单复数",
+      "阅读·物品信息定位"
+    ],
+    "grammar": "n. 可数；复数 schoolbags。单数前通常用 a/the 或物主限定词，如 a schoolbag、my schoolbag。",
+    "collocations": "a schoolbag; pack your schoolbag; a schoolbag for school。",
+    "commonMistake": "schoolbag 是可数名词，单数前要有 a、the、my 等限定词；不要说 I have schoolbag。",
+    "example": {
+      "english": "There is a blue pencil in my schoolbag.",
+      "chinese": "我的书包里有一支蓝色铅笔。"
+    },
+    "application": {
+      "prompt": "I have ___ new schoolbag. A. a B. an",
+      "solution": "A。解析：schoolbag 以辅音音素开头，单数可数名词前用 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: schoolbag",
+        "url": "https://dictionary.cambridge.org/dictionary/english/schoolbag"
+      }
+    ]
+  },
+  {
+    "word": "cap",
+    "examTags": [
+      "词汇·可数名词单复数",
+      "语境·服饰与物品"
+    ],
+    "grammar": "n. 可数；复数 caps。表示一顶帽子时用 a cap；棒球帽可说 a baseball cap。",
+    "collocations": "wear a cap; a baseball cap; a red cap。",
+    "commonMistake": "cap 是可数名词，单数前通常要有 a、the 或物主限定词。",
+    "example": {
+      "english": "Ben has a black cap.",
+      "chinese": "Ben 有一顶黑色帽子。"
+    },
+    "application": {
+      "prompt": "Lily is wearing ___ orange cap. A. a B. an",
+      "solution": "B。解析：orange 的开头是元音音素，使用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: cap",
+        "url": "https://dictionary.cambridge.org/dictionary/english/cap"
+      }
+    ]
+  },
+  {
+    "word": "ruler",
+    "examTags": [
+      "词汇·可数名词单复数",
+      "语境·学习用品"
+    ],
+    "grammar": "n. 可数；复数 rulers。表示长度时常用 a 30-centimetre ruler。",
+    "collocations": "a ruler; a long ruler; use a ruler。",
+    "commonMistake": "ruler 指“尺子”时是可数名词；注意不要和 rule（规则）混淆。",
+    "example": {
+      "english": "I use a ruler to draw a straight line.",
+      "chinese": "我用尺子画一条直线。"
+    },
+    "application": {
+      "prompt": "I need ___ ruler for my maths class. A. a B. an",
+      "solution": "A。解析：ruler 以辅音音素开头，前面用 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: ruler",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ruler"
+      }
+    ]
+  },
+  {
+    "word": "pencil",
+    "examTags": [
+      "词汇·可数名词与复数",
+      "语境·学习用品"
+    ],
+    "grammar": "n. 可数；复数 pencils。可用 a pencil、two pencils；铅笔盒是 pencil case。",
+    "collocations": "a pencil; a pencil case; write in pencil。",
+    "commonMistake": "复数直接加 -s：pencils；表示用铅笔写可说 in pencil。",
+    "example": {
+      "english": "There are two pencils on my desk.",
+      "chinese": "我的书桌上有两支铅笔。"
+    },
+    "application": {
+      "prompt": "How many ___ are in the box? A. pencil B. pencils",
+      "solution": "B。解析：how many 后接可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pencil",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pencil"
+      }
+    ]
+  },
+  {
+    "word": "brown",
+    "examTags": [
+      "词汇·颜色与物品描述",
+      "阅读·根据颜色辨认物品"
+    ],
+    "grammar": "adj. 棕色的；也可作 n. 表示棕色。作形容词修饰名词时通常放在名词前。",
+    "collocations": "a brown bag; brown shoes; the colour brown。",
+    "commonMistake": "颜色作形容词时通常不加复数词尾：two brown pencils。",
+    "example": {
+      "english": "The brown ruler is mine.",
+      "chinese": "那把棕色尺子是我的。"
+    },
+    "application": {
+      "prompt": "I have a ___ pencil. It is the colour of chocolate. A. brown B. blue",
+      "solution": "A。解析：巧克力常呈棕色；brown 修饰 pencil。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: brown",
+        "url": "https://dictionary.cambridge.org/dictionary/english/brown"
+      }
+    ]
+  },
+  {
+    "word": "black",
+    "examTags": [
+      "词汇·颜色与物品描述",
+      "阅读·根据颜色辨认物品"
+    ],
+    "grammar": "adj. 黑色的；也可作 n. 表示黑色。作形容词时常放在名词前。",
+    "collocations": "a black cap; black trousers; the colour black。",
+    "commonMistake": "颜色作形容词时不因名词复数而变化：black caps。",
+    "example": {
+      "english": "Sam has a black schoolbag.",
+      "chinese": "Sam 有一个黑色书包。"
+    },
+    "application": {
+      "prompt": "The opposite of white is ___. A. black B. green",
+      "solution": "A。解析：black 表示黑色，与 white（白色）相对。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: black",
+        "url": "https://dictionary.cambridge.org/dictionary/english/black"
+      }
+    ]
+  },
+  {
+    "word": "yellow",
+    "examTags": [
+      "词汇·颜色与物品描述",
+      "阅读·根据颜色辨认物品"
+    ],
+    "grammar": "adj. 黄色的；也可作 n. 表示黄色。作形容词时放在名词前，词形不随名词变化。",
+    "collocations": "a yellow pencil; yellow flowers; the colour yellow。",
+    "commonMistake": "不要给颜色形容词加复数 -s：three yellow pencils。",
+    "example": {
+      "english": "The yellow pencil is in my bag.",
+      "chinese": "那支黄色铅笔在我的包里。"
+    },
+    "application": {
+      "prompt": "A banana is often ___. A. yellow B. red",
+      "solution": "A。解析：句子根据常见颜色描述香蕉，yellow 表示黄色。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: yellow",
+        "url": "https://dictionary.cambridge.org/dictionary/english/yellow"
+      }
+    ]
+  },
+  {
+    "word": "orange",
+    "examTags": [
+      "词汇·一词多义与词性",
+      "语法·冠词选择"
+    ],
+    "grammar": "adj. 橙色的；n. 橙子或橙色。表示一个橙子时是可数名词：an orange。",
+    "collocations": "an orange pencil; an orange; orange juice; the colour orange。",
+    "commonMistake": "注意词性和冠词：an orange 可指“一个橙子”；an orange bag 中 orange 是形容词。",
+    "example": {
+      "english": "There is an orange on the table.",
+      "chinese": "桌上有一个橙子。"
+    },
+    "application": {
+      "prompt": "She has ___ orange ruler. A. a B. an",
+      "solution": "B。解析：orange 的开头是元音音素，前面用 an。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: orange",
+        "url": "https://dictionary.cambridge.org/dictionary/english/orange"
+      }
+    ]
+  },
+  {
+    "word": "green",
+    "examTags": [
+      "词汇·颜色与物品描述",
+      "阅读·根据颜色辨认物品"
+    ],
+    "grammar": "adj. 绿色的；也可作 n. 表示绿色。作形容词时放在名词前，不加复数词尾。",
+    "collocations": "a green pencil; green leaves; the colour green。",
+    "commonMistake": "颜色形容词不随名词变复数：two green books，不说 two greens books。",
+    "example": {
+      "english": "My favourite pencil is green.",
+      "chinese": "我最喜欢的铅笔是绿色的。"
+    },
+    "application": {
+      "prompt": "Leaves are often ___. A. green B. white",
+      "solution": "A。解析：green 表示绿色，符合树叶的常见颜色。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: green",
+        "url": "https://dictionary.cambridge.org/dictionary/english/green"
+      }
+    ]
+  },
+  {
+    "word": "blue",
+    "examTags": [
+      "词汇·颜色与物品描述",
+      "阅读·根据颜色辨认物品"
+    ],
+    "grammar": "adj. 蓝色的；也可作 n. 表示蓝色。作形容词修饰名词时通常放在名词前。",
+    "collocations": "a blue ruler; blue eyes; the colour blue。",
+    "commonMistake": "颜色形容词不加复数词尾：blue bags；表示某物是蓝色可说 be blue。",
+    "example": {
+      "english": "The blue ruler is on the desk.",
+      "chinese": "蓝色尺子在书桌上。"
+    },
+    "application": {
+      "prompt": "The sky is ___. A. blue B. brown",
+      "solution": "A。解析：blue 表示蓝色，符合天空的常见颜色描述。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: blue",
+        "url": "https://dictionary.cambridge.org/dictionary/english/blue"
+      }
+    ]
+  },
+  {
+    "word": "white",
+    "examTags": [
+      "词汇·颜色与物品描述",
+      "阅读·根据颜色辨认物品"
+    ],
+    "grammar": "adj. 白色的；也可作 n. 表示白色。作形容词时通常放在名词前，词形不变。",
+    "collocations": "a white pencil; white paper; the colour white。",
+    "commonMistake": "white 作颜色形容词时不加复数 -s：white shirts。",
+    "example": {
+      "english": "This is a white pencil.",
+      "chinese": "这是一支白色铅笔。"
+    },
+    "application": {
+      "prompt": "Snow is usually ___. A. white B. black",
+      "solution": "A。解析：white 表示白色，符合雪的常见颜色。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: white",
+        "url": "https://dictionary.cambridge.org/dictionary/english/white"
+      }
+    ]
+  },
+  {
+    "word": "red",
+    "examTags": [
+      "词汇·颜色与物品描述",
+      "阅读·根据颜色辨认物品"
+    ],
+    "grammar": "adj. 红色的；也可作 n. 表示红色。作形容词时通常放在名词前。",
+    "collocations": "a red cap; red apples; the colour red。",
+    "commonMistake": "颜色作形容词时不加复数词尾：three red pencils。",
+    "example": {
+      "english": "I have a red cap and a blue cap.",
+      "chinese": "我有一顶红帽子和一顶蓝帽子。"
+    },
+    "application": {
+      "prompt": "The stop sign is usually ___. A. red B. yellow",
+      "solution": "A。解析：red 表示红色，符合常见交通标志的颜色。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: red",
+        "url": "https://dictionary.cambridge.org/dictionary/english/red"
+      }
+    ]
+  },
+  {
+    "word": "colour",
+    "examTags": [
+      "词汇·英美拼写辨析",
+      "语言运用·询问与描述颜色"
+    ],
+    "grammar": "n. 颜色；可数，复数 colours。colour 是英式拼写，美式常写 color。可问 What colour is it?",
+    "collocations": "What colour is it?; the colour of the bag; bright colours。",
+    "commonMistake": "colour 与 color 都表示“颜色”：前者常见于英式英语，后者常见于美式英语；同一篇写作中保持拼写一致。",
+    "example": {
+      "english": "What colour is your schoolbag?",
+      "chinese": "你的书包是什么颜色的？"
+    },
+    "application": {
+      "prompt": "Complete the question: What ___ is your pencil?",
+      "solution": "colour（美式也可写 color）。解析：What colour is ...? 用来询问颜色。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: colour",
+        "url": "https://dictionary.cambridge.org/dictionary/english/colour"
+      }
+    ]
+  },
+  {
+    "word": "trousers",
+    "examTags": [
+      "语法·复数名词与主谓一致",
+      "词汇·衣物表达"
+    ],
+    "grammar": "n. 裤子，通常用复数形式；一条裤子说 a pair of trousers。",
+    "collocations": "a pair of trousers; wear trousers; black trousers。",
+    "commonMistake": "不说 a trousers；表示“一条裤子”用 a pair of trousers。trousers 作主语时通常搭配复数谓语：These trousers are ...。",
+    "example": {
+      "english": "These trousers are too long for me.",
+      "chinese": "这条裤子对我来说太长了。"
+    },
+    "application": {
+      "prompt": "This pair of trousers ___ new. A. is B. are",
+      "solution": "A。解析：主语中心词是单数 pair，因此用 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: trousers",
+        "url": "https://dictionary.cambridge.org/dictionary/english/trousers"
+      }
+    ]
+  },
+  {
+    "word": "they",
+    "examTags": [
+      "语法·人称代词主格",
+      "阅读·代词指代"
+    ],
+    "grammar": "pron. 人称代词主格，指前文提到的复数人、动物或事物；作主语时用 they，作宾语时用 them。",
+    "collocations": "they are; they have; they like; refer to people/things mentioned earlier。",
+    "commonMistake": "主语位置用 they，宾语位置用 them。",
+    "example": {
+      "english": "The socks are under the bed. They are clean.",
+      "chinese": "袜子在床下。它们是干净的。"
+    },
+    "application": {
+      "prompt": "Mia and Tom are in the room. ___ are tidying it. A. They B. Them",
+      "solution": "A。解析：空格处作 are 的主语，用主格 they。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Learner's Dictionary: they",
+        "url": "https://dictionary.cambridge.org/dictionary/learner-english/they"
+      },
+      {
+        "label": "Cambridge Grammar: personal pronouns",
+        "url": "https://dictionary.cambridge.org/uk/grammar/british-grammar/pronouns-personal-i-me-you-he-it-etc"
+      }
+    ]
+  },
+  {
+    "word": "bicycle",
+    "examTags": [
+      "词汇·名词单复数",
+      "语言运用·交通方式表达"
+    ],
+    "grammar": "n. 可数名词，复数 bicycles；bike 是较口语的同义词。表示交通方式时可说 by bicycle/by bike，by 后不加冠词。",
+    "collocations": "ride a bicycle/bike; by bicycle/by bike; bicycle to school。",
+    "commonMistake": "by bicycle 表示交通方式时，bicycle 前不加 a。",
+    "example": {
+      "english": "Liu Lei rides his bicycle to school.",
+      "chinese": "刘磊骑自行车去上学。"
+    },
+    "application": {
+      "prompt": "We go to school ___ bicycle. A. by B. on",
+      "solution": "A。解析：表示出行方式用 by bicycle，名词前不加冠词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bicycle",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bicycle"
+      }
+    ]
+  },
+  {
+    "word": "shoe",
+    "examTags": [
+      "词汇·名词单复数",
+      "语境理解·成双物品"
+    ],
+    "grammar": "n. 可数名词，复数 shoes；通常用复数 shoes 指鞋子，也可用 a shoe 指一只鞋。",
+    "collocations": "a pair of shoes; put on/take off one's shoes; shoe shop。",
+    "commonMistake": "a pair of 后的 shoe 用复数 shoes。",
+    "example": {
+      "english": "I put on my shoes before I leave home.",
+      "chinese": "我出门前穿上鞋。"
+    },
+    "application": {
+      "prompt": "There is a pair of ___ by the door. A. shoe B. shoes",
+      "solution": "B。解析：pair of 后接表示一双物品的复数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Learner's Dictionary: shoe",
+        "url": "https://dictionary.cambridge.org/dictionary/learner-english/shoe"
+      }
+    ]
+  },
+  {
+    "word": "where",
+    "examTags": [
+      "语法·特殊疑问句语序",
+      "语言运用·询问地点"
+    ],
+    "grammar": "adv. 疑问副词，询问地点或去向。直接疑问句通常用 Where + be/do + 主语；间接疑问句用陈述语序。",
+    "collocations": "Where is...?; Where are...?; Where do/does...?; Where are you going?。",
+    "commonMistake": "直接提问说 Where is the book?；嵌入句中说 Do you know where the book is?。",
+    "example": {
+      "english": "Where is your red book?",
+      "chinese": "你的红色书在哪里？"
+    },
+    "application": {
+      "prompt": "A: ___ is your schoolbag? B: Under the chair. A. Where B. What",
+      "solution": "A。解析：答语说明地点，应用 where 提问。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Learner's Dictionary: where",
+        "url": "https://dictionary.cambridge.org/dictionary/learner-english/where"
+      },
+      {
+        "label": "Cambridge Grammar: word order with where",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/word-order-where"
+      }
+    ]
+  },
+  {
+    "word": "put",
+    "examTags": [
+      "语法·不规则动词变化",
+      "语言运用·动词与地点搭配"
+    ],
+    "grammar": "v. put—put—put；现在分词 putting。常用结构为 put + 人/物 + 地点表达，说明把某人或某物放在哪里。",
+    "collocations": "put a book on the desk; put shoes under the bed; put things in a box。",
+    "commonMistake": "put 的过去式仍是 put，不是 putted；put 后通常要交代放置的物品和地点。",
+    "example": {
+      "english": "Please put the books on the desk.",
+      "chinese": "请把书放在书桌上。"
+    },
+    "application": {
+      "prompt": "Please ___ your shoes under the bed. A. put B. puts C. putted",
+      "solution": "A。解析：祈使句用动词原形；put 的过去式也为 put。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: put",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/put"
+      },
+      {
+        "label": "Cambridge Dictionary: put",
+        "url": "https://dictionary.cambridge.org/dictionary/english/put"
+      }
+    ]
+  },
+  {
+    "word": "bed",
+    "examTags": [
+      "词汇·可数名词",
+      "语言运用·固定搭配与方位"
+    ],
+    "grammar": "n. 表示家具时是可数名词，复数 beds。表示上床睡觉的 go to bed 中通常不加 the；描述具体位置时可说 on/under the bed。",
+    "collocations": "go to bed; make the bed; on/under the bed。",
+    "commonMistake": "表示去睡觉时用 go to bed，不加 the；表示家具的位置时用 the bed 等限定词。",
+    "example": {
+      "english": "My cat is sleeping under the bed.",
+      "chinese": "我的猫正在床下睡觉。"
+    },
+    "application": {
+      "prompt": "It is late. I go ___ bed at nine. A. to B. on",
+      "solution": "A。解析：固定表达 go to bed 表示上床睡觉。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: bed",
+        "url": "https://dictionary.cambridge.org/dictionary/english/bed"
+      },
+      {
+        "label": "Cambridge Grammar: a/an and the",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/the"
+      }
+    ]
+  },
+  {
+    "word": "desk",
+    "examTags": [
+      "词汇·可数名词单复数",
+      "语言运用·方位介词辨析"
+    ],
+    "grammar": "n. 可数名词，复数 desks，指学习或办公用的书桌。表示人在书桌旁学习常说 at a desk；表示物品在桌面上常说 on the desk。",
+    "collocations": "a school desk; sit/work at a desk; a book on the desk。",
+    "commonMistake": "表示物品在桌面上用 on the desk；at a desk 常表示人在书桌旁活动。",
+    "example": {
+      "english": "A small clock is on my desk.",
+      "chinese": "我的书桌上有一个小钟。"
+    },
+    "application": {
+      "prompt": "The pencil is ___ the desk, not inside the drawer. A. on B. under",
+      "solution": "A。解析：铅笔在桌面上，用 on 表示位置。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: desk",
+        "url": "https://dictionary.cambridge.org/dictionary/english/desk"
+      }
+    ]
+  },
+  {
+    "word": "chair",
+    "examTags": [
+      "词汇·可数名词",
+      "语法·冠词与名词"
+    ],
+    "grammar": "n. 可数名词，复数 chairs，常指有靠背的椅子。",
+    "collocations": "a chair; sit on/in a chair; a chair by the desk。",
+    "commonMistake": "chair 是单数可数名词，单独作名词时通常需有冠词或其他限定词。",
+    "example": {
+      "english": "There are four chairs around the table.",
+      "chinese": "桌子周围有四把椅子。"
+    },
+    "application": {
+      "prompt": "Please bring me ___ chair. A. a B. an",
+      "solution": "A。解析：chair 以辅音音素开头，单数前用 a。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: chair",
+        "url": "https://dictionary.cambridge.org/dictionary/english/chair"
+      }
+    ]
+  },
+  {
+    "word": "book",
+    "examTags": [
+      "词汇·可数名词单复数",
+      "语言运用·动词与名词搭配"
+    ],
+    "grammar": "n. 可数名词，复数 books；可表示阅读的书，也可指用于记录或书写的本子。",
+    "collocations": "read/open/close a book; an English book; a book of stories。",
+    "commonMistake": "book 作单数可数名词时，前面通常要有 a/the 或 my 等限定词。",
+    "example": {
+      "english": "I borrowed an English book from the school library.",
+      "chinese": "我从学校图书馆借了一本英语书。"
+    },
+    "application": {
+      "prompt": "She reads two ___ every month. (book)",
+      "solution": "books。解析：two 后接可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: book",
+        "url": "https://dictionary.cambridge.org/dictionary/english/book"
+      }
+    ]
+  },
+  {
+    "word": "box",
+    "examTags": [
+      "词汇·名词复数拼写",
+      "语境理解·容器与方框"
+    ],
+    "grammar": "n. 可数名词，可指箱子、盒子或表格中的方框；复数 boxes，词尾 x 后加 -es。",
+    "collocations": "a box of books; in a box; tick/put an X in the box。",
+    "commonMistake": "box 的复数拼作 boxes，不是 boxs。",
+    "example": {
+      "english": "Put the cards in the blue box.",
+      "chinese": "把卡片放进蓝色盒子里。"
+    },
+    "application": {
+      "prompt": "There are three ___ on the shelf. A. boxs B. boxes",
+      "solution": "B。解析：以 x 结尾的名词变复数通常加 -es。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: box",
+        "url": "https://dictionary.cambridge.org/dictionary/english/box"
+      }
+    ]
+  },
+  {
+    "word": "sock",
+    "examTags": [
+      "词汇·名词单复数",
+      "语境理解·成双物品"
+    ],
+    "grammar": "n. 可数名词，复数 socks；表示一双短袜可说 a pair of socks。",
+    "collocations": "a pair of socks; put on one's socks; clean/dry socks。",
+    "commonMistake": "a pair of 后接 socks 这样的复数名词。",
+    "example": {
+      "english": "One sock is under the bed, and the other is in the box.",
+      "chinese": "一只短袜在床下，另一只在盒子里。"
+    },
+    "application": {
+      "prompt": "I need a clean pair of ___. A. sock B. socks",
+      "solution": "B。解析：pair of 后接物品的复数形式 socks。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sock",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sock"
+      }
+    ]
+  },
+  {
+    "word": "some",
+    "examTags": [
+      "语法·限定词与不定代词",
+      "词汇·名词可数性"
+    ],
+    "grammar": "det./pron. 作限定词时常用于肯定句，置于复数可数名词或不可数名词前；作代词时后面不接名词，所指内容需能从语境中理解。",
+    "collocations": "some books; some water; some of them; Would you like some...?。",
+    "commonMistake": "表示“一些”时，some 通常不直接修饰单数可数名词；可说 some books 或 some water。",
+    "example": {
+      "english": "There are some books on the desk.",
+      "chinese": "书桌上有一些书。"
+    },
+    "application": {
+      "prompt": "There are ___ socks in the box. A. some B. a",
+      "solution": "A。解析：socks 是复数可数名词，可用 some 表示一些。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: some",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/some"
+      }
+    ]
+  },
+  {
+    "word": "pair",
+    "examTags": [
+      "词汇·量词搭配",
+      "语法·主谓一致"
+    ],
+    "grammar": "n. 可数名词，复数 pairs。a pair of + 复数名词表示一双/一对……；短语作主语时通常以 pair 为中心词，谓语用单数。",
+    "collocations": "a pair of shoes/socks; two pairs of socks; in pairs。",
+    "commonMistake": "不要漏掉 of；a pair of 后接复数名词，如 a pair of shoes。",
+    "example": {
+      "english": "I found a pair of socks under the bed.",
+      "chinese": "我在床下找到一双短袜。"
+    },
+    "application": {
+      "prompt": "A pair of shoes ___ by the door. A. is B. are",
+      "solution": "A。解析：主语中心词是单数 pair，谓语通常用 is。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: pair",
+        "url": "https://dictionary.cambridge.org/dictionary/english/pair"
+      }
+    ]
+  },
+  {
+    "word": "of",
+    "examTags": [
+      "语法·介词搭配",
+      "语境理解·所属与数量关系"
+    ],
+    "grammar": "prep. 可连接两个名词，表示所属、部分与整体或内容等关系；常见结构有 a pair of + 复数名词、a box of + 名词。",
+    "collocations": "a pair of shoes; a box of books; the color of the box; a picture of my family。",
+    "commonMistake": "表示“一双鞋”要说 a pair of shoes，不能漏掉 of。",
+    "example": {
+      "english": "This is a picture of my family.",
+      "chinese": "这是一张我的家庭照片。"
+    },
+    "application": {
+      "prompt": "A pair ___ blue socks is on the bed. A. of B. on",
+      "solution": "A。解析：固定数量结构为 a pair of + 复数名词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: of",
+        "url": "https://dictionary.cambridge.org/dictionary/english/of"
+      },
+      {
+        "label": "Cambridge Grammar: of",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/of"
+      }
+    ]
+  },
+  {
+    "word": "on",
+    "examTags": [
+      "语法·方位介词",
+      "语境理解·物品位置"
+    ],
+    "grammar": "prep. 表示物品位于或接触某个表面；后接名词或代词，如 on the desk、on it。",
+    "collocations": "on the desk; on the bed; put a book on the table。",
+    "commonMistake": "表示物品在桌面上用 on；under 表示在……下，in 表示在内部。",
+    "example": {
+      "english": "Your notebook is on the desk.",
+      "chinese": "你的笔记本在书桌上。"
+    },
+    "application": {
+      "prompt": "The keys are ___ the desk, not inside the box. A. on B. under",
+      "solution": "A。解析：钥匙在桌面上，用 on 表示位置。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: on, onto",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/on"
+      }
+    ]
+  },
+  {
+    "word": "under",
+    "examTags": [
+      "语法·方位介词",
+      "阅读·空间关系"
+    ],
+    "grammar": "prep. 表示在某物的下方，也可表示被某物覆盖；后接名词或代词。",
+    "collocations": "under the bed; under the chair; put a box under the desk。",
+    "commonMistake": "under 表示在……下方；不要与表示表面上的 on 混淆。",
+    "example": {
+      "english": "My schoolbag is under the chair.",
+      "chinese": "我的书包在椅子下面。"
+    },
+    "application": {
+      "prompt": "The cat is sleeping ___ the bed. We can see its tail below the bed. A. under B. on",
+      "solution": "A。解析：猫在床的下方，用 under。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: under",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/under"
+      }
+    ]
+  },
+  {
+    "word": "mum",
+    "examTags": [
+      "词汇·英美拼写差异",
+      "语言运用·家庭成员表达"
+    ],
+    "grammar": "n. 可数名词，非正式地称呼母亲；英式英语常写 mum，美式英语常写 mom。",
+    "collocations": "my mum; Mum, can I...?; talk to one's mum。",
+    "commonMistake": "mum 和 mom 是英美英语中的地区拼写差异，按语境选用并保持一致。",
+    "example": {
+      "english": "My mum puts my shoes under the bed.",
+      "chinese": "我妈妈把我的鞋放在床下。"
+    },
+    "application": {
+      "prompt": "Choose the British English spelling: My ___ is at home. A. mum B. mom",
+      "solution": "A。解析：英式英语通常写 mum；美式英语通常写 mom。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: mum",
+        "url": "https://dictionary.cambridge.org/dictionary/english/mum"
+      },
+      {
+        "label": "Cambridge Learner's Dictionary: mom",
+        "url": "https://dictionary.cambridge.org/dictionary/learner-english/mom"
+      }
+    ]
+  },
+  {
+    "word": "not",
+    "examTags": [
+      "语法·否定表达",
+      "语法·否定句型"
+    ],
+    "grammar": "not 常放在 be 动词、助动词或情态动词后；一般现在时和一般过去时的否定句常用 do/does/did not + 动词原形。",
+    "collocations": "be not; do not (don’t) do sth; not any",
+    "commonMistake": "不要把 not 直接放在普通实义动词前：通常说 I do not know，而不是 I not know。no 后接名词，not 常用于否定动词或句子。",
+    "example": {
+      "english": "The books are not on the bed.",
+      "chinese": "这些书不在床上。"
+    },
+    "application": {
+      "prompt": "用 not 补全：The books are ___ on the bed.",
+      "solution": "not。be 动词后用 not 构成否定句：The books are not on the bed。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: not",
+        "url": "https://dictionary.cambridge.org/dictionary/english/not"
+      },
+      {
+        "label": "Cambridge Grammar: No or not?",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/no-or-not"
+      }
+    ]
+  },
+  {
+    "word": "find",
+    "examTags": [
+      "语言知识·动词词形",
+      "语境理解·句意推断"
+    ],
+    "grammar": "find 是及物动词，常接找到的人或物；过去式和过去分词都是 found。",
+    "collocations": "find a book; find my keys; find sth in/on a place",
+    "commonMistake": "find–found–found；find 表示找到或发现，look for 表示寻找的过程，注意区分。",
+    "example": {
+      "english": "I found my ruler under the desk.",
+      "chinese": "我在书桌下面找到了我的尺子。"
+    },
+    "application": {
+      "prompt": "选词填空：Yesterday, I ___ my blue pen under the chair. A. find  B. found",
+      "solution": "B. found。Yesterday 表示过去，find 的过去式是 found。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: find",
+        "url": "https://dictionary.cambridge.org/dictionary/english/find"
+      }
+    ]
+  },
+  {
+    "word": "new",
+    "examTags": [
+      "语言知识·形容词用法",
+      "词汇·比较级与最高级"
+    ],
+    "grammar": "new 是形容词，常放在名词前作定语；比较级为 newer，最高级为 newest。",
+    "collocations": "a new student; a new bag; something new",
+    "commonMistake": "new 是形容词，news 是名词“新闻”；不要把 news 放在名词前表达“新的”。",
+    "example": {
+      "english": "This is my new schoolbag.",
+      "chinese": "这是我的新书包。"
+    },
+    "application": {
+      "prompt": "选词填空：This is a ___ book. A. new  B. news",
+      "solution": "A. new。空格修饰名词 book，需要形容词 new。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: new",
+        "url": "https://dictionary.cambridge.org/dictionary/english/new"
+      }
+    ]
+  },
+  {
+    "word": "no",
+    "examTags": [
+      "语法·否定表达",
+      "词汇辨析·no/not",
+      "语言能力·交际意图"
+    ],
+    "grammar": "no 可作否定回答，也可作限定词放在名词前，表示“没有、并非任何”；no + 名词，not 常用于否定动词或其他结构。",
+    "collocations": "No, thanks.; no books; no problem",
+    "commonMistake": "名词前可用 no books；否定动作通常用 do not + 动词原形，不能说 no like。",
+    "example": {
+      "english": "There are no books on the desk.",
+      "chinese": "书桌上没有书。"
+    },
+    "application": {
+      "prompt": "选词填空：There are ___ pencils in the box. A. no  B. not",
+      "solution": "A. no。no 可直接放在名词 pencils 前；也可以说 There are not any pencils。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: no",
+        "url": "https://dictionary.cambridge.org/dictionary/english/no"
+      },
+      {
+        "label": "Cambridge Grammar: No or not?",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/no-or-not"
+      }
+    ]
+  },
+  {
+    "word": "here",
+    "examTags": [
+      "语境理解·方位表达",
+      "语境理解·句意推断"
+    ],
+    "grammar": "here 是地点副词，表示“在这里、到这里”；Here is/are + 名词可用于指出或递给别人某物。",
+    "collocations": "come here; over here; Here is your book.; Here you are.",
+    "commonMistake": "here 表示“这里”，there 表示“那里”；Here is/are + 名词时，be 动词与后面的名词保持单复数一致。",
+    "example": {
+      "english": "Here is your new notebook.",
+      "chinese": "这是你的新笔记本。"
+    },
+    "application": {
+      "prompt": "把尺子递给同学，并用 Here 开头的句子说“这是你的尺子”：___ is your ruler.",
+      "solution": "Here。完整句是 Here is your ruler. 这里用 here 指出递给对方的物品。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: here",
+        "url": "https://dictionary.cambridge.org/dictionary/english/here"
+      }
+    ]
+  },
+  {
+    "word": "room",
+    "examTags": [
+      "语言知识·名词单复数",
+      "语境理解·句意推断"
+    ],
+    "grammar": "room 表示“房间”时是可数名词，单数前常用 a，复数为 rooms；表示“空间”时常作不可数名词。",
+    "collocations": "a room; my room; tidy your room; a living room",
+    "commonMistake": "表示多个房间时用 rooms；room 表示“空间”时通常不加复数 s，如 make room。",
+    "example": {
+      "english": "There are two rooms in our new house.",
+      "chinese": "我们的新房子里有两个房间。"
+    },
+    "application": {
+      "prompt": "选词填空：There are three ___ in the house. A. room  B. rooms",
+      "solution": "B. rooms。three 后接可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: room",
+        "url": "https://dictionary.cambridge.org/dictionary/english/room"
+      }
+    ]
+  },
+  {
+    "word": "OK",
+    "examTags": [
+      "语言能力·交际意图",
+      "词汇辨析·词性"
+    ],
+    "grammar": "OK（也写作 okay）常用于非正式交流，可作回应语表示同意或明白，也可作形容词表示“可以、没问题”，或作副词表示“还好、顺利”。",
+    "collocations": "OK, thanks.; That’s OK.; Is it OK to…?; everything is OK",
+    "commonMistake": "OK 作为回应语表示“好、行”；别人说谢谢时常答 You’re welcome 或 That’s OK，注意与欢迎某人到来的 Welcome 区分。",
+    "example": {
+      "english": "“Can I borrow your ruler?” “OK, here you are.”",
+      "chinese": "“我可以借一下你的尺子吗？”“可以，给你。”"
+    },
+    "application": {
+      "prompt": "同学问“Can I sit here?”，你同意时选：A. OK.  B. Sorry.",
+      "solution": "A. OK. 在这个语境中 OK 表示同意；Sorry 常用于道歉或礼貌拒绝。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: Okay, OK",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/okay-ok"
+      },
+      {
+        "label": "Cambridge Dictionary: OK",
+        "url": "https://dictionary.cambridge.org/dictionary/english/ok"
+      }
+    ]
+  },
+  {
+    "word": "sorry",
+    "examTags": [
+      "语言能力·交际意图",
+      "语言运用·固定表达"
+    ],
+    "grammar": "sorry 常作形容词，常见表达有 I’m sorry、be sorry for/about sth、be sorry to hear…。也可单独用作道歉语。",
+    "collocations": "I’m sorry.; be sorry for sth; be sorry about sth; be sorry to hear…",
+    "commonMistake": "常说 I’m sorry，不能省略 be 说 I sorry；sorry 后可接 for/about + 名词或动名词。",
+    "example": {
+      "english": "I’m sorry about the broken ruler.",
+      "chinese": "尺子坏了，我很抱歉。"
+    },
+    "application": {
+      "prompt": "不小心碰到同学时，选合适的话：A. Sorry!  B. You’re welcome!",
+      "solution": "A. Sorry! 用于为自己的行为道歉；You’re welcome 用于回应感谢。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: sorry",
+        "url": "https://dictionary.cambridge.org/dictionary/english/sorry"
+      }
+    ]
+  },
+  {
+    "word": "dad",
+    "examTags": [
+      "话题语境·家庭",
+      "语言知识·名词用法"
+    ],
+    "grammar": "dad 是可数名词，常说 my dad、her dad；直接称呼父亲时常写作 Dad，首字母大写。",
+    "collocations": "my dad; Dad’s glasses; mum and dad",
+    "commonMistake": "直接称呼时 Dad 通常大写，如 Thanks, Dad!；表示“我的爸爸”时用 my dad，不说 the my dad。",
+    "example": {
+      "english": "My dad is waiting for me here.",
+      "chinese": "我爸爸正在这里等我。"
+    },
+    "application": {
+      "prompt": "选出直接称呼时合适的写法：Thanks, ___! A. Dad  B. dad",
+      "solution": "A. Dad。直接称呼家人时通常将称呼语首字母大写。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: dad",
+        "url": "https://dictionary.cambridge.org/dictionary/english/dad"
+      }
+    ]
+  },
+  {
+    "word": "glasses",
+    "examTags": [
+      "语言知识·名词单复数",
+      "语法·主谓一致"
+    ],
+    "grammar": "glasses 表示“眼镜”时通常只有复数形式，谓语动词用复数；表示一副眼镜时可说 a pair of glasses。",
+    "collocations": "wear glasses; a pair of glasses; reading glasses",
+    "commonMistake": "表示眼镜时不用 a glasses；通常说 some glasses 或 a pair of glasses。",
+    "example": {
+      "english": "My glasses are on the desk.",
+      "chinese": "我的眼镜在书桌上。"
+    },
+    "application": {
+      "prompt": "选词填空：Her glasses ___ next to the book. A. is  B. are",
+      "solution": "B. are。表示眼镜的 glasses 是复数形式，谓语用 are。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: glasses",
+        "url": "https://dictionary.cambridge.org/dictionary/english/glasses"
+      },
+      {
+        "label": "Cambridge Grammar: Nouns: singular and plural",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/nouns-plural"
+      }
+    ]
+  },
+  {
+    "word": "see",
+    "examTags": [
+      "语言知识·动词词形",
+      "动词辨析"
+    ],
+    "grammar": "see 表示用眼睛看见；see–saw–seen。can 后接动词原形 see。",
+    "collocations": "see a book; see my dad; can see; see you later",
+    "commonMistake": "see 的过去式是 saw，过去分词是 seen；有明确过去时间时用 saw，如 I saw him yesterday。",
+    "example": {
+      "english": "I can see my dad through the window.",
+      "chinese": "我能透过窗户看见爸爸。"
+    },
+    "application": {
+      "prompt": "选词填空：I can ___ my new glasses on the table. A. see  B. saw",
+      "solution": "A. see。情态动词 can 后接动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: see",
+        "url": "https://dictionary.cambridge.org/dictionary/english/see"
+      },
+      {
+        "label": "Cambridge Grammar: See",
+        "url": "https://dictionary.cambridge.org/us/grammar/british-grammar/see"
+      }
+    ]
+  },
+  {
+    "word": "them",
+    "examTags": [
+      "语法·代词格",
+      "阅读·代词指代"
+    ],
+    "grammar": "them 是 they 的宾格，指代复数的人或物，常作动词或介词的宾语。",
+    "collocations": "see them; find them; wait for them; give them to…",
+    "commonMistake": "they 作主语，them 常作宾语；例如 They are here. / I can see them. 不要在动词宾语位置误用 they。",
+    "example": {
+      "english": "I can’t find the books. I can’t find them.",
+      "chinese": "我找不到这些书。我找不到它们。"
+    },
+    "application": {
+      "prompt": "选词填空：I can see the children. I can see ___. A. they  B. them",
+      "solution": "B. them。空格位于动词 see 后，作宾语，应使用 they 的宾格 them。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Grammar: Pronouns: personal",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/pronouns-personal-i-me-you-him-it-they-them"
+      }
+    ]
+  },
+  {
+    "word": "wait",
+    "examTags": [
+      "语言运用·动词搭配",
+      "语境理解·句意推断"
+    ],
+    "grammar": "wait 可单独使用，也可接时间表达；接等待的人或物时用 wait for + 名词或代词；wait 后也可接 to do。",
+    "collocations": "wait for me; wait for the bus; wait a minute; wait to see",
+    "commonMistake": "等待某人或某物时不能直接说 wait me，应说 wait for me；但 wait a minute 中通常不需要 for。",
+    "example": {
+      "english": "Please wait for me here.",
+      "chinese": "请在这里等我。"
+    },
+    "application": {
+      "prompt": "选词填空：Please wait ___ your dad by the door. A. for  B. to",
+      "solution": "A. for。wait for 后接等待的人或物；wait to 后接动词原形。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: wait",
+        "url": "https://dictionary.cambridge.org/dictionary/english/wait"
+      },
+      {
+        "label": "Cambridge Grammar: Wait or wait for?",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/wait-or-wait-for"
+      }
+    ]
+  },
+  {
+    "word": "minute",
+    "examTags": [
+      "语言知识·名词单复数",
+      "语境理解·时间表达"
+    ],
+    "grammar": "minute 作“分钟”时是可数名词；单数前常用 a，表示多个分钟时用 minutes。",
+    "collocations": "a minute; wait a minute; in a minute; five minutes",
+    "commonMistake": "two、three 等数词后用 minutes；a minute 中 minute 用单数。",
+    "example": {
+      "english": "Please wait one minute.",
+      "chinese": "请等一分钟。"
+    },
+    "application": {
+      "prompt": "选词填空：The class starts in five ___. A. minute  B. minutes",
+      "solution": "B. minutes。five 后接可数名词复数。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: minute",
+        "url": "https://dictionary.cambridge.org/dictionary/english/minute"
+      }
+    ]
+  },
+  {
+    "word": "head",
+    "examTags": [
+      "话题语境·身体部位",
+      "语言知识·名词用法"
+    ],
+    "grammar": "head 表示“头”时是可数名词，单数前通常用 a、the 或物主代词；复数为 heads。",
+    "collocations": "my head; on your head; shake your head; nod your head",
+    "commonMistake": "表示“我的头”时用 my head，不在物主代词 my 前再加 a 或 the。",
+    "example": {
+      "english": "Put your hat on your head.",
+      "chinese": "把帽子戴在头上。"
+    },
+    "application": {
+      "prompt": "选词填空：The boy has a small hat on his ___. A. head  B. heads",
+      "solution": "A. head。his 已限定为单数的“他的头”，此处用 head。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: head",
+        "url": "https://dictionary.cambridge.org/dictionary/english/head"
+      }
+    ]
+  },
+  {
+    "word": "welcome",
+    "examTags": [
+      "语言能力·交际意图",
+      "语言运用·固定表达"
+    ],
+    "grammar": "welcome 作动词时通常直接接被欢迎的人；作到达时的问候语常用 Welcome to + 地点；You’re welcome 常用于回应感谢。",
+    "collocations": "welcome someone; Welcome to our school.; You’re welcome.; a warm welcome",
+    "commonMistake": "欢迎某人作动词时说 welcome someone；回应感谢时说 You’re welcome，不能漏掉 are/'re。",
+    "example": {
+      "english": "Welcome to our classroom, Mia!",
+      "chinese": "欢迎来到我们的教室，米娅！"
+    },
+    "application": {
+      "prompt": "同学说“Thank you for helping me.”，选合适的回应：A. You’re welcome.  B. Welcome to school.",
+      "solution": "A. You’re welcome. 这是回应感谢的常用表达；Welcome to school 是欢迎某人来到学校。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: welcome",
+        "url": "https://dictionary.cambridge.org/dictionary/english/welcome"
+      }
+    ]
+  },
+  {
+    "word": "her",
+    "examTags": [
+      "语法·代词格",
+      "语法·物主限定词"
+    ],
+    "grammar": "her 可作宾格，常放在动词或介词后表示“她”；也可作形容词性物主限定词，放在名词前表示“她的”。",
+    "collocations": "her book; her glasses; see her; wait for her",
+    "commonMistake": "句子主语位置用 she；动词或介词后的宾语位置用 her；her 作“她的”时后面要接名词，如 her nose。",
+    "example": {
+      "english": "Her glasses are on the table.",
+      "chinese": "她的眼镜在桌上。"
+    },
+    "application": {
+      "prompt": "选词填空：I like ___ new bag. A. she  B. her",
+      "solution": "B. her。空格后有名词 bag，需要用 her 表示“她的”；she 不能作名词前的物主限定词。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: her",
+        "url": "https://dictionary.cambridge.org/dictionary/english/her"
+      },
+      {
+        "label": "Cambridge Grammar: Pronouns: personal",
+        "url": "https://dictionary.cambridge.org/grammar/british-grammar/pronouns-personal-i-me-you-him-it-they-them"
+      }
+    ]
+  },
+  {
+    "word": "nose",
+    "examTags": [
+      "话题语境·身体部位",
+      "语言知识·名词单复数"
+    ],
+    "grammar": "nose 表示“鼻子”时是可数名词，复数为 noses；描述身体部位时常与 my、your、his、her 等物主限定词连用。",
+    "collocations": "my nose; a small nose; blow your nose; a runny nose",
+    "commonMistake": "nose 的复数是 noses，不是 nose’s；表示“你的鼻子”用 your nose。",
+    "example": {
+      "english": "The puppy has a black nose.",
+      "chinese": "这只小狗有一个黑鼻子。"
+    },
+    "application": {
+      "prompt": "选词填空：The children have small ___. A. nose  B. noses",
+      "solution": "B. noses。children 是复数，且 nose 的复数形式为 noses。"
+    },
+    "sources": [
+      {
+        "label": "Cambridge Dictionary: nose",
+        "url": "https://dictionary.cambridge.org/dictionary/english/nose"
+      }
+    ]
+  }
+]

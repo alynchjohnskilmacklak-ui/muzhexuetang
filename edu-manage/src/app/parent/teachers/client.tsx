@@ -7,7 +7,29 @@ import { DEFAULT_TEACHER_AVATAR, getTeacherAvatarUrl } from '@/lib/teacher-avata
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { BrandModal } from '@/components/Common/BrandModal'
 import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { AnimatedNumber } from '@/components/Common/AnimatedNumber'
+import { getTiltSurfacePosition } from '@/lib/ui-motion'
 import { resolveTier, TIER_THEME, TIER_RANK } from '@/constants/teacher-tier'
+import styles from './teachers.module.css'
+
+function handleTiltMove(event: React.PointerEvent<HTMLButtonElement>) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+  const position = getTiltSurfacePosition(event.clientX, event.clientY, event.currentTarget.getBoundingClientRect(), 3.5)
+  event.currentTarget.classList.add(styles.isTilting)
+  event.currentTarget.style.setProperty('--mz-tilt-x', `${position.rotateX}deg`)
+  event.currentTarget.style.setProperty('--mz-tilt-y', `${position.rotateY}deg`)
+  event.currentTarget.style.setProperty('--mz-light-x', `${position.lightX}%`)
+  event.currentTarget.style.setProperty('--mz-light-y', `${position.lightY}%`)
+}
+
+function resetTilt(event: React.PointerEvent<HTMLButtonElement>) {
+  event.currentTarget.classList.remove(styles.isTilting)
+  event.currentTarget.style.setProperty('--mz-tilt-x', '0deg')
+  event.currentTarget.style.setProperty('--mz-tilt-y', '0deg')
+  event.currentTarget.style.setProperty('--mz-light-x', '50%')
+  event.currentTarget.style.setProperty('--mz-light-y', '50%')
+}
 
 const { Title, Text, Paragraph } = Typography
 
@@ -43,7 +65,14 @@ function TeacherGridCard({ teacher, onSelect }: { teacher: TeacherInfo; onSelect
   const tier = resolveTier(teacher.tierLevel)
   const tierTheme = TIER_THEME[tier]
 
-  return <button type="button" className={`parent-teacher-card parent-teacher-card--${tier.toLowerCase()}`} onClick={onSelect}>
+  return <button
+    type="button"
+    className={`parent-teacher-card parent-teacher-card--${tier.toLowerCase()} ${styles.tiltCard}`}
+    onClick={onSelect}
+    onPointerMove={handleTiltMove}
+    onPointerLeave={resetTilt}
+    onPointerCancel={resetTilt}
+  >
     <span className="parent-teacher-avatar" style={{ background: firstStyle.bg, color: firstStyle.color }}>
       <CachedAvatarImage
         src={getTeacherAvatarUrl(teacher.avatar, teacher.gender, teacher.id)}
@@ -89,7 +118,7 @@ export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) 
   return <div className="parent-teachers-page">
     <header className="parent-page-heading">
       <Title level={4}>教师团队</Title>
-      <Text type="secondary">牧哲学堂共 {teachers.length} 位在岗教师</Text>
+      <Text type="secondary">牧哲学堂共 <AnimatedNumber value={teachers.length} /> 位在岗教师</Text>
     </header>
 
     {teachers.length === 0 ? <div className="parent-teachers-empty">
@@ -101,9 +130,13 @@ export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) 
         {allSubjects.map(item => <button type="button" key={item} aria-pressed={subject === item} onClick={() => setSubject(item)}>{item}</button>)}
       </div>
 
-      <div className="parent-teacher-results-head"><Text strong>全部教师</Text><Text type="secondary">{filteredTeachers.length} 位</Text></div>
+      <div className="parent-teacher-results-head"><Text strong>全部教师</Text><Text type="secondary"><AnimatedNumber value={filteredTeachers.length} /> 位</Text></div>
       {filteredTeachers.length > 0 ? <div className="parent-teacher-grid">
-        {filteredTeachers.map(teacher => <TeacherGridCard key={teacher.id} teacher={teacher} onSelect={() => setSelectedTeacher(teacher)} />)}
+        {filteredTeachers.map((teacher, index) => (
+          <div key={teacher.id} className="stagger-item" style={{ animationDelay: `${index * 40}ms` }}>
+            <TeacherGridCard teacher={teacher} onSelect={() => setSelectedTeacher(teacher)} />
+          </div>
+        ))}
       </div> : <div className="parent-teachers-empty"><BrandEmpty title="没有找到符合条件的老师" hint="可以更换姓名或学科筛选条件。" /></div>}
     </>}
 
@@ -133,9 +166,9 @@ export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) 
           return <span key={item} style={{ background: style.bg, color: style.color }}>{item}</span>
         })}</div>}
         <div className="parent-teacher-detail-metrics">
-          <div><strong>{selectedTeacher.studentCount}</strong><span>服务学员</span></div>
-          <div><strong>{selectedTeacher.classGroupCount}</strong><span>授课班级</span></div>
-          <div><strong>{selectedTeacher.ratingCount ? selectedTeacher.rating.toFixed(1) : '暂无'}</strong><span>家长评分</span></div>
+          <div><strong><AnimatedNumber value={selectedTeacher.studentCount} /></strong><span>服务学员</span></div>
+          <div><strong><AnimatedNumber value={selectedTeacher.classGroupCount} /></strong><span>授课班级</span></div>
+          <div><strong>{selectedTeacher.ratingCount ? <AnimatedNumber value={selectedTeacher.rating} precision={1} /> : '暂无'}</strong><span>家长评分</span></div>
         </div>
         {selectedTeacher.currentUnit && <Paragraph><Text strong>当前单位：</Text>{selectedTeacher.currentUnit}</Paragraph>}
         {selectedTeacher.bio && <Paragraph className="parent-teacher-detail-bio">{selectedTeacher.bio}</Paragraph>}

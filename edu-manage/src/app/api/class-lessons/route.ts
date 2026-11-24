@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
-import { activeEnrollmentWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
+import { activeEnrollmentWhere, parentLinkedStudentWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { getLocalDayRange } from '@/lib/date/local-day'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ? await resolveAdminTermScope(prisma, division, req)
     : await getActiveAcademicTerm(prisma, division)
 
-  const where: Record<string, unknown> = { status: { not: 'CANCELLED' }, division, deletedAt: null }
+  const where: Record<string, unknown> = { status: { notIn: ['CANCELLED', 'POSTPONED'] }, division, deletedAt: null }
 
   if (startDate) {
     where.lessonDate = { ...(where.lessonDate as object), gte: getLocalDayRange(startDate).start }
@@ -43,6 +44,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ...visibleClassGroupWhere,
     termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
   }
+  let parentStudentIds: string[] | null = null
 
   if (user.role === 'teacher') {
     if (!user.teacherId) return NextResponse.json({ error: '未绑定教师档案' }, { status: 403 })
@@ -56,19 +58,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: '无权查看其他教师的课程' }, { status: 403 })
     }
   } else if (user.role === 'parent') {
-    const studentIds = (
+    parentStudentIds = (
       await prisma.student.findMany({
-        where: { parentUserId: user.id, status: { not: 'ARCHIVED' }, deletedAt: null },
+        where: parentLinkedStudentWhere(user.id),
         select: { id: true },
       })
     ).map(s => s.id)
-    if (!studentIds.length) return NextResponse.json([])
+    if (!parentStudentIds.length) return NextResponse.json([])
     where.group = {
       ...(where.group as object),
       enrollments: {
         some: {
-          studentId: { in: studentIds },
+          studentId: { in: parentStudentIds },
           status: 'ACTIVE',
+          deletedAt: null,
         },
       },
     }
@@ -98,14 +101,39 @@ export const GET = apiHandler(async (req: NextRequest) => {
           teacher: { select: { id: true, name: true, phone: true } },
           teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } }, orderBy: { createdAt: 'asc' } },
           room: { select: { id: true, name: true, capacity: true, type: true } },
-          enrollments: { where: activeEnrollmentWhere, select: { id: true } },
+          enrollments: {
+            where: user.role === 'parent'
+              ? { ...activeEnrollmentWhere, student: parentLinkedStudentWhere(user.id) }
+              : activeEnrollmentWhere,
+            select: { id: true, studentId: true, subjects: true },
+          },
         },
       },
       teacher: { select: { id: true, name: true, subjects: true } },
-      lessonStudents: { include: { student: { select: { id: true, name: true } } }, orderBy: { createdAt: 'asc' } },
+      lessonStudents: {
+        ...(user.role === 'parent' ? { where: { student: parentLinkedStudentWhere(user.id) } } : {}),
+        include: { student: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'asc' },
+      },
     },
     orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
   })
 
-  return NextResponse.json(lessons)
+  const visibleLessons = parentStudentIds
+    ? lessons.filter((lesson) => {
+        const teacherSubject = lesson.group.teacherAssignments.find((assignment) =>
+          assignment.teacherId === lesson.teacherId || assignment.teacherId === lesson.group.teacherId,
+        )?.subject
+        const lessonSubject = lesson.subject || teacherSubject || lesson.group.course?.subject
+        const eligibleStudentIds = resolveSubjectLessonStudentIds(
+          lesson.lessonStudents.map((row) => row.studentId),
+          lesson.group.enrollments.map((enrollment) => ({ studentId: enrollment.studentId, subjects: enrollment.subjects })),
+          lessonSubject,
+          lesson.lessonDate,
+        )
+        return eligibleStudentIds.some((studentId) => parentStudentIds?.includes(studentId))
+      })
+    : lessons
+
+  return NextResponse.json(visibleLessons)
 })

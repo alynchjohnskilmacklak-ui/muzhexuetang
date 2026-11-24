@@ -120,7 +120,8 @@ export async function getStudentArchive(
   range?: ProfileRange,
 ): Promise<StudentArchive | null> {
   // Permission check
-  await assertArchiveAccess(prisma, studentId, viewer)
+  const identityScope = await assertArchiveAccess(prisma, studentId, viewer)
+  const archiveStudentIds = await resolveArchiveStudentIds(prisma, studentId, viewer, identityScope)
 
   const now = new Date()
   const defaultFrom = new Date(now.getFullYear(), now.getMonth() - 3, 1)
@@ -129,16 +130,16 @@ export async function getStudentArchive(
 
   const [student, profile] = await Promise.all([
     fetchStudentBasic(prisma, studentId),
-    getStudentProfile(prisma, studentId, { from, to }),
+    getStudentProfile(prisma, studentId, { from, to }, archiveStudentIds),
   ])
   if (!student) return null
 
   const [courses, attendance, feedbacks, files, timeline] = await Promise.all([
-    fetchCourses(prisma, studentId),
-    fetchAttendance(prisma, studentId),
-    fetchFeedbacks(prisma, studentId, viewer),
-    fetchFiles(prisma, studentId, viewer),
-    fetchTimeline(prisma, studentId, from, to),
+    fetchCourses(prisma, archiveStudentIds),
+    fetchAttendance(prisma, archiveStudentIds),
+    fetchFeedbacks(prisma, studentId, archiveStudentIds, viewer),
+    fetchFiles(prisma, archiveStudentIds, viewer),
+    fetchTimeline(prisma, studentId, archiveStudentIds, from, to),
   ])
 
   return { studentBasic: student, courses, attendance, feedbacks, profile, files, timeline }
@@ -146,8 +147,13 @@ export async function getStudentArchive(
 
 // ---- permission ----
 
-async function assertArchiveAccess(prisma: PrismaClient, studentId: string, viewer: ArchiveViewer) {
-  const student = await prisma.student.findUnique({ where: { id: studentId }, select: { division: true, parentUserId: true, id: true } })
+type ArchiveIdentityScope = { identityId: string | null; division: string }
+
+async function assertArchiveAccess(prisma: PrismaClient, studentId: string, viewer: ArchiveViewer): Promise<ArchiveIdentityScope> {
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+    select: { id: true, identityId: true, division: true, parentUserId: true },
+  })
   if (!student) throw new ArchiveAccessError('学生不存在', 404)
 
   if (viewer.division && student.division && student.division !== viewer.division) {
@@ -178,6 +184,24 @@ async function assertArchiveAccess(prisma: PrismaClient, studentId: string, view
     if (!enr) throw new ArchiveAccessError('无权访问该学生档案', 403)
   }
   // admin: always allowed within division
+  return { identityId: student.identityId, division: student.division }
+}
+
+async function resolveArchiveStudentIds(
+  prisma: PrismaClient,
+  studentId: string,
+  viewer: ArchiveViewer,
+  scope: ArchiveIdentityScope,
+) {
+  // Teachers retain the existing per-student access boundary. Parents and admins
+  // can see linked term records, but only within their authorized scope.
+  if (viewer.role === 'teacher' || !scope.identityId) return [studentId]
+
+  const where = viewer.role === 'parent'
+    ? { identityId: scope.identityId, id: { in: viewer.parentStudentIds || [] }, deletedAt: null }
+    : { identityId: scope.identityId, division: scope.division, deletedAt: null }
+  const records = await prisma.student.findMany({ where, select: { id: true } })
+  return [...new Set([studentId, ...records.map((record) => record.id)])]
 }
 
 export class ArchiveAccessError extends Error {
@@ -207,9 +231,9 @@ async function fetchStudentBasic(prisma: PrismaClient, studentId: string): Promi
   }
 }
 
-async function fetchCourses(prisma: PrismaClient, studentId: string): Promise<ArchiveCourses> {
+async function fetchCourses(prisma: PrismaClient, studentIds: string[]): Promise<ArchiveCourses> {
   const enrollments = await prisma.enrollment.findMany({
-    where: { studentId, status: 'ACTIVE' },
+    where: { studentId: { in: studentIds }, status: 'ACTIVE' },
     include: {
       group: {
         include: {
@@ -268,9 +292,9 @@ async function fetchCourses(prisma: PrismaClient, studentId: string): Promise<Ar
   }
 }
 
-async function fetchAttendance(prisma: PrismaClient, studentId: string): Promise<ArchiveAttendance> {
+async function fetchAttendance(prisma: PrismaClient, studentIds: string[]): Promise<ArchiveAttendance> {
   const records = await prisma.attendance.findMany({
-    where: { studentId },
+    where: { studentId: { in: studentIds } },
     include: {
       lesson: { select: { lessonDate: true, startTime: true, endTime: true, group: { select: { lessonMinutes: true, course: { select: { name: true, type: true } } } } } },
     },
@@ -281,10 +305,10 @@ async function fetchAttendance(prisma: PrismaClient, studentId: string): Promise
   for (const r of records) statusCount[r.status as keyof typeof statusCount] = (statusCount[r.status as keyof typeof statusCount] || 0) + 1
 
   const leaves = await prisma.leaveRequest.findMany({
-    where: { studentId }, orderBy: { createdAt: 'desc' }, take: 20,
+    where: { studentId: { in: studentIds } }, orderBy: { createdAt: 'desc' }, take: 20,
   })
   const makeups = await prisma.makeupRequest.findMany({
-    where: { studentId }, orderBy: { createdAt: 'desc' }, take: 20,
+    where: { studentId: { in: studentIds } }, orderBy: { createdAt: 'desc' }, take: 20,
   })
 
   const total = records.length
@@ -305,8 +329,8 @@ async function fetchAttendance(prisma: PrismaClient, studentId: string): Promise
   }
 }
 
-async function fetchFeedbacks(prisma: PrismaClient, studentId: string, viewer: ArchiveViewer): Promise<ArchiveFeedback[]> {
-  const where: Record<string, unknown> = { studentIds: { has: studentId } }
+async function fetchFeedbacks(prisma: PrismaClient, studentId: string, studentIds: string[], viewer: ArchiveViewer): Promise<ArchiveFeedback[]> {
+  const where: Record<string, unknown> = { studentIds: { hasSome: studentIds } }
   if (viewer.role === 'parent') where.status = 'PUBLISHED'
 
   const feedbacks = await prisma.classroomFeedback.findMany({
@@ -321,17 +345,17 @@ async function fetchFeedbacks(prisma: PrismaClient, studentId: string, viewer: A
     teacher: f.teacher ? { id: f.teacher.id, name: f.teacher.name } : null,
     studentIds: [studentId], lessonContent: f.lessonContent, knowledgePoints: f.knowledgePoints,
     summary: f.summary, homework: f.homework, overallComment: f.overallComment,
-    mood: f.mood, tags: f.tags, studentRatings: filterStudentRatingsForStudents(f.studentRatings, [studentId]),
+    mood: f.mood, tags: f.tags, studentRatings: filterStudentRatingsForStudents(f.studentRatings, studentIds),
     imageUrls: f.imageUrls, parentReply: f.parentReply, parentRepliedAt: f.parentRepliedAt,
     images: variantsForFeedback(f.imageUrls, imageVariants),
     adminReply: f.adminReply, createdAt: f.createdAt, status: f.status,
   }))
 }
 
-async function fetchFiles(prisma: PrismaClient, studentId: string, _viewer: ArchiveViewer) {
+async function fetchFiles(prisma: PrismaClient, studentIds: string[], _viewer: ArchiveViewer) {
   try {
     const files = await (prisma as unknown as Record<string, unknown>).fileAsset ? (prisma as unknown as { fileAsset: { findMany: (args: Record<string, unknown>) => Promise<Array<Record<string, unknown>>> } }).fileAsset.findMany({
-      where: { studentId, deletedAt: null },
+      where: { studentId: { in: studentIds }, deletedAt: null },
       orderBy: { createdAt: 'desc' as const }, take: 50,
       select: { id: true, filename: true, url: true, mimeType: true, ownerType: true, size: true, createdAt: true },
     }) : []
@@ -342,27 +366,27 @@ async function fetchFiles(prisma: PrismaClient, studentId: string, _viewer: Arch
   } catch { return [] }
 }
 
-async function fetchTimeline(prisma: PrismaClient, studentId: string, from: Date, to: Date): Promise<ArchiveTimelineItem[]> {
+async function fetchTimeline(prisma: PrismaClient, studentId: string, studentIds: string[], from: Date, to: Date): Promise<ArchiveTimelineItem[]> {
   const items: ArchiveTimelineItem[] = []
 
   const [feedbacks, posts, badges, highlights] = await Promise.all([
     prisma.classroomFeedback.findMany({
-      where: { studentIds: { has: studentId }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
+      where: { studentIds: { hasSome: studentIds }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
       select: { id: true, summary: true, imageUrls: true, createdAt: true, teacher: { select: { name: true } } },
       orderBy: { createdAt: 'desc' }, take: 30,
     }),
     prisma.performancePost.findMany({
-      where: { studentId, createdAt: { gte: from, lte: to } },
+      where: { studentId: { in: studentIds }, createdAt: { gte: from, lte: to } },
       select: { id: true, content: true, images: true, createdAt: true, teacher: { select: { name: true } } },
       orderBy: { createdAt: 'desc' }, take: 30,
     }),
     prisma.achievementBadge.findMany({
-      where: { studentId, earnedAt: { gte: from, lte: to } },
+      where: { studentId: { in: studentIds }, earnedAt: { gte: from, lte: to } },
       select: { id: true, badgeType: true, description: true, earnedAt: true },
       orderBy: { earnedAt: 'desc' }, take: 20,
     }),
     prisma.classHighlight.findMany({
-      where: { studentId, createdAt: { gte: from, lte: to } },
+      where: { studentId: { in: studentIds }, createdAt: { gte: from, lte: to } },
       select: { id: true, content: true, imageUrl: true, createdAt: true, teacher: { select: { name: true } } },
       orderBy: { createdAt: 'desc' }, take: 20,
     }),

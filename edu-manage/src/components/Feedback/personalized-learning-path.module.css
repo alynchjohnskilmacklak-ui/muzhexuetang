@@ -1,0 +1,492 @@
+.plan {
+  margin: 0 0 16px;
+  padding: 16px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: var(--color-surface-1);
+  color: var(--color-ink);
+}
+
+.compact {
+  margin: 8px 0 0;
+  padding: 12px;
+}
+
+/* Share posters use one warm, unified learning profile instead of several nested dark blocks. */
+.posterProfile {
+  margin: 0;
+  padding: 15px;
+  border: 1px solid rgba(138, 101, 23, .2);
+  border-radius: 17px;
+  background: var(--color-surface-1);
+  box-shadow: 0 7px 20px rgba(26, 18, 1, .055);
+}
+
+.posterHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.posterProfile .eyebrow {
+  margin-bottom: 4px;
+  color: var(--color-brand-gold);
+  letter-spacing: .04em;
+}
+
+.posterProfile .heading h3 {
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.posterProfile .heading p {
+  margin-top: 4px;
+  font-size: 10px;
+}
+
+.posterMoodFace {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(138, 101, 23, .2);
+  border-radius: 14px;
+  background: var(--color-brand-gold-bg);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.posterTopic {
+  grid-column: 1 / -1;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0;
+  white-space: normal;
+}
+
+.posterProfile .facts {
+  margin-top: 13px;
+}
+
+.posterProfile .fact {
+  gap: 4px;
+  padding: 10px 11px;
+  border-color: var(--color-hairline);
+  border-radius: 12px;
+  background: var(--color-surface-2);
+}
+
+.posterProfile .fact strong {
+  font-size: 13px;
+}
+
+.posterProfile .masteryScale .masteryActive {
+  background: var(--color-brand-gold-fill);
+}
+
+.posterProfile .observation,
+.posterProfile .followup,
+.posterProfile .homePlan {
+  margin-top: 12px;
+  padding: 12px 0 0;
+  border: 0;
+  border-top: 1px solid var(--color-hairline);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.posterProfile .sectionTitle {
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.posterProfile .sectionMark {
+  width: 24px;
+  height: 24px;
+  flex-basis: 24px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 9px;
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-size: 10px;
+}
+
+.posterProfile .tagList li {
+  padding: 4px 9px;
+  border-color: var(--color-hairline);
+  background: var(--color-surface-2);
+  color: var(--color-ink-muted);
+  font-size: 10px;
+}
+
+.posterProfile .insight,
+.posterProfile .remark {
+  font-size: 11px;
+}
+
+.posterProfile .remark {
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--color-surface-3);
+}
+
+.posterProfile .followup p {
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 7px;
+  font-size: 10px;
+}
+
+.posterProfile .followup p b {
+  color: var(--color-brand-gold);
+}
+
+.posterProfile .guideGrid {
+  gap: 9px;
+}
+
+.posterProfile .guideBlock {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.posterProfile .guideBlock::before {
+  display: none;
+}
+
+.posterProfile .guideHeader {
+  gap: 7px;
+  margin: 0 0 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.posterProfile .guideIcon {
+  width: 25px;
+  height: 25px;
+  flex-basis: 25px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 9px;
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.posterProfile .guideTitleGroup strong {
+  color: var(--color-primary);
+}
+
+.posterProfile .guideCount {
+  border-color: var(--color-hairline);
+  background: var(--color-brand-gold-bg);
+  color: var(--color-brand-gold);
+}
+
+.posterProfile .guideBlock li {
+  padding: 7px 8px;
+  border-color: var(--color-hairline);
+  border-radius: 9px;
+  background: var(--color-surface-2);
+}
+
+.posterProfile .guideNumber {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.titleBlock { min-width: 0; }
+
+.eyebrow {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--color-primary);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .08em;
+}
+
+.heading h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.heading p {
+  margin: 4px 0 0;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.topic {
+  flex: 0 0 auto;
+  max-width: 42%;
+  padding: 4px 9px;
+  overflow: hidden;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: 999px;
+  background: var(--color-brand-gold-bg);
+  color: var(--color-brand-gold);
+  font-size: 10px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fact {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  padding: 10px 11px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  background: var(--color-surface-3);
+}
+
+.factLabel,
+.factNote { color: var(--color-ink-muted); font-size: 10px; }
+.fact strong { color: var(--color-primary); font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+.factNote { line-height: 1.45; }
+
+.masteryScale { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+.masteryScale i { height: 4px; border-radius: 99px; background: var(--color-hairline); }
+.masteryScale .masteryActive { background: var(--color-primary); }
+
+.observation,
+.followup,
+.homePlan {
+  margin-top: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  background: var(--color-surface-3);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+  color: var(--color-ink);
+  font-size: 12px;
+}
+
+.sectionMark {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tagList li {
+  padding: 3px 8px;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: 999px;
+  background: var(--color-surface-1);
+  color: var(--color-ink-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.insight,
+.remark {
+  margin: 7px 0 0;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.remark {
+  padding-top: 7px;
+  border-top: 1px solid var(--color-hairline);
+  color: var(--color-ink);
+}
+
+.followup p {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 8px;
+  margin: 6px 0 0;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.followup p:first-of-type { margin-top: 0; }
+.followup p b { color: var(--color-primary); font-weight: 700; }
+.followup p span { color: var(--color-ink); overflow-wrap: anywhere; }
+
+.homePlan {
+  background: linear-gradient(145deg, #edf5f1 0%, #f7f5ee 100%);
+  border-color: rgba(20, 87, 77, .14);
+}
+
+.guideGrid { display: grid; gap: 10px; }
+
+.guideBlock {
+  --guide-accent: #8a6517;
+  --guide-soft: #fbf4e4;
+  --guide-line: rgba(138, 101, 23, .2);
+  position: relative;
+  overflow: hidden;
+  padding: 0 10px 10px;
+  border: 1px solid var(--guide-line);
+  border-radius: 12px;
+  background: #fffdfa;
+  box-shadow: 0 3px 10px rgba(26, 18, 1, .035);
+}
+
+.guideBlock::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--guide-accent);
+  content: '';
+}
+
+.guidePractice {
+  --guide-accent: #14574d;
+  --guide-soft: #eaf4f1;
+  --guide-line: rgba(20, 87, 77, .18);
+  background: #fbfefd;
+}
+
+.guideCheck {
+  --guide-accent: #b7683f;
+  --guide-soft: #fff0e8;
+  --guide-line: rgba(184, 104, 63, .19);
+  background: #fffdfb;
+}
+
+.guideHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 -10px 8px;
+  padding: 9px 10px 9px 12px;
+  border-bottom: 1px solid var(--guide-line);
+  background: linear-gradient(90deg, var(--guide-soft), rgba(255, 255, 255, .72));
+}
+
+.guideIcon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border: 1px solid var(--guide-line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--guide-accent);
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(26, 18, 1, .04);
+}
+
+.guideTitleGroup { display: grid; min-width: 0; gap: 1px; }
+.guideTitleGroup strong { color: var(--guide-accent); font-size: 11px; line-height: 1.35; }
+.guideTitleGroup small { color: var(--color-ink-muted); font-size: 9px; line-height: 1.35; }
+
+.guideCount {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 3px 7px;
+  border: 1px solid var(--guide-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--guide-accent);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.guideBlock ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-ink);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.guideBlock li {
+  display: grid;
+  grid-template-columns: 23px minmax(0, 1fr);
+  align-items: start;
+  gap: 7px;
+  padding: 7px 8px;
+  border: 1px solid rgba(26, 18, 1, .055);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .88);
+  overflow-wrap: anywhere;
+}
+
+.guideNumber {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--guide-soft);
+  color: var(--guide-accent);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.guideBlock li p { margin: 1px 0 0; }
+
+@media (max-width: 380px) {
+  .plan { padding: 13px; }
+  .compact { padding: 11px; }
+  .facts { gap: 6px; }
+  .fact { padding: 8px; }
+  .followup p { grid-template-columns: 56px minmax(0, 1fr); gap: 6px; }
+  .guideGrid { gap: 8px; }
+  .guideBlock { padding: 0 8px 8px; }
+  .guideHeader { margin-inline: -8px; padding-inline: 9px; }
+  .guideBlock li { gap: 6px; padding: 6px; }
+}

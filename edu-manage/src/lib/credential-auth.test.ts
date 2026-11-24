@@ -59,6 +59,7 @@ describe('authoritative credential authentication', () => {
       expect.objectContaining({ ip: '127.0.0.1' }),
       'JUNIOR',
       'email',
+      { ok: true, email: 'parent@example.com' },
     )
   })
 

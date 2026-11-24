@@ -67,7 +67,7 @@ export function MetricsCards({ data }: { data: AdminDashboardMetrics }) {
       {cards.map((card) => (
         <Col xs={12} sm={12} lg={6} key={card.title}>
           <Card
-            bordered={false}
+            variant="borderless"
             style={{
               borderRadius: 16,
               height: '100%',

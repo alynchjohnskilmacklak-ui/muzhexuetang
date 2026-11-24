@@ -16,6 +16,8 @@
 import { writeFile, mkdir, unlink, readFile, open, stat } from 'fs/promises'
 import { join, extname, dirname } from 'path'
 import crypto from 'crypto'
+import { protectedUploadFallback } from '@/lib/upload-url'
+import { ossPutOptions } from '@/lib/storage/oss-put-options'
 
 // ---- types ----
 
@@ -36,7 +38,7 @@ export interface PostSignature {
 
 export interface StorageDriver {
   put(key: string, file: File, bucket?: string): Promise<UploadResult>
-  putBuffer(key: string, buffer: Buffer, mimeType: string): Promise<UploadResult>
+  putBuffer(key: string, buffer: Buffer, mimeType: string, options?: { privateObject?: boolean }): Promise<UploadResult>
   readBuffer(key: string): Promise<Buffer>
   readPrefix(key: string, length: number): Promise<Buffer>
   getMetadata(key: string): Promise<{ size: number; contentType?: string }>
@@ -139,7 +141,7 @@ class LocalStorageDriver implements StorageDriver {
     return this.putBuffer(key, Buffer.from(await file.arrayBuffer()), file.type)
   }
 
-  async putBuffer(key: string, buffer: Buffer, _mimeType: string): Promise<UploadResult> {
+  async putBuffer(key: string, buffer: Buffer, _mimeType: string, _options?: { privateObject?: boolean }): Promise<UploadResult> {
     const filePath = join(UPLOAD_ROOT, key)
     const dir = dirname(filePath)
     await mkdir(dir, { recursive: true })
@@ -213,13 +215,12 @@ class AliyunOssDriver implements StorageDriver {
     return this.putBuffer(key, Buffer.from(await file.arrayBuffer()), file.type)
   }
 
-  async putBuffer(key: string, buffer: Buffer, _mimeType: string): Promise<UploadResult> {
-    const client = await this.getClient() as { put(key: string, buf: Buffer): Promise<{ url: string; name: string }> }
+  async putBuffer(key: string, buffer: Buffer, _mimeType: string, options?: { privateObject?: boolean }): Promise<UploadResult> {
+    const client = await this.getClient() as { put(key: string, buf: Buffer, options?: { headers?: Record<string, string> }): Promise<{ url: string; name: string }> }
     try {
-      const result = await client.put(key, buffer)
-      const baseUrl = process.env.ALIYUN_OSS_PUBLIC_BASE_URL || `https://${ossPostHost(process.env.ALIYUN_OSS_BUCKET || '')}`
+      const result = await client.put(key, buffer, ossPutOptions(options?.privateObject))
       return {
-        url: `${baseUrl.replace(/\/+$/, '')}/${result.name}`,
+        url: protectedUploadFallback(result.name),
         storageKey: result.name,
         storageDriver: 'aliyun-oss',
       }
@@ -272,8 +273,7 @@ class AliyunOssDriver implements StorageDriver {
   }
 
   getUrl(key: string): string {
-    const baseUrl = process.env.ALIYUN_OSS_PUBLIC_BASE_URL || `https://${ossPostHost(process.env.ALIYUN_OSS_BUCKET || '')}`
-    return `${baseUrl.replace(/\/+$/, '')}/${key}`
+    return protectedUploadFallback(key)
   }
 
   /** 生成浏览器直传 PostObject 签名 */
@@ -386,10 +386,11 @@ export async function uploadBuffer(buffer: Buffer, meta: {
   prefix?: string
   bucket?: string
   allowLocalFallback?: boolean
+  privateObject?: boolean
 }): Promise<UploadResult> {
   const key = safeFilename(meta.originalName, meta.prefix)
   try {
-    return await getDriver().putBuffer(key, buffer, meta.mimeType)
+    return await getDriver().putBuffer(key, buffer, meta.mimeType, { privateObject: meta.privateObject })
   } catch (error) {
     if (!meta.allowLocalFallback || !(error instanceof StorageConfigurationError)) throw error
     console.warn('[storage] OSS upload unavailable; using persistent local storage', {
