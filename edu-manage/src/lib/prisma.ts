@@ -1,4 +1,4 @@
-import { PrismaClient, type Prisma } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 
 type DivisionKey = 'JUNIOR' | 'SENIOR'
 
@@ -48,9 +48,12 @@ function createClient(url: string | undefined): PrismaClient {
     'Student', 'Course', 'ClassGroup', 'ClassLesson', 'Enrollment', 'ExamPaper', 'StudyMaterial', 'StudyHallClass', 'FileAsset',
     'PerformancePost', 'HourTransaction', 'Attendance', 'GradeRecord', 'Fee', 'Notification', 'ClassroomFeedback', 'AchievementBadge', 'LearningGoal', 'StageSummary', 'LeaveRequest', 'TeacherSalaryTransaction',
   ])
-  const withVisibleOnly = (model: string, args: { where?: Record<string, unknown> }) => {
+  const withVisibleOnly = <T extends { where?: Record<string, unknown> }>(model: string, args: T): T => {
     if (softDeleteModels.has(model) && (!args.where || !Object.prototype.hasOwnProperty.call(args.where, 'deletedAt'))) {
-      args.where = { ...(args.where || {}), deletedAt: null }
+      return {
+        ...args,
+        where: { ...(args.where || {}), deletedAt: null },
+      }
     }
     return args
   }
@@ -60,6 +63,35 @@ function createClient(url: string | undefined): PrismaClient {
         findMany({ model, args, query }) { return query(withVisibleOnly(model, args)) },
         findFirst({ model, args, query }) { return query(withVisibleOnly(model, args)) },
         findFirstOrThrow({ model, args, query }) { return query(withVisibleOnly(model, args)) },
+        async findUnique({ model, args, query }) {
+          const result = await query(args)
+          if (
+            result &&
+            softDeleteModels.has(model) &&
+            (!args.where || !Object.prototype.hasOwnProperty.call(args.where, 'deletedAt'))
+          ) {
+            const row = result as Record<string, unknown>
+            if (row.deletedAt !== null && row.deletedAt !== undefined) {
+              return null
+            }
+          }
+          return result
+        },
+        async findUniqueOrThrow({ model, args, query }) {
+          const result = await query(args)
+          if (
+            result &&
+            softDeleteModels.has(model) &&
+            (!args.where || !Object.prototype.hasOwnProperty.call(args.where, 'deletedAt'))
+          ) {
+            const row = result as Record<string, unknown>
+            if (row.deletedAt !== null && row.deletedAt !== undefined) {
+              throw new Error(`Record for ${model} has been deleted`)
+            }
+          }
+          return result
+        },
+        groupBy({ model, args, query }) { return query(withVisibleOnly(model, args)) },
         count({ model, args, query }) { return query(withVisibleOnly(model, args)) },
         aggregate({ model, args, query }) { return query(withVisibleOnly(model, args)) },
       },

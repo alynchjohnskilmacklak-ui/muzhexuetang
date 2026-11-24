@@ -38,7 +38,6 @@ import useSWR from 'swr'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { summarizeUnreadByType } from '@/constants/notification-types'
-import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 import BrandBackground from '@/components/BrandBackground'
@@ -85,7 +84,6 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     fetcher,
     { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
-  useKickListener()
   useSessionPing({ initialDelay: 6_000 })
 
   useEffect(() => {

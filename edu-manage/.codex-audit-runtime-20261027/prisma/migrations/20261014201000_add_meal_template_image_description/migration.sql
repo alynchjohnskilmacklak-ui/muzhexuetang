@@ -1,3 +1,0 @@
-ALTER TABLE "MealTemplate"
-ADD COLUMN IF NOT EXISTS "image" TEXT,
-ADD COLUMN IF NOT EXISTS "description" TEXT;

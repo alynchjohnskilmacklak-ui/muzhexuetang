@@ -11,6 +11,7 @@ import { SWRConfig } from 'swr'
 import { Toaster } from 'sonner'
 import { ANTD_THEME } from '@/constants/theme'
 import { InteractionMotionLayer } from '@/components/Common/InteractionMotionLayer'
+import type { Session } from 'next-auth'
 
 const swrConfig = {
   revalidateOnFocus: false,
@@ -26,7 +27,7 @@ const swrConfig = {
   // 避免所有 SWR 同时刷新导致界面卡顿
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children, session }: { children: React.ReactNode; session?: Session | null }) {
   const [toastPos, setToastPos] = useState<'top-center' | 'bottom-center'>('top-center')
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         locale={zhCN}
         theme={ANTD_THEME}
       >
-        <NextAuthProvider>
+        <NextAuthProvider session={session}>
           <AntdApp>
             <InteractionMotionLayer />
             {children}

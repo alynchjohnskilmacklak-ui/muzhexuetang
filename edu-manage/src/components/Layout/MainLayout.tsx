@@ -16,7 +16,6 @@ import { TopNav } from './TopNav'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
 import { LayoutHydrationFallback } from './LayoutHydrationFallback'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
 import { adminNavItems } from './admin-nav'
 
@@ -38,7 +37,6 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
   const [tabletNavExpanded, setTabletNavExpanded] = useState(false)
   const { data: session } = useSession()
-  useKickListener()
   useSessionPing({ initialDelay: 6000 })
 
   const isSenior = (session?.user as { division?: string } | undefined)?.division === 'SENIOR'

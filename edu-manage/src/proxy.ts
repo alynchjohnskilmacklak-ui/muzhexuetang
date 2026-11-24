@@ -91,7 +91,6 @@ export async function proxy(request: NextRequest) {
     resetPasswordRequest ||
     pathname.startsWith('/WW_verify') ||
     pathname === '/api/setup' ||
-    pathname.startsWith('/api/wxpusher/callback') ||
     pathname === '/api/qywx/event' ||
     pathname === '/api/ai/public-assistant' ||
     pathname === '/api/vocab/phonetic' ||

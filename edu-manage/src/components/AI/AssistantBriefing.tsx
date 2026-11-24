@@ -227,14 +227,24 @@ const EMPTY_DATA: AssistantBriefingData = {
   adminDashboard: null,
 }
 
-async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T | null> {
-  try {
-    const response = await fetch(url, { cache: 'no-store', signal })
-    if (!response.ok) return null
-    return await response.json() as T
-  } catch {
-    return null
+const briefingRequestCache = new Map<string, { promise: Promise<unknown>; time: number }>()
+
+async function fetchJson<T>(url: string, signal?: AbortSignal, ttl = 15_000): Promise<T | null> {
+  const cached = briefingRequestCache.get(url)
+  if (cached && Date.now() - cached.time < ttl) {
+    return cached.promise as Promise<T | null>
   }
+  const promise = (async () => {
+    try {
+      const response = await fetch(url, { signal })
+      if (!response.ok) return null
+      return await response.json() as T
+    } catch {
+      return null
+    }
+  })()
+  briefingRequestCache.set(url, { promise, time: Date.now() })
+  return promise
 }
 
 function asCount(value: unknown): number {

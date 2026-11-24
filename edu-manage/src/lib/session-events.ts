@@ -45,9 +45,17 @@ async function ensureRedis(): Promise<{ pub: unknown; sub: unknown } | null> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createClient } = require('redis') as { createClient: (opts: Record<string, unknown>) => { connect(): Promise<void>; duplicate(): { connect(): Promise<void>; subscribe(ch: string, fn: (msg: string, ch: string) => void): Promise<void> }; publish(ch: string, msg: string): Promise<void> } }
-    const pub = createClient({ url: process.env.REDIS_URL })
+    const pub = createClient({
+      url: process.env.REDIS_URL,
+      socket: { connectTimeout: 3000 },
+    })
     const sub = pub.duplicate()
-    await Promise.all([pub.connect(), sub.connect()])
+    const connectWithTimeout = (client: { connect(): Promise<void> }, ms = 3000) =>
+      Promise.race([
+        client.connect(),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Redis connect timeout')), ms)),
+      ])
+    await Promise.all([connectWithTimeout(pub), connectWithTimeout(sub)])
     _pubClient = pub
     _subClient = sub
 

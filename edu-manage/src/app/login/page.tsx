@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { getSession, signIn } from 'next-auth/react'
-import { Button, Checkbox, Input, Modal, Typography } from 'antd'
+import { signIn } from 'next-auth/react'
+import { Button, Checkbox, Input, Modal } from 'antd'
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
@@ -24,7 +24,6 @@ import {
   writeLoginPreference,
 } from '@/lib/login-preferences'
 
-const { Text } = Typography
 
 type LoginRole = 'admin' | 'teacher' | 'parent'
 type LoginDivision = 'JUNIOR' | 'SENIOR'
@@ -48,11 +47,6 @@ const ROLE_OPTIONS: Array<{ value: LoginRole; label: string }> = [
   { value: 'parent', label: '家长端' },
 ]
 
-const PLACEHOLDER_MAP: Record<LoginRole, { email: string; pwd: string }> = {
-  admin: { email: '请输入账号', pwd: '请输入密码' },
-  teacher: { email: '请输入账号', pwd: '请输入密码' },
-  parent: { email: '请输入账号', pwd: '请输入密码' },
-}
 
 const BUSINESS_SLIDES = [
   { src: '/services/seasonal-bootcamp/1.png', title: '寒暑假冲刺预备课', kicker: '集中学习 · 系统复习 · 查漏补缺', tag: '冲刺培优' },
@@ -230,215 +224,6 @@ function BrandLeft({ activeSlide, onSlideChange, onSwipe, preloadActive, deferIm
   )
 }
 
-function TopBusinessOverview({ activeSlide, onChange, onHoverChange }: { activeSlide: number; onChange: (index: number) => void; onHoverChange?: (paused: boolean) => void }) {
-  const current = BUSINESS_SLIDES[activeSlide]
-  const touchStartX = useRef<number | null>(null)
-  const touchStartY = useRef<number | null>(null)
-  const [imageLoadedMap, setImageLoadedMap] = useState<Record<number, boolean>>({})
-  const [displayedSlide, setDisplayedSlide] = useState(0)
-
-  useEffect(() => {
-    if (imageLoadedMap[activeSlide]) setDisplayedSlide(activeSlide)
-  }, [activeSlide, imageLoadedMap])
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length !== 1) return
-    touchStartX.current = e.touches[0].clientX
-    touchStartY.current = e.touches[0].clientY
-    onHoverChange?.(true)
-  }
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    onHoverChange?.(false)
-    if (touchStartX.current === null || touchStartY.current === null) return
-    const diffX = e.changedTouches[0].clientX - touchStartX.current
-    const diffY = e.changedTouches[0].clientY - touchStartY.current
-    touchStartX.current = null
-    touchStartY.current = null
-
-    // 仅在水平滑动距离占优时触发切页，避免纵向正常滑动页面时误触轮播
-    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.2) {
-      if (diffX < 0) {
-        onChange((activeSlide + 1) % BUSINESS_SLIDES.length)
-      } else {
-        onChange((activeSlide - 1 + BUSINESS_SLIDES.length) % BUSINESS_SLIDES.length)
-      }
-    }
-  }
-
-  return (
-    <div
-      className="login-top-business"
-      style={{ width: '100%', maxWidth: 420, marginBottom: 14 }}
-      onMouseEnter={() => onHoverChange?.(true)}
-      onMouseLeave={() => onHoverChange?.(false)}
-    >
-      {/* ── 超简洁顶栏：轻巧的业务分类与当前标题 ── */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-        padding: '0 4px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{
-            display: 'inline-block',
-            width: 3,
-            height: 12,
-            borderRadius: 2,
-            background: '#14574D',
-          }} />
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#1a1201', letterSpacing: 0.5 }}>
-            办学业务总览
-          </span>
-          <span style={{ fontSize: 11, color: '#8A6517', fontWeight: 600 }}>
-            · {current.title}
-          </span>
-        </div>
-      </div>
-
-      {/* ── 展示海报卡片（黄金比例高度，支持平滑手势与自动预载） ── */}
-      <div
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={() => {
-          onHoverChange?.(false)
-          touchStartX.current = null
-          touchStartY.current = null
-        }}
-        style={{
-          borderRadius: 16,
-          overflow: 'hidden',
-          background: 'transparent',
-          border: '1px solid rgba(214, 180, 91, 0.45)',
-          boxShadow: '0 4px 14px rgba(26, 18, 1, 0.05)',
-          userSelect: 'none',
-        }}
-      >
-        <div style={{
-          position: 'relative',
-          width: '100%',
-          height: 'clamp(180px, 48vw, 230px)',
-          background: 'transparent',
-          overflow: 'hidden',
-        }}>
-          {BUSINESS_SLIDES.map((slide, idx) => {
-            const isActive = idx === activeSlide
-            const isDisplayed = idx === displayedSlide
-            // 严控网络并发：当前激活页或已预载页才挂载，防止首屏同时下载多张1MB+大图堵死登录网络通道
-            if (!isActive && !isDisplayed && !imageLoadedMap[idx]) return null
-
-            return (
-              <div
-                key={slide.src}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  opacity: isDisplayed ? 1 : 0,
-                  transition: 'opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-                  pointerEvents: 'none',
-                  zIndex: isDisplayed ? 2 : 1,
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={slide.src}
-                  alt={slide.title}
-                  loading={isActive ? 'eager' : 'lazy'}
-                  decoding="async"
-                  fetchPriority={isActive ? 'high' : 'auto'}
-                  onLoad={() => setImageLoadedMap((prev) => ({ ...prev, [idx]: true }))}
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    objectPosition: 'center',
-                    padding: 8,
-                    filter: 'drop-shadow(0 4px 12px rgba(26, 18, 1, 0.08))',
-                  }}
-                />
-              </div>
-            )
-          })}
-        </div>
-
-        {/* ── 卡片底部信息条：业务亮点 + 可点击切换圆点 ── */}
-        <div style={{
-          padding: '8px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderTop: '1px solid rgba(220, 210, 195, 0.6)',
-          background: 'linear-gradient(180deg, #FFFFFF 0%, #FAF6EE 100%)',
-        }}>
-          <span style={{
-            fontSize: 11,
-            color: '#8A6517',
-            fontWeight: 600,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            maxWidth: '52%',
-          }}>
-            {current.kicker}
-          </span>
-
-          {/* ── 核心交互：可直接点击切换的点（舒适触摸热区） ── */}
-          <div
-            role="tablist"
-            aria-label="业务导航指示点"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              flexShrink: 0,
-            }}
-          >
-            {BUSINESS_SLIDES.map((slide, idx) => {
-              const active = idx === activeSlide
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  aria-label={`切换到业务: ${slide.title}`}
-                  onClick={() => onChange(idx)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '8px 3px',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      height: 5.5,
-                      width: active ? 16 : 5.5,
-                      borderRadius: 999,
-                      background: active ? '#14574D' : 'rgba(0, 0, 0, 0.16)',
-                      boxShadow: active ? '0 1px 3px rgba(20, 87, 77, 0.3)' : 'none',
-                      transition: 'all 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
-                    }}
-                  />
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 function BottomAdvantagesSection() {
   return (
@@ -518,7 +303,7 @@ function RightForm({
   role, division, setDivision, loading, formError, setFormError, onFinish, showPwd, setShowPwd,
   autoDetectRole, onResolveRole, onEmailEdit, onManualRoleSelect,
   isMobile, reason, initialEmail, rememberAccount, setRememberAccount, identifierType, onIdentifierTypeChange,
-  activeSlide, onSlideChange, onHoverChange,
+  activeSlide: _activeSlide, onSlideChange: _onSlideChange, onHoverChange: _onHoverChange,
 }: {
   role: LoginRole
   division: LoginDivision; setDivision: (d: LoginDivision) => void
@@ -537,8 +322,8 @@ function RightForm({
   setRememberAccount: (remember: boolean) => void
   identifierType: LoginIdentifierType
   onIdentifierTypeChange: (identifierType: LoginIdentifierType) => void
-  activeSlide: number
-  onSlideChange: (index: number) => void
+  activeSlide?: number
+  onSlideChange?: (index: number) => void
   onHoverChange?: (paused: boolean) => void
 }) {
   const [email, setEmail] = useState('')
@@ -588,22 +373,13 @@ function RightForm({
   }
 
   return (
-    <section className="login-right" style={{ flex: 1, display: 'grid', placeItems: 'center', padding: isMobile ? '16px 16px 28px' : 40, minHeight: '100vh', width: '100%' }}>
+    <section className="login-right" style={{ flex: 1, display: 'grid', placeItems: 'center', padding: isMobile ? '12px 16px 20px' : 40, minHeight: isMobile ? '100dvh' : '100vh', width: '100%' }}>
       <div className="login-form-shell" style={{ width: '100%', maxWidth: 420 }}>
-        {/* 1. 最上面：业务总览（海报顶部自带官方Logo与校训） */}
-        {isMobile && (
-          <TopBusinessOverview
-            activeSlide={activeSlide}
-            onChange={onSlideChange}
-            onHoverChange={onHoverChange}
-          />
-        )}
-
         <div className="login-card" style={{
           position: 'relative',
           overflow: 'hidden',
           borderRadius: 22,
-          padding: isMobile ? '28px 22px 24px' : '36px 34px',
+          padding: isMobile ? '20px 18px 18px' : '36px 34px',
           border: '1px solid rgba(214, 180, 91, 0.35)',
           boxShadow: '0 4px 16px -2px rgba(26, 18, 1, 0.04), 0 20px 48px -6px rgba(26, 18, 1, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
         }}>
@@ -649,19 +425,19 @@ function RightForm({
           )}
 
           {/* School Badge & Header */}
-          <div style={{ textAlign: 'center', marginBottom: 20, position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', marginBottom: isMobile ? 12 : 20, position: 'relative', zIndex: 1 }}>
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 52,
-              height: 52,
-              borderRadius: 16,
+              width: isMobile ? 44 : 52,
+              height: isMobile ? 44 : 52,
+              borderRadius: 14,
               background: 'linear-gradient(135deg, #FFFDF9 0%, #F7EFE6 100%)',
               border: '1px solid rgba(214, 180, 91, 0.4)',
               boxShadow: '0 4px 14px rgba(232, 120, 74, 0.12), inset 0 1px 0 #ffffff',
-              marginBottom: 10,
-              padding: 8,
+              marginBottom: isMobile ? 6 : 10,
+              padding: isMobile ? 6 : 8,
             }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -670,16 +446,16 @@ function RightForm({
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
-            <div className="login-welcome-title stagger-item" style={{ fontSize: 21, fontWeight: 800, color: '#1a1201', letterSpacing: -0.3, lineHeight: 1.25, marginBottom: 4 }}>
+            <div className="login-welcome-title stagger-item" style={{ fontSize: isMobile ? 19 : 21, fontWeight: 800, color: '#1a1201', letterSpacing: -0.3, lineHeight: 1.25, marginBottom: 2 }}>
               欢迎登录牧哲学堂
             </div>
-            <p className="stagger-item" style={{ fontSize: 13, color: '#8a7d6d', margin: 0, letterSpacing: 0.3 }}>
+            <p className="stagger-item" style={{ fontSize: isMobile ? 12 : 13, color: '#8a7d6d', margin: 0, letterSpacing: 0.3 }}>
               教学记录 · 课堂反馈 · 家校沟通平台
             </p>
           </div>
 
           {/* 角色切换标签 */}
-          <div className="stagger-item" style={{ marginBottom: 14 }}>
+          <div className="stagger-item" style={{ marginBottom: isMobile ? 10 : 14 }}>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
@@ -698,7 +474,8 @@ function RightForm({
                     disabled={loading}
                     onClick={() => onManualRoleSelect(item.value)}
                     style={{
-                      height: 38,
+                      height: isMobile ? 44 : 38,
+                      minHeight: 44,
                       borderRadius: 9,
                       border: 'none',
                       background: active ? '#ffffff' : 'transparent',
@@ -789,7 +566,7 @@ function RightForm({
                 height: 48,
                 background: '#FCFBFA',
                 border: '1px solid #E6DFD5',
-                fontSize: 15,
+                fontSize: 16,
                 boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)',
               }}
             />
@@ -822,7 +599,7 @@ function RightForm({
                 height: 48,
                 background: '#FCFBFA',
                 border: '1px solid #E6DFD5',
-                fontSize: 15,
+                fontSize: 16,
                 boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)',
               }}
             />
@@ -1042,7 +819,7 @@ function MobileBrandBar(_props: { activeSlide: number; onSlideChange: (index: nu
 
 /* ── Main Page ── */
 export default function LoginPage() {
-  const [showSplash, setShowSplash] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
   const [splashResolved, setSplashResolved] = useState(true)
   const [loading, setLoading] = useState(false)
   const [showPwd, setShowPwd] = useState(false)
@@ -1212,9 +989,14 @@ export default function LoginPage() {
     const loginDivision = divisionRef.current
     try {
       const email = values.email.trim().toLowerCase()
-      const result = await signIn('credentials', {
+      const signInPromise = signIn('credentials', {
         email, password: values.password, loginRole, identifierType: loginIdentifierType, division: loginDivision, redirect: false,
       })
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('TIMEOUT')), 10000)
+      })
+
+      const result = await Promise.race([signInPromise, timeoutPromise])
 
       if (!result || result.error) {
         const code = result?.code || result?.error || ''
@@ -1228,25 +1010,9 @@ export default function LoginPage() {
         return
       }
 
-      const session = await getSession()
-      const authenticatedRole = session?.user?.role
-      if (!session || (authenticatedRole !== 'admin' && authenticatedRole !== 'teacher' && authenticatedRole !== 'parent')) {
-        const msg = '登录成功，但暂时无法确认账号身份，请刷新页面后重试'
-        setFormError(msg)
-        toast.error(msg, { duration: 6000 })
-        return
-      }
-      if (authenticatedRole !== loginRole) {
-        const msg = '账号身份与所选入口不一致，请切换到正确入口登录'
-        setFormError(msg)
-        toast.error(msg, { duration: 6000 })
-        return
-      }
-      const authenticatedDivision: LoginDivision = session.user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
-
       setFormError('')
       if (rememberAccount) {
-        writeLoginPreference({ email, role: authenticatedRole, division: authenticatedDivision })
+        writeLoginPreference({ email, role: loginRole, division: loginDivision })
         void offerPasswordManagerSave(email, values.password)
       } else {
         clearLoginPreference()
@@ -1255,7 +1021,7 @@ export default function LoginPage() {
 
       const requestedReturnTo = new URLSearchParams(window.location.search).get('returnTo')
       let safeParentReturnTo: string | null = null
-      if (authenticatedRole === 'parent' && requestedReturnTo) {
+      if (loginRole === 'parent' && requestedReturnTo) {
         try {
           const target = new URL(requestedReturnTo, window.location.origin)
           if (target.origin === window.location.origin && target.pathname.startsWith('/parent/')) {
@@ -1265,14 +1031,17 @@ export default function LoginPage() {
           // Ignore malformed or external return targets and use the normal dashboard.
         }
       }
-      const destination = safeParentReturnTo || (authenticatedRole === 'parent'
+      const destination = safeParentReturnTo || (loginRole === 'parent'
         ? '/parent/dashboard'
-        : authenticatedRole === 'teacher'
-          ? `/teacher/dashboard?division=${authenticatedDivision}`
-          : `/dashboard?division=${authenticatedDivision}`)
+        : loginRole === 'teacher'
+          ? `/teacher/dashboard?division=${loginDivision}`
+          : `/dashboard?division=${loginDivision}`)
       window.location.replace(destination)
-    } catch {
-      const msg = '登录请求未完成，请检查网络或稍后重试'
+    } catch (err: unknown) {
+      const isTimeout = err instanceof Error && err.message === 'TIMEOUT'
+      const msg = isTimeout
+        ? '登录响应超时，请检查网络连接后重试'
+        : '登录请求未完成，请检查网络或稍后重试'
       setFormError(msg)
       toast.error(msg, { duration: 5000 })
     } finally {

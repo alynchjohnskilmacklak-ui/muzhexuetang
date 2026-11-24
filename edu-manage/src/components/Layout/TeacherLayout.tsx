@@ -39,7 +39,6 @@ import { DEFAULT_TEACHER_AVATAR, getTeacherAvatarUrl } from '@/lib/teacher-avata
 import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
 import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
 import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
@@ -122,7 +121,6 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   const [changingPwd, setChangingPwd] = useState(false)
   const [pwdSubmitting, setPwdSubmitting] = useState(false)
   const [pwdForm] = Form.useForm()
-  useKickListener()
   useSessionPing({ initialDelay: 6000 })
 
   useEffect(() => {

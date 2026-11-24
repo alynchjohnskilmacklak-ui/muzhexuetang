@@ -1,3 +1,0 @@
-Browser tab: 3, Title: "牧哲学堂", URL: "http://localhost:3000/parent/vip".
-There has been no change in the accessibility tree.
-The focused UI element is 0 AXWebArea 牧哲学堂, URL: localhost:3000/parent/vip

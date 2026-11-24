@@ -8,6 +8,7 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "react-hooks/set-state-in-effect": "off",
+      "react-hooks/refs": "warn",
       "@typescript-eslint/no-unused-vars": ["warn", {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
@@ -30,8 +31,18 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "tmp/**",
+    ".tmp*/**",
+    ".agents/**",
+    "_audit*/**",
+    "_codex*/**",
+    ".codex*/**",
+    "backups/**",
     "public/pdf.worker.min.mjs",
     "next-env.d.ts",
+    "*.js",
+    "*.cjs",
+    "*.mjs",
+    "!eslint.config.mjs",
   ]),
 ]);
 

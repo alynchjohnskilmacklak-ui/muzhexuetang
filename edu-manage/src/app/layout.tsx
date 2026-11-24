@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { SiteFilingFooter } from '@/components/SiteFilingFooter'
+import { auth } from '@/lib/auth'
 import { Providers } from './providers'
 import './globals.css'
 
@@ -28,12 +29,13 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth()
   return (
     <html lang="zh-CN">
       <body className="min-h-screen">
         <div id="admin-root">
-          <Providers>{children}</Providers>
+          <Providers session={session}>{children}</Providers>
           <SiteFilingFooter />
         </div>
       </body>

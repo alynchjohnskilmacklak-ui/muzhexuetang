@@ -43,3 +43,15 @@ __pycache__/
 
 # scratch
 _context_mode_review/
+
+# audit, temp, backups and sensitive scratch files
+_audit*
+_codex*
+.codex*
+.tmp*
+backups/
+remote-psql.py
+pkg_err.txt
+*.dump
+*.dump.sha256
+

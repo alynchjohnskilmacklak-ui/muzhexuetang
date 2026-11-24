@@ -90,3 +90,10 @@ __pycache__/
 query-teachers*.cjs
 find_ai_text.js
 .codex*
+_audit*
+_codex*
+backups/
+remote-psql.py
+pkg_err.txt
+*.dump
+*.dump.sha256

@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import NextAuth, { CredentialsSignin } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { headers } from 'next/headers'
@@ -102,7 +103,7 @@ class LoginCredentialsError extends CredentialsSignin {
   }
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const nextAuth = NextAuth({
   trustHost: true,
   providers: [
     CredentialsProvider({
@@ -192,7 +193,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         })
 
-        emitKick(u.id as string, sessionMark)
+        emitKick(u.id as string, sessionMark).catch((err) => {
+          console.warn('[auth] emitKick failed:', err)
+        })
       }
 
       // Refresh staff portraits for both new sign-ins and older sessions. Admin
@@ -245,3 +248,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: '/login',
   },
 })
+
+export const { handlers, signIn, signOut } = nextAuth
+export const auth = cache(nextAuth.auth)
