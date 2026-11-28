@@ -45,6 +45,8 @@ const nextConfig: NextConfig = {
   // 标记为服务端外部包，运行时由 Node 原生 require，绕开打包器。
   serverExternalPackages: ['ali-oss', 'urllib', 'proxy-agent', 'pac-proxy-agent', 'pac-resolver', 'degenerator', 'vm2'],
   experimental: {
+    // 安全升级策略：Next.js 自动化升级仅采用安全修复版本，规避非安全变更
+    agentUpgrade: 'security',
     // 构建并行 CPU 上限：避免高核数机器上 Next 多 worker 同时构建导致内存 OOM
     cpus: buildCpus,
     optimizePackageImports: ['antd', '@ant-design/icons', 'lodash', 'date-fns'],
